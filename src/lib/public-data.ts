@@ -2,6 +2,17 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
 type PublicClient = SupabaseClient<Database>;
+type PublicTables = Database['public']['Tables'];
+type TableRow<Name extends keyof PublicTables> = PublicTables[Name]['Row'];
+
+export type LeagueSnapshot = {
+  leagues: TableRow<'leagues'>[];
+  seasons: TableRow<'seasons'>[];
+  teams: TableRow<'teams'>[];
+  games: TableRow<'games'>[];
+  standings: TableRow<'standings'>[];
+  news: TableRow<'news'>[];
+};
 
 export function getPublicClient(): PublicClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -13,7 +24,7 @@ export function getPublicClient(): PublicClient | null {
   });
 }
 
-export async function getLeagueSnapshot() {
+export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
   const client = getPublicClient();
   if (!client) {
     return { leagues: [], seasons: [], teams: [], games: [], standings: [], news: [] };
