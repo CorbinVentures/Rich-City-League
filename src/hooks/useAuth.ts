@@ -19,7 +19,7 @@ export function useAuth() {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('*')
-            .eq('user_id', data.user.id)
+            .eq('id', data.user.id)
             .single();
 
           if (profileError && profileError.code !== 'PGRST116') throw profileError;
