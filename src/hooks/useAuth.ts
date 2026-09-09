@@ -1,41 +1,71 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect, useMemo } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 import { Profile } from '@/types';
 
 export function useAuth() {
-  const [user, setUser] = useState<any>(null);
+  const supabase = useMemo(() => getSupabaseClient(), []);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
+    if (!supabase) {
+      setError('Supabase is not configured. Add the public project URL and anon key.');
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    const loadProfile = async (currentUser: User | null) => {
+      if (!currentUser) {
+        if (mounted) setProfile(null);
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') throw profileError;
+      if (mounted) setProfile(profileData);
+    };
+
     const getUser = async () => {
       try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) throw error;
+        const { data } = await supabase.auth.getUser();
+        if (!mounted) return;
         setUser(data.user);
-
-        if (data.user) {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-          if (profileError && profileError.code !== 'PGRST116') throw profileError;
-          setProfile(profileData);
-        }
-      } catch (err: any) {
-        setError(err.message);
+        await loadProfile(data.user);
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : 'Unable to load your session.');
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     getUser();
-  }, []);
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      void loadProfile(session?.user ?? null).catch((err: unknown) => {
+        if (mounted) setError(err instanceof Error ? err.message : 'Unable to load your profile.');
+      });
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const signUp = async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -45,8 +75,8 @@ export function useAuth() {
       if (error) throw error;
       setUser(data.user);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to create your account.');
       throw err;
     } finally {
       setLoading(false);
@@ -54,6 +84,7 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -63,8 +94,8 @@ export function useAuth() {
       if (error) throw error;
       setUser(data.user);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign in.');
       throw err;
     } finally {
       setLoading(false);
@@ -72,16 +103,28 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
       setProfile(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign out.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/update-password`,
+    });
+    if (error) {
+      setError(error.message);
+      throw error;
     }
   };
 
@@ -93,5 +136,6 @@ export function useAuth() {
     signUp,
     signIn,
     signOut,
+    resetPassword,
   };
 }
