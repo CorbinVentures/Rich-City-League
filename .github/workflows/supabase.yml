@@ -21,5 +21,9 @@ jobs:
           version: latest
       - name: Start local database for validation
         run: supabase start
+      - name: Validate complete migration sequence
+        run: supabase db reset --local --no-seed
       - name: Validate migration files
         run: supabase db lint --local
+      - name: Run database authorization tests
+        run: supabase test db

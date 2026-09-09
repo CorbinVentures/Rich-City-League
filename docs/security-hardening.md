@@ -36,6 +36,23 @@ The September 2026 audit reports:
   compatibility review covering App Router, middleware, Supabase Auth,
   server actions, and deployment before upgrading.
 
+## Automated validation
+
+`npm test` runs the middleware authorization tests. `npm run test:rls` runs the
+repeatable pgTAP suite in `supabase/tests/authorization_test.sql` through the
+local Supabase database, including registration, staff, and coach RLS
+boundaries. `npm run test:all` runs both suites.
+
+The Supabase workflow resets and lints the complete migration sequence before
+running the RLS suite. It requires Docker and the Supabase CLI; Docker registry
+rate limits can block image pulls. The workflow must be retried when reasonable,
+but migrations must not be changed to work around that infrastructure failure.
+
+The local suite does not prove the production project's deployed state.
+Production or preview validation still requires the Supabase native preview
+environment and approved credentials. No service-role or test-user credentials
+are committed; external role-account checks remain documented below.
+
 ## Authenticated test account requirements
 
 Use existing accounts or secret-managed test accounts only. Never seed fake
