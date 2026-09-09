@@ -124,6 +124,8 @@ mechanism. Configure the integration for the production project and the `main`
 branch. When changes are pushed to `main`, Supabase applies the versioned
 migrations from `supabase/migrations/`; GitHub Actions never links to or pushes
 the production database.
+This GitHub Integration deployment is what processes pending production
+migrations in timestamp order.
 
 The `Supabase validation` GitHub Actions workflow is validation-only. It does
 not authenticate to Supabase, link a project, or deploy migrations. Its local
