@@ -22,7 +22,9 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     setSubmitting(true);
     setMessage(null);
-    if (!seasonId || !divisionId || !form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+    const selectedSeason = seasons.find((season) => season.id === seasonId);
+    const selectedDivision = divisions.find((division) => division.id === divisionId);
+    if (!seasonId || !divisionId || !selectedSeason?.registration_open || selectedDivision?.season_id !== seasonId || !form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
       setMessage('Complete the required fields before submitting.');
       setSubmitting(false);
       return;
@@ -69,9 +71,9 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     <div className="mt-6 grid gap-4 sm:grid-cols-2">
       <label className="text-sm text-gray-300">Season<select required value={seasonId} onChange={(event) => setSeasonId(event.target.value)} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3">{seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</select></label>
       <label className="text-sm text-gray-300">Division<select required value={divisionId} onChange={(event) => setDivisionId(event.target.value)} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3"><option value="">Select a division</option>{divisions.filter((division) => division.season_id === seasonId).map((division) => <option key={division.id} value={division.id}>{division.name}{division.age_group ? ` · ${division.age_group}` : ''}</option>)}</select></label>
-      <label className="text-sm text-gray-300">First name<input required value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
-      <label className="text-sm text-gray-300">Last name<input required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
-      <label className="text-sm text-gray-300">Email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
+      <label className="text-sm text-gray-300">First name<input required maxLength={100} value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
+      <label className="text-sm text-gray-300">Last name<input required maxLength={100} value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
+      <label className="text-sm text-gray-300">Email<input required maxLength={320} type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Date of birth<input type="date" value={form.dateOfBirth} onChange={(event) => setForm({ ...form, dateOfBirth: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
     </div>
     <button disabled={submitting || !seasonId || !divisionId} className="mt-6 rounded-lg bg-rcl-gold px-5 py-3 font-bold text-rcl-black disabled:opacity-50">{submitting ? 'Submitting…' : 'Submit registration'}</button>
