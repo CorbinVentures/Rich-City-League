@@ -66,14 +66,17 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
 export async function getTeamDetail(slug: string): Promise<TeamDetailData | null> {
   const client = getPublicClient();
   if (!client) return null;
-  const teamResult = await client.from('teams').select('*').eq('slug', slug).eq('is_active', true).maybeSingle() as unknown as { data: Team | null; error: { message: string } | null };
+  const slugResult = await client.from('teams').select('*').eq('slug', slug).eq('is_active', true).maybeSingle() as unknown as { data: Team | null; error: { message: string } | null };
+  const teamResult = slugResult.data || slugResult.error
+    ? slugResult
+    : await client.from('teams').select('*').eq('id', slug).eq('is_active', true).maybeSingle() as unknown as { data: Team | null; error: { message: string } | null };
   const { data: team, error: teamError } = teamResult;
   if (teamError) throw new Error(teamError.message);
   if (!team) return null;
   const results = await Promise.all([
     client.from('leagues').select('*').eq('id', team.league_id).maybeSingle(),
     client.from('team_seasons').select('*').eq('team_id', team.id),
-    client.from('rosters').select('*').is('left_at', null),
+    Promise.resolve({ data: [], error: null }),
     client.from('players').select('*').eq('is_active', true),
     client.from('team_coaches').select('*').eq('team_id', team.id),
     client.from('games').select('*').or(`home_team_id.eq.${team.id},away_team_id.eq.${team.id}`).order('scheduled_at'),
@@ -82,10 +85,13 @@ export async function getTeamDetail(slug: string): Promise<TeamDetailData | null
     client.from('team_game_stats').select('*').eq('team_id', team.id),
     client.from('venues').select('*'),
   ]) as unknown as [QueryResult<League | null>, QueryResult<TeamSeason[]>, QueryResult<Roster[]>, QueryResult<Player[]>, QueryResult<TeamCoach[]>, QueryResult<Game[]>, QueryResult<Standing[]>, QueryResult<PlayerGameStats[]>, QueryResult<TeamGameStats[]>, QueryResult<Venue[]>];
-  const [leagueResult, teamSeasonResult, rosterResult, playerResult, coachResult, gameResult, standingsResult, playerStatsResult, teamStatsResult, venueResult] = results;
+  const [leagueResult, teamSeasonResult, , playerResult, coachResult, gameResult, standingsResult, playerStatsResult, teamStatsResult, venueResult] = results;
+  const teamSeasons = teamSeasonResult.data ?? [];
+  const rosterResult = teamSeasons.length
+    ? await client.from('rosters').select('*').in('team_season_id', teamSeasons.map((item) => item.id)).is('left_at', null) as unknown as QueryResult<Roster[]>
+    : { data: [], error: null } as QueryResult<Roster[]>;
   const firstError = [leagueResult, teamSeasonResult, rosterResult, playerResult, coachResult, gameResult, standingsResult, playerStatsResult, teamStatsResult, venueResult].find((result) => result.error)?.error;
   if (firstError) throw new Error(firstError.message);
-  const teamSeasons = teamSeasonResult.data ?? [];
   const seasonIds = [...new Set(teamSeasons.map((item) => item.season_id))];
   const rosterIds = new Set(teamSeasons.map((item) => item.id));
   const rosters = (rosterResult.data ?? []).filter((item) => rosterIds.has(item.team_season_id));
