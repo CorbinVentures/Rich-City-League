@@ -69,7 +69,7 @@ export default function OperationsPage() {
 
   async function updateRegistration(id: string, changes: Partial<Pick<Registration, 'status' | 'division_id'>>) {
     if (!client) return;
-    const { error: updateError } = await client.from('registrations').update({ ...changes, reviewed_at: new Date().toISOString() } as never).eq('id', id);
+    const { error: updateError } = await client.from('registrations').update({ ...changes, reviewed_at: new Date().toISOString(), reviewed_by: profile?.id ?? null } as never).eq('id', id);
     if (updateError) setError(updateError.message);
     else setRegistrations((items) => items.map((item) => item.id === id ? { ...item, ...changes } : item));
   }
