@@ -1,6 +1,6 @@
 begin;
 
-select plan(13);
+select plan(15);
 
 -- Fixtures are created as the database owner, then every assertion runs through
 -- the same roles used by Supabase RLS.
@@ -10,11 +10,20 @@ insert into auth.users (id, aud, role, email, encrypted_password, email_confirme
 values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'authenticated', 'authenticated', 'player@example.test', 'not-used', now()),
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated', 'coach@example.test', 'not-used', now()),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated', 'staff@example.test', 'not-used', now())
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated', 'staff@example.test', 'not-used', now()),
+  ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now())
 on conflict (id) do nothing;
 
+-- The auth trigger creates every profile as a player. Bootstrap the administrator
+-- through an insert, then use that authenticated identity for privileged changes.
+delete from public.profiles where id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+insert into public.profiles (id, display_name, role)
+values ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'admin@example.test', 'admin');
+
+select set_config('request.jwt.claim.sub', 'ffffffff-ffff-ffff-ffff-ffffffffffff', true);
 update public.profiles set role = 'coach' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 update public.profiles set role = 'staff' where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+reset role;
 
 insert into public.seasons (id, league_id, name, slug, start_date, end_date, status, registration_open)
 values
@@ -139,6 +148,14 @@ select is((with changed as (
   where id = 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa'
   returning id
 ) select count(*) from changed), 1::bigint, 'staff can manage another users registration');
+
+set_config('request.jwt.claim.sub', 'ffffffff-ffff-ffff-ffff-ffffffffffff', true);
+select lives_ok($$
+  update public.profiles set role = 'coach'
+  where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+$$, 'administrators can assign profile roles');
+select is((select role from public.profiles where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+  'coach'::public.app_role, 'administrator role assignment is applied');
 
 select * from finish();
 rollback;
