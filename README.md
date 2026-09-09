@@ -102,6 +102,21 @@ update the application import if you choose to use the CLI-generated output.
 The service-role key and database password are server/CLI secrets; never expose
 them as `NEXT_PUBLIC_*` variables.
 
+### Supabase preview migration gate
+
+Before merging a pull request that changes `supabase/`, the Supabase native GitHub
+Integration must create its preview branch and successfully apply every file in
+`supabase/migrations/`. The preview branch is the required migration validation
+environment for this repository; a local reset or static inspection alone does
+not establish production readiness. Keep the pull request blocked from `main`
+until the Supabase preview migration check succeeds.
+
+The preview must also confirm that `supabase/seed.sql` runs successfully and
+idempotently. The checked-in `supabase/config.toml` enables the intended seed
+file (`[db.seed].enabled = true` and `sql_paths = ["./seed.sql"]`). Seed rows use
+fixed demo identifiers and conflict-safe inserts, and contain no production
+credentials or external side effects.
+
 ### Production database deployment
 
 Supabase's native GitHub Integration is the only production database deployment
@@ -109,6 +124,11 @@ mechanism. Configure the integration for the production project and the `main`
 branch. When changes are pushed to `main`, Supabase applies the versioned
 migrations from `supabase/migrations/`; GitHub Actions never links to or pushes
 the production database.
+
+The `Supabase validation` GitHub Actions workflow is validation-only. It does
+not authenticate to Supabase, link a project, or deploy migrations. Its local
+Docker validation can be unavailable when the container registry rate-limits
+image pulls; that does not change the required Supabase preview gate above.
 
 The repository source of truth is:
 
