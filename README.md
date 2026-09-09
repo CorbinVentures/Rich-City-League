@@ -99,8 +99,17 @@ never expose them as `NEXT_PUBLIC_*` variables.
 
 For GitHub Actions deployment, configure the repository secrets
 `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, and
-optionally `SUPABASE_DB_URL`. The workflow applies migrations only; credentials are
-never stored in the repository.
+optionally `SUPABASE_DB_URL`. The workflow validates the local migrations and applies
+them to the linked project; credentials are never stored in the repository.
+
+### Production database deployment
+
+1. Create an empty Supabase project and copy its project reference, database password,
+   project URL, and anon key into the GitHub/Vercel secret stores.
+2. Add the four GitHub Actions secrets listed above (the database URL is optional).
+3. Push the `supabase/` directory to `main`, or manually run the **Supabase** workflow.
+4. The workflow runs `supabase db push`; no tables or policies need to be created in
+   the dashboard. Run `supabase db push` locally instead when deploying manually.
 
 ## Features
 
@@ -151,7 +160,7 @@ NODE_ENV=development
 
 ## Database Schema
 
-See `sql/migrations/` for complete schema including:
+See `supabase/migrations/` for the complete version-controlled schema. It includes:
 - users
 - profiles
 - players
@@ -173,6 +182,11 @@ See `sql/migrations/` for complete schema including:
 - news
 - awards
 - staff
+- notifications
+- commissioners
+- registration_items
+
+TypeScript definitions matching the public schema are in `src/types/database.ts`.
 
 ## Authentication & Roles
 

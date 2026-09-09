@@ -8,7 +8,7 @@ export type Json =
 
 type Row<T> = T;
 type Insert<T> = Omit<T, 'id' | 'created_at' | 'updated_at'> &
-  Partial<Pick<T, 'id' | 'created_at' | 'updated_at'>>;
+  Partial<Pick<T, Extract<keyof T, 'id' | 'created_at' | 'updated_at'>>>;
 type Update<T> = Partial<T>;
 
 export interface Database {
@@ -18,6 +18,7 @@ export interface Database {
       leagues: { Row: League; Insert: Insert<League>; Update: Update<League> };
       seasons: { Row: Season; Insert: Insert<Season>; Update: Update<Season> };
       divisions: { Row: Division; Insert: Insert<Division>; Update: Update<Division> };
+      venues: { Row: Venue; Insert: Insert<Venue>; Update: Update<Venue> };
       teams: { Row: Team; Insert: Insert<Team>; Update: Update<Team> };
       team_seasons: { Row: TeamSeason; Insert: Insert<TeamSeason>; Update: Update<TeamSeason> };
       players: { Row: Player; Insert: Insert<Player>; Update: Update<Player> };
@@ -58,6 +59,7 @@ export interface ProfileRow { id: string; username: string | null; first_name: s
 export interface League { id: string; name: string; slug: string; description: string | null; city: string; state: string; is_active: boolean; created_at: string; updated_at: string; }
 export interface Season { id: string; league_id: string; name: string; slug: string; start_date: string; end_date: string; status: Database['public']['Enums']['season_status']; registration_open: boolean; created_at: string; updated_at: string; }
 export interface Division { id: string; season_id: string; name: string; age_group: string | null; gender: string | null; max_teams: number | null; created_at: string; }
+export interface Venue { id: string; name: string; address: string | null; city: string | null; state: string | null; postal_code: string | null; latitude: number | null; longitude: number | null; amenities: Json; created_at: string; }
 export interface Team { id: string; league_id: string; name: string; slug: string; short_name: string | null; logo_url: string | null; primary_color: string | null; secondary_color: string | null; city: string | null; description: string | null; is_active: boolean; created_at: string; updated_at: string; }
 export interface TeamSeason { id: string; team_id: string; season_id: string; division_id: string | null; seed: number | null; created_at: string; }
 export interface Player { id: string; profile_id: string | null; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; date_of_birth: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; created_at: string; updated_at: string; }
