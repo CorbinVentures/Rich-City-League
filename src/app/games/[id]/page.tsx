@@ -7,9 +7,10 @@ import { formatDate, formatTime } from '@/utils/helpers';
 
 export const revalidate = 60;
 
-export default async function GameDetailPage({ params }: { params: { id: string } }) {
+export default async function GameDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { games, teams, venues, seasons } = await getLeagueSnapshotWithVenueData();
-  const game = games.find((item) => item.id === params.id);
+  const { id } = await params;
+  const game = games.find((item) => item.id === id);
   if (!game) notFound();
   const home = teams.find((team) => team.id === game.home_team_id)?.name ?? 'Home team';
   const away = teams.find((team) => team.id === game.away_team_id)?.name ?? 'Away team';
