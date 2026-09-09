@@ -83,7 +83,8 @@ scripts/                  # Build and setup scripts
 ### Supabase CLI workflow
 
 The repository contains the complete Supabase project under `supabase/`: configuration,
-versioned migrations, storage policies, and deterministic demo data. Install the
+versioned migrations, storage policies, cross-season integrity checks, and deterministic
+fictional demo data. Install the
 [Supabase CLI](https://supabase.com/docs/guides/cli), then run:
 
 ```bash
@@ -94,8 +95,11 @@ npm run dev
 
 `npm run db:migrate` resets the local database, applies every migration, and loads
 `supabase/seed.sql`. Use `npm run db:push` to apply pending migrations to a linked
-remote project. The service-role key and database password are server/CLI secrets;
-never expose them as `NEXT_PUBLIC_*` variables.
+remote project. To regenerate the checked-in TypeScript definitions after schema changes,
+run `supabase gen types typescript --local > src/types/database.generated.ts` and update
+the application import if you choose to use the CLI-generated output. The service-role
+key and database password are server/CLI secrets; never expose them as `NEXT_PUBLIC_*`
+variables.
 
 For GitHub Actions deployment, configure the repository secrets
 `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, and
@@ -104,12 +108,18 @@ them to the linked project; credentials are never stored in the repository.
 
 ### Production database deployment
 
-1. Create an empty Supabase project and copy its project reference, database password,
-   project URL, and anon key into the GitHub/Vercel secret stores.
-2. Add the four GitHub Actions secrets listed above (the database URL is optional).
-3. Push the `supabase/` directory to `main`, or manually run the **Supabase** workflow.
-4. The workflow runs `supabase db push`; no tables or policies need to be created in
-   the dashboard. Run `supabase db push` locally instead when deploying manually.
+1. Create a new, empty Supabase project specifically for Rich City League. Do not use
+   another application's project.
+2. In Supabase Authentication, keep email/password enabled and configure the production
+   site URL and redirect URLs.
+3. Copy the project reference, database password, project URL, and anon key into the
+   appropriate GitHub/Vercel secret stores.
+4. Add `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, and `SUPABASE_DB_PASSWORD` as
+   GitHub Actions secrets. Add `SUPABASE_DB_URL` only when using a direct database URL.
+5. Push the `supabase/` directory to `main`, or manually run the **Supabase** workflow.
+   The workflow runs `supabase db push`; no tables or policies need to be created in the
+   dashboard. Run `supabase link --project-ref "$SUPABASE_PROJECT_ID"` followed by
+   `supabase db push` locally when deploying manually.
 
 ## Features
 
