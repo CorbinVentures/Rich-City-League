@@ -41,7 +41,8 @@ export default function DashboardWorkspace() {
           supabase.from('notifications').select('*').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(8),
         ]);
         if (games.error || registrations.error || notifications.error) throw new Error((games.error ?? registrations.error ?? notifications.error)?.message);
-        const registrationIds = (registrations.data ?? []).map((registration) => registration.id);
+        const loadedRegistrations = (registrations.data ?? []) as Registration[];
+        const registrationIds = loadedRegistrations.map((registration) => registration.id);
         const payments = registrationIds.length
           ? await supabase.from('payments').select('*').in('registration_id', registrationIds).order('created_at', { ascending: false }).limit(10)
           : { data: [], error: null };
@@ -71,7 +72,7 @@ export default function DashboardWorkspace() {
             counts[table] = result.count ?? 0;
           }
         }
-        setData({ games: games.data ?? [], teams, registrations: registrations.data ?? [], payments: payments.data ?? [], stats, notifications: notifications.data ?? [], counts });
+        setData({ games: games.data ?? [], teams, registrations: loadedRegistrations, payments: payments.data ?? [], stats, notifications: notifications.data ?? [], counts });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unable to load dashboard data.');
       } finally {
@@ -93,7 +94,7 @@ export default function DashboardWorkspace() {
 
   async function markNotificationRead(id: string) {
     if (!supabase || !user) return;
-    const { error: updateError } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('recipient_id', user.id);
+    const { error: updateError } = await supabase.from('notifications').update({ read_at: new Date().toISOString() } as never).eq('id', id).eq('recipient_id', user.id);
     if (updateError) {
       setError(updateError.message);
       return;

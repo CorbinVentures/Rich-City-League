@@ -50,7 +50,7 @@ export default function OperationsPage() {
         const resultError = [registrationResult, gameResult, playerResult, teamResult, divisionsResult, teamSeasonResult, rosterResult, statResult, coachResult].find((result) => result.error)?.error;
         if (resultError) throw new Error(resultError.message);
         setRegistrations(registrationResult.data ?? []);
-        const loadedGames = gameResult.data ?? [];
+        const loadedGames = (gameResult.data ?? []) as Game[];
         setGames(profile?.role === 'coach'
           ? loadedGames.filter((game) => ((coachResult.data ?? []) as Array<{ team_id: string }>).some((item) => item.team_id === game.home_team_id || item.team_id === game.away_team_id))
           : loadedGames);
@@ -61,9 +61,11 @@ export default function OperationsPage() {
         const loadedTeamIds = profile?.role === 'coach'
           ? ((coachResult.data ?? []) as Array<{ team_id: string }>).map((item) => item.team_id)
           : null;
-        setRosters((rosterResult.data ?? []).filter((roster) => {
+        const loadedTeamSeasons = (teamSeasonResult.data ?? []) as TeamSeason[];
+        const loadedRosters = (rosterResult.data ?? []) as Roster[];
+        setRosters(loadedRosters.filter((roster) => {
           if (!loadedTeamIds) return true;
-          const teamSeason = (teamSeasonResult.data ?? []).find((item) => item.id === roster.team_season_id);
+          const teamSeason = loadedTeamSeasons.find((item) => item.id === roster.team_season_id);
           return teamSeason ? loadedTeamIds.includes(teamSeason.team_id) : false;
         }));
         setPlayerStats(statResult.data ?? []);
