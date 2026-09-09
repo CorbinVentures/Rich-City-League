@@ -3,7 +3,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Division, Season } from '@/types/database';
+import type { Database, Division, Season } from '@/types/database';
 
 export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; divisions: Division[] }) {
   const { user, profile } = useAuth();
@@ -21,14 +21,15 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     setSubmitting(true);
     setMessage(null);
-    const { error } = await supabase.from('registrations').insert({
+    const registration: Database['public']['Tables']['registrations']['Insert'] = {
       season_id: seasonId,
       applicant_id: user.id,
       first_name: form.firstName.trim(),
       last_name: form.lastName.trim(),
       email: form.email.trim(),
       date_of_birth: form.dateOfBirth || null,
-    });
+    };
+    const { error } = await supabase.from('registrations').insert(registration);
     setSubmitting(false);
     setMessage(error ? error.message : 'Registration submitted. The league will review your application.');
     if (!error) setForm((current) => ({ ...current, firstName: '', lastName: '', email: '', dateOfBirth: '' }));

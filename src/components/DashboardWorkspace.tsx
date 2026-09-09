@@ -48,7 +48,8 @@ export default function DashboardWorkspace() {
           const player = await supabase.from('players').select('id').eq('profile_id', user.id).maybeSingle();
           if (player.error) throw player.error;
           if (player.data) {
-            const result = await supabase.from('player_game_stats').select('*').eq('player_id', player.data.id);
+            const playerId = (player.data as { id: string }).id;
+            const result = await supabase.from('player_game_stats').select('*').eq('player_id', playerId);
             if (result.error) throw result.error;
             stats = result.data ?? [];
           }
