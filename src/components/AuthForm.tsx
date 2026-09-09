@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -16,7 +18,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
     try {
       if (mode === 'sign-in') {
         await signIn(email, password);
-        window.location.assign('/dashboard');
+        router.push('/dashboard');
       } else if (mode === 'sign-up') {
         await signUp(email, password);
         setMessage('Account created. Check your email if confirmation is enabled.');

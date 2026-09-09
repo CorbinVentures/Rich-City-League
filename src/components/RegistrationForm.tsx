@@ -21,6 +21,21 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     setSubmitting(true);
     setMessage(null);
+    if (!seasonId || !form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+      setMessage('Complete the required fields before submitting.');
+      return;
+    }
+    const existing = await supabase.from('registrations').select('id').eq('applicant_id', user.id).eq('season_id', seasonId).limit(1);
+    if (existing.error) {
+      setMessage(existing.error.message);
+      setSubmitting(false);
+      return;
+    }
+    if (existing.data?.length) {
+      setMessage('You already have a registration for this season.');
+      setSubmitting(false);
+      return;
+    }
     const registration: Database['public']['Tables']['registrations']['Insert'] = {
       season_id: seasonId,
       applicant_id: user.id,
@@ -47,7 +62,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     <p className="mt-2 text-sm text-gray-400">Your application is saved with pending status for league review. Payment is not collected here.</p>
     <div className="mt-6 grid gap-4 sm:grid-cols-2">
       <label className="text-sm text-gray-300">Season<select required value={seasonId} onChange={(event) => setSeasonId(event.target.value)} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3">{seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</select></label>
-      <label className="text-sm text-gray-300">Division (optional)<select className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3"><option value="">Select division</option>{divisions.filter((division) => division.season_id === seasonId).map((division) => <option key={division.id}>{division.name}</option>)}</select></label>
+      <div className="rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-gray-400"><p className="font-semibold text-gray-300">Division</p><p className="mt-1">The league will assign the appropriate division during review{divisions.some((division) => division.season_id === seasonId) ? '.' : ' based on the season and application.'}</p></div>
       <label className="text-sm text-gray-300">First name<input required value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Last name<input required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
