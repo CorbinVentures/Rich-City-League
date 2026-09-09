@@ -9,6 +9,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
   const { user, profile } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [seasonId, setSeasonId] = useState(seasons[0]?.id ?? '');
+  const [divisionId, setDivisionId] = useState('');
   const [form, setForm] = useState({ firstName: profile?.first_name ?? '', lastName: profile?.last_name ?? '', email: '', dateOfBirth: '' });
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -21,8 +22,9 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     setSubmitting(true);
     setMessage(null);
-    if (!seasonId || !form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+    if (!seasonId || !divisionId || !form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
       setMessage('Complete the required fields before submitting.');
+      setSubmitting(false);
       return;
     }
     const existing = await supabase.from('registrations').select('id').eq('applicant_id', user.id).eq('season_id', seasonId).limit(1);
@@ -38,6 +40,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     const registration: Database['public']['Tables']['registrations']['Insert'] = {
       season_id: seasonId,
+      division_id: divisionId,
       applicant_id: user.id,
       team_id: null,
       first_name: form.firstName.trim(),
@@ -54,7 +57,10 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     const { error } = await supabase.from('registrations').insert(registration as never);
     setSubmitting(false);
     setMessage(error ? error.message : 'Registration submitted. The league will review your application.');
-    if (!error) setForm((current) => ({ ...current, firstName: '', lastName: '', email: '', dateOfBirth: '' }));
+    if (!error) {
+      setForm((current) => ({ ...current, firstName: '', lastName: '', email: '', dateOfBirth: '' }));
+      setDivisionId('');
+    }
   }
 
   return <form onSubmit={submit} className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
@@ -62,13 +68,13 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     <p className="mt-2 text-sm text-gray-400">Your application is saved with pending status for league review. Payment is not collected here.</p>
     <div className="mt-6 grid gap-4 sm:grid-cols-2">
       <label className="text-sm text-gray-300">Season<select required value={seasonId} onChange={(event) => setSeasonId(event.target.value)} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3">{seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</select></label>
-      <div className="rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-gray-400"><p className="font-semibold text-gray-300">Division</p><p className="mt-1">The league will assign the appropriate division during review{divisions.some((division) => division.season_id === seasonId) ? '.' : ' based on the season and application.'}</p></div>
+      <label className="text-sm text-gray-300">Division<select required value={divisionId} onChange={(event) => setDivisionId(event.target.value)} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3"><option value="">Select a division</option>{divisions.filter((division) => division.season_id === seasonId).map((division) => <option key={division.id} value={division.id}>{division.name}{division.age_group ? ` · ${division.age_group}` : ''}</option>)}</select></label>
       <label className="text-sm text-gray-300">First name<input required value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Last name<input required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
       <label className="text-sm text-gray-300">Date of birth<input type="date" value={form.dateOfBirth} onChange={(event) => setForm({ ...form, dateOfBirth: event.target.value })} className="mt-2 w-full rounded-lg border border-white/10 bg-rcl-black p-3" /></label>
     </div>
-    <button disabled={submitting || !seasonId} className="mt-6 rounded-lg bg-rcl-gold px-5 py-3 font-bold text-rcl-black disabled:opacity-50">{submitting ? 'Submitting…' : 'Submit registration'}</button>
+    <button disabled={submitting || !seasonId || !divisionId} className="mt-6 rounded-lg bg-rcl-gold px-5 py-3 font-bold text-rcl-black disabled:opacity-50">{submitting ? 'Submitting…' : 'Submit registration'}</button>
     {message && <p role="status" className="mt-4 text-sm text-gray-300">{message}</p>}
   </form>;
 }
