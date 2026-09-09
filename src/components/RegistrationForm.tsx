@@ -24,10 +24,14 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     const registration: Database['public']['Tables']['registrations']['Insert'] = {
       season_id: seasonId,
       applicant_id: user.id,
+      team_id: null,
       first_name: form.firstName.trim(),
       last_name: form.lastName.trim(),
       email: form.email.trim(),
       date_of_birth: form.dateOfBirth || null,
+      emergency_contact: {},
+      status: 'pending',
+      notes: null,
     };
     const { error } = await supabase.from('registrations').insert(registration);
     setSubmitting(false);
