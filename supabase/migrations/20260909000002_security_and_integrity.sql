@@ -64,6 +64,7 @@ begin
     join public.rosters r on r.team_season_id = ts.id
     where g.id = new.game_id
       and ts.team_id = new.team_id
+      and (ts.team_id = g.home_team_id or ts.team_id = g.away_team_id)
       and r.player_id = new.player_id
       and (r.left_at is null or r.left_at >= g.scheduled_at::date)
       and r.joined_at <= g.scheduled_at::date
