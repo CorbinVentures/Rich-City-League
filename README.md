@@ -101,10 +101,20 @@ the application import if you choose to use the CLI-generated output. The servic
 key and database password are server/CLI secrets; never expose them as `NEXT_PUBLIC_*`
 variables.
 
-For GitHub Actions deployment, configure the repository secrets
-`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, and
-optionally `SUPABASE_DB_URL`. The workflow validates the local migrations and applies
-them to the linked project; credentials are never stored in the repository.
+For GitHub Actions deployment, configure these exact repository secrets:
+
+- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token. The workflow passes it
+  to `supabase link` and `supabase db push` for Management API authentication.
+- `SUPABASE_PROJECT_ID`: the project reference for the dedicated Rich City League
+  Supabase project. It is passed to `supabase link`; do not use another
+  application's project.
+- `SUPABASE_DB_PASSWORD`: the database password for that project. It is passed to
+  `supabase link` when `SUPABASE_DB_URL` is not configured.
+- `SUPABASE_DB_URL` (optional): a direct database connection URL. When configured,
+  the workflow passes it to `supabase db push` and skips `supabase link`.
+
+The workflow validates the local migrations and applies them to the configured
+project; credentials are never stored in the repository or printed in logs.
 
 ### Production database deployment
 
