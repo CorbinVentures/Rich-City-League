@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 
@@ -6,23 +6,32 @@ export async function middleware(request: NextRequest) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return NextResponse.next();
   }
-  const response = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req: request, res: response });
-  const { data: { session } } = await supabase.auth.getSession();
+  let response = NextResponse.next({ request });
+  const supabase = createServerClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookies) => {
+        cookies.forEach(({ name, value, options }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
 
   const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal');
-  if (protectedPath && !session) {
+  if (protectedPath && !user) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';
     signInUrl.searchParams.set('next', request.nextUrl.pathname);
     return NextResponse.redirect(signInUrl);
   }
 
-  if (session && request.nextUrl.pathname.startsWith('/portal/operations')) {
+  if (user && request.nextUrl.pathname.startsWith('/portal/operations')) {
     const { data: profileData } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .maybeSingle();
     const profile = profileData as { role: string } | null;
     if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {

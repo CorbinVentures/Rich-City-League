@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { getTeamDetail } from '@/lib/public-data';
@@ -26,7 +27,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
     <main>
       <Container maxWidth="xl" className="py-12">
         <div className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/[0.04] p-7 sm:flex-row sm:items-center">
-          {team.logo_url ? <img src={team.logo_url} alt={`${team.name} logo`} className="h-24 w-24 rounded-2xl object-cover" /> : <div className="h-24 w-24 rounded-2xl" style={{ backgroundColor: team.primary_color ?? '#FFD700' }} />}
+          {team.logo_url ? <Image src={team.logo_url} alt={`${team.name} logo`} width={96} height={96} className="h-24 w-24 rounded-2xl object-cover" /> : <div className="h-24 w-24 rounded-2xl" style={{ backgroundColor: team.primary_color ?? '#FFD700' }} />}
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">Team detail</p>
             <h1 className="mt-2 font-display text-4xl font-bold">{team.name}</h1>

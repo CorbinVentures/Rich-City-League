@@ -3,10 +3,10 @@ import { NextRequest } from 'next/server';
 
 let session: unknown = null;
 
-vi.mock('@supabase/auth-helpers-nextjs', () => ({
-  createMiddlewareClient: () => ({
+vi.mock('@supabase/ssr', () => ({
+  createServerClient: () => ({
     auth: {
-      getSession: async () => ({ data: { session } }),
+      getUser: async () => ({ data: { user: session ? (session as { user: unknown }).user : null } }),
     },
   }),
 }));
