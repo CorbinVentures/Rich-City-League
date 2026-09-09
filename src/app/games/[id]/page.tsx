@@ -13,7 +13,7 @@ export default async function GameDetailPage({ params }: { params: { id: string 
   if (!game) notFound();
   const home = teams.find((team) => team.id === game.home_team_id)?.name ?? 'Home team';
   const away = teams.find((team) => team.id === game.away_team_id)?.name ?? 'Away team';
-  return <main><Container maxWidth="lg" className="py-16"><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">{game.status}</p><h1 className="mt-2 font-display text-4xl font-bold">{away} <span className="text-rcl-gold">vs</span> {home}</h1><p className="mt-4 text-gray-400">{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)} · {venues.find((venue) => venue.id === game.venue_id)?.name ?? 'Venue TBA'}</p><LiveGameScore initialGame={game} /><p className="mt-5 text-sm text-gray-500">{seasons.find((season) => season.id === game.season_id)?.name ?? 'Rich City League'}</p></Container></main>;
+  return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-4xl font-bold">{away} <span className="text-rcl-gold">vs</span> {home}</h1><p className="mt-4 text-gray-400">{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)} · {venues.find((venue) => venue.id === game.venue_id)?.name ?? 'Venue TBA'}</p><LiveGameScore initialGame={game} homeName={home} awayName={away} /><p className="mt-5 text-sm text-gray-500">{seasons.find((season) => season.id === game.season_id)?.name ?? 'Rich City League'}</p></Container></main>;
 }
 
 async function getLeagueSnapshotWithVenueData(): Promise<Awaited<ReturnType<typeof getLeagueSnapshot>> & { venues: Venue[] }> {
