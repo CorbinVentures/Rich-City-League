@@ -141,8 +141,8 @@ create table public.games (
   id uuid primary key default gen_random_uuid(),
   season_id uuid not null references public.seasons(id) on delete cascade,
   division_id uuid references public.divisions(id) on delete set null,
-  home_team_id uuid not null references public.teams(id),
-  away_team_id uuid not null references public.teams(id),
+  home_team_id uuid not null references public.teams(id) on delete restrict,
+  away_team_id uuid not null references public.teams(id) on delete restrict,
   venue_id uuid references public.venues(id) on delete set null,
   scheduled_at timestamptz not null,
   status public.game_status not null default 'scheduled',
@@ -389,7 +389,11 @@ alter table public.staff enable row level security;
 create policy "published leagues are public" on public.leagues for select using (is_active);
 create policy "published seasons are public" on public.seasons for select using (status in ('registration','active','completed'));
 create policy "public league data" on public.divisions for select using (true);
+create policy "staff manage divisions" on public.divisions
+  for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "public venues" on public.venues for select using (true);
+create policy "staff manage venues" on public.venues
+  for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "public teams" on public.teams for select using (is_active);
 create policy "public team seasons" on public.team_seasons for select using (true);
 create policy "public players" on public.players for select using (is_active);
@@ -418,6 +422,8 @@ create policy "published media" on public.media for select using (status = 'publ
 create policy "authenticated media upload" on public.media for insert with check (uploader_id = auth.uid());
 create policy "staff manage media" on public.media for update using (public.is_staff_or_admin());
 create policy "public awards" on public.awards for select using (true);
+create policy "staff manage awards" on public.awards
+  for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage league data" on public.leagues for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage seasons" on public.seasons for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage teams" on public.teams for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());

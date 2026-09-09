@@ -110,8 +110,8 @@ create policy "users delete own notifications" on public.notifications
 create policy "public commissioner names" on public.commissioners
   for select using (true);
 create policy "staff manage commissioners" on public.commissioners
-  for all using (public.is_staff_or_admin() or public.is_admin())
-  with check (public.is_staff_or_admin() or public.is_admin());
+  for all using (public.is_staff_or_admin())
+  with check (public.is_staff_or_admin());
 
 create policy "users view own registration items" on public.registration_items
   for select using (
