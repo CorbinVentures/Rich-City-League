@@ -36,6 +36,23 @@ The September 2026 audit reports:
   compatibility review covering App Router, middleware, Supabase Auth,
   server actions, and deployment before upgrading.
 
+## Automated validation
+
+`npm test` runs the middleware authorization tests. `npm run test:rls` runs the
+repeatable pgTAP suite in `supabase/tests/authorization_test.sql` through the
+local Supabase database, including registration, staff, and coach RLS
+boundaries. `npm run test:all` runs both suites.
+
+The Supabase workflow resets and lints the complete migration sequence before
+running the RLS suite. It requires Docker and the Supabase CLI; Docker registry
+rate limits can block image pulls. The workflow must be retried when reasonable,
+but migrations must not be changed to work around that infrastructure failure.
+
+The local suite does not prove the production project's deployed state.
+Production or preview validation still requires the Supabase native preview
+environment and approved credentials. No service-role or test-user credentials
+are committed; external role-account checks remain documented below.
+
 ## Authenticated test account requirements
 
 Use existing accounts or secret-managed test accounts only. Never seed fake
@@ -68,10 +85,12 @@ authorization test.
 
 ## Registration division integrity
 
-`registrations.division_id` is an additive nullable foreign key to
-`divisions.id`, and the registration policy validates that the selected
-division belongs to the submitted season. Applicant inserts also require an
-authenticated `applicant_id` matching `auth.uid()` and an open season.
+Migration `20260909000004_registration_divisions.sql` adds the nullable
+`registrations.division_id` foreign key to `divisions.id`, a trigger that
+rejects cross-season divisions, and registration policy checks that require an
+authenticated `applicant_id` matching `auth.uid()` plus an open season. The
+automated RLS suite covers both the valid registration path and the
+cross-season rejection path.
 
 ## Deferred production work
 
