@@ -2,6 +2,8 @@ begin;
 
 select plan(15);
 
+-- Fixtures are created as the database owner, then every assertion runs through
+-- the same roles used by Supabase RLS.
 set role postgres;
 
 insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at)
@@ -12,9 +14,21 @@ values
   ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now())
 on conflict (id) do nothing;
 
-update public.profiles set role = 'coach' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-update public.profiles set role = 'staff' where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
-update public.profiles set role = 'admin' where id = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+delete from public.profiles
+where id in (
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+  'cccccccc-cccc-cccc-cccc-cccccccccccc',
+  'dddddddd-dddd-dddd-dddd-dddddddddddd'
+);
+
+insert into public.profiles (id, role)
+values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'player'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'coach'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'staff'),
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'admin')
+on conflict (id) do nothing;
 
 insert into public.seasons (id, league_id, name, slug, start_date, end_date, status, registration_open)
 values
@@ -88,6 +102,12 @@ select throws_ok($$
     ('77777777-7777-7777-7777-777777777777', '99999999-9999-9999-9999-999999999999',
      'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Other', 'Applicant', 'other@example.test')
 $$, '42501', null, 'registration ownership is enforced');
+select is((with changed as (
+  update public.registrations set notes = 'tampered'
+  where id = '11111111-aaaa-aaaa-aaaa-111111111111'
+  returning id
+) select count(*) from changed), 0::bigint,
+  'users cannot modify another users registration');
 select throws_ok($$
   insert into public.registrations
     (season_id, division_id, applicant_id, first_name, last_name, email)
@@ -104,7 +124,7 @@ select throws_ok($$
 $$, 'P0001', 'Registration division must belong to its season',
   'invalid season and division combinations are denied');
 
-set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
 select is((with changed as (
   update public.rosters r set is_captain = true
   from public.team_seasons ts
@@ -119,14 +139,24 @@ select is((with changed as (
     and ts.team_id = '52222222-2222-2222-2222-222222222222'
   returning r.id
 ) select count(*) from changed), 0::bigint, 'coach access remains scoped to assigned teams');
+select is((with changed as (
+  update public.team_seasons set division_id = null
+  where team_id = '52222222-2222-2222-2222-222222222222'
+  returning id
+) select count(*) from changed), 0::bigint, 'coaches cannot modify another team season');
+select is((with changed as (
+  update public.games set notes = 'unauthorized'
+  where id = '66666666-6666-6666-6666-666666666666'
+  returning id
+) select count(*) from changed), 0::bigint, 'coaches cannot manage games outside staff authorization');
 
-set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
+select set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
 select lives_ok($$
   insert into public.registrations
-    (id, season_id, applicant_id, first_name, last_name, email)
+    (id, season_id, division_id, applicant_id, first_name, last_name, email)
   values
     ('33333333-aaaa-aaaa-aaaa-333333333333', '22222222-2222-2222-2222-222222222222',
-     null, 'Staff', 'Managed', 'staff-managed@example.test')
+     null, null, 'Staff', 'Managed', 'staff-managed@example.test')
 $$, 'authorized staff access remains functional');
 select is((with changed as (
   update public.registrations set status = 'approved'
@@ -134,7 +164,7 @@ select is((with changed as (
   returning id
 ) select count(*) from changed), 1::bigint, 'staff can manage another users registration');
 
-set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
 select lives_ok($$
   update public.seasons
   set name = 'Admin Test Season'
