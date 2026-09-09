@@ -15,6 +15,9 @@
     "db:seed": "supabase db reset",
     "db:push": "supabase db push",
     "db:lint": "supabase db lint",
+    "test": "vitest run",
+    "test:rls": "supabase status >/dev/null 2>&1 || (echo 'Local Supabase is unavailable. Start it with npm run db:start before running RLS tests.' >&2; exit 1); supabase test db --local",
+    "test:all": "npm run test && npm run test:rls",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\""
   },
   "dependencies": {
@@ -42,7 +45,8 @@
     "@typescript-eslint/parser": "^8.70.0",
     "eslint": "^8.54.0",
     "eslint-config-next": "^15.5.24",
-    "prettier": "^3.1.0"
+    "prettier": "^3.1.0",
+    "vitest": "^3.2.6"
   },
   "overrides": {
     "postcss": "$postcss"

@@ -6,6 +6,10 @@ on:
     paths:
       - "supabase/**"
       - ".github/workflows/supabase.yml"
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase.yml"
   workflow_dispatch:
 
 jobs:
@@ -21,5 +25,9 @@ jobs:
           version: latest
       - name: Start local database for validation
         run: supabase start
+      - name: Validate complete migration sequence
+        run: supabase db reset --local
       - name: Validate migration files
         run: supabase db lint --local
+      - name: Run database authorization tests
+        run: supabase test db --local

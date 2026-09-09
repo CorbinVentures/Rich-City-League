@@ -36,6 +36,13 @@ The September 2026 audit reports:
   compatibility review covering App Router, middleware, Supabase Auth,
   server actions, and deployment before upgrading.
 
+## Automated validation
+
+`npm test` runs the middleware authorization tests. `npm run test:rls` runs the
+pgTAP suite in `supabase/tests/authorization_test.sql` against the local
+Supabase database only. It fails if the local instance is unavailable; it does
+not use production or remote credentials.
+
 ## Authenticated test account requirements
 
 Use existing accounts or secret-managed test accounts only. Never seed fake
