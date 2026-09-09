@@ -22,17 +22,6 @@ create table public.commissioners (
   unique (league_id, profile_id)
 );
 
-create table public.registration_items (
-  id uuid primary key default gen_random_uuid(),
-  registration_id uuid not null references public.registrations(id) on delete cascade,
-  player_id uuid references public.players(id) on delete set null,
-  team_id uuid references public.teams(id) on delete set null,
-  amount_cents integer not null default 0 check (amount_cents >= 0),
-  description text not null,
-  created_at timestamptz not null default now(),
-  check (player_id is not null or team_id is not null)
-);
-
 alter table public.team_game_stats
   add constraint team_game_stats_nonnegative check (
     points >= 0 and rebounds >= 0 and assists >= 0 and turnovers >= 0 and fouls >= 0
@@ -95,7 +84,6 @@ create trigger protect_profile_privileged_fields
 
 alter table public.notifications enable row level security;
 alter table public.commissioners enable row level security;
-alter table public.registration_items enable row level security;
 
 create policy "users view own notifications" on public.notifications
   for select using (recipient_id = auth.uid());
@@ -110,17 +98,5 @@ create policy "users delete own notifications" on public.notifications
 create policy "public commissioner names" on public.commissioners
   for select using (true);
 create policy "staff manage commissioners" on public.commissioners
-  for all using (public.is_staff_or_admin())
-  with check (public.is_staff_or_admin());
-
-create policy "users view own registration items" on public.registration_items
-  for select using (
-    public.is_staff_or_admin()
-    or exists (
-      select 1 from public.registrations r
-      where r.id = registration_id and r.applicant_id = auth.uid()
-    )
-  );
-create policy "staff manage registration items" on public.registration_items
   for all using (public.is_staff_or_admin())
   with check (public.is_staff_or_admin());

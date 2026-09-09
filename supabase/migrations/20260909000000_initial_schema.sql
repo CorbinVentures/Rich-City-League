@@ -4,7 +4,6 @@ create extension if not exists "citext";
 create type public.app_role as enum ('player', 'coach', 'staff', 'admin');
 create type public.season_status as enum ('draft', 'registration', 'active', 'completed', 'archived');
 create type public.registration_status as enum ('pending', 'approved', 'waitlisted', 'rejected', 'cancelled');
-create type public.payment_status as enum ('pending', 'paid', 'failed', 'refunded', 'waived');
 create type public.game_status as enum ('scheduled', 'live', 'completed', 'cancelled', 'postponed');
 create type public.content_status as enum ('draft', 'published', 'archived');
 
@@ -224,18 +223,6 @@ create table public.registrations (
   notes text
 );
 
-create table public.payments (
-  id uuid primary key default gen_random_uuid(),
-  registration_id uuid not null references public.registrations(id) on delete cascade,
-  amount_cents integer not null check (amount_cents >= 0),
-  currency text not null default 'usd',
-  status public.payment_status not null default 'pending',
-  provider text,
-  provider_payment_id text unique,
-  paid_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
 create table public.posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles(id) on delete cascade,
@@ -376,7 +363,6 @@ alter table public.player_game_stats enable row level security;
 alter table public.team_game_stats enable row level security;
 alter table public.standings enable row level security;
 alter table public.registrations enable row level security;
-alter table public.payments enable row level security;
 alter table public.posts enable row level security;
 alter table public.comments enable row level security;
 alter table public.likes enable row level security;
@@ -434,11 +420,6 @@ create policy "staff manage standings" on public.standings for all using (public
 create policy "users view own registrations" on public.registrations for select using (applicant_id = auth.uid() or public.is_staff_or_admin());
 create policy "users submit registrations" on public.registrations for insert with check (applicant_id = auth.uid() or applicant_id is null);
 create policy "staff manage registrations" on public.registrations for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
-create policy "users view own payments" on public.payments for select using (
-  exists (select 1 from public.registrations r where r.id = registration_id and r.applicant_id = auth.uid())
-  or public.is_staff_or_admin()
-);
-create policy "staff manage payments" on public.payments for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage players" on public.players for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage rosters" on public.rosters for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "staff manage coaches" on public.team_coaches for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
