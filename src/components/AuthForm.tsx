@@ -1,0 +1,48 @@
+'use client';
+
+import Link from 'next/link';
+import { FormEvent, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+
+export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
+  const { signIn, signUp, resetPassword, loading, error } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage('');
+    try {
+      if (mode === 'sign-in') {
+        await signIn(email, password);
+        window.location.assign('/dashboard');
+      } else if (mode === 'sign-up') {
+        await signUp(email, password);
+        setMessage('Account created. Check your email if confirmation is enabled.');
+      } else {
+        await resetPassword(email);
+        setMessage('Password recovery instructions have been sent if this email exists.');
+      }
+    } catch {
+      // The hook exposes a user-safe error message.
+    }
+  }
+
+  const title = mode === 'sign-in' ? 'Welcome back' : mode === 'sign-up' ? 'Join RCL' : 'Reset your password';
+  return (
+    <form onSubmit={submit} className="space-y-5 rounded-2xl border border-white/10 bg-white/[0.04] p-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold">{title}</h1>
+        <p className="mt-2 text-sm text-gray-400">Use your RCL account to access league tools.</p>
+      </div>
+      <label className="block text-sm font-semibold">Email<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-lg border border-white/15 bg-black px-3 py-3 font-normal outline-none focus:border-rcl-gold" /></label>
+      {mode !== 'reset' && <label className="block text-sm font-semibold">Password<input required minLength={8} type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-lg border border-white/15 bg-black px-3 py-3 font-normal outline-none focus:border-rcl-gold" /></label>}
+      {(error || message) && <p className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
+      <button disabled={loading} className="w-full rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : 'Create account'}</button>
+      <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">
+        {mode === 'sign-in' ? <><Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link><Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}
+      </div>
+    </form>
+  );
+}

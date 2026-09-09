@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { Profile } from '@/types';
 
 export function useAuth() {
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -11,6 +12,14 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
+
+    if (!supabase) {
+      setError('Supabase is not configured. Add the public project URL and anon key.');
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
 
     const loadProfile = async (currentUser: User | null) => {
       if (!currentUser) {
@@ -53,9 +62,10 @@ export function useAuth() {
       mounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const signUp = async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -74,6 +84,7 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -92,6 +103,7 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -106,6 +118,7 @@ export function useAuth() {
   };
 
   const resetPassword = async (email: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
