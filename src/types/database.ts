@@ -29,7 +29,6 @@ export interface Database {
       team_game_stats: { Row: TeamGameStats; Insert: Insert<TeamGameStats>; Update: Update<TeamGameStats> };
       standings: { Row: Standing; Insert: Insert<Standing>; Update: Update<Standing> };
       registrations: { Row: Registration; Insert: Insert<Registration>; Update: Update<Registration> };
-      payments: { Row: Payment; Insert: Insert<Payment>; Update: Update<Payment> };
       posts: { Row: Post; Insert: Insert<Post>; Update: Update<Post> };
       comments: { Row: Comment; Insert: Insert<Comment>; Update: Update<Comment> };
       likes: { Row: Like; Insert: Like; Update: Partial<Like> };
@@ -40,7 +39,6 @@ export interface Database {
       staff: { Row: Staff; Insert: Insert<Staff>; Update: Update<Staff> };
       notifications: { Row: Notification; Insert: Insert<Notification>; Update: Update<Notification> };
       commissioners: { Row: Commissioner; Insert: Insert<Commissioner>; Update: Update<Commissioner> };
-      registration_items: { Row: RegistrationItem; Insert: Insert<RegistrationItem>; Update: Update<RegistrationItem> };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -48,7 +46,6 @@ export interface Database {
       app_role: 'player' | 'coach' | 'staff' | 'admin';
       season_status: 'draft' | 'registration' | 'active' | 'completed' | 'archived';
       registration_status: 'pending' | 'approved' | 'waitlisted' | 'rejected' | 'cancelled';
-      payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'waived';
       game_status: 'scheduled' | 'live' | 'completed' | 'cancelled' | 'postponed';
       content_status: 'draft' | 'published' | 'archived';
     };
@@ -70,7 +67,6 @@ export interface PlayerGameStats { id: string; game_id: string; player_id: strin
 export interface TeamGameStats { id: string; game_id: string; team_id: string; points: number; rebounds: number; assists: number; turnovers: number; fouls: number; }
 export interface Standing { id: string; season_id: string; division_id: string | null; team_id: string; wins: number; losses: number; ties: number; points_for: number; points_against: number; streak: string | null; rank: number | null; updated_at: string; }
 export interface Registration { id: string; season_id: string; division_id: string | null; applicant_id: string | null; team_id: string | null; first_name: string; last_name: string; email: string; date_of_birth: string | null; emergency_contact: Json; status: Database['public']['Enums']['registration_status']; submitted_at: string; reviewed_at: string | null; reviewed_by: string | null; notes: string | null; }
-export interface Payment { id: string; registration_id: string; amount_cents: number; currency: string; status: Database['public']['Enums']['payment_status']; provider: string | null; provider_payment_id: string | null; paid_at: string | null; created_at: string; }
 export interface Post { id: string; author_id: string; body: string; media_urls: Json; status: Database['public']['Enums']['content_status']; created_at: string; updated_at: string; }
 export interface Comment { id: string; post_id: string; author_id: string; body: string; created_at: string; }
 export interface Like { post_id: string; user_id: string; created_at: string; }
@@ -81,4 +77,3 @@ export interface Award { id: string; season_id: string; player_id: string | null
 export interface Staff { id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
 export interface Notification { id: string; recipient_id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; }
 export interface Commissioner { id: string; league_id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
-export interface RegistrationItem { id: string; registration_id: string; player_id: string | null; team_id: string | null; amount_cents: number; description: string; created_at: string; }

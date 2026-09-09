@@ -216,7 +216,6 @@ See `supabase/migrations/` for the complete version-controlled schema. It includ
 - staff
 - notifications
 - commissioners
-- registration_items
 
 TypeScript definitions matching the public schema are in `src/types/database.ts`.
 

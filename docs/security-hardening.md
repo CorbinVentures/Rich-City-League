@@ -60,7 +60,7 @@ authorization test.
 
 | Role | UI route scenarios | Database/RLS scenarios |
 | --- | --- | --- |
-| Public | Public pages render; `/dashboard` and `/portal/*` redirect to sign-in | Published rows are readable; registration, payment, profile, and operational writes fail |
+| Public | Public pages render; `/dashboard` and `/portal/*` redirect to sign-in | Published rows are readable; registration, profile, and operational writes fail |
 | Player | Own profile and registration are visible; own team/statistics are visible; portal operations is denied | Own profile/player/registration access succeeds; unrelated private records and staff operations fail |
 | Coach | Assigned teams, rosters, games, and authorized statistics are visible; unrelated team and admin operations are denied | Assigned roster/team-season operations succeed; unrelated team mutations and admin-only writes fail |
 | Staff | Registration, game, statistics, and content operations render | Authorized staff mutations succeed; profile role/status and admin-only staff changes fail |

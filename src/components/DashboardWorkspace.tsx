@@ -5,19 +5,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Database, Game, Notification, Payment, PlayerGameStats, Registration, Team } from '@/types/database';
+import type { Database, Game, Notification, PlayerGameStats, Registration, Team } from '@/types/database';
 
 type DashboardData = {
   games: Game[];
   teams: Team[];
   registrations: Registration[];
-  payments: Payment[];
   stats: PlayerGameStats[];
   notifications: Notification[];
   counts: Record<string, number>;
 };
 
-const emptyData: DashboardData = { games: [], teams: [], registrations: [], payments: [], stats: [], notifications: [], counts: {} };
+const emptyData: DashboardData = { games: [], teams: [], registrations: [], stats: [], notifications: [], counts: {} };
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"><p className="text-xs font-bold uppercase tracking-wider text-gray-500">{label}</p><p className="mt-2 font-display text-3xl font-bold text-white">{value}</p></div>;
@@ -42,11 +41,6 @@ export default function DashboardWorkspace() {
         ]);
         if (games.error || registrations.error || notifications.error) throw new Error((games.error ?? registrations.error ?? notifications.error)?.message);
         const loadedRegistrations = (registrations.data ?? []) as Registration[];
-        const registrationIds = loadedRegistrations.map((registration) => registration.id);
-        const payments = registrationIds.length
-          ? await supabase.from('payments').select('*').in('registration_id', registrationIds).order('created_at', { ascending: false }).limit(10)
-          : { data: [], error: null };
-        if (payments.error) throw payments.error;
         let stats: PlayerGameStats[] = [];
         let teams: Team[] = [];
         if (profile?.role === 'player') {
@@ -66,13 +60,13 @@ export default function DashboardWorkspace() {
         }
         const counts: Record<string, number> = {};
         if (profile?.role === 'staff' || profile?.role === 'admin') {
-          for (const table of ['profiles', 'seasons', 'teams', 'players', 'games', 'registrations', 'payments']) {
+          for (const table of ['profiles', 'seasons', 'teams', 'players', 'games', 'registrations']) {
             const result = await supabase.from(table as keyof Database['public']['Tables']).select('*', { count: 'exact', head: true });
             if (result.error) throw result.error;
             counts[table] = result.count ?? 0;
           }
         }
-        setData({ games: games.data ?? [], teams, registrations: loadedRegistrations, payments: payments.data ?? [], stats, notifications: notifications.data ?? [], counts });
+        setData({ games: games.data ?? [], teams, registrations: loadedRegistrations, stats, notifications: notifications.data ?? [], counts });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unable to load dashboard data.');
       } finally {
@@ -105,7 +99,7 @@ export default function DashboardWorkspace() {
   return <main><Container maxWidth="xl" className="py-10 sm:py-14">
     <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">{role} dashboard</p><h1 className="mt-2 font-display text-4xl font-bold">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1><p className="mt-3 text-gray-400">Your Rich City League operations center.</p></div><button onClick={() => void signOut()} className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-rcl-gold hover:text-rcl-gold">Sign out</button></div>
     <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {role === 'player' ? <><StatCard label="Registration" value={status} /><StatCard label="Career points" value={totalPoints} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Notifications" value={unread.length} /></> : <><StatCard label="Teams" value={role === 'coach' ? data.teams.length : data.counts.teams ?? 0} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Registrations" value={data.counts.registrations ?? data.registrations.length} /><StatCard label="Payments" value={data.counts.payments ?? data.payments.length} /></>}
+      {role === 'player' ? <><StatCard label="Registration" value={status} /><StatCard label="Career points" value={totalPoints} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Notifications" value={unread.length} /></> : <><StatCard label="Teams" value={role === 'coach' ? data.teams.length : data.counts.teams ?? 0} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Registrations" value={data.counts.registrations ?? data.registrations.length} /><StatCard label="Notifications" value={data.notifications.length} /></>}
     </div>
     <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-bold">Upcoming games</h2><Link href="/games" className="text-sm text-rcl-gold">Game center</Link></div>{upcoming.length === 0 ? <p className="mt-6 text-gray-500">No upcoming games are scheduled.</p> : <div className="mt-5 space-y-3">{upcoming.map((game) => <Link href={`/games/${game.id}`} key={game.id} className="flex items-center justify-between rounded-xl border border-white/10 p-4 hover:border-rcl-gold/50"><span><span className="block text-sm text-gray-300">{new Date(game.scheduled_at).toLocaleDateString()}</span><span className="text-xs uppercase text-gray-500">{game.status}</span></span><span className="font-semibold">{game.away_score} — {game.home_score}</span></Link>)}</div>}</section>

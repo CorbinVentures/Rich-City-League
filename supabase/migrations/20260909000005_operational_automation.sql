@@ -117,33 +117,6 @@ create trigger notify_registration_status_after_change
 after insert or update of status on public.registrations
 for each row execute procedure public.notify_registration_status();
 
-create or replace function public.notify_payment_status()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  recipient uuid;
-begin
-  select applicant_id into recipient from public.registrations where id = new.registration_id;
-  if recipient is not null and (tg_op = 'INSERT' or new.status is distinct from old.status) then
-    insert into public.notifications (recipient_id, actor_id, type, title, body, link)
-    values (
-      recipient, auth.uid(), 'payment_status',
-      'Payment ' || initcap(new.status::text),
-      'Your registration payment status is now ' || new.status::text || '.',
-      '/registration'
-    );
-  end if;
-  return new;
-end;
-$$;
-
-create trigger notify_payment_status_after_change
-after insert or update of status on public.payments
-for each row execute procedure public.notify_payment_status();
-
 create or replace function public.notify_game_change()
 returns trigger
 language plpgsql
