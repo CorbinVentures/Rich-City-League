@@ -14,7 +14,7 @@ export function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    meridiem: 'short',
+    hour12: true,
   });
 }
 
