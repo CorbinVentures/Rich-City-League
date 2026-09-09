@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
-import type { Player, PlayerGameStats, Team, TeamGameStats } from '@/types/database';
+import type { PlayerGameStats, PublicPlayer, Team, TeamGameStats } from '@/types/database';
 
 export const revalidate = 60;
 
@@ -10,17 +10,17 @@ export default async function StatsPage() {
   const client = getPublicClient();
   let playerStats: PlayerGameStats[] = [];
   let teamStats: TeamGameStats[] = [];
-  let players: Player[] = [];
+  let players: PublicPlayer[] = [];
   let teams: Team[] = [];
   let error: string | null = null;
   if (client) {
     const [playerResult, teamResult, playersResult, teamsResult] = await Promise.all([
       client.from('player_game_stats').select('*'),
       client.from('team_game_stats').select('*'),
-      client.from('players').select('*').eq('is_active', true),
+      client.from('public_players').select('*'),
       client.from('teams').select('*').eq('is_active', true),
     ]);
-    error = [playerResult, teamResult, playersResult, teamsResult].find((result) => result.error)?.error?.message ?? null;
+    error = [playerResult, teamResult, playersResult, teamsResult].find((result) => result.error) ? 'Statistics are temporarily unavailable.' : null;
     playerStats = playerResult.data ?? [];
     teamStats = teamResult.data ?? [];
     players = playersResult.data ?? [];
