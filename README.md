@@ -94,42 +94,32 @@ npm run dev
 ```
 
 `npm run db:migrate` resets the local database, applies every migration, and loads
-`supabase/seed.sql`. Use `npm run db:push` to apply pending migrations to a linked
-remote project. To regenerate the checked-in TypeScript definitions after schema changes,
-run `supabase gen types typescript --local > src/types/database.generated.ts` and update
-the application import if you choose to use the CLI-generated output. The service-role
-key and database password are server/CLI secrets; never expose them as `NEXT_PUBLIC_*`
-variables.
-
-For GitHub Actions deployment, configure these exact repository secrets:
-
-- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token. The workflow passes it
-  to `supabase link` and `supabase db push` for Management API authentication.
-- `SUPABASE_PROJECT_ID`: the project reference for the dedicated Rich City League
-  Supabase project. It is passed to `supabase link`; do not use another
-  application's project.
-- `SUPABASE_DB_PASSWORD`: the database password for that project. It is passed to
-  `supabase link` when `SUPABASE_DB_URL` is not configured.
-- `SUPABASE_DB_URL` (optional): a direct database connection URL. When configured,
-  the workflow passes it to `supabase db push` and skips `supabase link`.
-
-The workflow validates the local migrations and applies them to the configured
-project; credentials are never stored in the repository or printed in logs.
+`supabase/seed.sql`. `npm run db:push` is available for local or explicitly
+manual development workflows only; it is not used to deploy production. To
+regenerate the checked-in TypeScript definitions after schema changes, run
+`supabase gen types typescript --local > src/types/database.generated.ts` and
+update the application import if you choose to use the CLI-generated output.
+The service-role key and database password are server/CLI secrets; never expose
+them as `NEXT_PUBLIC_*` variables.
 
 ### Production database deployment
 
-1. Create a new, empty Supabase project specifically for Rich City League. Do not use
-   another application's project.
-2. In Supabase Authentication, keep email/password enabled and configure the production
-   site URL and redirect URLs.
-3. Copy the project reference, database password, project URL, and anon key into the
-   appropriate GitHub/Vercel secret stores.
-4. Add `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, and `SUPABASE_DB_PASSWORD` as
-   GitHub Actions secrets. Add `SUPABASE_DB_URL` only when using a direct database URL.
-5. Push the `supabase/` directory to `main`, or manually run the **Supabase** workflow.
-   The workflow runs `supabase db push`; no tables or policies need to be created in the
-   dashboard. Run `supabase link --project-ref "$SUPABASE_PROJECT_ID"` followed by
-   `supabase db push` locally when deploying manually.
+Supabase's native GitHub Integration is the only production database deployment
+mechanism. Configure the integration for the production project and the `main`
+branch. When changes are pushed to `main`, Supabase applies the versioned
+migrations from `supabase/migrations/`; GitHub Actions never links to or pushes
+the production database.
+
+The repository source of truth is:
+
+- `supabase/migrations/` — versioned production schema changes
+- `supabase/config.toml` — Supabase project and local tooling configuration
+- `supabase/seed.sql` — deterministic local/demo seed data
+
+Create the production project and configure its authentication and site URLs in
+Supabase. Application runtime credentials belong in the appropriate Vercel
+secret stores. The Supabase GitHub Integration, not repository secrets or a
+custom workflow, deploys database migrations.
 
 ## Features
 
