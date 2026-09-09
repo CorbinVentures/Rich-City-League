@@ -10,11 +10,24 @@ export async function middleware(request: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req: request, res: response });
   const { data: { session } } = await supabase.auth.getSession();
 
-  if ((request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal')) && !session) {
+  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal');
+  if (protectedPath && !session) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';
     signInUrl.searchParams.set('next', request.nextUrl.pathname);
     return NextResponse.redirect(signInUrl);
+  }
+
+  if (session && request.nextUrl.pathname.startsWith('/portal/operations')) {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    const profile = profileData as { role: string } | null;
+    if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   return response;

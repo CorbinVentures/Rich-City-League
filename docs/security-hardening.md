@@ -66,20 +66,12 @@ authorization test.
 | Staff | Registration, game, statistics, and content operations render | Authorized staff mutations succeed; profile role/status and admin-only staff changes fail |
 | Admin | All authorized administration routes render | Full authorized administration succeeds; RLS still rejects malformed or cross-tenant references |
 
-## Registration division blocker
+## Registration division integrity
 
-`registrations` stores `season_id` and an optional `team_id`, but no
-`division_id`. Division is currently represented directly by `divisions` and
-indirectly for teams through `team_seasons.division_id`; a registration can
-only be associated with a division by first assigning a team, which is not
-safe for an unassigned applicant. This is a schema blocker:
-
-> `registrations` cannot persist division assignment with the current schema.
-
-Do not add `division_id` during this hardening phase. The smallest future
-migration is an additive nullable foreign key from `registrations.division_id`
-to `divisions.id`, with a composite season/division integrity constraint and
-an application form update.
+`registrations.division_id` is an additive nullable foreign key to
+`divisions.id`, and the registration policy validates that the selected
+division belongs to the submitted season. Applicant inserts also require an
+authenticated `applicant_id` matching `auth.uid()` and an open season.
 
 ## Deferred production work
 

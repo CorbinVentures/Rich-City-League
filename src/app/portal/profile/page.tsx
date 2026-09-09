@@ -36,7 +36,7 @@ export default function ProfilePage() {
     }
     const payload: Database['public']['Tables']['profiles']['Update'] = form;
     const { error: updateError } = await client.from('profiles').update(payload as never).eq('id', user.id);
-    if (updateError) setError(updateError.message);
+    if (updateError) setError('Unable to update your profile.');
     else setMessage('Your profile was updated.');
   }
 

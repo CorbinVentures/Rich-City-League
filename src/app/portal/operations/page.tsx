@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Division, Game, Player, PlayerGameStats, Registration, Roster, Team, TeamSeason } from '@/types/database';
+import type { Division, Game, PlayerGameStats, PublicPlayer, Registration, Roster, Team, TeamSeason } from '@/types/database';
 
 export default function OperationsPage() {
   const { profile, loading: authLoading } = useAuth();
   const client = useMemo(() => getSupabaseClient(), []);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<PublicPlayer[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamSeasons, setTeamSeasons] = useState<TeamSeason[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -39,7 +39,7 @@ export default function OperationsPage() {
         const [registrationResult, gameResult, playerResult, teamResult, divisionsResult, teamSeasonResult, rosterResult, statResult, coachResult] = await Promise.all([
           isStaff ? supabase.from('registrations').select('*').order('submitted_at', { ascending: false }) : Promise.resolve({ data: [], error: null }),
           supabase.from('games').select('*').order('scheduled_at', { ascending: true }),
-          supabase.from('players').select('*').eq('is_active', true).order('last_name'),
+          supabase.from('public_players').select('*').order('last_name'),
           supabase.from('teams').select('*').eq('is_active', true).order('name'),
           supabase.from('divisions').select('*').order('name'),
           supabase.from('team_seasons').select('*'),
@@ -48,13 +48,13 @@ export default function OperationsPage() {
           profile?.role === 'coach' ? supabase.from('team_coaches').select('team_id').eq('profile_id', profile.id) : Promise.resolve({ data: [], error: null }),
         ]);
         const resultError = [registrationResult, gameResult, playerResult, teamResult, divisionsResult, teamSeasonResult, rosterResult, statResult, coachResult].find((result) => result.error)?.error;
-        if (resultError) throw new Error(resultError.message);
+        if (resultError) throw new Error('Unable to load league operations.');
         setRegistrations(registrationResult.data ?? []);
         const loadedGames = (gameResult.data ?? []) as Game[];
         setGames(profile?.role === 'coach'
           ? loadedGames.filter((game) => ((coachResult.data ?? []) as Array<{ team_id: string }>).some((item) => item.team_id === game.home_team_id || item.team_id === game.away_team_id))
           : loadedGames);
-        setPlayers(playerResult.data ?? []);
+        setPlayers((playerResult.data ?? []) as PublicPlayer[]);
         setTeams(teamResult.data ?? []);
         setDivisions(divisionsResult.data ?? []);
         setTeamSeasons(teamSeasonResult.data ?? []);
@@ -71,7 +71,8 @@ export default function OperationsPage() {
         setPlayerStats(statResult.data ?? []);
         setAssignedTeamIds(profile?.role === 'coach' ? ((coachResult.data ?? []) as Array<{ team_id: string }>).map((item) => item.team_id) : []);
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : 'Unable to load league operations.');
+        console.error('Unable to load league operations', reason);
+        setError('Unable to load league operations.');
       } finally {
         setBusy(false);
       }
@@ -80,30 +81,32 @@ export default function OperationsPage() {
   }, [authLoading, client, isStaff, profile?.id, profile?.role]);
 
   async function updateRegistration(id: string, changes: Partial<Pick<Registration, 'status' | 'division_id'>>) {
-    if (!client) return;
+    if (!client || (profile?.role !== 'staff' && profile?.role !== 'admin')) return;
     const { error: updateError } = await client.from('registrations').update({ ...changes, reviewed_at: new Date().toISOString(), reviewed_by: profile?.id ?? null } as never).eq('id', id);
-    if (updateError) setError(updateError.message);
+    if (updateError) setError('Unable to update registration.');
     else setRegistrations((items) => items.map((item) => item.id === id ? { ...item, ...changes } : item));
   }
 
   async function updateGame() {
-    if (!client || !selectedGame) return;
+    if (!client || !selectedGame || (profile?.role !== 'staff' && profile?.role !== 'admin')) return;
     const { error: updateError } = await client.from('games').update({ home_score: score.home, away_score: score.away, status: score.status } as never).eq('id', selectedGame);
-    if (updateError) setError(updateError.message);
+    if (updateError) setError('Unable to update game.');
     else { setMessage('Game updated.'); setGames((items) => items.map((item) => item.id === selectedGame ? { ...item, home_score: score.home, away_score: score.away, status: score.status } : item)); }
   }
 
   async function addPlayer() {
-    if (!client || !selectedTeamSeason || !selectedPlayer) return;
+    const teamSeason = teamSeasons.find((item) => item.id === selectedTeamSeason);
+    if (!client || !teamSeason || !selectedPlayer || (!isStaff && !assignedTeamIds.includes(teamSeason.team_id))) return;
     const { data, error: insertError } = await client.from('rosters').insert({ team_season_id: selectedTeamSeason, player_id: selectedPlayer } as never).select().single();
-    if (insertError) setError(insertError.message);
+    if (insertError) setError('Unable to add player to roster.');
     else if (data) { setRosters((items) => [...items, data as Roster]); setMessage('Player added to the roster.'); }
   }
 
   async function removePlayer(roster: Roster) {
-    if (!client) return;
+    const teamSeason = teamSeasons.find((item) => item.id === roster.team_season_id);
+    if (!client || !teamSeason || (!isStaff && !assignedTeamIds.includes(teamSeason.team_id))) return;
     const { error: deleteError } = await client.from('rosters').delete().eq('id', roster.id);
-    if (deleteError) setError(deleteError.message);
+    if (deleteError) setError('Unable to remove player from roster.');
     else { setRosters((items) => items.filter((item) => item.id !== roster.id)); setMessage('Player removed from the roster.'); }
   }
 
@@ -116,7 +119,7 @@ export default function OperationsPage() {
     const existing = playerStats.find((item) => item.game_id === selectedGame && item.player_id === selectedPlayer);
     const payload = { ...statForm, team_id: teamSeason.team_id, game_id: selectedGame, player_id: selectedPlayer };
     const result = (existing ? await client.from('player_game_stats').update(payload as never).eq('id', existing.id).select().single() : await client.from('player_game_stats').insert(payload as never).select().single()) as unknown as { data: PlayerGameStats | null; error: { message: string } | null };
-    if (result.error) setError(result.error.message);
+    if (result.error) setError('Unable to save player statistics.');
     else if (result.data) { const saved = result.data as PlayerGameStats; setPlayerStats((items) => existing ? items.map((item) => item.id === existing.id ? saved : item) : [...items, saved]); setMessage('Player statistics saved.'); }
   }
 

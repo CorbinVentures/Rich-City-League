@@ -44,7 +44,8 @@ export function useAuth() {
         setUser(data.user);
         await loadProfile(data.user);
       } catch (err) {
-        if (mounted) setError(err instanceof Error ? err.message : 'Unable to load your session.');
+        console.error('Unable to load session', err);
+        if (mounted) setError('Unable to load your session.');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -54,7 +55,8 @@ export function useAuth() {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       void loadProfile(session?.user ?? null).catch((err: unknown) => {
-        if (mounted) setError(err instanceof Error ? err.message : 'Unable to load your profile.');
+        console.error('Unable to load profile', err);
+        if (mounted) setError('Unable to load your profile.');
       });
     });
 
@@ -123,7 +125,7 @@ export function useAuth() {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
     if (error) {
-      setError(error.message);
+      setError('Unable to send the password reset email.');
       throw error;
     }
   };

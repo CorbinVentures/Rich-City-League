@@ -39,23 +39,23 @@ export default function DashboardWorkspace() {
           supabase.from('registrations').select('*').eq('applicant_id', user.id).order('submitted_at', { ascending: false }),
           supabase.from('notifications').select('*').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(8),
         ]);
-        if (games.error || registrations.error || notifications.error) throw new Error((games.error ?? registrations.error ?? notifications.error)?.message);
+        if (games.error || registrations.error || notifications.error) throw new Error('Unable to load dashboard data.');
         const loadedRegistrations = (registrations.data ?? []) as Registration[];
         let stats: PlayerGameStats[] = [];
         let teams: Team[] = [];
         if (profile?.role === 'player') {
           const player = await supabase.from('players').select('id').eq('profile_id', user.id).maybeSingle();
-          if (player.error) throw player.error;
+          if (player.error) throw new Error('Unable to load dashboard data.');
           if (player.data) {
             const playerId = (player.data as { id: string }).id;
             const result = await supabase.from('player_game_stats').select('*').eq('player_id', playerId);
-            if (result.error) throw result.error;
+            if (result.error) throw new Error('Unable to load dashboard data.');
             stats = result.data ?? [];
           }
         }
         if (profile?.role === 'coach' || profile?.role === 'staff' || profile?.role === 'admin') {
           const result = await supabase.from('teams').select('*').order('name');
-          if (result.error) throw result.error;
+          if (result.error) throw new Error('Unable to load dashboard data.');
           teams = result.data ?? [];
         }
         const counts: Record<string, number> = {};
@@ -68,7 +68,8 @@ export default function DashboardWorkspace() {
         }
         setData({ games: games.data ?? [], teams, registrations: loadedRegistrations, stats, notifications: notifications.data ?? [], counts });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unable to load dashboard data.');
+        console.error('Unable to load dashboard data', err);
+        setError('Unable to load dashboard data.');
       } finally {
         setLoading(false);
       }
@@ -90,7 +91,7 @@ export default function DashboardWorkspace() {
     if (!supabase || !user) return;
     const { error: updateError } = await supabase.from('notifications').update({ read_at: new Date().toISOString() } as never).eq('id', id).eq('recipient_id', user.id);
     if (updateError) {
-      setError(updateError.message);
+      setError('Unable to update notification.');
       return;
     }
     setData((current) => ({ ...current, notifications: current.notifications.map((notification) => notification.id === id ? { ...notification, read_at: new Date().toISOString() } : notification) }));
