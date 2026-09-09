@@ -24,6 +24,8 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - name: Start local database for validation
+        run: supabase start
       - name: Validate migration files
         run: supabase db lint --local
       - name: Link project
