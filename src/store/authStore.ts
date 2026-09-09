@@ -1,10 +1,11 @@
 import create from 'zustand';
+import type { User } from '@supabase/supabase-js';
 import { Profile } from '@/types';
 
 interface AuthStore {
-  user: any | null;
+  user: User | null;
   profile: Profile | null;
-  setUser: (user: any) => void;
+  setUser: (user: User | null) => void;
   setProfile: (profile: Profile | null) => void;
   clearAuth: () => void;
 }

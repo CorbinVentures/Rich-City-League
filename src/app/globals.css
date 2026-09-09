@@ -8,5 +8,14 @@
 
 body {
   margin: 0;
-  background: #000000;
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
 }
