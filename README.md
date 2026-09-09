@@ -80,6 +80,28 @@ scripts/                  # Build and setup scripts
 
    Open [http://localhost:3000](http://localhost:3000)
 
+### Supabase CLI workflow
+
+The repository contains the complete Supabase project under `supabase/`: configuration,
+versioned migrations, storage policies, and deterministic demo data. Install the
+[Supabase CLI](https://supabase.com/docs/guides/cli), then run:
+
+```bash
+supabase start
+npm run db:migrate
+npm run dev
+```
+
+`npm run db:migrate` resets the local database, applies every migration, and loads
+`supabase/seed.sql`. Use `npm run db:push` to apply pending migrations to a linked
+remote project. The service-role key and database password are server/CLI secrets;
+never expose them as `NEXT_PUBLIC_*` variables.
+
+For GitHub Actions deployment, configure the repository secrets
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, and
+optionally `SUPABASE_DB_URL`. The workflow applies migrations only; credentials are
+never stored in the repository.
+
 ## Features
 
 ### Phase 1 Implementation

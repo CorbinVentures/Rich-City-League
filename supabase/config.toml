@@ -1,0 +1,47 @@
+project_id = "rich-city-league"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://*.vercel.app/**"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[storage.buckets.avatars]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/*"]
+
+[storage.buckets.media]
+public = true
+file_size_limit = "50MiB"
+allowed_mime_types = ["image/*", "video/*", "audio/*"]
+
+[storage.buckets.documents]
+public = false
+file_size_limit = "20MiB"
+allowed_mime_types = ["application/pdf", "image/*"]
