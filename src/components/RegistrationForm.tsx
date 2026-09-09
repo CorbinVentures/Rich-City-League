@@ -36,7 +36,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
       reviewed_by: null,
       notes: null,
     };
-    const { error } = await supabase.from('registrations').insert(registration);
+    const { error } = await supabase.from('registrations').insert(registration as never);
     setSubmitting(false);
     setMessage(error ? error.message : 'Registration submitted. The league will review your application.');
     if (!error) setForm((current) => ({ ...current, firstName: '', lastName: '', email: '', dateOfBirth: '' }));
