@@ -6,8 +6,9 @@ import { formatDate } from '@/utils/helpers';
 
 export const revalidate = 60;
 
-export default async function PlayerDetailPage({ params }: { params: { id: string } }) {
-  const data = await getPlayerDetail(params.id);
+export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const data = await getPlayerDetail(id);
   if (!data) notFound();
   const { player, rosters, teamSeasons, teams, seasons, divisions, games, stats } = data;
   const teamById = new Map(teams.map((team) => [team.id, team]));

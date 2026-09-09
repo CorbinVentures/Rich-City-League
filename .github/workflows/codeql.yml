@@ -25,6 +25,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
+          build-mode: none
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
