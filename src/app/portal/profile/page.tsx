@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import type { Database } from '@/types/database';
 
 export default function ProfilePage() {
   const { user, profile, loading } = useAuth();
@@ -33,7 +34,8 @@ export default function ProfilePage() {
       setError('Supabase is not configured.');
       return;
     }
-    const { error: updateError } = await client.from('profiles').update(form).eq('id', user.id);
+    const payload: Database['public']['Tables']['profiles']['Update'] = form;
+    const { error: updateError } = await client.from('profiles').update(payload as never).eq('id', user.id);
     if (updateError) setError(updateError.message);
     else setMessage('Your profile was updated.');
   }
