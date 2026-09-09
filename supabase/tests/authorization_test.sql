@@ -21,6 +21,7 @@ insert into public.profiles (id, display_name, role)
 values ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'admin@example.test', 'admin');
 
 select set_config('request.jwt.claim.sub', 'ffffffff-ffff-ffff-ffff-ffffffffffff', true);
+set role authenticated;
 update public.profiles set role = 'coach' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 update public.profiles set role = 'staff' where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 reset role;
