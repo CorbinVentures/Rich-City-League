@@ -151,7 +151,8 @@ security definer
 set search_path = public
 as $$
 begin
-  if new.status is distinct from old.status
+  if tg_op = 'INSERT'
+     or new.status is distinct from old.status
      or new.scheduled_at is distinct from old.scheduled_at then
     insert into public.notifications (recipient_id, actor_id, type, title, body, link)
     select distinct tc.profile_id, auth.uid(), 'game_changed',
@@ -169,9 +170,32 @@ begin
 end;
 $$;
 
-create trigger notify_game_change_after_update
-after update of status, scheduled_at on public.games
+create trigger notify_game_change_after_change
+after insert or update of status, scheduled_at on public.games
 for each row execute procedure public.notify_game_change();
+
+create or replace function public.notify_award()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.player_id is not null then
+    insert into public.notifications (recipient_id, actor_id, type, title, body, link)
+    select p.profile_id, auth.uid(), 'award', 'New league award',
+      'You received the ' || new.name || ' award.',
+      '/players/' || new.player_id::text
+    from public.players p
+    where p.id = new.player_id and p.profile_id is not null;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger notify_award_after_insert
+after insert on public.awards
+for each row execute procedure public.notify_award();
 
 alter publication supabase_realtime add table public.games;
 alter publication supabase_realtime add table public.notifications;
