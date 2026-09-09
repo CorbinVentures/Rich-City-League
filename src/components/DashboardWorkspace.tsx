@@ -35,13 +35,17 @@ export default function DashboardWorkspace() {
     const load = async () => {
       setLoading(true);
       try {
-        const [games, registrations, payments, notifications] = await Promise.all([
+        const [games, registrations, notifications] = await Promise.all([
           supabase.from('games').select('*').order('scheduled_at', { ascending: true }).limit(8),
           supabase.from('registrations').select('*').eq('applicant_id', user.id).order('submitted_at', { ascending: false }),
-          supabase.from('payments').select('*').order('created_at', { ascending: false }).limit(10),
-          supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(8),
+          supabase.from('notifications').select('*').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(8),
         ]);
-        if (games.error || registrations.error || payments.error || notifications.error) throw new Error((games.error ?? registrations.error ?? payments.error ?? notifications.error)?.message);
+        if (games.error || registrations.error || notifications.error) throw new Error((games.error ?? registrations.error ?? notifications.error)?.message);
+        const registrationIds = (registrations.data ?? []).map((registration) => registration.id);
+        const payments = registrationIds.length
+          ? await supabase.from('payments').select('*').in('registration_id', registrationIds).order('created_at', { ascending: false }).limit(10)
+          : { data: [], error: null };
+        if (payments.error) throw payments.error;
         let stats: PlayerGameStats[] = [];
         let teams: Team[] = [];
         if (profile?.role === 'player') {
@@ -87,6 +91,16 @@ export default function DashboardWorkspace() {
   const totalPoints = data.stats.reduce((sum, stat) => sum + stat.points, 0);
   const status = data.registrations[0]?.status ?? 'Not submitted';
 
+  async function markNotificationRead(id: string) {
+    if (!supabase || !user) return;
+    const { error: updateError } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('recipient_id', user.id);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setData((current) => ({ ...current, notifications: current.notifications.map((notification) => notification.id === id ? { ...notification, read_at: new Date().toISOString() } : notification) }));
+  }
+
   return <main><Container maxWidth="xl" className="py-10 sm:py-14">
     <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">{role} dashboard</p><h1 className="mt-2 font-display text-4xl font-bold">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1><p className="mt-3 text-gray-400">Your Rich City League operations center.</p></div><button onClick={() => void signOut()} className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-rcl-gold hover:text-rcl-gold">Sign out</button></div>
     <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -94,7 +108,7 @@ export default function DashboardWorkspace() {
     </div>
     <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-bold">Upcoming games</h2><Link href="/games" className="text-sm text-rcl-gold">Game center</Link></div>{upcoming.length === 0 ? <p className="mt-6 text-gray-500">No upcoming games are scheduled.</p> : <div className="mt-5 space-y-3">{upcoming.map((game) => <Link href={`/games/${game.id}`} key={game.id} className="flex items-center justify-between rounded-xl border border-white/10 p-4 hover:border-rcl-gold/50"><span><span className="block text-sm text-gray-300">{new Date(game.scheduled_at).toLocaleDateString()}</span><span className="text-xs uppercase text-gray-500">{game.status}</span></span><span className="font-semibold">{game.away_score} — {game.home_score}</span></Link>)}</div>}</section>
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Notifications</h2>{data.notifications.length === 0 ? <p className="mt-6 text-gray-500">You are all caught up.</p> : <div className="mt-5 space-y-4">{data.notifications.slice(0, 4).map((notification) => <div key={notification.id} className={notification.read_at ? 'border-b border-white/5 pb-3' : 'border-b border-rcl-gold/30 pb-3'}><p className="font-semibold">{notification.title}</p><p className="mt-1 text-sm text-gray-400">{notification.body ?? 'New league update'}</p></div>)}</div>}</section>
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between gap-3"><h2 className="font-display text-2xl font-bold">Notifications</h2>{unread.length > 0 && <button type="button" onClick={() => void Promise.all(unread.map((notification) => markNotificationRead(notification.id)))} className="text-sm text-rcl-gold">Mark all read</button>}</div>{data.notifications.length === 0 ? <p className="mt-6 text-gray-500">You are all caught up.</p> : <div className="mt-5 space-y-4">{data.notifications.slice(0, 4).map((notification) => <button type="button" key={notification.id} onClick={() => notification.read_at ? undefined : void markNotificationRead(notification.id)} className={`block w-full text-left ${notification.read_at ? 'border-b border-white/5 pb-3' : 'border-b border-rcl-gold/30 pb-3'}`}><p className="font-semibold">{notification.title}</p><p className="mt-1 text-sm text-gray-400">{notification.body ?? 'New league update'}</p></button>)}</div>}</section>
     </div>
     {(role === 'staff' || role === 'admin') && <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">{role === 'admin' ? 'System overview' : 'League operations'}</h2><div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">{Object.entries(data.counts).map(([label, value]) => <div key={label}><p className="text-xs uppercase text-gray-500">{label}</p><p className="mt-1 text-2xl font-bold">{value}</p></div>)}</div></section>}
     <div className="mt-6 grid gap-4 sm:grid-cols-3">
