@@ -33,7 +33,7 @@ export default function ProfilePage() {
       setError('Supabase is not configured.');
       return;
     }
-    const { error: updateError } = await client.from('profiles').update(form).eq('id', user.id);
+    const { error: updateError } = await client.from('profiles').update(form as never).eq('id', user.id);
     if (updateError) setError(updateError.message);
     else setMessage('Your profile was updated.');
   }
