@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req: request, res: response });
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !session) {
+  if ((request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal')) && !session) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';
     signInUrl.searchParams.set('next', request.nextUrl.pathname);
