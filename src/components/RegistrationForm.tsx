@@ -31,7 +31,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     }
     const existing = await supabase.from('registrations').select('id').eq('applicant_id', user.id).eq('season_id', seasonId).limit(1);
     if (existing.error) {
-      setMessage(existing.error.message);
+      setMessage('Unable to check your existing registrations.');
       setSubmitting(false);
       return;
     }
@@ -58,7 +58,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     };
     const { error } = await supabase.from('registrations').insert(registration as never);
     setSubmitting(false);
-    setMessage(error ? error.message : 'Registration submitted. The league will review your application.');
+    setMessage(error ? 'Unable to submit registration. Check the season and division and try again.' : 'Registration submitted. The league will review your application.');
     if (!error) {
       setForm((current) => ({ ...current, firstName: '', lastName: '', email: '', dateOfBirth: '' }));
       setDivisionId('');

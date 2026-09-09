@@ -86,9 +86,11 @@ authorization test.
 ## Registration division integrity
 
 Migration `20260909000004_registration_divisions.sql` adds the nullable
-`registrations.division_id` foreign key and a trigger that rejects a division
-from another season. The automated RLS suite exercises both the valid
-registration path and the cross-season rejection path.
+`registrations.division_id` foreign key to `divisions.id`, a trigger that
+rejects cross-season divisions, and registration policy checks that require an
+authenticated `applicant_id` matching `auth.uid()` plus an open season. The
+automated RLS suite covers both the valid registration path and the
+cross-season rejection path.
 
 ## Deferred production work
 

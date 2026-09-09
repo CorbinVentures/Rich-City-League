@@ -40,7 +40,9 @@ export interface Database {
       notifications: { Row: Notification; Insert: Insert<Notification>; Update: Update<Notification> };
       commissioners: { Row: Commissioner; Insert: Insert<Commissioner>; Update: Update<Commissioner> };
     };
-    Views: Record<string, never>;
+    Views: {
+      public_players: { Row: PublicPlayer };
+    };
     Functions: Record<string, never>;
     Enums: {
       app_role: 'player' | 'coach' | 'staff' | 'admin';
@@ -60,6 +62,7 @@ export interface Venue { id: string; name: string; address: string | null; city:
 export interface Team { id: string; league_id: string; name: string; slug: string; short_name: string | null; logo_url: string | null; primary_color: string | null; secondary_color: string | null; city: string | null; description: string | null; is_active: boolean; created_at: string; updated_at: string; }
 export interface TeamSeason { id: string; team_id: string; season_id: string; division_id: string | null; seed: number | null; created_at: string; }
 export interface Player { id: string; profile_id: string | null; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; date_of_birth: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; created_at: string; updated_at: string; }
+export interface PublicPlayer { id: string; first_name: string; last_name: string; jersey_number: string | null; position: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; }
 export interface TeamCoach { id: string; team_id: string; profile_id: string; title: string; created_at: string; }
 export interface Roster { id: string; team_season_id: string; player_id: string; jersey_number: string | null; is_captain: boolean; joined_at: string; left_at: string | null; created_at: string; }
 export interface Game { id: string; season_id: string; division_id: string | null; home_team_id: string; away_team_id: string; venue_id: string | null; scheduled_at: string; status: Database['public']['Enums']['game_status']; home_score: number; away_score: number; notes: string | null; created_by: string | null; created_at: string; updated_at: string; }
