@@ -31,6 +31,9 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
       date_of_birth: form.dateOfBirth || null,
       emergency_contact: {},
       status: 'pending',
+      submitted_at: new Date().toISOString(),
+      reviewed_at: null,
+      reviewed_by: null,
       notes: null,
     };
     const { error } = await supabase.from('registrations').insert(registration);
