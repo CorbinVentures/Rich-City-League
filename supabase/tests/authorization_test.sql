@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(13);
 
 -- Fixtures are created as the database owner, then every assertion runs through
 -- the same roles used by Supabase RLS.
@@ -45,6 +45,14 @@ where ts.team_id = '51111111-1111-1111-1111-111111111111'
   and ts.season_id = '22222222-2222-2222-2222-222222222222'
 on conflict (team_season_id, player_id) do nothing;
 
+insert into public.registrations
+  (id, season_id, division_id, applicant_id, first_name, last_name, email)
+values
+  ('bbbbbbbb-1111-1111-1111-bbbbbbbbbbbb', '77777777-7777-7777-7777-777777777777',
+   '99999999-9999-9999-9999-999999999999', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+   'Coach', 'Applicant', 'coach@example.test')
+on conflict (id) do nothing;
+
 set role anon;
 select is((select count(*) from public.profiles where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 0::bigint,
   'anonymous users cannot read private player profile fields');
@@ -72,10 +80,10 @@ select throws_ok($$
 $$, '42501', null, 'users cannot create another user registration');
 select is((with changed as (
   update public.registrations set notes = 'tampered'
-  where id = 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa'
+  where id = 'bbbbbbbb-1111-1111-1111-bbbbbbbbbbbb'
   returning id
 ) select count(*) from changed), 0::bigint,
-  'users cannot modify registrations through another-user management paths');
+  'users cannot modify another users registration');
 select throws_ok($$
   insert into public.registrations
     (season_id, division_id, applicant_id, first_name, last_name, email)
