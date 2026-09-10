@@ -37,6 +37,8 @@ export default function SocialPage() {
   const [newPostImage, setNewPostImage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<'for-you' | 'league' | 'teams' | 'players'>('for-you');
+  const [stories, setStories] = useState<any[]>([]);
+  const [storyBody, setStoryBody] = useState('');
 
   // Comment reply state
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
@@ -68,10 +70,32 @@ export default function SocialPage() {
       if (!error && data) {
         setPosts(data);
       }
+      const { data: activeStories } = await supabase
+        .from('stories')
+        .select('id,body,story_type,expires_at,author:profiles(display_name,username)')
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setStories(activeStories ?? []);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateStory = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!supabase || !user || !storyBody.trim()) return;
+    const { data, error } = await supabase.from('stories').insert({
+      author_id: user.id,
+      story_type: 'text',
+      body: storyBody.trim(),
+      audience: 'friends',
+    } as never).select('id,body,story_type,expires_at,author:profiles(display_name,username)').single();
+    if (!error && data) {
+      setStories((current) => [data, ...current]);
+      setStoryBody('');
     }
   };
 
@@ -233,6 +257,24 @@ export default function SocialPage() {
       </section>
 
       <Container maxWidth="lg" className="mt-10 grid gap-8 lg:grid-cols-3">
+        <section className="lg:col-span-3 rounded-2xl border border-white/10 bg-black/50 p-4 shadow-xl backdrop-blur">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black tracking-widest text-rcl-gold">RCL STORIES · 24 HOURS</span>
+            <span className="text-[10px] text-gray-500">{stories.length} ACTIVE</span>
+          </div>
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+            {user && <form onSubmit={handleCreateStory} className="min-w-44 rounded-2xl border border-rcl-gold/40 bg-rcl-gold/10 p-3">
+              <textarea value={storyBody} onChange={(event) => setStoryBody(event.target.value)} placeholder="Share a game-day story..." maxLength={240} className="h-16 w-full resize-none bg-transparent text-xs outline-none placeholder:text-gray-500" />
+              <button className="text-[10px] font-black tracking-widest text-rcl-gold">POST STORY</button>
+            </form>}
+            {stories.map((story) => <article key={story.id} className="min-w-44 rounded-2xl border border-white/10 bg-gradient-to-br from-rcl-navy to-black p-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-rcl-gold text-xs font-black text-black">{story.author?.display_name?.[0] ?? story.author?.username?.[0] ?? 'R'}</div>
+              <p className="mt-3 line-clamp-3 text-xs text-gray-200">{story.body}</p>
+              <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-rcl-gold">{story.author?.display_name ?? story.author?.username ?? 'RCL player'}</p>
+            </article>)}
+            {!user && stories.length === 0 && <p className="py-5 text-sm text-gray-500">Sign in to share a story with your basketball circle.</p>}
+          </div>
+        </section>
         {/* Left Column: Create Post & Filters */}
         <div className="lg:col-span-1 space-y-6">
           {/* Post creator (authenticated) */}
