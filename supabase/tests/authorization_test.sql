@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(17);
 
 -- Fixtures are created as the database owner, then every assertion runs through
 -- the same roles used by Supabase RLS.
@@ -170,6 +170,12 @@ select lives_ok($$
   set name = 'Admin Test Season'
   where id = '77777777-7777-7777-7777-777777777777'
 $$, 'authorized admin access remains functional');
+select lives_ok($$
+  update public.profiles set role = 'coach'
+  where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+$$, 'administrators can assign profile roles');
+select is((select role from public.profiles where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+  'coach'::public.app_role, 'administrator role assignment is applied');
 
 select * from finish();
 rollback;
