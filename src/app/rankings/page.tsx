@@ -10,7 +10,7 @@ export default async function RankingsPage() {
 
   // 1. Fetch Players with heights/profiles
   const { data: rawPlayers } = client 
-    ? await client.from('players').select('*, profile:profiles(*), team:teams(*)')
+    ? await client.from('players').select('*, profile:profiles(*)')
     : { data: [] };
 
   // Calculate scores/ratings dynamically to determine rankings

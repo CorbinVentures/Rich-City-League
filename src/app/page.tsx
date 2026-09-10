@@ -14,7 +14,7 @@ export default async function HomePage() {
 
   // Load Player of the Week (PotW)
   const { data: potwData } = client
-    ? await client.from('player_of_week').select('*, player:players(*, profile:profiles(*))').order('week_start', { ascending: false }).limit(1).maybeSingle() as any
+    ? await client.from('player_of_week').select('*, player:players(*, profile:profiles(*))').order('week_number', { ascending: false }).limit(1).maybeSingle() as any
     : { data: null };
 
   // Load trending social posts
@@ -67,7 +67,7 @@ export default async function HomePage() {
                     <FaCrown className="h-3 w-3" /> PLAYER OF THE WEEK
                   </span>
                   <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-wider">
-                    {potwData ? `Week of ${new Date(potwData.week_start).toLocaleDateString()}` : 'RCL REGULAR SEASON'}
+                    {potwData ? `WEEK ${potwData.week_number}` : 'RCL REGULAR SEASON'}
                   </span>
                 </div>
 
@@ -80,7 +80,7 @@ export default async function HomePage() {
                       {potwData?.player?.profile?.first_name || 'Richmond'} <span className="text-rcl-gold">{potwData?.player?.profile?.last_name || 'Baller'}</span>
                     </h3>
                     <p className="mt-1 text-xs text-gray-400 font-semibold uppercase tracking-widest">
-                      {potwData?.performance_summary || 'Elite performance recorded across Richmond courts this past week.'}
+                      {potwData?.description || 'Elite performance recorded across Richmond courts this past week.'}
                     </p>
                   </div>
                 </div>

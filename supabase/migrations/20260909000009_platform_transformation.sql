@@ -127,6 +127,11 @@ create policy "authenticated users manage reactions" on public.reactions for all
 drop policy if exists "staff view audit_logs" on public.audit_logs;
 create policy "staff view audit_logs" on public.audit_logs for select using (public.is_staff_or_admin());
 
+drop policy if exists "staff create audit_logs" on public.audit_logs;
+create policy "staff create audit_logs" on public.audit_logs
+  for insert
+  with check (public.is_staff_or_admin() and user_id = auth.uid());
+
 -- Add updated_at triggers
 drop trigger if exists site_settings_updated_at on public.site_settings;
 create trigger site_settings_updated_at before update on public.site_settings for each row execute procedure public.set_updated_at();
@@ -202,8 +207,10 @@ where id in (
   select id from auth.users where email = 'info@rich-city-league.com'
 );
 
--- Recreate public_players view to include height_inches
-create or replace view public.public_players
+-- Recreate public_players view to include height_inches. Dropping first keeps
+-- PostgreSQL from treating the inserted column as a renamed existing column.
+drop view if exists public.public_players;
+create view public.public_players
 with (security_invoker = false)
 as
 select
@@ -220,4 +227,3 @@ from public.players
 where is_active;
 
 grant select on public.public_players to anon, authenticated;
-

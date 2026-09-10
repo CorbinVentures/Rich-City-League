@@ -182,7 +182,7 @@ export function SiteHeader() {
       </header>
 
       {/* Mobile App Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-black/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] h-16 font-display pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-black/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] h-16 font-display pb-[env(safe-area-inset-bottom)]">
         <div className="grid h-full grid-cols-5 items-center justify-items-center">
           {mainNavLinks.slice(0, 4).map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
