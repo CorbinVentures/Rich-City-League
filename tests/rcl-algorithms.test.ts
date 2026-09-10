@@ -21,4 +21,22 @@ describe('RCL algorithm services', () => {
   it('keeps fantasy scoring separate and transparent', () => {
     expect(calculateFantasyPoints({ points: 20, rebounds: 10, assists: 5, steals: 2, blocks: 1, turnovers: 3 })).toBe(45.5);
   });
+
+  it('clamps win factor component data to the score range', () => {
+    const result = calculateWinFactor({
+      wins: 10,
+      games: 10,
+      impact: [150],
+      efficiency: [-20],
+      defense: [200],
+      playmaking: [-10],
+      consistency: [120],
+    });
+    expect(result.score).toBeGreaterThanOrEqual(0);
+    expect(result.score).toBeLessThanOrEqual(100);
+  });
+
+  it('does not return negative fantasy points', () => {
+    expect(calculateFantasyPoints({ points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, turnovers: 20 })).toBe(0);
+  });
 });
