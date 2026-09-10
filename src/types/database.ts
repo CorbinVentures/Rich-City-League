@@ -62,9 +62,13 @@ export interface Database {
       user_levels: { Row: UserLevel; Insert: Insert<UserLevel>; Update: Update<UserLevel> };
       reports: { Row: Report; Insert: Insert<Report>; Update: Update<Report> };
       saved_posts: { Row: SavedPost; Insert: SavedPost; Update: Partial<SavedPost> };
+      player_iq_profiles: { Row: PlayerIQProfile; Insert: Insert<PlayerIQProfile>; Update: Update<PlayerIQProfile> };
+      player_iq_history: { Row: PlayerIQHistory; Insert: Insert<PlayerIQHistory>; Update: Update<PlayerIQHistory> };
+      teammate_evaluations: { Row: TeammateEvaluation; Insert: Insert<TeammateEvaluation>; Update: Update<TeammateEvaluation> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
+      public_player_iq: { Row: PublicPlayerIQ };
     };
     Functions: Record<string, never>;
     Enums: {
@@ -127,3 +131,21 @@ export interface XpTransaction { id: string; profile_id: string; amount: number;
 export interface UserLevel { profile_id: string; xp: number; level: number; current_streak: number; updated_at: string; }
 export interface Report { id: string; reporter_id: string; reported_profile_id: string | null; post_id: string | null; message_id: string | null; reason: string; status: 'open' | 'reviewing' | 'resolved' | 'dismissed'; reviewed_by: string | null; created_at: string; }
 export interface SavedPost { profile_id: string; post_id: string; created_at: string; }
+export interface PlayerIQProfile {
+  player_id: string; rcl_rating: number; court_performance_score: number; skill_profile_score: number;
+  teammate_grade_score: number; community_popularity_score: number; growth_consistency_score: number;
+  exposure_index: number; player_archetype: string | null; rating_trend: 'rising' | 'stable' | 'declining';
+  previous_rating: number | null; rating_change: number; games_evaluated: number;
+  last_calculated_at: string | null; created_at: string; updated_at: string;
+}
+export interface PublicPlayerIQ extends Omit<PlayerIQProfile, 'created_at' | 'updated_at'> {}
+export interface PlayerIQHistory {
+  id: string; player_id: string; rcl_rating: number; court_performance_score: number;
+  skill_profile_score: number; teammate_grade_score: number; community_popularity_score: number;
+  growth_consistency_score: number; exposure_index: number; calculated_at: string;
+}
+export interface TeammateEvaluation {
+  id: string; game_id: string; evaluator_player_id: string; teammate_player_id: string;
+  communication: number; unselfishness: number; effort: number; leadership: number;
+  defense: number; team_chemistry: number; coachability: number; created_at: string;
+}

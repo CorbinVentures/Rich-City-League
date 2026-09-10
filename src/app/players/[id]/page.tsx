@@ -4,6 +4,7 @@ import { Container } from '@/components/Container';
 import { getPlayerDetail, getPublicClient } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
 import { FaAward, FaBolt, FaCircleCheck } from 'react-icons/fa6';
+import { calculatePlayerIQ } from '@/lib/player-iq';
 
 export const revalidate = 60;
 
@@ -12,7 +13,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const data = await getPlayerDetail(id);
   if (!data) notFound();
 
-  const { player, rosters, teamSeasons, teams, seasons, divisions, games, stats } = data;
+  const { player, rosters, teamSeasons, teams, seasons, divisions, games, stats, iq, iqHistory } = data;
   const client = getPublicClient();
 
   // Load earned badges
@@ -49,12 +50,27 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const total3PA = stats.reduce((sum, s) => sum + s.three_pointers_attempted, 0);
   const threePct = total3PA ? Math.round((total3PM / total3PA) * 100) : 0;
 
-  // Video Game Style Overall Rating (Scoring, Passing, Rebounding, Defense)
+  const calculatedIQ = calculatePlayerIQ({ stats });
+  const playerIQ = iq ?? {
+    rcl_rating: calculatedIQ.rclRating,
+    court_performance_score: calculatedIQ.courtPerformance,
+    skill_profile_score: calculatedIQ.skillProfile,
+    teammate_grade_score: calculatedIQ.teammateGrade,
+    community_popularity_score: calculatedIQ.communityPopularity,
+    growth_consistency_score: calculatedIQ.growthConsistency,
+    exposure_index: calculatedIQ.exposureIndex,
+    player_archetype: calculatedIQ.archetype,
+    rating_trend: calculatedIQ.trend,
+    rating_change: calculatedIQ.ratingChange,
+    games_evaluated: calculatedIQ.gamesEvaluated,
+  };
+
+  // Keep the existing stat cards while exposing the cached Player IQ dimensions.
   const scoreRating = Math.min(99, Math.max(50, Math.round(50 + (avgPoints * 2.5))));
   const passingRating = Math.min(99, Math.max(50, Math.round(50 + (avgAssists * 5))));
   const reboundRating = Math.min(99, Math.max(50, Math.round(50 + (avgRebounds * 4))));
   const defenseRating = Math.min(99, Math.max(50, Math.round(50 + ((avgSteals + avgBlocks) * 8))));
-  const overallRating = totalGames ? Math.round((scoreRating + passingRating + reboundRating + defenseRating) / 4) : 60;
+  const overallRating = Math.round(playerIQ.rcl_rating);
 
   // Get current active team
   const currentRoster = rosters[0];
@@ -112,14 +128,14 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-rcl-gold bg-black shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 <div className="text-center">
                   <span className="block font-display text-3xl font-black text-white">{overallRating}</span>
-                  <span className="block text-[8px] font-bold tracking-widest text-rcl-gold">OVR</span>
+                  <span className="block text-[8px] font-bold tracking-widest text-rcl-gold">RCL IQ</span>
                 </div>
               </div>
               <div className="space-y-1 font-mono text-xs">
-                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">SCORING</span><span className="font-bold text-white">{scoreRating}</span></div>
-                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">PLAYMAKING</span><span className="font-bold text-white">{passingRating}</span></div>
-                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">REBOUNDS</span><span className="font-bold text-white">{reboundRating}</span></div>
-                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">DEFENSE</span><span className="font-bold text-white">{defenseRating}</span></div>
+                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">COURT</span><span className="font-bold text-white">{Math.round(playerIQ.court_performance_score)}</span></div>
+                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">SKILLS</span><span className="font-bold text-white">{Math.round(playerIQ.skill_profile_score)}</span></div>
+                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">TEAMMATE</span><span className="font-bold text-white">{Math.round(playerIQ.teammate_grade_score)}</span></div>
+                <div className="flex justify-between gap-8"><span className="text-gray-400 uppercase font-black">EXPOSURE</span><span className="font-bold text-white">{Math.round(playerIQ.exposure_index)}</span></div>
               </div>
             </div>
           </div>
@@ -211,6 +227,26 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
         {/* Right Columns: Stats Grid */}
         <div className="space-y-8 lg:col-span-2">
+          <div className="rounded-2xl border border-rcl-gold/20 bg-rcl-gold/[0.04] p-6 shadow-xl">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-sm font-black tracking-widest text-rcl-gold uppercase">PLAYER DNA</h2>
+                <p className="mt-1 text-xs text-gray-400">{playerIQ.player_archetype ?? 'Not enough data'} · {playerIQ.rating_trend} trend</p>
+              </div>
+              <div className="text-right"><span className="block text-[9px] uppercase tracking-widest text-gray-500">Exposure Index</span><span className="font-display text-2xl font-black text-white">{Math.round(playerIQ.exposure_index)}</span></div>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {[
+                ['Court Performance', playerIQ.court_performance_score],
+                ['Skill Profile', playerIQ.skill_profile_score],
+                ['Teammate Grade', playerIQ.teammate_grade_score],
+                ['Community', playerIQ.community_popularity_score],
+                ['Growth', playerIQ.growth_consistency_score],
+              ].map(([label, value]) => <div key={label as string}><div className="flex justify-between text-[10px] uppercase tracking-wider text-gray-400"><span>{label as string}</span><b className="text-white">{Math.round(value as number)}</b></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-rcl-gold" style={{ width: `${value}%` }} /></div></div>)}
+            </div>
+            <p className="mt-5 text-xs leading-relaxed text-gray-400">Your RCL Rating is weighted toward court performance and skill, with teammate impact, community popularity, and sustained growth contributing separately. {playerIQ.rating_change > 0 ? `Your rating is up ${playerIQ.rating_change}.` : 'Add more completed game logs to improve rating confidence.'}</p>
+            {iqHistory.length > 1 && <p className="mt-2 text-[10px] uppercase tracking-widest text-gray-500">Rating history: {iqHistory.map((item) => Math.round(item.rcl_rating)).join(' → ')}</p>}
+          </div>
           {/* Stats Summary Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">

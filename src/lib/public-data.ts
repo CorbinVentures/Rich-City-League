@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Division, Game, League, PlayerGameStats, PublicPlayer, Roster, Season, Standing, Team, TeamCoach, TeamGameStats, TeamSeason, Venue } from '@/types/database';
+import type { Database, Division, Game, League, PlayerGameStats, PublicPlayer, PublicPlayerIQ, Roster, Season, Standing, Team, TeamCoach, TeamGameStats, TeamSeason, Venue } from '@/types/database';
 
 type PublicClient = SupabaseClient<Database>;
 type QueryResult<T> = { data: T; error: { message: string } | null };
@@ -38,6 +38,8 @@ export type PlayerDetailData = {
   divisions: Division[];
   games: Game[];
   stats: PlayerGameStats[];
+  iq: PublicPlayerIQ | null;
+  iqHistory: Database['public']['Tables']['player_iq_history']['Row'][];
 };
 
 export function getPublicClient(): PublicClient | null {
@@ -130,12 +132,14 @@ export async function getPlayerDetail(id: string): Promise<PlayerDetailData | nu
     throw new Error('Unable to load public player data.');
   }
   if (!player) return null;
-  const [rosterResult, statsResult] = await Promise.all([
+  const [rosterResult, statsResult, iqResult, iqHistoryResult] = await Promise.all([
     client.from('rosters').select('*').eq('player_id', id).is('left_at', null),
     client.from('player_game_stats').select('*').eq('player_id', id),
-  ]) as unknown as [QueryResult<Roster[]>, QueryResult<PlayerGameStats[]>];
-  if (rosterResult.error || statsResult.error) {
-    console.error('Public player detail query failed', rosterResult.error ?? statsResult.error);
+    client.from('public_player_iq').select('*').eq('player_id', id).maybeSingle(),
+    client.from('player_iq_history').select('*').eq('player_id', id).order('calculated_at', { ascending: true }),
+  ]) as unknown as [QueryResult<Roster[]>, QueryResult<PlayerGameStats[]>, QueryResult<PublicPlayerIQ | null>, QueryResult<Database['public']['Tables']['player_iq_history']['Row'][]>;
+  if (rosterResult.error || statsResult.error || iqResult.error || iqHistoryResult.error) {
+    console.error('Public player detail query failed', rosterResult.error ?? statsResult.error ?? iqResult.error ?? iqHistoryResult.error);
     throw new Error('Unable to load public player data.');
   }
   const rosters = rosterResult.data ?? [];
@@ -158,7 +162,7 @@ export async function getPlayerDetail(id: string): Promise<PlayerDetailData | nu
     console.error('Public player related data query failed', teamsResult.error ?? seasonsResult.error ?? gamesResult.error ?? divisionsResult.error);
     throw new Error('Unable to load public player data.');
   }
-  return { player, rosters, teamSeasons, teams: teamsResult.data ?? [], seasons: seasonsResult.data ?? [], divisions: divisionsResult.data ?? [], games: gamesResult.data ?? [], stats: statsResult.data ?? [] };
+  return { player, rosters, teamSeasons, teams: teamsResult.data ?? [], seasons: seasonsResult.data ?? [], divisions: divisionsResult.data ?? [], games: gamesResult.data ?? [], stats: statsResult.data ?? [], iq: iqResult.data, iqHistory: iqHistoryResult.data ?? [] };
 }
 
 export async function getSocialFeed() {
@@ -245,4 +249,3 @@ export async function getRecentBadgesEarned() {
   }
   return data ?? [];
 }
-

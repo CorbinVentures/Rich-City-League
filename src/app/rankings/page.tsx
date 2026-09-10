@@ -8,21 +8,16 @@ export const revalidate = 60;
 export default async function RankingsPage() {
   const client = getPublicClient();
 
-  // 1. Fetch Players with heights/profiles
+  // 1. Fetch players with cached Player IQ scores.
   const { data: rawPlayers } = client 
-    ? await client.from('players').select('*, profile:profiles(*)')
+    ? await client.from('public_players').select('*, iq:public_player_iq(*)')
     : { data: [] };
 
   // Calculate scores/ratings dynamically to determine rankings
   // Let's create high fidelity leaderboards
   const players = (rawPlayers || []).map((p: any) => {
-    // Generate realistic, consistent ratings/metrics based on their record
-    const ppg = p.ppg ?? (14.5 + (parseInt(p.id?.slice(0,2), 16) || 1) % 15);
-    const rpg = p.rpg ?? (5.2 + (parseInt(p.id?.slice(2,4), 16) || 1) % 8);
-    const apg = p.apg ?? (3.4 + (parseInt(p.id?.slice(4,6), 16) || 1) % 6);
-    const spg = p.spg ?? (1.1 + (parseInt(p.id?.slice(6,8), 16) || 1) % 3);
-    const bpg = p.bpg ?? (0.8 + (parseInt(p.id?.slice(8,10), 16) || 1) % 3);
-    const ovr = Math.min(99, Math.round(70 + (ppg * 1.2) + (rpg * 0.8) + (apg * 1.0) + ((spg + bpg) * 1.5)));
+    const ppg = 0; const rpg = 0; const apg = 0; const spg = 0; const bpg = 0;
+    const ovr = p.iq?.rcl_rating ?? null;
 
     return {
       ...p,
@@ -39,7 +34,7 @@ export default async function RankingsPage() {
   const ppgLeaders = [...players].sort((a, b) => b.ppg - a.ppg).slice(0, 5);
   const rpgLeaders = [...players].sort((a, b) => b.rpg - a.rpg).slice(0, 5);
   const apgLeaders = [...players].sort((a, b) => b.apg - a.apg).slice(0, 5);
-  const ovrLeaders = [...players].sort((a, b) => b.ovr - a.ovr).slice(0, 5);
+  const ovrLeaders = [...players].filter((p) => p.ovr !== null).sort((a, b) => b.ovr - a.ovr).slice(0, 5);
 
   // 2. Fetch Teams and compute standings
   const { data: teamsData } = client
@@ -108,7 +103,7 @@ export default async function RankingsPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-gray-500 font-bold">#{idx + 1}</span>
                         <Link href={`/players/${p.id}`} className="text-xs font-bold text-gray-200 hover:text-rcl-gold truncate max-w-[120px]">
-                          {p.profile?.first_name} {p.profile?.last_name}
+                          {p.first_name} {p.last_name}
                         </Link>
                       </div>
                       <span className="font-display font-black text-rcl-gold">{p.ovr} OVR</span>
@@ -130,7 +125,7 @@ export default async function RankingsPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-gray-500 font-bold">#{idx + 1}</span>
                         <Link href={`/players/${p.id}`} className="text-xs font-bold text-gray-200 hover:text-rcl-gold truncate max-w-[120px]">
-                          {p.profile?.first_name} {p.profile?.last_name}
+                          {p.first_name} {p.last_name}
                         </Link>
                       </div>
                       <span className="font-display font-black text-white">{p.ppg?.toFixed(1)} PPG</span>
@@ -152,7 +147,7 @@ export default async function RankingsPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-gray-500 font-bold">#{idx + 1}</span>
                         <Link href={`/players/${p.id}`} className="text-xs font-bold text-gray-200 hover:text-rcl-gold truncate max-w-[120px]">
-                          {p.profile?.first_name} {p.profile?.last_name}
+                          {p.first_name} {p.last_name}
                         </Link>
                       </div>
                       <span className="font-display font-black text-white">{p.rpg?.toFixed(1)} RPG</span>
@@ -174,7 +169,7 @@ export default async function RankingsPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-gray-500 font-bold">#{idx + 1}</span>
                         <Link href={`/players/${p.id}`} className="text-xs font-bold text-gray-200 hover:text-rcl-gold truncate max-w-[120px]">
-                          {p.profile?.first_name} {p.profile?.last_name}
+                          {p.first_name} {p.last_name}
                         </Link>
                       </div>
                       <span className="font-display font-black text-white">{p.apg?.toFixed(1)} APG</span>
