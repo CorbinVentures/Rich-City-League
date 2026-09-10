@@ -137,7 +137,7 @@ export async function getPlayerDetail(id: string): Promise<PlayerDetailData | nu
     client.from('player_game_stats').select('*').eq('player_id', id),
     client.from('public_player_iq').select('*').eq('player_id', id).maybeSingle(),
     client.from('player_iq_history').select('*').eq('player_id', id).order('calculated_at', { ascending: true }),
-  ]) as unknown as [QueryResult<Roster[]>, QueryResult<PlayerGameStats[]>, QueryResult<PublicPlayerIQ | null>, QueryResult<Database['public']['Tables']['player_iq_history']['Row'][]>;
+  ]) as unknown as [QueryResult<Roster[]>, QueryResult<PlayerGameStats[]>, QueryResult<PublicPlayerIQ | null>, QueryResult<Database['public']['Tables']['player_iq_history']['Row'][] >];
   if (rosterResult.error || statsResult.error || iqResult.error || iqHistoryResult.error) {
     console.error('Public player detail query failed', rosterResult.error ?? statsResult.error ?? iqResult.error ?? iqHistoryResult.error);
     throw new Error('Unable to load public player data.');

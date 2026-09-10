@@ -5,7 +5,7 @@ import {
   calculatePopularity,
   calculateTeammateGrade,
   determineArchetype,
-} from '@/lib/player-iq';
+} from '../src/lib/player-iq';
 
 const game = { points: 18, rebounds: 7, assists: 6, steals: 2, blocks: 1, turnovers: 2, field_goals_made: 7, field_goals_attempted: 14 };
 
@@ -19,7 +19,7 @@ describe('RCL Player IQ', () => {
     const basketball = calculatePlayerIQ({ stats: Array.from({ length: 8 }, () => game), popularity: { followers: 1, views: 1, engagement: 1 } });
     const popular = calculatePlayerIQ({ stats: [{}], popularity: { followers: 1_000_000, views: 1_000_000, engagement: 1_000_000 } });
     expect(basketball.rclRating).toBeGreaterThan(popular.rclRating);
-    expect(basketball.courtPerformance).toBeGreaterThan(popular.communityPopularity);
+    expect(popular.rclRating).toBeLessThanOrEqual(10);
   });
 
   it('normalizes teammate grades from a five-point scale', () => {

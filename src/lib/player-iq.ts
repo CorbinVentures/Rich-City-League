@@ -54,7 +54,7 @@ export function calculatePopularity(metrics: { followers?: number; views?: numbe
 }
 
 export function calculateGrowthConsistency(current: StatLine[], previous: StatLine[] = []): number {
-  if (!current.length) return 0;
+  if (!current.length || current.every((stat) => Object.values(stat).every((value) => !safe(value)))) return 0;
   const currentImpact = calculateCourtPerformance(current);
   const previousImpact = previous.length ? calculateCourtPerformance(previous) : currentImpact;
   const consistency = clamp(100 - (Math.sqrt(avg(current.map((s) => Math.abs(safe(s.points) - avg(current.map((x) => safe(x.points))))))) * 4));
