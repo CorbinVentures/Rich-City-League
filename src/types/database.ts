@@ -65,6 +65,13 @@ export interface Database {
       player_iq_profiles: { Row: PlayerIQProfile; Insert: Insert<PlayerIQProfile>; Update: Update<PlayerIQProfile> };
       player_iq_history: { Row: PlayerIQHistory; Insert: Insert<PlayerIQHistory>; Update: Update<PlayerIQHistory> };
       teammate_evaluations: { Row: TeammateEvaluation; Insert: Insert<TeammateEvaluation>; Update: Update<TeammateEvaluation> };
+      profile_roles: { Row: ProfileRole; Insert: Insert<ProfileRole>; Update: Update<ProfileRole> };
+      fan_profiles: { Row: FanProfile; Insert: Insert<FanProfile>; Update: Update<FanProfile> };
+      score_explanations: { Row: ScoreExplanation; Insert: Insert<ScoreExplanation>; Update: Update<ScoreExplanation> };
+      fantasy_seasons: { Row: FantasySeason; Insert: Insert<FantasySeason>; Update: Update<FantasySeason> };
+      fantasy_teams: { Row: FantasyTeam; Insert: Insert<FantasyTeam>; Update: Update<FantasyTeam> };
+      fantasy_rosters: { Row: FantasyRoster; Insert: FantasyRoster; Update: Partial<FantasyRoster> };
+      fantasy_scores: { Row: FantasyScore; Insert: Insert<FantasyScore>; Update: Update<FantasyScore> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
@@ -72,7 +79,7 @@ export interface Database {
     };
     Functions: Record<string, never>;
     Enums: {
-      app_role: 'player' | 'coach' | 'staff' | 'admin';
+      app_role: 'player' | 'coach' | 'fan' | 'staff' | 'admin';
       season_status: 'draft' | 'registration' | 'active' | 'completed' | 'archived';
       registration_status: 'pending' | 'approved' | 'waitlisted' | 'rejected' | 'cancelled';
       game_status: 'scheduled' | 'live' | 'completed' | 'cancelled' | 'postponed';
@@ -81,7 +88,7 @@ export interface Database {
   };
 }
 
-export interface ProfileRow { id: string; username: string | null; first_name: string | null; last_name: string | null; display_name: string | null; avatar_url: string | null; bio: string | null; phone: string | null; role: Database['public']['Enums']['app_role']; is_active: boolean; created_at: string; updated_at: string; }
+export interface ProfileRow { id: string; username: string | null; first_name: string | null; last_name: string | null; display_name: string | null; avatar_url: string | null; cover_url?: string | null; bio: string | null; phone: string | null; location?: string | null; profile_visibility?: 'public' | 'friends' | 'private'; role: Database['public']['Enums']['app_role']; is_active: boolean; created_at: string; updated_at: string; }
 export interface League { id: string; name: string; slug: string; description: string | null; city: string; state: string; is_active: boolean; created_at: string; updated_at: string; }
 export interface Season { id: string; league_id: string; name: string; slug: string; start_date: string; end_date: string; status: Database['public']['Enums']['season_status']; registration_open: boolean; created_at: string; updated_at: string; }
 export interface Division { id: string; season_id: string; name: string; age_group: string | null; gender: string | null; max_teams: number | null; created_at: string; }
@@ -149,3 +156,10 @@ export interface TeammateEvaluation {
   communication: number; unselfishness: number; effort: number; leadership: number;
   defense: number; team_chemistry: number; coachability: number; created_at: string;
 }
+export interface ProfileRole { profile_id: string; role: Database['public']['Enums']['app_role']; status: 'active' | 'pending' | 'revoked'; verified_at: string | null; verified_by: string | null; created_at: string; }
+export interface FanProfile { profile_id: string; favorite_team_id: string | null; fan_level: number; games_attended: number; created_at: string; updated_at: string; }
+export interface ScoreExplanation { id: string; profile_id: string | null; player_id: string | null; score_type: 'player_index' | 'player_win_factor' | 'coach_index' | 'fan_win_factor'; score: number; components: Json; data_points: number; calculated_at: string; }
+export interface FantasySeason { id: string; season_id: string; name: string; status: 'draft' | 'active' | 'completed'; scoring_rules: Json; champion_fantasy_team_id: string | null; created_at: string; }
+export interface FantasyTeam { id: string; fantasy_season_id: string; manager_id: string; name: string; total_points: number; wins: number; losses: number; created_at: string; }
+export interface FantasyRoster { fantasy_team_id: string; player_id: string; roster_slot: 'starter' | 'bench' | 'ir'; acquired_at: string; }
+export interface FantasyScore { id: string; fantasy_team_id: string; player_id: string; game_id: string; fantasy_points: number; scoring_breakdown: Json; created_at: string; }
