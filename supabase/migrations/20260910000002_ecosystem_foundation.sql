@@ -100,6 +100,7 @@ alter table public.fantasy_scores enable row level security;
 
 create policy "public active profile roles" on public.profile_roles for select using (status = 'active');
 create policy "users manage own fan role request" on public.profile_roles for insert with check (profile_id = auth.uid() and role = 'fan');
+create policy "staff manage profile roles" on public.profile_roles for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "users view own fan profile" on public.fan_profiles for select using (true);
 create policy "users update own fan profile" on public.fan_profiles for all using (profile_id = auth.uid()) with check (profile_id = auth.uid());
 create policy "public score explanations" on public.score_explanations for select using (true);

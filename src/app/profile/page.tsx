@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function ProfilePage() {
   const { user, profile } = useAuth(); const supabase = useMemo(() => getSupabaseClient(), []); const [displayName, setDisplayName] = useState(''); const [bio, setBio] = useState(''); const [role, setRole] = useState<'fan' | 'player' | 'coach'>('fan'); const [saved, setSaved] = useState(false);
-  useEffect(() => { setDisplayName(profile?.display_name ?? ''); setBio(profile?.bio ?? ''); }, [profile]);
+  useEffect(() => { setDisplayName(profile?.display_name ?? ''); setBio(profile?.bio ?? ''); if (profile?.role === 'player' || profile?.role === 'coach' || profile?.role === 'fan') setRole(profile.role); }, [profile]);
   const save = async (event: React.FormEvent) => {
     event.preventDefault(); if (!supabase || !user) return;
     const profileResult = await supabase.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null } as never).eq('id', user.id);

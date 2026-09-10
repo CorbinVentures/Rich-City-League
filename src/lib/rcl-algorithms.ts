@@ -43,6 +43,7 @@ export function calculateWinFactor(input: { wins: number; games: number; impact:
 }
 
 export function calculateFanWinFactor(input: { posts: number; comments: number; reactions: number; predictions: number; predictionAccuracy: number; communityActions: number; gamesAttended: number }): ExplainableScore {
+  if (input.posts + input.comments + input.reactions + input.predictions + input.communityActions + input.gamesAttended === 0) return { score: null, components: [], dataPoints: 0, reason: 'Start participating to establish a fan score.' };
   const values = [
     { label: 'Engagement', value: clamp(input.posts * 2 + input.comments + input.reactions * 0.5), weight: 0.25, available: true },
     { label: 'Basketball knowledge', value: input.predictions ? clamp(input.predictionAccuracy) : 0, weight: 0.25, available: input.predictions > 0 },

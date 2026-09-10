@@ -7,7 +7,7 @@ export interface Profile {
   avatar_url?: string | null;
   bio?: string | null;
   phone?: string | null;
-  role?: 'player' | 'coach' | 'staff' | 'admin' | null;
+  role?: 'player' | 'coach' | 'fan' | 'staff' | 'admin' | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
