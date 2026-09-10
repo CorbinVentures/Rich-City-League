@@ -20,6 +20,8 @@ import {
   FaBars, 
   FaXmark,
   FaBell
+  ,FaComments
+  ,FaPeopleGroup
 } from 'react-icons/fa6';
 
 export function SiteHeader() {
@@ -63,6 +65,7 @@ export function SiteHeader() {
     { label: 'STANDINGS', href: '/standings', icon: FaFolderOpen },
     { label: 'STATS', href: '/stats', icon: FaChartSimple },
     { label: 'SOCIAL', href: '/social', icon: FaUsers },
+    { label: 'MESSAGES', href: '/messages', icon: FaComments },
   ];
 
   const secondaryNavLinks = [
@@ -72,6 +75,10 @@ export function SiteHeader() {
     { label: 'NEWS', href: '/news', icon: FaNewspaper },
     { label: 'MEDIA', href: '/media', icon: FaPlay },
     { label: 'RANKINGS', href: '/rankings', icon: FaListOl },
+    { label: 'COMMUNITIES', href: '/communities', icon: FaPeopleGroup },
+    { label: 'FRIENDS', href: '/friends', icon: FaUsers },
+    { label: 'LEADERBOARDS', href: '/leaderboards', icon: FaListOl },
+    { label: 'NOTIFICATIONS', href: '/notifications', icon: FaBell },
   ];
 
   if (isAdmin) {
