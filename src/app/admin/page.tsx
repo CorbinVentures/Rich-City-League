@@ -213,15 +213,17 @@ export default function AdminDashboardPage() {
     const { data: teamSeasons } = await supabase
       .from('team_seasons')
       .select('id, team_id')
-      .in('team_id', [game.home_team_id, game.away_team_id]);
+      .in('team_id', [game.home_team_id, game.away_team_id]) as unknown as {
+        data: Array<{ id: string; team_id: string }> | null;
+      };
     const teamSeasonIds = (teamSeasons ?? []).map((teamSeason) => teamSeason.id);
-    const { data: rosterRows } = teamSeasonIds.length
-      ? await supabase.from('rosters').select('player_id, team_season_id').in('team_season_id', teamSeasonIds)
-      : { data: [] };
-    const playerIds = (rosterRows ?? []).map((roster) => roster.player_id);
-    const { data: teamPlayers } = playerIds.length
-      ? await supabase.from('players').select('*, profile:profiles(*)').in('id', playerIds)
-      : { data: [] };
+    const rosterRows: Array<{ player_id: string; team_season_id: string }> = teamSeasonIds.length
+      ? (await supabase.from('rosters').select('player_id, team_season_id').in('team_season_id', teamSeasonIds)).data ?? []
+      : [];
+    const playerIds = rosterRows.map((roster) => roster.player_id);
+    const teamPlayers: any[] = playerIds.length
+      ? (await supabase.from('players').select('*, profile:profiles(*)').in('id', playerIds)).data ?? []
+      : [];
     const teamByPlayerId = new Map(
       (rosterRows ?? []).map((roster) => [
         roster.player_id,
