@@ -14,7 +14,7 @@ type Update<T> = Partial<T>;
 export interface Database {
   public: {
     Tables: {
-      profiles: { Row: Row<ProfileRow>; Insert: Insert<ProfileRow>; Update: Update<ProfileRow> };
+      profiles: { Row: Row<ProfileRow>; Insert: Insert<ProfileRow>; Update: Update<ProfileRow>; Relationships: [] };
       leagues: { Row: League; Insert: Insert<League>; Update: Update<League> };
       seasons: { Row: Season; Insert: Insert<Season>; Update: Update<Season> };
       divisions: { Row: Division; Insert: Insert<Division>; Update: Update<Division> };
@@ -65,8 +65,8 @@ export interface Database {
       player_iq_profiles: { Row: PlayerIQProfile; Insert: Insert<PlayerIQProfile>; Update: Update<PlayerIQProfile> };
       player_iq_history: { Row: PlayerIQHistory; Insert: Insert<PlayerIQHistory>; Update: Update<PlayerIQHistory> };
       teammate_evaluations: { Row: TeammateEvaluation; Insert: Insert<TeammateEvaluation>; Update: Update<TeammateEvaluation> };
-      profile_roles: { Row: ProfileRole; Insert: Insert<ProfileRole>; Update: Update<ProfileRole> };
-      fan_profiles: { Row: FanProfile; Insert: Insert<FanProfile>; Update: Update<FanProfile> };
+      profile_roles: { Row: ProfileRole; Insert: Insert<ProfileRole>; Update: Update<ProfileRole>; Relationships: [] };
+      fan_profiles: { Row: FanProfile; Insert: Insert<FanProfile>; Update: Update<FanProfile>; Relationships: [] };
       score_explanations: { Row: ScoreExplanation; Insert: Insert<ScoreExplanation>; Update: Update<ScoreExplanation> };
       fantasy_seasons: { Row: FantasySeason; Insert: Insert<FantasySeason>; Update: Update<FantasySeason> };
       fantasy_teams: { Row: FantasyTeam; Insert: Insert<FantasyTeam>; Update: Update<FantasyTeam> };

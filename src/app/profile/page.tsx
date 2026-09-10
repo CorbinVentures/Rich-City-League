@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 import { Container } from '@/components/Container';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,12 +12,16 @@ export default function ProfilePage() {
   useEffect(() => { setDisplayName(profile?.display_name ?? ''); setBio(profile?.bio ?? ''); if (profile?.role === 'player' || profile?.role === 'coach' || profile?.role === 'fan') setRole(profile.role); }, [profile]);
   const save = async (event: FormEvent) => {
     event.preventDefault(); setSaved(false); setError(''); if (!supabase || !user) return;
-    const profileResult = await supabase.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null }).eq('id', user.id);
+    const profileUpdate: Database['public']['Tables']['profiles']['Update'] = { display_name: displayName.trim() || null, bio: bio.trim() || null };
+    const writeClient = supabase as unknown as SupabaseClient;
+    const profileResult = await writeClient.from('profiles').update(profileUpdate).eq('id', user.id);
     if (profileResult.error) { setError('Unable to save your profile details.'); return; }
-    const roleResult = await supabase.from('profile_roles').upsert({ profile_id: user.id, role, status: role === 'fan' ? 'active' : 'pending' });
+    const roleRequest: Partial<Database['public']['Tables']['profile_roles']['Insert']> = { profile_id: user.id, role, status: role === 'fan' ? 'active' : 'pending', verified_at: null, verified_by: null };
+    const roleResult = await writeClient.from('profile_roles').upsert(roleRequest);
     if (roleResult.error) { setError('Unable to submit your role request.'); return; }
     if (role === 'fan') {
-      const fanResult = await supabase.from('fan_profiles').upsert({ profile_id: user.id });
+      const fanProfile: Partial<Database['public']['Tables']['fan_profiles']['Insert']> = { profile_id: user.id, favorite_team_id: null, fan_level: 1, games_attended: 0 };
+      const fanResult = await writeClient.from('fan_profiles').upsert(fanProfile);
       if (fanResult.error) { setError('Unable to create your fan profile.'); return; }
     }
     setSaved(true);
