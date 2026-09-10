@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
       ] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('teams').select('*').order('name', { ascending: true }),
-        supabase.from('players').select('*, profile:profiles(*), team:teams(*)'),
+        supabase.from('players').select('*, profile:profiles(*)'),
         supabase.from('team_coaches').select('*, profile:profiles(*)'),
         supabase.from('games').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)').order('scheduled_at', { ascending: false }),
         supabase.from('posts').select('*, author:profiles(*)').order('created_at', { ascending: false }),
@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
   const postAuditLog = async (action: string, details: string) => {
     if (!supabase || !user) return;
     await supabase.from('audit_logs').insert({
-      admin_id: user.id,
+      user_id: user.id,
       action,
       details,
     } as never);
@@ -210,15 +210,29 @@ export default function AdminDashboardPage() {
 
     // Prepare default empty box scores for active team members
     if (!supabase) return;
-    const { data: teamPlayers } = await supabase
-      .from('players')
-      .select('*, profile:profiles(*)')
-      .or(`team_id.eq.${game.home_team_id},team_id.eq.${game.away_team_id}`);
+    const { data: teamSeasons } = await supabase
+      .from('team_seasons')
+      .select('id, team_id')
+      .in('team_id', [game.home_team_id, game.away_team_id]);
+    const teamSeasonIds = (teamSeasons ?? []).map((teamSeason) => teamSeason.id);
+    const { data: rosterRows } = teamSeasonIds.length
+      ? await supabase.from('rosters').select('player_id, team_season_id').in('team_season_id', teamSeasonIds)
+      : { data: [] };
+    const playerIds = (rosterRows ?? []).map((roster) => roster.player_id);
+    const { data: teamPlayers } = playerIds.length
+      ? await supabase.from('players').select('*, profile:profiles(*)').in('id', playerIds)
+      : { data: [] };
+    const teamByPlayerId = new Map(
+      (rosterRows ?? []).map((roster) => [
+        roster.player_id,
+        teamSeasons?.find((teamSeason) => teamSeason.id === roster.team_season_id)?.team_id,
+      ]),
+    );
 
     const initialStats = (teamPlayers || []).map((p: any) => ({
-      player_id: p.profile_id,
+      player_id: p.id,
       player_name: `${p.profile?.first_name || 'RCL'} ${p.profile?.last_name || 'Athlete'}`,
-      team_id: p.team_id,
+      team_id: teamByPlayerId.get(p.id),
       min: 24,
       pts: 0,
       fgm: 0,
@@ -302,12 +316,12 @@ export default function AdminDashboardPage() {
         team_id: stat.team_id,
         minutes: stat.min,
         points: stat.pts,
-        fgm: stat.fgm,
-        fga: stat.fga,
-        tpm: stat.tpm,
-        tpa: stat.tpa,
-        ftm: stat.ftm,
-        fta: stat.fta,
+        field_goals_made: stat.fgm,
+        field_goals_attempted: stat.fga,
+        three_pointers_made: stat.tpm,
+        three_pointers_attempted: stat.tpa,
+        free_throws_made: stat.ftm,
+        free_throws_attempted: stat.fta,
         rebounds: stat.orb + stat.drb,
         assists: stat.ast,
         steals: stat.stl,

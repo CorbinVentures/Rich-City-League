@@ -78,7 +78,7 @@ select results_eq($$
   order by ordinal_position
 $$, $$ values
   ('id'), ('first_name'), ('last_name'), ('jersey_number'), ('position'),
-  ('hometown'), ('photo_url'), ('is_active')
+  ('height_inches'), ('hometown'), ('photo_url'), ('is_active')
 $$, 'public_players exposes only intended fields');
 select throws_ok($$
   insert into public.registrations (season_id, division_id, applicant_id, first_name, last_name, email)
