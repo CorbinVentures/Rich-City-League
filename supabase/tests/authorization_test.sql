@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(17);
 
 -- Fixtures are created as the database owner, then every assertion runs through
 -- the same roles used by Supabase RLS.
@@ -11,20 +11,24 @@ values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'authenticated', 'authenticated', 'player@example.test', 'not-used', now()),
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated', 'coach@example.test', 'not-used', now()),
   ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated', 'staff@example.test', 'not-used', now()),
-  ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now())
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now())
 on conflict (id) do nothing;
 
--- The auth trigger creates every profile as a player. Bootstrap the administrator
--- through an insert, then use that authenticated identity for privileged changes.
-delete from public.profiles where id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
-insert into public.profiles (id, display_name, role)
-values ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'admin@example.test', 'admin');
+delete from public.profiles
+where id in (
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+  'cccccccc-cccc-cccc-cccc-cccccccccccc',
+  'dddddddd-dddd-dddd-dddd-dddddddddddd'
+);
 
-select set_config('request.jwt.claim.sub', 'ffffffff-ffff-ffff-ffff-ffffffffffff', true);
-set role authenticated;
-update public.profiles set role = 'coach' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-update public.profiles set role = 'staff' where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
-reset role;
+insert into public.profiles (id, role)
+values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'player'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'coach'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'staff'),
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'admin')
+on conflict (id) do nothing;
 
 insert into public.seasons (id, league_id, name, slug, start_date, end_date, status, registration_open)
 values
@@ -37,7 +41,7 @@ on conflict (id) do nothing;
 insert into public.divisions (id, season_id, name)
 values
   ('99999999-9999-9999-9999-999999999999', '77777777-7777-7777-7777-777777777777', 'Test Open'),
-  ('dddddddd-dddd-dddd-dddd-dddddddddddd', '88888888-8888-8888-8888-888888888888', 'Other Open')
+  ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '88888888-8888-8888-8888-888888888888', 'Other Open')
 on conflict (id) do nothing;
 
 insert into public.team_coaches (team_id, profile_id)
@@ -45,11 +49,11 @@ values ('51111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbb
 on conflict (team_id, profile_id) do nothing;
 
 insert into public.players (id, profile_id, first_name, last_name)
-values ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Test', 'Player')
+values ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Test', 'Player')
 on conflict (id) do nothing;
 
 insert into public.rosters (team_season_id, player_id)
-select ts.id, 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
+select ts.id, 'ffffffff-ffff-ffff-ffff-ffffffffffff'
 from public.team_seasons ts
 where ts.team_id = '51111111-1111-1111-1111-111111111111'
   and ts.season_id = '22222222-2222-2222-2222-222222222222'
@@ -58,14 +62,24 @@ on conflict (team_season_id, player_id) do nothing;
 insert into public.registrations
   (id, season_id, division_id, applicant_id, first_name, last_name, email)
 values
-  ('bbbbbbbb-1111-1111-1111-bbbbbbbbbbbb', '77777777-7777-7777-7777-777777777777',
+  ('11111111-aaaa-aaaa-aaaa-111111111111', '77777777-7777-7777-7777-777777777777',
    '99999999-9999-9999-9999-999999999999', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
    'Coach', 'Applicant', 'coach@example.test')
 on conflict (id) do nothing;
 
 set role anon;
-select is((select count(*) from public.profiles where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'), 0::bigint,
-  'anonymous users cannot read private player profile fields');
+select throws_ok($$
+  select * from public.players
+$$, '42501', null, 'anonymous access to private player data is denied');
+select results_eq($$
+  select column_name::text
+  from information_schema.columns
+  where table_schema = 'public' and table_name = 'public_players'
+  order by ordinal_position
+$$, $$ values
+  ('id'), ('first_name'), ('last_name'), ('jersey_number'), ('position'),
+  ('hometown'), ('photo_url'), ('is_active')
+$$, 'public_players exposes only intended fields');
 select throws_ok($$
   insert into public.registrations (season_id, division_id, applicant_id, first_name, last_name, email)
   values ('77777777-7777-7777-7777-777777777777', '99999999-9999-9999-9999-999999999999',
@@ -78,7 +92,7 @@ select lives_ok($$
   insert into public.registrations
     (id, season_id, division_id, applicant_id, first_name, last_name, email)
   values
-    ('aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
+    ('22222222-aaaa-aaaa-aaaa-222222222222', '77777777-7777-7777-7777-777777777777',
      '99999999-9999-9999-9999-999999999999', auth.uid(), 'Test', 'Player', 'player@example.test')
 $$, 'authenticated users can create their own valid registration');
 select throws_ok($$
@@ -87,10 +101,10 @@ select throws_ok($$
   values
     ('77777777-7777-7777-7777-777777777777', '99999999-9999-9999-9999-999999999999',
      'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Other', 'Applicant', 'other@example.test')
-$$, '42501', null, 'users cannot create another user registration');
+$$, '42501', null, 'registration ownership is enforced');
 select is((with changed as (
   update public.registrations set notes = 'tampered'
-  where id = 'bbbbbbbb-1111-1111-1111-bbbbbbbbbbbb'
+  where id = '11111111-aaaa-aaaa-aaaa-111111111111'
   returning id
 ) select count(*) from changed), 0::bigint,
   'users cannot modify another users registration');
@@ -100,31 +114,31 @@ select throws_ok($$
   values
     ('22222222-2222-2222-2222-222222222222', '33333333-3333-3333-3333-333333333333',
      auth.uid(), 'Closed', 'Season', 'closed@example.test')
-$$, '42501', null, 'registrations for closed seasons are rejected');
+$$, '42501', null, 'closed-season registration is denied');
 select throws_ok($$
   insert into public.registrations
     (season_id, division_id, applicant_id, first_name, last_name, email)
   values
-    ('77777777-7777-7777-7777-777777777777', 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+    ('77777777-7777-7777-7777-777777777777', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
      auth.uid(), 'Wrong', 'Division', 'wrong@example.test')
 $$, 'P0001', 'Registration division must belong to its season',
-  'registrations with a division from another season are rejected');
+  'invalid season and division combinations are denied');
 
-set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
 select is((with changed as (
   update public.rosters r set is_captain = true
   from public.team_seasons ts
   where r.team_season_id = ts.id
     and ts.team_id = '51111111-1111-1111-1111-111111111111'
   returning r.id
-) select count(*) from changed), 1::bigint, 'coaches can manage their assigned roster');
+) select count(*) from changed), 1::bigint, 'authorized coach access remains functional');
 select is((with changed as (
   update public.rosters r set is_captain = true
   from public.team_seasons ts
   where r.team_season_id = ts.id
     and ts.team_id = '52222222-2222-2222-2222-222222222222'
   returning r.id
-) select count(*) from changed), 0::bigint, 'coaches cannot manage another team roster');
+) select count(*) from changed), 0::bigint, 'coach access remains scoped to assigned teams');
 select is((with changed as (
   update public.team_seasons set division_id = null
   where team_id = '52222222-2222-2222-2222-222222222222'
@@ -136,21 +150,26 @@ select is((with changed as (
   returning id
 ) select count(*) from changed), 0::bigint, 'coaches cannot manage games outside staff authorization');
 
-set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
+select set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
 select lives_ok($$
   insert into public.registrations
     (id, season_id, division_id, applicant_id, first_name, last_name, email)
   values
-    ('cccccccc-1111-1111-1111-cccccccccccc', '22222222-2222-2222-2222-222222222222',
-     null, 'Staff', 'Managed', 'staff-managed@example.test')
-$$, 'staff can create an authorized registration');
+    ('33333333-aaaa-aaaa-aaaa-333333333333', '22222222-2222-2222-2222-222222222222',
+     null, null, 'Staff', 'Managed', 'staff-managed@example.test')
+$$, 'authorized staff access remains functional');
 select is((with changed as (
   update public.registrations set status = 'approved'
-  where id = 'aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa'
+  where id = '22222222-aaaa-aaaa-aaaa-222222222222'
   returning id
 ) select count(*) from changed), 1::bigint, 'staff can manage another users registration');
 
-set_config('request.jwt.claim.sub', 'ffffffff-ffff-ffff-ffff-ffffffffffff', true);
+select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select lives_ok($$
+  update public.seasons
+  set name = 'Admin Test Season'
+  where id = '77777777-7777-7777-7777-777777777777'
+$$, 'authorized admin access remains functional');
 select lives_ok($$
   update public.profiles set role = 'coach'
   where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'

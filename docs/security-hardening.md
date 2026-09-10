@@ -39,14 +39,16 @@ The September 2026 audit reports:
 ## Automated validation
 
 `npm test` runs the middleware authorization tests. `npm run test:rls` runs the
-repeatable pgTAP suite in `supabase/tests/authorization_test.sql` through the
-local Supabase database, including registration, staff, and coach RLS
-boundaries. `npm run test:all` runs both suites.
+repeatable pgTAP suite in `supabase/tests/authorization_test.sql` against the
+local Supabase database only, including registration, coach, staff, and admin
+RLS boundaries. It fails if the local instance is unavailable and does not use
+production or remote credentials. `npm run test:all` runs both suites.
 
 The Supabase workflow resets and lints the complete migration sequence before
 running the RLS suite. It requires Docker and the Supabase CLI; Docker registry
-rate limits can block image pulls. The workflow must be retried when reasonable,
-but migrations must not be changed to work around that infrastructure failure.
+rate limits can block image pulls. The workflow must be retried when
+reasonable, but migrations must not be changed to work around that
+infrastructure failure.
 
 The local suite does not prove the production project's deployed state.
 Production or preview validation still requires the Supabase native preview

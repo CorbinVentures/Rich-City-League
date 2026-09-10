@@ -39,6 +39,13 @@ export interface Database {
       staff: { Row: Staff; Insert: Insert<Staff>; Update: Update<Staff> };
       notifications: { Row: Notification; Insert: Insert<Notification>; Update: Update<Notification> };
       commissioners: { Row: Commissioner; Insert: Insert<Commissioner>; Update: Update<Commissioner> };
+      site_settings: { Row: SiteSetting; Insert: Insert<SiteSetting>; Update: Update<SiteSetting> };
+      badges: { Row: Badge; Insert: Insert<Badge>; Update: Update<Badge> };
+      player_badges: { Row: PlayerBadge; Insert: Insert<PlayerBadge>; Update: Update<PlayerBadge> };
+      coach_badges: { Row: CoachBadge; Insert: Insert<CoachBadge>; Update: Update<CoachBadge> };
+      player_of_week: { Row: PlayerOfWeek; Insert: Insert<PlayerOfWeek>; Update: Update<PlayerOfWeek> };
+      reactions: { Row: Reaction; Insert: Insert<Reaction>; Update: Update<Reaction> };
+      audit_logs: { Row: AuditLog; Insert: Insert<AuditLog>; Update: Update<AuditLog> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
@@ -62,7 +69,7 @@ export interface Venue { id: string; name: string; address: string | null; city:
 export interface Team { id: string; league_id: string; name: string; slug: string; short_name: string | null; logo_url: string | null; primary_color: string | null; secondary_color: string | null; city: string | null; description: string | null; is_active: boolean; created_at: string; updated_at: string; }
 export interface TeamSeason { id: string; team_id: string; season_id: string; division_id: string | null; seed: number | null; created_at: string; }
 export interface Player { id: string; profile_id: string | null; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; date_of_birth: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; created_at: string; updated_at: string; }
-export interface PublicPlayer { id: string; first_name: string; last_name: string; jersey_number: string | null; position: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; }
+export interface PublicPlayer { id: string; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; hometown: string | null; photo_url: string | null; is_active: boolean; }
 export interface TeamCoach { id: string; team_id: string; profile_id: string; title: string; created_at: string; }
 export interface Roster { id: string; team_season_id: string; player_id: string; jersey_number: string | null; is_captain: boolean; joined_at: string; left_at: string | null; created_at: string; }
 export interface Game { id: string; season_id: string; division_id: string | null; home_team_id: string; away_team_id: string; venue_id: string | null; scheduled_at: string; status: Database['public']['Enums']['game_status']; home_score: number; away_score: number; notes: string | null; created_by: string | null; created_at: string; updated_at: string; }
@@ -71,7 +78,7 @@ export interface TeamGameStats { id: string; game_id: string; team_id: string; p
 export interface Standing { id: string; season_id: string; division_id: string | null; team_id: string; wins: number; losses: number; ties: number; points_for: number; points_against: number; streak: string | null; rank: number | null; updated_at: string; }
 export interface Registration { id: string; season_id: string; division_id: string | null; applicant_id: string | null; team_id: string | null; first_name: string; last_name: string; email: string; date_of_birth: string | null; emergency_contact: Json; status: Database['public']['Enums']['registration_status']; submitted_at: string; reviewed_at: string | null; reviewed_by: string | null; notes: string | null; }
 export interface Post { id: string; author_id: string; body: string; media_urls: Json; status: Database['public']['Enums']['content_status']; created_at: string; updated_at: string; }
-export interface Comment { id: string; post_id: string; author_id: string; body: string; created_at: string; }
+export interface Comment { id: string; post_id: string; author_id: string; body: string; parent_id?: string | null; created_at: string; }
 export interface Like { post_id: string; user_id: string; created_at: string; }
 export interface Follow { follower_id: string; following_id: string; created_at: string; }
 export interface News { id: string; author_id: string | null; title: string; slug: string; excerpt: string | null; body: string; cover_image_url: string | null; status: Database['public']['Enums']['content_status']; published_at: string | null; created_at: string; updated_at: string; }
@@ -80,3 +87,11 @@ export interface Award { id: string; season_id: string; player_id: string | null
 export interface Staff { id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
 export interface Notification { id: string; recipient_id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; }
 export interface Commissioner { id: string; league_id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
+
+export interface SiteSetting { key: string; value: Json; created_at: string; updated_at: string; }
+export interface Badge { id: string; name: string; description: string; category: string; icon: string; tier: string; requirement_type: string; requirement_value: number; is_active: boolean; created_at: string; updated_at: string; }
+export interface PlayerBadge { id: string; player_id: string; badge_id: string; game_id: string | null; earned_at: string; created_at: string; }
+export interface CoachBadge { id: string; profile_id: string; badge_id: string; earned_at: string; created_at: string; }
+export interface PlayerOfWeek { id: string; player_id: string; season_id: string; week_number: number; description: string; stats: Json; is_active: boolean; created_at: string; updated_at: string; }
+export interface Reaction { id: string; post_id: string; user_id: string; type: 'bucket' | 'heat' | 'strong' | 'locked' | 'money' | 'watch' | 'king' | 'certified' | 'highlight' | 'champ'; created_at: string; }
+export interface AuditLog { id: string; user_id: string | null; action: string; details: string | null; created_at: string; }
