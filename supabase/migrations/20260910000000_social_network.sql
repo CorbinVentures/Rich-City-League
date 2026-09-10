@@ -176,6 +176,8 @@ create index if not exists messages_conversation_idx on public.messages (convers
 create index if not exists community_posts_idx on public.community_posts (community_id, created_at desc);
 create index if not exists activity_profile_idx on public.user_activity (profile_id, created_at desc);
 create index if not exists xp_leaderboard_idx on public.user_levels (xp desc, level desc);
+create unique index if not exists xp_transactions_dedup_idx
+  on public.xp_transactions (profile_id, reason, coalesce(source_type, ''), coalesce(source_id, '00000000-0000-0000-0000-000000000000'::uuid));
 
 create or replace function public.level_for_xp(total_xp integer)
 returns integer language sql immutable as $$
@@ -198,6 +200,12 @@ declare result public.user_levels;
 declare inserted_transaction boolean := false;
 begin
   if xp_amount <= 0 or xp_amount > 1000 then raise exception 'Invalid XP amount'; end if;
+  if xp_reason not in ('profile_completed', 'joined_team', 'played_game', 'won_game', 'stat_milestone', 'quality_content', 'meaningful_engagement', 'community_contribution', 'invite_teammate') then
+    raise exception 'Invalid XP reason';
+  end if;
+  if xp_reason <> 'profile_completed' and (source_kind is null or source_uuid is null) then
+    raise exception 'Activity source is required';
+  end if;
   if not public.is_staff_or_admin() and target_profile_id <> auth.uid() then
     raise exception 'Not authorized to award XP';
   end if;

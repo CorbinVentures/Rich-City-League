@@ -29,13 +29,13 @@ export default function FriendsPage() {
   };
   const request = async (id: string) => {
     if (!supabase || !user) return;
-    const { error } = await supabase.from('friendships').insert({ requester_id: user.id, addressee_id: id, status: 'pending' });
+    const { error } = await supabase.from('friendships').insert({ requester_id: user.id, addressee_id: id, status: 'pending' } as never);
     setMessage(error ? error.message : 'Friend request sent.');
     if (!error) await load();
   };
   const update = async (id: string, status: 'accepted' | 'declined' | 'cancelled') => {
     if (!supabase || !user) return;
-    await supabase.from('friendships').update({ status }).eq('id', id);
+    await supabase.from('friendships').update({ status } as never).eq('id', id);
     await load();
   };
   const label = (row: FriendRow) => row.requester_id === user?.id ? row.addressee?.display_name ?? row.addressee?.username : row.requester?.display_name ?? row.requester?.username;
