@@ -19,7 +19,7 @@ export default async function CoachesPage() {
             RCL <span className="text-rcl-gold">COACHES</span>
           </h1>
           <p className="mt-4 mx-auto max-w-xl text-base text-gray-400">
-            Meet the tactical minds guiding Richmond's finest athletic talent to championship glory.
+            Meet the tactical minds guiding Richmond&apos;s finest athletic talent to championship glory.
           </p>
         </Container>
       </section>

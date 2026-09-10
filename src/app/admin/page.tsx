@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -361,9 +362,9 @@ export default function AdminDashboardPage() {
           <p className="mt-4 text-sm leading-relaxed text-gray-400">
             Unauthorized access detected. This console is restricted exclusively to Rich City League system administrators.
           </p>
-          <a href="/" className="mt-8 inline-block rounded-xl bg-white px-6 py-2.5 text-xs font-black text-black uppercase tracking-widest hover:bg-rcl-gold">
+          <Link href="/" className="mt-8 inline-block rounded-xl bg-white px-6 py-2.5 text-xs font-black text-black uppercase tracking-widest hover:bg-rcl-gold">
             RETURN TO COURT
-          </a>
+          </Link>
         </div>
       </main>
     );

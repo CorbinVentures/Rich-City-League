@@ -136,11 +136,11 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               ATHLETE BIO
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-gray-300">
-              {player.is_active ? 'Active player' : 'Inactive player'} currently registered in Richmond's Rich City League. This card represents certified league credentials.
+              {player.is_active ? 'Active player' : 'Inactive player'} currently registered in Richmond&apos;s Rich City League. This card represents certified league credentials.
             </p>
             <div className="mt-6 border-t border-white/10 pt-4 space-y-3 text-xs">
               <div className="flex justify-between"><span className="text-gray-500">HOMETOWN</span><span className="font-bold text-white">{player.hometown || 'Richmond, VA'}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">AGE DIVISION</span><span className="font-bold text-white">Open Men's</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">AGE DIVISION</span><span className="font-bold text-white">Open Men&apos;s</span></div>
               <div className="flex justify-between"><span className="text-gray-500">STATUS</span><span className="font-bold text-emerald-400 flex items-center gap-1"><FaCircleCheck /> Certified</span></div>
             </div>
           </div>
