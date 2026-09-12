@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fa6';
 
 // Original Branded reactions configuration
-const REACTION_TYPES = [
+const DEFAULT_REACTION_TYPES = [
   { name: 'bucket', emoji: '🏀', label: 'BUCKET' },
   { name: 'heat', emoji: '🔥', label: 'HEAT' },
   { name: 'strong', emoji: '💪', label: 'STRONG' },
@@ -39,6 +39,7 @@ export default function SocialPage() {
   const [filter, setFilter] = useState<'for-you' | 'league' | 'teams' | 'players'>('for-you');
   const [stories, setStories] = useState<any[]>([]);
   const [storyBody, setStoryBody] = useState('');
+  const [reactionTypes, setReactionTypes] = useState<typeof DEFAULT_REACTION_TYPES>(DEFAULT_REACTION_TYPES);
 
   // Comment reply state
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
@@ -69,6 +70,14 @@ export default function SocialPage() {
 
       if (!error && data) {
         setPosts(data);
+      }
+      const { data: configuredReactions } = await supabase
+        .from('reaction_types')
+        .select('id, emoji, label')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      if (configuredReactions?.length) {
+        setReactionTypes(configuredReactions as typeof DEFAULT_REACTION_TYPES);
       }
       const { data: activeStories } = await supabase
         .from('stories')
@@ -134,20 +143,24 @@ export default function SocialPage() {
   const handleToggleReaction = async (postId: string, reactionType: string) => {
     if (!supabase || !user) return;
 
-    // Check if current user already has this specific reaction on this post
+    // A user may keep one basketball reaction per post; clicking it again removes it.
     const post = posts.find((p) => p.id === postId);
-    const existing = post?.reactions?.find(
-      (r: any) => r.user_id === user.id && r.type === reactionType
-    );
+    const existing = post?.reactions?.find((r: any) => r.user_id === user.id);
 
     if (existing) {
-      // Remove reaction
+      if (existing.type !== reactionType) {
+        await supabase.from('reactions').delete().eq('post_id', postId).eq('user_id', user.id);
+        const { error } = await supabase.from('reactions').insert({
+          post_id: postId, user_id: user.id, type: reactionType,
+        } as never);
+        if (!error) await loadFeed();
+        return;
+      }
       const { error } = await supabase
         .from('reactions')
         .delete()
         .eq('post_id', postId)
-        .eq('user_id', user.id)
-        .eq('type', reactionType);
+        .eq('user_id', user.id);
       
       if (!error) {
         setPosts((current) =>
@@ -155,7 +168,7 @@ export default function SocialPage() {
             if (p.id === postId) {
               return {
                 ...p,
-                reactions: p.reactions.filter((r: any) => !(r.user_id === user.id && r.type === reactionType)),
+                reactions: p.reactions.filter((r: any) => r.user_id !== user.id),
               };
             }
             return p;
@@ -178,7 +191,7 @@ export default function SocialPage() {
             if (p.id === postId) {
               return {
                 ...p,
-                reactions: [...p.reactions, { post_id: postId, user_id: user.id, type: reactionType }],
+                reactions: [...p.reactions.filter((r: any) => r.user_id !== user.id), { post_id: postId, user_id: user.id, type: reactionType }],
               };
             }
             return p;
@@ -191,7 +204,7 @@ export default function SocialPage() {
   // Delete Post
   const handleDeletePost = async (postId: string) => {
     if (!supabase) return;
-    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    const { error } = await supabase.from('posts').update({ status: 'archived' } as never).eq('id', postId);
     if (!error) {
       setPosts((current) => current.filter((p) => p.id !== postId));
     }
@@ -417,7 +430,7 @@ export default function SocialPage() {
                       REACTIONS
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {REACTION_TYPES.map((type) => {
+                      {reactionTypes.map((type) => {
                         const count = reactions.filter((r: any) => r.type === type.name).length;
                         const userReacted = user ? reactions.some((r: any) => r.user_id === user.id && r.type === type.name) : false;
                         return (
