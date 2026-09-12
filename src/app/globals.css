@@ -127,6 +127,52 @@ button, a {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 
+.rcl-splash, .rcl-splash-loading {
+  position: fixed; inset: 0; z-index: 60; overflow: hidden; background: #05070b; color: #f5f1e8;
+}
+.rcl-splash { isolation: isolate; font-family: Arial, Helvetica, sans-serif; }
+.rcl-splash::before { content: ''; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .1; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"); mix-blend-mode: screen; }
+.rcl-splash::after { content: ''; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.72) 100%), linear-gradient(180deg, rgba(0,0,0,.45), transparent 35%, rgba(0,0,0,.75)); }
+.rcl-splash-loading { display: grid; place-items: center; font-family: Impact, sans-serif; font-size: 3rem; letter-spacing: .1em; color: var(--rcl-orange); }
+.rcl-splash-loading span { animation: rcl-splash-breathe 1.3s ease-in-out infinite; }
+.rcl-splash-atmosphere { position: absolute; inset: -20%; background: radial-gradient(circle at 70% 38%, rgba(255,107,26,.24), transparent 18rem), radial-gradient(circle at 25% 55%, rgba(20,73,112,.5), transparent 30rem); animation: rcl-splash-drift 12s ease-in-out both; }
+.rcl-splash-skyline { position: absolute; inset: auto 0 13%; height: 42%; opacity: .7; background: linear-gradient(160deg, transparent 0 18%, #102d43 18% 20%, transparent 20% 26%, #0d2437 26% 43%, transparent 43% 49%, #122d43 49% 66%, transparent 66% 74%, #0e2233 74%); clip-path: polygon(0 62%, 5% 57%, 8% 65%, 12% 38%, 17% 59%, 22% 22%, 26% 55%, 31% 44%, 35% 61%, 41% 16%, 45% 52%, 51% 36%, 56% 61%, 62% 29%, 67% 56%, 72% 42%, 78% 63%, 83% 34%, 88% 58%, 94% 46%, 100% 58%, 100% 100%, 0 100%); transform: scale(1.08); animation: rcl-splash-push 12s ease-out both; }
+.rcl-splash-skyline::after { content: 'RICHMOND'; position: absolute; right: 8%; top: 19%; color: rgba(255,255,255,.12); font-size: clamp(3rem, 11vw, 10rem); font-weight: 900; letter-spacing: .12em; }
+.rcl-splash-bridge { position: absolute; left: 8%; right: 8%; bottom: 9%; height: 1px; background: rgba(255,107,26,.55); box-shadow: 0 0 18px rgba(255,107,26,.7); transform: rotate(-2deg); }
+.rcl-splash-court { position: absolute; inset: auto -10% -25% -10%; height: 55%; border-top: 1px solid rgba(255,107,26,.75); background: repeating-linear-gradient(90deg, transparent 0 14rem, rgba(255,255,255,.06) 14.1rem 14.2rem), linear-gradient(175deg, transparent 0 48%, rgba(255,107,26,.12) 48.2% 48.5%, transparent 49%); transform: perspective(500px) rotateX(58deg); transform-origin: bottom; animation: rcl-splash-court 12s ease-out both; }
+.rcl-splash-player { position: absolute; z-index: 2; left: 50%; bottom: 5%; width: clamp(8rem, 27vw, 20rem); height: clamp(15rem, 55vh, 30rem); transform: translateX(-50%); background: radial-gradient(ellipse at 50% 14%, #050608 0 7%, transparent 7.5%), linear-gradient(100deg, transparent 0 19%, #07090d 20% 38%, transparent 39% 42%, #090b10 43% 68%, transparent 69%), linear-gradient(80deg, transparent 0 38%, #080a0e 39% 60%, transparent 61%); clip-path: polygon(36% 4%, 63% 4%, 69% 16%, 78% 31%, 68% 52%, 77% 99%, 56% 100%, 48% 66%, 41% 100%, 17% 100%, 27% 48%, 20% 29%, 30% 17%); filter: drop-shadow(0 1rem 1.6rem #000); animation: rcl-splash-player 12s cubic-bezier(.2,.65,.3,1) both; }
+.rcl-splash-ball { position: absolute; right: -5%; top: 29%; display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; color: var(--rcl-orange); font-size: 1.5rem; filter: drop-shadow(0 0 12px rgba(255,107,26,.8)); animation: rcl-splash-dribble 1.1s ease-in-out infinite; }
+.rcl-splash-scene { position: absolute; z-index: 6; left: clamp(1.5rem, 8vw, 8rem); bottom: 20%; max-width: min(34rem, 80vw); animation: rcl-splash-copy-in .8s ease both; }
+.rcl-splash-eyebrow { margin: 0 0 1rem; color: var(--rcl-orange); font-size: clamp(.55rem, 1.3vw, .75rem); font-weight: 900; letter-spacing: .28em; }
+.rcl-splash-scene h1 { margin: 0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(3.2rem, 9vw, 8rem); line-height: .83; letter-spacing: -.02em; text-transform: uppercase; text-shadow: 0 .2rem 1.5rem #000; }
+.rcl-splash-scene h1 span, .rcl-splash-finale span { color: var(--rcl-orange); }
+.rcl-splash-copy { margin-top: 1.5rem; color: rgba(245,241,232,.7); font-size: clamp(.65rem, 1.5vw, .9rem); font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+.rcl-splash-mark { position: absolute; z-index: 7; top: 22%; left: 50%; color: white; font-family: Impact, sans-serif; font-size: clamp(4rem, 13vw, 10rem); letter-spacing: -.1em; transform: translateX(-50%); animation: rcl-splash-mark .9s ease both; text-shadow: 0 0 2rem rgba(255,107,26,.55); }
+.rcl-splash-mark span { color: var(--rcl-orange); }
+.rcl-splash-finale { position: absolute; z-index: 7; inset: 26% 1.5rem auto; text-align: center; animation: rcl-splash-copy-in .8s ease both; }
+.rcl-splash-finale p { margin: 0 0 .75rem; color: var(--rcl-orange); font-size: .7rem; font-weight: 900; letter-spacing: .3em; }
+.rcl-splash-finale strong { font-family: Impact, sans-serif; font-size: clamp(3rem, 10vw, 8rem); line-height: .82; text-transform: uppercase; }
+.rcl-splash-enter { display: inline-flex; align-items: center; gap: .75rem; margin-top: 2rem; border: 0; border-radius: .2rem; background: var(--rcl-orange); padding: 1rem 1.3rem; color: #080a0e; font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; transition: transform .2s ease, background .2s ease; }
+.rcl-splash-enter:hover { background: #ff984f; transform: translateY(-2px); }
+.rcl-splash-skip { position: absolute; z-index: 8; top: 1.5rem; right: 1.5rem; border: 1px solid rgba(255,255,255,.32); background: rgba(0,0,0,.2); padding: .65rem .8rem; color: white; font-size: .58rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+.rcl-splash-skip:hover { border-color: var(--rcl-orange); color: var(--rcl-orange); }
+.rcl-splash-progress { position: absolute; z-index: 8; right: 1.5rem; bottom: 1.5rem; left: 1.5rem; height: 2px; background: rgba(255,255,255,.18); }
+.rcl-splash-progress span { display: block; height: 100%; background: var(--rcl-orange); transition: width .2s ease; }
+.rcl-splash-reduced .rcl-splash-content { position: relative; z-index: 2; padding: 2rem; }
+.rcl-splash-reduced .rcl-splash-skyline { opacity: .35; }
+.rcl-splash-reduced h1 { margin: 1rem 0; font-family: Impact, sans-serif; font-size: clamp(4rem, 16vw, 9rem); line-height: .8; }
+.rcl-splash-reduced h1 span { color: var(--rcl-orange); }
+.rcl-splash-reduced .rcl-splash-skip { position: static; margin-left: 1rem; }
+@keyframes rcl-splash-drift { from { transform: scale(1.05); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+@keyframes rcl-splash-push { from { transform: scale(1.2) translateX(4%); } to { transform: scale(1.08) translateX(-2%); } }
+@keyframes rcl-splash-court { from { transform: perspective(500px) rotateX(58deg) translateY(12%); } to { transform: perspective(500px) rotateX(58deg) translateY(0); } }
+@keyframes rcl-splash-player { 0%, 12% { transform: translateX(-50%) translateY(22%) scale(.8); opacity: 0; } 30% { opacity: 1; } 58% { transform: translateX(-58%) translateY(0) scale(1.03); } 100% { transform: translateX(-38%) translateY(-10%) scale(1.12); opacity: .72; } }
+@keyframes rcl-splash-dribble { 50% { transform: translateY(3.2rem) rotate(180deg); } }
+@keyframes rcl-splash-copy-in { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rcl-splash-mark { from { opacity: 0; transform: translateX(-50%) scale(.75); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+@keyframes rcl-splash-breathe { 50% { opacity: .45; transform: scale(.96); } }
+@media (max-width: 639px) { .rcl-splash-scene { bottom: 23%; } .rcl-splash-scene h1 { font-size: clamp(3rem, 15vw, 5rem); } .rcl-splash-player { left: 65%; opacity: .75; } .rcl-splash-skyline { height: 36%; bottom: 18%; } .rcl-splash-court { height: 43%; } .rcl-splash-skip span { display: none; } }
+
 /* RCL visual language: brick, concrete, court lines, and editorial type. */
 .rcl-display { font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; letter-spacing: -.025em; }
 .rcl-texture {
