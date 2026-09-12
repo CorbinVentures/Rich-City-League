@@ -81,6 +81,14 @@ export default function LeagueOperationsPage() {
     if (!error) void load();
   }
 
+  async function updateDraft(id: string, status: Draft['status']) {
+    if (!supabase) return;
+    const patch = status === 'OPEN' ? { status, clock_started_at: new Date().toISOString(), clock_deadline_at: new Date(Date.now() + 120000).toISOString() } : { status };
+    const { error } = await supabase.from('drafts').update(patch as never).eq('id', id);
+    setMessage(error ? error.message : `Draft ${status.toLowerCase()}.`);
+    if (!error) void load();
+  }
+
   if (authLoading || busy) return <main><Container maxWidth="xl" className="py-16"><div className="h-8 w-72 animate-pulse rounded bg-white/10" /></Container></main>;
   if (!profile || !isStaff) return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-bold">League operations access required</h1><p className="mt-3 text-gray-400">This command center is limited to authorized league staff.</p></Container></main>;
 
@@ -113,7 +121,7 @@ export default function LeagueOperationsPage() {
         <input required type="number" min="1" value={draftForm.rounds} onChange={(e) => setDraftForm({ ...draftForm, rounds: Number(e.target.value) })} placeholder="Rounds" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <input required type="number" min="1" value={draftForm.roster_limit} onChange={(e) => setDraftForm({ ...draftForm, roster_limit: Number(e.target.value) })} placeholder="Roster limit" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <button className="rounded-lg bg-rcl-orange px-4 py-3 font-bold text-black sm:col-span-2">Create draft</button>
-      </form><div className="mt-6 space-y-2">{drafts.map((d) => <div key={d.id} className="flex items-center justify-between rounded-lg border border-white/10 p-3 text-sm"><span>{d.name} · pick {d.current_pick}</span><span className="rounded-full bg-white/10 px-3 py-1 text-xs">{d.status}</span></div>)}</div></section>
+      </form><div className="mt-6 space-y-2">{drafts.map((d) => <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-sm"><span>{d.name} · pick {d.current_pick}</span><div className="flex items-center gap-2"><span className="rounded-full bg-white/10 px-3 py-1 text-xs">{d.status}</span>{d.status === 'SETUP' && <button type="button" onClick={() => void updateDraft(d.id, 'OPEN')} className="rounded bg-rcl-orange px-3 py-1 text-xs font-bold text-black">Open</button>}{d.status === 'OPEN' && <button type="button" onClick={() => void updateDraft(d.id, 'PAUSED')} className="rounded border border-white/20 px-3 py-1 text-xs">Pause</button>}{d.status === 'PAUSED' && <button type="button" onClick={() => void updateDraft(d.id, 'OPEN')} className="rounded bg-rcl-orange px-3 py-1 text-xs font-bold text-black">Resume</button>}{['OPEN', 'PAUSED'].includes(d.status) && <button type="button" onClick={() => void updateDraft(d.id, 'COMPLETED')} className="rounded border border-red-400/40 px-3 py-1 text-xs text-red-300">Complete</button>}</div></div>)}</div></section>
     </div>
     <div className="mt-8 grid gap-8 lg:grid-cols-2">
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Request center</h2><div className="mt-5 space-y-3">{requests.slice(0, 8).map((r) => <div key={r.id} className="rounded-lg border border-white/10 p-4"><div className="flex justify-between gap-3"><div><p className="font-semibold">{r.subject}</p><p className="mt-1 text-xs text-gray-500">{r.category}</p></div><select value={r.status} onChange={(e) => void updateRequest(r.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white">{['SUBMITTED','UNDER_REVIEW','NEEDS_INFORMATION','APPROVED','DENIED','RESOLVED','CLOSED'].map((v) => <option key={v}>{v}</option>)}</select></div></div>)}{requests.length === 0 && <p className="text-sm text-gray-500">No requests are waiting for staff.</p>}</div></section>
