@@ -70,7 +70,9 @@ export default function ShopPage() {
   };
   const favorite = async (product: Product) => {
     if (!supabase) return;
-    const { error } = await supabase.from('product_favorites').insert({ product_id: product.id, user_id: (await supabase.auth.getUser()).data.user?.id } as never);
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) { setNotice('Sign in to save gear.'); setTimeout(() => setNotice(''), 2500); return; }
+    const { error } = await supabase.from('product_favorites').upsert({ product_id: product.id, user_id: userId } as never);
     setNotice(error ? 'Sign in to save gear.' : 'Saved to your gear.');
     setTimeout(() => setNotice(''), 2500);
   };
