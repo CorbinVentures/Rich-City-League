@@ -152,9 +152,10 @@ button, a {
 .rcl-splash-finale { position: absolute; z-index: 7; inset: 26% 1.5rem auto; text-align: center; animation: rcl-splash-copy-in .8s ease both; }
 .rcl-splash-finale p { margin: 0 0 .75rem; color: var(--rcl-orange); font-size: .7rem; font-weight: 900; letter-spacing: .3em; }
 .rcl-splash-finale strong { font-family: Impact, sans-serif; font-size: clamp(3rem, 10vw, 8rem); line-height: .82; text-transform: uppercase; }
+.rcl-splash-finale small { display: block; margin-top: 1rem; color: rgba(245,241,232,.7); font-size: .68rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; }
 .rcl-splash-enter { display: inline-flex; align-items: center; gap: .75rem; margin-top: 2rem; border: 0; border-radius: .2rem; background: var(--rcl-orange); padding: 1rem 1.3rem; color: #080a0e; font-size: .68rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; transition: transform .2s ease, background .2s ease; }
 .rcl-splash-enter:hover { background: #ff984f; transform: translateY(-2px); }
-.rcl-splash-skip { position: absolute; z-index: 8; top: 1.5rem; right: 1.5rem; border: 1px solid rgba(255,255,255,.32); background: rgba(0,0,0,.2); padding: .65rem .8rem; color: white; font-size: .58rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+.rcl-splash-skip { position: absolute; z-index: 8; top: max(1.5rem, env(safe-area-inset-top)); right: max(1.5rem, env(safe-area-inset-right)); min-height: 2.75rem; border: 1px solid rgba(255,255,255,.32); background: rgba(0,0,0,.2); padding: .65rem .8rem; color: white; font-size: .58rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
 .rcl-splash-skip:hover { border-color: var(--rcl-orange); color: var(--rcl-orange); }
 .rcl-splash-progress { position: absolute; z-index: 8; right: 1.5rem; bottom: 1.5rem; left: 1.5rem; height: 2px; background: rgba(255,255,255,.18); }
 .rcl-splash-progress span { display: block; height: 100%; background: var(--rcl-orange); transition: width .2s ease; }
@@ -171,7 +172,7 @@ button, a {
 @keyframes rcl-splash-copy-in { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rcl-splash-mark { from { opacity: 0; transform: translateX(-50%) scale(.75); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
 @keyframes rcl-splash-breathe { 50% { opacity: .45; transform: scale(.96); } }
-@media (max-width: 639px) { .rcl-splash-scene { bottom: 23%; } .rcl-splash-scene h1 { font-size: clamp(3rem, 15vw, 5rem); } .rcl-splash-player { left: 65%; opacity: .75; } .rcl-splash-skyline { height: 36%; bottom: 18%; } .rcl-splash-court { height: 43%; } .rcl-splash-skip span { display: none; } }
+@media (max-width: 639px) { .rcl-splash-scene { bottom: 23%; } .rcl-splash-scene h1 { font-size: clamp(3rem, 15vw, 5rem); } .rcl-splash-player { left: 65%; opacity: .75; } .rcl-splash-skyline { height: 36%; bottom: 18%; } .rcl-splash-court { height: 43%; } .rcl-splash-finale { top: 23%; right: 1.5rem; left: 1.5rem; } }
 
 /* RCL visual language: brick, concrete, court lines, and editorial type. */
 .rcl-display { font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; letter-spacing: -.025em; }
