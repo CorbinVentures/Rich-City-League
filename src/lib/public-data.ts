@@ -160,3 +160,89 @@ export async function getPlayerDetail(id: string): Promise<PlayerDetailData | nu
   }
   return { player, rosters, teamSeasons, teams: teamsResult.data ?? [], seasons: seasonsResult.data ?? [], divisions: divisionsResult.data ?? [], games: gamesResult.data ?? [], stats: statsResult.data ?? [] };
 }
+
+export async function getSocialFeed() {
+  const client = getPublicClient();
+  if (!client) return [];
+  const { data, error } = await client
+    .from('posts')
+    .select(`
+      id,
+      author_id,
+      body,
+      media_urls,
+      status,
+      created_at,
+      updated_at,
+      author:profiles(*),
+      comments(id, post_id, author_id, body, parent_id, created_at, author:profiles(*)),
+      reactions(*)
+    `)
+    .eq('status', 'published')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error('getSocialFeed error', error);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getCoachesList() {
+  const client = getPublicClient();
+  if (!client) return [];
+  const { data, error } = await client
+    .from('team_coaches')
+    .select('*, team:teams(*), profile:profiles(*)');
+  if (error) {
+    console.error('getCoachesList error', error);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getBadgesList() {
+  const client = getPublicClient();
+  if (!client) return [];
+  const { data, error } = await client
+    .from('badges')
+    .select('*')
+    .eq('is_active', true);
+  if (error) {
+    console.error('getBadgesList error', error);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getPlayerOfWeekData() {
+  const client = getPublicClient();
+  if (!client) return null;
+  const { data, error } = await client
+    .from('player_of_week')
+    .select('*, player:players(*), season:seasons(*)')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error('getPlayerOfWeekData error', error);
+    return null;
+  }
+  return data;
+}
+
+export async function getRecentBadgesEarned() {
+  const client = getPublicClient();
+  if (!client) return [];
+  const { data, error } = await client
+    .from('player_badges')
+    .select('*, player:players(*), badge:badges(*)')
+    .order('earned_at', { ascending: false })
+    .limit(6);
+  if (error) {
+    console.error('getRecentBadgesEarned error', error);
+    return [];
+  }
+  return data ?? [];
+}
+

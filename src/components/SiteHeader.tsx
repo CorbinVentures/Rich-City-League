@@ -1,44 +1,305 @@
-import Link from 'next/link';
-import { Container } from '@/components/Container';
+'use client';
 
-const links = [
-  ['Games', '/games'],
-  ['Standings', '/standings'],
-  ['Teams', '/teams'],
-  ['Seasons', '/seasons'],
-  ['News', '/news'],
-];
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState, useMemo } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { getSupabaseClient } from '@/lib/supabase';
+import { 
+  FaHouse, 
+  FaCalendarDays, 
+  FaChartSimple, 
+  FaUsers, 
+  FaUser, 
+  FaFolderOpen, 
+  FaNewspaper, 
+  FaPlay, 
+  FaListOl, 
+  FaUserTie, 
+  FaGear, 
+  FaBars, 
+  FaXmark,
+  FaBell
+} from 'react-icons/fa6';
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const { user, profile, signOut } = useAuth();
+  const supabase = useMemo(() => getSupabaseClient(), []);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user || !supabase) return;
+    const fetchUnread = async () => {
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .is('read_at', null);
+      if (!error && count !== null) {
+        setUnreadCount(count);
+      }
+    };
+    fetchUnread();
+    // Subscribe to new notifications
+    const channel = supabase
+      .channel('header_notifs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, () => {
+        setUnreadCount((c) => c + 1);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, supabase]);
+
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'staff';
+
+  const mainNavLinks = [
+    { label: 'HOME', href: '/', icon: FaHouse },
+    { label: 'SCHEDULE', href: '/games', icon: FaCalendarDays },
+    { label: 'STANDINGS', href: '/standings', icon: FaFolderOpen },
+    { label: 'STATS', href: '/stats', icon: FaChartSimple },
+    { label: 'SOCIAL', href: '/social', icon: FaUsers },
+  ];
+
+  const secondaryNavLinks = [
+    { label: 'PLAYERS', href: '/players', icon: FaUser },
+    { label: 'TEAMS', href: '/teams', icon: FaUsers },
+    { label: 'COACHES', href: '/coaches', icon: FaUserTie },
+    { label: 'NEWS', href: '/news', icon: FaNewspaper },
+    { label: 'MEDIA', href: '/media', icon: FaPlay },
+    { label: 'RANKINGS', href: '/rankings', icon: FaListOl },
+  ];
+
+  if (isAdmin) {
+    secondaryNavLinks.push({ label: 'ADMIN', href: '/admin', icon: FaGear });
+  }
+
+  const allLinks = [...mainNavLinks, ...secondaryNavLinks];
+
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-rcl-black/95 backdrop-blur">
-      <Container maxWidth="xl" className="flex min-h-16 items-center justify-between gap-6">
-        <Link href="/" className="font-display text-lg font-bold tracking-tight text-white">
-          RICH CITY <span className="text-rcl-gold">LEAGUE</span>
-        </Link>
-        <nav aria-label="Main navigation" className="hidden items-center gap-6 md:flex">
-          {links.map(([label, href]) => (
-            <Link key={href} href={href} className="text-sm text-gray-300 transition hover:text-rcl-gold">
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <Link
-          href="/register"
-          className="rounded-full bg-rcl-gold px-4 py-2 text-sm font-bold text-rcl-black transition hover:bg-white"
-        >
-          Register
-        </Link>
-      </Container>
-      <nav aria-label="Mobile navigation" className="border-t border-white/10 md:hidden">
-        <Container className="flex gap-5 overflow-x-auto py-3">
-          {links.map(([label, href]) => (
-            <Link key={href} href={href} className="whitespace-nowrap text-sm text-gray-300">
-              {label}
-            </Link>
-          ))}
-        </Container>
+    <>
+      {/* 2K-Style Premium Desktop Navigation Header */}
+      <header className="sticky top-0 z-45 border-b border-white/10 bg-black/95 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur font-display">
+        <div className="mx-auto flex max-w-7xl h-18 items-center justify-between px-4 sm:px-6">
+          {/* Logo & Richmond VA Badge */}
+          <Link href="/" className="group flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-rcl-gold bg-black font-extrabold text-rcl-gold shadow-[0_0_10px_rgba(255,215,0,0.3)] transition-all group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+              R
+            </div>
+            <div>
+              <span className="block text-sm font-black tracking-[0.2em] text-white">
+                RICH CITY <span className="text-rcl-gold">LEAGUE</span>
+              </span>
+              <span className="block text-[9px] font-bold tracking-[0.35em] text-gray-400">
+                RICHMOND, VIRGINIA
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+            {allLinks.map((link) => {
+              const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold tracking-widest transition-all duration-300 hover:bg-white/5 hover:text-rcl-gold group ${
+                    active 
+                      ? 'text-rcl-gold shadow-[inset_0_-2px_0_#FFD700]' 
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${active ? 'text-rcl-gold' : 'text-gray-500 group-hover:text-rcl-gold'}`} />
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Auth & Notification Controls */}
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-3">
+                {/* Notification Bell */}
+                <Link 
+                  href="/dashboard" 
+                  className="relative p-2 rounded-full border border-white/10 bg-white/5 hover:border-rcl-gold hover:text-rcl-gold transition-all"
+                >
+                  <FaBell className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rcl-red text-[10px] font-black text-white animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Dashboard / User RVA Profile Card */}
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-2 pr-4 py-1 hover:border-rcl-gold transition-all"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-rcl-gold text-xs font-black text-black uppercase">
+                    {profile?.display_name?.[0] ?? user.email?.[0] ?? 'P'}
+                  </div>
+                  <span className="hidden sm:inline text-xs font-bold text-gray-300">
+                    {profile?.display_name ?? 'Dashboard'}
+                  </span>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth/sign-in"
+                  className="rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-bold tracking-wider text-white hover:border-rcl-gold hover:text-rcl-gold transition-all"
+                >
+                  SIGN IN
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full bg-rcl-gold px-4 py-1.5 text-xs font-bold tracking-wider text-black hover:bg-white transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]"
+                >
+                  REGISTER
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile Menu Toggle button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg border border-white/10 bg-white/5 hover:text-rcl-gold hover:border-rcl-gold transition-all"
+              aria-label="Open navigation menu"
+            >
+              <FaBars className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile App Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-black/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] h-16 font-display pb-safe">
+        <div className="grid h-full grid-cols-5 items-center justify-items-center">
+          {mainNavLinks.slice(0, 4).map((link) => {
+            const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex flex-col items-center gap-1 py-2 text-[10px] font-black tracking-widest ${
+                  active ? 'text-rcl-gold' : 'text-gray-400'
+                }`}
+              >
+                <Icon className={`h-4 w-4 ${active ? 'text-rcl-gold' : 'text-gray-500'}`} />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center gap-1 py-2 text-[10px] font-black tracking-widest text-gray-400 hover:text-rcl-gold"
+          >
+            <FaBars className="h-4 w-4 text-gray-500" />
+            <span>MORE</span>
+          </button>
+        </div>
       </nav>
-    </header>
+
+      {/* Mobile Drawer (NBA 2K-Style overlay panel) */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm lg:hidden font-display">
+          <div className="w-full max-w-xs bg-black border-l border-white/15 h-full flex flex-col justify-between p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] animate-slide-up">
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                <div>
+                  <span className="block font-black text-sm text-white tracking-widest">RCL NAVIGATION</span>
+                  <span className="block text-[9px] text-gray-500 tracking-wider">RICHMOND BASKETBALL</span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-lg border border-white/10 bg-white/5 hover:text-rcl-gold hover:border-rcl-gold transition-all"
+                  aria-label="Close navigation menu"
+                >
+                  <FaXmark className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="mt-6 flex flex-col gap-1 overflow-y-auto max-h-[70vh]">
+                {allLinks.map((link) => {
+                  const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold tracking-widest transition-all ${
+                        active 
+                          ? 'bg-rcl-gold text-black shadow-[0_0_15px_rgba(255,215,0,0.3)]' 
+                          : 'text-gray-300 hover:bg-white/5 hover:text-rcl-gold'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Profile / Footer Actions */}
+            <div className="pt-6 border-t border-white/10 flex flex-col gap-3">
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white hover:border-rcl-gold"
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rcl-gold text-[10px] font-black text-black">
+                      {profile?.display_name?.[0] ?? 'D'}
+                    </div>
+                    <span>{profile?.display_name ?? 'Dashboard'}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      void signOut();
+                    }}
+                    className="w-full py-3 rounded-xl border border-white/10 text-xs font-bold tracking-widest text-rcl-red hover:bg-rcl-red/10 transition-all"
+                  >
+                    SIGN OUT
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/auth/sign-in"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-3 rounded-xl border border-white/20 text-center text-xs font-bold tracking-widest text-white hover:border-rcl-gold"
+                  >
+                    SIGN IN
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-3 rounded-xl bg-rcl-gold text-center text-xs font-bold tracking-widest text-black hover:bg-white"
+                  >
+                    REGISTER NOW
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
