@@ -9,14 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'rcl-black': '#000000',
+        'rcl-black': '#07090d',
         'rcl-white': '#FFFFFF',
-        'rcl-gold': '#FFD700',
+        'rcl-gold': '#ff6b1a',
         'rcl-red': '#E63946',
-        'rcl-blue': '#457B9D',
-        'rcl-navy': '#1D3557',
+        'rcl-blue': '#4da3ff',
+        'rcl-navy': '#101c2d',
         'rcl-teal': '#06A77D',
-        'rcl-orange': '#F77F00',
+        'rcl-orange': '#ff6b1a',
         'rcl-purple': '#7209B7',
         'rcl-gray': '#2B2D42',
       },

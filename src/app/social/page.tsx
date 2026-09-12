@@ -16,15 +16,15 @@ import {
 // Original Branded reactions configuration
 const DEFAULT_REACTION_TYPES = [
   { name: 'bucket', emoji: '🏀', label: 'BUCKET' },
-  { name: 'heat', emoji: '🔥', label: 'HEAT' },
-  { name: 'strong', emoji: '💪', label: 'STRONG' },
-  { name: 'locked', emoji: '🧱', label: 'LOCKED' },
-  { name: 'money', emoji: '🎯', label: 'MONEY' },
-  { name: 'watch', emoji: '👀', label: 'WATCH' },
-  { name: 'king', emoji: '👑', label: 'KING' },
-  { name: 'certified', emoji: '💯', label: 'CERTIFIED' },
+  { name: 'heat', emoji: '🔥', label: 'HEAT CHECK' },
+  { name: 'strong', emoji: '💪', label: 'TOUGH' },
+  { name: 'locked', emoji: '🔒', label: 'LOCKED UP' },
+  { name: 'money', emoji: '🎯', label: 'PURE' },
+  { name: 'watch', emoji: '👀', label: 'I SEE YOU' },
+  { name: 'king', emoji: '🧊', label: 'COLD BLOODED' },
+  { name: 'certified', emoji: '👏', label: 'SALUTE' },
   { name: 'highlight', emoji: '🚨', label: 'HIGHLIGHT' },
-  { name: 'champ', emoji: '🏆', label: 'CHAMP' },
+  { name: 'champ', emoji: '🏆', label: 'CHAMPIONSHIP' },
 ];
 
 export default function SocialPage() {
@@ -254,17 +254,17 @@ export default function SocialPage() {
   }, [posts, filter]);
 
   return (
-    <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white font-display">
-      <section className="border-b border-white/10 py-12 text-center">
+    <main className="rcl-texture min-h-screen bg-rcl-black pb-24 text-white font-display">
+      <section className="border-b border-white/10 bg-rcl-navy/30 py-12 text-left">
         <Container maxWidth="xl">
           <p className="text-xs font-black uppercase tracking-[0.25em] text-rcl-gold">
-            RICH CITY SOCIAL
+            <span className="rcl-live">804 NOW · LIVE COMMUNITY PULSE</span>
           </p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl text-white">
-            RCL <span className="text-rcl-gold">TIMELINE</span>
+            RICH CITY <span className="text-rcl-orange">FEED</span>
           </h1>
           <p className="mt-3 text-sm text-gray-400">
-            Share basketball moments, post highlights, unlock badges, and interact with the Richmond court community.
+            Basketball, culture, and community from every corner of the 804.
           </p>
         </Container>
       </section>
@@ -272,12 +272,12 @@ export default function SocialPage() {
       <Container maxWidth="lg" className="mt-10 grid gap-8 lg:grid-cols-3">
         <section className="lg:col-span-3 rounded-2xl border border-white/10 bg-black/50 p-4 shadow-xl backdrop-blur">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black tracking-widest text-rcl-gold">RCL STORIES · 24 HOURS</span>
+            <span className="text-[10px] font-black tracking-widest text-rcl-orange">CITY STORIES · 24 HOURS</span>
             <span className="text-[10px] text-gray-500">{stories.length} ACTIVE</span>
           </div>
           <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
             {user && <form onSubmit={handleCreateStory} className="min-w-44 rounded-2xl border border-rcl-gold/40 bg-rcl-gold/10 p-3">
-              <textarea value={storyBody} onChange={(event) => setStoryBody(event.target.value)} placeholder="Share a game-day story..." maxLength={240} className="h-16 w-full resize-none bg-transparent text-xs outline-none placeholder:text-gray-500" />
+              <textarea value={storyBody} onChange={(event) => setStoryBody(event.target.value)} placeholder="Drop a city moment..." maxLength={240} className="h-16 w-full resize-none bg-transparent text-xs outline-none placeholder:text-gray-500" />
               <button className="text-[10px] font-black tracking-widest text-rcl-gold">POST STORY</button>
             </form>}
             {stories.map((story) => <article key={story.id} className="min-w-44 rounded-2xl border border-white/10 bg-gradient-to-br from-rcl-navy to-black p-3">
@@ -294,13 +294,13 @@ export default function SocialPage() {
           {user ? (
             <form onSubmit={handleCreatePost} className="rounded-2xl border border-white/10 bg-black/60 p-5 shadow-xl backdrop-blur">
               <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase mb-3">
-                SHARE A HOOP UPDATE
+                WHAT&apos;S HAPPENING IN THE CITY?
               </span>
               <textarea
                 required
                 value={newPostBody}
                 onChange={(e) => setNewPostBody(e.target.value)}
-                placeholder="What's going down on the Richmond court today?"
+                placeholder="Share a game moment, a take, or a win..."
                 className="w-full h-24 rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white focus:border-rcl-gold outline-none resize-none"
               />
               <div className="mt-3 flex items-center gap-2 border border-white/10 bg-black/40 rounded-xl px-3 py-1 text-xs">
@@ -333,14 +333,14 @@ export default function SocialPage() {
           {/* Timeline Filters */}
           <div className="rounded-2xl border border-white/10 bg-black/40 p-5 shadow-xl backdrop-blur">
             <span className="block text-[10px] font-black tracking-widest text-gray-500 uppercase mb-3">
-              TIMELINE FEEDS
+              RICH CITY FEED
             </span>
             <div className="flex flex-col gap-2">
               {[
                 { id: 'for-you', label: 'FOR YOU (ALL)' },
-                { id: 'league', label: 'LEAGUE UPDATES' },
-                { id: 'teams', label: 'TEAMS' },
-                { id: 'players', label: 'PLAYERS & BADGES' },
+                { id: 'league', label: '804 NOW' },
+                { id: 'teams', label: 'GAME DAY' },
+                { id: 'players', label: 'TRENDING PLAYERS' },
               ].map((feed) => (
                 <button
                   key={feed.id}
@@ -383,7 +383,7 @@ export default function SocialPage() {
               return (
                 <div 
                   key={post.id} 
-                  className={`rounded-2xl border p-6 shadow-xl relative transition-all hover:border-white/15 ${
+                  className={`rcl-editorial rounded-2xl border p-6 shadow-xl relative transition-all hover:border-rcl-orange/50 ${
                     isSystemActivity 
                       ? 'border-rcl-gold/30 bg-gradient-to-r from-rcl-navy/25 to-black' 
                       : 'border-white/10 bg-black/40 backdrop-blur-md'
@@ -427,7 +427,7 @@ export default function SocialPage() {
                   {/* Original Branded Reactions */}
                   <div className="mt-6 border-t border-white/5 pt-4">
                     <span className="block text-[9px] font-black tracking-widest text-gray-500 uppercase mb-3">
-                      REACTIONS
+                      RCL REACTIONS
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {reactionTypes.map((type) => {
