@@ -143,3 +143,59 @@ button, a {
 .rcl-live::before { content: ''; width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 .25rem rgba(255,107,26,.12); animation: rcl-pulse 1.8s ease-in-out infinite; }
 .rcl-focus:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--rcl-orange); outline-offset: 3px; }
 @keyframes rcl-pulse { 50% { opacity: .45; transform: scale(.8); } }
+
+.faq-page {
+  background:
+    radial-gradient(circle at 15% 18%, rgba(255, 107, 26, .08), transparent 28rem),
+    linear-gradient(135deg, rgba(255, 107, 26, .025) 25%, transparent 25% 50%, rgba(255, 107, 26, .018) 50% 75%, transparent 75%),
+    var(--rcl-charcoal);
+  background-size: auto, 8rem 8rem, auto;
+}
+.faq-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 32rem;
+  background:
+    linear-gradient(90deg, rgba(5, 8, 14, .98) 0%, rgba(5, 8, 14, .9) 42%, rgba(8, 17, 30, .58) 100%),
+    radial-gradient(ellipse at 82% 45%, rgba(255, 107, 26, .28), transparent 24rem),
+    linear-gradient(145deg, #162b43, #07090d 70%);
+}
+.faq-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 58%;
+  opacity: .5;
+  background: repeating-linear-gradient(100deg, transparent 0 2.8rem, rgba(255,255,255,.08) 2.9rem 3rem, transparent 3.1rem 7rem);
+  transform: skewX(-12deg);
+}
+.faq-breadcrumb { display: flex; gap: .65rem; color: #8694a3; font-size: .62rem; font-weight: 900; letter-spacing: .16em; }
+.faq-breadcrumb a { color: var(--rcl-orange); }
+.faq-search-panel { display: flex; min-height: 4.5rem; align-items: center; gap: 1rem; border: 1px solid rgba(255,255,255,.14); border-left: 3px solid var(--rcl-orange); background: rgba(16, 28, 45, .96); padding: .75rem 1.15rem; box-shadow: 0 1.5rem 4rem rgba(0,0,0,.3); }
+.faq-search-panel input { min-width: 0; flex: 1; border: 0; background: transparent; color: white; font-size: .8rem; font-weight: 800; letter-spacing: .12em; outline: none; }
+.faq-search-panel input::placeholder { color: #738092; }
+.faq-clear { color: var(--rcl-orange); font-size: .6rem; font-weight: 900; letter-spacing: .12em; }
+.faq-categories { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .65rem; scrollbar-width: none; }
+.faq-categories::-webkit-scrollbar { display: none; }
+.faq-categories button { flex: 0 0 auto; border: 1px solid rgba(255,255,255,.12); border-radius: .35rem; background: rgba(255,255,255,.025); padding: .65rem .8rem; color: #8492a1; font-size: .6rem; font-weight: 900; letter-spacing: .12em; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+.faq-categories button:hover, .faq-categories button.active { border-color: var(--rcl-orange); background: rgba(255,107,26,.12); color: white; }
+.faq-list { overflow: hidden; border-top: 1px solid rgba(255,255,255,.12); }
+.faq-item { border-bottom: 1px solid rgba(255,255,255,.12); }
+.faq-item h3 { margin: 0; }
+.faq-item button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 1rem; border: 0; background: transparent; padding: 1.25rem .15rem; color: #f5f1e8; text-align: left; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: .98rem; font-weight: 700; }
+.faq-item button svg { flex: 0 0 auto; color: var(--rcl-orange); font-size: .8rem; }
+.faq-item.open button { color: var(--rcl-orange); }
+.faq-answer { padding: 0 2rem 1.25rem .15rem; color: #aeb9c5; font-size: .88rem; line-height: 1.8; }
+.faq-empty { border: 1px dashed rgba(255,255,255,.2); padding: 2.5rem 1rem; color: #8492a1; text-align: center; }
+.faq-empty p { font-size: .85rem; }
+.faq-empty button { margin-top: 1rem; color: var(--rcl-orange); font-size: .65rem; font-weight: 900; letter-spacing: .14em; }
+.faq-story-panel, .faq-numbers, .faq-closing { border: 1px solid rgba(255,255,255,.12); background: linear-gradient(145deg, rgba(16,28,45,.96), rgba(7,9,13,.9)); padding: 1.35rem; }
+.faq-timeline { display: grid; grid-template-columns: 5.5rem 1fr; gap: .8rem; border-left: 1px solid rgba(255,107,26,.5); padding-left: .8rem; }
+.faq-timeline > span { color: var(--rcl-orange); font-size: .65rem; font-weight: 900; letter-spacing: .05em; }
+.faq-timeline h3 { margin: 0; font-size: .7rem; font-weight: 900; letter-spacing: .14em; }
+.faq-timeline p { margin-top: .35rem; color: #8190a0; font-size: .68rem; line-height: 1.5; }
+.faq-feature-card { display: flex; min-height: 12rem; flex-direction: column; border: 1px solid rgba(255,255,255,.12); background: linear-gradient(145deg, rgba(16,38,61,.9), rgba(9,15,24,.95)); padding: 1.25rem; transition: transform .2s ease, border-color .2s ease; }
+.faq-feature-card:hover { border-color: rgba(255,107,26,.75); transform: translateY(-3px); }
+.faq-closing { position: relative; overflow: hidden; background: linear-gradient(120deg, rgba(18,48,76,.95), rgba(7,9,13,.94) 65%); }
+.faq-closing::after { content: ''; position: absolute; right: -8rem; bottom: -12rem; height: 28rem; width: 28rem; border: 1px solid rgba(255,107,26,.35); border-radius: 50%; box-shadow: 0 0 0 2rem rgba(255,107,26,.05), 0 0 0 5rem rgba(255,107,26,.03); }
+.faq-outline-button { display: inline-flex; min-height: 3rem; align-items: center; border: 1px solid rgba(255,255,255,.22); padding: .85rem 1.25rem; color: white; font-size: .7rem; font-weight: 900; letter-spacing: .14em; transition: border-color .2s ease, color .2s ease; }
+.faq-outline-button:hover { border-color: var(--rcl-orange); color: var(--rcl-orange); }
