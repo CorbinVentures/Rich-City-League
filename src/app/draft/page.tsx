@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Draft, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
+import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
 
 type PoolEntry = { player_id: string; eligible: boolean };
 
@@ -23,6 +23,7 @@ export default function DraftNightPage() {
   const { user, profile } = useAuth();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [draftOrder, setDraftOrder] = useState<DraftOrder[]>([]);
   const [picks, setPicks] = useState<DraftPick[]>([]);
   const [pool, setPool] = useState<PoolEntry[]>([]);
   const [players, setPlayers] = useState<PublicPlayer[]>([]);
@@ -33,6 +34,7 @@ export default function DraftNightPage() {
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     if (!supabase) {
@@ -51,18 +53,20 @@ export default function DraftNightPage() {
       setLoading(false);
       return;
     }
-    const [teamsResult, picksResult, poolResult, playerResult, iqResult, ownPlayerResult] = await Promise.all([
+    const [teamsResult, orderResult, picksResult, poolResult, playerResult, iqResult, ownPlayerResult] = await Promise.all([
       supabase.from('teams').select('*').eq('is_active', true).order('name'),
+      supabase.from('draft_order').select('*').eq('draft_id', liveDraft.id).order('pick_number'),
       supabase.from('draft_picks').select('*').eq('draft_id', liveDraft.id).order('pick_number'),
       supabase.from('draft_pools').select('player_id, eligible').eq('season_id', liveDraft.season_id),
       supabase.from('public_players').select('*'),
       supabase.from('public_player_iq').select('*'),
       user ? supabase.from('players').select('id').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
     ]);
-    if (teamsResult.error || picksResult.error || poolResult.error || playerResult.error || iqResult.error) {
+    if (teamsResult.error || orderResult.error || picksResult.error || poolResult.error || playerResult.error || iqResult.error) {
       setMessage('Unable to load the live draft board. Please try again.');
     } else {
       setTeams((teamsResult.data ?? []) as Team[]);
+      setDraftOrder((orderResult.data ?? []) as DraftOrder[]);
       setPicks((picksResult.data ?? []) as DraftPick[]);
       setPool((poolResult.data ?? []) as PoolEntry[]);
       setPlayers((playerResult.data ?? []) as PublicPlayer[]);
@@ -84,17 +88,30 @@ export default function DraftNightPage() {
       .channel(`draft-night-${draft.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'drafts', filter: `id=eq.${draft.id}` }, () => void load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_picks', filter: `draft_id=eq.${draft.id}` }, () => void load())
-      .subscribe();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_order', filter: `draft_id=eq.${draft.id}` }, () => void load())
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') void load();
+      });
     return () => { void supabase.removeChannel(channel); };
   }, [draft, load, supabase]);
 
-  const orderedTeams = useMemo(() => [...teams].sort((a, b) => a.name.localeCompare(b.name)), [teams]);
-  const currentTeam = draft && orderedTeams.length ? orderedTeams[(draft.current_pick - 1) % orderedTeams.length] : null;
+  useEffect(() => {
+    if (!draft?.clock_deadline_at || draft.status !== 'OPEN') return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [draft?.clock_deadline_at, draft?.status]);
+
+  const currentOrder = draftOrder.find((entry) => entry.pick_number === draft?.current_pick);
+  const currentTeam = currentOrder ? teams.find((team) => team.id === currentOrder.team_id) : null;
+  const secondsRemaining = draft?.clock_deadline_at && draft.status === 'OPEN'
+    ? Math.max(0, Math.ceil((new Date(draft.clock_deadline_at).getTime() - now) / 1000))
+    : null;
+  const clockExpired = draft?.status === 'OPEN' && secondsRemaining === 0;
   const pickedIds = new Set(picks.map((pick) => pick.player_id));
   const availablePlayers = players.filter((player) => pool.some((entry) => entry.player_id === player.id && entry.eligible) && !pickedIds.has(player.id) && playerName(player).toLowerCase().includes(query.toLowerCase()));
   const myPlayer = myPlayerId ? players.find((player) => player.id === myPlayerId) : undefined;
   const myPick = myPlayer ? picks.find((pick) => pick.player_id === myPlayer.id) : undefined;
-  const isOnClock = Boolean(coachTeam && currentTeam?.id === coachTeam && draft?.status === 'OPEN');
+  const isOnClock = Boolean(coachTeam && currentTeam?.id === coachTeam && draft?.status === 'OPEN' && !clockExpired);
 
   async function submitPick() {
     if (!supabase || !draft || !coachTeam || !selectedPlayer) return;
@@ -122,18 +139,19 @@ export default function DraftNightPage() {
           <h1 className="mt-4 font-display text-4xl font-black uppercase tracking-tight sm:text-6xl">RCL Draft Night</h1>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div><p className="text-xs uppercase tracking-widest text-gray-500">On the clock</p><p className="mt-1 text-2xl font-black text-rcl-orange">{currentTeam?.name ?? 'Awaiting order'}</p></div>
-            <div><p className="text-xs uppercase tracking-widest text-gray-500">Round · pick</p><p className="mt-1 text-2xl font-black">R{Math.ceil(draft.current_pick / Math.max(orderedTeams.length, 1))} · {draft.current_pick}</p></div>
+            <div><p className="text-xs uppercase tracking-widest text-gray-500">Round · pick</p><p className="mt-1 text-2xl font-black">R{currentOrder?.round_number ?? '—'} · {draft.current_pick}</p></div>
+            <div><p className="text-xs uppercase tracking-widest text-gray-500">Clock</p><p className="mt-1 text-2xl font-black text-rcl-orange">{clockExpired ? 'PICK EXPIRED' : secondsRemaining === null ? '—' : `${Math.floor(secondsRemaining / 60)}:${String(secondsRemaining % 60).padStart(2, '0')}`}</p></div>
             <div><p className="text-xs uppercase tracking-widest text-gray-500">Completed</p><p className="mt-1 text-2xl font-black">{picks.length} <span className="text-base font-normal text-gray-500">selections</span></p></div>
           </div>
         </div>
       </section>
 
       {message && <p role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</p>}
-      {profile?.role === 'coach' && <section className={`mt-6 rounded-2xl border p-5 ${isOnClock ? 'border-rcl-orange bg-rcl-orange/10' : 'border-white/10 bg-white/[0.03]'}`}><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-orange">{isOnClock ? 'Your team is on the clock' : 'Coach draft room'}</p><p className="mt-2 text-lg font-bold">{coachTeam ? (teams.find((team) => team.id === coachTeam)?.name ?? 'Your team') : 'No team assignment found'}</p><p className="mt-1 text-sm text-gray-400">{isOnClock ? 'Select a player below, then confirm the official pick.' : `Waiting for ${currentTeam?.name ?? 'the next team'} to make pick ${draft.current_pick}.`}</p></section>}
+      {profile?.role === 'coach' && <section className={`mt-6 rounded-2xl border p-5 ${isOnClock ? 'border-rcl-orange bg-rcl-orange/10' : 'border-white/10 bg-white/[0.03]'}`}><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-orange">{isOnClock ? 'Your team is on the clock' : 'Coach draft room'}</p><p className="mt-2 text-lg font-bold">{coachTeam ? (teams.find((team) => team.id === coachTeam)?.name ?? 'Your team') : 'No team assignment found'}</p><p className="mt-1 text-sm text-gray-400">{clockExpired ? 'PICK EXPIRED · COMMISSIONER REVIEW' : isOnClock ? 'Select a player below, then confirm the official pick.' : `Waiting for ${currentTeam?.name ?? 'the next team'} to make pick ${draft.current_pick}.`}</p></section>}
       {user && myPlayer && <section className="mt-6 rounded-2xl border border-rcl-gold/30 bg-rcl-gold/10 p-5"><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">Your RCL draft status</p><p className="mt-2 text-xl font-bold">{myPick ? `You've been drafted by ${teams.find((team) => team.id === myPick.team_id)?.name ?? 'an RCL team'}` : 'Waiting to be selected'}</p><p className="mt-1 text-sm text-gray-300">{myPick ? `Round ${myPick.round_number} · Pick ${myPick.pick_number}` : `Draft pool: ${pool.some((entry) => entry.player_id === myPlayer.id && entry.eligible) ? 'Yes' : 'Not eligible'}`}</p></section>}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.35fr_0.65fr]">
-        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6"><div className="flex items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">Live board</p><h2 className="mt-2 font-display text-3xl font-bold">Every pick, in real time</h2></div><span className="text-xs text-gray-500">{picks.length} completed</span></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[620px] text-left text-sm"><thead className="border-b border-white/10 text-xs uppercase tracking-widest text-gray-500"><tr><th className="p-3">Pick</th><th className="p-3">Round</th><th className="p-3">Team</th><th className="p-3">Player</th><th className="p-3">OVR</th><th className="p-3">Status</th></tr></thead><tbody>{Array.from({ length: Math.max(picks.length + 1, Math.min(orderedTeams.length * draft.rounds, 8)) }, (_, index) => { const pickNumber = index + 1; const pick = picks.find((item) => item.pick_number === pickNumber); const team = pick ? teams.find((item) => item.id === pick.team_id) : orderedTeams[(pickNumber - 1) % Math.max(orderedTeams.length, 1)]; const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; const rating = player ? iq.find((item) => item.player_id === player.id)?.rcl_rating : undefined; const current = pickNumber === draft.current_pick; return <tr key={pickNumber} className={`border-b border-white/5 ${current ? 'bg-rcl-orange/10' : ''}`}><td className="p-3 font-bold">{pickNumber}</td><td className="p-3 text-gray-400">R{Math.ceil(pickNumber / Math.max(orderedTeams.length, 1))}</td><td className="p-3 font-semibold">{team?.name ?? 'TBD'}{current && <span className="ml-2 rounded bg-rcl-orange px-2 py-1 text-[10px] font-black text-black">ON CLOCK</span>}</td><td className="p-3">{player ? <Link className="font-semibold hover:text-rcl-orange" href={`/players/${player.id}`}>{playerName(player)}</Link> : <span className="text-gray-600">—</span>}</td><td className="p-3 font-bold">{rating ?? '—'}</td><td className="p-3 text-xs font-bold uppercase text-gray-500">{pick ? 'Drafted' : current ? 'On clock' : 'Future'}</td></tr>; })}</tbody></table></div></section>
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6"><div className="flex items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">Live board</p><h2 className="mt-2 font-display text-3xl font-bold">Every pick, in real time</h2></div><span className="text-xs text-gray-500">{picks.length} completed</span></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[620px] text-left text-sm"><thead className="border-b border-white/10 text-xs uppercase tracking-widest text-gray-500"><tr><th className="p-3">Pick</th><th className="p-3">Round</th><th className="p-3">Team</th><th className="p-3">Player</th><th className="p-3">OVR</th><th className="p-3">Status</th></tr></thead><tbody>{draftOrder.map((order) => { const pick = picks.find((item) => item.pick_number === order.pick_number); const team = teams.find((item) => item.id === order.team_id); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; const rating = player ? iq.find((item) => item.player_id === player.id)?.rcl_rating : undefined; const current = order.pick_number === draft.current_pick; return <tr key={order.id} className={`border-b border-white/5 ${current ? 'bg-rcl-orange/10' : ''}`}><td className="p-3 font-bold">{order.pick_number}</td><td className="p-3 text-gray-400">R{order.round_number}</td><td className="p-3 font-semibold">{team?.name ?? 'TBD'}{current && <span className="ml-2 rounded bg-rcl-orange px-2 py-1 text-[10px] font-black text-black">ON CLOCK</span>}</td><td className="p-3">{player ? <Link className="font-semibold hover:text-rcl-orange" href={`/players/${player.id}`}>{playerName(player)}</Link> : <span className="text-gray-600">—</span>}</td><td className="p-3 font-bold">{rating ?? '—'}</td><td className="p-3 text-xs font-bold uppercase text-gray-500">{pick ? 'Drafted' : current ? 'On clock' : 'Future'}</td></tr>; })}</tbody></table></div></section>
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">Available players</p><h2 className="mt-2 font-display text-2xl font-bold">The pool</h2><input aria-label="Search available players" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search players…" className="mt-4 w-full rounded-xl border border-white/10 bg-black/20 p-3 text-white outline-none focus:border-rcl-orange" /><div className="mt-4 max-h-[580px] space-y-2 overflow-y-auto">{availablePlayers.map((player) => { const rating = iq.find((item) => item.player_id === player.id)?.rcl_rating; const active = selectedPlayer === player.id; return <div key={player.id} className={`rounded-xl border p-3 ${active ? 'border-rcl-orange bg-rcl-orange/10' : 'border-white/10'}`}><div className="flex items-center justify-between gap-3"><Link href={`/players/${player.id}`} className="min-w-0"><p className="truncate font-semibold">{playerName(player)}</p><p className="text-xs text-gray-500">{player.position ?? 'Position TBD'} · {formatHeight(player.height_inches)} · OVR {rating ?? '—'}</p></Link>{isOnClock && <button type="button" onClick={() => setSelectedPlayer(active ? null : player.id)} className="rounded-lg bg-rcl-orange px-3 py-2 text-xs font-black text-black">{active ? 'Selected' : 'Select'}</button>}</div></div>; })}{availablePlayers.length === 0 && <p className="py-8 text-center text-sm text-gray-500">No eligible players match this search.</p>}</div>{isOnClock && selectedPlayer && <button type="button" onClick={() => void submitPick()} className="mt-4 w-full rounded-xl bg-rcl-orange p-3 font-black text-black">Confirm draft pick</button>}</section>
       </div>
     </Container>
