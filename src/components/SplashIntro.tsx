@@ -12,14 +12,15 @@ export interface SplashConfig {
 }
 
 const scenes = [
-  { eyebrow: '804 · RICHMOND, VIRGINIA', title: <>RICHMOND<br /><span>VIRGINIA</span></>, copy: 'THE CITY IS THE COURT.' },
-  { eyebrow: 'THE RUN STARTS HERE', title: <>PLAYERS.<br />COMMUNITY.<br /><span>OPPORTUNITY.</span></>, copy: 'Every court has a story.' },
-  { eyebrow: 'NO SHORTCUTS', title: <>MORE<br />THAN<br /><span>A LEAGUE.</span></>, copy: 'Compete with purpose.' },
-  { eyebrow: 'THE DRIVE', title: <>BUILT BY<br /><span>THE CITY.</span><br />FOR THE CITY.</>, copy: 'One city. One rhythm.' },
-  { eyebrow: 'THE FINISH', title: <>REAL HOOPERS.<br /><span>REAL OPPORTUNITY.</span></>, copy: 'Rise to the moment.' },
+  { eyebrow: 'RICHMOND, VIRGINIA', title: <>RICHMOND<br /><span>VIRGINIA</span></>, copy: 'REAL HOOPS. REAL PEOPLE. REAL IMPACT.' },
+  { eyebrow: 'THE CITY', title: <>THE CITY<br /><span>IS THE COURT.</span></>, copy: 'JAMES RIVER · 804 · AFTER DARK' },
+  { eyebrow: 'THE PLAYER', title: <>MORE<br />THAN A<br /><span>LEAGUE.</span></>, copy: 'A PLAYER WHO COULD PLAY HERE.' },
+  { eyebrow: 'THE RUN', title: <>PLAY.<br />DEVELOP.<br /><span>COMPETE.</span></>, copy: 'BELONG.' },
+  { eyebrow: 'THE COMMUNITY', title: <>COMMUNITY.<br />OPPORTUNITY.<br /><span>EXPOSURE.</span></>, copy: 'RICHMOND.' },
+  { eyebrow: 'THE GAME', title: <>SAME CITY.<br /><span>HIGHER STANDARDS.</span></>, copy: 'THE NEXT POSSESSION IS OURS.' },
   { eyebrow: 'RICH CITY LEAGUE', title: <>RICH CITY<br /><span>LEAGUE</span></>, copy: 'RICHMOND, VA · THE CITY IS THE COURT.' },
-  { eyebrow: 'THE MISSION', title: <>BASKETBALL<br />BUILDS<br /><span>BETTER PEOPLE.</span></>, copy: 'COMPETITION · CULTURE · COMMUNITY' },
-  { eyebrow: 'THE NEXT CHAPTER', title: <>A STRONGER<br /><span>RICHMOND.</span></>, copy: 'PLAY. DEVELOP. BELONG.' },
+  { eyebrow: 'THE MISSION', title: <>A STRONGER<br /><span>RICHMOND.</span></>, copy: 'COMPETITION CREATES OPPORTUNITY. OPPORTUNITY CREATES CHANGE.' },
+  { eyebrow: 'WELCOME TO THE', title: <>RICH CITY<br /><span>LEAGUE</span></>, copy: 'SAME CITY. HIGHER STANDARDS.' },
 ];
 
 const sceneDuration = 1500;
@@ -33,7 +34,6 @@ export function SplashIntro() {
   const startedAt = useRef(0);
 
   const complete = useCallback(() => {
-    if (typeof window !== 'undefined') window.localStorage.setItem('rcl_seen_splash', 'true');
     setShow(false);
     setLoading(false);
   }, []);
@@ -44,32 +44,31 @@ export function SplashIntro() {
     setReducedMotion(motionQuery.matches);
     const onMotionChange = () => setReducedMotion(motionQuery.matches);
     motionQuery.addEventListener?.('change', onMotionChange);
-    if (window.localStorage.getItem('rcl_seen_splash') === 'true') {
-      setLoading(false);
-    } else {
-      setShow(true);
-      startedAt.current = Date.now();
-      const supabase = getSupabaseClient();
-      const loadConfig = async () => {
-        try {
-          if (!supabase) return;
-          const result = await Promise.race([
-            supabase.from('site_settings').select('value').eq('key', 'splash_config').maybeSingle(),
-            new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1800)),
-          ]);
-          const data = (result as { data?: { value?: unknown } | null } | null)?.data;
-          if (data?.value) {
-            const value = data.value as unknown as SplashConfig;
-            setConfig(value);
-            if (value.enabled === false) complete();
-          }
-        } catch {
-          // The cinematic intro is intentionally independent of CMS availability.
+    setShow(true);
+    setLoading(false);
+    startedAt.current = Date.now();
+
+    const supabase = getSupabaseClient();
+    const loadConfig = async () => {
+      try {
+        if (!supabase) return;
+        const result = await Promise.race([
+          supabase.from('site_settings').select('value').eq('key', 'splash_config').maybeSingle(),
+          new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1800)),
+        ]);
+        const data = (result as { data?: { value?: unknown } | null } | null)?.data;
+        if (data?.value) {
+          const value = data.value as unknown as SplashConfig;
+          setConfig(value);
+          if (value.enabled === false) complete();
         }
-      };
-      void loadConfig();
-    }
-    const failsafe = window.setTimeout(() => complete(), 18000);
+      } catch {
+        // The cinematic intro is intentionally independent of CMS availability.
+      }
+    };
+    void loadConfig();
+
+    const failsafe = window.setTimeout(complete, 18000);
     return () => {
       motionQuery.removeEventListener?.('change', onMotionChange);
       window.clearTimeout(failsafe);
@@ -87,9 +86,7 @@ export function SplashIntro() {
     return () => window.clearInterval(timer);
   }, [complete, config.duration, reducedMotion, show]);
 
-  if (!show && loading) {
-    return <div className="rcl-splash-loading" role="status" aria-label="Preparing Rich City League intro"><span>RCL</span></div>;
-  }
+  if (!show && loading) return <div className="rcl-splash-loading" role="status" aria-label="Preparing Rich City League intro"><span>RCL</span></div>;
   if (!show) return null;
 
   if (reducedMotion) {
@@ -97,11 +94,11 @@ export function SplashIntro() {
       <div className="rcl-splash rcl-splash-reduced" role="dialog" aria-label="Rich City League introduction">
         <div className="rcl-splash-skyline" aria-hidden="true" />
         <div className="rcl-splash-content">
-          <p className="rcl-splash-eyebrow">804 · RICHMOND, VIRGINIA</p>
+          <p className="rcl-splash-eyebrow">RICHMOND, VIRGINIA</p>
           <h1>RICH CITY<br /><span>LEAGUE</span></h1>
           <p className="rcl-splash-copy">THE CITY IS THE COURT.</p>
           <button className="rcl-splash-enter" onClick={complete}>ENTER THE LEAGUE <FaArrowRight /></button>
-          <button className="rcl-splash-skip" onClick={complete}>SKIP INTRO</button>
+          <button className="rcl-splash-skip" onClick={complete}>SKIP</button>
         </div>
       </div>
     );
@@ -119,15 +116,16 @@ export function SplashIntro() {
         <h1>{activeScene.title}</h1>
         <p className="rcl-splash-copy">{activeScene.copy}</p>
       </div>
-      {scene === 5 && <div className="rcl-splash-mark" aria-label="RCL logo">R<span>CL</span></div>}
+      {scene === 6 && <div className="rcl-splash-mark" aria-label="Rich City League mark">R<span>CL</span></div>}
       {scene === scenes.length - 1 && (
         <div className="rcl-splash-finale">
           <p>WELCOME TO THE</p>
           <strong>RICH CITY<br /><span>LEAGUE</span></strong>
+          <small>SAME CITY. HIGHER STANDARDS.</small>
           <button className="rcl-splash-enter" onClick={complete}>ENTER THE LEAGUE <FaArrowRight /></button>
         </div>
       )}
-      <button className="rcl-splash-skip" onClick={complete}>SKIP <span>INTRO</span></button>
+      <button className="rcl-splash-skip" onClick={complete} aria-label="Skip intro">SKIP</button>
       <div className="rcl-splash-progress" aria-hidden="true"><span style={{ width: `${((scene + 1) / scenes.length) * 100}%` }} /></div>
     </div>
   );
