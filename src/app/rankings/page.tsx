@@ -8,24 +8,34 @@ export const revalidate = 60;
 export default async function RankingsPage() {
   const client = getPublicClient();
 
-  // 1. Fetch players with cached Player IQ scores.
+  // Fetch public players, verified game statistics, and calculated Player IQ scores.
   const { data: rawPlayers } = client 
     ? await client.from('public_players').select('*, iq:public_player_iq(*)')
     : { data: [] };
+  const { data: playerStats } = client
+    ? await client.from('player_game_stats').select('player_id, points, rebounds, assists, steals, blocks')
+    : { data: [] };
+  const statsByPlayer = new Map<string, any[]>();
+  for (const stat of (playerStats ?? []) as any[]) {
+    const current = statsByPlayer.get(stat.player_id) ?? [];
+    current.push(stat);
+    statsByPlayer.set(stat.player_id, current);
+  }
 
-  // Calculate scores/ratings dynamically to determine rankings
-  // Let's create high fidelity leaderboards
   const players = (rawPlayers || []).map((p: any) => {
-    const ppg = 0; const rpg = 0; const apg = 0; const spg = 0; const bpg = 0;
+    const stats = statsByPlayer.get(p.id) ?? [];
+    const average = (key: string) => stats.length
+      ? stats.reduce((total, stat) => total + Number(stat[key] ?? 0), 0) / stats.length
+      : 0;
     const ovr = p.iq?.rcl_rating ?? null;
 
     return {
       ...p,
-      ppg,
-      rpg,
-      apg,
-      spg,
-      bpg,
+      ppg: average('points'),
+      rpg: average('rebounds'),
+      apg: average('assists'),
+      spg: average('steals'),
+      bpg: average('blocks'),
       ovr,
     };
   });
@@ -36,20 +46,19 @@ export default async function RankingsPage() {
   const apgLeaders = [...players].sort((a, b) => b.apg - a.apg).slice(0, 5);
   const ovrLeaders = [...players].filter((p) => p.ovr !== null).sort((a, b) => b.ovr - a.ovr).slice(0, 5);
 
-  // 2. Fetch Teams and compute standings
-  const { data: teamsData } = client
-    ? await client.from('teams').select('*')
+  // Use the database-maintained standings rather than deriving records from identifiers.
+  const { data: standingsData } = client
+    ? await client.from('standings').select('*, team:teams(*)').order('rank', { ascending: true, nullsFirst: false })
     : { data: [] };
 
-  const teams = (teamsData || []).map((t: any) => {
-    const wins = t.wins ?? (parseInt(t.id?.slice(0,2), 16) || 1) % 8;
-    const losses = t.losses ?? (parseInt(t.id?.slice(2,4), 16) || 1) % 5;
+  const teams = (standingsData || []).map((standing: any) => {
+    const wins = Number(standing.wins ?? 0);
+    const losses = Number(standing.losses ?? 0);
     const gp = wins + losses;
     const pct = gp ? Math.round((wins / gp) * 100) : 0;
-    const ppg = t.ppg ?? 72.4;
-    const diff = t.diff ?? (wins * 4 - losses * 3);
-    return { ...t, wins, losses, gp, pct, ppg, diff };
-  }).sort((a, b) => b.wins - a.wins || b.pct - a.pct || b.diff - a.diff);
+    const diff = Number(standing.points_for ?? 0) - Number(standing.points_against ?? 0);
+    return { ...standing.team, wins, losses, gp, pct, diff };
+  });
 
   // 3. Fetch Coaches
   const { data: coachesData } = client
@@ -57,11 +66,12 @@ export default async function RankingsPage() {
     : { data: [] };
 
   const coaches = (coachesData || []).map((c: any) => {
-    const wins = c.wins ?? 10;
-    const losses = c.losses ?? 5;
+    const coachStandings = (standingsData || []).filter((standing: any) => standing.team_id === c.team_id);
+    const wins = coachStandings.reduce((total: number, standing: any) => total + Number(standing.wins ?? 0), 0);
+    const losses = coachStandings.reduce((total: number, standing: any) => total + Number(standing.losses ?? 0), 0);
     const gp = wins + losses;
     const pct = gp ? Math.round((wins / gp) * 100) : 0;
-    const championships = c.championships ?? 1;
+    const championships = 0;
     return { ...c, wins, losses, pct, championships };
   }).sort((a, b) => b.wins - a.wins || b.championships - a.championships);
 
