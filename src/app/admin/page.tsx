@@ -456,6 +456,12 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex gap-2">
+              <Link
+                href="/admin/operations"
+                className="rounded-xl bg-rcl-orange px-4 py-2.5 text-xs font-black uppercase tracking-widest text-black hover:bg-rcl-gold"
+              >
+                LEAGUE OPERATIONS
+              </Link>
               <button 
                 onClick={loadDashboardData} 
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold"
