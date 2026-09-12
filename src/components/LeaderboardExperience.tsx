@@ -13,7 +13,7 @@ type Props = {
   playerBadges: Pick<DatabasePlayerBadge, 'id' | 'player_id' | 'badge_id' | 'earned_at'>[]; community: Pick<UserLevel, 'profile_id' | 'xp' | 'level' | 'current_streak'>[];
 };
 type DatabasePlayerBadge = { id: string; player_id: string; badge_id: string; earned_at: string };
-type PlayerRow = PublicPlayer & { gp: number; ppg: number; rpg: number; apg: number; spg: number; bpg: number; fg: number; ovr: number | null; iq: number | null; team: Team | null; badgeCount: number };
+type PlayerRow = PublicPlayer & { gp: number; points: number; rebounds: number; assists: number; steals: number; blocks: number; ppg: number; rpg: number; apg: number; spg: number; bpg: number; fg: number; ovr: number | null; iq: number | null; team: Team | null; badgeCount: number };
 
 const statOptions = [
   ['points', 'POINTS'], ['ppg', 'PPG'], ['rebounds', 'REBOUNDS'], ['rpg', 'RPG'], ['assists', 'ASSISTS'], ['apg', 'APG'],
@@ -22,7 +22,7 @@ const statOptions = [
 
 export default function LeaderboardExperience(props: Props) {
   const [category, setCategory] = useState<Category>('players');
-  const [seasonId, setSeasonId] = useState('all');
+  const [seasonId, setSeasonId] = useState(() => props.seasons.find((season) => season.status === 'active')?.id ?? 'all');
   const [sort, setSort] = useState<(typeof statOptions)[number][0]>('ppg');
   const seasonGames = useMemo(() => new Set(props.games.filter((game) => seasonId === 'all' || game.season_id === seasonId).map((game) => game.id)), [props.games, seasonId]);
   const players = useMemo<PlayerRow[]>(() => {
@@ -40,7 +40,7 @@ export default function LeaderboardExperience(props: Props) {
       const iqRecord = iqMap.get(player.id);
       const fgAttempts = playerStats.reduce((total, stat) => total + stat.field_goals_attempted, 0);
       const fgMade = playerStats.reduce((total, stat) => total + stat.field_goals_made, 0);
-      return { ...player, gp: playerStats.length, ppg: average('points'), rpg: average('rebounds'), apg: average('assists'), spg: average('steals'), bpg: average('blocks'), fg: fgAttempts ? (fgMade / fgAttempts) * 100 : 0, ovr: iqRecord?.rcl_rating ?? null, iq: iqRecord?.rcl_rating ?? null, team: rosterTeam.get(player.id) ?? null, badgeCount: badgeCounts.get(player.id) ?? 0 };
+      return { ...player, gp: playerStats.length, points: playerStats.reduce((total, stat) => total + stat.points, 0), rebounds: playerStats.reduce((total, stat) => total + stat.rebounds, 0), assists: playerStats.reduce((total, stat) => total + stat.assists, 0), steals: playerStats.reduce((total, stat) => total + stat.steals, 0), blocks: playerStats.reduce((total, stat) => total + stat.blocks, 0), ppg: average('points'), rpg: average('rebounds'), apg: average('assists'), spg: average('steals'), bpg: average('blocks'), fg: fgAttempts ? (fgMade / fgAttempts) * 100 : 0, ovr: iqRecord?.rcl_rating ?? null, iq: iqRecord?.rcl_rating ?? null, team: rosterTeam.get(player.id) ?? null, badgeCount: badgeCounts.get(player.id) ?? 0 };
     }).filter((player) => player.gp > 0 || player.ovr !== null || player.badgeCount > 0);
   }, [props, seasonGames]);
   const sortedPlayers = useMemo(() => [...players].sort((a, b) => Number(b[sort as keyof PlayerRow] ?? -1) - Number(a[sort as keyof PlayerRow] ?? -1) || a.last_name.localeCompare(b.last_name)), [players, sort]);
