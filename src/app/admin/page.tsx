@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
 
       if (leagues) {
         setLeaguesList(leagues);
-        setNewTeamLeagueId((current) => current || leagues[0]?.id || '');
+        setNewTeamLeagueId((current: string) => current || leagues[0]?.id || '');
       }
       if (users) setUsersRoster(users);
       if (teams) setTeamsList(teams);
