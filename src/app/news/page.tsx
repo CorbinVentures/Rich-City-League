@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
-import { formatDate } from '@/utils/helpers';
+import { NewsDirectory } from '@/components/PublicDirectory';
 
 export const revalidate = 300;
 
 export default async function NewsPage() {
   const { news } = await getLeagueSnapshot();
-  return <main><Container maxWidth="xl" className="py-12"><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">From the league</p><h1 className="mt-2 font-display text-4xl font-bold">News</h1><div className="mt-10 grid gap-4 md:grid-cols-2">{news.length === 0 && <p className="col-span-full rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-500">No news has been published yet.</p>}{news.map((item) => <Link key={item.id} href={`/news/${item.slug}`} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 hover:border-rcl-gold/50"><p className="text-xs text-gray-500">{item.published_at ? formatDate(item.published_at) : 'RCL News'}</p><h2 className="mt-3 font-display text-2xl font-bold">{item.title}</h2>{item.excerpt && <p className="mt-3 text-gray-400">{item.excerpt}</p>}</Link>)}</div></Container></main>;
+  const items = news.map((item) => ({ id: item.id, slug: item.slug, title: item.title, excerpt: item.excerpt, category: 'League News', publishedAt: item.published_at, coverImageUrl: item.cover_image_url }));
+  return <main className="min-h-screen bg-rcl-black pb-24"><section className="border-b border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(255,107,26,0.16),transparent_60%)] py-16"><Container maxWidth="xl"><p className="text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">From the league</p><h1 className="mt-3 font-display text-5xl font-bold sm:text-7xl">RCL <span className="text-rcl-gold">NEWS</span></h1><p className="mt-4 max-w-xl text-gray-400">Stories, updates, and impact from Richmond basketball.</p></Container></section><Container maxWidth="xl" className="py-10"><NewsDirectory items={items} /></Container></main>;
 }
