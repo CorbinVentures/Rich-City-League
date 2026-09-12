@@ -40,7 +40,7 @@ export default async function HomePage() {
             <p className="mt-6 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
               Play. Compete. Connect. Build your legacy in Richmond&apos;s basketball world.
             </p>
-            <Link href="/games" className="rcl-button mt-8 inline-flex items-center gap-3">
+            <Link href="/city" className="rcl-button mt-8 inline-flex items-center gap-3">
               Enter the city <FaArrowRight />
             </Link>
           </div>
