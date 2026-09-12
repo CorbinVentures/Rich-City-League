@@ -126,7 +126,8 @@ export default function AdminDashboardPage() {
 
       if (leagues) {
         setLeaguesList(leagues);
-        setNewTeamLeagueId((current: string) => current || leagues[0]?.id || '');
+        const availableLeagues = leagues as Array<{ id: string; name: string }>;
+        setNewTeamLeagueId((current: string) => current || availableLeagues[0]?.id || '');
       }
       if (users) setUsersRoster(users);
       if (teams) setTeamsList(teams);
@@ -215,22 +216,24 @@ export default function AdminDashboardPage() {
     if (error || !player) {
       setRosterError(error?.message ?? 'Unable to create player.');
     } else {
+      const createdPlayer = player as { id: string };
       if (newPlayerTeamId) {
-        const { data: teamSeason } = await supabase
+        const { data: teamSeasonData } = await supabase
           .from('team_seasons')
           .select('id')
           .eq('team_id', newPlayerTeamId)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
+        const teamSeason = teamSeasonData as { id: string } | null;
         if (teamSeason) {
           const { error: rosterInsertError } = await supabase.from('rosters').insert({
             team_season_id: teamSeason.id,
-            player_id: player.id,
+            player_id: createdPlayer.id,
             jersey_number: newPlayerJersey || null,
           } as never);
           if (rosterInsertError) {
-            await supabase.from('players').delete().eq('id', player.id);
+            await supabase.from('players').delete().eq('id', createdPlayer.id);
             setRosterError(rosterInsertError.message);
             setRosterSubmitting(false);
             return;
