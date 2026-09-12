@@ -4,9 +4,12 @@ import type { Database } from '@/types/database';
 import { getSupabaseConfig } from './src/lib/supabase-config';
 
 export async function middleware(request: NextRequest) {
+  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal') || request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/account');
   const config = getSupabaseConfig();
   if (config.status !== 'configured') {
-    return NextResponse.next();
+    return protectedPath
+      ? NextResponse.json({ error: 'Authentication is temporarily unavailable.' }, { status: 503 })
+      : NextResponse.next();
   }
   let response = NextResponse.next({ request });
   const supabase = createServerClient<Database>(config.url!, config.anonKey!, {
@@ -21,7 +24,6 @@ export async function middleware(request: NextRequest) {
   });
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal') || request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/account');
   if (protectedPath && !user) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';

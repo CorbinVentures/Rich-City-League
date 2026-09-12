@@ -12,6 +12,7 @@ vi.mock('@supabase/ssr', () => ({
 }));
 
 import { middleware } from '../middleware';
+import { getSafeNextPath } from '../src/lib/auth-redirect';
 
 describe('protected route middleware', () => {
   beforeEach(() => {
@@ -35,5 +36,24 @@ describe('protected route middleware', () => {
     const response = await middleware(new NextRequest('http://localhost/dashboard'));
 
     expect(response.status).toBe(200);
+  });
+
+  it('preserves only the internal destination in the sign-in redirect', async () => {
+    const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue'));
+    const location = new URL(response.headers.get('location')!);
+
+    expect(location.pathname).toBe('/auth/sign-in');
+    expect(location.searchParams.get('next')).toBe('/portal/operations?view=queue');
+  });
+
+  it.each(['https://evil-site.com', '//evil-site.com', 'javascript:alert(1)', '/\\evil-site.com'])(
+    'rejects unsafe next destination %s',
+    (next) => {
+      expect(getSafeNextPath(next)).toBe('/dashboard');
+    },
+  );
+
+  it('preserves a trusted internal query string', () => {
+    expect(getSafeNextPath('/portal/operations?view=queue')).toBe('/portal/operations?view=queue');
   });
 });
