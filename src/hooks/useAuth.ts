@@ -11,6 +11,16 @@ function getSupabaseUnavailableMessage() {
     : getSupabaseConfigMessage(status);
 }
 
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
+  const message = error instanceof Error ? error.message.toLowerCase() : '';
+  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) return 'Invalid email or password.';
+  if (code === 'email_not_confirmed' || message.includes('email not confirmed')) return 'Please confirm your email before signing in.';
+  if (code === 'user_banned') return 'This account is unavailable. Contact the league administrator.';
+  if (message.includes('password')) return 'Use a password with at least 8 characters.';
+  return fallback;
+}
+
 export function useAuth() {
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<User | null>(null);
@@ -69,8 +79,10 @@ export function useAuth() {
 
     getUser();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setUser(session?.user ?? null);
       void loadProfile(session?.user ?? null).catch((err: unknown) => {
+        if (!mounted) return;
         console.error('Unable to load profile', err);
         if (mounted) setError('Unable to load your profile.');
       });
@@ -94,7 +106,7 @@ export function useAuth() {
       setUser(data.user);
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create your account.');
+      setError(getAuthErrorMessage(err, 'Unable to create your account.'));
       throw err;
     } finally {
       setLoading(false);
@@ -113,7 +125,7 @@ export function useAuth() {
       setUser(data.user);
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to sign in.');
+      setError(getAuthErrorMessage(err, 'Unable to sign in.'));
       throw err;
     } finally {
       setLoading(false);
@@ -129,7 +141,7 @@ export function useAuth() {
       setUser(null);
       setProfile(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to sign out.');
+      setError(getAuthErrorMessage(err, 'Unable to sign out.'));
     } finally {
       setLoading(false);
     }
@@ -143,6 +155,15 @@ export function useAuth() {
     });
     if (error) {
       setError('Unable to send the password reset email.');
+      throw error;
+    }
+  };
+
+  const resendConfirmation = async (email: string) => {
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    if (error) {
+      setError('Unable to resend the confirmation email. Please try again later.');
       throw error;
     }
   };
@@ -165,6 +186,7 @@ export function useAuth() {
     signIn,
     signOut,
     resetPassword,
+    resendConfirmation,
     updatePassword,
   };
 }
