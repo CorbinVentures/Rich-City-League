@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Division, Game, League, PlayerGameStats, PublicPlayer, PublicPlayerIQ, Roster, Season, Standing, Team, TeamCoach, TeamGameStats, TeamSeason, Venue } from '@/types/database';
+import { getSupabaseConfig } from '@/lib/supabase-config';
 
 type PublicClient = SupabaseClient<Database>;
 type QueryResult<T> = { data: T; error: { message: string } | null };
@@ -43,10 +44,14 @@ export type PlayerDetailData = {
 };
 
 export function getPublicClient(): PublicClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return createClient<Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const config = getSupabaseConfig();
+  if (config.status !== 'configured') return null;
+  try {
+    return createClient<Database>(config.url, config.anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  } catch (error) {
+    console.error('Unable to initialize the public Supabase client', error);
+    return null;
+  }
 }
 
 export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {

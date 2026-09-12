@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
 import { Profile } from '@/types';
 
 export function useAuth() {
@@ -13,8 +14,16 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true;
 
+    const config = getSupabaseConfig();
+    if (config.status !== 'configured') {
+      setError(getSupabaseConfigMessage(config.status));
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
     if (!supabase) {
-      setError('Supabase is not configured. Add the public project URL and anon key.');
+      setError('Supabase client could not be initialized. Check the public URL and anon key.');
       setLoading(false);
       return () => {
         mounted = false;
@@ -67,7 +76,7 @@ export function useAuth() {
   }, [supabase]);
 
   const signUp = async (email: string, password: string) => {
-    if (!supabase) throw new Error('Supabase is not configured.');
+    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -86,7 +95,7 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) throw new Error('Supabase is not configured.');
+    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -105,7 +114,7 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    if (!supabase) throw new Error('Supabase is not configured.');
+    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -131,7 +140,7 @@ export function useAuth() {
   };
 
   const updatePassword = async (password: string) => {
-    if (!supabase) throw new Error('Supabase is not configured.');
+    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setError('Unable to update your password.');
