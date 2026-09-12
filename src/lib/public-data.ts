@@ -47,7 +47,7 @@ export function getPublicClient(): PublicClient | null {
   const config = getSupabaseConfig();
   if (config.status !== 'configured') return null;
   try {
-    return createClient<Database>(config.url, config.anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    return createClient<Database>(config.url!, config.anonKey!, { auth: { persistSession: false, autoRefreshToken: false } });
   } catch (error) {
     console.error('Unable to initialize the public Supabase client', error);
     return null;

@@ -4,6 +4,13 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
 import { Profile } from '@/types';
 
+function getSupabaseUnavailableMessage() {
+  const status = getSupabaseConfig().status;
+  return status === 'configured'
+    ? 'Supabase client could not be initialized. Check the public URL and anon key.'
+    : getSupabaseConfigMessage(status);
+}
+
 export function useAuth() {
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<User | null>(null);
@@ -23,7 +30,7 @@ export function useAuth() {
       };
     }
     if (!supabase) {
-      setError('Supabase client could not be initialized. Check the public URL and anon key.');
+      setError(getSupabaseUnavailableMessage());
       setLoading(false);
       return () => {
         mounted = false;
@@ -76,7 +83,7 @@ export function useAuth() {
   }, [supabase]);
 
   const signUp = async (email: string, password: string) => {
-    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -95,7 +102,7 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -114,7 +121,7 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -129,7 +136,8 @@ export function useAuth() {
   };
 
   const resetPassword = async (email: string) => {
-    if (!supabase || typeof window === 'undefined') throw new Error('Password recovery is only available in the browser.');
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
+    if (typeof window === 'undefined') throw new Error('Password recovery is only available in the browser.');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
@@ -140,7 +148,7 @@ export function useAuth() {
   };
 
   const updatePassword = async (password: string) => {
-    if (!supabase) throw new Error(getSupabaseConfigMessage(getSupabaseConfig().status));
+    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setError('Unable to update your password.');

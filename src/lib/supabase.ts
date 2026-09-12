@@ -7,7 +7,7 @@ export function getSupabaseClient() {
   if (config.status !== 'configured') return null;
 
   try {
-    return createClient<Database>(config.url, config.anonKey);
+    return createClient<Database>(config.url!, config.anonKey!);
   } catch (error) {
     console.error('Unable to initialize the Supabase browser client', error);
     return null;

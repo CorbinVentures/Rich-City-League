@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   let response = NextResponse.next({ request });
-  const supabase = createServerClient<Database>(config.url, config.anonKey, {
+  const supabase = createServerClient<Database>(config.url!, config.anonKey!, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookies) => {
@@ -39,7 +39,6 @@ export async function middleware(request: NextRequest) {
     if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-
   }
 
   if (user && request.nextUrl.pathname.startsWith('/admin')) {
