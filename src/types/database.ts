@@ -73,6 +73,16 @@ export interface Database {
       fantasy_teams: { Row: FantasyTeam; Insert: Insert<FantasyTeam>; Update: Update<FantasyTeam> };
       fantasy_rosters: { Row: FantasyRoster; Insert: FantasyRoster; Update: Partial<FantasyRoster> };
       fantasy_scores: { Row: FantasyScore; Insert: Insert<FantasyScore>; Update: Update<FantasyScore> };
+      shop_categories: { Row: ShopCategory; Insert: Insert<ShopCategory>; Update: Update<ShopCategory> };
+      shop_collections: { Row: ShopCollection; Insert: Insert<ShopCollection>; Update: Update<ShopCollection> };
+      products: { Row: Product; Insert: Insert<Product>; Update: Update<Product> };
+      product_variants: { Row: ProductVariant; Insert: Insert<ProductVariant>; Update: Update<ProductVariant> };
+      product_favorites: { Row: ProductFavorite; Insert: ProductFavorite; Update: Partial<ProductFavorite> };
+      carts: { Row: Cart; Insert: Insert<Cart>; Update: Update<Cart> };
+      cart_items: { Row: CartItem; Insert: Insert<CartItem>; Update: Update<CartItem> };
+      orders: { Row: Order; Insert: Insert<Order>; Update: Update<Order> };
+      order_items: { Row: OrderItem; Insert: Insert<OrderItem>; Update: Update<OrderItem> };
+      inventory_adjustments: { Row: InventoryAdjustment; Insert: Insert<InventoryAdjustment>; Update: Update<InventoryAdjustment> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
@@ -165,3 +175,13 @@ export interface FantasySeason { id: string; season_id: string; name: string; st
 export interface FantasyTeam { id: string; fantasy_season_id: string; manager_id: string; name: string; total_points: number; wins: number; losses: number; created_at: string; }
 export interface FantasyRoster { fantasy_team_id: string; player_id: string; roster_slot: 'starter' | 'bench' | 'ir'; acquired_at: string; }
 export interface FantasyScore { id: string; fantasy_team_id: string; player_id: string; game_id: string; fantasy_points: number; scoring_breakdown: Json; created_at: string; }
+export interface ShopCategory { id: string; name: string; slug: string; created_at: string; }
+export interface ShopCollection { id: string; name: string; slug: string; description: string | null; is_published: boolean; created_at: string; updated_at: string; }
+export interface Product { id: string; name: string; slug: string; description: string | null; short_description: string | null; category_id: string | null; collection_id: string | null; price: number; compare_at_price: number | null; currency: string; status: 'DRAFT' | 'ACTIVE' | 'SOLD_OUT' | 'ARCHIVED' | 'SCHEDULED'; featured: boolean; limited_edition: boolean; thumbnail_url: string | null; images: Json; team: string | null; release_date: string | null; edition_size: number | null; created_at: string; updated_at: string; }
+export interface ProductVariant { id: string; product_id: string; sku: string; name: string; size: string | null; color: string | null; inventory: number; reserved: number; created_at: string; updated_at: string; }
+export interface ProductFavorite { user_id: string; product_id: string; created_at: string; }
+export interface Cart { id: string; user_id: string; created_at: string; updated_at: string; }
+export interface CartItem { cart_id: string; variant_id: string; quantity: number; created_at: string; updated_at: string; }
+export interface Order { id: string; order_number: string; user_id: string | null; customer_email: string; customer_name: string | null; shipping_address: Json; subtotal: number; shipping: number; tax: number; total: number; payment_status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | 'PARTIALLY_REFUNDED'; fulfillment_status: 'UNFULFILLED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'; tracking_number: string | null; created_at: string; updated_at: string; }
+export interface OrderItem { id: string; order_id: string; product_id: string | null; variant_id: string | null; product_snapshot: Json; variant_snapshot: Json | null; quantity: number; unit_price: number; created_at: string; }
+export interface InventoryAdjustment { id: string; variant_id: string; quantity_delta: number; reason: string; created_by: string | null; created_at: string; }
