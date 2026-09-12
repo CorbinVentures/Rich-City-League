@@ -79,7 +79,7 @@ export default function DashboardWorkspace() {
 
   if (authLoading || loading) return <main><Container maxWidth="xl" className="py-16"><div className="h-8 w-64 animate-pulse rounded bg-white/10" /><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="h-28 animate-pulse rounded-2xl bg-white/5" />)}</div></Container></main>;
   if (!user) return <main><Container maxWidth="xl" className="py-16"><p>Please sign in to access your dashboard.</p><Link className="mt-4 inline-block text-rcl-gold" href="/auth/sign-in">Sign in</Link></Container></main>;
-  if (error) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-bold">Dashboard unavailable</h1><p className="mt-3 text-red-300">{error}</p><button className="mt-6 rounded-lg border border-white/20 px-4 py-2" onClick={() => window.location.reload()}>Try again</button></Container></main>;
+  if (error) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-bold">Dashboard unavailable</h1><p className="mt-3 text-red-300">{error}</p><button className="mt-6 rounded-lg border border-white/20 px-4 py-2" onClick={() => { if (typeof window !== 'undefined') window.location.reload(); }}>Try again</button></Container></main>;
 
   const role = profile?.role ?? 'player';
   const upcoming = data.games.filter((game) => game.status === 'scheduled' || game.status === 'live').slice(0, 4);

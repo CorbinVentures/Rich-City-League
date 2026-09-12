@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   });
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal');
+  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal') || request.nextUrl.pathname.startsWith('/admin');
   if (protectedPath && !user) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';
@@ -37,11 +37,23 @@ export async function middleware(request: NextRequest) {
     if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+
+    if (user && request.nextUrl.pathname.startsWith('/admin')) {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+      const role = (profileData as { role?: string } | null)?.role;
+      if (role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/portal/:path*'],
+  matcher: ['/dashboard/:path*', '/portal/:path*', '/admin/:path*'],
 };

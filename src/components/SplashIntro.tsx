@@ -22,6 +22,7 @@ export function SplashIntro() {
   });
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     // Check localStorage
     const hasSeen = localStorage.getItem('rcl_seen_splash');
     if (hasSeen === 'true') {
@@ -80,6 +81,7 @@ export function SplashIntro() {
   }, [show, config.duration]);
 
   const handleComplete = () => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('rcl_seen_splash', 'true');
     setShow(false);
     setLoading(false);

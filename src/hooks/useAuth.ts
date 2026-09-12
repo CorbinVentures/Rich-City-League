@@ -120,7 +120,7 @@ export function useAuth() {
   };
 
   const resetPassword = async (email: string) => {
-    if (!supabase) throw new Error('Supabase is not configured.');
+    if (!supabase || typeof window === 'undefined') throw new Error('Password recovery is only available in the browser.');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });

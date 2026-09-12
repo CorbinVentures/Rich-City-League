@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
     if (authLoading) return null;
     if (!user) return false;
     // Direct check for admin email or verified roles
-    return user.email === 'info@rich-city-league.com' || (profile?.role as any) === 'admin' || (profile?.role as any) === 'super_admin';
+    return profile?.role === 'admin';
   }, [user, profile, authLoading]);
 
   // Fetch Dashboard Database Data
