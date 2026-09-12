@@ -29,7 +29,6 @@ export function StandingsExperience({ seasons, divisions, teams, teamSeasons, st
     .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999) || b.wins - a.wins || b.points_for - b.points_against - (a.points_for - a.points_against) || a.team_id.localeCompare(b.team_id));
   const officialGames = games.filter((game) => game.season_id === seasonId && game.status === 'completed');
   const recentGames = [...officialGames].sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at)).slice(0, 5);
-  const filteredTeamIds = new Set(seasonStandings.map((standing) => standing.team_id));
   const stats = seasonStandings.map((standing) => ({
     standing,
     team: teamById.get(standing.team_id),
