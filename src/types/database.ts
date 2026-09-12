@@ -83,6 +83,21 @@ export interface Database {
       orders: { Row: Order; Insert: Insert<Order>; Update: Update<Order> };
       order_items: { Row: OrderItem; Insert: Insert<OrderItem>; Update: Update<OrderItem> };
       inventory_adjustments: { Row: InventoryAdjustment; Insert: Insert<InventoryAdjustment>; Update: Update<InventoryAdjustment> };
+      tryout_sessions: { Row: TryoutSession; Insert: Insert<TryoutSession>; Update: Update<TryoutSession> };
+      tryout_registrations: { Row: TryoutRegistration; Insert: Insert<TryoutRegistration>; Update: Update<TryoutRegistration> };
+      tryout_attendance: { Row: TryoutAttendance; Insert: Insert<TryoutAttendance>; Update: Update<TryoutAttendance> };
+      player_evaluations: { Row: PlayerEvaluation; Insert: Insert<PlayerEvaluation>; Update: Update<PlayerEvaluation> };
+      draft_pools: { Row: DraftPool; Insert: Insert<DraftPool>; Update: Update<DraftPool> };
+      drafts: { Row: Draft; Insert: Insert<Draft>; Update: Update<Draft> };
+      draft_picks: { Row: DraftPick; Insert: Insert<DraftPick>; Update: Update<DraftPick> };
+      roster_status_history: { Row: RosterStatusHistory; Insert: Insert<RosterStatusHistory>; Update: Update<RosterStatusHistory> };
+      league_transactions: { Row: LeagueTransaction; Insert: Insert<LeagueTransaction>; Update: Update<LeagueTransaction> };
+      league_requests: { Row: LeagueRequest; Insert: Insert<LeagueRequest>; Update: Update<LeagueRequest> };
+      league_request_messages: { Row: LeagueRequestMessage; Insert: Insert<LeagueRequestMessage>; Update: Update<LeagueRequestMessage> };
+      game_participation_status: { Row: GameParticipationStatus; Insert: Insert<GameParticipationStatus>; Update: Update<GameParticipationStatus> };
+      discipline_categories: { Row: DisciplineCategory; Insert: Insert<DisciplineCategory>; Update: Update<DisciplineCategory> };
+      discipline_cases: { Row: DisciplineCase; Insert: Insert<DisciplineCase>; Update: Update<DisciplineCase> };
+      discipline_appeals: { Row: DisciplineAppeal; Insert: Insert<DisciplineAppeal>; Update: Update<DisciplineAppeal> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
@@ -124,6 +139,21 @@ export interface Media { id: string; uploader_id: string | null; title: string; 
 export interface Award { id: string; season_id: string; player_id: string | null; team_id: string | null; name: string; description: string | null; awarded_at: string; created_at: string; }
 export interface Staff { id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
 export interface Notification { id: string; recipient_id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; }
+export interface TryoutSession { id: string; season_id: string; venue_id: string | null; starts_at: string; ends_at: string; capacity: number; eligibility: string; evaluator_staff_ids: string[]; notes: string | null; status: 'DRAFT'|'OPEN'|'FULL'|'COMPLETED'|'CANCELLED'; created_by: string; created_at: string; }
+export interface TryoutRegistration { id: string; session_id: string; player_id: string; registered_by: string; created_at: string; }
+export interface TryoutAttendance { id: string; registration_id: string; status: 'PRESENT'|'ABSENT'|'EXCUSED'|'LATE'; marked_by: string; notes: string | null; marked_at: string; }
+export interface PlayerEvaluation { id: string; player_id: string; session_id: string; evaluator_id: string; scores: Json; evaluation_score: number; notes: string | null; created_at: string; }
+export interface DraftPool { id: string; season_id: string; player_id: string; eligible: boolean; eligibility_reason: string | null; added_by: string; updated_at: string; }
+export interface Draft { id: string; season_id: string; name: string; rounds: number; roster_limit: number; status: 'SETUP'|'OPEN'|'PAUSED'|'COMPLETED'|'CANCELLED'; current_pick: number; created_by: string; created_at: string; }
+export interface DraftPick { id: string; draft_id: string; pick_number: number; round_number: number; team_id: string; player_id: string; selected_by: string; selected_at: string; }
+export interface RosterStatusHistory { id: string; roster_id: string; status: 'ACTIVE'|'INACTIVE'|'DNP'|'SUSPENDED'|'INJURED'|'RELEASED'|'TRADED'|'WAIVED'; reason: string | null; effective_at: string; changed_by: string; created_at: string; }
+export interface LeagueTransaction { id: string; season_id: string; transaction_type: string; sending_team_id: string | null; receiving_team_id: string | null; player_ids: string[]; status: string; notes: string | null; reason: string | null; proposed_by: string; approved_by: string | null; executed_at: string | null; created_at: string; updated_at: string; }
+export interface LeagueRequest { id: string; requester_id: string; team_id: string | null; category: string; subject: string; description: string; status: string; assigned_to: string | null; resolution: string | null; created_at: string; updated_at: string; }
+export interface LeagueRequestMessage { id: string; request_id: string; author_id: string; body: string; created_at: string; }
+export interface GameParticipationStatus { id: string; game_id: string; player_id: string; status: string; reason: string | null; recorded_by: string; created_at: string; }
+export interface DisciplineCategory { id: string; name: string; is_active: boolean; created_at: string; }
+export interface DisciplineCase { id: string; player_id: string | null; reported_profile_id: string | null; game_id: string | null; team_id: string | null; category_id: string | null; incident_date: string; description: string; evidence: Json; witnesses: string | null; status: string; decision: string | null; sanction: string | null; decision_notes: string | null; created_by: string; decision_maker: string | null; decided_at: string | null; created_at: string; updated_at: string; }
+export interface DisciplineAppeal { id: string; case_id: string; submitted_by: string; reason: string; outcome: string | null; reviewer_id: string | null; decision_notes: string | null; submitted_at: string; decided_at: string | null; }
 export interface Commissioner { id: string; league_id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
 
 export interface SiteSetting { key: string; value: Json; created_at: string; updated_at: string; }
