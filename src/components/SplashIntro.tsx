@@ -57,7 +57,7 @@ export function SplashIntro() {
             supabase.from('site_settings').select('value').eq('key', 'splash_config').maybeSingle(),
             new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1800)),
           ]);
-          const data = result && 'data' in result ? result.data : null;
+          const data = (result as { data?: { value?: unknown } | null } | null)?.data;
           if (data?.value) {
             const value = data.value as unknown as SplashConfig;
             setConfig(value);
