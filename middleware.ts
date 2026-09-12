@@ -21,11 +21,11 @@ export async function middleware(request: NextRequest) {
   });
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal') || request.nextUrl.pathname.startsWith('/admin');
+  const protectedPath = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/portal') || request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/account');
   if (protectedPath && !user) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = '/auth/sign-in';
-    signInUrl.searchParams.set('next', request.nextUrl.pathname);
+    signInUrl.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
 
@@ -57,5 +57,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/portal/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/portal/:path*', '/admin/:path*', '/account/:path*'],
 };
