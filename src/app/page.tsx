@@ -99,7 +99,7 @@ export default async function HomePage() {
             {news.slice(0, 3).map((item) => (
               <Link href={`/news/${item.slug}`} key={item.id} className="rcl-news-card">
                 <div className="flex items-start justify-between gap-4"><FaNewspaper className="text-rcl-orange" /><FaArrowRight className="text-slate-500" /></div>
-                <p className="mt-8 text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">{item.category ?? 'RCL NEWS'}</p>
+                <p className="mt-8 text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL NEWS</p>
                 <h3 className="mt-2 font-display text-xl font-bold leading-tight">{item.title}</h3>
                 <p className="mt-3 text-xs text-slate-500">{item.published_at ? formatDate(item.published_at) : 'RCL newsroom'}</p>
               </Link>
