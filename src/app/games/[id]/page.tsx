@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { Container } from '@/components/Container';
 import { LiveGameScore } from '@/components/LiveGameScore';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
@@ -50,4 +51,4 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
   </Container></main>;
 }
 
-function Heading({ children }: { children: React.ReactNode }) { return <h2 className="font-display text-xl font-black uppercase tracking-wide">{children}</h2>; }
+function Heading({ children }: { children: ReactNode }) { return <h2 className="font-display text-xl font-black uppercase tracking-wide">{children}</h2>; }
