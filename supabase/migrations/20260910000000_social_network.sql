@@ -287,4 +287,3 @@ create policy "reporters view reports" on public.reports for select using (repor
 create policy "users manage saved posts" on public.saved_posts for all using (profile_id = auth.uid()) with check (profile_id = auth.uid());
 
 alter publication supabase_realtime add table public.messages;
-alter publication supabase_realtime add table public.notifications;

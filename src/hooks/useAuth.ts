@@ -130,6 +130,15 @@ export function useAuth() {
     }
   };
 
+  const updatePassword = async (password: string) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      setError('Unable to update your password.');
+      throw error;
+    }
+  };
+
   return {
     user,
     profile,
@@ -139,5 +148,6 @@ export function useAuth() {
     signIn,
     signOut,
     resetPassword,
+    updatePassword,
   };
 }

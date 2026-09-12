@@ -36,6 +36,7 @@ export default function AdminDashboardPage() {
   });
   const [usersList, setUsersRoster] = useState<any[]>([]);
   const [teamsList, setTeamsList] = useState<any[]>([]);
+  const [leaguesList, setLeaguesList] = useState<any[]>([]);
   const [playersList, setPlayersList] = useState<any[]>([]);
   const [coachesList, setCoachesList] = useState<any[]>([]);
   const [gamesList, setGamesList] = useState<any[]>([]);
@@ -55,10 +56,16 @@ export default function AdminDashboardPage() {
   // Roster Creators
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamSlug, setNewTeamSlug] = useState('');
+  const [newTeamLeagueId, setNewTeamLeagueId] = useState('');
   const [newPlayerProfileId, setNewPlayerProfileId] = useState('');
   const [newPlayerTeamId, setNewPlayerTeamId] = useState('');
+  const [newPlayerFirstName, setNewPlayerFirstName] = useState('');
+  const [newPlayerLastName, setNewPlayerLastName] = useState('');
   const [newPlayerJersey, setNewPlayerJersey] = useState('');
   const [newPlayerPosition, setNewPlayerPosition] = useState('G');
+  const [rosterError, setRosterError] = useState<string | null>(null);
+  const [rosterMessage, setRosterMessage] = useState<string | null>(null);
+  const [rosterSubmitting, setRosterSubmitting] = useState(false);
 
   // Security and role validation
   const isAuthorizedAdmin = useMemo(() => {
@@ -98,6 +105,7 @@ export default function AdminDashboardPage() {
 
       // 2. Fetch rosters
       const [
+        { data: leagues },
         { data: users },
         { data: teams },
         { data: players },
@@ -106,6 +114,7 @@ export default function AdminDashboardPage() {
         { data: posts },
         { data: logs },
       ] = await Promise.all([
+        supabase.from('leagues').select('id, name').eq('is_active', true).order('name'),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('teams').select('*').order('name', { ascending: true }),
         supabase.from('players').select('*, profile:profiles(*)'),
@@ -115,6 +124,11 @@ export default function AdminDashboardPage() {
         supabase.from('audit_logs').select('*, admin:profiles(*)').order('created_at', { ascending: false }).limit(20),
       ]);
 
+      if (leagues) {
+        setLeaguesList(leagues);
+        const availableLeagues = leagues as Array<{ id: string; name: string }>;
+        setNewTeamLeagueId((current: string) => current || availableLeagues[0]?.id || '');
+      }
       if (users) setUsersRoster(users);
       if (teams) setTeamsList(teams);
       if (players) setPlayersList(players);
@@ -162,39 +176,80 @@ export default function AdminDashboardPage() {
   // Manage Team Insertion
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase || !newTeamName.trim() || !newTeamSlug.trim()) return;
-
+    setRosterError(null);
+    setRosterMessage(null);
+    if (!supabase || !newTeamName.trim() || !newTeamSlug.trim() || !newTeamLeagueId) return;
+    setRosterSubmitting(true);
     const { error } = await supabase.from('teams').insert({
+      league_id: newTeamLeagueId,
       name: newTeamName.trim(),
-      slug: newTeamSlug.trim(),
+      slug: newTeamSlug.trim().toLowerCase(),
     } as never);
 
-    if (!error) {
+    if (error) {
+      setRosterError(error.message);
+    } else {
       await postAuditLog('CREATE_TEAM', `Created team ${newTeamName}`);
       setNewTeamName('');
       setNewTeamSlug('');
+      setRosterMessage('Team created successfully.');
       loadDashboardData();
     }
+    setRosterSubmitting(false);
   };
 
   // Manage Player Creation
   const handleCreatePlayer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase || !newPlayerProfileId) return;
-
-    const { error } = await supabase.from('players').insert({
+    setRosterError(null);
+    setRosterMessage(null);
+    if (!supabase || !newPlayerProfileId || !newPlayerFirstName.trim() || !newPlayerLastName.trim()) return;
+    setRosterSubmitting(true);
+    const { data: player, error } = await supabase.from('players').insert({
       profile_id: newPlayerProfileId,
-      team_id: newPlayerTeamId || null,
+      first_name: newPlayerFirstName.trim(),
+      last_name: newPlayerLastName.trim(),
       jersey_number: newPlayerJersey || null,
       position: newPlayerPosition,
-    } as never);
+    } as never).select('id').single();
 
-    if (!error) {
+    if (error || !player) {
+      setRosterError(error?.message ?? 'Unable to create player.');
+    } else {
+      const createdPlayer = player as { id: string };
+      if (newPlayerTeamId) {
+        const { data: teamSeasonData } = await supabase
+          .from('team_seasons')
+          .select('id')
+          .eq('team_id', newPlayerTeamId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const teamSeason = teamSeasonData as { id: string } | null;
+        if (teamSeason) {
+          const { error: rosterInsertError } = await supabase.from('rosters').insert({
+            team_season_id: teamSeason.id,
+            player_id: createdPlayer.id,
+            jersey_number: newPlayerJersey || null,
+          } as never);
+          if (rosterInsertError) {
+            await supabase.from('players').delete().eq('id', createdPlayer.id);
+            setRosterError(rosterInsertError.message);
+            setRosterSubmitting(false);
+            return;
+          }
+        }
+      }
       await postAuditLog('CREATE_PLAYER', `Assigned user ID ${newPlayerProfileId} as official player`);
       setNewPlayerProfileId('');
+      setNewPlayerFirstName('');
+      setNewPlayerLastName('');
       setNewPlayerJersey('');
+      setNewPlayerTeamId('');
+      setRosterMessage('Player registered successfully.');
       loadDashboardData();
     }
+    setRosterSubmitting(false);
   };
 
   // Game Score Box Score Load Trigger
@@ -561,6 +616,13 @@ export default function AdminDashboardPage() {
                       CREATE NEW LEAGUE TEAM
                     </h3>
                     <div>
+                      <label className="block text-[10px] font-black text-gray-500 mb-1">LEAGUE</label>
+                      <select required value={newTeamLeagueId} onChange={(e) => setNewTeamLeagueId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none">
+                        <option value="">-- Choose League --</option>
+                        {leaguesList.map((league) => <option key={league.id} value={league.id}>{league.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
                       <label className="block text-[10px] font-black text-gray-500 mb-1">TEAM NAME</label>
                       <input
                         type="text"
@@ -577,13 +639,15 @@ export default function AdminDashboardPage() {
                         type="text"
                         required
                         value={newTeamSlug}
-                        onChange={(e) => setNewTeamSlug(e.target.value)}
+                        onChange={(e) => setNewTeamSlug(e.target.value.replace(/\s+/g, '-'))}
                         placeholder="e.g. richmond-generals"
                         className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none"
                       />
                     </div>
-                    <button type="submit" className="w-full rounded-xl bg-rcl-gold py-2.5 font-bold text-black text-xs uppercase tracking-wider">
-                      CREATE TEAM
+                    {rosterError && <p className="text-sm text-rcl-red">{rosterError}</p>}
+                    {rosterMessage && <p className="text-sm text-rcl-gold">{rosterMessage}</p>}
+                    <button type="submit" disabled={rosterSubmitting} className="w-full rounded-xl bg-rcl-gold py-2.5 font-bold text-black text-xs uppercase tracking-wider disabled:opacity-60">
+                      {rosterSubmitting ? 'CREATING…' : 'CREATE TEAM'}
                     </button>
                   </form>
 
@@ -592,6 +656,10 @@ export default function AdminDashboardPage() {
                     <h3 className="font-display text-sm font-black tracking-widest text-rcl-gold uppercase">
                       REGISTER PLAYER TO TEAM
                     </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input required value={newPlayerFirstName} onChange={(e) => setNewPlayerFirstName(e.target.value)} placeholder="First name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
+                      <input required value={newPlayerLastName} onChange={(e) => setNewPlayerLastName(e.target.value)} placeholder="Last name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
+                    </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 mb-1">SELECT USER PROFILE</label>
                       <select
@@ -647,8 +715,10 @@ export default function AdminDashboardPage() {
                         </select>
                       </div>
                     </div>
-                    <button type="submit" className="w-full rounded-xl bg-rcl-gold py-2.5 font-bold text-black text-xs uppercase tracking-wider">
-                      OFFICIALLY REGISTER PLAYER
+                    {rosterError && <p className="text-sm text-rcl-red">{rosterError}</p>}
+                    {rosterMessage && <p className="text-sm text-rcl-gold">{rosterMessage}</p>}
+                    <button type="submit" disabled={rosterSubmitting} className="w-full rounded-xl bg-rcl-gold py-2.5 font-bold text-black text-xs uppercase tracking-wider disabled:opacity-60">
+                      {rosterSubmitting ? 'REGISTERING…' : 'OFFICIALLY REGISTER PLAYER'}
                     </button>
                   </form>
                 </div>
