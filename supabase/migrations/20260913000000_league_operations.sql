@@ -205,6 +205,7 @@ language plpgsql security definer set search_path = public
 as $$
 declare result public.tryout_registrations;
 begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
   if target_player <> (select id from public.players where profile_id = auth.uid()) and not public.is_staff_or_admin() then
     raise exception 'Players may only register themselves';
   end if;
