@@ -407,7 +407,7 @@ export default function AdminDashboardPage() {
   // Moderate Delete Post
   const handleModerateDeletePost = async (postId: string) => {
     if (!supabase) return;
-    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    const { error } = await supabase.from('posts').update({ status: 'archived' } as never).eq('id', postId);
     if (!error) {
       await postAuditLog('MODERATE_DELETE_POST', `Deleted inappropriate social post ID ${postId}`);
       loadDashboardData();
@@ -451,7 +451,7 @@ export default function AdminDashboardPage() {
                 <FaUserShield /> SYSTEM CONTROL CENTER
               </span>
               <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-white">
-                RCL <span className="text-rcl-gold">ADMIN DASHBOARD</span>
+                RCL <span className="text-rcl-gold">COMMAND CENTER</span>
               </h1>
             </div>
 

@@ -45,6 +45,7 @@ export interface Database {
       coach_badges: { Row: CoachBadge; Insert: Insert<CoachBadge>; Update: Update<CoachBadge> };
       player_of_week: { Row: PlayerOfWeek; Insert: Insert<PlayerOfWeek>; Update: Update<PlayerOfWeek> };
       reactions: { Row: Reaction; Insert: Insert<Reaction>; Update: Update<Reaction> };
+      reaction_types: { Row: ReactionType; Insert: Insert<ReactionType>; Update: Update<ReactionType> };
       audit_logs: { Row: AuditLog; Insert: Insert<AuditLog>; Update: Update<AuditLog> };
       friendships: { Row: Friendship; Insert: Insert<Friendship>; Update: Update<Friendship> };
       blocks: { Row: Block; Insert: Block; Update: Partial<Block> };
@@ -121,6 +122,7 @@ export interface PlayerBadge { id: string; player_id: string; badge_id: string; 
 export interface CoachBadge { id: string; profile_id: string; badge_id: string; earned_at: string; created_at: string; }
 export interface PlayerOfWeek { id: string; player_id: string; season_id: string; week_number: number; description: string; stats: Json; is_active: boolean; created_at: string; updated_at: string; }
 export interface Reaction { id: string; post_id: string; user_id: string; type: 'bucket' | 'heat' | 'strong' | 'locked' | 'money' | 'watch' | 'king' | 'certified' | 'highlight' | 'champ'; created_at: string; }
+export interface ReactionType { id: string; emoji: string; label: string; sort_order: number; is_active: boolean; created_at: string; updated_at: string; }
 export interface AuditLog { id: string; user_id: string | null; action: string; details: string | null; created_at: string; }
 export interface Friendship { id: string; requester_id: string; addressee_id: string; status: 'pending' | 'accepted' | 'declined' | 'cancelled'; created_at: string; updated_at: string; }
 export interface Block { blocker_id: string; blocked_id: string; created_at: string; }
