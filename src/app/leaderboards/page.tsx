@@ -17,7 +17,7 @@ export default async function LeaderboardsPage() {
     return <LeaderboardShell><LeaderboardExperience seasons={[]} players={[]} games={[]} stats={[]} teams={[]} rosters={[]} teamSeasons={[]} standings={[]} iq={[]} badges={[]} playerBadges={[]} community={[]} /></LeaderboardShell>;
   }
 
-  const [seasons, players, games, stats, teams, rosters, teamSeasons, standings, iq, badges, playerBadges, community] = await Promise.all([
+  const [seasons, players, games, stats, teams, rosters, teamSeasons, standings, iq, badges, playerBadges, community, profiles] = await Promise.all([
     client.from('seasons').select('*').in('status', ['registration', 'active', 'completed']).order('start_date', { ascending: false }),
     client.from('public_players').select('*').eq('is_active', true).order('last_name'),
     client.from('games').select('id, season_id, status, home_score, away_score').eq('status', 'completed'),
@@ -30,7 +30,9 @@ export default async function LeaderboardsPage() {
     client.from('badges').select('*').eq('is_active', true),
     client.from('player_badges').select('id, player_id, badge_id, earned_at'),
     client.from('user_levels').select('profile_id, xp, level, current_streak'),
+    client.from('profiles').select('id, display_name, username').eq('is_active', true),
   ]);
+  const communityRows = (community.data ?? []) as { profile_id: string; xp: number; level: number; current_streak: number }[];
 
   return (
     <LeaderboardShell>
@@ -46,7 +48,10 @@ export default async function LeaderboardsPage() {
         iq={iq.data ?? []}
         badges={badges.data ?? []}
         playerBadges={playerBadges.data ?? []}
-        community={community.data ?? []}
+        community={communityRows.map((row) => {
+          const profile = ((profiles.data ?? []) as { id: string; display_name: string | null; username: string | null }[]).find((item) => item.id === row.profile_id);
+          return { ...row, displayName: profile?.display_name ?? profile?.username ?? 'RCL community member' };
+        })}
       />
     </LeaderboardShell>
   );
