@@ -23,7 +23,8 @@ import {
   FaComments,
   FaPeopleGroup,
   FaCrown,
-  FaTrophy
+  FaTrophy,
+  FaShirt
 } from 'react-icons/fa6';
 
 export function SiteHeader() {
@@ -79,7 +80,9 @@ export function SiteHeader() {
     { label: 'RANKINGS', href: '/rankings', icon: FaListOl },
     { label: 'COMMUNITIES', href: '/communities', icon: FaPeopleGroup },
     { label: 'FRIENDS', href: '/friends', icon: FaUsers },
+    { label: 'FANTASY', href: '/fantasy', icon: FaTrophy },
     { label: 'LEADERBOARDS', href: '/leaderboards', icon: FaListOl },
+    { label: 'SHOP', href: '/shop', icon: FaShirt },
     { label: 'NOTIFICATIONS', href: '/notifications', icon: FaBell },
   ];
 
@@ -199,7 +202,7 @@ export function SiteHeader() {
             { label: 'GAMES', href: '/games', icon: FaCalendarDays },
             { label: 'RCL', href: '/dashboard', icon: FaCrown },
             { label: 'SOCIAL', href: '/social', icon: FaUsers },
-            { label: 'FANTASY', href: '/leaderboards', icon: FaTrophy },
+            { label: 'FANTASY', href: '/fantasy', icon: FaTrophy },
           ].map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             const Icon = link.icon;

@@ -58,11 +58,11 @@ export default async function HomePage() {
         <section aria-labelledby="destinations">
           <SectionHeader eyebrow="YOUR WORLD" title="Choose your destination" id="destinations" />
           <div className="rcl-shortcuts">
-            <Destination href="/dashboard" icon={<FaCrown />} title="My Career" subtitle="Track your journey" />
+            <Destination href="/dashboard" icon={<FaCrown />} title="My Career" subtitle="Build your legacy" />
             <Destination href="/communities" icon={<FaPeopleGroup />} title="Community" subtitle="Connect & talk" />
             <Destination href="/stats" icon={<FaChartLine />} title="The Lab" subtitle="See your impact" />
-            <Destination href="/leaderboards" icon={<FaTrophy />} title="Fantasy" subtitle="Build & compete" />
-            <Destination href="/media" icon={<FaShirt />} title="The Shop" subtitle="Gear the culture" />
+            <Destination href="/fantasy" icon={<FaTrophy />} title="Fantasy" subtitle="Build & compete" />
+            <Destination href="/shop" icon={<FaShirt />} title="The Shop" subtitle="Gear the culture" />
           </div>
         </section>
 

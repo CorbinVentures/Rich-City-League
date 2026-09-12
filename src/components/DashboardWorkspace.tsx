@@ -5,112 +5,76 @@ import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Database, Game, Notification, PlayerGameStats, Registration, Team } from '@/types/database';
+import type { Game, Player, PlayerGameStats, Season, Team, TeamCoach, TeamSeason, UserLevel } from '@/types/database';
 
-type DashboardData = {
-  games: Game[];
-  teams: Team[];
-  registrations: Registration[];
-  stats: PlayerGameStats[];
-  notifications: Notification[];
-  counts: Record<string, number>;
-};
-
-const emptyData: DashboardData = { games: [], teams: [], registrations: [], stats: [], notifications: [], counts: {} };
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"><p className="text-xs font-bold uppercase tracking-wider text-gray-500">{label}</p><p className="mt-2 font-display text-3xl font-bold text-white">{value}</p></div>;
-}
+type CareerData = { player: Player | null; stats: PlayerGameStats[]; games: Game[]; seasons: Season[]; teams: Team[]; iq: { rcl_rating: number; exposure_index: number; previous_rating: number | null } | null; badges: { id: string; name: string; icon: string }[]; level: UserLevel | null; coach: TeamCoach | null };
+const empty: CareerData = { player: null, stats: [], games: [], seasons: [], teams: [], iq: null, badges: [], level: null, coach: null };
 
 export default function DashboardWorkspace() {
   const { user, profile, loading: authLoading, signOut } = useAuth();
-  const [data, setData] = useState<DashboardData>(emptyData);
+  const supabase = useMemo(() => getSupabaseClient(), []);
+  const [data, setData] = useState<CareerData>(empty);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = useMemo(() => getSupabaseClient(), []);
 
   useEffect(() => {
-    if (authLoading || !user || !supabase) return;
+    if (authLoading) return;
+    if (!user || !supabase) { setLoading(false); return; }
+    let active = true;
     const load = async () => {
       setLoading(true);
       try {
-        const [games, registrations, notifications] = await Promise.all([
-          supabase.from('games').select('*').order('scheduled_at', { ascending: true }).limit(8),
-          supabase.from('registrations').select('*').eq('applicant_id', user.id).order('submitted_at', { ascending: false }),
-          supabase.from('notifications').select('*').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(8),
-        ]);
-        if (games.error || registrations.error || notifications.error) throw new Error('Unable to load dashboard data.');
-        const loadedRegistrations = (registrations.data ?? []) as Registration[];
-        let stats: PlayerGameStats[] = [];
-        let teams: Team[] = [];
+        const levelResult = await supabase.from('user_levels').select('*').eq('profile_id', user.id).maybeSingle();
         if (profile?.role === 'player') {
-          const player = await supabase.from('players').select('id').eq('profile_id', user.id).maybeSingle();
-          if (player.error) throw new Error('Unable to load dashboard data.');
-          if (player.data) {
-            const playerId = (player.data as { id: string }).id;
-            const result = await supabase.from('player_game_stats').select('*').eq('player_id', playerId);
-            if (result.error) throw new Error('Unable to load dashboard data.');
-            stats = result.data ?? [];
-          }
+          const playerResult = await supabase.from('players').select('*').eq('profile_id', user.id).maybeSingle();
+          if (playerResult.error) throw playerResult.error;
+          if (!playerResult.data) { if (active) setData({ ...empty, level: levelResult.data }); return; }
+          const player = playerResult.data;
+          const [statsResult, iqResult, badgeResult] = await Promise.all([
+            supabase.from('player_game_stats').select('*').eq('player_id', player.id),
+            supabase.from('public_player_iq').select('rcl_rating, exposure_index, previous_rating').eq('player_id', player.id).maybeSingle(),
+            supabase.from('player_badges').select('id, badge:badges(name, icon)').eq('player_id', player.id),
+          ]);
+          const stats = statsResult.data ?? [];
+          const gameIds = [...new Set(stats.map((item) => item.game_id))];
+          const gamesResult = gameIds.length ? await supabase.from('games').select('*').in('id', gameIds) : { data: [], error: null };
+          const seasonIds = [...new Set((gamesResult.data ?? []).map((item) => item.season_id))];
+          const seasonsResult = seasonIds.length ? await supabase.from('seasons').select('*').in('id', seasonIds) : { data: [], error: null };
+          if (statsResult.error || iqResult.error || badgeResult.error || gamesResult.error || seasonsResult.error) throw new Error('Unable to load official career data.');
+          if (active) setData({ ...empty, player, stats, games: gamesResult.data ?? [], seasons: seasonsResult.data ?? [], iq: iqResult.data, badges: (badgeResult.data ?? []).map((item: any) => ({ id: item.id, name: item.badge?.name ?? 'RCL badge', icon: item.badge?.icon ?? '🏀' })), level: levelResult.data });
+        } else if (profile?.role === 'coach') {
+          const coachResult = await supabase.from('team_coaches').select('*').eq('profile_id', user.id).maybeSingle();
+          const teamsResult = coachResult.data ? await supabase.from('teams').select('*').eq('id', coachResult.data.team_id) : { data: [], error: null };
+          if (coachResult.error || teamsResult.error) throw new Error('Unable to load official coaching data.');
+          if (active) setData({ ...empty, coach: coachResult.data, teams: teamsResult.data ?? [], level: levelResult.data });
+        } else {
+          if (active) setData({ ...empty, level: levelResult.data });
         }
-        if (profile?.role === 'coach' || profile?.role === 'staff' || profile?.role === 'admin') {
-          const result = await supabase.from('teams').select('*').order('name');
-          if (result.error) throw new Error('Unable to load dashboard data.');
-          teams = result.data ?? [];
-        }
-        const counts: Record<string, number> = {};
-        if (profile?.role === 'staff' || profile?.role === 'admin') {
-          for (const table of ['profiles', 'seasons', 'teams', 'players', 'games', 'registrations']) {
-            const result = await supabase.from(table as keyof Database['public']['Tables']).select('*', { count: 'exact', head: true });
-            if (result.error) throw result.error;
-            counts[table] = result.count ?? 0;
-          }
-        }
-        setData({ games: games.data ?? [], teams, registrations: loadedRegistrations, stats, notifications: notifications.data ?? [], counts });
       } catch (err) {
-        console.error('Unable to load dashboard data', err);
-        setError('Unable to load dashboard data.');
+        console.error('Unable to load career data', err);
+        if (active) setError('Official career data is temporarily unavailable.');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
     void load();
+    return () => { active = false; };
   }, [authLoading, profile?.role, supabase, user]);
 
-  if (authLoading || loading) return <main><Container maxWidth="xl" className="py-16"><div className="h-8 w-64 animate-pulse rounded bg-white/10" /><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="h-28 animate-pulse rounded-2xl bg-white/5" />)}</div></Container></main>;
-  if (!user) return <main><Container maxWidth="xl" className="py-16"><p>Please sign in to access your dashboard.</p><Link className="mt-4 inline-block text-rcl-gold" href="/auth/sign-in">Sign in</Link></Container></main>;
-  if (error) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-bold">Dashboard unavailable</h1><p className="mt-3 text-red-300">{error}</p><button className="mt-6 rounded-lg border border-white/20 px-4 py-2" onClick={() => { if (typeof window !== 'undefined') window.location.reload(); }}>Try again</button></Container></main>;
-
-  const role = profile?.role ?? 'player';
-  const upcoming = data.games.filter((game) => game.status === 'scheduled' || game.status === 'live').slice(0, 4);
-  const unread = data.notifications.filter((notification) => !notification.read_at);
-  const totalPoints = data.stats.reduce((sum, stat) => sum + stat.points, 0);
-  const status = data.registrations[0]?.status ?? 'Not submitted';
-
-  async function markNotificationRead(id: string) {
-    if (!supabase || !user) return;
-    const { error: updateError } = await supabase.from('notifications').update({ read_at: new Date().toISOString() } as never).eq('id', id).eq('recipient_id', user.id);
-    if (updateError) {
-      setError('Unable to update notification.');
-      return;
-    }
-    setData((current) => ({ ...current, notifications: current.notifications.map((notification) => notification.id === id ? { ...notification, read_at: new Date().toISOString() } : notification) }));
-  }
-
-  return <main><Container maxWidth="xl" className="py-10 sm:py-14">
-    <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-rcl-gold">{role} dashboard</p><h1 className="mt-2 font-display text-4xl font-bold">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1><p className="mt-3 text-gray-400">Your Rich City League operations center.</p></div><button onClick={() => void signOut()} className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:border-rcl-gold hover:text-rcl-gold">Sign out</button></div>
-    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {role === 'player' ? <><StatCard label="Registration" value={status} /><StatCard label="Career points" value={totalPoints} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Notifications" value={unread.length} /></> : <><StatCard label="Teams" value={role === 'coach' ? data.teams.length : data.counts.teams ?? 0} /><StatCard label="Upcoming games" value={upcoming.length} /><StatCard label="Registrations" value={data.counts.registrations ?? data.registrations.length} /><StatCard label="Notifications" value={data.notifications.length} /></>}
-    </div>
-    <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-bold">Upcoming games</h2><Link href="/games" className="text-sm text-rcl-gold">Game center</Link></div>{upcoming.length === 0 ? <p className="mt-6 text-gray-500">No upcoming games are scheduled.</p> : <div className="mt-5 space-y-3">{upcoming.map((game) => <Link href={`/games/${game.id}`} key={game.id} className="flex items-center justify-between rounded-xl border border-white/10 p-4 hover:border-rcl-gold/50"><span><span className="block text-sm text-gray-300">{new Date(game.scheduled_at).toLocaleDateString()}</span><span className="text-xs uppercase text-gray-500">{game.status}</span></span><span className="font-semibold">{game.away_score} — {game.home_score}</span></Link>)}</div>}</section>
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between gap-3"><h2 className="font-display text-2xl font-bold">Notifications</h2>{unread.length > 0 && <button type="button" onClick={() => void Promise.all(unread.map((notification) => markNotificationRead(notification.id)))} className="text-sm text-rcl-gold">Mark all read</button>}</div>{data.notifications.length === 0 ? <p className="mt-6 text-gray-500">You are all caught up.</p> : <div className="mt-5 space-y-4">{data.notifications.slice(0, 4).map((notification) => <button type="button" key={notification.id} onClick={() => notification.read_at ? undefined : void markNotificationRead(notification.id)} className={`block w-full text-left ${notification.read_at ? 'border-b border-white/5 pb-3' : 'border-b border-rcl-gold/30 pb-3'}`}><p className="font-semibold">{notification.title}</p><p className="mt-1 text-sm text-gray-400">{notification.body ?? 'New league update'}</p></button>)}</div>}</section>
-    </div>
-    {(role === 'staff' || role === 'admin') && <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">{role === 'admin' ? 'System overview' : 'League operations'}</h2><div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">{Object.entries(data.counts).map(([label, value]) => <div key={label}><p className="text-xs uppercase text-gray-500">{label}</p><p className="mt-1 text-2xl font-bold">{value}</p></div>)}</div></section>}
-    <div className="mt-6 grid gap-4 sm:grid-cols-3">
-      <Link href="/portal/profile" className="rounded-2xl border border-white/10 p-5 hover:border-rcl-gold/50">Profile <span className="mt-1 block text-sm text-gray-400">Update permitted contact information</span></Link>
-      <Link href="/stats" className="rounded-2xl border border-white/10 p-5 hover:border-rcl-gold/50">Statistics <span className="mt-1 block text-sm text-gray-400">View real game performance</span></Link>
-      {(role === 'player' || role === 'coach') ? <Link href="/register" className="rounded-2xl border border-white/10 p-5 hover:border-rcl-gold/50">Registration <span className="mt-1 block text-sm text-gray-400">Submit or review status</span></Link> : <Link href="/portal/operations" className="rounded-2xl border border-white/10 p-5 hover:border-rcl-gold/50">Operations <span className="mt-1 block text-sm text-gray-400">Review registrations and games</span></Link>}
-    </div>
-  </Container></main>;
+  if (authLoading || loading) return <main><Container maxWidth="xl" className="py-16"><div className="h-10 w-72 animate-pulse rounded bg-white/10" /><div className="mt-8 grid gap-4 sm:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="h-28 rounded-2xl bg-white/5" />)}</div></Container></main>;
+  if (!user) return <main><Container maxWidth="xl" className="py-16"><p>Sign in to enter My Career.</p><Link className="mt-4 inline-block text-rcl-gold" href="/auth/sign-in">Sign in</Link></Container></main>;
+  if (error) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-bold">Career unavailable</h1><p className="mt-3 text-red-300">{error}</p></Container></main>;
+  const role = profile?.role ?? 'fan';
+  return <main className="min-h-screen bg-rcl-black pb-24 text-white"><Container maxWidth="xl" className="py-10 sm:py-14"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange">{role === 'fan' ? 'MY RCL JOURNEY' : role === 'coach' ? 'MY COACH CAREER' : 'MY CAREER'}</p><h1 className="mt-2 font-display text-4xl font-black sm:text-6xl">{profile?.display_name ?? 'RCL member'}</h1><p className="mt-3 text-gray-400">Your official Rich City League progression hub.</p></div><button onClick={() => void signOut()} className="rounded-xl border border-white/15 px-4 py-2 text-xs font-bold uppercase tracking-widest">Sign out</button></div>{role === 'player' ? <PlayerCareer data={data} /> : role === 'coach' ? <CoachCareer data={data} /> : <FanJourney data={data} />}</Container></main>;
 }
+
+function PlayerCareer({ data }: { data: CareerData }) {
+  const totals = data.stats.reduce((sum, stat) => ({ points: sum.points + stat.points, rebounds: sum.rebounds + stat.rebounds, assists: sum.assists + stat.assists, steals: sum.steals + stat.steals, blocks: sum.blocks + stat.blocks }), { points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0 });
+  const hasStats = data.stats.length > 0;
+  const average = (value: number) => hasStats ? (value / data.stats.length).toFixed(1) : '—';
+  return <><div className="mt-8 grid gap-4 sm:grid-cols-4"><Card label="TEAM" value="Official RCL roster" /><Card label="OVR" value={data.iq?.rcl_rating ?? '—'} /><Card label="PLAYER IQ" value={data.iq?.rcl_rating ?? '—'} /><Card label="LEVEL / XP" value={data.level ? `${data.level.level} / ${data.level.xp}` : '—'} /></div><section className="mt-8 rounded-2xl border border-white/10 bg-white/[.03] p-6"><h2 className="font-display text-2xl font-bold">Career overview</h2>{!hasStats && <p className="mt-5 text-sm text-gray-400">Not enough official data yet.</p>}<div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">{[['GP', data.stats.length], ['PPG', average(totals.points)], ['RPG', average(totals.rebounds)], ['APG', average(totals.assists)], ['SPG', average(totals.steals)], ['BPG', average(totals.blocks)], ['TOTAL POINTS', totals.points], ['TOTAL REBOUNDS', totals.rebounds], ['TOTAL ASSISTS', totals.assists], ['EXPOSURE', data.iq?.exposure_index ?? '—']].map(([label, value]) => <Card key={label as string} label={label as string} value={value as string | number} />)}</div></section><section className="mt-6 grid gap-6 lg:grid-cols-2"><div className="rounded-2xl border border-white/10 bg-white/[.03] p-6"><h2 className="font-display text-2xl font-bold">Badges</h2><div className="mt-4 flex flex-wrap gap-2">{data.badges.map((badge) => <span key={badge.id} className="rounded-full border border-rcl-gold/30 bg-rcl-gold/10 px-3 py-2 text-sm">{badge.icon} {badge.name}</span>)}{!data.badges.length && <p className="text-sm text-gray-500">No official badges earned yet.</p>}</div></div><div className="rounded-2xl border border-white/10 bg-white/[.03] p-6"><h2 className="font-display text-2xl font-bold">Season history</h2>{data.seasons.length ? data.seasons.map((season) => <div key={season.id} className="mt-4 flex justify-between border-b border-white/10 pb-3 text-sm"><span>{season.name}</span><span className="text-gray-400">{data.stats.filter((stat) => data.games.find((game) => game.id === stat.game_id)?.season_id === season.id).length} games</span></div>) : <p className="mt-4 text-sm text-gray-500">Not enough official data yet.</p>}</div></section></>;
+}
+
+function CoachCareer({ data }: { data: CareerData }) { return <section className="mt-8 rounded-2xl border border-white/10 bg-white/[.03] p-6"><h2 className="font-display text-2xl font-bold">Coach legacy</h2><div className="mt-5 grid gap-4 sm:grid-cols-4"><Card label="TEAM" value={data.teams[0]?.name ?? '—'} /><Card label="ROLE" value={data.coach?.title ?? '—'} /><Card label="GAMES COACHED" value="0" /><Card label="LEGACY GRADE" value="—" /></div><p className="mt-6 text-sm text-gray-400">Not enough official data yet. Coaching records, championships, and achievements appear here only after verified league results are recorded.</p></section>; }
+function FanJourney({ data }: { data: CareerData }) { return <section className="mt-8 rounded-2xl border border-white/10 bg-white/[.03] p-6"><h2 className="font-display text-2xl font-bold">Your RCL journey</h2><div className="mt-5 grid gap-4 sm:grid-cols-4"><Card label="FAN LEVEL" value={data.level?.level ?? '—'} /><Card label="XP" value={data.level?.xp ?? '—'} /><Card label="FANTASY" value="Explore fantasy" /><Card label="BADGES" value="—" /></div><p className="mt-6 text-sm text-gray-400">Your community reputation, favorite teams, fantasy milestones, and fan achievements will grow from official RCL activity.</p><Link href="/fantasy" className="mt-5 inline-flex rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase tracking-widest text-black">Enter RCL Fantasy</Link></section>; }
+function Card({ label, value }: { label: string; value: string | number }) { return <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</p><p className="mt-2 font-display text-xl font-bold">{value}</p></div>; }
