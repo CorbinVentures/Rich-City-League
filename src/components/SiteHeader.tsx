@@ -65,6 +65,7 @@ export function SiteHeader() {
   const mainNavLinks = [
     { label: 'HOME', href: '/', icon: FaHouse },
     { label: 'SCHEDULE', href: '/games', icon: FaCalendarDays },
+    { label: 'DRAFT NIGHT', href: '/draft', icon: FaCrown },
     { label: 'STANDINGS', href: '/standings', icon: FaFolderOpen },
     { label: 'STATS', href: '/stats', icon: FaChartSimple },
     { label: 'SOCIAL', href: '/social', icon: FaUsers },

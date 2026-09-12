@@ -103,7 +103,9 @@ export interface Database {
       public_players: { Row: PublicPlayer };
       public_player_iq: { Row: PublicPlayerIQ };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      record_draft_pick: { Args: { target_draft: string; target_team: string; target_player: string }; Returns: DraftPick };
+    };
     Enums: {
       app_role: 'player' | 'coach' | 'fan' | 'staff' | 'admin';
       season_status: 'draft' | 'registration' | 'active' | 'completed' | 'archived';
@@ -144,7 +146,7 @@ export interface TryoutRegistration { id: string; session_id: string; player_id:
 export interface TryoutAttendance { id: string; registration_id: string; status: 'PRESENT'|'ABSENT'|'EXCUSED'|'LATE'; marked_by: string; notes: string | null; marked_at: string; }
 export interface PlayerEvaluation { id: string; player_id: string; session_id: string; evaluator_id: string; scores: Json; evaluation_score: number; notes: string | null; created_at: string; }
 export interface DraftPool { id: string; season_id: string; player_id: string; eligible: boolean; eligibility_reason: string | null; added_by: string; updated_at: string; }
-export interface Draft { id: string; season_id: string; name: string; rounds: number; roster_limit: number; status: 'SETUP'|'OPEN'|'PAUSED'|'COMPLETED'|'CANCELLED'; current_pick: number; created_by: string; created_at: string; }
+export interface Draft { id: string; season_id: string; name: string; rounds: number; roster_limit: number; status: 'SETUP'|'OPEN'|'PAUSED'|'COMPLETED'|'CANCELLED'; current_pick: number; clock_duration_seconds: number; clock_started_at: string | null; clock_deadline_at: string | null; created_by: string; created_at: string; }
 export interface DraftPick { id: string; draft_id: string; pick_number: number; round_number: number; team_id: string; player_id: string; selected_by: string; selected_at: string; }
 export interface RosterStatusHistory { id: string; roster_id: string; status: 'ACTIVE'|'INACTIVE'|'DNP'|'SUSPENDED'|'INJURED'|'RELEASED'|'TRADED'|'WAIVED'; reason: string | null; effective_at: string; changed_by: string; created_at: string; }
 export interface LeagueTransaction { id: string; season_id: string; transaction_type: string; sending_team_id: string | null; receiving_team_id: string | null; player_ids: string[]; status: string; notes: string | null; reason: string | null; proposed_by: string; approved_by: string | null; executed_at: string | null; created_at: string; updated_at: string; }
