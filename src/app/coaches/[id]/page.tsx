@@ -33,12 +33,12 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
   const profile = coachData.profile;
   const team = coachData.team;
 
-  // Coaching Metrics (if not in DB, generate high fidelity realistic coaching averages)
-  const wins = coachData.wins ?? 15;
-  const losses = coachData.losses ?? 6;
+  // Coaching metrics are only shown when official records exist.
+  const wins = Number(coachData.wins ?? 0);
+  const losses = Number(coachData.losses ?? 0);
   const winPct = wins + losses ? Math.round((wins / (wins + losses)) * 100) : 0;
-  const championships = coachData.championships ?? 1;
-  const appearances = coachData.playoff_appearances ?? 3;
+  const championships = Number(coachData.championships ?? 0);
+  const appearances = Number(coachData.playoff_appearances ?? 0);
 
   // Recommended standard achievements/stats
   const statsSummary = [
@@ -120,21 +120,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
             </h3>
             {earnedBadges.length === 0 ? (
               <div className="mt-4 space-y-3">
-                {/* Standard Coaching Badges generated */}
-                <div className="flex items-center gap-3 rounded-xl border border-blue-400/20 bg-blue-500/5 p-3">
-                  <span className="text-2xl">🧠</span>
-                  <div>
-                    <span className="block text-xs font-bold text-blue-300">Defensive Mind</span>
-                    <span className="block text-[10px] text-gray-400">Team allows under 65 PPG on average.</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-xl border border-rcl-gold/20 bg-rcl-gold/5 p-3">
-                  <span className="text-2xl">🏆</span>
-                  <div>
-                    <span className="block text-xs font-bold text-rcl-gold">Championship Coach</span>
-                    <span className="block text-[10px] text-gray-400">Won 1+ official RCL division cups.</span>
-                  </div>
-                </div>
+                <p className="text-sm text-gray-500">No official coaching achievements yet.</p>
               </div>
             ) : (
               <div className="mt-4 grid grid-cols-2 gap-3">
@@ -178,15 +164,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-white/5 hover:bg-white/[0.02] transition">
-                    <td className="py-3 font-semibold">2026 Season 1</td>
-                    <td className="py-3">
-                      <span className="font-bold text-gray-300">{team ? team.name : 'RCL Roster'}</span>
-                    </td>
-                    <td className="py-3 text-center font-display font-black text-rcl-gold text-sm">{wins}</td>
-                    <td className="py-3 text-center font-bold text-white">{losses}</td>
-                    <td className="py-3 text-center font-bold text-white">{winPct}%</td>
-                  </tr>
+                  <tr><td colSpan={5} className="py-6 text-center text-gray-500">No official coaching seasons recorded yet.</td></tr>
                 </tbody>
               </table>
             </div>

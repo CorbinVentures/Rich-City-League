@@ -12,7 +12,7 @@ const empty: CareerData = { player: null, stats: [], games: [], seasons: [], tea
 
 export default function DashboardWorkspace() {
   const { user, profile, loading: authLoading, signOut } = useAuth();
-  const supabase = useMemo(() => getSupabaseClient(), []);
+  const supabase = useMemo(() => getSupabaseClient() as any, []);
   const [data, setData] = useState<CareerData>(empty);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +36,9 @@ export default function DashboardWorkspace() {
             supabase.from('player_badges').select('id, badge:badges(name, icon)').eq('player_id', player.id),
           ]);
           const stats = statsResult.data ?? [];
-          const gameIds = [...new Set(stats.map((item) => item.game_id))];
+          const gameIds = [...new Set(stats.map((item: PlayerGameStats) => item.game_id))];
           const gamesResult = gameIds.length ? await supabase.from('games').select('*').in('id', gameIds) : { data: [], error: null };
-          const seasonIds = [...new Set((gamesResult.data ?? []).map((item) => item.season_id))];
+          const seasonIds = [...new Set((gamesResult.data ?? []).map((item: Game) => item.season_id))];
           const seasonsResult = seasonIds.length ? await supabase.from('seasons').select('*').in('id', seasonIds) : { data: [], error: null };
           if (statsResult.error || iqResult.error || badgeResult.error || gamesResult.error || seasonsResult.error) throw new Error('Unable to load official career data.');
           if (active) setData({ ...empty, player, stats, games: gamesResult.data ?? [], seasons: seasonsResult.data ?? [], iq: iqResult.data, badges: (badgeResult.data ?? []).map((item: any) => ({ id: item.id, name: item.badge?.name ?? 'RCL badge', icon: item.badge?.icon ?? '🏀' })), level: levelResult.data });

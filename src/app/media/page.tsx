@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getPublicClient } from '@/lib/public-data';
+import type { Media } from '@/types/database';
 import { FaPlay, FaImage, FaFilm, FaNewspaper } from 'react-icons/fa6';
 
 export const revalidate = 60;
@@ -12,7 +13,7 @@ export default async function MediaPage() {
     ? await client.from('media').select('*').order('created_at', { ascending: false })
     : { data: [] };
 
-  const items = mediaItems ?? [];
+  const items = (mediaItems ?? []) as unknown as Media[];
 
   return (
     <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white font-display">

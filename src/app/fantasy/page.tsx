@@ -12,7 +12,7 @@ type RosterRow = FantasyRoster & { player?: PublicPlayer };
 
 export default function FantasyPage() {
   const { user, profile, loading: authLoading } = useAuth();
-  const supabase = useMemo(() => getSupabaseClient(), []);
+  const supabase = useMemo(() => getSupabaseClient() as any, []);
   const [season, setSeason] = useState<FantasySeason | null>(null);
   const [team, setTeam] = useState<FantasyTeam | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
@@ -40,7 +40,7 @@ export default function FantasyPage() {
         if (!teamResult.error && teamResult.data) {
           setTeam(teamResult.data);
           const rosterResult = await supabase.from('fantasy_rosters').select('*').eq('fantasy_team_id', teamResult.data.id);
-          setRoster((rosterResult.data ?? []).map((item) => ({ ...item, player: (playersResult.data ?? []).find((player) => player.id === item.player_id) })));
+          setRoster((rosterResult.data ?? []).map((item: any) => ({ ...item, player: (playersResult.data ?? []).find((player: any) => player.id === item.player_id) })));
         }
       }
       setLoading(false);
