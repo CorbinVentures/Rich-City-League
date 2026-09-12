@@ -49,6 +49,7 @@ export default function MessagesPage() {
     const next = await Promise.all(rows.map(async (conversation) => {
       const membershipRow = memberships.find((row) => row.conversation_id === conversation.id);
       const latest = await supabase.from('messages').select('body,created_at,sender_id').eq('conversation_id', conversation.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      const latestData = latest.data as { body: string; created_at: string } | null;
       const unread = membershipRow?.last_read_at
         ? await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('conversation_id', conversation.id).gt('created_at', membershipRow.last_read_at).neq('sender_id', user.id)
         : await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('conversation_id', conversation.id).neq('sender_id', user.id);
@@ -56,8 +57,8 @@ export default function MessagesPage() {
         id: conversation.id,
         title: conversation.title ?? 'RCL conversation',
         type: labelType(conversation.conversation_type),
-        preview: latest.data?.body ?? '',
-        updatedAt: latest.data?.created_at ?? conversation.updated_at,
+        preview: latestData?.body ?? '',
+        updatedAt: latestData?.created_at ?? conversation.updated_at,
         unread: unread.count ?? 0,
         avatarUrl: null,
       };
@@ -97,10 +98,11 @@ export default function MessagesPage() {
   const startConversation = async (person: ProfileResult) => {
     if (!supabase || !user) return;
     setStarting(person.id);
-    const conversation = await supabase.from('conversations').insert({ created_by: user.id, title: person.display_name ?? person.username ?? 'RCL member', conversation_type: 'direct' }).select('id').single();
-    if (!conversation.error && conversation.data) {
-      await supabase.from('conversation_members').insert([{ conversation_id: conversation.data.id, profile_id: user.id }, { conversation_id: conversation.data.id, profile_id: person.id }]);
-      window.location.href = `/messages/${conversation.data.id}`;
+    const conversation = await supabase.from('conversations').insert({ created_by: user.id, title: person.display_name ?? person.username ?? 'RCL member', conversation_type: 'direct' } as never).select('id').single();
+    const conversationData = conversation.data as unknown as { id: string } | null;
+    if (!conversation.error && conversationData) {
+      await supabase.from('conversation_members').insert([{ conversation_id: conversationData.id, profile_id: user.id }, { conversation_id: conversationData.id, profile_id: person.id }] as never);
+      window.location.href = `/messages/${conversationData.id}`;
     }
     setStarting(null);
   };
@@ -130,7 +132,7 @@ export default function MessagesPage() {
           <div className="flex gap-1 overflow-x-auto rounded-lg border border-white/10 bg-white/[.03] p-1">{filters.map((item) => <button key={item} type="button" onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-md px-3 py-2 text-[10px] font-black tracking-wider ${filter === item ? 'bg-rcl-gold text-black' : 'text-gray-500 hover:text-white'}`}>{item}</button>)}</div>
         </div>
         <div className="mt-5 overflow-hidden rounded-xl border border-white/10 bg-white/[.025]">
-          {authLoading || loading ? <div className="space-y-px">{[1, 2, 3, 4].map((row) => <div key={row} className="flex animate-pulse items-center gap-3 border-b border-white/[.07] p-4"><div className="h-12 w-12 rounded-full bg-white/10" /><div className="flex-1 space-y-2"><div className="h-3 w-1/3 rounded bg-white/10" /><div className="h-2 w-2/3 rounded bg-white/10" /></div></div>)}</div> : error ? <div className="p-12 text-center"><p className="font-display text-xl font-bold uppercase">Messages are having a moment.</p><p className="mt-2 text-sm text-gray-500">We couldn't load your conversations.</p><button type="button" onClick={() => void loadConversations()} className="mt-5 rounded-lg border border-rcl-gold px-4 py-2 text-xs font-black uppercase tracking-widest text-rcl-gold">Try again</button></div> : <ConversationList items={visible} emptyMessage={items.length ? 'No conversations match these filters.' : 'Your inbox is ready for your first conversation.'} />}
+          {authLoading || loading ? <div className="space-y-px">{[1, 2, 3, 4].map((row) => <div key={row} className="flex animate-pulse items-center gap-3 border-b border-white/[.07] p-4"><div className="h-12 w-12 rounded-full bg-white/10" /><div className="flex-1 space-y-2"><div className="h-3 w-1/3 rounded bg-white/10" /><div className="h-2 w-2/3 rounded bg-white/10" /></div></div>)}</div> : error ? <div className="p-12 text-center"><p className="font-display text-xl font-bold uppercase">Messages are having a moment.</p>          <p className="mt-2 text-sm text-gray-500">We couldn&apos;t load your conversations.</p><button type="button" onClick={() => void loadConversations()} className="mt-5 rounded-lg border border-rcl-gold px-4 py-2 text-xs font-black uppercase tracking-widest text-rcl-gold">Try again</button></div> : <ConversationList items={visible} emptyMessage={items.length ? 'No conversations match these filters.' : 'Your inbox is ready for your first conversation.'} />}
         </div>
         {!loading && !items.length && <div className="mt-8 grid gap-5 rounded-xl border border-rcl-gold/20 bg-rcl-gold/[.05] p-6 sm:grid-cols-[1fr_auto] sm:items-center"><div><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">Build your RCL network</p><h3 className="mt-2 font-display text-2xl font-black uppercase">Your court. Your community.</h3><p className="mt-2 max-w-lg text-sm text-gray-400">Start a conversation with teammates, players, coaches, or members of the RCL community.</p></div><Link href="/players" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white hover:text-rcl-gold">Find people <FiArrowRight aria-hidden="true" /></Link></div>}
       </Container>
