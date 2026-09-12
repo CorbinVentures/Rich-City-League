@@ -8,7 +8,9 @@ type QueryResult<T> = { data: T; error: { message: string } | null };
 export type LeagueSnapshot = {
   leagues: League[];
   seasons: Season[];
+  divisions: Division[];
   teams: Team[];
+  teamSeasons: TeamSeason[];
   games: Game[];
   standings: Standing[];
   news: Database['public']['Tables']['news']['Row'][];
@@ -57,22 +59,34 @@ export function getPublicClient(): PublicClient | null {
 
 export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
   const client = getPublicClient();
-  if (!client) return { leagues: [], seasons: [], teams: [], games: [], standings: [], news: [], venues: [] };
-  const [leagues, seasons, teams, games, standings, news, venues] = await Promise.all([
+  if (!client) return { leagues: [], seasons: [], divisions: [], teams: [], teamSeasons: [], games: [], standings: [], news: [], venues: [] };
+  const [leagues, seasons, divisions, teams, teamSeasons, games, standings, news, venues] = await Promise.all([
     client.from('leagues').select('*').eq('is_active', true).order('name'),
     client.from('seasons').select('*').in('status', ['registration', 'active', 'completed']).order('start_date', { ascending: false }),
+    client.from('divisions').select('*').order('name'),
     client.from('teams').select('*').eq('is_active', true).order('name'),
-    client.from('games').select('*').order('scheduled_at', { ascending: true }).limit(50),
+    client.from('team_seasons').select('*'),
+    client.from('games').select('*').order('scheduled_at', { ascending: false }).limit(100),
     client.from('standings').select('*').order('rank', { ascending: true, nullsFirst: false }),
     client.from('news').select('*').eq('status', 'published').order('published_at', { ascending: false }).limit(6),
     client.from('venues').select('*').order('name'),
   ]);
-  const firstError = [leagues, seasons, teams, games, standings, news, venues].find((result) => result.error)?.error;
+  const firstError = [leagues, seasons, divisions, teams, teamSeasons, games, standings, news, venues].find((result) => result.error)?.error;
   if (firstError) {
     console.error('Public league snapshot query failed', firstError);
     throw new Error('Unable to load public league data.');
   }
-  return { leagues: leagues.data ?? [], seasons: seasons.data ?? [], teams: teams.data ?? [], games: games.data ?? [], standings: standings.data ?? [], news: news.data ?? [], venues: venues.data ?? [] };
+  return {
+    leagues: leagues.data ?? [],
+    seasons: seasons.data ?? [],
+    divisions: divisions.data ?? [],
+    teams: teams.data ?? [],
+    teamSeasons: teamSeasons.data ?? [],
+    games: games.data ?? [],
+    standings: standings.data ?? [],
+    news: news.data ?? [],
+    venues: venues.data ?? [],
+  };
 }
 
 export async function getTeamDetail(slug: string): Promise<TeamDetailData | null> {
