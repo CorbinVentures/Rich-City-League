@@ -19,9 +19,11 @@ import {
   FaGear, 
   FaBars, 
   FaXmark,
-  FaBell
-  ,FaComments
-  ,FaPeopleGroup
+  FaBell,
+  FaComments,
+  FaPeopleGroup,
+  FaCrown,
+  FaTrophy
 } from 'react-icons/fa6';
 
 export function SiteHeader() {
@@ -188,28 +190,38 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile App Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-black/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] h-16 font-display pb-[env(safe-area-inset-bottom)]">
-        <div className="grid h-full grid-cols-5 items-center justify-items-center">
-          {mainNavLinks.slice(0, 4).map((link) => {
+      {/* Mobile world navigation */}
+      <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-[#060b14]/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] font-display pb-[env(safe-area-inset-bottom)]">
+        <div className="grid min-h-16 grid-cols-7 items-center justify-items-center px-1">
+          {[
+            { label: 'HOME', href: '/', icon: FaHouse },
+            { label: 'PLAYERS', href: '/players', icon: FaUser },
+            { label: 'GAMES', href: '/games', icon: FaCalendarDays },
+            { label: 'RCL', href: '/dashboard', icon: FaCrown },
+            { label: 'SOCIAL', href: '/social', icon: FaUsers },
+            { label: 'FANTASY', href: '/leaderboards', icon: FaTrophy },
+          ].map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             const Icon = link.icon;
+            const center = link.label === 'RCL';
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex flex-col items-center gap-1 py-2 text-[10px] font-black tracking-widest ${
+                aria-label={link.label}
+                className={`flex min-h-14 flex-col items-center justify-center gap-1 py-1 text-[8px] font-black tracking-wider ${
                   active ? 'text-rcl-gold' : 'text-gray-400'
                 }`}
               >
-                <Icon className={`h-4 w-4 ${active ? 'text-rcl-gold' : 'text-gray-500'}`} />
+                <Icon className={`${center ? 'h-7 w-7 rounded-full bg-rcl-orange p-1.5 text-black shadow-[0_0_18px_rgba(249,115,22,.5)]' : 'h-4 w-4'} ${active ? 'text-rcl-gold' : 'text-gray-500'}`} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col items-center gap-1 py-2 text-[10px] font-black tracking-widest text-gray-400 hover:text-rcl-gold"
+            aria-label="Open more navigation"
+            className="flex min-h-14 flex-col items-center justify-center gap-1 py-1 text-[8px] font-black tracking-wider text-gray-400 hover:text-rcl-gold"
           >
             <FaBars className="h-4 w-4 text-gray-500" />
             <span>MORE</span>
