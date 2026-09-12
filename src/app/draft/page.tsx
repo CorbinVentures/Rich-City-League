@@ -244,14 +244,35 @@ export default function DraftNightPage() {
         </section>
 
         <section className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
-          <div><p className="rcl-kicker">Draft pool</p><h2 className="rcl-display mt-2 text-4xl uppercase">Top prospects</h2><div className="mt-5 flex gap-3 overflow-x-auto pb-3">{availablePlayers.slice(0, 8).map((player, index) => { const rating = ratings.get(player.id)?.rcl_rating; return <Link key={player.id} href={`/players/${player.id}`} className="rcl-editorial min-w-[16rem] rounded-2xl p-5 transition-transform hover:-translate-y-1"><div className="flex items-start justify-between"><span className="text-3xl font-black text-rcl-orange">#{index + 1}</span>{player.photo_url ? <img src={player.photo_url} alt="" className="h-14 w-14 rounded-full object-cover" /> : <span className="h-14 w-14 rounded-full bg-white/10" />}</div><h3 className="mt-7 text-lg font-black uppercase">{nameOf(player)}</h3><p className="mt-1 text-xs uppercase tracking-widest text-white/45">{player.position ?? 'Position TBD'} · OVR {rating ?? '—'}</p><p className="mt-4 text-xs text-white/45">{player.hometown ?? 'Hometown not published'}</p><span className="rcl-link mt-5">View profile →</span></Link>)}{availablePlayers.length === 0 && <div className="rcl-editorial w-full rounded-2xl p-8 text-sm text-white/45">No players announced yet.</div>}</div></div>
+          <div>
+            <p className="rcl-kicker">Draft pool</p>
+            <h2 className="rcl-display mt-2 text-4xl uppercase">Top prospects</h2>
+            <div className="mt-5 flex gap-3 overflow-x-auto pb-3">
+              {availablePlayers.slice(0, 8).map((player, index) => {
+                const rating = ratings.get(player.id)?.rcl_rating;
+                return (
+                  <Link key={player.id} href={`/players/${player.id}`} className="rcl-editorial min-w-[16rem] rounded-2xl p-5 transition-transform hover:-translate-y-1">
+                    <div className="flex items-start justify-between">
+                      <span className="text-3xl font-black text-rcl-orange">#{index + 1}</span>
+                      {player.photo_url ? <img src={player.photo_url} alt="" className="h-14 w-14 rounded-full object-cover" /> : <span className="h-14 w-14 rounded-full bg-white/10" />}
+                    </div>
+                    <h3 className="mt-7 text-lg font-black uppercase">{nameOf(player)}</h3>
+                    <p className="mt-1 text-xs uppercase tracking-widest text-white/45">{player.position ?? 'Position TBD'} · OVR {rating ?? '—'}</p>
+                    <p className="mt-4 text-xs text-white/45">{player.hometown ?? 'Hometown not published'}</p>
+                    <span className="rcl-link mt-5">View profile →</span>
+                  </Link>
+                );
+              })}
+              {availablePlayers.length === 0 && <div className="rcl-editorial w-full rounded-2xl p-8 text-sm text-white/45">No players announced yet.</div>}
+            </div>
+          </div>
           <div className="rcl-editorial rounded-3xl p-6"><p className="rcl-kicker">Player search</p><h2 className="mt-2 text-2xl font-black uppercase">Browse the pool</h2><input aria-label="Search draft prospects" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search players…" className="mt-5 w-full rounded-xl border border-white/10 bg-black/30 p-3 text-white outline-none focus:border-rcl-orange" /><div className="mt-3 flex flex-wrap gap-2">{(['ALL', 'PG', 'SG', 'SF', 'PF', 'C'] as Filter[]).map((position) => <button key={position} type="button" onClick={() => setFilter(position)} className={`rounded-full px-3 py-2 text-[10px] font-black tracking-widest ${filter === position ? 'bg-rcl-orange text-black' : 'bg-white/10 text-white/60'}`}>{position}</button>)}</div><p className="mt-5 text-xs text-white/35">{availablePlayers.length} eligible prospects available</p></div>
         </section>
 
         {isOnClock && selectedPlayer && <div className="sticky bottom-4 z-20 mt-8 rounded-2xl border border-rcl-orange bg-[#101c2d] p-4 shadow-2xl"><div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm font-bold">Confirm selection: <span className="text-rcl-orange">{nameOf(players.find((player) => player.id === selectedPlayer))}</span></p><button type="button" onClick={() => void submitPick()} className="rcl-button">Confirm pick</button></div></div>}
 
         <section className="mt-20 border-t border-white/10 pt-16"><p className="rcl-kicker">The RCL path</p><h2 className="rcl-display mt-3 max-w-2xl text-5xl uppercase">How the draft works</h2><div className="mt-8 grid gap-3 sm:grid-cols-5">{[['01', 'Evaluation'], ['02', 'Draft pool'], ['03', 'Draft night'], ['04', 'Roster'], ['05', 'Season']].map(([number, title]) => <div key={number} className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><span className="text-sm font-black text-rcl-orange">{number}</span><h3 className="mt-8 text-sm font-black uppercase">{title}</h3><p className="mt-2 text-xs leading-5 text-white/40">{title === 'Evaluation' ? 'Players show up and compete.' : title === 'Draft pool' ? 'Eligible players enter the board.' : title === 'Draft night' ? 'Coaches make official selections.' : title === 'Roster' ? 'Selections become assignments.' : 'Careers start in Richmond.'}</p></div>)}</div></section>
-        <section className="rcl-hero relative mt-20 overflow-hidden rounded-3xl p-8 sm:p-14"><div className="relative z-10 max-w-2xl"><p className="rcl-kicker">More than a draft</p><h2 className="rcl-display mt-4 text-6xl uppercase leading-[.9]">It's a<br /><span className="text-rcl-orange">movement.</span></h2><p className="mt-6 text-base leading-7 text-white/65">The RCL Draft is where preparation meets opportunity. Local talent. Real competition. Real platform. Bigger futures.</p><p className="mt-8 text-sm font-black uppercase tracking-[.25em] text-white">The city is the court.</p></div></section>
+        <section className="rcl-hero relative mt-20 overflow-hidden rounded-3xl p-8 sm:p-14"><div className="relative z-10 max-w-2xl"><p className="rcl-kicker">More than a draft</p><h2 className="rcl-display mt-4 text-6xl uppercase leading-[.9]">It&apos;s a<br /><span className="text-rcl-orange">movement.</span></h2><p className="mt-6 text-base leading-7 text-white/65">The RCL Draft is where preparation meets opportunity. Local talent. Real competition. Real platform. Bigger futures.</p><p className="mt-8 text-sm font-black uppercase tracking-[.25em] text-white">The city is the court.</p></div></section>
       </Container>
     </main>
   );
