@@ -33,12 +33,12 @@ export default async function HomePage() {
         <div className="rcl-skyline" aria-hidden="true" />
         <Container maxWidth="xl" className="relative z-10 py-12 sm:py-20">
           <div className="max-w-3xl">
-            <p className="rcl-kicker"><FaBolt /> RICHMOND, VIRGINIA · EST. 2024</p>
-            <h1 className="mt-5 max-w-xl font-display text-5xl font-black uppercase leading-[.9] tracking-tight sm:text-8xl">
-              Welcome to<br /><span className="text-rcl-orange">the city.</span>
+            <p className="rcl-kicker"><FaBolt /> 804 · RICHMOND, VIRGINIA</p>
+            <h1 className="rcl-display mt-5 max-w-xl text-5xl font-black uppercase leading-[.86] tracking-tight sm:text-8xl">
+              The city<br /><span className="text-rcl-orange">is the court.</span>
             </h1>
             <p className="mt-6 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
-              Play. Compete. Connect. Build your legacy in Richmond&apos;s basketball world.
+              Richmond basketball culture, connected. Follow the runs, find your people, and build your legacy in the city.
             </p>
             <Link href="/city" className="rcl-button mt-8 inline-flex items-center gap-3">
               Enter the city <FaArrowRight />
@@ -46,8 +46,8 @@ export default async function HomePage() {
           </div>
           <div className="mt-12 flex items-end justify-between gap-4 sm:mt-16">
             <div>
-              <p className="rcl-kicker">THE NEXT CHAPTER</p>
-              <p className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">Your game. Your people.</p>
+              <p className="rcl-kicker">RICH CITY LEAGUE</p>
+              <p className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">Your game. Your people. Your city.</p>
             </div>
             <div className="hidden h-20 w-20 items-center justify-center rounded-full border border-rcl-orange/50 bg-rcl-orange/10 text-4xl text-rcl-orange shadow-[0_0_40px_rgba(249,115,22,.25)] sm:flex"><FaBasketball /></div>
           </div>
@@ -56,11 +56,11 @@ export default async function HomePage() {
 
       <Container maxWidth="xl" className="relative z-10 -mt-5 space-y-12 sm:-mt-8 sm:space-y-20">
         <section aria-labelledby="destinations">
-          <SectionHeader eyebrow="YOUR WORLD" title="Choose your destination" id="destinations" />
+          <SectionHeader eyebrow="STEP INTO THE WORLD" title="Find your court" id="destinations" />
           <div className="rcl-shortcuts">
             <Destination href="/dashboard" icon={<FaCrown />} title="My Career" subtitle="Build your legacy" />
-            <Destination href="/communities" icon={<FaPeopleGroup />} title="Community" subtitle="Connect & talk" />
-            <Destination href="/stats" icon={<FaChartLine />} title="The Lab" subtitle="See your impact" />
+            <Destination href="/social" icon={<FaPeopleGroup />} title="Rich City Feed" subtitle="What&apos;s happening" />
+            <Destination href="/stats" icon={<FaChartLine />} title="Player IQ" subtitle="See your impact" />
             <Destination href="/fantasy" icon={<FaTrophy />} title="Fantasy" subtitle="Build & compete" />
             <Destination href="/shop" icon={<FaShirt />} title="The Shop" subtitle="Gear the culture" />
           </div>
@@ -87,7 +87,7 @@ export default async function HomePage() {
         </section>
 
         <section>
-          <SectionHeader eyebrow="THE NEIGHBORHOOD" title="For you" href="/social" />
+          <SectionHeader eyebrow="804 NOW" title="What&apos;s happening in the city" href="/social" />
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {posts?.length ? posts.map((post: any) => <SocialCard key={post.id} post={post} />) : <EmptyState>No community updates yet. Be the first to post.</EmptyState>}
           </div>

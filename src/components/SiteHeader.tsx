@@ -94,20 +94,18 @@ export function SiteHeader() {
 
   return (
     <>
-      {/* 2K-Style Premium Desktop Navigation Header */}
-      <header className="sticky top-0 z-45 border-b border-white/10 bg-black/95 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur font-display">
+      <header className="sticky top-0 z-45 border-b border-white/10 bg-[#07090d]/95 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur font-display">
         <div className="mx-auto flex max-w-7xl h-18 items-center justify-between px-4 sm:px-6">
-          {/* Logo & Richmond VA Badge */}
           <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-rcl-gold bg-black font-extrabold text-rcl-gold shadow-[0_0_10px_rgba(255,215,0,0.3)] transition-all group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+            <div className="rcl-texture flex h-10 w-10 items-center justify-center rounded-lg border-2 border-rcl-orange bg-rcl-navy font-extrabold text-rcl-orange shadow-[0_0_10px_rgba(255,107,26,0.3)] transition-all group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,107,26,0.45)]">
               R
             </div>
             <div>
               <span className="block text-sm font-black tracking-[0.2em] text-white">
-                RICH CITY <span className="text-rcl-gold">LEAGUE</span>
+                RICH CITY <span className="text-rcl-orange">LEAGUE</span>
               </span>
               <span className="block text-[9px] font-bold tracking-[0.35em] text-gray-400">
-                RICHMOND, VIRGINIA
+                THE CITY IS THE COURT
               </span>
             </div>
           </Link>
@@ -193,7 +191,6 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile world navigation */}
       <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-[#060b14]/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] font-display pb-[env(safe-area-inset-bottom)]">
         <div className="grid min-h-16 grid-cols-7 items-center justify-items-center px-1">
           {[
