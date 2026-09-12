@@ -91,6 +91,13 @@ export function useAuth() {
 
     const getUser = async () => {
       try {
+        if (typeof window !== 'undefined') {
+          const recoveryCode = new URLSearchParams(window.location.search).get('code');
+          if (recoveryCode) {
+            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(recoveryCode);
+            if (exchangeError) throw exchangeError;
+          }
+        }
         const { data } = await supabase.auth.getUser();
         if (!mounted) return;
         await applySession(data.user);
