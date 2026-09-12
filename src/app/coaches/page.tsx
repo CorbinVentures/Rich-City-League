@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getCoachesList, getLeagueSnapshot } from '@/lib/public-data';
 import { CoachesDirectory } from '@/components/PublicDirectory';
@@ -10,7 +9,7 @@ export default async function CoachesPage() {
   const items = coaches.map((coach: any) => {
     const record = snapshot.standings.find((standing) => standing.team_id === coach.team_id);
     const profile = coach.profile;
-    return { id: coach.id, profileId: coach.profile_id, name: profile?.display_name ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Coach', title: coach.title || 'Coach', team: coach.team?.name ?? null, teamSlug: coach.team?.slug ?? null, wins: record?.wins ?? null, losses: record?.losses ?? null };
+    return { id: coach.id, profileId: coach.profile_id, name: profile?.display_name ?? ([profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Coach'), title: coach.title || 'Coach', team: coach.team?.name ?? null, teamSlug: coach.team?.slug ?? null, wins: record?.wins ?? null, losses: record?.losses ?? null };
   });
 
   return (

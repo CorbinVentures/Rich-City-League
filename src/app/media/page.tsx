@@ -1,6 +1,7 @@
 import { Container } from '@/components/Container';
 import { getPublicClient } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
+import type { Media } from '@/types/database';
 
 export const revalidate = 60;
 
@@ -11,7 +12,7 @@ export default async function MediaPage() {
     ? await client.from('media').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(60)
     : { data: [] };
 
-  const items = (mediaItems ?? []).map((item) => ({ id: item.id, title: item.title, description: item.description, type: item.media_type, url: item.storage_path, createdAt: item.created_at }));
+  const items = ((mediaItems ?? []) as Media[]).map((item) => ({ id: item.id, title: item.title, description: item.description, type: item.media_type, url: item.storage_path, createdAt: item.created_at }));
 
   return (
     <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white font-display">
