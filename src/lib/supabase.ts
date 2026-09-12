@@ -1,9 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
+import { getSupabaseConfig } from '@/lib/supabase-config';
 
 export function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) return null;
-  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+  const config = getSupabaseConfig();
+  if (config.status !== 'configured') return null;
+
+  try {
+    return createClient<Database>(config.url!, config.anonKey!);
+  } catch (error) {
+    console.error('Unable to initialize the Supabase browser client', error);
+    return null;
+  }
 }

@@ -181,10 +181,9 @@ custom workflow, deploys database migrations.
 ## Environment Variables
 
 ```env
-# Supabase
+# Supabase public browser/server-session configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 # Environment
 NODE_ENV=development
@@ -247,7 +246,16 @@ npm run start
 
 ## Deployment
 
-The application is configured for deployment on Vercel.
+The application is configured for deployment on Vercel. Add the following variables
+to both the **Preview** and **Production** environments before deploying:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+The public URL and anon key are safe for browser use; do not add a service-role key
+to browser-exposed variables. If either variable is missing in a Vercel Preview
+deployment, the application code is correctly configured; Vercel Preview
+environment variables must be added/verified.
 
 1. Push to GitHub
 2. Connect repository to Vercel

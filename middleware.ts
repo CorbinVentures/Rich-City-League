@@ -1,13 +1,15 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
+import { getSupabaseConfig } from './src/lib/supabase-config';
 
 export async function middleware(request: NextRequest) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  const config = getSupabaseConfig();
+  if (config.status !== 'configured') {
     return NextResponse.next();
   }
   let response = NextResponse.next({ request });
-  const supabase = createServerClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+  const supabase = createServerClient<Database>(config.url!, config.anonKey!, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookies) => {
@@ -37,17 +39,17 @@ export async function middleware(request: NextRequest) {
     if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
+  }
 
-    if (user && request.nextUrl.pathname.startsWith('/admin')) {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-      const role = (profileData as { role?: string } | null)?.role;
-      if (role !== 'admin') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
+  if (user && request.nextUrl.pathname.startsWith('/admin')) {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+    const role = (profileData as { role?: string } | null)?.role;
+    if (role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
