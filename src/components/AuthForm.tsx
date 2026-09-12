@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { getSafeNextPath } from '@/lib/auth-redirect';
 
 export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
@@ -20,16 +21,16 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
     try {
       if (mode === 'sign-in') {
         await signIn(email, password);
-        const next = new URLSearchParams(window.location.search).get('next');
-        const destination = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
-        router.push(destination);
+        router.push(getSafeNextPath(new URLSearchParams(window.location.search).get('next')));
       } else if (mode === 'sign-up') {
         if (password !== confirmation) {
           setMessage('Passwords do not match.');
           return;
         }
-        await signUp(email, password);
-        setMessage('Account created. Check your email for a confirmation link if required.');
+        const { session } = await signUp(email, password);
+        setMessage(session
+          ? 'Your account is ready. Welcome to RCL.'
+          : 'Account created. Check your email to confirm your address before signing in.');
       } else {
         await resetPassword(email);
         setMessage('Password recovery instructions have been sent if this email exists.');

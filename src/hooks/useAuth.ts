@@ -26,6 +26,8 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recoverySession, setRecoverySession] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function useAuth() {
     if (config.status !== 'configured') {
       setError(getSupabaseConfigMessage(config.status));
       setLoading(false);
+      setRecoveryLoading(false);
       return () => {
         mounted = false;
       };
@@ -42,14 +45,17 @@ export function useAuth() {
     if (!supabase) {
       setError(getSupabaseUnavailableMessage());
       setLoading(false);
+      setRecoveryLoading(false);
       return () => {
         mounted = false;
       };
     }
 
-    const loadProfile = async (currentUser: User | null) => {
+    let requestId = 0;
+
+    const loadProfile = async (currentUser: User | null, currentRequestId: number) => {
       if (!currentUser) {
-        if (mounted) setProfile(null);
+        if (mounted && currentRequestId === requestId) setProfile(null);
         return;
       }
 
@@ -60,33 +66,54 @@ export function useAuth() {
         .single();
 
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
-      if (mounted) setProfile(profileData);
+      if (mounted && currentRequestId === requestId) setProfile(profileData);
     };
+
+    const applySession = async (currentUser: User | null, event?: string) => {
+      const currentRequestId = ++requestId;
+      if (!mounted) return;
+      setUser(currentUser);
+      if (event === 'PASSWORD_RECOVERY') setRecoverySession(true);
+      if (event === 'SIGNED_OUT') setRecoverySession(false);
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_OUT') setRecoveryLoading(false);
+      try {
+        await loadProfile(currentUser, currentRequestId);
+      } catch (err) {
+        if (!mounted || currentRequestId !== requestId) return;
+        console.error('Unable to load profile', err);
+        setError('Unable to load your profile.');
+      }
+    };
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      void applySession(session?.user ?? null, event);
+    });
 
     const getUser = async () => {
       try {
+        if (typeof window !== 'undefined') {
+          const recoveryCode = new URLSearchParams(window.location.search).get('code');
+          if (recoveryCode) {
+            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(recoveryCode);
+            if (exchangeError) throw exchangeError;
+          }
+        }
         const { data } = await supabase.auth.getUser();
         if (!mounted) return;
-        setUser(data.user);
-        await loadProfile(data.user);
+        await applySession(data.user);
+        if (mounted) setRecoveryLoading(false);
       } catch (err) {
         console.error('Unable to load session', err);
-        if (mounted) setError('Unable to load your session.');
+        if (mounted) {
+          setError('Unable to load your session.');
+          setRecoveryLoading(false);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
     getUser();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      setUser(session?.user ?? null);
-      void loadProfile(session?.user ?? null).catch((err: unknown) => {
-        if (!mounted) return;
-        console.error('Unable to load profile', err);
-        if (mounted) setError('Unable to load your profile.');
-      });
-    });
 
     return () => {
       mounted = false;
@@ -97,6 +124,7 @@ export function useAuth() {
   const signUp = async (email: string, password: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
+      setError(null);
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -116,6 +144,7 @@ export function useAuth() {
   const signIn = async (email: string, password: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
+      setError(null);
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -135,6 +164,7 @@ export function useAuth() {
   const signOut = async () => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
+      setError(null);
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -150,6 +180,7 @@ export function useAuth() {
   const resetPassword = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     if (typeof window === 'undefined') throw new Error('Password recovery is only available in the browser.');
+    setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
@@ -161,6 +192,7 @@ export function useAuth() {
 
   const resendConfirmation = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
+    setError(null);
     const { error } = await supabase.auth.resend({ type: 'signup', email });
     if (error) {
       setError('Unable to resend the confirmation email. Please try again later.');
@@ -170,6 +202,7 @@ export function useAuth() {
 
   const updatePassword = async (password: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
+    setError(null);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       setError('Unable to update your password.');
@@ -181,6 +214,8 @@ export function useAuth() {
     user,
     profile,
     loading,
+    recoverySession,
+    recoveryLoading,
     error,
     signUp,
     signIn,
