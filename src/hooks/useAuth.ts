@@ -33,6 +33,17 @@ function getAuthErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function getRecoveryUrlState() {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  return (
+    params.get('type') === 'recovery' ||
+    hashParams.get('type') === 'recovery' ||
+    Boolean(params.get('code'))
+  );
+}
+
 export function useAuth() {
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [user, setUser] = useState<User | null>(null);
@@ -60,14 +71,11 @@ export function useAuth() {
     }
 
     let requestId = 0;
-    let recoveryFlow = false;
-
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-      recoveryFlow = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery' || Boolean(params.get('code'));
-      if (recoveryFlow) setRecoverySession(true);
-    }
+    // Detect the recovery URL before registering the auth listener. This prevents
+    // the SIGNED_IN event emitted during a PKCE recovery exchange from being
+    // mistaken for a normal login.
+    let recoveryFlow = getRecoveryUrlState();
+    if (recoveryFlow) setRecoverySession(true);
 
     const loadProfile = async (currentUser: User | null, currentRequestId: number) => {
       if (!currentUser || recoveryFlow) {
@@ -118,6 +126,17 @@ export function useAuth() {
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      // A recovery URL is authoritative until the password has been changed.
+      // Never publish the temporary recovery user as the app's normal user.
+      if (recoveryFlow && event !== 'SIGNED_OUT') {
+        if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          setRecoverySession(true);
+          setUser(null);
+          setProfile(null);
+          setRecoveryLoading(false);
+        }
+        return;
+      }
       void applySession(session?.user ?? null, event);
     });
 
@@ -226,7 +245,10 @@ export function useAuth() {
   const resetPassword = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     setError(null);
-    const redirectTo = `${getAuthSiteUrl()}/auth/update-password`;
+    // The explicit recovery marker makes the destination unambiguous even when
+    // the browser already has a normal session stored locally. Supabase's PKCE
+    // recovery flow then exchanges the one-time code for the temporary session.
+    const redirectTo = `${getAuthSiteUrl()}/auth/update-password?type=recovery`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
       setError('Unable to send the password reset email.');
