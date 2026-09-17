@@ -9,15 +9,10 @@ const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
 function getAuthSiteUrl() {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
-
-  // Never let a Vercel preview/deployment URL become the production auth origin.
-  // The canonical public site is the only accepted production override.
   if (configuredSiteUrl === PRODUCTION_SITE_URL) return configuredSiteUrl;
-
   if (typeof window !== 'undefined' && LOCAL_HOSTNAMES.has(window.location.hostname)) {
     return window.location.origin.replace(/\/$/, '');
   }
-
   return PRODUCTION_SITE_URL;
 }
 
@@ -55,33 +50,35 @@ export function useAuth() {
       setError(getSupabaseConfigMessage(config.status));
       setLoading(false);
       setRecoveryLoading(false);
-      return () => {
-        mounted = false;
-      };
+      return () => { mounted = false; };
     }
     if (!supabase) {
       setError(getSupabaseUnavailableMessage());
       setLoading(false);
       setRecoveryLoading(false);
-      return () => {
-        mounted = false;
-      };
+      return () => { mounted = false; };
     }
 
     let requestId = 0;
+    let recoveryFlow = false;
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      recoveryFlow = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery' || Boolean(params.get('code'));
+      if (recoveryFlow) setRecoverySession(true);
+    }
 
     const loadProfile = async (currentUser: User | null, currentRequestId: number) => {
-      if (!currentUser) {
+      if (!currentUser || recoveryFlow) {
         if (mounted && currentRequestId === requestId) setProfile(null);
         return;
       }
-
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
         .single();
-
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
       if (mounted && currentRequestId === requestId) setProfile(profileData);
     };
@@ -89,10 +86,28 @@ export function useAuth() {
     const applySession = async (currentUser: User | null, event?: string) => {
       const currentRequestId = ++requestId;
       if (!mounted) return;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryFlow = true;
+        setRecoverySession(true);
+        setUser(null);
+        setProfile(null);
+        setRecoveryLoading(false);
+        return;
+      }
+
+      if (event === 'SIGNED_OUT') {
+        recoveryFlow = false;
+        setRecoverySession(false);
+      }
+
+      if (recoveryFlow) {
+        setUser(null);
+        setProfile(null);
+        return;
+      }
+
       setUser(currentUser);
-      if (event === 'PASSWORD_RECOVERY') setRecoverySession(true);
-      if (event === 'SIGNED_OUT') setRecoverySession(false);
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_OUT') setRecoveryLoading(false);
       try {
         await loadProfile(currentUser, currentRequestId);
       } catch (err) {
@@ -114,16 +129,25 @@ export function useAuth() {
           if (recoveryCode) {
             const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(recoveryCode);
             if (exchangeError) throw exchangeError;
-            if (mounted) setRecoverySession(true);
+            recoveryFlow = true;
+            if (mounted) {
+              setRecoverySession(true);
+              setUser(null);
+              setProfile(null);
+            }
           }
         }
-        const { data } = await supabase.auth.getUser();
-        if (!mounted) return;
-        await applySession(data.user);
-        if (typeof window !== 'undefined') {
-          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-          if (hashParams.get('type') === 'recovery') setRecoverySession(true);
+
+        if (!recoveryFlow) {
+          const { data } = await supabase.auth.getUser();
+          if (!mounted) return;
+          await applySession(data.user);
+        } else {
+          setRecoverySession(true);
+          setUser(null);
+          setProfile(null);
         }
+
         if (mounted) setRecoveryLoading(false);
       } catch (err) {
         console.error('Unable to load session', err);
@@ -152,9 +176,7 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${getAuthSiteUrl()}/auth/sign-in`,
-        },
+        options: { emailRedirectTo: `${getAuthSiteUrl()}/auth/sign-in` },
       });
       if (error) throw error;
       setUser(data.user);
@@ -172,10 +194,7 @@ export function useAuth() {
     try {
       setError(null);
       setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       setUser(data.user);
       return data;
@@ -196,6 +215,7 @@ export function useAuth() {
       if (error) throw error;
       setUser(null);
       setProfile(null);
+      setRecoverySession(false);
     } catch (err) {
       setError(getAuthErrorMessage(err, 'Unable to sign out.'));
     } finally {
@@ -232,6 +252,13 @@ export function useAuth() {
       setError('Unable to update your password.');
       throw error;
     }
+    // A recovery link creates a temporary authenticated recovery session by design.
+    // End that session immediately after the password is changed so the user must
+    // explicitly sign in with the new password instead of being silently logged in.
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setRecoverySession(false);
   };
 
   return {
