@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
+import { AdminControlShortcut } from '@/components/AdminControlShortcut';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityleague.com'),
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body>
         <SiteHeader />
+        <AdminControlShortcut />
         {children}
       </body>
     </html>
