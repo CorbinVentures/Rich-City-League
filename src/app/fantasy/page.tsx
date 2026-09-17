@@ -32,13 +32,17 @@ export default function FantasyPage() {
       supabase.from('public_players').select('*').eq('is_active', true).order('last_name').order('first_name').limit(200),
     ]);
     if (seasonResult.error || playersResult.error) { setMessage('Official fantasy data is not available yet.'); setLoading(false); return; }
-    setSeason(seasonResult.data); setPlayers(playersResult.data ?? []);
-    if (user && seasonResult.data) {
-      const teamResult = await supabase.from('fantasy_teams').select('*').eq('fantasy_season_id', seasonResult.data.id).eq('manager_id', user.id).maybeSingle();
-      if (teamResult.data) {
-        setTeam(teamResult.data);
-        const rosterResult = await supabase.from('fantasy_rosters').select('*').eq('fantasy_team_id', teamResult.data.id);
-        setRoster((rosterResult.data ?? []).map(item => ({ ...item, player: (playersResult.data ?? []).find(player => player.id === item.player_id) })));
+    const activeSeason = seasonResult.data as FantasySeason | null;
+    const playerPool = (playersResult.data ?? []) as PublicPlayer[];
+    setSeason(activeSeason); setPlayers(playerPool);
+    if (user && activeSeason) {
+      const teamResult = await supabase.from('fantasy_teams').select('*').eq('fantasy_season_id', activeSeason.id).eq('manager_id', user.id).maybeSingle();
+      const fantasyTeam = teamResult.data as FantasyTeam | null;
+      if (fantasyTeam) {
+        setTeam(fantasyTeam);
+        const rosterResult = await supabase.from('fantasy_rosters').select('*').eq('fantasy_team_id', fantasyTeam.id);
+        const rosterRows = (rosterResult.data ?? []) as FantasyRoster[];
+        setRoster(rosterRows.map(item => ({ ...item, player: playerPool.find(player => player.id === item.player_id) })));
       }
     }
     setLoading(false);
@@ -51,7 +55,7 @@ export default function FantasyPage() {
     if (!supabase || !user || !season || profile?.role !== 'fan' || teamName.trim().length < 2) return;
     setSaving(true); setMessage(null);
     const result = await supabase.from('fantasy_teams').insert({ fantasy_season_id: season.id, manager_id: user.id, name: teamName.trim() } as never).select().single();
-    if (result.error) setMessage('Only fan accounts can create fantasy teams.'); else { setTeam(result.data); setTeamName(''); setMessage('Fantasy team created. Build your roster below.'); }
+    if (result.error) setMessage('Only fan accounts can create fantasy teams.'); else { setTeam(result.data as FantasyTeam); setTeamName(''); setMessage('Fantasy team created. Build your roster below.'); }
     setSaving(false);
   };
 
