@@ -22,7 +22,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pin the CLI so CI is reproducible and does not depend on GitHub's
+          # release API at job startup.
+          version: 2.115.0
       - name: Start local database for validation
         run: supabase start
       - name: Validate complete migration sequence
