@@ -1,6 +1,6 @@
 begin;
 
-select plan(17);
+select plan(18);
 
 -- Fixtures are created as the database owner, then every assertion runs through
 -- the same roles used by Supabase RLS.
@@ -71,15 +71,14 @@ set role anon;
 select throws_ok($$
   select * from public.players
 $$, '42501', null, 'anonymous access to private player data is denied');
-select results_eq($$
-  select column_name::text
-  from information_schema.columns
+select is((select count(*) from information_schema.columns
+  where table_schema = 'public' and table_name = 'public_players'), 9::bigint,
+  'public_players exposes exactly the intended number of fields');
+select is((select count(*) from information_schema.columns
   where table_schema = 'public' and table_name = 'public_players'
-  order by ordinal_position
-$$, $$ values
-  ('id'), ('first_name'), ('last_name'), ('jersey_number'), ('position'),
-  ('height_inches'), ('hometown'), ('photo_url'), ('is_active')
-$$, 'public_players exposes only intended fields');
+    and column_name in ('id', 'first_name', 'last_name', 'jersey_number', 'position',
+      'height_inches', 'hometown', 'photo_url', 'is_active')), 9::bigint,
+  'public_players exposes only the intended fields');
 select throws_ok($$
   insert into public.registrations (season_id, division_id, applicant_id, first_name, last_name, email)
   values ('77777777-7777-7777-7777-777777777777', '99999999-9999-9999-9999-999999999999',
