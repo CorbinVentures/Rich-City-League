@@ -96,9 +96,6 @@ drop policy if exists "public view eligible draft pool" on public.draft_pools;
 create policy "public view eligible draft pool" on public.draft_pools
   for select to anon, authenticated
   using (eligible);
-create policy "staff view all draft pool entries" on public.draft_pools
-  for select to authenticated
-  using (public.is_staff_or_admin());
 
 drop policy if exists "staff manage drafts" on public.drafts;
 create policy "staff manage drafts" on public.drafts
@@ -110,6 +107,3 @@ drop policy if exists "public view live drafts" on public.drafts;
 create policy "public view live drafts" on public.drafts
   for select to anon, authenticated
   using (status in ('OPEN', 'PAUSED', 'COMPLETED'));
-create policy "staff view setup drafts" on public.drafts
-  for select to authenticated
-  using (public.is_staff_or_admin());
