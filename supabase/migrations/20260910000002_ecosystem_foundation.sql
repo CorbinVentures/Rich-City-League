@@ -5,6 +5,10 @@ begin
 exception when duplicate_object then null;
 end $$;
 
+-- NOTE: PostgreSQL does not permit using a newly-added enum value in the same
+-- transaction that adds it. Policies that reference 'fan' are created in a
+-- later migration after the enum addition has committed.
+
 create table if not exists public.profile_roles (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   role public.app_role not null,
@@ -47,18 +51,6 @@ create table if not exists public.fantasy_seasons (
   unique (season_id)
 );
 
-create table if not exists public.fantasy_teams (
-  id uuid primary key default gen_random_uuid(),
-  fantasy_season_id uuid not null references public.fantasy_seasons(id) on delete cascade,
-  manager_id uuid not null references public.profiles(id) on delete cascade,
-  name text not null check (length(trim(name)) between 2 and 60),
-  total_points numeric(10,2) not null default 0 check (total_points >= 0),
-  wins integer not null default 0 check (wins >= 0),
-  losses integer not null default 0 check (losses >= 0),
-  created_at timestamptz not null default now(),
-  unique (fantasy_season_id, manager_id)
-);
-
 alter table public.fantasy_seasons
   drop constraint if exists fantasy_seasons_champion_fantasy_team_id_fkey;
 alter table public.fantasy_seasons
@@ -99,7 +91,6 @@ alter table public.fantasy_rosters enable row level security;
 alter table public.fantasy_scores enable row level security;
 
 create policy "public active profile roles" on public.profile_roles for select using (status = 'active');
-create policy "users manage own fan role request" on public.profile_roles for insert with check (profile_id = auth.uid() and role = 'fan');
 create policy "staff manage profile roles" on public.profile_roles for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "users view own fan profile" on public.fan_profiles for select using (true);
 create policy "users update own fan profile" on public.fan_profiles for all using (profile_id = auth.uid()) with check (profile_id = auth.uid());
@@ -121,7 +112,7 @@ create policy "staff manage fantasy scores" on public.fantasy_scores for all usi
 create or replace function public.calculate_fantasy_points(
   points numeric, rebounds numeric, assists numeric, steals numeric, blocks numeric, turnovers numeric,
   rules jsonb default '{"points":1,"rebounds":1.2,"assists":1.5,"steals":3,"blocks":3,"turnovers":-1}'::jsonb
-) returns numeric language sql immutable as $$
+) returns numeric language sql immutable set search_path = public as $$
   select round(
     coalesce(points, 0) * coalesce((rules->>'points')::numeric, 1)
     + coalesce(rebounds, 0) * coalesce((rules->>'rebounds')::numeric, 1)
