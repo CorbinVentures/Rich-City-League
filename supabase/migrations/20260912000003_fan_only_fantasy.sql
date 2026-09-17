@@ -1,4 +1,6 @@
 -- Fantasy team management is a fan-only capability. Staff administer official totals.
+-- This migration is intentionally the first migration that references the newly
+-- added app_role value 'fan'; the enum addition occurs in an earlier migration.
 drop policy if exists "users manage own fan role request" on public.profile_roles;
 create policy "users request fan role" on public.profile_roles for insert
   with check (profile_id = auth.uid() and role = 'fan' and status = 'pending');
