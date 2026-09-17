@@ -109,15 +109,21 @@ export function useAuth() {
     const getUser = async () => {
       try {
         if (typeof window !== 'undefined') {
-          const recoveryCode = new URLSearchParams(window.location.search).get('code');
+          const params = new URLSearchParams(window.location.search);
+          const recoveryCode = params.get('code');
           if (recoveryCode) {
             const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(recoveryCode);
             if (exchangeError) throw exchangeError;
+            if (mounted) setRecoverySession(true);
           }
         }
         const { data } = await supabase.auth.getUser();
         if (!mounted) return;
         await applySession(data.user);
+        if (typeof window !== 'undefined') {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+          if (hashParams.get('type') === 'recovery') setRecoverySession(true);
+        }
         if (mounted) setRecoveryLoading(false);
       } catch (err) {
         console.error('Unable to load session', err);
