@@ -18,6 +18,7 @@ const scenes = [
 ];
 
 const sceneDuration = 1600;
+const SPLASH_LAST_SEEN_KEY = 'rcl_splash_last_seen';
 const features = [
   { icon: FaBasketball, label: 'PLAY', detail: 'Games & stats' },
   { icon: FaUsers, label: 'PLAYERS', detail: 'Profiles & rankings' },
@@ -27,16 +28,40 @@ const features = [
   { icon: FaCalendarDays, label: 'LEAGUE', detail: 'Schedules & events' },
 ];
 
+function getLocalDateKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function SplashIntro() {
   const [show, setShow] = useState(false); const [loading, setLoading] = useState(true); const [scene, setScene] = useState(0); const [reducedMotion, setReducedMotion] = useState(false);
   const [config, setConfig] = useState<SplashConfig>({ enabled: true, title: 'RICH CITY LEAGUE', subtitle: 'THE HOME OF RICHMOND BASKETBALL', duration: 12 });
   const startedAt = useRef(0);
-  const complete = useCallback(() => { setShow(false); setLoading(false); }, []);
+  const complete = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(SPLASH_LAST_SEEN_KEY, getLocalDateKey());
+    }
+    setShow(false);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)'); setReducedMotion(motionQuery.matches);
-    const onMotionChange = () => setReducedMotion(motionQuery.matches); motionQuery.addEventListener?.('change', onMotionChange); setShow(true); setLoading(false); startedAt.current = Date.now();
+    const onMotionChange = () => setReducedMotion(motionQuery.matches); motionQuery.addEventListener?.('change', onMotionChange);
+
+    // The cinematic intro is shown at most once per local calendar day.
+    // localStorage keeps this device-specific and avoids showing the intro on every navigation.
+    const lastSeen = window.localStorage.getItem(SPLASH_LAST_SEEN_KEY);
+    if (lastSeen === getLocalDateKey()) {
+      setLoading(false);
+      return () => motionQuery.removeEventListener?.('change', onMotionChange);
+    }
+
+    setShow(true); setLoading(false); startedAt.current = Date.now();
     const supabase = getSupabaseClient();
     const loadConfig = async () => { try { if (!supabase) return; const result = await Promise.race([supabase.from('site_settings').select('value').eq('key', 'splash_config').maybeSingle(), new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1800))]); const data = (result as { data?: { value?: unknown } | null } | null)?.data; if (data?.value) { const value = data.value as SplashConfig; setConfig(value); if (value.enabled === false) complete(); } } catch { /* Intro remains independent of CMS availability. */ } };
     void loadConfig(); const failsafe = window.setTimeout(complete, 18000); return () => { motionQuery.removeEventListener?.('change', onMotionChange); window.clearTimeout(failsafe); };
