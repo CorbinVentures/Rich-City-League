@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Rich City League - Basketball League Management & Social Platform",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
