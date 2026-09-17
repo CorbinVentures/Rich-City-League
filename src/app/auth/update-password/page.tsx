@@ -2,10 +2,12 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function UpdatePasswordPage() {
+  const router = useRouter();
   const { updatePassword, error, recoverySession, recoveryLoading } = useAuth();
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -27,9 +29,7 @@ export default function UpdatePasswordPage() {
     setSubmitting(true);
     try {
       await updatePassword(password);
-      setMessage('Your password has been updated. You can now sign in.');
-      setPassword('');
-      setConfirmation('');
+      router.replace('/auth/sign-in?passwordReset=success');
     } catch {
       // The hook exposes a user-safe error message.
     } finally {
