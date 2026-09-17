@@ -160,7 +160,7 @@ export default function LabPage() {
 
         <section id="challenges" className="mt-6 rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-6 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div><p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">TODAY'S CHALLENGE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">The 804 Shootout</h2><p className="mt-2 text-xs text-white/40">Make 10 three-pointers. Build your shot confidence.</p></div>
+            <div><p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">TODAY&apos;S CHALLENGE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">The 804 Shootout</h2><p className="mt-2 text-xs text-white/40">Make 10 three-pointers. Build your shot confidence.</p></div>
             <div className="flex items-center gap-4"><div><p className="text-2xl font-black">0<span className="text-white/20"> / 10</span></p><p className="text-[8px] font-black tracking-widest text-white/25">SHOTS MADE</p></div><span className="rounded-lg bg-rcl-orange/10 px-3 py-2 text-[9px] font-black text-rcl-orange">+250 XP</span><a href="#training" className="rounded-lg bg-rcl-orange px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Enter →</a></div>
           </div>
         </section>
