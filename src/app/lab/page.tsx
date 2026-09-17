@@ -43,7 +43,7 @@ const modules = [
   { title: 'Film Room', body: 'Study the game.', icon: FaFilm, target: 'film-room' },
   { title: 'Basketball IQ', body: 'Think faster.', icon: FaBrain, target: 'iq' },
   { title: 'Skill Challenges', body: 'Daily grind.', icon: FaBolt, target: 'challenges' },
-  { title: 'Badge Lab', body: 'Earn your badges.', icon: FaMedal, target: 'badges' },
+  { title: 'Badge Lab', body: 'Track your progression.', icon: FaMedal, target: 'badges' },
 ];
 
 function readHistory(): Workout[] {
@@ -143,13 +143,13 @@ export default function LabPage() {
         <section id="player-lab" className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0a111b]/95 shadow-2xl backdrop-blur-xl">
           <div className="grid md:grid-cols-[1.3fr_.7fr]">
             <div className="p-6 sm:p-8">
-              <p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">YOUR PERFORMANCE SPACE</p>
+              <p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">PLAYER LAB</p>
               <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Build the player.<br /><span className="text-rcl-orange">Not just the workout.</span></h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-white/45">The Lab turns your goals into a personalized development session, then gives you a place to keep building.</p>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-white/45">Your development space connects training, performance, film, IQ and progression. Start with a workout, then use the other systems to keep developing.</p>
               <div className="mt-6 grid grid-cols-3 gap-2">
-                <Metric label="FOCUS" value="8 skills" />
-                <Metric label="LENGTH" value="15–90m" />
-                <Metric label="COACHING" value="AI guided" />
+                <Metric label="SKILLS" value="8 focus areas" />
+                <Metric label="SESSIONS" value="15–90 min" />
+                <Metric label="PROGRESSION" value="XP + badges" />
               </div>
             </div>
             <div className="flex items-center justify-center border-t border-white/10 bg-[radial-gradient(circle,rgba(255,107,26,.1),transparent_60%)] p-8 md:border-l md:border-t-0">
@@ -160,13 +160,13 @@ export default function LabPage() {
 
         <section id="challenges" className="mt-6 rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-6 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div><p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">TODAY&apos;S CHALLENGE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">The 804 Shootout</h2><p className="mt-2 text-xs text-white/40">Make 10 three-pointers. Build your shot confidence.</p></div>
-            <div className="flex items-center gap-4"><div><p className="text-2xl font-black">0<span className="text-white/20"> / 10</span></p><p className="text-[8px] font-black tracking-widest text-white/25">SHOTS MADE</p></div><span className="rounded-lg bg-rcl-orange/10 px-3 py-2 text-[9px] font-black text-rcl-orange">+250 XP</span><a href="#training" className="rounded-lg bg-rcl-orange px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Enter →</a></div>
+            <div><p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">SKILL CHALLENGE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">The 804 Shootout</h2><p className="mt-2 max-w-xl text-xs leading-6 text-white/40">Make 10 three-pointers and build your shot confidence. Challenges belong here so they are separate from workout creation.</p></div>
+            <div className="flex items-center gap-4"><div><p className="text-2xl font-black">0<span className="text-white/20"> / 10</span></p><p className="text-[8px] font-black tracking-widest text-white/25">SHOTS MADE</p></div><span className="rounded-lg bg-rcl-orange/10 px-3 py-2 text-[9px] font-black text-rcl-orange">+250 XP</span><span className="rounded-lg border border-white/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white/30">READY</span></div>
           </div>
         </section>
 
         <section className="mt-8" aria-labelledby="lab-systems">
-          <div className="flex items-end justify-between gap-4"><div><p className="text-[9px] font-black tracking-[.25em] text-white/30">EXPLORE THE SYSTEM</p><h2 id="lab-systems" className="mt-1 font-display text-2xl font-black uppercase">Enter the Lab</h2></div><span className="text-[8px] font-black uppercase tracking-widest text-white/25">6 systems online</span></div>
+          <div className="flex items-end justify-between gap-4"><div><p className="text-[9px] font-black tracking-[.25em] text-white/30">EXPLORE THE SYSTEM</p><h2 id="lab-systems" className="mt-1 font-display text-2xl font-black uppercase">Choose your system</h2></div><span className="text-[8px] font-black uppercase tracking-widest text-white/25">6 systems</span></div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {modules.map(({ title, body, icon: Icon, target }) => <a key={title} href={`#${target}`} className="group min-h-[145px] rounded-xl border border-white/10 bg-[#0a111b] p-4 transition hover:-translate-y-1 hover:border-rcl-orange/60"><div className="grid h-10 w-10 place-items-center rounded-lg bg-white/5 text-rcl-orange transition group-hover:bg-rcl-orange group-hover:text-black"><Icon /></div><h3 className="mt-7 font-display text-sm font-black uppercase">{title}</h3><p className="mt-1 text-[9px] uppercase tracking-widest text-white/30">{body}</p></a>)}
           </div>
@@ -191,10 +191,10 @@ export default function LabPage() {
           </section>
         </section>
 
-        <section id="badges" className="mt-8 grid gap-4 sm:grid-cols-3">
+        <section className="mt-8 grid gap-4 sm:grid-cols-3">
           <LabFeature id="film-room" icon={<FaFilm />} title="Film Room" body="Turn game footage into lessons. Study, clip and build a smarter player." />
           <LabFeature id="iq" icon={<FaBrain />} title="Basketball IQ" body="Daily reads, situations and decisions designed to sharpen how you see the game." />
-          <LabFeature id="coach" icon={<FaMedal />} title="Badge Lab" body="Turn completed work into visible progression and future RCL badges." />
+          <LabFeature id="badges" icon={<FaMedal />} title="Badge Lab" body="Turn completed work into visible progression and future RCL badges." />
         </section>
       </Container>
     </main>
