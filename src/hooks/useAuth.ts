@@ -5,12 +5,16 @@ import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-conf
 import { Profile } from '@/types';
 
 const PRODUCTION_SITE_URL = 'https://www.rich-city-league.com';
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
 function getAuthSiteUrl() {
-  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (configuredSiteUrl) return configuredSiteUrl.replace(/\/$/, '');
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
 
-  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+  // Never let a Vercel preview/deployment URL become the production auth origin.
+  // The canonical public site is the only accepted production override.
+  if (configuredSiteUrl === PRODUCTION_SITE_URL) return configuredSiteUrl;
+
+  if (typeof window !== 'undefined' && LOCAL_HOSTNAMES.has(window.location.hostname)) {
     return window.location.origin.replace(/\/$/, '');
   }
 
