@@ -4,7 +4,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
 import { Profile } from '@/types';
 
-const PRODUCTION_SITE_URL = 'https://www.rich-city-league.com';
+const PRODUCTION_SITE_URL = 'https://richcityhoops.com';
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
 function getAuthSiteUrl() {
