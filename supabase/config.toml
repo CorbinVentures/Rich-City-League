@@ -18,8 +18,12 @@ sql_paths = ["./seed.sql"]
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://*.vercel.app/**"]
+site_url = "https://www.rich-city-league.com"
+additional_redirect_urls = [
+  "https://www.rich-city-league.com/**",
+  "https://rich-city-league.com/**",
+  "https://*.vercel.app/**"
+]
 enable_signup = true
 
 [auth.email]
