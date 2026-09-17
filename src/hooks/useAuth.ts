@@ -142,6 +142,9 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${getAuthSiteUrl()}/auth/sign-in`,
+        },
       });
       if (error) throw error;
       setUser(data.user);
