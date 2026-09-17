@@ -99,7 +99,6 @@ alter table public.fantasy_rosters enable row level security;
 alter table public.fantasy_scores enable row level security;
 
 create policy "public active profile roles" on public.profile_roles for select using (status = 'active');
-create policy "users manage own fan role request" on public.profile_roles for insert with check (profile_id = auth.uid() and role = 'fan');
 create policy "staff manage profile roles" on public.profile_roles for all using (public.is_staff_or_admin()) with check (public.is_staff_or_admin());
 create policy "users view own fan profile" on public.fan_profiles for select using (true);
 create policy "users update own fan profile" on public.fan_profiles for all using (profile_id = auth.uid()) with check (profile_id = auth.uid());
@@ -121,7 +120,9 @@ create policy "staff manage fantasy scores" on public.fantasy_scores for all usi
 create or replace function public.calculate_fantasy_points(
   points numeric, rebounds numeric, assists numeric, steals numeric, blocks numeric, turnovers numeric,
   rules jsonb default '{"points":1,"rebounds":1.2,"assists":1.5,"steals":3,"blocks":3,"turnovers":-1}'::jsonb
-) returns numeric language sql immutable as $$
+) returns numeric language sql immutable
+  set search_path = public
+as $$
   select round(
     coalesce(points, 0) * coalesce((rules->>'points')::numeric, 1)
     + coalesce(rebounds, 0) * coalesce((rules->>'rebounds')::numeric, 1)
