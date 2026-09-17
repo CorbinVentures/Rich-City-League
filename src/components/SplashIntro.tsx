@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaArrowRight, FaBasketball, FaCalendarDays, FaComments, FaDumbbell, FaFlask, FaGamepad, FaLocationDot, FaMedal, FaPeopleGroup, FaRankingStar, FaUser } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import './RclSplashMockup.css';
 
 export interface SplashConfig { enabled: boolean; title: string; subtitle: string; duration: number; }
 const SPLASH_LAST_SEEN_KEY = 'rcl_splash_last_seen';
@@ -64,45 +65,18 @@ export function SplashIntro() {
       <div className="rcl-splash-skyline-art" aria-hidden="true"><span /><i /><b /><em /></div>
       <div className="rcl-splash-bridge-art" aria-hidden="true" />
       <div className="rcl-splash-player-art" aria-hidden="true"><div className="rcl-player-head" /><div className="rcl-player-body" /><div className="rcl-player-arm rcl-player-arm-left" /><div className="rcl-player-arm rcl-player-arm-right" /></div>
-
-      <header className="rcl-splash-header">
-        <div className="rcl-splash-wordmark"><span>RICHMOND</span><span>•</span><span>PLAY</span><span>•</span><span>COMPETE</span><span>•</span><span>CONNECT</span><span>•</span><span>BUILD</span></div>
-        <button className="rcl-splash-close" onClick={complete} aria-label="Close introduction">×</button>
-      </header>
-
+      <header className="rcl-splash-header"><div className="rcl-splash-wordmark"><span>RICHMOND</span><span>•</span><span>PLAY</span><span>•</span><span>COMPETE</span><span>•</span><span>CONNECT</span><span>•</span><span>BUILD</span></div><button className="rcl-splash-close" onClick={complete} aria-label="Close introduction">×</button></header>
       <div className="rcl-splash-side-copy rcl-splash-side-left">MORE<br />THAN<br />BASKETBALL</div>
       <div className="rcl-splash-side-copy rcl-splash-side-right">SAME<br />CITY.<br />BIGGER<br />OPPORTUNITIES.</div>
       <div className="rcl-splash-side-copy rcl-splash-wall-left">OUR<br />CITY.<br />OUR<br />LEAGUE.</div>
       <div className="rcl-splash-side-copy rcl-splash-wall-right">GOOD<br />PLAYERS.<br />BETTER<br />PEOPLE.</div>
-
       <main className="rcl-splash-content">
         <div className="rcl-splash-logo" aria-label="Rich City League logo"><div className="rcl-splash-logo-city">RICHMOND</div><strong>RCL</strong><span>RICH CITY LEAGUE</span><small>PLAYERS &nbsp; PEOPLE &nbsp; PURPOSE</small></div>
-        <p className="rcl-splash-kicker">WELCOME TO</p>
-        <h1>{config.title || 'RICH CITY LEAGUE'}</h1>
-        <p className="rcl-splash-tagline">BASKETBALL LIVES HERE</p>
-
-        <section className="rcl-splash-feature-grid" aria-label="Rich City League features">
-          {featureCards.map(({ label, detail, icon: Icon, href, tone }) => (
-            <Link key={label} href={href} className={`rcl-splash-feature rcl-splash-feature-${tone}`} onClick={complete}>
-              <div className="rcl-splash-feature-icon"><Icon /></div>
-              <div><strong>{label}</strong><small>{detail}</small></div>
-            </Link>
-          ))}
-        </section>
-
-        <button className="rcl-splash-enter" onClick={complete}>GET STARTED <FaArrowRight /></button>
-        <p className="rcl-splash-microcopy">A STRONGER RICHMOND THROUGH BASKETBALL</p>
+        <p className="rcl-splash-kicker">WELCOME TO</p><h1>{config.title || 'RICH CITY LEAGUE'}</h1><p className="rcl-splash-tagline">BASKETBALL LIVES HERE</p>
+        <section className="rcl-splash-feature-grid" aria-label="Rich City League features">{featureCards.map(({ label, detail, icon: Icon, href, tone }) => <Link key={label} href={href} className={`rcl-splash-feature rcl-splash-feature-${tone}`} onClick={complete}><div className="rcl-splash-feature-icon"><Icon /></div><div><strong>{label}</strong><small>{detail}</small></div></Link>)}</section>
+        <button className="rcl-splash-enter" onClick={complete}>GET STARTED <FaArrowRight /></button><p className="rcl-splash-microcopy">A STRONGER RICHMOND THROUGH BASKETBALL</p>
       </main>
-
-      <nav className="rcl-splash-nav" aria-label="Primary navigation">
-        <Link href="/" onClick={complete}><FaGamepad /><span>HOME</span></Link>
-        <Link href="/schedule" onClick={complete}><FaCalendarDays /><span>SCHEDULE</span></Link>
-        <Link href="/teams" onClick={complete}><FaPeopleGroup /><span>TEAMS</span></Link>
-        <button className="rcl-splash-nav-rcl" onClick={complete} aria-label="RCL home"><FaBasketball /></button>
-        <Link href="/stats" onClick={complete}><FaRankingStar /><span>STATS</span></Link>
-        <Link href="/community" onClick={complete}><FaPeopleGroup /><span>COMMUNITY</span></Link>
-        <Link href="/more" onClick={complete}><FaDumbbell /><span>MORE</span></Link>
-      </nav>
+      <nav className="rcl-splash-nav" aria-label="Primary navigation"><Link href="/" onClick={complete}><FaGamepad /><span>HOME</span></Link><Link href="/schedule" onClick={complete}><FaCalendarDays /><span>SCHEDULE</span></Link><Link href="/teams" onClick={complete}><FaPeopleGroup /><span>TEAMS</span></Link><button className="rcl-splash-nav-rcl" onClick={complete} aria-label="RCL home"><FaBasketball /></button><Link href="/stats" onClick={complete}><FaRankingStar /><span>STATS</span></Link><Link href="/community" onClick={complete}><FaPeopleGroup /><span>COMMUNITY</span></Link><Link href="/more" onClick={complete}><FaDumbbell /><span>MORE</span></Link></nav>
     </div>
   );
 }
