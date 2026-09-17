@@ -4,6 +4,19 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
 import { Profile } from '@/types';
 
+const PRODUCTION_SITE_URL = 'https://www.rich-city-league.com';
+
+function getAuthSiteUrl() {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredSiteUrl) return configuredSiteUrl.replace(/\/$/, '');
+
+  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    return window.location.origin.replace(/\/$/, '');
+  }
+
+  return PRODUCTION_SITE_URL;
+}
+
 function getSupabaseUnavailableMessage() {
   const status = getSupabaseConfig().status;
   return status === 'configured'
@@ -179,11 +192,9 @@ export function useAuth() {
 
   const resetPassword = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
-    if (typeof window === 'undefined') throw new Error('Password recovery is only available in the browser.');
     setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
-    });
+    const redirectTo = `${getAuthSiteUrl()}/auth/update-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
       setError('Unable to send the password reset email.');
       throw error;
@@ -195,7 +206,7 @@ export function useAuth() {
     setError(null);
     const { error } = await supabase.auth.resend({ type: 'signup', email });
     if (error) {
-      setError('Unable to resend the confirmation email. Please try again later.');
+      setError('Unable to resend the email confirmation. Please try again later.');
       throw error;
     }
   };
