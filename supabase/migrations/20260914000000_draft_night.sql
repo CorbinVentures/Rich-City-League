@@ -48,7 +48,6 @@ as $$
 declare
   d public.drafts;
   result public.draft_picks;
-  season_team uuid;
   expected_team uuid;
   team_season uuid;
   roster_id uuid;
@@ -160,7 +159,7 @@ create or replace function public.configure_draft_order(target_draft uuid, order
 returns void
 language plpgsql security definer set search_path = public
 as $$
-declare d public.drafts; team_count integer; i integer; team_id uuid;
+declare d public.drafts; team_count integer; pick_index integer; ordered_team_id uuid;
 begin
   if not public.is_staff_or_admin() then raise exception 'Only league staff may configure draft order'; end if;
   select * into d from public.drafts where id = target_draft for update;
@@ -171,17 +170,17 @@ begin
   if team_count = 0 or coalesce(array_length(ordered_teams, 1), 0) <> team_count * d.rounds then
     raise exception 'Draft order must contain one entry for every team in every round';
   end if;
-  for i in 1..array_length(ordered_teams, 1) loop
-    team_id := ordered_teams[i];
+  for pick_index in 1..array_length(ordered_teams, 1) loop
+    ordered_team_id := ordered_teams[pick_index];
     if not exists (select 1 from public.team_seasons ts join public.teams t on t.id = ts.team_id
-      where ts.season_id = d.season_id and ts.team_id = team_id and t.is_active) then
+      where ts.season_id = d.season_id and ts.team_id = ordered_team_id and t.is_active) then
       raise exception 'Draft order contains a team outside this season';
     end if;
   end loop;
   delete from public.draft_order where draft_id = target_draft;
-  for i in 1..array_length(ordered_teams, 1) loop
+  for pick_index in 1..array_length(ordered_teams, 1) loop
     insert into public.draft_order(draft_id, pick_number, round_number, team_id)
-      values (target_draft, i, ((i - 1) / team_count) + 1, ordered_teams[i]);
+      values (target_draft, pick_index, ((pick_index - 1) / team_count) + 1, ordered_teams[pick_index]);
   end loop;
 end;
 $$;
