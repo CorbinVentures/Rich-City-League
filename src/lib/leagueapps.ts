@@ -124,9 +124,9 @@ export async function fetchLeagueAppsBatch(
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(`LeagueApps export failed (${response.status}): ${detail.slice(0, 300)}`);
+    throw new Error(`LeagueApps ${resource} request failed (${response.status}): ${detail.slice(0, 300)}`);
   }
 
-  const data = await response.json();
-  return Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+  const records = await response.json() as Array<Record<string, unknown>>;
+  return records;
 }
