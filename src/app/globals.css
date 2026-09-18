@@ -497,3 +497,5 @@ img, video, canvas, svg { max-width: 100%; }
 .rcl-admin-panel{border-radius:1rem;padding:1.25rem;}
 .rcl-admin-chip{display:inline-flex;align-items:center;gap:.45rem;border:1px solid rgba(255,255,255,.1);border-radius:.6rem;padding:.55rem .7rem;color:rgba(255,255,255,.55);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;}
 @media(max-width:639px){.rcl-admin-hub .rcl-admin-source-card{min-width:0}.rcl-admin-hub h1{font-size:3.6rem!important}.rcl-admin-module{min-height:12rem}.rcl-admin-panel{padding:1rem}}
+
+.rcl-admin-hub { background-color: #05080d; }
