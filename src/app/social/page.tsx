@@ -44,7 +44,8 @@ export default function SocialPage() {
   const mediaInputRef = useRef<HTMLInputElement | null>(null); const storyInputRef = useRef<HTMLInputElement | null>(null);
 
   const signInForSocial = () => { window.location.href = '/auth/sign-in?redirect=/social'; };
-  const openComposer = () => { if (!user) { signInForSocial(); return; } setComposerOpen(true); };\n  const trackActivity = async (activity_type: string, entity_type?: string, entity_id?: string, metadata: Record<string, unknown> = {}) => {
+  const openComposer = () => { if (!user) { signInForSocial(); return; } setComposerOpen(true); };
+  const trackActivity = async (activity_type: string, entity_type?: string, entity_id?: string, metadata: Record<string, unknown> = {}) => {
     if (!supabase || !user) return;
     await supabase.from('user_activity').insert({ profile_id: user.id, activity_type, entity_type: entity_type ?? null, entity_id: entity_id ?? null, metadata } as never);
   };
@@ -65,7 +66,8 @@ export default function SocialPage() {
         postIds.length ? supabase.from('reactions').select('post_id,user_id,type').in('post_id', postIds) : Promise.resolve({ data: [], error: null }),
         supabase.from('stories').select('id,body,media_url,expires_at,author_id').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(20),
         user ? supabase.from('follows').select('following_id').eq('follower_id', user.id) : Promise.resolve({ data: [], error: null }),
-        user ? supabase.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),\n        user ? supabase.from('user_levels').select('level,xp').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+        user ? supabase.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),
+        user ? supabase.from('user_levels').select('level,xp').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
       ]);
       const authors = (authorsResult.data ?? []) as unknown as Array<Author & { id: string }>;
       const authorMap = new Map(authors.map((a) => [a.id, a]));
@@ -73,7 +75,9 @@ export default function SocialPage() {
       setPosts(safePosts.map((p) => ({ ...p, author: authorMap.get(p.author_id), comments: comments.filter((c) => c.post_id === p.id).map((c) => ({ ...c, author: authorMap.get(c.author_id) })), reactions: reactionsData.filter((r) => r.post_id === p.id) })));
       setStories(storyRows.map((s) => ({ ...s, author: authorMap.get(s.author_id ?? '') })));
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((r) => r.following_id));
-      setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((r) => r.post_id));\n      const levelData = levelResult.data as { level?: number; xp?: number } | null;\n      setLevel(levelData?.level ? { level: levelData.level, xp: levelData.xp ?? 0 } : null);
+      setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((r) => r.post_id));
+      const levelData = levelResult.data as { level?: number; xp?: number } | null;
+      setLevel(levelData?.level ? { level: levelData.level, xp: levelData.xp ?? 0 } : null);
     } catch (loadError) { console.error('Unable to load the social timeline', loadError); setError(loadError instanceof Error ? loadError.message : 'We could not load the social timeline.'); setPosts([]); }
     finally { setLoading(false); }
   };
