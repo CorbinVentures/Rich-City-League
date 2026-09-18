@@ -8,7 +8,7 @@ const modules = {
     body: 'Build structured basketball sessions around your skill, level, time, environment and equipment.',
     icon: FaDumbbell,
     cta: 'Open Workout Builder',
-    href: '/lab#training',
+    href: '/lab/training',
     accent: 'orange',
     cards: [
       ['Personalized workouts', 'Generate a session from your current development focus.'],
