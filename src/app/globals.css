@@ -499,3 +499,5 @@ img, video, canvas, svg { max-width: 100%; }
 @media(max-width:639px){.rcl-admin-hub .rcl-admin-source-card{min-width:0}.rcl-admin-hub h1{font-size:3.6rem!important}.rcl-admin-module{min-height:12rem}.rcl-admin-panel{padding:1rem}}
 
 .rcl-admin-hub { background-color: #05080d; }
+
+.rcl-admin-hub .rcl-admin-module { position: relative; overflow: hidden; }
