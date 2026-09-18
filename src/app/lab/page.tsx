@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDumbbell, FaFilm, FaMedal, FaPlay, FaRotate, FaTriangleExclamation } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 
@@ -38,12 +39,12 @@ const environments = ['Indoor court', 'Outdoor court', 'Gym', 'Home / no equipme
 const equipment = ['Basketball', 'Cones', 'Resistance bands', 'Weights', 'Agility ladder', 'None'];
 
 const modules = [
-  { title: 'Training', body: 'Build the work.', icon: FaDumbbell, target: 'training' },
-  { title: 'Player Lab', body: 'Build your player.', icon: FaChartLine, target: 'player-lab' },
-  { title: 'Film Room', body: 'Study the game.', icon: FaFilm, target: 'film-room' },
-  { title: 'Basketball IQ', body: 'Think faster.', icon: FaBrain, target: 'iq' },
-  { title: 'Skill Challenges', body: 'Daily grind.', icon: FaBolt, target: 'challenges' },
-  { title: 'Badge Lab', body: 'Track your progression.', icon: FaMedal, target: 'badges' },
+  { title: 'Training', body: 'Build the work.', icon: FaDumbbell, path: '/lab/training' },
+  { title: 'Player Lab', body: 'Build your player.', icon: FaChartLine, path: '/lab/player-lab' },
+  { title: 'Film Room', body: 'Study the game.', icon: FaFilm, path: '/lab/film-room' },
+  { title: 'Basketball IQ', body: 'Think faster.', icon: FaBrain, path: '/lab/iq' },
+  { title: 'Skill Challenges', body: 'Daily grind.', icon: FaBolt, path: '/lab/challenges' },
+  { title: 'Badge Lab', body: 'Track your progression.', icon: FaMedal, path: '/lab/badges' },
 ];
 
 function readHistory(): Workout[] {
@@ -168,7 +169,7 @@ export default function LabPage() {
         <section className="mt-8" aria-labelledby="lab-systems">
           <div className="flex items-end justify-between gap-4"><div><p className="text-[9px] font-black tracking-[.25em] text-white/30">EXPLORE THE SYSTEM</p><h2 id="lab-systems" className="mt-1 font-display text-2xl font-black uppercase">Choose your system</h2></div><span className="text-[8px] font-black uppercase tracking-widest text-white/25">6 systems</span></div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {modules.map(({ title, body, icon: Icon, target }) => <a key={title} href={`#${target}`} className="group min-h-[145px] rounded-xl border border-white/10 bg-[#0a111b] p-4 transition hover:-translate-y-1 hover:border-rcl-orange/60"><div className="grid h-10 w-10 place-items-center rounded-lg bg-white/5 text-rcl-orange transition group-hover:bg-rcl-orange group-hover:text-black"><Icon /></div><h3 className="mt-7 font-display text-sm font-black uppercase">{title}</h3><p className="mt-1 text-[9px] uppercase tracking-widest text-white/30">{body}</p></a>)}
+            {modules.map(({ title, body, icon: Icon, path }) => <Link key={title} href={path} className="group min-h-[145px] rounded-xl border border-white/10 bg-[#0a111b] p-4 transition hover:-translate-y-1 hover:border-rcl-orange/60"><div className="grid h-10 w-10 place-items-center rounded-lg bg-white/5 text-rcl-orange transition group-hover:bg-rcl-orange group-hover:text-black"><Icon /></div><h3 className="mt-7 font-display text-sm font-black uppercase">{title}</h3><p className="mt-1 text-[9px] uppercase tracking-widest text-white/30">{body}</p></Link>)}
           </div>
         </section>
 
