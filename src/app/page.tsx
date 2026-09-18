@@ -44,20 +44,14 @@ export default async function HomePage() {
               Enter the city <FaArrowRight />
             </Link>
           </div>
-          <div className="mt-12 flex items-end justify-between gap-4 sm:mt-16">
-            <div>
-              <p className="rcl-kicker">RICH CITY LEAGUE</p>
-              <p className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">Your game. Your people. Your city.</p>
-            </div>
-            <div className="hidden h-20 w-20 items-center justify-center rounded-full border border-rcl-orange/50 bg-rcl-orange/10 text-4xl text-rcl-orange shadow-[0_0_40px_rgba(249,115,22,.25)] sm:flex"><FaBasketball /></div>
-          </div>
+
         </Container>
       </section>
 
-      <Container maxWidth="xl" className="relative z-10 -mt-5 space-y-12 sm:-mt-8 sm:space-y-20">
+      <Container maxWidth="xl" className="rcl-home-content relative z-10 space-y-12 sm:space-y-20">
         <section aria-labelledby="destinations">
           <SectionHeader eyebrow="STEP INTO THE WORLD" title="Find your court" id="destinations" />
-          <div className="rcl-shortcuts">
+          <div className="rcl-shortcuts rcl-court-grid">
             <Destination href="/dashboard" icon={<FaCrown />} title="My Career" subtitle="Build your legacy" />
             <Destination href="/social" icon={<FaPeopleGroup />} title="Rich City Feed" subtitle="What&apos;s happening" />
             <Destination href="/stats" icon={<FaChartLine />} title="Player IQ" subtitle="See your impact" />
@@ -117,7 +111,7 @@ function SectionHeader({ eyebrow, title, href, id }: { eyebrow: string; title: s
 }
 
 function Destination({ href, icon, title, subtitle }: { href: string; icon: React.ReactNode; title: string; subtitle: string }) {
-  return <Link href={href} className="rcl-destination"><span className="rcl-destination-icon">{icon}</span><span><strong>{title}</strong><small>{subtitle}</small></span><FaArrowRight className="ml-auto text-slate-600" /></Link>;
+  return <Link href={href} className="rcl-destination"><span className="rcl-destination-icon">{icon}</span><span className="min-w-0"><strong>{title}</strong><small>{subtitle}</small></span><FaArrowRight className="ml-auto shrink-0 text-slate-500" /></Link>;
 }
 
 function GameCard({ game, teams }: { game: Awaited<ReturnType<typeof getLeagueSnapshot>>['games'][number]; teams: Awaited<ReturnType<typeof getLeagueSnapshot>>['teams'] }) {
