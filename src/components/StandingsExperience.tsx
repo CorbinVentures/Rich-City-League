@@ -42,7 +42,7 @@ export function StandingsExperience({ seasons, divisions, teams, teamSeasons, st
   const noResults = hasTeams && officialGames.length === 0;
 
   return (
-    <main className="min-h-screen bg-rcl-black text-white">
+    <main className="rcl-mock-page rcl-league-page min-h-screen bg-rcl-black text-white">
       <section className="rcl-standings-hero relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 opacity-25 [background:repeating-linear-gradient(115deg,transparent_0_5rem,rgba(255,107,26,.25)_5.1rem_5.2rem,transparent_5.3rem_10rem)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:py-24">
