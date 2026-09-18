@@ -28,7 +28,7 @@ export default async function CityPage() {
           <p className="rcl-kicker"><FaBolt /> RCL WORLD · RICHMOND, VIRGINIA</p>
           <h1 className="mt-5 max-w-3xl font-display text-5xl font-black uppercase leading-[.88] sm:text-8xl">Welcome to<br /><span className="text-rcl-orange">the city.</span></h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-slate-300">Play. Compete. Connect. Build your legacy in the Rich City basketball world.</p>
-          <Link href="#destinations" className="rcl-button mt-8 inline-flex items-center gap-3">Explore RCL <FaArrowRight /></Link>
+          <Link href="/city#destinations" className="rcl-button mt-8 inline-flex items-center gap-3">Explore RCL <FaArrowRight /></Link>
         </Container>
       </section>
 
