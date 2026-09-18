@@ -19,7 +19,8 @@ const featureCards = [
 function getLocalDateKey() { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; }
 
 export function SplashIntro() {
-  const [show, setShow] = useState(false); const [loading, setLoading] = useState(true);
+  const [show, setShow] = useState(false);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null); const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState<SplashConfig>({ enabled: true, title: 'RICH CITY LEAGUE', subtitle: 'THE HOME OF RICHMOND BASKETBALL', duration: 12 });
   const complete = useCallback(() => { if (typeof window !== 'undefined') window.localStorage.setItem(SPLASH_LAST_SEEN_KEY, getLocalDateKey()); setShow(false); setLoading(false); }, []);
   useEffect(() => {
@@ -28,12 +29,14 @@ export function SplashIntro() {
     setShow(true); setLoading(false);
     const supabase = getSupabaseClient();
     const loadConfig = async () => { try { if (!supabase) return; const result = await Promise.race([supabase.from('site_settings').select('value').eq('key', 'splash_config').maybeSingle(), new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 1800))]); const data = (result as { data?: { value?: unknown } | null } | null)?.data; if (data?.value) { const value = data.value as SplashConfig; setConfig(value); if (value.enabled === false) complete(); } } catch { /* Splash remains independent of CMS availability. */ } };
-    void loadConfig(); const failsafe = window.setTimeout(complete, 18000); return () => window.clearTimeout(failsafe);
+    void loadConfig();
+    if (supabase) void supabase.from('content_assets').select('image_url').eq('asset_key', 'splash.background').eq('is_active', true).maybeSingle().then(({ data }) => setBackgroundUrl((data as { image_url?: string | null } | null)?.image_url ?? null));
+    const failsafe = window.setTimeout(complete, 18000); return () => window.clearTimeout(failsafe);
   }, [complete]);
   if (!show && loading) return <div className="rcl-splash-loading" role="status" aria-label="Preparing Rich City League"><span>RCL</span></div>;
   if (!show) return null;
   return (
-    <div className="rcl-splash" role="dialog" aria-label="Rich City League introduction">
+    <div className="rcl-splash" role="dialog" aria-label="Rich City League introduction">{backgroundUrl && <img src={backgroundUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-30" />}
       <div className="rcl-splash-stars" aria-hidden="true" /><div className="rcl-splash-glow" aria-hidden="true" />
       <div className="rcl-splash-skyline-art" aria-hidden="true"><span /><i /><b /><em /></div><div className="rcl-splash-bridge-art" aria-hidden="true" />
       <div className="rcl-splash-player-art" aria-hidden="true"><div className="rcl-player-head" /><div className="rcl-player-body" /><div className="rcl-player-arm rcl-player-arm-left" /><div className="rcl-player-arm rcl-player-arm-right" /></div>
