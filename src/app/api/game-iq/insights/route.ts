@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getServerSupabaseClient } from '@/lib/supabase-server';
 
 function extractResponseText(payload: any): string {
   if (typeof payload?.output_text === 'string') return payload.output_text;
