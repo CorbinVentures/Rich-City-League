@@ -147,8 +147,8 @@ export default function DraftNightPage() {
           <div className="rcl-draft-module rcl-draft-hub">
             <div className="rcl-module-heading"><span className="rcl-module-icon"><FaCrown /></span><div><small>DRAFT HUB</small><h2>Draft control</h2></div></div>
             <div className="rcl-draft-countdown"><span>NEXT DRAFT</span><strong>{draft?.status === 'OPEN' ? 'LIVE NOW' : 'RCL SEASON DRAFT'}</strong><div><b>{draft?.current_pick ?? '—'}</b><small>PICK</small><b>{order.length}</b><small>ORDER</small></div></div>
-            <Link href="#draft-board" className="rcl-draft-primary">VIEW DRAFT BOARD <FaArrowRight /></Link>
-            <Link href="#rules" className="rcl-draft-secondary">DRAFT RULES</Link>
+            <Link href="/draft#draft-board" className="rcl-draft-primary">VIEW DRAFT BOARD <FaArrowRight /></Link>
+            <Link href="/draft#rules" className="rcl-draft-secondary">DRAFT RULES</Link>
           </div>
 
           <div id="draft-board" className="rcl-draft-module rcl-draft-board">
