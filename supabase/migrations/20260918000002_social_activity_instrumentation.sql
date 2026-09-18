@@ -1,7 +1,7 @@
 -- Social analytics instrumentation for relevance and community health.
 -- Only the authenticated profile may create its own activity events.
 
-create policy if not exists "users create own activity"
+drop policy if exists "users create own activity" on public.user_activity;\n\ncreate policy "users create own activity"
 on public.user_activity
 for insert
 with check (profile_id = auth.uid());
