@@ -1,4 +1,4 @@
-import type { GameEvent, PlayerGameStats, TeamGameStats } from '@/types/database';
+import type { GameEvent, PlayerGameStats } from '@/types/database';
 
 export type AdvancedPlayerMetrics = PlayerGameStats & {
   fg_pct: number;
