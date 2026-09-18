@@ -1,4 +1,6 @@
 -- RCL GAME IQ v2: lineup tracking, minutes and plus/minus derived from substitutions.
+alter table public.player_game_stats add column if not exists plus_minus integer not null default 0;
+
 alter table public.game_lineups
   add column if not exists segment_key text,
   add column if not exists seconds_played integer not null default 0;
@@ -309,4 +311,4 @@ end;
 $$;
 
 revoke execute on function public.record_game_event(uuid,integer,numeric,text,uuid,uuid,uuid,uuid,uuid,integer,integer,text,numeric,numeric,text,text,text,jsonb) from public,anon;
-grant execute on function public.record_game_event(uuid,integer,numeric,text,uuid,uuid,uuid,uuid,uuid,integer,integer,text,text,text,text,text,jsonb) to authenticated;
+grant execute on function public.record_game_event(uuid,integer,numeric,text,uuid,uuid,uuid,uuid,uuid,integer,integer,text,numeric,numeric,text,text,text,jsonb) to authenticated;
