@@ -5,7 +5,7 @@ import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Game, GameEvent, GameLineup, Player, PlayerGameStats, Team, TeamSeason, Roster } from '@/types/database';
-import { derivePlayerMetrics, describeEvent, formatClock, summarizeGame, zoneFromCoordinates } from '@/lib/game-iq';
+import { deriveGameAnalytics, derivePlayerMetrics, describeEvent, formatClock, summarizeGame, zoneFromCoordinates } from '@/lib/game-iq';
 
 type GameRow = Game & { home_team?: Team; away_team?: Team };
 
@@ -85,6 +85,8 @@ export default function ScorebookPage() {
     return candidates.at(-1)?.player_ids ?? [];
   }, [lineups, selectedGame, selectedTeamId, period]);
 
+  const analytics = selectedGame ? deriveGameAnalytics(selectedGame, events, stats, lineups) : null;
+  const selectedTeamAnalytics = analytics?.teams.find((item) => item.team_id === selectedTeamId);
   const selectedStat = stats.find((stat) => stat.player_id === selectedPlayerId);
   const selectedPlayer = players.find((player) => player.id === selectedPlayerId);
   const derived = selectedStat ? derivePlayerMetrics(selectedStat, summary?.possessions ?? 0) : null;
@@ -115,7 +117,6 @@ export default function ScorebookPage() {
       setSelectedPlayerId('');
       setAssistPlayerId('');
       setPendingShot(null);
-      setStartingFive([]);
       setSubOut('');
       setSubIn('');
     } catch (reason) {
@@ -438,6 +439,74 @@ export default function ScorebookPage() {
             <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
           </div>
         </section>
+
+        {analytics && (
+          <section className="mt-4 grid gap-4 lg:grid-cols-[1.15fr_1fr]">
+            <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+              <div className="flex items-center justify-between">
+                <div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Basketball Intelligence Engine</p><p className="mt-1 text-xs text-white/40">Deterministic analytics calculated from the live event stream.</p></div>
+                <span className="rounded-full border border-rcl-orange/20 bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">LIVE IQ</span>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  ['PACE / 48', selectedTeamAnalytics?.pace_48 ?? 0],
+                  ['ORtg', selectedTeamAnalytics?.offensive_rating ?? 0],
+                  ['DRtg', selectedTeamAnalytics?.defensive_rating ?? 0],
+                  ['NET', selectedTeamAnalytics?.net_rating ?? 0],
+                  ['eFG%', `${selectedTeamAnalytics?.efg_pct ?? 0}%`],
+                  ['TS%', `${selectedTeamAnalytics?.ts_pct ?? 0}%`],
+                  ['TOV%', `${selectedTeamAnalytics?.turnover_rate ?? 0}%`],
+                  ['ORB%', `${selectedTeamAnalytics?.offensive_rebound_rate ?? 0}%`],
+                ].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}
+              </div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {analytics.teams.map((team) => <div key={team.team_id} className="rounded-xl border border-white/5 bg-black/20 p-3">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-white/35">{teamName(team.team_id)}</p>
+                  <p className="mt-1 text-sm font-black">{team.points} PTS · {team.possessions} POSS</p>
+                  <p className="mt-1 text-[9px] text-white/35">ORtg {team.offensive_rating} · DRtg {team.defensive_rating} · Net {team.net_rating >= 0 ? '+' : ''}{team.net_rating}</p>
+                </div>)}
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Runs & Clutch</p>
+              <div className="mt-3 space-y-2">
+                {analytics.scoring_runs.slice().reverse().slice(0, 5).map((run, index) => <div key={`${run.team_id}-${run.start_period}-${run.start_clock}-${index}`} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
+                  <div><p className="text-[9px] font-black uppercase text-white/40">{teamName(run.team_id)} run</p><p className="mt-1 text-xs text-white/60">Q{run.start_period} {formatClock(run.start_clock)} → Q{run.end_period} {formatClock(run.end_clock)}</p></div>
+                  <span className="font-display text-xl font-black text-rcl-orange">{run.points}-0</span>
+                </div>)}
+                {!analytics.scoring_runs.length && <p className="rounded-xl bg-black/20 p-4 text-xs text-white/30">No 6+ point scoring run detected yet.</p>}
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {[selectedGame.home_team_id, selectedGame.away_team_id].map((teamId) => {
+                  const clutch = analytics.clutch[teamId];
+                  return <div key={teamId} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black uppercase text-white/30">{teamName(teamId)} clutch</p><p className="mt-1 text-lg font-black">{clutch.points} PTS</p><p className="text-[9px] text-white/35">{clutch.efg_pct}% eFG · {clutch.turnovers} TO</p></div>;
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {analytics && (
+          <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.25fr]">
+            <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Shot Zone Efficiency</p>
+              <div className="mt-3 space-y-2">
+                {Object.entries(analytics.shot_zones[selectedTeamId] ?? {}).sort((a,b) => b[1].attempts - a[1].attempts).slice(0, 8).map(([zone, value]) => <div key={zone} className="flex items-center justify-between rounded-xl bg-black/20 p-3"><div><p className="text-[10px] font-black uppercase">{zone.replace(/_/g, ' ')}</p><p className="mt-1 text-[9px] text-white/30">{value.made}/{value.attempts} FG · {value.points} PTS</p></div><span className="font-black">{value.fg_pct}%</span></div>)}
+                {!Object.keys(analytics.shot_zones[selectedTeamId] ?? {}).length && <p className="py-8 text-center text-xs text-white/25">Shot-zone data appears as shots are logged.</p>}
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Lineup Combinations</p>
+              <div className="mt-3 space-y-2">
+                {analytics.lineup_combinations.filter((lineup) => lineup.team_id === selectedTeamId).slice(0, 6).map((lineup) => <div key={`${lineup.team_id}-${lineup.player_ids.join('-')}`} className="rounded-xl bg-black/20 p-3">
+                  <div className="flex items-center justify-between"><p className="text-[9px] font-black uppercase text-white/55">{lineup.player_ids.map((id) => `#${players.find((p) => p.id === id)?.jersey_number ?? '--'}`).join(' · ')}</p><span className="text-[9px] font-black text-rcl-gold">{Math.round(lineup.seconds / 60)} MIN</span></div>
+                  <p className="mt-1 text-[9px] text-white/35">{lineup.points_for}-{lineup.points_against} · {lineup.plus_minus >= 0 ? '+' : ''}{lineup.plus_minus} +/- · {lineup.possessions} possessions</p>
+                </div>)}
+                {!analytics.lineup_combinations.filter((lineup) => lineup.team_id === selectedTeamId).length && <p className="py-8 text-center text-xs text-white/25">Save a starting five to unlock lineup analytics.</p>}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
