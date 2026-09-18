@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { FaArrowLeft, FaArrowRight, FaBasketball, FaBolt, FaBrain, FaChartLine, FaDumbbell, FaFilm, FaMedal } from 'react-icons/fa6';
 
 const modules = {
@@ -92,7 +93,8 @@ type ModuleKey = keyof typeof modules;
 
 export default async function LabModulePage({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
-  const config = modules[module as ModuleKey] ?? modules.training;
+  const config = modules[module as ModuleKey];
+  if (!config) notFound();
   const Icon = config.icon;
 
   return (
