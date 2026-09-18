@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   const game = gameResult.data;
   if (!game) return NextResponse.json({ error: 'Game not found.' }, { status: 404 });
-  const teamNames = new Map((teamsResult.data ?? []).map((team) => [team.id, team.name]));
+  const teamNames = new Map((teamsResult.data ?? []).map((team: { id: string; name: string }) => [team.id, team.name]));
   const payload = {
     game: {
       home: teamNames.get(game.home_team_id) ?? 'Home',
