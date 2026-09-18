@@ -13,6 +13,7 @@ function extractResponseText(payload: any): string {
 
 export async function POST(request: Request) {
   const supabase = await getSupabaseServerClient();
+  if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
   }
 
   const game = gameResult.data;
+  if (!game) return NextResponse.json({ error: 'Game not found.' }, { status: 404 });
   const teamNames = new Map((teamsResult.data ?? []).map((team) => [team.id, team.name]));
   const payload = {
     game: {
