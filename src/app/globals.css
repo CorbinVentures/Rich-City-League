@@ -481,3 +481,19 @@ img, video, canvas, svg { max-width: 100%; }
   .rcl-more-page .rcl-hub-tile { min-height:9rem; padding:.85rem; }
   .rcl-more-page .rcl-hub-tile > span:nth-child(2) { font-size:1rem; }
 }
+
+/* Admin operations hub */
+.rcl-admin-hub .rcl-admin-source-card,.rcl-admin-hub .rcl-admin-panel{border:1px solid rgba(255,255,255,.1);background:linear-gradient(145deg,rgba(14,29,45,.9),rgba(5,8,12,.95));box-shadow:0 1.5rem 4rem rgba(0,0,0,.2);}
+.rcl-admin-source-card{display:flex;min-width:17rem;flex-direction:column;gap:.45rem;border-radius:1rem;padding:1rem 1.15rem;}
+.rcl-admin-source-card strong{font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;font-size:1.15rem;letter-spacing:.03em;}
+.rcl-admin-source-card small{color:rgba(255,255,255,.35);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;}
+.rcl-admin-module{display:block;min-height:14rem;border:1px solid rgba(255,255,255,.09);border-radius:1rem;background:linear-gradient(145deg,rgba(12,25,40,.9),rgba(5,8,12,.96));padding:1rem;transition:.2s ease;}
+.rcl-admin-module:hover{transform:translateY(-2px);border-color:rgba(255,107,26,.48);background:linear-gradient(145deg,rgba(17,35,55,.95),rgba(5,8,12,.98));}
+.rcl-admin-icon{display:grid;height:2.7rem;width:2.7rem;place-items:center;border-radius:.75rem;background:rgba(255,107,26,.09);color:var(--rcl-orange);}
+.rcl-admin-badge{border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:.35rem .5rem;font-size:.48rem;font-weight:900;letter-spacing:.1em;}
+.rcl-admin-badge.leagueapps{color:#ffb36f;background:rgba(255,107,26,.07);}
+.rcl-admin-badge.bridge{color:#8fc5ff;background:rgba(50,130,220,.08);}
+.rcl-admin-badge.rcl{color:#a8b4c5;background:rgba(255,255,255,.04);}
+.rcl-admin-panel{border-radius:1rem;padding:1.25rem;}
+.rcl-admin-chip{display:inline-flex;align-items:center;gap:.45rem;border:1px solid rgba(255,255,255,.1);border-radius:.6rem;padding:.55rem .7rem;color:rgba(255,255,255,.55);font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;}
+@media(max-width:639px){.rcl-admin-hub .rcl-admin-source-card{min-width:0}.rcl-admin-hub h1{font-size:3.6rem!important}.rcl-admin-module{min-height:12rem}.rcl-admin-panel{padding:1rem}}
