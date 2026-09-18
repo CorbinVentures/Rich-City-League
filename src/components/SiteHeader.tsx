@@ -143,8 +143,11 @@ export function SiteHeader() {
             </button>
           </div>
 
-          {/* Auth & Notification Controls */}
+          {/* Auth & Registration Controls */}
           <div className="flex items-center gap-4">
+            <Link href="https://vba.leagueapps.com/leagues" className="rounded-full bg-rcl-gold px-4 py-1.5 text-xs font-bold tracking-wider text-black hover:bg-white transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+              REGISTER
+            </Link>
             {user ? (
               <div className="flex items-center gap-3">
                 {/* Notification Bell */}
@@ -180,12 +183,6 @@ export function SiteHeader() {
                   className="rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-bold tracking-wider text-white hover:border-rcl-gold hover:text-rcl-gold transition-all"
                 >
                   SIGN IN
-                </Link>
-                <Link
-                  href="https://vba.leagueapps.com/leagues"
-                  className="rounded-full bg-rcl-gold px-4 py-1.5 text-xs font-bold tracking-wider text-black hover:bg-white transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]"
-                >
-                  REGISTER
                 </Link>
               </div>
             )}
