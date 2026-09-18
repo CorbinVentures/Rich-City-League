@@ -107,6 +107,8 @@ export default function ScorebookPage() {
     }
   }
 
+  // loadGameData is intentionally kept local to this screen; the selected game changes through the explicit selector below.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (authLoading || !supabase || !profile) return;
     async function load() {
