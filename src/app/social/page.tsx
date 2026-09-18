@@ -44,7 +44,12 @@ export default function SocialPage() {
   const mediaInputRef = useRef<HTMLInputElement | null>(null); const storyInputRef = useRef<HTMLInputElement | null>(null);
 
   const signInForSocial = () => { window.location.href = '/auth/sign-in?redirect=/social'; };
-  const openComposer = () => { if (!user) { signInForSocial(); return; } setComposerOpen(true); };
+  const openComposer = () => { if (!user) { signInForSocial(); return; } setComposerOpen(true); };\n  const trackActivity = async (activity_type: string, entity_type?: string, entity_id?: string, metadata: Record<string, unknown> = {}) => {
+    if (!supabase || !user) return;
+    await supabase.from('user_activity').insert({ profile_id: user.id, activity_type, entity_type: entity_type ?? null, entity_id: entity_id ?? null, metadata } as never);
+  };
+
+
 
   const load = async () => {
     if (!supabase) { setLoading(false); setError('Social services are not configured.'); return; }
@@ -91,7 +96,7 @@ export default function SocialPage() {
   const createPost = async (e: React.FormEvent) => {
     e.preventDefault(); if (!supabase || !user) { signInForSocial(); return; } if (!body.trim() && !mediaFile) return;
     setPublishing(true); setError('');
-    try { const mediaUrl = mediaFile ? await uploadMedia(mediaFile, 'posts') : ''; const { data, error: insertError } = await supabase.from('posts').insert({ author_id: user.id, body: body.trim(), media_urls: mediaUrl ? [mediaUrl] : [], status: 'published' } as never).select('id,author_id,body,media_urls,created_at').single(); if (insertError) throw insertError; setBody(''); setMediaFile(null); setComposerOpen(false); if (data) setPosts((current) => [{ ...(data as unknown as Post), author: { id: user.id, display_name: 'You', username: null, avatar_url: null, role: 'member' }, comments: [], reactions: [] }, ...current]); }
+    try { const mediaUrl = mediaFile ? await uploadMedia(mediaFile, 'posts') : ''; const { data, error: insertError } = await supabase.from('posts').insert({ author_id: user.id, body: body.trim(), media_urls: mediaUrl ? [mediaUrl] : [], status: 'published' } as never).select('id,author_id,body,media_urls,created_at').single(); if (insertError) throw insertError; setBody(''); setMediaFile(null); setComposerOpen(false); void trackActivity('post_created', 'post', data?.id as string | undefined); if (data) setPosts((current) => [{ ...(data as unknown as Post), author: { id: user.id, display_name: 'You', username: null, avatar_url: null, role: 'member' }, comments: [], reactions: [] }, ...current]); }
     catch (publishError) { setError(publishError instanceof Error ? publishError.message : 'We could not publish that post.'); } finally { setPublishing(false); }
   };
   const createStory = async (e: React.FormEvent) => {
@@ -103,23 +108,23 @@ export default function SocialPage() {
     if (!supabase || !user) { signInForSocial(); return; } const post = posts.find((p) => p.id === postId); const existing = post?.reactions?.find((r) => r.user_id === user.id); const nextType = existing?.type === type ? null : type;
     setPosts((current) => current.map((p) => p.id !== postId ? p : { ...p, reactions: nextType ? [...(p.reactions ?? []).filter((r) => r.user_id !== user.id), { post_id: postId, user_id: user.id, type: nextType }] : (p.reactions ?? []).filter((r) => r.user_id !== user.id) }));
     const removed = existing ? await supabase.from('reactions').delete().eq('post_id', postId).eq('user_id', user.id) : { error: null }; if (removed.error) { setError(removed.error.message); void load(); return; }
-    if (nextType) { const added = await supabase.from('reactions').insert({ post_id: postId, user_id: user.id, type: nextType } as never); if (added.error) { setError(added.error.message); void load(); } }
+    if (nextType) { void trackActivity('reaction', 'post', postId, { reaction_type: nextType }); const added = await supabase.from('reactions').insert({ post_id: postId, user_id: user.id, type: nextType } as never); if (added.error) { setError(added.error.message); void load(); } }
   };
   const toggleSave = async (postId: string) => {
     if (!supabase || !user) { signInForSocial(); return; } const isSaved = saved.includes(postId); setSaved((current) => isSaved ? current.filter((id) => id !== postId) : [...current, postId]);
-    const result = isSaved ? await supabase.from('saved_posts').delete().eq('profile_id', user.id).eq('post_id', postId) : await supabase.from('saved_posts').insert({ profile_id: user.id, post_id: postId } as never); if (result.error) { setSaved((current) => isSaved ? [...current, postId] : current.filter((id) => id !== postId)); setError(result.error.message); }
+    const result = isSaved ? await supabase.from('saved_posts').delete().eq('profile_id', user.id).eq('post_id', postId) : await supabase.from('saved_posts').insert({ profile_id: user.id, post_id: postId } as never); if (result.error) { setSaved((current) => isSaved ? [...current, postId] : current.filter((id) => id !== postId)); setError(result.error.message); } else { void trackActivity(isSaved ? 'save_removed' : 'save_added', 'post', postId); }
   };
   const toggleFollow = async (profileId: string) => {
     if (!supabase || !user) { signInForSocial(); return; } if (profileId === user.id) return; const isFollowing = following.includes(profileId); setFollowing((current) => isFollowing ? current.filter((id) => id !== profileId) : [...current, profileId]);
-    const result = isFollowing ? await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', profileId) : await supabase.from('follows').insert({ follower_id: user.id, following_id: profileId } as never); if (result.error) { setFollowing((current) => isFollowing ? [...current, profileId] : current.filter((id) => id !== profileId)); setError(result.error.message); }
+    const result = isFollowing ? await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', profileId) : await supabase.from('follows').insert({ follower_id: user.id, following_id: profileId } as never); if (result.error) { setFollowing((current) => isFollowing ? [...current, profileId] : current.filter((id) => id !== profileId)); setError(result.error.message); } else { void trackActivity(isFollowing ? 'unfollow' : 'follow', 'profile', profileId); }
   };
   const addComment = async (postId: string) => {
     if (!supabase || !user) { signInForSocial(); return; } const text = comment[postId]?.trim(); if (!text) return; setComment((current) => ({ ...current, [postId]: '' }));
     const optimistic: Comment = { id: `local-${Date.now()}`, post_id: postId, author_id: user.id, body: text, created_at: new Date().toISOString(), author: { id: user.id, display_name: 'You', username: null } }; setPosts((current) => current.map((p) => p.id === postId ? { ...p, comments: [...(p.comments ?? []), optimistic] } : p));
-    const { error: commentError } = await supabase.from('comments').insert({ post_id: postId, author_id: user.id, body: text, parent_id: null } as never); if (commentError) { setError(commentError.message); void load(); }
+    const { error: commentError } = await supabase.from('comments').insert({ post_id: postId, author_id: user.id, body: text, parent_id: null } as never); if (commentError) { setError(commentError.message); void load(); } else { void trackActivity('comment', 'post', postId); }
   };
-  const sharePost = async (post: Post) => { const url = `${window.location.origin}/social#post-${post.id}`; try { if (navigator.share) await navigator.share({ title: 'Rich City Social', text: post.body.slice(0, 120), url }); else { await navigator.clipboard.writeText(url); setError('Post link copied to your clipboard.'); window.setTimeout(() => setError(''), 2200); } } catch { /* cancelled */ } };
-  const viewStory = async (index: number) => { setStoryIndex(index); const item = stories[index]; if (supabase && user && item) await supabase.from('story_views').upsert({ story_id: item.id, viewer_id: user.id } as never); };
+  const sharePost = async (post: Post) => { const url = `${window.location.origin}/social#post-${post.id}`; try { if (navigator.share) { await navigator.share({ title: 'Rich City Social', text: post.body.slice(0, 120), url }); void trackActivity('share', 'post', post.id); } else { await navigator.clipboard.writeText(url); void trackActivity('share', 'post', post.id); setError('Post link copied to your clipboard.'); window.setTimeout(() => setError(''), 2200); } } catch { /* cancelled */ } };
+  const viewStory = async (index: number) => { setStoryIndex(index); const item = stories[index]; if (supabase && user && item) { void trackActivity('story_view', 'story', item.id); await supabase.from('story_views').upsert({ story_id: item.id, viewer_id: user.id } as never); } };
   const deletePost = async (postId: string) => { if (!supabase || !user) return; if (!window.confirm('Delete this post?')) return; const result = await supabase.from('posts').delete().eq('id', postId).eq('author_id', user.id); if (result.error) { setError(result.error.message); return; } setPosts((current) => current.filter((p) => p.id !== postId)); };
 
   const visiblePosts = useMemo(() => {
