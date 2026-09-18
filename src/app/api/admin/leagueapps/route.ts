@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       configured: getLeagueAppsConfigStatus(),
       state: error ? [] : (state ?? []),
+      checkedAt: new Date().toISOString(),
     });
   }
 
@@ -43,11 +44,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Resource must be members-2 or registrations-2.' }, { status: 400 });
   }
 
-  const { data: previous } = await db
-    .from('leagueapps_sync_state')
-    .select('last_updated,last_id')
-    .eq('resource', resource)
-    .maybeSingle();
+  const { data: previous } = await db.from('leagueapps_sync_state').select('last_updated,last_id').eq('resource', resource).maybeSingle();
 
   let cursor = {
     lastUpdated: Number(previous?.last_updated ?? 0),
@@ -101,14 +98,7 @@ export async function GET(request: Request) {
       last_error: null,
     });
 
-    return NextResponse.json({
-      ok: true,
-      resource,
-      recordsSynced: total,
-      batches,
-      status,
-      cursor,
-    });
+    return NextResponse.json({ ok: true, resource, recordsSynced: total, batches, status, cursor });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'LeagueApps sync failed.';
     await db.from('leagueapps_sync_state').upsert({
