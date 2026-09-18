@@ -1,4 +1,64 @@
-export type Json =
+e
+
+export type GameEventType =
+  | 'shot_made' | 'shot_missed' | 'free_throw_made' | 'free_throw_missed'
+  | 'rebound_off' | 'rebound_def' | 'assist' | 'steal' | 'block'
+  | 'turnover' | 'foul' | 'substitution' | 'timeout' | 'violation'
+  | 'period_start' | 'period_end' | 'score_adjustment' | 'possession';
+
+export interface GameEvent {
+  id: string;
+  game_id: string;
+  period_number: number;
+  clock_seconds: number;
+  sequence_no: number;
+  event_type: GameEventType;
+  team_id: string | null;
+  player_id: string | null;
+  secondary_player_id: string | null;
+  player_in_id: string | null;
+  player_out_id: string | null;
+  points: number;
+  shot_value: 1 | 2 | 3 | null;
+  shot_result: 'made' | 'missed' | null;
+  shot_x: number | null;
+  shot_y: number | null;
+  shot_zone: string | null;
+  foul_type: string | null;
+  turnover_type: string | null;
+  metadata: Json;
+  created_by: string | null;
+  created_at: string;
+  voided_at: string | null;
+}
+
+export interface GameLineup {
+  id: string;
+  game_id: string;
+  team_id: string;
+  player_ids: string[];
+  period_number: number;
+  started_clock_seconds: number;
+  ended_clock_seconds: number | null;
+  plus_minus: number;
+  possessions: number;
+  points_for: number;
+  points_against: number;
+  created_at: string;
+}
+
+export interface GameAIInsight {
+  id: string;
+  game_id: string;
+  insight_type: string;
+  title: string;
+  body: string;
+  data: Json;
+  confidence: number | null;
+  generated_at: string;
+  created_by: string | null;
+}
+xport type Json =
   | string
   | number
   | boolean
@@ -25,6 +85,9 @@ export interface Database {
       team_coaches: { Row: TeamCoach; Insert: Insert<TeamCoach>; Update: Update<TeamCoach> };
       rosters: { Row: Roster; Insert: Insert<Roster>; Update: Update<Roster> };
       games: { Row: Game; Insert: Insert<Game>; Update: Update<Game> };
+      game_events: { Row: GameEvent; Insert: Insert<GameEvent>; Update: Update<GameEvent> };
+      game_lineups: { Row: GameLineup; Insert: Insert<GameLineup>; Update: Update<GameLineup> };
+      game_ai_insights: { Row: GameAIInsight; Insert: Insert<GameAIInsight>; Update: Update<GameAIInsight> };
       player_game_stats: { Row: PlayerGameStats; Insert: Insert<PlayerGameStats>; Update: Update<PlayerGameStats> };
       team_game_stats: { Row: TeamGameStats; Insert: Insert<TeamGameStats>; Update: Update<TeamGameStats> };
       standings: { Row: Standing; Insert: Insert<Standing>; Update: Update<Standing> };
