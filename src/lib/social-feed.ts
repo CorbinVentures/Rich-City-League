@@ -67,7 +67,7 @@ export function scoreSocialPost(post: SocialFeedPost, context: FeedContext) {
   );
 }
 
-export function rankSocialPosts(posts: SocialFeedPost[], context: FeedContext) {
+export function rankSocialPosts<T extends SocialFeedPost>(posts: T[], context: FeedContext): T[] {
   return [...posts]
     .map((post, index) => ({ post, index, score: scoreSocialPost(post, context) }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
