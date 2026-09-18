@@ -43,7 +43,7 @@ export function StandingsExperience({ seasons, divisions, teams, teamSeasons, st
 
   return (
     <main className="rcl-mock-page rcl-league-page min-h-screen bg-rcl-black text-white">
-      <section className="rcl-standings-hero relative overflow-hidden border-b border-white/10">
+      <section className="rcl-standings-hero relative overflow-hidden border-b border-white/10"><ContentAssetBackground assetKey="league.cover" opacity={0.14} />
         <div className="absolute inset-0 opacity-25 [background:repeating-linear-gradient(115deg,transparent_0_5rem,rgba(255,107,26,.25)_5.1rem_5.2rem,transparent_5.3rem_10rem)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:py-24">
           <p className="rcl-kicker">Official RCL league table</p>
