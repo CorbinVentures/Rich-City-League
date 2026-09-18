@@ -26,16 +26,18 @@ type SyncState = {
   last_error: string | null;
 };
 
+const leagueAppsAdminUrl = 'https://manager.leagueapps.com/console/sites/2294';
+
 const areas: Area[] = [
-  { title: 'Registrations', eyebrow: 'MEMBERS', description: 'Open programs, registration status, waitlists, waivers, participant records and registration workflows.', icon: FaFileLines, state: 'leagueapps' },
+  { title: 'Registrations', eyebrow: 'MEMBERS', description: 'Open programs, registration status, waitlists, waivers, participant records and registration workflows.', icon: FaFileLines, href: leagueAppsAdminUrl, state: 'leagueapps' },
   { title: 'Members & Families', eyebrow: 'PEOPLE', description: 'Search participants, profiles, guardians, contact information, eligibility and account status.', icon: FaPeopleGroup, state: 'bridge' },
   { title: 'Teams & Rosters', eyebrow: 'ROSTER', description: 'Build teams, assign players and coaches, manage roster movement and season assignments.', icon: FaBasketball, href: '/admin/operations', state: 'bridge' },
-  { title: 'Scheduling', eyebrow: 'GAME CENTER', description: 'Create, edit and publish games, practices, events, venues and schedule changes.', icon: FaCalendarDays, href: '/admin/operations', state: 'leagueapps' },
+  { title: 'Scheduling', eyebrow: 'GAME CENTER', description: 'Create, edit and publish games, practices, events, venues and schedule changes.', icon: FaCalendarDays, href: leagueAppsAdminUrl, state: 'leagueapps' },
   { title: 'Scores & Standings', eyebrow: 'COMPETITION', description: 'Enter official scores, box scores, player stats and standings from one RCL control surface.', icon: FaChartLine, href: '/admin', state: 'rcl' },
-  { title: 'Payments & Invoices', eyebrow: 'FINANCE', description: 'Registration payments, invoices, balances, refunds, payment plans and financial reporting.', icon: FaCreditCard, state: 'leagueapps' },
-  { title: 'Communications', eyebrow: 'ENGAGEMENT', description: 'Send targeted or organization-wide email, text, alerts and league announcements.', icon: FaComments, state: 'leagueapps' },
-  { title: 'Reports & Analytics', eyebrow: 'INTELLIGENCE', description: 'Registration, transactions, attendance, program performance and organization KPIs.', icon: FaChartLine, state: 'leagueapps' },
-  { title: 'Facilities', eyebrow: 'VENUES', description: 'Courts, bookings, conflicts, facility invoices and venue availability.', icon: FaBuilding, state: 'leagueapps' },
+  { title: 'Payments & Invoices', eyebrow: 'FINANCE', description: 'Registration payments, invoices, balances, refunds, payment plans and financial reporting.', icon: FaCreditCard, href: leagueAppsAdminUrl, state: 'leagueapps' },
+  { title: 'Communications', eyebrow: 'ENGAGEMENT', description: 'Send targeted or organization-wide email, text, alerts and league announcements.', icon: FaComments, href: leagueAppsAdminUrl, state: 'leagueapps' },
+  { title: 'Reports & Analytics', eyebrow: 'INTELLIGENCE', description: 'Registration, transactions, attendance, program performance and organization KPIs.', icon: FaChartLine, href: leagueAppsAdminUrl, state: 'leagueapps' },
+  { title: 'Facilities', eyebrow: 'VENUES', description: 'Courts, bookings, conflicts, facility invoices and venue availability.', icon: FaBuilding, href: leagueAppsAdminUrl, state: 'leagueapps' },
   { title: 'Content & Marketing', eyebrow: 'RCL MEDIA', description: 'News, pages, media, homepage content, campaigns and public-facing league information.', icon: FaNewspaper, href: '/admin/control-center', state: 'rcl' },
   { title: 'Staff & Permissions', eyebrow: 'SECURITY', description: 'Admin roles, staff access, program assignments and permission boundaries.', icon: FaUserShield, href: '/admin/control-center', state: 'rcl' },
   { title: 'Data Sync', eyebrow: 'INTEGRATION', description: 'Monitor LeagueApps imports, RCL IDs, last sync, failures and reconciliation.', icon: FaDatabase, state: 'bridge' },
@@ -147,6 +149,7 @@ export default function LeagueAppsAdminHub() {
       <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(({ title, eyebrow, description, href, icon: Icon, state }) => {
           const body = <><div className="flex items-start justify-between"><span className="rcl-admin-icon"><Icon /></span><span className={`rcl-admin-badge ${state}`}>{statusLabel[state]}</span></div><p className="mt-6 text-[9px] font-black tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-2 font-display text-xl font-black uppercase">{title}</h2><p className="mt-2 min-h-12 text-xs leading-5 text-white/40">{description}</p><span className="mt-5 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.16em] text-white/65">Open control <FaArrowRight /></span></>;
+          if (href?.startsWith('http')) return <a key={title} href={href} target="_blank" rel="noreferrer" className="rcl-admin-module">{body}</a>;
           if (href) return <Link key={title} href={href} className="rcl-admin-module">{body}</Link>;
           if (title === 'Data Sync') {
             return <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => document.getElementById('leagueapps-sync')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{body}</button>;
