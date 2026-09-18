@@ -24,7 +24,8 @@ import {
   FaPeopleGroup,
   FaCrown,
   FaTrophy,
-  FaShirt
+  FaShirt,
+  FaMagnifyingGlass
 } from 'react-icons/fa6';
 
 export function SiteHeader() {
