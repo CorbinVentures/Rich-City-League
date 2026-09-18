@@ -110,7 +110,7 @@ export default function LeagueAppsAdminHub() {
     </section>
 
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="rcl-admin-panel mb-6">
+      <div id="leagueapps-sync" className="rcl-admin-panel mb-6 scroll-mt-24">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="rcl-kicker">LIVE INTEGRATION</p>
@@ -147,7 +147,11 @@ export default function LeagueAppsAdminHub() {
       <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(({ title, eyebrow, description, href, icon: Icon, state }) => {
           const body = <><div className="flex items-start justify-between"><span className="rcl-admin-icon"><Icon /></span><span className={`rcl-admin-badge ${state}`}>{statusLabel[state]}</span></div><p className="mt-6 text-[9px] font-black tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-2 font-display text-xl font-black uppercase">{title}</h2><p className="mt-2 min-h-12 text-xs leading-5 text-white/40">{description}</p><span className="mt-5 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.16em] text-white/65">Open control <FaArrowRight /></span></>;
-          return href ? <Link key={title} href={href} className="rcl-admin-module">{body}</Link> : <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => window.alert(`${title} is connected through LeagueApps. Connect the LeagueApps API to enable this control inside RCL.`)}>{body}</button>;
+          if (href) return <Link key={title} href={href} className="rcl-admin-module">{body}</Link>;
+          if (title === 'Data Sync') {
+            return <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => document.getElementById('leagueapps-sync')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{body}</button>;
+          }
+          return <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => window.alert(`${title} is a LeagueApps-controlled operation. Use the LeagueApps controls above when API access is enabled.`)}>{body}</button>;
         })}
       </div>
 
