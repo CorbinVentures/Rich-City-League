@@ -31,7 +31,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to load the official game data.' }, { status: 500 });
   }
 
-  const game = gameResult.data;
+  const game = gameResult.data as unknown as {
+    id: string;
+    home_team_id: string;
+    away_team_id: string;
+    home_score: number;
+    away_score: number;
+    status: string;
+    season_id: string;
+  } | null;
   if (!game) return NextResponse.json({ error: 'Game not found.' }, { status: 404 });
   const teamNames = new Map((teamsResult.data ?? []).map((team: { id: string; name: string }) => [team.id, team.name]));
   const payload = {
