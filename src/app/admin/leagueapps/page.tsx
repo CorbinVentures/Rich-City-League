@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaArrowRight, FaBasketball, FaCalendarDays, FaChartLine, FaComments,
   FaCreditCard, FaFileLines, FaPeopleGroup, FaBuilding,
@@ -61,19 +62,37 @@ export default function LeagueAppsAdminHub() {
   const totalSynced = syncState.reduce((sum, row) => sum + Number(row.records_synced || 0), 0);
   const lastSynced = syncState.map(row => row.last_synced_at).filter(Boolean).sort().at(-1) ?? null;
 
+  async function getAuthHeaders() {
+    const client = getSupabaseClient();
+    if (!client) throw new Error('Supabase client is unavailable.');
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    const token = data.session?.access_token;
+    if (!token) throw new Error('Your admin session is not available. Please sign in again.');
+    return { Authorization: `Bearer ${token}` };
+  }
+
   async function loadIntegrationStatus() {
-    const response = await fetch('/api/admin/leagueapps?action=status', { cache: 'no-store' });
-    if (!response.ok) return;
-    const data = await response.json();
-    setConfigured(Boolean(data.configured?.configured));
-    setSyncState(data.state ?? []);
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/admin/leagueapps?action=status', { cache: 'no-store', headers });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to load the LeagueApps connection.');
+      setConfigured(Boolean(data.configured?.configured));
+      setSyncState(data.state ?? []);
+      setSyncMessage('');
+    } catch (error) {
+      setConfigured(false);
+      setSyncMessage(error instanceof Error ? error.message : 'Unable to load the LeagueApps connection.');
+    }
   }
 
   async function runSync(resource: 'members-2' | 'registrations-2') {
     setSyncing(resource);
     setSyncMessage('');
     try {
-      const response = await fetch(`/api/admin/leagueapps?action=sync&resource=${resource}`, { method: 'GET', cache: 'no-store' });
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/admin/leagueapps?action=sync&resource=${resource}`, { method: 'GET', cache: 'no-store', headers });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Sync failed.');
       setSyncMessage(`${resource === 'members-2' ? 'Members' : 'Registrations'} synced: ${data.recordsSynced} record(s).`);
@@ -118,7 +137,7 @@ export default function LeagueAppsAdminHub() {
             <p className="rcl-kicker">LIVE INTEGRATION</p>
             <h2 className="rcl-display mt-2 text-3xl uppercase">LeagueApps <span className="text-rcl-orange">bridge.</span></h2>
             <p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">
-              {configured ? 'Server credentials are configured. RCL can now pull private LeagueApps member and registration exports without exposing the key to the browser.' : 'The server bridge is installed, but LeagueApps credentials have not been configured in the deployment environment yet.'}
+              {configured ? 'Server credentials are configured. RCL can now pull private LeagueApps member and registration exports without exposing the key to the browser.' : 'The server bridge is installed, but the LeagueApps connection could not be verified yet.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
