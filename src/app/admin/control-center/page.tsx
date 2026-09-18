@@ -109,17 +109,57 @@ export default function AdminControlCenterPage() {
   async function uploadSiteImage(asset: any, file: File) {
     if (!supabase || !user || !file.type.startsWith('image/')) { setMessage('Please choose an image file.'); return; }
     setBusy(true);
-    const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
-    const path = `site/${asset.asset_key}/${Date.now()}-${safeName}`;
-    const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { upsert: true, contentType: file.type });
-    if (uploadError) { setMessage(uploadError.message); setBusy(false); return; }
-    const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(path);
-    const { error } = await supabase.from('content_assets').update({ image_url: publicUrl.publicUrl, storage_path: path, updated_by: user.id } as never).eq('id', asset.id);
-    if (error) setMessage(error.message);
-    else { await audit('ADMIN_CONTENT_IMAGE_UPLOAD', `Updated site image ${asset.asset_key}`); setMessage(`${asset.title} updated.`); await load(); }
-    setBusy(false);
-  }
+    setMessage(`Uploading ${asset.title}…`);
+    try {
+      const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+      const path = `site/${asset.asset_key}/${Date.now()}-${safeName}`;
 
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
+      if (uploadError || !uploaded?.path) {
+        setMessage(`Upload failed for ${asset.title}: ${uploadError?.message ?? 'Storage did not return a file path.'}`);
+        return;
+      }
+
+      const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(uploaded.path);
+      if (!publicUrl?.publicUrl) {
+        setMessage(`Upload succeeded, but no public URL was returned for ${asset.title}.`);
+        return;
+      }
+
+      const { data: updated, error: updateError } = await supabase
+        .from('content_assets')
+        .update({ image_url: publicUrl.publicUrl, storage_path: uploaded.path, updated_by: user.id } as never)
+        .eq('id', asset.id)
+        .select('id,asset_key,title,image_url,storage_path,is_active,updated_at')
+        .single();
+
+      if (updateError || !updated) {
+        setMessage(`Storage upload succeeded, but CMS update failed for ${asset.title}: ${updateError?.message ?? 'No row was returned.'}`);
+        return;
+      }
+
+      const { data: verified, error: verifyError } = await supabase
+        .from('content_assets')
+        .select('image_url,storage_path,updated_at')
+        .eq('id', asset.id)
+        .single();
+
+      if (verifyError || verified?.storage_path !== uploaded.path || verified?.image_url !== publicUrl.publicUrl) {
+        setMessage(`Image saved, but verification failed for ${asset.title}. Please refresh before replacing it again.`);
+        return;
+      }
+
+      await audit('ADMIN_CONTENT_IMAGE_UPLOAD', `Updated site image ${asset.asset_key}`);
+      setMessage(`${asset.title} is LIVE.`);
+      await load();
+    } catch (error) {
+      setMessage(`Image update failed for ${asset.title}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function updateAsset(asset: any, patch: Record<string, unknown>) {
     if (!supabase || !user) return;
     const { error } = await supabase.from('content_assets').update({ ...patch, updated_by: user.id } as never).eq('id', asset.id);
