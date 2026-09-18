@@ -361,15 +361,13 @@ img, video, canvas, svg { max-width: 100%; }
   .rcl-site-header .flex.items-center.gap-4 a { white-space: nowrap; }
   .rcl-site-header .flex.items-center.gap-4 a[href="/auth/sign-in"] { padding: .65rem .9rem !important; font-size: .7rem !important; }
   .rcl-site-header .flex.items-center.gap-4 a[href="/register"] { padding: .7rem 1rem !important; font-size: .68rem !important; }
-  .rcl-site-header .rcl-brand ~ .flex { display: none !important; }
-  .rcl-site-header .rcl-brand + nav { display: none !important; }
-  .rcl-site-header .rcl-brand + nav + .hidden { display: none !important; }
-  .rcl-site-header .flex.items-center.gap-4::after { content: ''; display: block; width: 2rem; height: 2rem; border: 1px solid rgba(255,255,255,.14); border-radius: .7rem; margin-left: .2rem; }
+  .rcl-site-header-inner > .hidden { display: none !important; }
+  .rcl-site-header .flex.items-center.gap-4::after { content: ''; display: block; width: 2rem; height: 2rem; border: 1px solid rgba(255,255,255,.14); border-radius: .7rem; margin-left: .2rem; flex: 0 0 auto; }
 
   .rcl-world { padding-bottom: 5.2rem !important; }
   .rcl-hero { min-height: 42rem !important; align-items: flex-start !important; background: linear-gradient(135deg, #151d2b 0%, #21191b 58%, #111824 100%) !important; }
   .rcl-hero .rcl-skyline { height: 32%; opacity: .3 !important; bottom: 0; }
-  .rcl-hero > div[class*="z-10"] { padding: 13.2rem 1.7rem 3rem !important; }
+  .rcl-hero > div[class*="z-10"] { padding: 7.4rem 1.7rem 3rem !important; }
   .rcl-hero .rcl-kicker { font-size: .62rem !important; letter-spacing: .17em !important; }
   .rcl-hero h1 { max-width: 20rem !important; margin-top: 1.9rem !important; font-size: 4.1rem !important; line-height: .84 !important; letter-spacing: -.045em !important; }
   .rcl-hero h1 + p { max-width: 21rem !important; margin-top: 2rem !important; font-size: .92rem !important; line-height: 1.8rem !important; color: #d2d6df !important; }
