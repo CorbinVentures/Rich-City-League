@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from '@/lib/supabase-config';
 
-export async function getServerSupabaseClient() {
+export async function getServerSupabaseClient(accessToken?: string | null) {
   const config = getSupabaseConfig();
   if (config.status !== 'configured') return null;
 
@@ -20,5 +20,8 @@ export async function getServerSupabaseClient() {
         }
       },
     },
+    global: accessToken
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : undefined,
   });
 }
