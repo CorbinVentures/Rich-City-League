@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   FaArrowRight, FaBasketball, FaCalendarDays, FaChartLine, FaComments,
   FaCreditCard, FaFileLines, FaPeopleGroup, FaBuilding,
-  FaUserShield, FaNewspaper, FaDatabase, FaRotate
+  FaUserShield, FaNewspaper, FaDatabase, FaRotate, FaClock
 } from 'react-icons/fa6';
 
 type Area = {
