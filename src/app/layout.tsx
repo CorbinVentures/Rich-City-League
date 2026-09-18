@@ -4,6 +4,7 @@ import '@/components/RclSplashMockup.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
+import { DraftChime } from '@/components/DraftChime';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityleague.com'),
@@ -15,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><SiteHeader /><AdminControlShortcut />{children}</body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><SiteHeader /><AdminControlShortcut />{children}</body></html>;
 }
