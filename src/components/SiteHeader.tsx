@@ -132,7 +132,7 @@ export function SiteHeader() {
           </nav>
 
           <div className="rcl-mobile-actions flex items-center gap-2 lg:hidden">
-            <Link href="/social" aria-label="Search RCL" className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
+            <Link href="/search" aria-label="Search RCL" className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
               <FaMagnifyingGlass className="h-4 w-4" />
             </Link>
             <Link href={user ? "/dashboard" : "/auth/sign-in"} aria-label={user ? "Open profile" : "Sign in"} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
