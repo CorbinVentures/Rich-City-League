@@ -182,7 +182,7 @@ export function SiteHeader() {
                   SIGN IN
                 </Link>
                 <Link
-                  href="/register"
+                  href="https://vba.leagueapps.com/leagues"
                   className="rounded-full bg-rcl-gold px-4 py-1.5 text-xs font-bold tracking-wider text-black hover:bg-white transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]"
                 >
                   REGISTER
@@ -309,7 +309,7 @@ export function SiteHeader() {
                     SIGN IN
                   </Link>
                   <Link
-                    href="/register"
+                    href="https://vba.leagueapps.com/leagues"
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full py-3 rounded-xl bg-rcl-gold text-center text-xs font-bold tracking-widest text-black hover:bg-white"
                   >
