@@ -21,7 +21,11 @@ function getConfig(): LeagueAppsConfig | null {
   return {
     siteId,
     clientId,
-    privateKey: privateKey.replace(/\\n/g, '\n'),
+    privateKey: privateKey
+      .replace(/^\uFEFF/, '')
+      .replace(/^["']|["']$/g, '')
+      .replace(/\\n/g, '\n')
+      .trim(),
     authBaseUrl: (process.env.LEAGUEAPPS_AUTH_BASE_URL || 'https://auth.leagueapps.io').replace(/\/$/, ''),
     apiBaseUrl: (process.env.LEAGUEAPPS_API_BASE_URL || 'https://admin.leagueapps.io').replace(/\/$/, ''),
   };
@@ -55,7 +59,15 @@ function createClientAssertion(config: LeagueAppsConfig) {
   const signer = createSign('RSA-SHA256');
   signer.update(unsigned);
   signer.end();
-  const signature = signer.sign(createPrivateKey(config.privateKey)).toString('base64url');
+  let privateKey;
+  try {
+    privateKey = createPrivateKey({ key: config.privateKey, format: 'pem' });
+  } catch {
+    throw new Error(
+      'LeagueApps private key could not be decoded. Vercel must contain the PEM private key converted from the LeagueApps .p12 file, including its BEGIN/END PRIVATE KEY lines.'
+    );
+  }
+  const signature = signer.sign(privateKey).toString('base64url');
   return `${unsigned}.${signature}`;
 }
 
