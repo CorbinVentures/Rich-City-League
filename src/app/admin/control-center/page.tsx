@@ -144,7 +144,7 @@ export default function AdminControlCenterPage() {
         .from('content_assets')
         .select('image_url,storage_path,updated_at')
         .eq('id', asset.id)
-        .single();
+        .single() as { data: { image_url: string | null; storage_path: string | null; updated_at: string | null } | null; error: { message: string } | null };
 
       if (verifyError || verified?.storage_path !== uploaded.path || verified?.image_url !== publicUrl.publicUrl) {
         setMessage(`Image saved, but verification failed for ${asset.title}. Please refresh before replacing it again.`);
