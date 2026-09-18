@@ -135,7 +135,7 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-2 lg:hidden">
             <button aria-label="Search RCL" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/60">
-              <FaChartSimple className="h-3.5 w-3.5" />
+              <FaMagnifyingGlass className="h-3.5 w-3.5" />
             </button>
             <Link href={user ? "/dashboard" : "/auth/sign-in"} aria-label={user ? "Open profile" : "Sign in"} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/70">
               {user ? (
