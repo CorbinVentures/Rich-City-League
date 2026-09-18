@@ -96,19 +96,16 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-45 border-b border-white/10 bg-[#07090d]/95 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur font-display">
-        <div className="mx-auto flex max-w-7xl h-18 items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="rcl-texture flex h-10 w-10 items-center justify-center rounded-lg border-2 border-rcl-orange bg-rcl-navy font-extrabold text-rcl-orange shadow-[0_0_10px_rgba(255,107,26,0.3)] transition-all group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,107,26,0.45)]">
+      <header className="rcl-site-header sticky top-0 z-45 border-b border-white/10 bg-[#07090d]/95 shadow-[0_4px_30px_rgba(0,0,0,0.8)] backdrop-blur font-display">
+        <div className="rcl-site-header-inner mx-auto flex max-w-7xl h-18 items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="rcl-brand group flex items-center gap-4">
+            <div className="rcl-brand-mark rcl-texture flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-rcl-orange bg-rcl-navy font-extrabold text-lg text-rcl-orange shadow-[0_0_18px_rgba(255,107,26,0.22)] transition-all group-hover:scale-105">
               R
             </div>
-            <div>
-              <span className="block text-sm font-black tracking-[0.2em] text-white">
-                RICH CITY <span className="text-rcl-orange">LEAGUE</span>
-              </span>
-              <span className="block text-[9px] font-bold tracking-[0.35em] text-gray-400">
-                THE CITY IS THE COURT
-              </span>
+            <div className="leading-none">
+              <span className="block text-[18px] font-black tracking-[0.24em] text-white">RICH CITY</span>
+              <span className="mt-1 block text-[18px] font-black tracking-[0.24em] text-rcl-orange">LEAGUE</span>
+              <span className="mt-2 block text-[9px] font-bold tracking-[0.38em] text-gray-400">THE CITY IS THE COURT</span>
             </div>
           </Link>
 
@@ -134,18 +131,7 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2 lg:hidden">
-            <button aria-label="Search RCL" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/60">
-              <FaMagnifyingGlass className="h-3.5 w-3.5" />
-            </button>
-            <Link href={user ? "/dashboard" : "/auth/sign-in"} aria-label={user ? "Open profile" : "Sign in"} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/70">
-              {user ? (
-                <span className="text-[10px] font-black text-rcl-orange">{profile?.display_name?.[0] ?? user.email?.[0] ?? 'P'}</span>
-              ) : (
-                <FaUser className="h-3.5 w-3.5" />
-              )}
-            </Link>
-          </div>
+          <div className="hidden lg:hidden" aria-hidden="true" />
 
           {/* Auth & Notification Controls */}
           <div className="flex items-center gap-4">
@@ -207,12 +193,14 @@ export function SiteHeader() {
       </header>
 
             <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#05080d]/96 backdrop-blur-xl shadow-[0_-10px_35px_rgba(0,0,0,0.7)] font-display pb-[env(safe-area-inset-bottom)] lg:hidden">
-        <div className="mx-auto grid min-h-16 max-w-xl grid-cols-5 items-center px-2">
+        <div className="mx-auto grid min-h-16 max-w-xl grid-cols-7 items-center px-2">
           {[
             { label: 'HOME', href: '/', icon: FaHouse },
             { label: 'PLAYERS', href: '/players', icon: FaUser },
             { label: 'GAMES', href: '/games', icon: FaCalendarDays },
+            { label: 'RCL', href: '/dashboard', icon: FaCrown },
             { label: 'SOCIAL', href: '/social', icon: FaUsers },
+            { label: 'FANTASY', href: '/fantasy', icon: FaTrophy },
           ].map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             const Icon = link.icon;
