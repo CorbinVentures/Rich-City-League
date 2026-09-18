@@ -51,6 +51,8 @@ export default function ScorebookPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [aiInsight, setAiInsight] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
 
   const isStaff = profile?.role === 'admin' || profile?.role === 'staff';
   const isCoach = profile?.role === 'coach';
@@ -194,6 +196,42 @@ export default function ScorebookPage() {
     }
   }
 
+  async function runGameIQ() {
+    if (!selectedGameId) return;
+    setAiBusy(true);
+    setError('');
+    try {
+      const response = await fetch('/api/game-iq/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: selectedGameId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Game IQ analysis failed.');
+      setAiInsight(data.insight ?? '');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Game IQ analysis failed.');
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  async function finalizeScorebook() {
+    if (!supabase || !selectedGameId || busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { data, error: rpcError } = await supabase.rpc('finalize_game_scorebook', { target_game_id: selectedGameId } as never);
+      if (rpcError) throw rpcError;
+      setGames((current) => current.map((game) => game.id === selectedGameId ? { ...game, ...(data as Game) } : game));
+      setMessage('Scorebook finalized. Official box score is locked into the league data pipeline.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to finalize the scorebook.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function undoLast() {
     const latest = events.find((event) => !event.voided_at);
     if (!latest || !supabase) return;
@@ -250,6 +288,11 @@ export default function ScorebookPage() {
 
         {error && <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
         {message && <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</div>}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>
+          <button disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
+        </div>
+        {aiInsight && <section className="mt-4 rounded-2xl border border-rcl-gold/20 bg-rcl-gold/[.06] p-4"><p className="text-[9px] font-black uppercase tracking-widest text-rcl-gold">RCL Game IQ · AI Coach Report</p><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-white/75">{aiInsight}</p></section>}
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
