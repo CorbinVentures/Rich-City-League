@@ -131,7 +131,17 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <div className="hidden lg:hidden" aria-hidden="true" />
+          <div className="rcl-mobile-actions flex items-center gap-2 lg:hidden">
+            <Link href="/social" aria-label="Search RCL" className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
+              <FaMagnifyingGlass className="h-4 w-4" />
+            </Link>
+            <Link href={user ? "/dashboard" : "/auth/sign-in"} aria-label={user ? "Open profile" : "Sign in"} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
+              {user ? <span className="text-xs font-black text-rcl-orange">{profile?.display_name?.[0] ?? user.email?.[0] ?? 'P'}</span> : <FaUser className="h-4 w-4" />}
+            </Link>
+            <button onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/65">
+              <FaBars className="h-4 w-4" />
+            </button>
+          </div>
 
           {/* Auth & Notification Controls */}
           <div className="flex items-center gap-4">
@@ -193,14 +203,12 @@ export function SiteHeader() {
       </header>
 
             {pathname !== '/social' && <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#05080d]/96 backdrop-blur-xl shadow-[0_-10px_35px_rgba(0,0,0,0.7)] font-display pb-[env(safe-area-inset-bottom)] lg:hidden">
-        <div className="mx-auto grid min-h-16 max-w-xl grid-cols-7 items-center px-2">
+        <div className="mx-auto grid min-h-16 max-w-xl grid-cols-5 items-center px-2">
           {[
             { label: 'HOME', href: '/', icon: FaHouse },
             { label: 'PLAYERS', href: '/players', icon: FaUser },
             { label: 'GAMES', href: '/games', icon: FaCalendarDays },
-            { label: 'RCL', href: '/dashboard', icon: FaCrown },
             { label: 'SOCIAL', href: '/social', icon: FaUsers },
-            { label: 'FANTASY', href: '/fantasy', icon: FaTrophy },
           ].map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             const Icon = link.icon;
