@@ -136,6 +136,6 @@ export function describeEvent(event: GameEvent, playerName = 'Player', secondary
     case 'substitution': return `Sub · ${playerName}`;
     case 'timeout': return 'Timeout';
     case 'violation': return `Violation · ${playerName}`;
-    default: return event.event_type.replaceAll('_', ' ');
+    default: return event.event_type.replace(/_/g, ' ');
   }
 }
