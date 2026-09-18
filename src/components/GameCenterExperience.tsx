@@ -47,8 +47,8 @@ export function GameCenterExperience({
   const todayGames = seasonGames.filter((game) => new Date(game.scheduled_at).toDateString() === new Date().toDateString());
 
   return (
-    <main className="min-h-screen bg-[#080a0f]">
-      <section className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_80%_20%,rgba(244,120,32,.2),transparent_35%),linear-gradient(115deg,#080a0f,#101b31)]">
+    <main className="rcl-mock-page rcl-games-page min-h-screen bg-[#080a0f]">
+      <section className="rcl-mock-hero relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_80%_20%,rgba(244,120,32,.2),transparent_35%),linear-gradient(115deg,#080a0f,#101b31)]">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24">
           <p className="text-xs font-black uppercase tracking-[0.35em] text-rcl-gold">RCL Game Center</p>
           <h1 className="mt-4 max-w-3xl font-display text-5xl font-black uppercase leading-[.9] tracking-tight sm:text-7xl">Every game<br /><span className="text-rcl-gold">builds tomorrow.</span></h1>
