@@ -57,6 +57,10 @@ export default function ScorebookPage() {
   const [error, setError] = useState('');
   const [aiInsight, setAiInsight] = useState('');
   const [aiBusy, setAiBusy] = useState(false);
+  const [coachQuestion, setCoachQuestion] = useState('');
+  const [coachAnswer, setCoachAnswer] = useState('');
+  const [coachAskBusy, setCoachAskBusy] = useState(false);
+  const coachPrompts = ['Why did we lose?', 'What changed in Q3?', 'Which lineup worked best?', 'Where were we inefficient?', 'What should we review?', 'Who impacted the game?'];
 
   const isStaff = profile?.role === 'admin' || profile?.role === 'staff';
   const isCoach = profile?.role === 'coach';
@@ -274,6 +278,28 @@ export default function ScorebookPage() {
     }
   }
 
+  async function askGameIQ(question = coachQuestion) {
+    const normalized = question.trim();
+    if (!selectedGameId || !normalized || coachAskBusy) return;
+    setCoachAskBusy(true);
+    setError('');
+    setCoachAnswer('');
+    try {
+      const response = await fetch('/api/game-iq/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: selectedGameId, question: normalized }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Game IQ could not answer that question.');
+      setCoachAnswer(data.answer ?? '');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Game IQ could not answer that question.');
+    } finally {
+      setCoachAskBusy(false);
+    }
+  }
+
   async function finalizeScorebook() {
     if (!supabase || !selectedGameId || busy) return;
     setBusy(true);
@@ -350,7 +376,16 @@ export default function ScorebookPage() {
           <button disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>
           <button disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
         </div>
-        <section className="mt-4 rounded-3xl border border-rcl-orange/20 bg-rcl-orange/[.06] p-4"><div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">RCL GAME IQ™ · AI COACH</p><p className="mt-1 text-xs text-white/40">AI interpretation of the official event, lineup and analytics engine.</p></div><span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">AI COACH</span></div>{aiInsight ? <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-white/75">{aiInsight}</p> : <p className="mt-4 text-xs text-white/35">Run Game IQ after the game to generate a coach-facing report from the recorded game data.</p>}</section>
+        <section className="mt-4 rounded-3xl border border-rcl-orange/20 bg-rcl-orange/[.06] p-4">
+          <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">RCL GAME IQ™ · AI COACH</p><p className="mt-1 text-xs text-white/40">Ask questions against the official event stream, box score, lineup data and deterministic analytics.</p></div><span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">AI COACH</span></div>
+          <div className="mt-4 flex flex-wrap gap-2">{coachPrompts.map((prompt) => <button key={prompt} onClick={() => { setCoachQuestion(prompt); void askGameIQ(prompt); }} disabled={coachAskBusy || !selectedGameId} className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[9px] font-black uppercase tracking-wide text-white/60 hover:border-rcl-gold/40 hover:text-white disabled:opacity-30">{prompt}</button>)}</div>
+          <div className="mt-3 flex gap-2">
+            <input value={coachQuestion} onChange={(e) => setCoachQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void askGameIQ(); }} placeholder="Ask Game IQ about this game…" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-white outline-none placeholder:text-white/25" />
+            <button onClick={() => void askGameIQ()} disabled={coachAskBusy || !coachQuestion.trim()} className="rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">{coachAskBusy ? 'Thinking…' : 'Ask'}</button>
+          </div>
+          {coachAnswer && <div className="mt-4 rounded-2xl border border-rcl-gold/15 bg-black/20 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-rcl-gold">Game IQ answer</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/75">{coachAnswer}</p></div>}
+          {aiInsight && <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-white/30">Postgame report</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/65">{aiInsight}</p></div>}
+        </section>
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
