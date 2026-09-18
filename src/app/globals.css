@@ -541,3 +541,83 @@ img, video, canvas, svg { max-width: 100%; }
     flex: 0 0 auto !important;
   }
 }
+
+/* Device-aware orientation layer: phone landscape stays a phone layout instead of crossing into tablet rules. */
+@media screen and (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+  .rcl-site-header { height: 4.25rem !important; }
+  .rcl-site-header-inner { height: 4.25rem !important; padding: 0 1rem !important; }
+  .rcl-brand { display: flex !important; max-width: 14rem !important; }
+  .rcl-brand-mark { width: 2.35rem !important; height: 2.35rem !important; }
+  .rcl-brand > div:last-child span:nth-child(1),
+  .rcl-brand > div:last-child span:nth-child(2) {
+    display: inline !important;
+    font-size: .68rem !important;
+    letter-spacing: .14em !important;
+  }
+  .rcl-brand > div:last-child span:nth-child(2)::before { content: ' '; }
+  .rcl-brand > div:last-child span:nth-child(3) { display: none !important; }
+  .rcl-mobile-actions { display: flex !important; }
+  .rcl-site-header .flex.items-center.gap-4 { display: none !important; }
+  .rcl-site-header-inner > nav { display: none !important; }
+
+  .rcl-world { padding-bottom: 4.3rem !important; }
+  .rcl-world .rcl-hero {
+    min-height: calc(100svh - 4.25rem) !important;
+    height: calc(100svh - 4.25rem) !important;
+    max-height: 34rem !important;
+    align-items: stretch !important;
+  }
+  .rcl-world .rcl-hero > div[class*="z-10"] {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 2.2rem 2rem !important;
+    max-width: 44rem !important;
+  }
+  .rcl-world .rcl-hero h1 {
+    margin-top: .8rem !important;
+    max-width: 34rem !important;
+    font-size: clamp(3rem, 10vw, 5rem) !important;
+    line-height: .82 !important;
+  }
+  .rcl-world .rcl-hero h1 + p {
+    max-width: 32rem !important;
+    margin-top: 1rem !important;
+    font-size: .78rem !important;
+    line-height: 1.45rem !important;
+  }
+  .rcl-world .rcl-hero .rcl-button {
+    min-width: 15rem !important;
+    min-height: 3.25rem !important;
+    margin-top: 1rem !important;
+  }
+  .rcl-world .rcl-hero .rcl-skyline {
+    height: 42% !important;
+    opacity: .35 !important;
+  }
+
+  .rcl-home-content { padding: 1.5rem 1.25rem 1rem !important; }
+  .rcl-court-grid .rcl-destination {
+    min-width: 15rem !important;
+    flex-basis: 15rem !important;
+  }
+
+  .rcl-site-header + nav {
+    display: flex !important;
+    min-height: 4rem !important;
+  }
+  .rcl-site-header + nav > div {
+    min-height: 4rem !important;
+  }
+  .rcl-site-header + nav a {
+    min-height: 3.6rem !important;
+  }
+
+  .rcl-mock-page .rcl-mock-hero h1 { font-size: clamp(2.8rem, 8vw, 4.2rem) !important; }
+}
+
+/* True tablet landscape gets the spacious tablet composition. */
+@media screen and (orientation: landscape) and (min-height: 521px) and (min-width: 768px) {
+  .rcl-site-header-inner { max-width: 110rem; }
+  .rcl-world .rcl-hero { min-height: 30rem; }
+}
