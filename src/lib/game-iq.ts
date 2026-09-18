@@ -197,8 +197,6 @@ export type GameIQAnalytics = {
   }>;
 };
 
-const jsonRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 
 const roundMetric = (value: number, digits = 1) => Number(value.toFixed(digits));
 
@@ -222,8 +220,7 @@ export function deriveGameAnalytics(
       fta: acc.fta + item.free_throws_attempted,
       ftm: acc.ftm + item.free_throws_made,
       to: acc.to + item.turnovers,
-      oreb: acc.oreb + Math.max(0, item.rebounds - 0),
-    }), { points: 0, fga: 0, fgm: 0, tpa: 0, tpm: 0, fta: 0, ftm: 0, to: 0, oreb: 0 });
+    }), { points: 0, fga: 0, fgm: 0, tpa: 0, tpm: 0, fta: 0, ftm: 0, to: 0 });
 
     // Player-game stats currently expose total rebounds, so the event stream is the source for OREB.
     const oreb = active.filter((event) => event.team_id === teamId && event.event_type === 'rebound_off').length;
@@ -241,8 +238,8 @@ export function deriveGameAnalytics(
     const tsa = stat.fga + 0.44 * stat.fta;
     const ts = tsa > 0 ? stat.points / (2 * tsa) : 0;
     const totalRebounds = oreb + dreb;
-    const opponentRebounds = active.filter((event) => event.team_id === opponent && ['rebound_off', 'rebound_def'].includes(event.event_type)).length;
-    const orbRate = totalRebounds + opponentRebounds > 0 ? oreb / (oreb + opponentRebounds) : 0;
+    const opponentDefensiveRebounds = active.filter((event) => event.team_id === opponent && event.event_type === 'rebound_def').length;
+    const orbRate = oreb + opponentDefensiveRebounds > 0 ? oreb / (oreb + opponentDefensiveRebounds) : 0;
     const ftRate = stat.fga > 0 ? stat.fta / stat.fga : 0;
     const tovRate = (stat.fga + 0.44 * stat.fta + stat.to) > 0 ? stat.to / (stat.fga + 0.44 * stat.fta + stat.to) : 0;
     const net = (stat.points / possessions) * 100 - ((stats.filter((item) => item.team_id === opponent).reduce((s, item) => s + item.points, 0)) / opponentPossessions) * 100;
@@ -263,7 +260,6 @@ export function deriveGameAnalytics(
     };
   });
 
-  const scores: Record<string, number> = Object.fromEntries(teamIds.map((id) => [id, 0]));
   const scoringRuns: GameIQAnalytics['scoring_runs'] = [];
   let runTeam = '';
   let runPoints = 0;
@@ -282,7 +278,6 @@ export function deriveGameAnalytics(
       runPoints = points;
       runStart = event;
     }
-    scores[event.team_id] += points;
   }
   if (runTeam && runPoints >= 6 && runStart) {
     const last = active.filter((event) => event.team_id === runTeam && ['shot_made', 'free_throw_made', 'score_adjustment'].includes(event.event_type) && event.points > 0).at(-1);
@@ -353,7 +348,6 @@ export function deriveGameAnalytics(
   for (const teamId of teamIds) {
     const teamMinutes = gameMinutes * 60;
     const teamLineups = lineups.filter((lineup) => lineup.team_id === teamId);
-    const teamMargin = teamStats.find((item) => item.team_id === teamId)?.net_rating ?? 0;
     const finalMargin = (teamId === game.home_team_id ? game.home_score - game.away_score : game.away_score - game.home_score);
     const playersOnTeam = [...new Set(teamLineups.flatMap((lineup) => lineup.player_ids))];
     for (const playerId of playersOnTeam) {
@@ -363,7 +357,6 @@ export function deriveGameAnalytics(
       const offSeconds = Math.max(0, teamMinutes - onSeconds);
       const offPlusMinus = finalMargin - onPlusMinus;
       onOff[playerId] = { team_id: teamId, on_seconds: onSeconds, on_plus_minus: onPlusMinus, off_seconds: offSeconds, off_plus_minus: offPlusMinus };
-      void teamMargin;
     }
   }
 
