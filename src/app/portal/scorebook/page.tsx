@@ -477,7 +477,7 @@ export default function ScorebookPage() {
                 {!analytics.scoring_runs.length && <p className="rounded-xl bg-black/20 p-4 text-xs text-white/30">No 6+ point scoring run detected yet.</p>}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
-                {[selectedGame.home_team_id, selectedGame.away_team_id].map((teamId) => {
+                {analytics.teams.map((team) => { const teamId = team.team_id;
                   const clutch = analytics.clutch[teamId];
                   return <div key={teamId} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black uppercase text-white/30">{teamName(teamId)} clutch</p><p className="mt-1 text-lg font-black">{clutch.points} PTS</p><p className="text-[9px] text-white/35">{clutch.efg_pct}% eFG · {clutch.turnovers} TO</p></div>;
                 })}
