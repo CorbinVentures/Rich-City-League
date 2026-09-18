@@ -30,7 +30,7 @@ const leagueAppsAdminUrl = 'https://manager.leagueapps.com/console/sites/2294';
 
 const areas: Area[] = [
   { title: 'Registrations', eyebrow: 'MEMBERS', description: 'Open programs, registration status, waitlists, waivers, participant records and registration workflows.', icon: FaFileLines, href: leagueAppsAdminUrl, state: 'leagueapps' },
-  { title: 'Members & Families', eyebrow: 'PEOPLE', description: 'Search participants, profiles, guardians, contact information, eligibility and account status.', icon: FaPeopleGroup, state: 'bridge' },
+  { title: 'Members & Families', eyebrow: 'PEOPLE', description: 'Search participants, profiles, guardians, contact information, eligibility and account status.', icon: FaPeopleGroup, href: '/admin/operations', state: 'bridge' },
   { title: 'Teams & Rosters', eyebrow: 'ROSTER', description: 'Build teams, assign players and coaches, manage roster movement and season assignments.', icon: FaBasketball, href: '/admin/operations', state: 'bridge' },
   { title: 'Scheduling', eyebrow: 'GAME CENTER', description: 'Create, edit and publish games, practices, events, venues and schedule changes.', icon: FaCalendarDays, href: leagueAppsAdminUrl, state: 'leagueapps' },
   { title: 'Scores & Standings', eyebrow: 'COMPETITION', description: 'Enter official scores, box scores, player stats and standings from one RCL control surface.', icon: FaChartLine, href: '/admin', state: 'rcl' },
@@ -154,7 +154,7 @@ export default function LeagueAppsAdminHub() {
           if (title === 'Data Sync') {
             return <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => document.getElementById('leagueapps-sync')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{body}</button>;
           }
-          return <button key={title} type="button" className="rcl-admin-module text-left" onClick={() => window.alert(`${title} is a LeagueApps-controlled operation. Use the LeagueApps controls above when API access is enabled.`)}>{body}</button>;
+          return <div key={title} className="rcl-admin-module">{body}</div>;
         })}
       </div>
 
