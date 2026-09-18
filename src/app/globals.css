@@ -246,3 +246,103 @@ button, a {
 .faq-closing::after { content: ''; position: absolute; right: -8rem; bottom: -12rem; height: 28rem; width: 28rem; border: 1px solid rgba(255,107,26,.35); border-radius: 50%; box-shadow: 0 0 0 2rem rgba(255,107,26,.05), 0 0 0 5rem rgba(255,107,26,.03); }
 .faq-outline-button { display: inline-flex; min-height: 3rem; align-items: center; border: 1px solid rgba(255,255,255,.22); padding: .85rem 1.25rem; color: white; font-size: .7rem; font-weight: 900; letter-spacing: .14em; transition: border-color .2s ease, color .2s ease; }
 .faq-outline-button:hover { border-color: var(--rcl-orange); color: var(--rcl-orange); }
+
+
+/* Responsive RCL experience: compact phone UI, preserved tablet canvas, full desktop layout. */
+html { overflow-x: hidden; }
+body { overflow-x: hidden; }
+img, video, canvas, svg { max-width: 100%; }
+
+@media (max-width: 639px) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+  .rcl-world { padding-bottom: 5.25rem !important; }
+  .rcl-hero {
+    min-height: 24rem;
+    display: flex;
+    align-items: center;
+  }
+  .rcl-hero .rcl-skyline { height: 34%; opacity: .16; }
+  .rcl-hero > div[class*="z-10"] { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .rcl-hero h1 { font-size: clamp(2.85rem, 14vw, 4.25rem) !important; }
+  .rcl-hero h1 + p { margin-top: 1rem !important; font-size: .78rem; line-height: 1.45rem; max-width: 20rem; }
+  .rcl-hero .rcl-button { margin-top: 1rem !important; min-height: 2.7rem; padding: .7rem 1rem; }
+  .rcl-hero .flex.items-end { display: none; }
+
+  .rcl-world > .max-w-7xl {
+    margin-top: 0 !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    gap: 2.25rem !important;
+  }
+  .rcl-world > .max-w-7xl > section { margin: 0; }
+  .rcl-world .rcl-kicker { font-size: .55rem; letter-spacing: .15em; }
+  .rcl-world .font-display.text-2xl { font-size: 1.35rem !important; line-height: 1.15; }
+
+  .rcl-shortcuts {
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: .25rem 1rem .65rem;
+    gap: .6rem;
+  }
+  .rcl-destination {
+    min-width: 10.5rem;
+    min-height: 5rem;
+    flex: 0 0 10.5rem;
+    flex-direction: row;
+    padding: .7rem;
+    border-radius: .8rem;
+  }
+  .rcl-destination-icon { width: 2.1rem; height: 2.1rem; border-radius: .6rem; }
+  .rcl-destination strong { font-size: .72rem; }
+  .rcl-destination small { font-size: .6rem; }
+  .rcl-destination > svg { font-size: .7rem; }
+
+  .rcl-world .grid.lg\:grid-cols-\[1\.35fr_\.65fr\] {
+    display: block;
+  }
+  .rcl-world .grid.lg\:grid-cols-\[1\.35fr_\.65fr\] > div + div {
+    margin-top: 2rem;
+  }
+  .rcl-world .grid.gap-4.sm\:grid-cols-2 {
+    display: flex;
+    overflow-x: auto;
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: .25rem 1rem .5rem;
+    scrollbar-width: none;
+  }
+  .rcl-world .grid.gap-4.sm\:grid-cols-2::-webkit-scrollbar { display: none; }
+  .rcl-world .grid.gap-4.sm\:grid-cols-2 > * {
+    min-width: 18rem;
+    flex: 0 0 18rem;
+  }
+
+  .rcl-world .grid.gap-4.md\:grid-cols-3 {
+    display: flex;
+    overflow-x: auto;
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: .25rem 1rem .5rem;
+    scrollbar-width: none;
+  }
+  .rcl-world .grid.gap-4.md\:grid-cols-3::-webkit-scrollbar { display: none; }
+  .rcl-world .grid.gap-4.md\:grid-cols-3 > * {
+    min-width: 17rem;
+    flex: 0 0 17rem;
+  }
+
+  .rcl-game-card { padding: .9rem; }
+  .rcl-panel { border-radius: .8rem; }
+  .rcl-news-card { min-height: 10rem; padding: 1rem; }
+  .rcl-news-card h3 { font-size: 1rem; }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .rcl-hero { min-height: 31rem; }
+  .rcl-hero > div[class*="z-10"] { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
+  .rcl-world > .max-w-7xl { gap: 3.5rem !important; }
+}
+
+@media (min-width: 1024px) {
+  .rcl-world { padding-bottom: 0 !important; }
+}
