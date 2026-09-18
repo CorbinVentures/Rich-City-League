@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Game, GameEvent, Player, PlayerGameStats, Team, TeamSeason, Roster } from '@/types/database';
+import type { Game, GameEvent, GameLineup, Player, PlayerGameStats, Team, TeamSeason, Roster } from '@/types/database';
 import { derivePlayerMetrics, describeEvent, formatClock, summarizeGame, zoneFromCoordinates } from '@/lib/game-iq';
 
 type GameRow = Game & { home_team?: Team; away_team?: Team };
@@ -41,6 +41,10 @@ export default function ScorebookPage() {
   const [rosters, setRosters] = useState<Roster[]>([]);
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [stats, setStats] = useState<PlayerGameStats[]>([]);
+  const [lineups, setLineups] = useState<GameLineup[]>([]);
+  const [startingFive, setStartingFive] = useState<string[]>([]);
+  const [subOut, setSubOut] = useState('');
+  const [subIn, setSubIn] = useState('');
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [assistPlayerId, setAssistPlayerId] = useState('');
@@ -85,20 +89,26 @@ export default function ScorebookPage() {
     setError('');
     try {
       const game = games.find((item) => item.id === gameId);
-      const [eventResult, statResult] = await Promise.all([
+      const [eventResult, statResult, lineupResult] = await Promise.all([
         supabase.from('game_events').select('*').eq('game_id', gameId).order('sequence_no', { ascending: false }),
         supabase.from('player_game_stats').select('*').eq('game_id', gameId),
+        supabase.from('game_lineups').select('*').eq('game_id', gameId).order('period_number').order('created_at'),
       ]);
       if (eventResult.error) throw eventResult.error;
       if (statResult.error) throw statResult.error;
+      if (lineupResult.error) throw lineupResult.error;
       setEvents((eventResult.data ?? []) as GameEvent[]);
       setStats((statResult.data ?? []) as PlayerGameStats[]);
+      setLineups((lineupResult.data ?? []) as GameLineup[]);
       setPeriod(1);
       setClock(game ? formatClock(game.period_length_seconds) : '10:00');
       setSelectedTeamId(game?.home_team_id ?? '');
       setSelectedPlayerId('');
       setAssistPlayerId('');
       setPendingShot(null);
+      setStartingFive([]);
+      setSubOut('');
+      setSubIn('');
     } catch (reason) {
       console.error(reason);
       setError('Unable to load the scorebook.');
@@ -148,6 +158,41 @@ export default function ScorebookPage() {
     }
     void load();
   }, [authLoading, profile?.id, profile?.role, supabase]);
+
+  async function saveStartingFive() {
+    if (!supabase || !selectedGameId || !selectedTeamId || startingFive.length !== 5 || busy) return;
+    setBusy(true); setError(''); setMessage('');
+    try {
+      const { error: rpcError } = await supabase.rpc('set_starting_lineup', {
+        target_game_id: selectedGameId, target_team_id: selectedTeamId,
+        target_period: period, target_player_ids: startingFive,
+      } as never);
+      if (rpcError) throw rpcError;
+      await loadGameData(selectedGameId);
+      setMessage(`Starting five saved for Q${period}.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to save the starting five.');
+    } finally { setBusy(false); }
+  }
+
+  async function saveSubstitution() {
+    if (!supabase || !selectedGameId || !selectedTeamId || !subOut || !subIn || busy) return;
+    const [minutes, seconds] = clock.split(':').map(Number);
+    const clockSeconds = Math.max(0, (minutes || 0) * 60 + (seconds || 0));
+    setBusy(true); setError(''); setMessage('');
+    try {
+      const { error: rpcError } = await supabase.rpc('record_substitution', {
+        target_game_id: selectedGameId, target_team_id: selectedTeamId,
+        target_period: period, target_clock_seconds: clockSeconds,
+        target_player_out: subOut, target_player_in: subIn,
+      } as never);
+      if (rpcError) throw rpcError;
+      await loadGameData(selectedGameId);
+      setMessage('Substitution recorded. Minutes and lineup plus/minus recalculated.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to record substitution.');
+    } finally { setBusy(false); }
+  }
 
   async function recordAction(eventType: GameEvent['event_type'], points = 0, shotValue: 1 | 2 | 3 | null = null, made = false) {
     if (!supabase || !selectedGame || !selectedTeamId || !selectedPlayerId || busy) return;
@@ -357,6 +402,31 @@ export default function ScorebookPage() {
             <h2 className="mt-2 font-display text-2xl font-black uppercase">{selectedPlayer ? `#${selectedPlayer.jersey_number ?? '--'} ${selectedPlayer.first_name} ${selectedPlayer.last_name}` : 'Select a player'}</h2>
             {derived && <div className="mt-4 grid grid-cols-2 gap-2">{[['PTS', derived.points], ['REB', derived.rebounds], ['AST', derived.assists], ['STL', derived.steals], ['BLK', derived.blocks], ['TO', derived.turnovers], ['FG%', `${(derived.fg_pct * 100).toFixed(0)}%`], ['TS%', `${(derived.ts_pct * 100).toFixed(0)}%`], ['eFG%', `${(derived.efg_pct * 100).toFixed(0)}%`], ['EFF', derived.efficiency]].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}</div>}
             {mode === 'pro' && selectedPlayerId && <><p className="mt-5 text-[9px] font-black uppercase tracking-widest text-white/35">Optional assist</p><select value={assistPlayerId} onChange={(e) => setAssistPlayerId(e.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">No assist</option>{teamPlayers.filter((p) => p.id !== selectedPlayerId).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></>}
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+          <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+            <div className="flex items-center justify-between">
+              <div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Lineup Lab</p><p className="mt-1 text-xs text-white/40">Set the five on the floor. RCL derives minutes and plus/minus from the substitution timeline.</p></div>
+              <span className="rounded-full border border-rcl-gold/20 bg-rcl-gold/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-gold">{startingFive.length}/5 selected</span>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {teamPlayers.map((player) => {
+                const selected = startingFive.includes(player.id);
+                return <button key={player.id} onClick={() => setStartingFive((current) => selected ? current.filter((id) => id !== player.id) : current.length < 5 ? [...current, player.id] : current)} className={`rounded-xl border p-3 text-left ${selected ? 'border-emerald-300 bg-emerald-300/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-[10px] font-black">{player.first_name} {player.last_name}</p>{selected && <p className="mt-1 text-[8px] uppercase text-emerald-300">On floor</p>}</button>;
+              })}
+            </div>
+            <button disabled={startingFive.length !== 5 || busy} onClick={() => void saveStartingFive()} className="mt-3 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">Save Q{period} Starting Five</button>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+            <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Substitution Desk</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <select value={subOut} onChange={(e) => setSubOut(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player OUT</option>{teamPlayers.map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+              <select value={subIn} onChange={(e) => setSubIn(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player IN</option>{teamPlayers.filter((p) => p.id !== subOut).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+            </div>
+            <button disabled={!subOut || !subIn || busy} onClick={() => void saveSubstitution()} className="mt-3 w-full rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-orange disabled:opacity-30">Record Substitution</button>
+            <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
           </div>
         </section>
 
