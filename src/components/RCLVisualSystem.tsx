@@ -118,6 +118,6 @@ export function RCLVisualSystem() {
       @media (min-width: 640px) and (max-width: 1023px) {
         .rcl-hero, .city-hero { min-height: 34rem; }
       }
-    \`}</style>
+    `}</style>
   );
 }
