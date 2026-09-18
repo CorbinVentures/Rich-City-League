@@ -224,14 +224,10 @@ export function SiteHeader() {
               </Link>
             );
           })}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open more navigation"
-            className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] text-gray-500 transition-all hover:text-rcl-orange"
-          >
+          <Link href="/more" aria-label="Open RCL Hub" className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] transition-all ${pathname.startsWith('/more') ? 'text-rcl-orange' : 'text-gray-500 hover:text-rcl-orange'}`}>
             <FaBars className="h-4 w-4" />
             <span>MORE</span>
-          </button>
+          </Link>
         </div>
       </nav>}
 
