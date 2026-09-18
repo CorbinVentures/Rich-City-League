@@ -109,14 +109,146 @@ export function RCLVisualSystem() {
       }
       nav[aria-label="Primary mobile navigation"] a, nav[aria-label="Primary mobile navigation"] button { min-height: 60px; }
       nav[aria-label="Primary mobile navigation"] a[aria-current="page"], nav[aria-label="Primary mobile navigation"] a.text-rcl-orange { background: rgba(255,107,26,.07); }
+
       @media (max-width: 639px) {
-        header.sticky > div { min-height: 62px; }
-        h1 { font-size: clamp(2.4rem, 13vw, 4rem); }
-        h2 { font-size: clamp(1.45rem, 7vw, 2rem); }
-        .rcl-hero, .city-hero { min-height: 31rem; }
+        header.sticky {
+          height: 4.5rem !important;
+          min-height: 4.5rem !important;
+        }
+        header.sticky > div {
+          height: 4.5rem !important;
+          min-height: 4.5rem !important;
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+          gap: .5rem !important;
+        }
+        header.sticky .rcl-brand {
+          display: flex !important;
+          flex: 1 1 auto !important;
+          width: auto !important;
+          max-width: 11rem !important;
+          min-width: 0 !important;
+          gap: .55rem !important;
+          overflow: visible !important;
+        }
+        header.sticky .rcl-brand-mark {
+          width: 2.35rem !important;
+          height: 2.35rem !important;
+          border-radius: .7rem !important;
+        }
+        header.sticky .rcl-brand > div:last-child {
+          min-width: 0 !important;
+          overflow: hidden !important;
+        }
+        header.sticky .rcl-brand > div:last-child span:nth-child(1),
+        header.sticky .rcl-brand > div:last-child span:nth-child(2) {
+          display: inline !important;
+          font-size: .6rem !important;
+          line-height: 1 !important;
+          letter-spacing: .12em !important;
+          white-space: nowrap !important;
+        }
+        header.sticky .rcl-brand > div:last-child span:nth-child(2)::before { content: ' '; }
+        header.sticky .rcl-brand > div:last-child span:nth-child(3) { display: none !important; }
+        header.sticky .rcl-mobile-actions {
+          display: flex !important;
+          flex: 0 0 auto !important;
+          gap: .35rem !important;
+        }
+        header.sticky .rcl-mobile-actions a,
+        header.sticky .rcl-mobile-actions button {
+          width: 2.45rem !important;
+          height: 2.45rem !important;
+        }
+        header.sticky > div > div:last-child { display: none !important; }
+
+        nav[aria-label="Primary mobile navigation"] {
+          min-height: 4.75rem !important;
+          padding-bottom: max(env(safe-area-inset-bottom), .35rem) !important;
+        }
+        nav[aria-label="Primary mobile navigation"] > div {
+          min-height: 4.25rem !important;
+          height: 4.25rem !important;
+          padding-left: .35rem !important;
+          padding-right: .35rem !important;
+        }
+        nav[aria-label="Primary mobile navigation"] a {
+          min-height: 4rem !important;
+          height: 4rem !important;
+          gap: .3rem !important;
+          padding-top: .35rem !important;
+          padding-bottom: .35rem !important;
+          border-radius: .8rem !important;
+        }
+        nav[aria-label="Primary mobile navigation"] a svg {
+          width: 1.25rem !important;
+          height: 1.25rem !important;
+        }
+        nav[aria-label="Primary mobile navigation"] a span {
+          font-size: .56rem !important;
+          line-height: 1 !important;
+          letter-spacing: .14em !important;
+        }
+
+        .rcl-world {
+          padding-bottom: 5rem !important;
+        }
+        .rcl-world .rcl-hero {
+          min-height: calc(100svh - 9.5rem) !important;
+          height: calc(100svh - 9.5rem) !important;
+          max-height: 44rem !important;
+        }
+        .rcl-world .rcl-hero > div[class*="z-10"] {
+          padding: 2rem 1.25rem !important;
+        }
+        .rcl-world .rcl-hero h1 {
+          font-size: clamp(3rem, 13vw, 4.8rem) !important;
+          line-height: .84 !important;
+        }
+        .rcl-world .rcl-hero h1 + p {
+          margin-top: 1rem !important;
+          font-size: .8rem !important;
+          line-height: 1.45rem !important;
+        }
+        .rcl-world .rcl-hero .rcl-button {
+          width: 100% !important;
+          min-width: 0 !important;
+          min-height: 3.25rem !important;
+          margin-top: 1rem !important;
+        }
+        .rcl-home-content { padding: 1.5rem 1rem 1rem !important; }
       }
+
       @media (min-width: 640px) and (max-width: 1023px) {
         .rcl-hero, .city-hero { min-height: 34rem; }
+      }
+
+      /* Phone landscape: stay in the phone composition rather than switching to tablet navigation. */
+      @media screen and (orientation: landscape) and (max-height: 520px) and (pointer: coarse) {
+        header.sticky {
+          height: 4.25rem !important;
+          min-height: 4.25rem !important;
+        }
+        header.sticky > div {
+          height: 4.25rem !important;
+          min-height: 4.25rem !important;
+        }
+        header.sticky .rcl-brand { display: flex !important; }
+        header.sticky .rcl-mobile-actions { display: flex !important; }
+        header.sticky > div > div:last-child { display: none !important; }
+        header.sticky nav { display: none !important; }
+        nav[aria-label="Primary mobile navigation"] {
+          min-height: 4.25rem !important;
+          padding-bottom: max(env(safe-area-inset-bottom), .25rem) !important;
+        }
+        nav[aria-label="Primary mobile navigation"] > div {
+          min-height: 3.9rem !important;
+          height: 3.9rem !important;
+        }
+        nav[aria-label="Primary mobile navigation"] a {
+          min-height: 3.65rem !important;
+          height: 3.65rem !important;
+        }
       }
     `}</style>
   );
