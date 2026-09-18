@@ -33,11 +33,23 @@ function getConfig(): LeagueAppsConfig | null {
 
 export function getLeagueAppsConfigStatus() {
   const config = getConfig();
+  let privateKeyValid = false;
+
+  if (config?.privateKey) {
+    try {
+      createPrivateKey({ key: config.privateKey, format: 'pem' });
+      privateKeyValid = true;
+    } catch {
+      privateKeyValid = false;
+    }
+  }
+
   return {
-    configured: Boolean(config),
+    configured: Boolean(config) && privateKeyValid,
     siteId: config?.siteId ?? null,
     clientIdPresent: Boolean(config?.clientId),
     privateKeyPresent: Boolean(config?.privateKey),
+    privateKeyValid,
   };
 }
 
@@ -112,9 +124,9 @@ export async function fetchLeagueAppsBatch(
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(`LeagueApps ${resource} request failed (${response.status}): ${detail.slice(0, 300)}`);
+    throw new Error(`LeagueApps export failed (${response.status}): ${detail.slice(0, 300)}`);
   }
 
-  const records = await response.json() as Array<Record<string, unknown>>;
-  return records;
+  const data = await response.json();
+  return Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
 }
