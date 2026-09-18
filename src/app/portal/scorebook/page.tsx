@@ -112,6 +112,7 @@ export default function ScorebookPage() {
   useEffect(() => {
     if (authLoading || !supabase || !profile) return;
     async function load() {
+      if (!supabase) return;
       setBusy(true);
       try {
         const [gamesResult, teamsResult, playersResult, rostersResult, teamSeasonsResult, coachResult] = await Promise.all([
