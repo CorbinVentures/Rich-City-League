@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
+import { deriveGameAnalytics } from '@/lib/game-iq';
+import type { Game, GameEvent, GameLineup, PlayerGameStats } from '@/types/database';
 
 function extractResponseText(payload: any): string {
   if (typeof payload?.output_text === 'string') return payload.output_text;
@@ -21,27 +23,21 @@ export async function POST(request: Request) {
   const gameId = typeof body?.game_id === 'string' ? body.game_id : '';
   if (!gameId) return NextResponse.json({ error: 'game_id is required.' }, { status: 400 });
 
-  const [gameResult, eventsResult, statsResult, teamsResult] = await Promise.all([
-    supabase.from('games').select('id, home_team_id, away_team_id, home_score, away_score, status, season_id').eq('id', gameId).single(),
+  const [gameResult, eventsResult, statsResult, lineupsResult, teamsResult] = await Promise.all([
+    supabase.from('games').select('*').eq('id', gameId).single(),
     supabase.from('game_events').select('*').eq('game_id', gameId).is('voided_at', null).order('sequence_no'),
     supabase.from('player_game_stats').select('*').eq('game_id', gameId),
+    supabase.from('game_lineups').select('*').eq('game_id', gameId),
     supabase.from('teams').select('id,name'),
   ]);
-  if (gameResult.error || eventsResult.error || statsResult.error || teamsResult.error) {
+  if (gameResult.error || eventsResult.error || statsResult.error || lineupsResult.error || teamsResult.error) {
     return NextResponse.json({ error: 'Unable to load the official game data.' }, { status: 500 });
   }
 
-  const game = gameResult.data as unknown as {
-    id: string;
-    home_team_id: string;
-    away_team_id: string;
-    home_score: number;
-    away_score: number;
-    status: string;
-    season_id: string;
-  } | null;
+  const game = gameResult.data as unknown as Game | null;
   if (!game) return NextResponse.json({ error: 'Game not found.' }, { status: 404 });
   const teamNames = new Map((teamsResult.data ?? []).map((team: { id: string; name: string }) => [team.id, team.name]));
+  const analytics = game ? deriveGameAnalytics(game, (eventsResult.data ?? []) as unknown as GameEvent[], (statsResult.data ?? []) as unknown as PlayerGameStats[], (lineupsResult.data ?? []) as unknown as GameLineup[]) : null;
   const payload = {
     game: {
       home: teamNames.get(game.home_team_id) ?? 'Home',
@@ -51,6 +47,7 @@ export async function POST(request: Request) {
     },
     official_stats: statsResult.data ?? [],
     play_by_play: eventsResult.data ?? [],
+    basketball_intelligence: analytics,
   };
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -68,7 +65,8 @@ export async function POST(request: Request) {
   const prompt = [
     'You are RCL Game IQ, a basketball analytics assistant.',
     'Use only the official structured game data supplied below. Never invent a stat, player action, lineup, injury, or coaching decision.',
-    'Write a concise coach-facing game report with: 1) what happened, 2) key statistical drivers, 3) player impact notes, 4) one or two questions a coach should investigate next.',
+    'Write a concise coach-facing game report with: 1) what happened, 2) key statistical drivers, 3) lineup and player impact notes, 4) momentum/scoring runs, 5) shot-zone or efficiency observations when available, 6) one or two questions a coach should investigate next.',
+    'Do not present recommendations as certainties. Phrase coaching implications as things to consider or investigate. Do not infer injuries, effort, motivation, intent, or player health from statistics alone.',
     'Clearly distinguish recorded facts from analytical interpretation.',
     JSON.stringify(payload),
   ].join('\n\n');
