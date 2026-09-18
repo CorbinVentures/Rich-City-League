@@ -79,6 +79,12 @@ export default function ScorebookPage() {
     return players.filter((p) => ids.has(p.id));
   }, [players, rosters, teamSeasons, selectedTeamId, selectedGame]);
 
+  const activeLineup = useMemo(() => {
+    if (!selectedGame) return [];
+    const candidates = lineups.filter((item) => item.game_id === selectedGame.id && item.team_id === selectedTeamId && item.period_number === period);
+    return candidates.at(-1)?.player_ids ?? [];
+  }, [lineups, selectedGame, selectedTeamId, period]);
+
   const selectedStat = stats.find((stat) => stat.player_id === selectedPlayerId);
   const selectedPlayer = players.find((player) => player.id === selectedPlayerId);
   const derived = selectedStat ? derivePlayerMetrics(selectedStat, summary?.possessions ?? 0) : null;
@@ -99,7 +105,10 @@ export default function ScorebookPage() {
       if (lineupResult.error) throw lineupResult.error;
       setEvents((eventResult.data ?? []) as GameEvent[]);
       setStats((statResult.data ?? []) as PlayerGameStats[]);
-      setLineups((lineupResult.data ?? []) as GameLineup[]);
+      const loadedLineups = (lineupResult.data ?? []) as GameLineup[];
+      setLineups(loadedLineups);
+      const currentLineup = loadedLineups.filter((item) => item.team_id === (game?.home_team_id ?? '') && item.period_number === 1).at(-1);
+      setStartingFive(currentLineup?.player_ids ?? []);
       setPeriod(1);
       setClock(game ? formatClock(game.period_length_seconds) : '10:00');
       setSelectedTeamId(game?.home_team_id ?? '');
@@ -422,8 +431,8 @@ export default function ScorebookPage() {
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Substitution Desk</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <select value={subOut} onChange={(e) => setSubOut(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player OUT</option>{teamPlayers.map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
-              <select value={subIn} onChange={(e) => setSubIn(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player IN</option>{teamPlayers.filter((p) => p.id !== subOut).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+              <select value={subOut} onChange={(e) => setSubOut(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player OUT</option>{teamPlayers.filter((p) => activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+              <select value={subIn} onChange={(e) => setSubIn(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player IN</option>{teamPlayers.filter((p) => p.id !== subOut && !activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
             </div>
             <button disabled={!subOut || !subIn || busy} onClick={() => void saveSubstitution()} className="mt-3 w-full rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-orange disabled:opacity-30">Record Substitution</button>
             <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
