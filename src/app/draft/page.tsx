@@ -10,6 +10,7 @@ import { FaArrowRight, FaBolt, FaCrown, FaMagnifyingGlass, FaShieldHalved, FaUse
 
 type Filter = 'ALL' | 'PG' | 'SG' | 'SF' | 'PF' | 'C';
 type PoolEntry = { player_id: string; eligible: boolean };
+type DraftFeature = { title: string; detail: string; Icon: typeof FaUserGroup };
 
 function playerName(player?: PublicPlayer) {
   return player ? `${player.first_name} ${player.last_name}` : 'Player TBD';
@@ -183,13 +184,13 @@ export default function DraftNightPage() {
         </section>
 
         <section className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {[
-            ['PLAYER SCOUTING', 'Profiles, stats, highlights', FaUserGroup],
-            ['LIVE DRAFTING', 'Real-time selections', FaCrown],
-            ['TEAM MANAGEMENT', 'Rosters, trades, waivers', FaShieldHalved],
-            ['ANALYTICS', 'Player rankings & trends', FaBolt],
-            ['COMMUNITY', 'Discuss, react, follow', FaUserGroup],
-          ].map(([title, detail, Icon]) => <div key={String(title)} className="rcl-draft-feature"><Icon /><div><strong>{title}</strong><span>{detail}</span></div></div>)}
+          {([
+            { title: 'PLAYER SCOUTING', detail: 'Profiles, stats, highlights', Icon: FaUserGroup },
+            { title: 'LIVE DRAFTING', detail: 'Real-time selections', Icon: FaCrown },
+            { title: 'TEAM MANAGEMENT', detail: 'Rosters, trades, waivers', Icon: FaShieldHalved },
+            { title: 'ANALYTICS', detail: 'Player rankings & trends', Icon: FaBolt },
+            { title: 'COMMUNITY', detail: 'Discuss, react, follow', Icon: FaUserGroup },
+          ] satisfies DraftFeature[]).map(({ title, detail, Icon }) => <div key={String(title)} className="rcl-draft-feature"><Icon /><div><strong>{title}</strong><span>{detail}</span></div></div>)}
         </section>
 
         <section className="mt-16">
