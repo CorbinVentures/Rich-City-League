@@ -107,6 +107,7 @@ export default async function HomePage() {
             ))}
             {!news.length && <EmptyState>RCL stories will appear here.</EmptyState>}
           </div>
+          </div>
         </section>
       </Container>
     </main>
