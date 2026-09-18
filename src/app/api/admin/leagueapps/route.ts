@@ -5,20 +5,23 @@ import { fetchLeagueAppsBatch, getLeagueAppsConfigStatus, type LeagueAppsResourc
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function unauthorized() {
-  return NextResponse.json({ error: 'Admin access required.' }, { status: 403 });
+function unauthorized(message = 'Admin access required.') {
+  return NextResponse.json({ error: message }, { status: 403 });
 }
 
 export async function GET(request: Request) {
-  const supabase = await getServerSupabaseClient();
+  const authorization = request.headers.get('authorization');
+  const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1] ?? null;
+  const supabase = await getServerSupabaseClient(bearerToken);
   if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return unauthorized();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return unauthorized('Your admin session was not recognized by the server. Please sign in again.');
 
   const db = supabase as any;
-  const { data: profile } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (profile?.role !== 'admin') return unauthorized();
+  const { data: profile, error: profileError } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  if (profileError) return NextResponse.json({ error: 'Unable to verify your admin role.' }, { status: 500 });
+  if (profile?.role !== 'admin') return unauthorized('Admin role required.');
 
   const url = new URL(request.url);
   const action = url.searchParams.get('action') ?? 'status';
