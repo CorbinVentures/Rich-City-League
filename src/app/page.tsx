@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { SplashIntro } from '@/components/SplashIntro';
-import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
+import { getContentAssets, getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
 import {
   FaArrowRight,
@@ -19,7 +19,10 @@ import {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const { teams, games, standings, news } = await getLeagueSnapshot();
+  const [{ teams, games, standings, news }, assets] = await Promise.all([
+    getLeagueSnapshot(),
+    getContentAssets(['homepage.hero', 'homepage.featured']),
+  ]);
   const client = getPublicClient();
   const { data: posts } = client
     ? await client.from('posts').select('id, body, created_at, author:profiles(display_name, first_name, last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3)
@@ -29,7 +32,9 @@ export default async function HomePage() {
   return (
     <main className="rcl-world min-h-screen overflow-hidden pb-24 text-white lg:pb-0">
       <SplashIntro />
-      <section className="rcl-hero relative">
+      <section className="rcl-hero relative overflow-hidden">
+        {assets['homepage.hero']?.image_url && <img src={assets['homepage.hero'].image_url} alt={assets['homepage.hero'].alt_text || 'Rich City League homepage hero'} className="absolute inset-0 h-full w-full object-cover opacity-55" />}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/25" aria-hidden="true" />
         <div className="rcl-skyline" aria-hidden="true" />
         <Container maxWidth="xl" className="relative z-10 py-12 sm:py-20">
           <div className="max-w-3xl">
@@ -87,7 +92,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section>
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 p-6 sm:p-8">
+          {assets['homepage.featured']?.image_url && <img src={assets['homepage.featured'].image_url} alt={assets['homepage.featured'].alt_text || 'Rich City League featured content'} className="absolute inset-0 h-full w-full object-cover opacity-20" />}
+          <div className="relative z-10">
           <SectionHeader eyebrow="THE STAGE" title="Latest from RCL" href="/news" />
           <div className="mt-5 grid gap-4 md:grid-cols-3">
             {news.slice(0, 3).map((item) => (
