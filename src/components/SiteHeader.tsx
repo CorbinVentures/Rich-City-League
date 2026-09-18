@@ -192,7 +192,7 @@ export function SiteHeader() {
         </div>
       </header>
 
-            <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#05080d]/96 backdrop-blur-xl shadow-[0_-10px_35px_rgba(0,0,0,0.7)] font-display pb-[env(safe-area-inset-bottom)] lg:hidden">
+            {pathname !== '/social' && <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#05080d]/96 backdrop-blur-xl shadow-[0_-10px_35px_rgba(0,0,0,0.7)] font-display pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="mx-auto grid min-h-16 max-w-xl grid-cols-7 items-center px-2">
           {[
             { label: 'HOME', href: '/', icon: FaHouse },
@@ -225,7 +225,7 @@ export function SiteHeader() {
             <span>MORE</span>
           </button>
         </div>
-      </nav>
+      </nav>}
 
       {/* Mobile Drawer (NBA 2K-Style overlay panel) */}
       {mobileMenuOpen && (
