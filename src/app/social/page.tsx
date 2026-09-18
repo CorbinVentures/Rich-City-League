@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { rankSocialPosts } from '@/lib/social-feed';
 import { FaArrowRight, FaBasketball, FaBolt, FaBookmark, FaCheck, FaComment, FaCompass, FaFire, FaHeart, FaImage, FaMagnifyingGlass, FaPeopleGroup, FaPlay, FaPlus, FaShareNodes, FaTrash, FaUserGroup, FaVideo, FaXmark } from 'react-icons/fa6';
 
 const reactions = [
@@ -122,8 +123,26 @@ export default function SocialPage() {
   const deletePost = async (postId: string) => { if (!supabase || !user) return; if (!window.confirm('Delete this post?')) return; const result = await supabase.from('posts').delete().eq('id', postId).eq('author_id', user.id); if (result.error) { setError(result.error.message); return; } setPosts((current) => current.filter((p) => p.id !== postId)); };
 
   const visiblePosts = useMemo(() => {
-    const query = search.trim().toLowerCase(); return posts.filter((post) => { const text = post.body.toLowerCase(); const author = `${post.author?.display_name ?? ''} ${post.author?.username ?? ''}`.toLowerCase(); if (query && !text.includes(query) && !author.includes(query)) return false;
-      if (filter === 'all') return true; if (filter === 'following') return following.includes(post.author_id) || post.author_id === user?.id; if (filter === 'runs') return /run|pickup|court|hooping|5v5|3v3|1v1/.test(text); if (filter === 'highlights') return (post.media_urls?.length ?? 0) > 0 || /highlight|bucket|dunk|game winner/.test(text); if (filter === 'players') return post.author?.role === 'player' || /player|guard|forward|center/.test(text); if (filter === 'teams') return /team|roster|squad|club/.test(text); return /community|804|richmond|neighborhood/.test(text); });
+    const query = search.trim().toLowerCase();
+    const filtered = posts.filter((post) => {
+      const text = post.body.toLowerCase();
+      const author = `${post.author?.display_name ?? ''} ${post.author?.username ?? ''}`.toLowerCase();
+      if (query && !text.includes(query) && !author.includes(query)) return false;
+      if (filter === 'following') return following.includes(post.author_id) || post.author_id === user?.id;
+      if (filter === 'runs') return /run|pickup|court|hooping|5v5|3v3|1v1/.test(text);
+      if (filter === 'highlights') return (post.media_urls?.length ?? 0) > 0 || /highlight|bucket|dunk|game winner/.test(text);
+      if (filter === 'players') return post.author?.role === 'player' || /player|guard|forward|center/.test(text);
+      if (filter === 'teams') return /team|roster|squad|club/.test(text);
+      if (filter === 'all') return true;
+      return /community|804|richmond|neighborhood/.test(text);
+    });
+
+    if (filter !== 'all' || search.trim()) return filtered;
+
+    return rankSocialPosts(filtered, {
+      userId: user?.id,
+      following,
+    });
   }, [posts, filter, search, following, user?.id]);
   const trending = useMemo(() => { const words = new Map<string, number>(); posts.forEach((p) => p.body.toLowerCase().split(/\s+/).forEach((word) => { const clean = word.replace(/[^a-z0-9#]/g, ''); if (clean.length >= 4 && !['that', 'this', 'with', 'from', 'game', 'just', 'have', 'your'].includes(clean)) words.set(clean, (words.get(clean) ?? 0) + 1); })); return [...words.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5); }, [posts]);
   const selectTab = (next: Tab) => { setTab(next); if (next === 'discover') { setSearch(''); setFilter('players'); } if (next === 'highlights') setFilter('highlights'); };
