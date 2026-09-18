@@ -24,13 +24,14 @@ export default function AdminControlCenterPage() {
   const [settings, setSettings] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [media, setMedia] = useState<any[]>([]);
+  const [assets, setAssets] = useState<any[]>([]);
   const [leagues, setLeagues] = useState<any[]>([]);
   const [stats, setStats] = useState({ users: 0, reports: 0, posts: 0, comments: 0, leagues: 0 });
 
   const load = useCallback(async () => {
     if (!supabase || !isAdmin) return;
     setBusy(true);
-    const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult] = await Promise.all([
+    const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('reports').select('*').order('created_at', { ascending: false }),
       supabase.from('posts').select('*').order('created_at', { ascending: false }),
@@ -39,6 +40,7 @@ export default function AdminControlCenterPage() {
       supabase.from('news').select('*').order('created_at', { ascending: false }),
       supabase.from('media').select('*').order('created_at', { ascending: false }),
       supabase.from('leagues').select('*').order('name'),
+      supabase.from('content_assets').select('*').order('location').order('title'),
     ]);
     setUsers(usersResult.data ?? []);
     setReports(reportsResult.data ?? []);
@@ -48,6 +50,7 @@ export default function AdminControlCenterPage() {
     setNews(newsResult.data ?? []);
     setMedia(mediaResult.data ?? []);
     setLeagues(leaguesResult.data ?? []);
+    setAssets(assetsResult.data ?? []);
     setStats({
       users: usersResult.data?.length ?? 0,
       reports: reportsResult.data?.filter((r: any) => r.status !== 'resolved' && r.status !== 'dismissed').length ?? 0,
@@ -101,6 +104,37 @@ export default function AdminControlCenterPage() {
     if (!supabase) return;
     const { error } = await supabase.from('leagues').update({ is_active: active } as never).eq('id', id);
     if (!error) { await audit('ADMIN_LEAGUE_STATUS', `${active ? 'Activated' : 'Deactivated'} league ${id}`); await load(); }
+  }
+
+  async function uploadSiteImage(asset: any, file: File) {
+    if (!supabase || !user || !file.type.startsWith('image/')) { setMessage('Please choose an image file.'); return; }
+    setBusy(true);
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+    const path = `site/${asset.asset_key}/${Date.now()}-${safeName}`;
+    const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadError) { setMessage(uploadError.message); setBusy(false); return; }
+    const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(path);
+    const { error } = await supabase.from('content_assets').update({ image_url: publicUrl.publicUrl, storage_path: path, updated_by: user.id } as never).eq('id', asset.id);
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_CONTENT_IMAGE_UPLOAD', `Updated site image ${asset.asset_key}`); setMessage(`${asset.title} updated.`); await load(); }
+    setBusy(false);
+  }
+
+  async function updateAsset(asset: any, patch: Record<string, unknown>) {
+    if (!supabase || !user) return;
+    const { error } = await supabase.from('content_assets').update({ ...patch, updated_by: user.id } as never).eq('id', asset.id);
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_CONTENT_ASSET_UPDATE', `Updated site asset ${asset.asset_key}`); await load(); }
+  }
+
+  async function deleteMedia(id: string) {
+    if (!supabase) return;
+    const item = media.find((m) => m.id === id);
+    if (!item) return;
+    if (!window.confirm(`Delete ${item.title || 'this media'}?`)) return;
+    const { error } = await supabase.from('media').delete().eq('id', id);
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_MEDIA_DELETE', `Deleted media ${id}`); await load(); }
   }
 
   async function publishNews(id: string, status: 'published' | 'draft' | 'archived') {
@@ -161,7 +195,24 @@ export default function AdminControlCenterPage() {
 
           {activeTab === 'league' && <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">League activation controls</h2><div className="grid gap-4 md:grid-cols-2">{leagues.map((l) => <div key={l.id} className="rounded-xl border border-white/5 p-4 flex items-center justify-between"><div><p className="font-black">{l.name}</p><p className="text-xs text-gray-500">{l.city}, {l.state}</p></div><button onClick={() => void toggleLeague(l.id, !l.is_active)} className={`rounded-lg px-4 py-2 text-[9px] font-black ${l.is_active ? 'bg-green-500/10 text-green-400' : 'bg-rcl-red/10 text-rcl-red'}`}>{l.is_active ? 'ACTIVE' : 'INACTIVE'}</button></div>)}</div></section>}
 
-          {activeTab === 'content' && <div className="grid gap-6 lg:grid-cols-2"><section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">News publishing</h2>{news.slice(0, 30).map((n) => <div key={n.id} className="flex items-center justify-between gap-4 border-b border-white/5 py-4"><div><p className="font-bold">{n.title}</p><p className="text-[10px] text-gray-500">{n.status}</p></div><select value={n.status} onChange={(e) => void publishNews(n.id, e.target.value as any)} className="rounded bg-black p-2 text-[9px]"><option value="draft">DRAFT</option><option value="published">PUBLISHED</option><option value="archived">ARCHIVED</option></select></div>)}</section><section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Media library</h2>{media.slice(0, 30).map((m) => <div key={m.id} className="flex items-center justify-between border-b border-white/5 py-4"><div><p className="font-bold">{m.title || 'Untitled media'}</p><p className="text-[10px] text-gray-500">{m.media_type} · {m.status}</p></div><FaShieldHalved className="text-rcl-gold" /></div>)}</section></div>}
+          {activeTab === 'content' && <div className="space-y-6">
+            <section className="rounded-2xl border border-rcl-orange/20 bg-gradient-to-br from-rcl-orange/10 to-white/[0.02] p-6">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[0.3em] text-rcl-orange">ADMIN MASTER ACCESS</p><h2 className="mt-2 text-2xl font-black uppercase">Content Studio</h2><p className="mt-2 max-w-2xl text-sm text-gray-400">Control the public-facing images used across RCL. Upload replacements, preview assets, edit accessibility text, and activate or deactivate site imagery from one place.</p></div><span className="rounded-full border border-green-400/20 bg-green-400/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-green-400">ADMIN ONLY</span></div>
+            </section>
+            <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-5 flex items-center justify-between"><div><h2 className="text-sm font-black uppercase tracking-widest text-rcl-gold">Site Image Map</h2><p className="mt-1 text-xs text-gray-500">Every slot represents a public RCL experience.</p></div><span className="text-[10px] font-black text-gray-500">{assets.length} SLOTS</span></div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{assets.map((asset) => <article key={asset.id} className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                <div className="relative aspect-[16/9] bg-white/5">{asset.image_url ? <img src={asset.image_url} alt={asset.alt_text || asset.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-center text-[10px] font-black uppercase tracking-widest text-gray-600">No image assigned</div>}
+                  <label className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-rcl-orange px-3 py-2 text-[9px] font-black uppercase tracking-widest text-black">Replace<input type="file" accept="image/*" className="hidden" onChange={(e) => { const file=e.target.files?.[0]; if(file) void uploadSiteImage(asset,file); e.currentTarget.value=''; }} /></label>
+                </div>
+                <div className="p-4"><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">{asset.location}</p><h3 className="mt-1 font-black">{asset.title}</h3><input value={asset.alt_text || ''} onChange={(e) => setAssets((prev) => prev.map((x) => x.id === asset.id ? {...x, alt_text:e.target.value} : x))} onBlur={(e) => void updateAsset(asset,{alt_text:e.target.value})} placeholder="Accessibility description" className="mt-3 w-full rounded-lg border border-white/10 bg-black p-2 text-xs text-white" /><div className="mt-3 flex items-center justify-between"><span className={asset.is_active ? 'text-[9px] font-black uppercase text-green-400' : 'text-[9px] font-black uppercase text-gray-500'}>{asset.is_active ? 'LIVE' : 'OFF'}</span><button onClick={() => void updateAsset(asset,{is_active:!asset.is_active})} className="rounded-lg border border-white/10 px-3 py-1.5 text-[9px] font-black uppercase">{asset.is_active ? 'Deactivate' : 'Activate'}</button></div></div>
+              </article>)}</div>
+            </section>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">News publishing</h2>{news.slice(0,30).map((n)=><div key={n.id} className="flex items-center justify-between gap-4 border-b border-white/5 py-4"><div><p className="font-bold">{n.title}</p><p className="text-[10px] text-gray-500">{n.status}</p></div><select value={n.status} onChange={(e)=>void publishNews(n.id,e.target.value as any)} className="rounded bg-black p-2 text-[9px]"><option value="draft">DRAFT</option><option value="published">PUBLISHED</option><option value="archived">ARCHIVED</option></select></div>)}</section>
+              <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-sm font-black uppercase tracking-widest text-rcl-gold">Media Library</h2><span className="text-[9px] font-black text-gray-500">{media.length} ITEMS</span></div>{media.slice(0,30).map((m)=><div key={m.id} className="flex items-center justify-between gap-4 border-b border-white/5 py-4"><div><p className="font-bold">{m.title || 'Untitled media'}</p><p className="text-[10px] text-gray-500">{m.media_type} · {m.status}</p></div><button onClick={()=>void deleteMedia(m.id)} className="rounded-lg bg-rcl-red/10 px-3 py-2 text-[9px] font-black text-rcl-red"><FaTrash /></button></div>)}{!media.length&&<p className="text-sm text-gray-500">No media records.</p>}</section>
+            </div>
+          </div>
 
           {activeTab === 'settings' && <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Platform configuration</h2><div className="space-y-4">{settings.map((s) => <SettingEditor key={s.key} setting={s} onSave={updateSetting} />)}</div></section>}
         </div>}
