@@ -56,6 +56,8 @@ export default function LeagueAppsAdminHub() {
   const [syncMessage, setSyncMessage] = useState('');
   const isAdmin = profile?.role === 'admin';
   const visible = useMemo(() => filter === 'all' ? areas : areas.filter(area => area.state === filter), [filter]);
+  const totalSynced = syncState.reduce((sum, row) => sum + Number(row.records_synced || 0), 0);
+  const lastSynced = syncState.map(row => row.last_synced_at).filter(Boolean).sort().at(-1) ?? null;
 
   async function loadIntegrationStatus() {
     const response = await fetch('/api/admin/leagueapps?action=status', { cache: 'no-store' });
