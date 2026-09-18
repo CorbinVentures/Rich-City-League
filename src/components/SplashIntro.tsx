@@ -14,7 +14,7 @@ const featureCards = [
   { label: 'MY CAREER', detail: 'STATS. MILESTONES. LEGACY.', icon: FaUser, href: '/dashboard', tone: 'career' },
   { label: 'THE DRAFT', detail: 'NEXT UP. BIGGER OPPORTUNITIES.', icon: FaPeopleGroup, href: '/draft', tone: 'draft' },
   { label: 'BADGES', detail: 'EARN. UNLOCK. STAND OUT.', icon: FaMedal, href: '/badges', tone: 'badges' },
-  { label: 'SOCIAL', detail: 'PLAYERS. FANS. CONVERSATION.', icon: FaComments, href: '/community', tone: 'social' },
+  { label: 'SOCIAL', detail: 'PLAYERS. FANS. CONVERSATION.', icon: FaComments, href: '/social', tone: 'social' },
 ];
 function getLocalDateKey() { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; }
 
@@ -48,7 +48,7 @@ export function SplashIntro() {
         <section className="rcl-splash-feature-grid" aria-label="Rich City League features">{featureCards.map(({ label, detail, icon: Icon, href, tone }) => <Link key={label} href={href} className={`rcl-splash-feature rcl-splash-feature-${tone}`} onClick={complete}><div className="rcl-splash-feature-icon"><Icon /></div><div><strong>{label}</strong><small>{detail}</small></div></Link>)}</section>
         <button className="rcl-splash-enter" onClick={complete}>GET STARTED <FaArrowRight /></button><p className="rcl-splash-microcopy">A STRONGER RICHMOND THROUGH BASKETBALL</p>
       </main>
-      <nav className="rcl-splash-nav" aria-label="Primary navigation"><Link href="/" onClick={complete}><FaGamepad /><span>HOME</span></Link><Link href="/schedule" onClick={complete}><FaCalendarDays /><span>SCHEDULE</span></Link><Link href="/teams" onClick={complete}><FaPeopleGroup /><span>TEAMS</span></Link><button className="rcl-splash-nav-rcl" onClick={complete} aria-label="RCL home"><FaBasketball /></button><Link href="/stats" onClick={complete}><FaRankingStar /><span>STATS</span></Link><Link href="/community" onClick={complete}><FaPeopleGroup /><span>COMMUNITY</span></Link><Link href="/account" onClick={complete}><FaDumbbell /><span>MORE</span></Link></nav>
+      <nav className="rcl-splash-nav" aria-label="Primary navigation"><Link href="/" onClick={complete}><FaGamepad /><span>HOME</span></Link><Link href="/games" onClick={complete}><FaCalendarDays /><span>SCHEDULE</span></Link><Link href="/teams" onClick={complete}><FaPeopleGroup /><span>TEAMS</span></Link><button className="rcl-splash-nav-rcl" onClick={complete} aria-label="RCL home"><FaBasketball /></button><Link href="/stats" onClick={complete}><FaRankingStar /><span>STATS</span></Link><Link href="/communities" onClick={complete}><FaPeopleGroup /><span>COMMUNITY</span></Link><Link href="/more" onClick={complete}><FaDumbbell /><span>MORE</span></Link></nav>
     </div>
   );
 }
