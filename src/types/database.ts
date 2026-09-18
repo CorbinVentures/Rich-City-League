@@ -172,6 +172,12 @@ export interface Database {
       record_draft_pick: { Args: { target_draft: string; target_team: string; target_player: string }; Returns: DraftPick };
       manage_draft_clock: { Args: { target_draft: string; target_action: string; target_extension_seconds?: number }; Returns: Draft };
       configure_draft_order: { Args: { target_draft: string; ordered_teams: string[] }; Returns: undefined };
+      can_manage_game: { Args: { target_game_id: string }; Returns: boolean };
+      rebuild_game_stats: { Args: { target_game_id: string }; Returns: undefined };
+      rebuild_season_standings: { Args: { target_season_id: string }; Returns: undefined };
+      record_game_event: { Args: { target_game_id: string; p_period_number: number; p_clock_seconds: number; p_event_type: string; p_team_id?: string | null; p_player_id?: string | null; p_secondary_player_id?: string | null; p_player_in_id?: string | null; p_player_out_id?: string | null; p_points?: number; p_shot_value?: number | null; p_shot_result?: string | null; p_shot_x?: number | null; p_shot_y?: number | null; p_shot_zone?: string | null; p_foul_type?: string | null; p_turnover_type?: string | null; p_metadata?: Json }; Returns: GameEvent };
+      void_game_event: { Args: { target_event_id: string }; Returns: GameEvent };
+      finalize_game_scorebook: { Args: { target_game_id: string }; Returns: Game };
     };
     Enums: {
       app_role: 'player' | 'coach' | 'fan' | 'staff' | 'admin';
