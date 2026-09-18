@@ -178,7 +178,7 @@ export interface GameEvent {
 export interface GameLineup {
   id: string; game_id: string; team_id: string; player_ids: string[]; period_number: number;
   started_clock_seconds: number; ended_clock_seconds: number | null; plus_minus: number;
-  possessions: number; points_for: number; points_against: number; created_at: string;
+  possessions: number; points_for: number; points_against: number; created_at: string; segment_key?: string | null; seconds_played: number;
 }
 export interface GameAIInsight {
   id: string; game_id: string; insight_type: string; title: string; body: string;
