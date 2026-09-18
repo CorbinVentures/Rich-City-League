@@ -133,6 +133,19 @@ export function SiteHeader() {
             })}
           </nav>
 
+          <div className="flex items-center gap-2 lg:hidden">
+            <button aria-label="Search RCL" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/60">
+              <FaChartSimple className="h-3.5 w-3.5" />
+            </button>
+            <Link href={user ? "/dashboard" : "/auth/sign-in"} aria-label={user ? "Open profile" : "Sign in"} className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[.04] text-white/70">
+              {user ? (
+                <span className="text-[10px] font-black text-rcl-orange">{profile?.display_name?.[0] ?? user.email?.[0] ?? 'P'}</span>
+              ) : (
+                <FaUser className="h-3.5 w-3.5" />
+              )}
+            </Link>
+          </div>
+
           {/* Auth & Notification Controls */}
           <div className="flex items-center gap-4">
             {user ? (
@@ -183,7 +196,7 @@ export function SiteHeader() {
             {/* Mobile Menu Toggle button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg border border-white/10 bg-white/5 hover:text-rcl-gold hover:border-rcl-gold transition-all"
+              className="hidden lg:hidden p-2 rounded-lg border border-white/10 bg-white/5 hover:text-rcl-gold hover:border-rcl-gold transition-all"
               aria-label="Open navigation menu"
             >
               <FaBars className="h-4 w-4" />
@@ -192,29 +205,24 @@ export function SiteHeader() {
         </div>
       </header>
 
-      <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-white/10 bg-[#060b14]/95 backdrop-blur-lg shadow-[0_-4px_30px_rgba(0,0,0,0.9)] font-display pb-[env(safe-area-inset-bottom)]">
-        <div className="grid min-h-16 grid-cols-7 items-center justify-items-center px-1">
+            <nav aria-label="Primary mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#05080d]/96 backdrop-blur-xl shadow-[0_-10px_35px_rgba(0,0,0,0.7)] font-display pb-[env(safe-area-inset-bottom)] lg:hidden">
+        <div className="mx-auto grid min-h-16 max-w-xl grid-cols-5 items-center px-2">
           {[
             { label: 'HOME', href: '/', icon: FaHouse },
             { label: 'PLAYERS', href: '/players', icon: FaUser },
             { label: 'GAMES', href: '/games', icon: FaCalendarDays },
-            { label: 'RCL', href: '/dashboard', icon: FaCrown },
             { label: 'SOCIAL', href: '/social', icon: FaUsers },
-            { label: 'FANTASY', href: '/fantasy', icon: FaTrophy },
           ].map((link) => {
             const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             const Icon = link.icon;
-            const center = link.label === 'RCL';
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 aria-label={link.label}
-                className={`flex min-h-14 flex-col items-center justify-center gap-1 py-1 text-[8px] font-black tracking-wider ${
-                  active ? 'text-rcl-gold' : 'text-gray-400'
-                }`}
+                className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] transition-all ${active ? 'text-rcl-orange' : 'text-gray-500'}`}
               >
-                <Icon className={`${center ? 'h-7 w-7 rounded-full bg-rcl-orange p-1.5 text-black shadow-[0_0_18px_rgba(249,115,22,.5)]' : 'h-4 w-4'} ${active ? 'text-rcl-gold' : 'text-gray-500'}`} />
+                <Icon className={`h-4 w-4 ${active ? 'text-rcl-orange' : 'text-gray-500'}`} />
                 <span>{link.label}</span>
               </Link>
             );
@@ -222,9 +230,9 @@ export function SiteHeader() {
           <button
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open more navigation"
-            className="flex min-h-14 flex-col items-center justify-center gap-1 py-1 text-[8px] font-black tracking-wider text-gray-400 hover:text-rcl-gold"
+            className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] text-gray-500 transition-all hover:text-rcl-orange"
           >
-            <FaBars className="h-4 w-4 text-gray-500" />
+            <FaBars className="h-4 w-4" />
             <span>MORE</span>
           </button>
         </div>
