@@ -1,3 +1,3 @@
 # Game IQ build check
 
-Temporary validation marker for CI.
+CI validation marker for the RCL Game IQ scorebook.
