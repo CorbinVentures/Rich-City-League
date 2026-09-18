@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { FaArrowLeft, FaArrowRight, FaBasketball, FaBolt, FaBrain, FaChartLine, FaDumbbell, FaFilm, FaMedal } from 'react-icons/fa6';
 
@@ -92,13 +90,7 @@ const modules = {
 
 type ModuleKey = keyof typeof modules;
 
-export default function LabModulePage({ params }: { params: Promise<{ module: string }> }) {
-  const [moduleKey] = [null] as [null];
-  void moduleKey;
-  return <LabModuleClient params={params} />;
-}
-
-async function LabModuleClient({ params }: { params: Promise<{ module: string }> }) {
+export default async function LabModulePage({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
   const config = modules[module as ModuleKey] ?? modules.training;
   const Icon = config.icon;
