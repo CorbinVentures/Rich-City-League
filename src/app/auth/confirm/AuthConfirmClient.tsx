@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase';
+import { getSupabaseRecoveryClient } from '@/lib/supabase';
 
 function getHashParams() {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -18,7 +18,7 @@ export default function AuthConfirmClient() {
     let cancelled = false;
 
     async function confirmRecovery() {
-      const supabase = getSupabaseClient();
+      const supabase = getSupabaseRecoveryClient();
       if (!supabase) {
         setError('Authentication is temporarily unavailable. Please try again.');
         return;
@@ -29,6 +29,8 @@ export default function AuthConfirmClient() {
       const type = searchParams.get('type');
       const hashParams = getHashParams();
       const hashError = hashParams.get('error_description') || hashParams.get('error');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
 
       if (hashError) {
         setError(decodeURIComponent(hashError.replace(/\+/g, ' ')));
@@ -36,7 +38,13 @@ export default function AuthConfirmClient() {
       }
 
       try {
-        if (code) {
+        if (accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (sessionError) throw sessionError;
+        } else if (code) {
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           if (exchangeError) throw exchangeError;
         } else if (tokenHash && type === 'recovery') {
