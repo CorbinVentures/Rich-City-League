@@ -115,6 +115,9 @@ export interface Database {
       can_manage_game: { Args: { target_game_id: string }; Returns: boolean };
       rebuild_game_stats: { Args: { target_game_id: string }; Returns: undefined };
       rebuild_season_standings: { Args: { target_season_id: string }; Returns: undefined };
+      set_starting_lineup: { Args: { target_game_id: string; target_team_id: string; target_period: number; target_player_ids: string[] }; Returns: GameEvent };
+      record_substitution: { Args: { target_game_id: string; target_team_id: string; target_period: number; target_clock_seconds: number; target_player_out: string; target_player_in: string }; Returns: GameEvent };
+      rebuild_game_lineups: { Args: { target_game_id: string }; Returns: undefined };
       record_game_event: { Args: { target_game_id: string; p_period_number: number; p_clock_seconds: number; p_event_type: string; p_team_id?: string | null; p_player_id?: string | null; p_secondary_player_id?: string | null; p_player_in_id?: string | null; p_player_out_id?: string | null; p_points?: number; p_shot_value?: number | null; p_shot_result?: string | null; p_shot_x?: number | null; p_shot_y?: number | null; p_shot_zone?: string | null; p_foul_type?: string | null; p_turnover_type?: string | null; p_metadata?: Json }; Returns: GameEvent };
       void_game_event: { Args: { target_event_id: string }; Returns: GameEvent };
       finalize_game_scorebook: { Args: { target_game_id: string }; Returns: Game };
@@ -182,7 +185,7 @@ export interface GameAIInsight {
   data: Json; confidence: number | null; generated_at: string; created_by: string | null;
 }
 
-export interface PlayerGameStats { id: string; game_id: string; player_id: string; team_id: string; minutes: number | null; points: number; rebounds: number; assists: number; steals: number; blocks: number; turnovers: number; fouls: number; field_goals_made: number; field_goals_attempted: number; three_pointers_made: number; three_pointers_attempted: number; free_throws_made: number; free_throws_attempted: number; created_at: string; updated_at: string; }
+export interface PlayerGameStats { id: string; game_id: string; player_id: string; team_id: string; minutes: number | null; points: number; rebounds: number; assists: number; steals: number; blocks: number; turnovers: number; fouls: number; field_goals_made: number; field_goals_attempted: number; plus_minus: number; three_pointers_made: number; three_pointers_attempted: number; free_throws_made: number; free_throws_attempted: number; created_at: string; updated_at: string; }
 export interface TeamGameStats { id: string; game_id: string; team_id: string; points: number; rebounds: number; assists: number; turnovers: number; fouls: number; }
 export interface Standing { id: string; season_id: string; division_id: string | null; team_id: string; wins: number; losses: number; ties: number; points_for: number; points_against: number; streak: string | null; rank: number | null; updated_at: string; }
 export interface Registration { id: string; season_id: string; division_id: string | null; applicant_id: string | null; team_id: string | null; first_name: string; last_name: string; email: string; date_of_birth: string | null; emergency_contact: Json; status: Database['public']['Enums']['registration_status']; submitted_at: string; reviewed_at: string | null; reviewed_by: string | null; notes: string | null; }
