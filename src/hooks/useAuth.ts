@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { getSupabaseClient } from '@/lib/supabase';
+import { getSupabaseClient, getSupabaseRecoveryClient } from '@/lib/supabase';
 import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
 import { Profile } from '@/types';
 
@@ -226,8 +226,10 @@ export function useAuth() {
   const resetPassword = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     setError(null);
+    const recoveryClient = getSupabaseRecoveryClient();
+    if (!recoveryClient) throw new Error(getSupabaseUnavailableMessage());
     const redirectTo = `${getAuthSiteUrl()}/auth/confirm`;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    const { error } = await recoveryClient.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
       setError('Unable to send the password reset email.');
       throw error;
