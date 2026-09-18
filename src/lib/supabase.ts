@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from '@/lib/supabase-config';
 
-function createBrowserClient(flowType: 'pkce' | 'implicit') {
+function createBrowserClient(flowType: 'pkce' | 'implicit', noStore = false) {
   const config = getSupabaseConfig();
   if (config.status !== 'configured') return null;
 
@@ -14,6 +14,7 @@ function createBrowserClient(flowType: 'pkce' | 'implicit') {
         persistSession: true,
         detectSessionInUrl: true,
       },
+      ...(noStore ? { global: { fetch: (input: RequestInfo | URL, init?: RequestInit) => fetch(input, { ...init, cache: 'no-store' }) } } : {}),
     });
   } catch (error) {
     console.error('Unable to initialize the Supabase browser client', error);
@@ -21,8 +22,8 @@ function createBrowserClient(flowType: 'pkce' | 'implicit') {
   }
 }
 
-export function getSupabaseClient() {
-  return createBrowserClient('pkce');
+export function getSupabaseClient(noStore = false) {
+  return createBrowserClient('pkce', noStore);
 }
 
 /**
