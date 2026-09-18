@@ -261,3 +261,27 @@ export async function getRecentBadgesEarned() {
   }
   return data ?? [];
 }
+
+export type ContentAsset = {
+  id: string;
+  asset_key: string;
+  title: string;
+  location: string;
+  image_url: string | null;
+  storage_path: string | null;
+  alt_text: string | null;
+  is_active: boolean;
+};
+
+export async function getContentAssets(keys?: string[]) {
+  const client = getPublicClient();
+  if (!client) return {} as Record<string, ContentAsset>;
+  let query = client.from('content_assets').select('id,asset_key,title,location,image_url,storage_path,alt_text,is_active').eq('is_active', true);
+  if (keys?.length) query = query.in('asset_key', keys);
+  const { data, error } = await query;
+  if (error) {
+    console.error('getContentAssets error', error);
+    return {} as Record<string, ContentAsset>;
+  }
+  return Object.fromEntries(((data ?? []) as ContentAsset[]).map((asset) => [asset.asset_key, asset]));
+}
