@@ -25,14 +25,14 @@ function TeamMark({ team }: { team?: Team }) {
 
 let draftAudioContext: AudioContext | null = null;
 
-function playDraftChime(): boolean {
+async function playDraftChime(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   try {
     const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return false;
     draftAudioContext ??= new AudioContextClass();
     if (draftAudioContext.state !== 'running') {
-      void draftAudioContext.resume();
+      await draftAudioContext.resume();
       if (draftAudioContext.state !== 'running') return false;
     }
 
@@ -147,16 +147,20 @@ export default function DraftNightPage() {
     soundArmedRef.current = true;
 
     const unlockAudio = () => {
-      playDraftChime();
+      void playDraftChime();
       window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
     };
 
-    const played = playDraftChime();
-    if (!played) {
-      window.addEventListener('pointerdown', unlockAudio, { once: true });
-      window.addEventListener('keydown', unlockAudio, { once: true });
-    }
+    const attemptOpeningChime = async () => {
+      const played = await playDraftChime();
+      if (!played) {
+        window.addEventListener('pointerdown', unlockAudio, { once: true });
+        window.addEventListener('keydown', unlockAudio, { once: true });
+      }
+    };
+
+    void attemptOpeningChime();
 
     return () => {
       window.removeEventListener('pointerdown', unlockAudio);
