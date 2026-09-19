@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
+import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { formatDate, formatTime } from '@/utils/helpers';
 
 export const revalidate = 60;
 
 export default async function GameIQPublicPage() {
   const { teams, games, standings } = await getLeagueSnapshot();
+  const supabase = await getServerSupabaseClient();
+  const { data: { user } } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+  const scorebookHref = user ? '/portal/scorebook' : '/auth/sign-in?next=%2Fportal%2Fscorebook';
   const completed = games.filter((game) => game.status === 'completed').slice(0, 12);
   const upcoming = games.filter((game) => game.status !== 'completed').slice(0, 6);
 
@@ -76,7 +80,7 @@ export default async function GameIQPublicPage() {
         <div className="mt-10 rounded-2xl border border-rcl-gold/15 bg-rcl-gold/[.04] p-5">
           <p className="text-[9px] font-black uppercase tracking-[.25em] text-rcl-gold">COACHES + ADMIN</p>
           <p className="mt-2 text-sm text-white/50">The private RCL Game IQ scorebook contains advanced analytics, lineup intelligence and AI Coach tools.</p>
-          <Link href="/portal/scorebook" className="mt-4 inline-flex rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Open staff scorebook →</Link>
+          <Link href={scorebookHref} className="mt-4 inline-flex rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Open staff scorebook →</Link>
         </div>
       </Container>
     </main>
