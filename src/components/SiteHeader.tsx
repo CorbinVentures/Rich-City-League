@@ -16,7 +16,7 @@ type NavItem={label:string;href:string;icon:any};
 const nav:NavItem[]=[
   {label:'Home',href:'/',icon:FaHouse},{label:'The Lab',href:'/lab',icon:FaFlask},
   {label:'Players',href:'/players',icon:FaUser},{label:'Teams',href:'/teams',icon:FaUsers},
-  {label:'Schedule',href:'/games',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
+  {label:'Schedule',href:'/schedule',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
   {label:'Standings',href:'/standings',icon:FaFolderOpen},{label:'Stats',href:'/stats',icon:FaChartSimple},
   {label:'Draft Night',href:'/draft',icon:FaCrown},{label:'Social',href:'/social',icon:FaPeopleGroup},
   {label:'News',href:'/news',icon:FaNewspaper},{label:'Media',href:'/media',icon:FaPlay},
@@ -25,7 +25,7 @@ const nav:NavItem[]=[
   {label:'Game IQ',href:'/game-iq',icon:FaChartSimple},{label:'Messages',href:'/messages',icon:FaComments},
   {label:'Friends',href:'/friends',icon:FaUsers},{label:'Coaches',href:'/coaches',icon:FaUserTie},
   {label:'Awards',href:'/badges',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
-  {label:'Notifications',href:'/notifications',icon:FaBell}
+  {label:'Notifications',href:'/notifications',icon:FaBell},{label:'About',href:'/about',icon:FaBasketball}
 ];
 
 export function SiteHeader(){
