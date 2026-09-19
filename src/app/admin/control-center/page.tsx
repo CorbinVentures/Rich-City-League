@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 import { FaArrowLeft, FaBell, FaBullhorn, FaChartLine, FaCheck, FaCircleExclamation, FaComments, FaFileShield, FaGear, FaLayerGroup, FaNewspaper, FaPeopleGroup, FaRotate, FaShieldHalved, FaTrash, FaUsersGear } from 'react-icons/fa6';
 
 const roles = ['player', 'coach', 'staff', 'admin'] as const;
@@ -30,17 +32,18 @@ export default function AdminControlCenterPage() {
 
   const load = useCallback(async () => {
     if (!supabase || !isAdmin) return;
+    const db = supabase as SupabaseClient<Database>;
     setBusy(true);
     const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult] = await Promise.all([
-      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-      supabase.from('reports').select('*').order('created_at', { ascending: false }),
-      supabase.from('posts').select('*').order('created_at', { ascending: false }),
-      supabase.from('comments').select('*').order('created_at', { ascending: false }),
-      supabase.from('site_settings').select('*').order('key'),
-      supabase.from('news').select('*').order('created_at', { ascending: false }),
-      supabase.from('media').select('*').order('created_at', { ascending: false }),
-      supabase.from('leagues').select('*').order('name'),
-      supabase.from('content_assets').select('*').order('location').order('title'),
+      db.from('profiles').select('*').order('created_at', { ascending: false }),
+      db.from('reports').select('*').order('created_at', { ascending: false }),
+      db.from('posts').select('*').order('created_at', { ascending: false }),
+      db.from('comments').select('*').order('created_at', { ascending: false }),
+      db.from('site_settings').select('*').order('key'),
+      db.from('news').select('*').order('created_at', { ascending: false }),
+      db.from('media').select('*').order('created_at', { ascending: false }),
+      db.from('leagues').select('*').order('name'),
+      db.from('content_assets').select('*').order('location').order('title'),
     ]);
     setUsers(usersResult.data ?? []);
     setReports(reportsResult.data ?? []);
