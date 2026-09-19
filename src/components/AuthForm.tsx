@@ -21,7 +21,29 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
     try {
       if (mode === 'sign-in') {
         await signIn(email, password);
-        router.push(getSafeNextPath(new URLSearchParams(window.location.search).get('next')));
+
+        // Resolve the user's role after authentication so staff land in the
+        // basketball operations workspace instead of the player/fan career hub.
+        const client = (await import('@/lib/supabase')).getSupabaseClient();
+        const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
+        let destination = getSafeNextPath(new URLSearchParams(window.location.search).get('next'));
+
+        if (!new URLSearchParams(window.location.search).get('next') && signedInUser && client) {
+          const { data: signedInProfile } = await client
+            .from('profiles')
+            .select('role, is_active')
+            .eq('id', signedInUser.id)
+            .maybeSingle();
+
+          if (
+            signedInProfile?.is_active &&
+            (signedInProfile.role === 'admin' || signedInProfile.role === 'coach')
+          ) {
+            destination = '/portal/scorebook';
+          }
+        }
+
+        router.push(destination);
       } else if (mode === 'sign-up') {
         if (password !== confirmation) {
           setMessage('Passwords do not match.');
