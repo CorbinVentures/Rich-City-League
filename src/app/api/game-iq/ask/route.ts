@@ -75,8 +75,14 @@ export async function POST(request: Request) {
     body: JSON.stringify({ model, input: prompt }),
   });
   if (!aiResponse.ok) {
-    console.error('Game IQ ask OpenAI error', await aiResponse.text());
-    return NextResponse.json({ error: 'Game IQ could not answer that question.' }, { status: 502 });
+    const providerError = await aiResponse.text();
+    console.error('Game IQ ask OpenAI error', providerError);
+    let detail = 'The AI provider rejected the request.';
+    try {
+      const parsed = JSON.parse(providerError);
+      detail = parsed?.error?.message || detail;
+    } catch { /* provider returned non-JSON text */ }
+    return NextResponse.json({ error: 'Game IQ could not answer that question.', detail, code: 'GAME_IQ_PROVIDER_ERROR' }, { status: 502 });
   }
 
   const answer = extractResponseText(await aiResponse.json());
