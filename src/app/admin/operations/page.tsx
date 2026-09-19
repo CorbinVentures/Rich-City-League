@@ -32,6 +32,7 @@ export default function LeagueOperationsPage() {
 
   async function load() {
     if (!supabase || !isStaff) return;
+    const db = supabase;
     setBusy(true);
     const [sessionResult, draftResult, poolResult, requestResult, caseResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
       db.from('tryout_sessions').select('*').order('starts_at'),
