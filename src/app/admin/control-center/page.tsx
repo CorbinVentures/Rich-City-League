@@ -28,12 +28,15 @@ export default function AdminControlCenterPage() {
   const [media, setMedia] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [leagues, setLeagues] = useState<any[]>([]);
+  const [staffRecords, setStaffRecords] = useState<any[]>([]);
+  const [commissioners, setCommissioners] = useState<any[]>([]);
+  const [commissionerForm, setCommissionerForm] = useState({ league_id: '', profile_id: '', title: 'Commissioner' });
   const [stats, setStats] = useState({ users: 0, reports: 0, posts: 0, comments: 0, leagues: 0 });
 
   const load = useCallback(async () => {
     if (!db || !isAdmin) return;
     setBusy(true);
-    const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult] = await Promise.all([
+    const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult, staffResult, commissionerResult] = await Promise.all([
       db.from('profiles').select('*').order('created_at', { ascending: false }),
       db.from('reports').select('*').order('created_at', { ascending: false }),
       db.from('posts').select('*').order('created_at', { ascending: false }),
@@ -43,6 +46,8 @@ export default function AdminControlCenterPage() {
       db.from('media').select('*').order('created_at', { ascending: false }),
       db.from('leagues').select('*').order('name'),
       db.from('content_assets').select('*').order('location').order('title'),
+      db.from('staff').select('*, profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
+      db.from('commissioners').select('*, league:leagues(id,name), profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
     ]);
     setUsers(usersResult.data ?? []);
     setReports(reportsResult.data ?? []);
@@ -53,6 +58,8 @@ export default function AdminControlCenterPage() {
     setMedia(mediaResult.data ?? []);
     setLeagues(leaguesResult.data ?? []);
     setAssets(assetsResult.data ?? []);
+    setStaffRecords(staffResult.data ?? []);
+    setCommissioners(commissionerResult.data ?? []);
     setStats({
       users: usersResult.data?.length ?? 0,
       reports: reportsResult.data?.filter((r: any) => r.status !== 'resolved' && r.status !== 'dismissed').length ?? 0,
@@ -75,6 +82,35 @@ export default function AdminControlCenterPage() {
     const { error } = await db?.from('profiles').update({ role } as never).eq('id', id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_UPDATE_ROLE', `Changed profile ${id} to ${role}`); setMessage('User role updated.'); await load(); }
+  }
+
+  async function saveStaffRecord(id: string, title: string, permissionsRaw: string) {
+    if (!db) return;
+    let permissions: unknown = {};
+    try { permissions = JSON.parse(permissionsRaw || '{}'); } catch { setMessage('Staff permissions must be valid JSON.'); return; }
+    const { error } = await db.from('staff').upsert({ id, profile_id: id, title: title || 'Staff', permissions } as never, { onConflict: 'profile_id' });
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_STAFF_PERMISSIONS', `Updated staff permissions for ${id}`); setMessage('Staff permissions saved.'); await load(); }
+  }
+
+  async function assignCommissioner(event: React.FormEvent) {
+    event.preventDefault();
+    if (!db || !commissionerForm.league_id || !commissionerForm.profile_id) return;
+    const { error } = await db.from('commissioners').upsert({
+      league_id: commissionerForm.league_id,
+      profile_id: commissionerForm.profile_id,
+      title: commissionerForm.title || 'Commissioner',
+      permissions: {},
+    } as never, { onConflict: 'league_id,profile_id' });
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_ASSIGN_COMMISSIONER', `Assigned ${commissionerForm.profile_id} to league ${commissionerForm.league_id}`); setMessage('Commissioner assignment saved.'); setCommissionerForm({ league_id: '', profile_id: '', title: 'Commissioner' }); await load(); }
+  }
+
+  async function removeCommissioner(id: string) {
+    if (!db) return;
+    const { error } = await db.from('commissioners').delete().eq('id', id);
+    if (error) setMessage(error.message);
+    else { await audit('ADMIN_REMOVE_COMMISSIONER', `Removed commissioner assignment ${id}`); await load(); }
   }
 
   async function updateProfileActive(id: string, active: boolean) {
@@ -211,7 +247,7 @@ export default function AdminControlCenterPage() {
   if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white"><AdminWorkspace /><h1 className="font-display text-3xl uppercase">Admin access required</h1><Link href="/admin" className="mt-5 inline-block text-rcl-gold">Return to Command Center</Link></main>;
 
   const tabs = [
-    ['overview', 'OVERVIEW', FaChartLine], ['users', 'USERS & ROLES', FaUsersGear], ['moderation', 'MODERATION', FaComments], ['reports', 'REPORT CENTER', FaFileShield], ['league', 'LEAGUE CONTROL', FaLayerGroup], ['content', 'CONTENT', FaNewspaper], ['settings', 'SITE SETTINGS', FaGear],
+    ['overview', 'OVERVIEW', FaChartLine], ['users', 'USERS & ROLES', FaUsersGear], ['governance', 'GOVERNANCE', FaShieldHalved], ['moderation', 'MODERATION', FaComments], ['reports', 'REPORT CENTER', FaFileShield], ['league', 'LEAGUE CONTROL', FaLayerGroup], ['content', 'CONTENT', FaNewspaper], ['settings', 'SITE SETTINGS', FaGear],
   ] as const;
 
   return (<main className="min-h-screen bg-rcl-black pb-24 text-white font-display"><AdminWorkspace />
@@ -229,6 +265,23 @@ export default function AdminControlCenterPage() {
           {activeTab === 'overview' && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{[['USERS', stats.users], ['OPEN REPORTS', stats.reports], ['POSTS', stats.posts], ['COMMENTS', stats.comments], ['LEAGUES', stats.leagues]].map(([label, value]) => <div key={label as string} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6"><span className="text-[10px] font-black tracking-widest text-gray-500">{label}</span><strong className="mt-2 block text-4xl">{value}</strong></div>)}</div>}
 
           {activeTab === 'users' && <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Account & privilege management</h2><div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-xs"><thead><tr className="border-b border-white/10 text-[9px] uppercase tracking-widest text-gray-500"><th className="pb-3">USER</th><th>EMAIL</th><th>ROLE</th><th>STATUS</th><th className="text-right">CONTROLS</th></tr></thead><tbody>{users.map((u) => <tr key={u.id} className="border-b border-white/5"><td className="py-4 font-bold">{u.display_name || `${u.first_name || ''} ${u.last_name || ''}` || 'RCL User'}</td><td className="text-gray-400">{u.email}</td><td><select disabled={u.id === user?.id} value={u.role || 'player'} onChange={(e) => void updateRole(u.id, e.target.value)} className="rounded-lg bg-black p-2"><option value="player">PLAYER</option><option value="coach">COACH</option><option value="staff">STAFF</option><option value="admin">ADMIN</option></select></td><td><span className={u.is_active === false ? 'text-rcl-red' : 'text-green-400'}>{u.is_active === false ? 'DISABLED' : 'ACTIVE'}</span></td><td className="text-right"><button disabled={u.id === user?.id} onClick={() => void updateProfileActive(u.id, u.is_active === false)} className="rounded-lg border border-white/10 px-3 py-2 text-[9px] font-black uppercase disabled:opacity-40">{u.is_active === false ? 'ACTIVATE' : 'DISABLE'}</button></td></tr>)}</tbody></table></div></section>}
+
+          {activeTab === 'governance' && <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Staff permissions</h2>
+              <div className="space-y-3">{staffRecords.map((s) => <div key={s.id} className="rounded-xl border border-white/5 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-bold">{s.profile?.display_name || [s.profile?.first_name, s.profile?.last_name].filter(Boolean).join(' ') || s.profile_id}</p><p className="text-[10px] text-gray-500">{s.title}</p></div><span className="text-[9px] font-black text-rcl-orange">{s.profile?.role}</span></div><div className="mt-3 flex gap-2"><input id={`staff-title-${s.id}`} defaultValue={s.title} className="min-w-0 flex-1 rounded border border-white/10 bg-black p-2 text-xs text-white" /><button onClick={() => { const title=(document.getElementById(`staff-title-${s.id}`) as HTMLInputElement)?.value || s.title; void saveStaffRecord(s.id,title,JSON.stringify(s.permissions || {})); }} className="rounded bg-rcl-orange px-3 py-2 text-[9px] font-black text-black">SAVE</button></div></div>)}</div>
+              {!staffRecords.length && <p className="text-sm text-gray-500">No staff records yet. Promote a user to STAFF first.</p>}
+            </section>
+            <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Commissioner assignments</h2>
+              <form onSubmit={assignCommissioner} className="grid gap-2 sm:grid-cols-3">
+                <select required value={commissionerForm.league_id} onChange={(e) => setCommissionerForm({ ...commissionerForm, league_id:e.target.value })} className="rounded-lg bg-black p-2 text-xs text-white"><option value="">League</option>{leagues.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}</select>
+                <select required value={commissionerForm.profile_id} onChange={(e) => setCommissionerForm({ ...commissionerForm, profile_id:e.target.value })} className="rounded-lg bg-black p-2 text-xs text-white"><option value="">User</option>{users.filter((u) => u.role === 'staff' || u.role === 'admin').map((u) => <option key={u.id} value={u.id}>{u.display_name || u.email || u.id}</option>)}</select>
+                <button className="rounded-lg bg-rcl-orange px-3 py-2 text-[9px] font-black text-black">ASSIGN</button>
+              </form>
+              <div className="mt-5 space-y-2">{commissioners.map((c) => <div key={c.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/5 p-3 text-xs"><span><b>{c.profile?.display_name || c.profile?.email || c.profile_id}</b><span className="ml-2 text-white/35">{c.league?.name || c.league_id} · {c.title}</span></span><button onClick={() => void removeCommissioner(c.id)} className="rounded bg-rcl-red/10 px-2 py-1 text-[9px] font-black text-rcl-red">REMOVE</button></div>)}</div>
+            </section>
+          </div>}
 
           {activeTab === 'moderation' && <div className="grid gap-6 lg:grid-cols-2"><section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Social posts</h2><div className="space-y-3">{posts.slice(0, 30).map((p) => <div key={p.id} className="rounded-xl border border-white/5 p-4"><p className="text-sm text-gray-200">{p.body}</p><div className="mt-3 flex gap-2"><button onClick={() => void moderatePost(p.id, 'published')} className="rounded bg-green-500/10 px-3 py-1.5 text-[9px] font-black text-green-400">PUBLISH</button><button onClick={() => void moderatePost(p.id, 'draft')} className="rounded bg-white/5 px-3 py-1.5 text-[9px] font-black">HIDE</button><button onClick={() => void moderatePost(p.id, 'archived')} className="rounded bg-rcl-red/10 px-3 py-1.5 text-[9px] font-black text-rcl-red">ARCHIVE</button></div></div>)}{!posts.length && <p className="text-sm text-gray-500">No posts.</p>}</div></section><section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"><h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Comments</h2><div className="space-y-3">{comments.slice(0, 30).map((c) => <div key={c.id} className="flex items-start justify-between gap-4 rounded-xl border border-white/5 p-4"><p className="text-sm text-gray-200">{c.body}</p><button onClick={() => void moderateComment(c.id)} className="shrink-0 rounded bg-rcl-red/10 px-3 py-1.5 text-[9px] font-black text-rcl-red"><FaTrash className="inline mr-1" /> DELETE</button></div>)}{!comments.length && <p className="text-sm text-gray-500">No comments.</p>}</div></section></div>}
 
