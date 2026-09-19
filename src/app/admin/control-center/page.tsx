@@ -46,8 +46,8 @@ export default function AdminControlCenterPage() {
       db.from('media').select('*').order('created_at', { ascending: false }),
       db.from('leagues').select('*').order('name'),
       db.from('content_assets').select('*').order('location').order('title'),
-      db.from('staff').select('*, profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
-      db.from('commissioners').select('*, league:leagues(id,name), profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
+      (db as any).from('staff').select('*, profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
+      (db as any).from('commissioners').select('*, league:leagues(id,name), profile:profiles(id,display_name,first_name,last_name,role)').order('created_at', { ascending: false }),
     ]);
     setUsers(usersResult.data ?? []);
     setReports(reportsResult.data ?? []);
@@ -91,11 +91,11 @@ export default function AdminControlCenterPage() {
     }
   }
 
-  async function saveStaffRecord(id: string, title: string, permissionsRaw: string) {
+  async function saveStaffRecord(staffId: string, profileId: string, title: string, permissionsRaw: string) {
     if (!db) return;
     let permissions: unknown = {};
     try { permissions = JSON.parse(permissionsRaw || '{}'); } catch { setMessage('Staff permissions must be valid JSON.'); return; }
-    const { error } = await db.from('staff').upsert({ id, profile_id: id, title: title || 'Staff', permissions } as never, { onConflict: 'profile_id' });
+    const { error } = await (db as any).from('staff').upsert({ id: staffId, profile_id: profileId, title: title || 'Staff', permissions } as never, { onConflict: 'profile_id' });
     if (error) setMessage(error.message);
     else { await audit('ADMIN_STAFF_PERMISSIONS', `Updated staff permissions for ${id}`); setMessage('Staff permissions saved.'); await load(); }
   }
@@ -276,7 +276,7 @@ export default function AdminControlCenterPage() {
           {activeTab === 'governance' && <div className="grid gap-6 lg:grid-cols-2">
             <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
               <h2 className="mb-5 text-sm font-black uppercase tracking-widest text-rcl-gold">Staff permissions</h2>
-              <div className="space-y-3">{staffRecords.map((s) => <div key={s.id} className="rounded-xl border border-white/5 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-bold">{s.profile?.display_name || [s.profile?.first_name, s.profile?.last_name].filter(Boolean).join(' ') || s.profile_id}</p><p className="text-[10px] text-gray-500">{s.title}</p></div><span className="text-[9px] font-black text-rcl-orange">{s.profile?.role}</span></div><div className="mt-3 flex gap-2"><input id={`staff-title-${s.id}`} defaultValue={s.title} className="min-w-0 flex-1 rounded border border-white/10 bg-black p-2 text-xs text-white" /><button onClick={() => { const title=(document.getElementById(`staff-title-${s.id}`) as HTMLInputElement)?.value || s.title; void saveStaffRecord(s.id,title,JSON.stringify(s.permissions || {})); }} className="rounded bg-rcl-orange px-3 py-2 text-[9px] font-black text-black">SAVE</button></div></div>)}</div>
+              <div className="space-y-3">{staffRecords.map((s) => <div key={s.id} className="rounded-xl border border-white/5 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-bold">{s.profile?.display_name || [s.profile?.first_name, s.profile?.last_name].filter(Boolean).join(' ') || s.profile_id}</p><p className="text-[10px] text-gray-500">{s.title}</p></div><span className="text-[9px] font-black text-rcl-orange">{s.profile?.role}</span></div><div className="mt-3 flex gap-2"><input id={`staff-title-${s.id}`} defaultValue={s.title} className="min-w-0 flex-1 rounded border border-white/10 bg-black p-2 text-xs text-white" /><button onClick={() => { const title=(document.getElementById(`staff-title-${s.id}`) as HTMLInputElement)?.value || s.title; void saveStaffRecord(s.id,s.profile_id,title,JSON.stringify(s.permissions || {})); }} className="rounded bg-rcl-orange px-3 py-2 text-[9px] font-black text-black">SAVE</button></div></div>)}</div>
               {!staffRecords.length && <p className="text-sm text-gray-500">No staff records yet. Promote a user to STAFF first.</p>}
             </section>
             <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
