@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { Container } from '@/components/Container';
 import { SplashIntro } from '@/components/SplashIntro';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
@@ -187,7 +188,7 @@ export default async function HomePage() {
   );
 }
 
-function Shortcut({ href, icon, title, subtitle }: { href: string; icon: React.ReactNode; title: string; subtitle: string }) {
+function Shortcut({ href, icon, title, subtitle }: { href: string; icon: ReactNode; title: string; subtitle: string }) {
   return <Link href={href} className="rcl-mockup-shortcut"><span>{icon}</span><b>{title}</b><small>{subtitle}</small></Link>;
 }
 
