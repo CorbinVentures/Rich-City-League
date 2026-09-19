@@ -6,7 +6,6 @@ import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
 import {
   FaArrowRight,
-  FaBasketball,
   FaBolt,
   FaChartLine,
   FaCrown,
@@ -116,7 +115,7 @@ function SectionHeader({ eyebrow, title, href, id }: { eyebrow: string; title: s
 }
 
 function Destination({ href, icon, title, subtitle }: { href: string; icon: React.ReactNode; title: string; subtitle: string }) {
-  return <Link href={href} className="rcl-destination"><span className="rcl-destination-icon">{icon}</span><span className="min-w-0"><strong>{title}</strong><small>{subtitle}</small></span><FaArrowRight className="ml-auto shrink-0 text-slate-500" /></Link>;
+  return <Link href={href} aria-label={`${title}: ${subtitle}`} className="rcl-destination group"><span className="rcl-destination-icon">{icon}</span><span className="min-w-0"><strong>{title}</strong><small>{subtitle}</small></span><FaArrowRight aria-hidden="true" className="ml-auto shrink-0 text-slate-500" /></Link>;
 }
 
 function GameCard({ game, teams }: { game: Awaited<ReturnType<typeof getLeagueSnapshot>>['games'][number]; teams: Awaited<ReturnType<typeof getLeagueSnapshot>>['teams'] }) {
