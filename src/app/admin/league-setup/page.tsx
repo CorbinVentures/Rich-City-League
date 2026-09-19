@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
@@ -76,7 +77,7 @@ export default function LeagueSetupPage() {
   const field='mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-rcl-orange/60';
   const button='rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-40';
 
-  if(authLoading||busy) return <main><Container maxWidth="xl" className="py-16"><div className="h-8 w-64 animate-pulse rounded bg-white/10"/><div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/5"/></Container></main>;
+  if(authLoading||busy) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><div className="h-8 w-64 animate-pulse rounded bg-white/10"/><div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/5"/></Container></main>;
   if(!profile||!isStaff) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-black uppercase">League setup access required</h1><p className="mt-3 text-gray-400">This workspace is limited to league staff and administrators.</p></Container></main>;
 
   if (!client) return <main><Container maxWidth="xl" className="py-16"><p className="text-red-300">Supabase is not configured.</p></Container></main>;
