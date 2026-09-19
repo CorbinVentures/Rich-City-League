@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/database';
 import { FaArrowLeft, FaBell, FaBullhorn, FaChartLine, FaCheck, FaCircleExclamation, FaComments, FaFileShield, FaGear, FaLayerGroup, FaNewspaper, FaPeopleGroup, FaRotate, FaShieldHalved, FaTrash, FaUsersGear } from 'react-icons/fa6';
 
 const roles = ['player', 'coach', 'staff', 'admin'] as const;
@@ -14,6 +12,7 @@ const roles = ['player', 'coach', 'staff', 'admin'] as const;
 export default function AdminControlCenterPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
+  const db = supabase as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database> | null;
   const isAdmin = profile?.role === 'admin';
   const [activeTab, setActiveTab] = useState('overview');
   const [message, setMessage] = useState('');
@@ -32,7 +31,6 @@ export default function AdminControlCenterPage() {
 
   const load = useCallback(async () => {
     if (!supabase || !isAdmin) return;
-    const db = supabase as SupabaseClient<Database>;
     setBusy(true);
     const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult] = await Promise.all([
       db.from('profiles').select('*').order('created_at', { ascending: false }),
@@ -67,50 +65,50 @@ export default function AdminControlCenterPage() {
   useEffect(() => { void load(); }, [load]);
 
   async function audit(action: string, details: string) {
-    if (!supabase || !user) return;
-    await supabase.from('audit_logs').insert({ user_id: user.id, action, details } as never);
+    if (!db || !user) return;
+    await db.from('audit_logs').insert({ user_id: user.id, action, details } as never);
   }
 
   async function updateRole(id: string, role: string) {
-    if (!supabase || id === user?.id || !roles.includes(role as any)) return;
-    const { error } = await supabase.from('profiles').update({ role } as never).eq('id', id);
+    if (!db || id === user?.id || !roles.includes(role as any)) return;
+    const { error } = await db?.from('profiles').update({ role } as never).eq('id', id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_UPDATE_ROLE', `Changed profile ${id} to ${role}`); setMessage('User role updated.'); await load(); }
   }
 
   async function updateProfileActive(id: string, active: boolean) {
-    if (!supabase || id === user?.id) return;
-    const { error } = await supabase.from('profiles').update({ is_active: active } as never).eq('id', id);
+    if (!db || id === user?.id) return;
+    const { error } = await db?.from('profiles').update({ is_active: active } as never).eq('id', id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_ACCOUNT_STATUS', `${active ? 'Activated' : 'Deactivated'} profile ${id}`); setMessage('Account status updated.'); await load(); }
   }
 
   async function moderatePost(id: string, status: 'published' | 'draft' | 'archived') {
-    if (!supabase) return;
-    const { error } = await supabase.from('posts').update({ status } as never).eq('id', id);
+    if (!db) return;
+    const { error } = await db?.from('posts').update({ status } as never).eq('id', id);
     if (!error) { await audit('ADMIN_POST_MODERATION', `Set post ${id} to ${status}`); await load(); }
   }
 
   async function moderateComment(id: string) {
     if (!supabase) return;
-    const { error } = await supabase.from('comments').delete().eq('id', id);
+    const { error } = await db?.from('comments').delete().eq('id', id);
     if (!error) { await audit('ADMIN_COMMENT_DELETE', `Deleted comment ${id}`); await load(); }
   }
 
   async function updateReport(id: string, status: string) {
     if (!supabase) return;
-    const { error } = await supabase.from('reports').update({ status, reviewed_by: user?.id } as never).eq('id', id);
+    const { error } = await db?.from('reports').update({ status, reviewed_by: user?.id } as never).eq('id', id);
     if (!error) { await audit('ADMIN_REPORT_REVIEW', `Set report ${id} to ${status}`); await load(); }
   }
 
   async function toggleLeague(id: string, active: boolean) {
     if (!supabase) return;
-    const { error } = await supabase.from('leagues').update({ is_active: active } as never).eq('id', id);
+    const { error } = await db?.from('leagues').update({ is_active: active } as never).eq('id', id);
     if (!error) { await audit('ADMIN_LEAGUE_STATUS', `${active ? 'Activated' : 'Deactivated'} league ${id}`); await load(); }
   }
 
   async function uploadSiteImage(asset: any, file: File) {
-    if (!supabase || !user || !file.type.startsWith('image/')) { setMessage('Please choose an image file.'); return; }
+    if (!db || !user || !file.type.startsWith('image/')) { setMessage('Please choose an image file.'); return; }
     setBusy(true);
     setMessage(`Uploading ${asset.title}…`);
     try {
@@ -165,7 +163,7 @@ export default function AdminControlCenterPage() {
   }
   async function updateAsset(asset: any, patch: Record<string, unknown>) {
     if (!supabase || !user) return;
-    const { error } = await supabase.from('content_assets').update({ ...patch, updated_by: user.id } as never).eq('id', asset.id);
+    const { error } = await db?.from('content_assets').update({ ...patch, updated_by: user.id } as never).eq('id', asset.id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_CONTENT_ASSET_UPDATE', `Updated site asset ${asset.asset_key}`); await load(); }
   }
@@ -175,14 +173,14 @@ export default function AdminControlCenterPage() {
     const item = media.find((m) => m.id === id);
     if (!item) return;
     if (!window.confirm(`Delete ${item.title || 'this media'}?`)) return;
-    const { error } = await supabase.from('media').delete().eq('id', id);
+    const { error } = await db?.from('media').delete().eq('id', id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_MEDIA_DELETE', `Deleted media ${id}`); await load(); }
   }
 
   async function publishNews(id: string, status: 'published' | 'draft' | 'archived') {
     if (!supabase) return;
-    const { error } = await supabase.from('news').update({ status } as never).eq('id', id);
+    const { error } = await db?.from('news').update({ status } as never).eq('id', id);
     if (!error) { await audit('ADMIN_NEWS_STATUS', `Set news ${id} to ${status}`); await load(); }
   }
 
@@ -190,7 +188,7 @@ export default function AdminControlCenterPage() {
     if (!supabase) return;
     let value: unknown;
     try { value = JSON.parse(raw); } catch { setMessage(`Invalid JSON for ${key}.`); return; }
-    const { error } = await supabase.from('site_settings').update({ value } as never).eq('key', key);
+    const { error } = await db?.from('site_settings').update({ value } as never).eq('key', key);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_SITE_SETTING', `Updated site setting ${key}`); setMessage(`Saved ${key}.`); await load(); }
   }
@@ -203,7 +201,7 @@ export default function AdminControlCenterPage() {
     const activeUsers = users.filter((u) => u.is_active !== false);
     const rows = activeUsers.map((u) => ({ recipient_id: u.id, actor_id: user.id, type: 'admin_announcement', title, body, link: '/dashboard' }));
     if (!rows.length) return;
-    const { error } = await supabase.from('notifications').insert(rows as never);
+    const { error } = await db?.from('notifications').insert(rows as never);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_BROADCAST', `Broadcast announcement to ${rows.length} active users`); setMessage(`Announcement sent to ${rows.length} users.`); }
   }
