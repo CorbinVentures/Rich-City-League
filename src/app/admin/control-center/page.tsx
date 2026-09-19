@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
@@ -206,15 +207,14 @@ export default function AdminControlCenterPage() {
     else { await audit('ADMIN_BROADCAST', `Broadcast announcement to ${rows.length} active users`); setMessage(`Announcement sent to ${rows.length} users.`); }
   }
 
-  if (authLoading) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white">Verifying administrator access…</main>;
+  if (authLoading) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white"><AdminWorkspace />Verifying administrator access…</main>;
   if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white"><h1 className="font-display text-3xl uppercase">Admin access required</h1><Link href="/admin" className="mt-5 inline-block text-rcl-gold">Return to Command Center</Link></main>;
 
   const tabs = [
     ['overview', 'OVERVIEW', FaChartLine], ['users', 'USERS & ROLES', FaUsersGear], ['moderation', 'MODERATION', FaComments], ['reports', 'REPORT CENTER', FaFileShield], ['league', 'LEAGUE CONTROL', FaLayerGroup], ['content', 'CONTENT', FaNewspaper], ['settings', 'SITE SETTINGS', FaGear],
   ] as const;
 
-  return (
-    <main className="min-h-screen bg-rcl-black pb-24 text-white font-display">
+  return (<main className="min-h-screen bg-rcl-black pb-24 text-white font-display"><AdminWorkspace />
       <Container maxWidth="xl" className="py-8">
         <Link href="/admin" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-gold"><FaArrowLeft /> Command Center</Link>
         <div className="mt-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
