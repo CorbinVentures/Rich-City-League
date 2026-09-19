@@ -958,3 +958,22 @@ body:has(.rcl-mock-home) .rcl-platform-root{
     flex-basis:11px!important;
   }
 }
+
+
+/* Admin control form primitives */
+.rcl-admin-field{
+  width:100%;
+  min-height:42px;
+  border:1px solid rgba(38,160,235,.24)!important;
+  border-radius:10px;
+  background:rgba(2,8,14,.72)!important;
+  color:#f6f8fb!important;
+  padding:.7rem .8rem;
+  font-size:.7rem;
+  outline:none;
+}
+.rcl-admin-field:focus{
+  border-color:#159fff!important;
+  box-shadow:0 0 0 3px rgba(21,159,255,.09);
+}
+textarea.rcl-admin-field{min-height:90px;resize:vertical}
