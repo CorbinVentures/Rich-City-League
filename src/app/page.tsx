@@ -12,6 +12,7 @@ import {
   FaCrown,
   FaNewspaper,
   FaPeopleGroup,
+  FaPlay,
   FaRankingStar,
   FaShirt,
   FaTrophy,
