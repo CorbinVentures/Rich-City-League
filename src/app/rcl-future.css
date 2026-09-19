@@ -469,3 +469,20 @@
 @media(prefers-reduced-motion:reduce){
   .rcl-world .rcl-hero .rcl-button::after{display:none}
 }
+
+/* ACCESSIBILITY + INTERACTION POLISH */
+.rcl-world .rcl-destination:focus-visible,
+.rcl-world .rcl-game-card:focus-visible,
+.rcl-world .rcl-news-card:focus-visible,
+.rcl-world .rcl-panel a:focus-visible,
+.rcl-world .rcl-button:focus-visible{
+  outline:2px solid #079dff!important;
+  outline-offset:3px;
+}
+.rcl-world .rcl-destination:active,
+.rcl-world .rcl-game-card:active,
+.rcl-world .rcl-news-card:active{transform:translateY(0)!important}
+@media(max-width:639px){
+  .rcl-world .rcl-destination{touch-action:pan-x}
+  .rcl-world .rcl-button{min-height:3.4rem!important}
+}
