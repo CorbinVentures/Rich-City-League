@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,50 @@ function TeamMark({ team }: { team?: Team }) {
   return team?.logo_url ? <img src={team.logo_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-rcl-orange/15 text-xs font-black text-rcl-orange">{team?.short_name?.slice(0, 2) ?? 'RCL'}</span>;
 }
 
+let draftAudioContext: AudioContext | null = null;
+
+function playDraftChime(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return false;
+    draftAudioContext ??= new AudioContextClass();
+    if (draftAudioContext.state !== 'running') {
+      void draftAudioContext.resume();
+      if (draftAudioContext.state !== 'running') return false;
+    }
+
+    const start = draftAudioContext.currentTime;
+    const master = draftAudioContext.createGain();
+    master.gain.setValueAtTime(0.0001, start);
+    master.gain.exponentialRampToValueAtTime(0.12, start + 0.012);
+    master.gain.exponentialRampToValueAtTime(0.0001, start + 0.9);
+    master.connect(draftAudioContext.destination);
+
+    [
+      { frequency: 659.25, offset: 0, duration: 0.42 },
+      { frequency: 783.99, offset: 0.11, duration: 0.5 },
+      { frequency: 987.77, offset: 0.22, duration: 0.62 },
+    ].forEach(({ frequency, offset, duration }) => {
+      const oscillator = draftAudioContext!.createOscillator();
+      const gain = draftAudioContext!.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start + offset);
+      gain.gain.setValueAtTime(0.0001, start + offset);
+      gain.gain.exponentialRampToValueAtTime(0.65, start + offset + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + duration);
+      oscillator.connect(gain);
+      gain.connect(master);
+      oscillator.start(start + offset);
+      oscillator.stop(start + offset + duration + 0.03);
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function DraftNightPage() {
   const supabase = useMemo(() => getSupabaseClient(), []);
   const { user, profile } = useAuth();
@@ -40,6 +84,10 @@ export default function DraftNightPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [now, setNow] = useState(Date.now());
+  const soundArmedRef = useRef(false);
+  const draftInitializedRef = useRef(false);
+  const knownPickIdsRef = useRef<Set<string>>(new Set());
+  const previousSecondsRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     if (!supabase) return setLoading(false);
@@ -89,6 +137,56 @@ export default function DraftNightPage() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, [draft?.clock_deadline_at, draft?.status]);
+
+  // Draft Night sound design:
+  // 1) Attempt the opening chime on page load.
+  // 2) If the browser blocks autoplay, the first user interaction unlocks audio.
+  useEffect(() => {
+    if (soundArmedRef.current) return;
+    soundArmedRef.current = true;
+
+    const unlockAudio = () => {
+      playDraftChime();
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+
+    const played = playDraftChime();
+    if (!played) {
+      window.addEventListener('pointerdown', unlockAudio, { once: true });
+      window.addEventListener('keydown', unlockAudio, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
+  // A new official pick triggers the same broadcast-style chime for every viewer.
+  useEffect(() => {
+    if (!draft) return;
+    const currentIds = new Set(picks.map((pick) => pick.id));
+
+    if (!draftInitializedRef.current) {
+      knownPickIdsRef.current = currentIds;
+      draftInitializedRef.current = true;
+      return;
+    }
+
+    const hasNewPick = [...currentIds].some((id) => !knownPickIdsRef.current.has(id));
+    knownPickIdsRef.current = currentIds;
+    if (hasNewPick) playDraftChime();
+  }, [draft, picks]);
+
+  // The clock crossing from a positive value to zero triggers a chime once.
+  useEffect(() => {
+    const previous = previousSecondsRef.current;
+    if (seconds === 0 && previous !== null && previous > 0) {
+      playDraftChime();
+    }
+    previousSecondsRef.current = seconds;
+  }, [seconds]);
 
   const current = order.find((item) => item.pick_number === draft?.current_pick);
   const currentTeam = teams.find((team) => team.id === current?.team_id);
