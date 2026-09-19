@@ -62,7 +62,7 @@ export default function ScorebookPage() {
   const [coachAskBusy, setCoachAskBusy] = useState(false);
   const coachPrompts = ['Why did we lose?', 'What changed in Q3?', 'Which lineup worked best?', 'Where were we inefficient?', 'What should we review?', 'Who impacted the game?'];
 
-  const isStaff = profile?.role === 'admin' || profile?.role === 'staff';
+  const isStaff = profile?.role === 'admin';
   const isCoach = profile?.role === 'coach';
 
   const selectedGame = games.find((game) => game.id === selectedGameId);
@@ -352,7 +352,7 @@ export default function ScorebookPage() {
   }
 
   if (!isStaff && !isCoach) {
-    return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-black uppercase">Scorebook access required</h1><p className="mt-3 text-white/50">The RCL Game IQ scorebook is limited to assigned coaches, league staff, and administrators.</p></Container></main>;
+    return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-black uppercase">Scorebook access required</h1><p className="mt-3 text-white/50">The RCL Game IQ scorebook is limited to authorized coaches and administrators.</p></Container></main>;
   }
 
   return (
