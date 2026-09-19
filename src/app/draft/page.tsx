@@ -34,8 +34,6 @@ async function playDraftChime(): Promise<boolean> {
     const audioContext = draftAudioContext;
     if (audioContext.state !== 'running') {
       await audioContext.resume();
-      const resumedState = audioContext.state;
-      if (resumedState !== 'running') return false;
     }
 
     const start = audioContext.currentTime;
