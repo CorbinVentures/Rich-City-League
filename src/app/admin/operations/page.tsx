@@ -89,6 +89,7 @@ export default function LeagueOperationsPage() {
 
   async function updateSession(id: string, status: TryoutSession['status']) {
     if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('tryout_sessions').update({ status } as never).eq('id', id);
     setMessage(error ? error.message : 'Tryout status updated.');
     if (!error) void load();
