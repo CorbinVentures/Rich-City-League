@@ -1,0 +1,423 @@
+/* RCL Basketball Brand System
+ * Global visual enforcement for the Rich City League experience.
+ * Designed to push every surface toward: basketball x Richmond x cinematic sports.
+ */
+
+:root {
+  --rcl-basket-orange: #ff6b1a;
+  --rcl-basket-orange-soft: rgba(255,107,26,.16);
+  --rcl-basket-blue: #1f8fff;
+  --rcl-basket-black: #05070b;
+  --rcl-basket-panel: rgba(9,15,23,.92);
+  --rcl-basket-line: rgba(255,255,255,.085);
+}
+
+html {
+  background: var(--rcl-basket-black);
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255,107,26,.075), transparent 24rem),
+    radial-gradient(circle at 92% 30%, rgba(31,143,255,.055), transparent 28rem),
+    linear-gradient(180deg, #05070b 0%, #080d14 52%, #05070b 100%);
+}
+
+/* The whole site gets a subtle arena/court atmosphere without becoming noisy. */
+.rcl-platform-root {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background:
+    linear-gradient(90deg, transparent 0 49.85%, rgba(255,107,26,.025) 50%, transparent 50.15%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 5px);
+}
+
+.rcl-platform-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: .34;
+  background:
+    radial-gradient(circle at 50% 115%, transparent 0 20rem, rgba(255,107,26,.045) 20.1rem 20.25rem, transparent 20.35rem),
+    radial-gradient(circle at 50% 115%, transparent 0 31rem, rgba(255,255,255,.028) 31.1rem 31.25rem, transparent 31.35rem);
+}
+
+.rcl-platform-root::after {
+  content: "RVA";
+  position: fixed;
+  right: -1.5rem;
+  bottom: 5rem;
+  z-index: -1;
+  pointer-events: none;
+  color: rgba(255,255,255,.018);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: clamp(9rem, 23vw, 25rem);
+  line-height: .7;
+  letter-spacing: -.08em;
+  transform: rotate(-8deg);
+}
+
+/* HOME / CINEMATIC SPORTS HUB */
+.rcl-mock-home {
+  position: relative;
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 74% 7%, rgba(255,107,26,.11), transparent 26rem),
+    radial-gradient(circle at 28% 40%, rgba(31,143,255,.045), transparent 28rem),
+    #05070b;
+}
+
+.rcl-home-main {
+  position: relative;
+  background:
+    linear-gradient(90deg, transparent 0 70%, rgba(255,107,26,.018) 70.1% 70.2%, transparent 70.3%),
+    repeating-linear-gradient(135deg, transparent 0 7rem, rgba(255,255,255,.012) 7.05rem 7.1rem);
+}
+
+/* Court-circle watermark behind the page content. */
+.rcl-home-main::before {
+  content: "";
+  position: absolute;
+  top: 34rem;
+  right: -15rem;
+  width: 48rem;
+  height: 48rem;
+  border: 1px solid rgba(255,107,26,.07);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 5rem rgba(255,255,255,.012),
+    0 0 0 11rem rgba(255,107,26,.018);
+  pointer-events: none;
+}
+
+/* Sidebar becomes a branded basketball tunnel. */
+.rcl-home-sidebar {
+  background:
+    linear-gradient(180deg, rgba(4,8,13,.98), rgba(5,10,17,.97)),
+    radial-gradient(circle at 50% 80%, rgba(255,107,26,.12), transparent 17rem) !important;
+  border-right-color: rgba(255,107,26,.13) !important;
+}
+
+.rcl-home-sidebar::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: 8rem;
+  width: 100%;
+  height: 16rem;
+  pointer-events: none;
+  opacity: .12;
+  background:
+    radial-gradient(ellipse at 50% 100%, transparent 0 5.8rem, #ff6b1a 5.9rem 6rem, transparent 6.1rem),
+    linear-gradient(90deg, transparent 49.6%, #ff6b1a 49.7% 50.3%, transparent 50.4%);
+}
+
+.rcl-home-logo {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.08), transparent 38%),
+    linear-gradient(145deg, #111c2a, #05070b) !important;
+  border-color: rgba(255,107,26,.35) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 0 30px rgba(255,107,26,.08);
+}
+
+.rcl-home-logo::after {
+  content: "◒";
+  position: absolute;
+  right: -2px;
+  bottom: -7px;
+  color: rgba(255,107,26,.18);
+  font-size: 2rem;
+  transform: rotate(-30deg);
+}
+
+/* Hero: photographic basketball + court geometry + Richmond energy. */
+.rcl-home-hero {
+  min-height: 560px !important;
+  border-bottom-color: rgba(255,107,26,.2) !important;
+  box-shadow: inset 0 -80px 100px rgba(0,0,0,.42);
+}
+
+.rcl-home-hero-image {
+  background:
+    linear-gradient(90deg, rgba(2,5,9,.98) 0%, rgba(2,5,9,.84) 37%, rgba(2,5,9,.38) 72%, rgba(2,5,9,.7) 100%),
+    linear-gradient(180deg, rgba(2,5,9,.02) 35%, rgba(2,5,9,.88) 100%),
+    url("https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2000&q=90") center/cover !important;
+  filter: saturate(.94) contrast(1.08);
+}
+
+.rcl-home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 74% 118%, transparent 0 8rem, rgba(255,107,26,.22) 8.1rem 8.2rem, transparent 8.3rem),
+    radial-gradient(ellipse at 74% 118%, transparent 0 18rem, rgba(255,255,255,.06) 18.1rem 18.2rem, transparent 18.3rem),
+    linear-gradient(90deg, transparent 0 73%, rgba(255,255,255,.05) 73.1% 73.25%, transparent 73.35%);
+  mix-blend-mode: screen;
+}
+
+.rcl-home-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .5;
+  background:
+    linear-gradient(112deg, transparent 0 62%, rgba(255,107,26,.12) 62.1% 62.25%, transparent 62.35%),
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(255,255,255,.018) 5px 6px);
+}
+
+.rcl-home-grid {
+  z-index: 2;
+  opacity: .22 !important;
+  background-image:
+    linear-gradient(rgba(255,107,26,.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,26,.065) 1px, transparent 1px) !important;
+  background-size: 84px 84px !important;
+}
+
+.rcl-home-hero-copy {
+  z-index: 3 !important;
+}
+
+.rcl-home-hero h1 {
+  text-shadow:
+    0 4px 0 rgba(0,0,0,.25),
+    0 20px 65px rgba(0,0,0,.8) !important;
+}
+
+.rcl-home-hero h1 span {
+  color: var(--rcl-basket-orange) !important;
+  text-shadow: 0 0 35px rgba(255,107,26,.12);
+}
+
+.rcl-home-cta {
+  background: linear-gradient(135deg, #ff6b1a, #e94f08) !important;
+  color: #070a0e !important;
+  box-shadow: 0 15px 45px rgba(255,107,26,.24) !important;
+}
+
+/* Basketball-branded section dividers. */
+.rcl-home-section-head {
+  position: relative;
+}
+
+.rcl-home-section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 4rem;
+  height: 2px;
+  background: var(--rcl-basket-orange);
+  box-shadow: 0 0 14px rgba(255,107,26,.45);
+}
+
+.rcl-home-section-head p,
+.rcl-home-section-head>a {
+  color: var(--rcl-basket-orange) !important;
+}
+
+/* Panels feel like arena media boards instead of generic cards. */
+.rcl-home-game-card,
+.rcl-home-standings,
+.rcl-home-news-grid,
+.rcl-home-latest,
+.rcl-home-quick-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(14,24,37,.96), rgba(4,8,13,.97)) !important;
+  border-color: var(--rcl-basket-line) !important;
+  box-shadow:
+    0 22px 70px rgba(0,0,0,.3),
+    inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+
+.rcl-home-game-card::before,
+.rcl-home-standings::before,
+.rcl-home-news-grid::before,
+.rcl-home-latest::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8rem;
+  height: 8rem;
+  pointer-events: none;
+  opacity: .08;
+  background:
+    radial-gradient(circle at 100% 0, transparent 0 2.8rem, #ff6b1a 2.9rem 3rem, transparent 3.1rem),
+    linear-gradient(135deg, transparent 49%, #ff6b1a 49.5% 50.5%, transparent 51%);
+}
+
+.rcl-home-quick-card {
+  background-blend-mode: screen, normal !important;
+}
+
+.rcl-home-quick-card:hover {
+  border-color: rgba(255,107,26,.55) !important;
+  box-shadow: 0 18px 45px rgba(255,107,26,.09);
+}
+
+.rcl-home-quick-card > span {
+  background: rgba(255,107,26,.11) !important;
+  color: var(--rcl-basket-orange) !important;
+  border: 1px solid rgba(255,107,26,.18);
+}
+
+/* Player cards get a jersey-number treatment. */
+.rcl-home-player-card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.08) !important;
+  background:
+    linear-gradient(180deg, rgba(16,26,39,.3), rgba(3,7,11,.98)) !important;
+}
+
+.rcl-home-player-card::after {
+  content: attr(data-jersey);
+  position: absolute;
+  right: .25rem;
+  bottom: -.6rem;
+  color: rgba(255,255,255,.035);
+  font-family: Impact, sans-serif;
+  font-size: 8rem;
+  line-height: .8;
+  pointer-events: none;
+}
+
+.rcl-home-player-card:hover {
+  border-color: rgba(255,107,26,.45) !important;
+}
+
+/* Games / standings use orange broadcast lines. */
+.rcl-home-game-grid > a:hover {
+  background: linear-gradient(90deg, rgba(255,107,26,.08), transparent) !important;
+}
+
+.rcl-home-game-grid small {
+  color: var(--rcl-basket-orange) !important;
+}
+
+.rcl-home-standings a:hover,
+.rcl-home-news-grid a:hover,
+.rcl-home-latest a:hover {
+  background: rgba(255,107,26,.045) !important;
+}
+
+/* Generic site cards get the same sports-broadcast language. */
+.rcl-panel,
+.rcl-game-card,
+.rcl-news-card,
+.city-dashboard,
+.city-section,
+.lab-panel,
+.lab-workout,
+.rcl-editorial {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(14,24,37,.95), rgba(5,9,15,.96)) !important;
+  border-color: rgba(255,255,255,.085) !important;
+}
+
+.rcl-panel::before,
+.rcl-game-card::before,
+.rcl-news-card::before,
+.city-dashboard::before,
+.city-section::before,
+.lab-panel::before,
+.lab-workout::before,
+.rcl-editorial::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7rem;
+  height: 7rem;
+  opacity: .06;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 100% 0, transparent 0 2.3rem, #ff6b1a 2.4rem 2.55rem, transparent 2.65rem),
+    linear-gradient(135deg, transparent 49%, #ff6b1a 49.5% 50.5%, transparent 51%);
+}
+
+/* Lab / draft / feature pages get a court-floor motif. */
+.rcl-draft-platform,
+.city-hero,
+.lab-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.rcl-draft-platform::before,
+.city-hero::before,
+.lab-hero::before {
+  content: "";
+  position: absolute;
+  inset: auto -15% -18rem;
+  height: 34rem;
+  pointer-events: none;
+  opacity: .14;
+  background:
+    radial-gradient(ellipse at 50% 0, transparent 0 7rem, rgba(255,107,26,.9) 7.1rem 7.18rem, transparent 7.25rem),
+    radial-gradient(ellipse at 50% 0, transparent 0 15rem, rgba(255,255,255,.28) 15.1rem 15.18rem, transparent 15.25rem),
+    repeating-linear-gradient(90deg, transparent 0 7rem, rgba(255,255,255,.07) 7.05rem 7.12rem);
+  transform: perspective(600px) rotateX(58deg);
+  transform-origin: center bottom;
+}
+
+/* Orange becomes the signature interaction color across the branded surfaces. */
+.rcl-button,
+.city-court,
+.lab-option:hover,
+.lab-option.selected {
+  background-color: var(--rcl-basket-orange) !important;
+}
+
+.rcl-button:hover {
+  background-color: #ff8a45 !important;
+}
+
+@media (max-width: 639px) {
+  .rcl-home-hero {
+    min-height: calc(100svh - 9.5rem) !important;
+  }
+
+  .rcl-home-hero::before {
+    background:
+      radial-gradient(ellipse at 75% 118%, transparent 0 5rem, rgba(255,107,26,.18) 5.1rem 5.2rem, transparent 5.3rem),
+      radial-gradient(ellipse at 75% 118%, transparent 0 11rem, rgba(255,255,255,.05) 11.1rem 11.2rem, transparent 11.3rem);
+  }
+
+  .rcl-home-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .rcl-home-section-head h2 {
+    font-size: 25px !important;
+  }
+
+  .rcl-platform-root::after {
+    right: -3rem;
+    bottom: 6rem;
+    font-size: 11rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcl-home-hero::before,
+  .rcl-home-hero::after {
+    animation: none !important;
+  }
+}
