@@ -307,7 +307,7 @@ export default function ScorebookPage() {
         body: JSON.stringify({ game_id: selectedGameId, question: normalized }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? 'Game IQ could not answer that question.');
+      if (!response.ok) throw new Error(data.detail ? `${data.error ?? 'Game IQ could not answer that question.'} ${data.detail}` : (data.error ?? 'Game IQ could not answer that question.'));
       setCoachAnswer(data.answer ?? '');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Game IQ could not answer that question.');
@@ -445,9 +445,10 @@ export default function ScorebookPage() {
             </div>
             <p className="mt-5 text-[9px] font-black uppercase tracking-widest text-white/35">Player</p>
             <div className="mt-2 grid max-h-[330px] grid-cols-2 gap-2 overflow-y-auto pr-1">
+              {teamPlayers.length === 0 && <div className="col-span-full rounded-xl border border-dashed border-white/10 p-4 text-center text-[10px] uppercase tracking-widest text-white/30">No active players are attached to this team for this season.</div>}
               {teamPlayers.map((player) => {
                 const stat = stats.find((item) => item.player_id === player.id);
-                return <button key={player.id} onClick={() => setSelectedPlayerId(player.id)} className={`rounded-xl border p-3 text-left ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
+                return <button type="button" key={player.id} aria-pressed={selectedPlayerId === player.id} onClick={() => { setSelectedPlayerId(player.id); setAssistPlayerId(''); }} className={`rounded-xl border p-3 text-left transition ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10 ring-1 ring-rcl-gold/30' : 'border-white/10 bg-black/20 hover:border-white/25'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
               })}
             </div>
           </div>
