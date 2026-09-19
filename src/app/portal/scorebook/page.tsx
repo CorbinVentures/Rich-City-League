@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Game, GameEvent, GameLineup, Player, PlayerGameStats, Team, TeamSeason, Roster } from '@/types/database';
 import { deriveGameAnalytics, derivePlayerMetrics, describeEvent, formatClock, summarizeGame, zoneFromCoordinates } from '@/lib/game-iq';
+import { ShotMap } from '@/components/scorebook/ShotMap';
 
 type GameRow = Game & { home_team?: Team; away_team?: Team };
 
@@ -425,20 +426,13 @@ export default function ScorebookPage() {
             <div className="mt-2 grid max-h-[330px] grid-cols-2 gap-2 overflow-y-auto pr-1">
               {teamPlayers.map((player) => {
                 const stat = stats.find((item) => item.player_id === player.id);
-                return <button key={player.id} onClick={() => setSelectedPlayerId(player.id)} className={`rounded-xl border p-3 text-left ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
-              })}
-            </div>
-          </div>
+                return <button key={player.id} onClick={() => setSelectedPlayerId(player.id)} className={`rounded-xl border p-3 text-left ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button          <ShotMap
+            events={events}
+            pendingShot={pendingShot}
+            onLocationSelect={(x, y) => setPendingShot({ x, y, zone: zoneFromCoordinates(x, y) })}
+          />
 
-          <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Shot map</p><p className="mt-1 text-xs text-white/40">Tap a location, then record the shot.</p></div>{pendingShot && <span className="rounded-full bg-rcl-orange/15 px-3 py-1 text-[9px] font-black uppercase text-rcl-orange">{pendingShot.zone}</span>}</div>
-            <div onClick={chooseCourtLocation} className="relative mt-4 aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-[#0b1119]">
-              <div className="absolute inset-[7%] rounded-[50%] border border-white/15" />
-              <div className="absolute left-[25%] right-[25%] top-[5%] h-[23%] rounded-b-[45%] border border-white/15" />
-              <div className="absolute left-[36%] right-[36%] top-[4%] h-[5%] rounded-b-full border-b-2 border-rcl-orange" />
-              <div className="absolute left-1/2 top-0 bottom-0 border-l border-white/5" />
-              {events.filter((e) => !e.voided_at && e.shot_x !== null && e.shot_y !== null && ['shot_made','shot_missed'].includes(e.event_type)).slice(0,120).map((shot) => <span key={shot.id} className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${shot.event_type === 'shot_made' ? 'border-emerald-300 bg-emerald-300/50' : 'border-red-300 bg-red-300/30'}`} style={{ left: `${shot.shot_x}%`, top: `${shot.shot_y}%` }} />)}
-              {pendingShot && <span className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rcl-gold bg-rcl-gold/30" style={{ left: `${pendingShot.x}%`, top: `${pendingShot.y}%` }} />}
+dingShot.y}%` }} />}
             </div>
           </div>
 
