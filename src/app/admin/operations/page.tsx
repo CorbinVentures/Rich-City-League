@@ -12,7 +12,7 @@ const categories = ['TRADE_REQUEST', 'ROSTER_CHANGE', 'PLAYER_RELEASE', 'PLAYER_
 export default function LeagueOperationsPage() {
   const { profile, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
-  const db = supabase as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database> | null;
+  const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database> | null;
   const [sessions, setSessions] = useState<TryoutSession[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [pool, setPool] = useState<DraftPool[]>([]);
@@ -32,7 +32,7 @@ export default function LeagueOperationsPage() {
 
   async function load() {
     if (!supabase || !isStaff) return;
-    const db = supabase;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     setBusy(true);
     const [sessionResult, draftResult, poolResult, requestResult, caseResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
       db.from('tryout_sessions').select('*').order('starts_at'),
