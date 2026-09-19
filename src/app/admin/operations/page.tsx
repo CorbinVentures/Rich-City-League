@@ -64,6 +64,7 @@ export default function LeagueOperationsPage() {
   async function createTryout(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !sessionForm.season_id) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('tryout_sessions').insert({ ...sessionForm, starts_at: new Date(sessionForm.starts_at).toISOString(), ends_at: new Date(sessionForm.ends_at).toISOString(), capacity: Number(sessionForm.capacity), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Tryout session created.');
     if (!error) void load();
