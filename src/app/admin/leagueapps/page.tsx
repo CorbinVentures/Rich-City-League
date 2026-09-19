@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -109,7 +110,7 @@ export default function LeagueAppsAdminHub() {
     if (isAdmin) void loadIntegrationStatus();
   }, [isAdmin]);
 
-  if (loading) return <main className="min-h-screen bg-rcl-black p-10 text-white/50">Loading command center…</main>;
+  if (loading) return <main className="min-h-screen bg-rcl-black p-10 text-white/50"><AdminWorkspace />Loading command center…</main>;
   if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-10 text-white"><h1 className="rcl-display text-4xl uppercase">Admin access required.</h1><Link href="/dashboard" className="rcl-link mt-5">Return to dashboard <FaArrowRight /></Link></main>;
 
   return <main className="rcl-admin-hub min-h-screen bg-rcl-black pb-24 text-white">
