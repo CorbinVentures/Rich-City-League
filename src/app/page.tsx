@@ -38,10 +38,10 @@ export default async function HomePage() {
           <div className="max-w-3xl">
             <p className="rcl-kicker"><FaBolt /> 804 · RICHMOND, VIRGINIA</p>
             <h1 className="rcl-display mt-5 max-w-xl text-5xl font-black uppercase leading-[.86] tracking-tight sm:text-8xl">
-              The city<br /><span className="text-rcl-orange">is the court.</span>
+              RICH CITY<br /><span className="text-rcl-orange">BUILDS DIFFERENT.</span>
             </h1>
             <p className="mt-6 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
-              Richmond basketball culture, connected. Follow the runs, find your people, and build your legacy in the city.
+              PLAY. COMPETE. CONNECT. GROW.
             </p>
             <Link href="/city" className="rcl-button mt-8 inline-flex items-center gap-3">
               Enter the city <FaArrowRight />
