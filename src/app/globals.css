@@ -639,3 +639,18 @@ img, video, canvas, svg { max-width: 100%; }
 @media(min-width:700px){body:has(.rcl-universal-sidebar) main:not(.rcl-mock-home){margin-left:212px;min-height:calc(100svh - 62px)}}
 @media(max-width:699px){.rcl-universal-sidebar{display:none}.rcl-universal-topbar{margin-left:0;height:62px;padding:0 13px}.rcl-universal-bottom{display:grid;left:0}.rcl-universal-wordmark b{font-size:9px}.rcl-universal-mark{width:47px;height:47px;flex-basis:47px}.rcl-universal-bottom a,.rcl-universal-bottom button{min-height:58px}.rcl-universal-drawer{width:88vw}.rcl-universal-drawer-head{min-height:105px}.rcl-universal-drawer nav{padding-bottom:25px}}
 @media(min-width:700px) and (max-width:1024px){.rcl-universal-bottom{display:grid}.rcl-universal-topbar{margin-left:212px}}
+
+/* Shared page-family enforcement */
+.rcl-mock-page,.rcl-games-page,.rcl-league-page{background:
+ radial-gradient(circle at 82% 0%,rgba(21,159,255,.07),transparent 28rem),
+ radial-gradient(circle at 10% 30%,rgba(255,79,22,.035),transparent 22rem),
+ #03070d!important;color:var(--rcl-text)}
+.rcl-mock-page .rcl-mock-hero,.rcl-mock-page section[class*="rounded"],.rcl-mock-page article[class*="rounded"],.rcl-mock-page form[class*="rounded"],
+.rcl-games-page .rounded-2xl,.rcl-league-page .rounded-2xl{border-color:var(--rcl-line)}
+.rcl-mock-page h1,.rcl-mock-page h2,.rcl-mock-page h3,.rcl-games-page h1,.rcl-games-page h2,.rcl-league-page h1,.rcl-league-page h2{font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+.rcl-mock-page .rcl-kicker,.rcl-mock-page [class*="text-rcl-gold"],.rcl-games-page [class*="text-rcl-gold"],.rcl-league-page [class*="text-rcl-gold"]{color:var(--rcl-orange)!important}
+.rcl-mock-page .bg-rcl-gold,.rcl-mock-page .bg-rcl-orange{background:var(--rcl-orange)!important}
+.rcl-mock-page button,.rcl-mock-page a[class*="bg-rcl-gold"],.rcl-games-page button,.rcl-league-page button{transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.rcl-mock-page button:hover,.rcl-games-page button:hover,.rcl-league-page button:hover{transform:translateY(-1px)}
+.rcl-mock-page input,.rcl-mock-page textarea,.rcl-mock-page select,.rcl-games-page input,.rcl-games-page select,.rcl-league-page input,.rcl-league-page select{background:#050d15!important;border-color:rgba(38,160,235,.24)!important;color:#f6f8fb}
+.rcl-mock-page table,.rcl-games-page table,.rcl-league-page table{background:linear-gradient(145deg,#071522,#040b13);border:1px solid var(--rcl-line);border-radius:14px;overflow:hidden}
