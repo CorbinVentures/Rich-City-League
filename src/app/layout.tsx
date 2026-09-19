@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './rcl-future.css';
 import '@/components/RclSplashMockup.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
