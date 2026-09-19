@@ -463,6 +463,7 @@ export default function AdminDashboardPage() {
               >
                 LEAGUE OPERATIONS
               </Link>
+              <Link href="/admin/league-setup" className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold">DATA FOUNDATION</Link>
               <button 
                 onClick={loadDashboardData} 
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold"
