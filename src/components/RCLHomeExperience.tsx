@@ -2,27 +2,15 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { RCL_NAV_ITEMS, RCL_ADMIN_NAV_ITEM } from '@/lib/rcl-navigation';
 import {
   FaArrowRight, FaBars, FaBell, FaCalendarDays, FaChartLine, FaComments, FaCrown,
   FaFlask, FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar, FaPlay,
   FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass, FaListOl, FaUserTie, FaGear
 } from 'react-icons/fa6';
 
-type NavItem = { label:string; href:string; icon: any };
-const nav: NavItem[] = [
-  {label:'Home',href:'/',icon:FaHouse},{label:'The Lab',href:'/lab',icon:FaFlask},
-  {label:'Players',href:'/players',icon:FaUser},{label:'Teams',href:'/teams',icon:FaUsers},
-  {label:'Schedule',href:'/schedule',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
-  {label:'Standings',href:'/standings',icon:FaFolderOpen},{label:'Stats',href:'/stats',icon:FaChartLine},
-  {label:'Draft Night',href:'/draft',icon:FaCrown},{label:'Social',href:'/social',icon:FaPeopleGroup},
-  {label:'News',href:'/news',icon:FaNewspaper},{label:'Media',href:'/media',icon:FaPlay},
-  {label:'Community',href:'/communities',icon:FaPeopleGroup},{label:'Rankings',href:'/rankings',icon:FaListOl},
-  {label:'Fantasy',href:'/fantasy',icon:FaTrophy},{label:'Leaderboards',href:'/leaderboards',icon:FaListOl},
-  {label:'Game IQ',href:'/game-iq',icon:FaChartLine},{label:'Messages',href:'/messages',icon:FaComments},
-  {label:'Friends',href:'/friends',icon:FaUsers},{label:'Coaches',href:'/coaches',icon:FaUserTie},
-  {label:'Awards',href:'/badges',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
-  {label:'Notifications',href:'/notifications',icon:FaBell},{label:'About',href:'/about',icon:FaBasketball}
-];
+const nav = RCL_NAV_ITEMS;
 const quick = [
   {title:'THE LAB',sub:'TRAIN. IMPROVE.',href:'/lab',icon:FaFlask,image:'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=700&q=82'},
   {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
@@ -47,6 +35,8 @@ const fallbackPlayers = [
 
 export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,posts}:Props) {
   const [menuOpen,setMenuOpen]=useState(false);
+  const {profile}=useAuth();
+  const menuLinks = profile?.role==='admin'||profile?.role==='staff' ? [...nav,RCL_ADMIN_NAV_ITEM] : nav;
   const team = (id:string) => teams.find(t=>t.id===id);
   const next = games.filter(g=>g.status!=='completed').slice(0,3);
   const featured = players.slice(0,3);
@@ -57,7 +47,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
   return <main className="rcl-mock-home">
     <aside className="rcl-home-sidebar">
       <div className="rcl-home-sidebar-brand"><div className="rcl-home-logo">RCL</div><div><b>RICH CITY</b><strong>LEAGUE</strong><small>804 · RVA</small></div></div>
-      <nav>{nav.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} className={item.href==='/'?'active':''}><Icon/><span>{item.label}</span></Link>})}</nav>
+      <nav>{menuLinks.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} className={item.href==='/'?'active':''}><Icon/><span>{item.label}</span></Link>})}</nav>
       <div className="rcl-home-sidebar-bottom">
         <Link href="/dashboard" className="rcl-home-profile"><span className="rcl-avatar">HI</span><span><b>HI FI</b><small>View Profile</small></span><FaArrowRight/></Link>
         <Link href="/settings"><span className="rcl-settings-dot">⚙</span>Settings</Link>
