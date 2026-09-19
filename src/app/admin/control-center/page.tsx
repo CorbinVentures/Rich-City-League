@@ -81,7 +81,14 @@ export default function AdminControlCenterPage() {
     if (!db || id === user?.id || !roles.includes(role as any)) return;
     const { error } = await db?.from('profiles').update({ role } as never).eq('id', id);
     if (error) setMessage(error.message);
-    else { await audit('ADMIN_UPDATE_ROLE', `Changed profile ${id} to ${role}`); setMessage('User role updated.'); await load(); }
+    else {
+      if (role === 'staff') {
+        await db.from('staff').upsert({ profile_id: id, title: 'Staff', permissions: {} } as never, { onConflict: 'profile_id' });
+      }
+      await audit('ADMIN_UPDATE_ROLE', `Changed profile ${id} to ${role}`);
+      setMessage('User role updated.');
+      await load();
+    }
   }
 
   async function saveStaffRecord(id: string, title: string, permissionsRaw: string) {
