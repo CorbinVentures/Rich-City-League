@@ -31,12 +31,14 @@ async function playDraftChime(): Promise<boolean> {
     const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return false;
     draftAudioContext ??= new AudioContextClass();
-    if (draftAudioContext.state !== 'running') {
-      await draftAudioContext.resume();
-      if (draftAudioContext.state !== 'running') return false;
+    const audioContext = draftAudioContext;
+    if (audioContext.state !== 'running') {
+      await audioContext.resume();
+      const resumedState = audioContext.state;
+      if (resumedState !== 'running') return false;
     }
 
-    const start = draftAudioContext.currentTime;
+    const start = audioContext.currentTime;
     const master = draftAudioContext.createGain();
     master.gain.setValueAtTime(0.0001, start);
     master.gain.exponentialRampToValueAtTime(0.12, start + 0.012);
@@ -48,8 +50,8 @@ async function playDraftChime(): Promise<boolean> {
       { frequency: 783.99, offset: 0.11, duration: 0.5 },
       { frequency: 987.77, offset: 0.22, duration: 0.62 },
     ].forEach(({ frequency, offset, duration }) => {
-      const oscillator = draftAudioContext!.createOscillator();
-      const gain = draftAudioContext!.createGain();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(frequency, start + offset);
       gain.gain.setValueAtTime(0.0001, start + offset);
