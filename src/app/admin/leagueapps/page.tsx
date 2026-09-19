@@ -65,7 +65,8 @@ export default function LeagueAppsAdminHub() {
   async function getAuthHeaders() {
     const client = getSupabaseClient();
     if (!client) throw new Error('Supabase client is unavailable.');
-    const { data, error } = await client.auth.getSession();
+    const db = client as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { data, error } = await db.auth.getSession();
     if (error) throw error;
     const token = data.session?.access_token;
     if (!token) throw new Error('Your admin session is not available. Please sign in again.');
