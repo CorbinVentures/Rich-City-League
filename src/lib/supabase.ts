@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { createBrowserClient as createSupabaseBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from '@/lib/supabase-config';
 
@@ -7,7 +7,7 @@ function createBrowserClient(flowType: 'pkce' | 'implicit', noStore = false) {
   if (config.status !== 'configured') return null;
 
   try {
-    return createBrowserClient<Database>(config.url!, config.anonKey!, {
+    return createSupabaseBrowserClient<Database>(config.url!, config.anonKey!, {
       auth: {
         flowType,
         autoRefreshToken: true,
