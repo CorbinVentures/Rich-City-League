@@ -81,7 +81,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
       <div className="rcl-home-content">
         <section className="rcl-home-quick">
           <div className="rcl-home-section-head"><div><p>STEP INTO THE WORLD</p><h2>FIND YOUR COURT</h2></div><b>01</b></div>
-          <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card" style={{backgroundImage:\`linear-gradient(90deg,rgba(3,8,13,.96),rgba(3,8,13,.48)),url(\${q.image})\`}}><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
+          <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card" style={{backgroundImage:'linear-gradient(90deg,rgba(3,8,13,.96),rgba(3,8,13,.48)),url('+q.image+')'}}><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
         </section>
 
         <section>
