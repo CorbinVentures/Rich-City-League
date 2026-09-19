@@ -12,6 +12,7 @@ const categories = ['TRADE_REQUEST', 'ROSTER_CHANGE', 'PLAYER_RELEASE', 'PLAYER_
 export default function LeagueOperationsPage() {
   const { profile, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
+  const db = supabase as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database> | null;
   const [sessions, setSessions] = useState<TryoutSession[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [pool, setPool] = useState<DraftPool[]>([]);
@@ -33,14 +34,14 @@ export default function LeagueOperationsPage() {
     if (!supabase || !isStaff) return;
     setBusy(true);
     const [sessionResult, draftResult, poolResult, requestResult, caseResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
-      supabase.from('tryout_sessions').select('*').order('starts_at'),
-      supabase.from('drafts').select('*').order('created_at', { ascending: false }),
-      supabase.from('draft_pools').select('*').order('updated_at', { ascending: false }),
-      supabase.from('league_requests').select('*').order('updated_at', { ascending: false }),
-      supabase.from('discipline_cases').select('*').order('created_at', { ascending: false }),
-      supabase.from('seasons').select('id,name').order('start_date', { ascending: false }),
-      supabase.from('teams').select('*').eq('is_active', true).order('name'),
-      supabase.from('team_seasons').select('team_id,season_id'),
+      db.from('tryout_sessions').select('*').order('starts_at'),
+      db.from('drafts').select('*').order('created_at', { ascending: false }),
+      db.from('draft_pools').select('*').order('updated_at', { ascending: false }),
+      db.from('league_requests').select('*').order('updated_at', { ascending: false }),
+      db.from('discipline_cases').select('*').order('created_at', { ascending: false }),
+      db.from('seasons').select('id,name').order('start_date', { ascending: false }),
+      db.from('teams').select('*').eq('is_active', true).order('name'),
+      db.from('team_seasons').select('team_id,season_id'),
     ]);
     if (sessionResult.error || draftResult.error || poolResult.error || requestResult.error || caseResult.error || seasonResult.error || teamResult.error || teamSeasonResult.error) {
       setMessage('Unable to load league operations.');
@@ -62,7 +63,7 @@ export default function LeagueOperationsPage() {
   async function createTryout(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !sessionForm.season_id) return;
-    const { error } = await supabase.from('tryout_sessions').insert({ ...sessionForm, starts_at: new Date(sessionForm.starts_at).toISOString(), ends_at: new Date(sessionForm.ends_at).toISOString(), capacity: Number(sessionForm.capacity), created_by: profile.id } as never);
+    const { error } = await db.from('tryout_sessions').insert({ ...sessionForm, starts_at: new Date(sessionForm.starts_at).toISOString(), ends_at: new Date(sessionForm.ends_at).toISOString(), capacity: Number(sessionForm.capacity), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Tryout session created.');
     if (!error) void load();
   }
@@ -70,21 +71,21 @@ export default function LeagueOperationsPage() {
   async function createDraft(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !draftForm.season_id) return;
-    const { error } = await supabase.from('drafts').insert({ ...draftForm, rounds: Number(draftForm.rounds), roster_limit: Number(draftForm.roster_limit), created_by: profile.id } as never);
+    const { error } = await db.from('drafts').insert({ ...draftForm, rounds: Number(draftForm.rounds), roster_limit: Number(draftForm.roster_limit), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Draft created in setup mode.');
     if (!error) void load();
   }
 
   async function updateRequest(id: string, status: string) {
     if (!supabase) return;
-    const { error } = await supabase.from('league_requests').update({ status } as never).eq('id', id);
+    const { error } = await db.from('league_requests').update({ status } as never).eq('id', id);
     setMessage(error ? error.message : 'Request status updated.');
     if (!error) void load();
   }
 
   async function updateSession(id: string, status: TryoutSession['status']) {
     if (!supabase) return;
-    const { error } = await supabase.from('tryout_sessions').update({ status } as never).eq('id', id);
+    const { error } = await db.from('tryout_sessions').update({ status } as never).eq('id', id);
     setMessage(error ? error.message : 'Tryout status updated.');
     if (!error) void load();
   }
@@ -92,7 +93,7 @@ export default function LeagueOperationsPage() {
   async function updateDraft(id: string, status: Draft['status']) {
     if (!supabase) return;
     const action = status === 'OPEN' ? 'OPEN' : status === 'PAUSED' ? 'PAUSE' : 'COMPLETE';
-    const { error } = await supabase.rpc('manage_draft_clock' as never, {
+    const { error } = await db.rpc('manage_draft_clock' as never, {
       target_draft: id,
       target_action: action,
       target_extension_seconds: 0,
@@ -104,7 +105,7 @@ export default function LeagueOperationsPage() {
   async function saveDraftOrder(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !orderDraftId || orderValues.some((teamId) => !teamId)) return;
-    const { error } = await supabase.rpc('configure_draft_order' as never, {
+    const { error } = await db.rpc('configure_draft_order' as never, {
       target_draft: orderDraftId,
       ordered_teams: orderValues,
     } as never);
