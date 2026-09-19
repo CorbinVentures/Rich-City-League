@@ -23,15 +23,12 @@ export default async function HomePage() {
   const snapshot = await getLeagueSnapshot();
   const client = getPublicClient();
 
-  const [postResult, playerResult] = client
-    ? await Promise.all([
-        client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
-        client.from('public_players').select('id,first_name,last_name,position,photo_url').eq('is_active', true).order('last_name').limit(3),
-      ])
-    : [{ data: [] }, { data: [] }];
+  const { data: posts } = client
+    ? await client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3)
+    : { data: [] };
 
-  const posts = (postResult.data ?? []) as Array<{ id: string; body: string | null; created_at: string; author?: { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null }>;
-  const players = (playerResult.data ?? []) as Array<{ id: string; first_name: string; last_name: string; position: string | null; photo_url: string | null }>;
+
+  const communityPosts = (posts ?? []) as Array<{ id: string; body: string | null; created_at: string; author?: { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null }>;
   const liveGame = snapshot.games.find((game) => game.status === 'live');
   const nextGames = snapshot.games.filter((game) => game.status !== 'completed' && game.status !== 'cancelled').slice(0, 3);
   const featuredGame = liveGame ?? nextGames[0];
@@ -114,26 +111,16 @@ export default async function HomePage() {
           <div>
             <MockupSectionHead title="FEATURED PLAYERS" href="/players" />
             <div className="rcl-player-grid">
-              {players.map((player, index) => (
-                <Link href={'/players/' + player.id} key={player.id} className="rcl-player-card">
-                  {player.photo_url && <img src={player.photo_url} alt="" />}
-                  <div className="rcl-player-shade" />
-                  <span className="rcl-player-rank">#{index + 1}</span>
-                  <div className="rcl-player-info">
-                    <small>RCL PLAYER</small>
-                    <h3>{player.first_name}<br />{player.last_name}</h3>
-                    <div><b>{player.position ?? 'PLAYER'}</b><b>RCL</b></div>
-                  </div>
-                </Link>
-              ))}
-              {!players.length && <div className="rcl-mockup-panel rcl-empty-player">Player profiles will appear here.</div>}
+              <Link href="/players" className="rcl-player-card"><ContentAssetBackground assetKey="players.cover" opacity={0.82} /><div className="rcl-player-shade" /><span className="rcl-player-rank">#01</span><div className="rcl-player-info"><small>RCL PLAYER</small><h3>DISCOVER<br />PLAYERS</h3><div><b>PLAYER PROFILES</b><b>→</b></div></div></Link>
+              <Link href="/rankings" className="rcl-player-card"><ContentAssetBackground assetKey="players.cover" opacity={0.64} /><div className="rcl-player-shade" /><span className="rcl-player-rank">#02</span><div className="rcl-player-info"><small>RCL SYSTEM</small><h3>RANKINGS<br />RISING</h3><div><b>SEE THE LIST</b><b>→</b></div></div></Link>
+              <Link href="/stats" className="rcl-player-card"><ContentAssetBackground assetKey="players.cover" opacity={0.52} /><div className="rcl-player-shade" /><span className="rcl-player-rank">#03</span><div className="rcl-player-info"><small>PLAYER IQ</small><h3>MEASURE<br />YOUR IMPACT</h3><div><b>VIEW STATS</b><b>→</b></div></div></Link>
             </div>
           </div>
 
           <div>
             <MockupSectionHead title="COMMUNITY FEED" href="/social" />
             <div className="rcl-feed-panel">
-              {posts.slice(0, 2).map((post) => {
+              {communityPosts.slice(0, 2).map((post) => {
                 const author = post.author?.display_name || [post.author?.first_name, post.author?.last_name].filter(Boolean).join(' ') || 'RCL Community';
                 return <Link href="/social" key={post.id} className="rcl-feed-post"><span>{author[0]}</span><div><b>{author}</b><small>RCL COMMUNITY · {formatDate(post.created_at)}</small><p>{post.body}</p></div></Link>;
               })}
