@@ -161,10 +161,6 @@ export function SiteHeader() {
               </div>
               <button onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/70 hover:border-rcl-orange hover:text-rcl-orange"><FaXmark className="h-4 w-4" /></button>
             </div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-5">
-              <div><span className="block text-sm font-black tracking-widest text-white">RCL NAVIGATION</span><span className="mt-1 block text-[9px] tracking-widest text-slate-600">RICHMOND · BASKETBALL · CULTURE</span></div>
-              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" className="grid h-9 w-9 place-items-center rounded-lg border border-white/10"><FaXmark className="h-4 w-4" /></button>
-            </div>
             <div className="mt-5 flex max-h-[72vh] flex-col gap-1 overflow-y-auto">
               {allLinks.map((link) => {
                 const Icon = link.icon;
