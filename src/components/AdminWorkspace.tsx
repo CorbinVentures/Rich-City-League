@@ -9,6 +9,7 @@ import {
   FaPlug,
   FaShirt,
   FaShieldHalved,
+  FaTrophy,
 } from 'react-icons/fa6';
 
 const items = [
