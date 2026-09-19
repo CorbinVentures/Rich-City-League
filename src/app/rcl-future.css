@@ -245,3 +245,227 @@
  .rcl-world .rcl-home-content{margin-top:-1.5rem!important;padding-left:1rem!important;padding-right:1rem!important}
  .rcl-world .rcl-game-card{min-height:9.5rem!important}
 }
+
+/* SECOND PASS — cinematic homepage polish, visual-only */
+.rcl-world::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.18;
+  background-image:
+    linear-gradient(rgba(65,178,240,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(65,178,240,.045) 1px,transparent 1px);
+  background-size:96px 96px;
+  mask-image:linear-gradient(to bottom,black,transparent 78%);
+}
+.rcl-world .rcl-hero .rcl-skyline{
+  height:48%!important;
+  opacity:.28!important;
+  filter:drop-shadow(0 0 18px rgba(7,157,255,.12));
+}
+.rcl-world .rcl-hero::before{
+  content:'RCL / 804';
+  position:absolute;
+  right:clamp(1rem,5vw,5rem);
+  bottom:2.2rem;
+  z-index:3;
+  color:rgba(255,255,255,.22);
+  font-size:.5rem;
+  font-weight:950;
+  letter-spacing:.28em;
+}
+.rcl-world .rcl-hero::after{
+  background-image:
+    linear-gradient(rgba(65,178,240,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(65,178,240,.055) 1px,transparent 1px),
+    linear-gradient(135deg,transparent 0 49.7%,rgba(7,157,255,.12) 49.9%,transparent 50.1%);
+  background-size:72px 72px,72px 72px,100% 100%;
+  opacity:.24;
+}
+.rcl-world .rcl-hero .rcl-kicker{
+  position:relative;
+  padding-left:.75rem;
+}
+.rcl-world .rcl-hero .rcl-kicker::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:50%;
+  width:.22rem;
+  height:1.15rem;
+  transform:translateY(-50%);
+  background:#ff4f16;
+  box-shadow:0 0 12px rgba(255,79,22,.45);
+}
+.rcl-world .rcl-hero h1.rcl-display{
+  text-wrap:balance;
+  max-width:12ch!important;
+  text-shadow:0 20px 65px rgba(0,0,0,.72),0 0 30px rgba(7,157,255,.06);
+}
+.rcl-world .rcl-hero .rcl-button{
+  position:relative;
+  overflow:hidden;
+}
+.rcl-world .rcl-hero .rcl-button::after{
+  content:'';
+  position:absolute;
+  inset:0 auto 0 -45%;
+  width:35%;
+  transform:skewX(-18deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+  transition:left .55s ease;
+}
+.rcl-world .rcl-hero .rcl-button:hover::after{left:125%}
+.rcl-world .rcl-home-content>section:first-child{
+  padding-top:.35rem;
+}
+.rcl-world .rcl-home-content>section:first-child::before{
+  content:'01';
+  position:absolute;
+  right:0;
+  top:.25rem;
+  color:rgba(255,255,255,.16);
+  font-family:Impact,Haettenschweiler,sans-serif;
+  font-size:2.8rem;
+  line-height:1;
+}
+.rcl-world .rcl-home-content>section:not(:first-child)::before{
+  content:'';
+  position:absolute;
+  top:-1.7rem;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,rgba(57,174,255,.22),transparent 70%);
+}
+.rcl-world .rcl-home-content>section:nth-child(2)::after,
+.rcl-world .rcl-home-content>section:nth-child(3)::after,
+.rcl-world .rcl-home-content>section:nth-child(4)::after{
+  content:'RCL';
+  position:absolute;
+  right:.8rem;
+  top:-2.35rem;
+  color:rgba(255,255,255,.09);
+  font-size:.45rem;
+  font-weight:950;
+  letter-spacing:.25em;
+}
+.rcl-world .rcl-shortcuts{
+  position:relative;
+}
+.rcl-world .rcl-destination{
+  position:relative;
+  overflow:hidden;
+}
+.rcl-world .rcl-destination::before{
+  content:'';
+  position:absolute;
+  inset:0 auto 0 0;
+  width:2px;
+  background:linear-gradient(#079dff,#ff4f16);
+  opacity:.55;
+}
+.rcl-world .rcl-destination strong{
+  font-size:.72rem!important;
+  letter-spacing:.09em;
+}
+.rcl-world .rcl-destination small{
+  font-size:.59rem!important;
+  letter-spacing:.03em;
+}
+.rcl-world .rcl-destination>svg:last-child{
+  color:rgba(255,255,255,.38)!important;
+  transition:transform .18s ease,color .18s ease;
+}
+.rcl-world .rcl-destination:hover>svg:last-child{
+  transform:translateX(3px);
+  color:#079dff!important;
+}
+.rcl-world .rcl-game-card{
+  position:relative;
+  overflow:hidden;
+}
+.rcl-world .rcl-game-card::after{
+  content:'';
+  position:absolute;
+  right:-3rem;
+  bottom:-4rem;
+  width:10rem;
+  height:10rem;
+  border:1px solid rgba(7,157,255,.12);
+  border-radius:50%;
+  box-shadow:0 0 0 1.5rem rgba(7,157,255,.025),0 0 0 3rem rgba(7,157,255,.018);
+  pointer-events:none;
+}
+.rcl-world .rcl-game-card .text-rcl-orange{
+  font-family:Impact,Haettenschweiler,sans-serif;
+  letter-spacing:.08em;
+}
+.rcl-world .rcl-panel.divide-y{
+  overflow:hidden;
+}
+.rcl-world .rcl-panel.divide-y>a{
+  position:relative;
+}
+.rcl-world .rcl-panel.divide-y>a::after{
+  content:'';
+  position:absolute;
+  right:1rem;
+  bottom:0;
+  left:1rem;
+  height:1px;
+  background:linear-gradient(90deg,rgba(57,174,255,.10),transparent);
+}
+.rcl-world .rcl-panel.divide-y>a:last-child::after{display:none}
+.rcl-world .rcl-panel.divide-y>a:hover .text-rcl-orange{
+  text-shadow:0 0 14px rgba(255,79,22,.45);
+}
+.rcl-world .rcl-news-card{
+  position:relative;
+  overflow:hidden;
+}
+.rcl-world .rcl-news-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  width:4rem;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#079dff);
+}
+.rcl-world .rcl-news-card h3{
+  max-width:16ch;
+  text-wrap:balance;
+}
+.rcl-world .rcl-home-content section:nth-of-type(3) .rcl-panel{
+  position:relative;
+}
+.rcl-world .rcl-home-content section:nth-of-type(3) .rcl-panel::before{
+  content:'804 COMMUNITY';
+  position:absolute;
+  right:1rem;
+  top:.9rem;
+  color:rgba(255,255,255,.16);
+  font-size:.42rem;
+  font-weight:950;
+  letter-spacing:.16em;
+}
+@media(max-width:900px){
+  .rcl-world .rcl-home-content>section:first-child::before{font-size:2.2rem}
+}
+@media(max-width:639px){
+  .rcl-world::before{background-size:64px 64px;opacity:.12}
+  .rcl-world .rcl-hero::before{right:1rem;bottom:1.35rem;font-size:.42rem}
+  .rcl-world .rcl-hero h1.rcl-display{max-width:10ch!important}
+  .rcl-world .rcl-home-content>section:first-child::before{right:0;font-size:1.9rem}
+  .rcl-world .rcl-home-content>section:not(:first-child)::before{top:-1rem}
+  .rcl-world .rcl-home-content>section:nth-child(2)::after,
+  .rcl-world .rcl-home-content>section:nth-child(3)::after,
+  .rcl-world .rcl-home-content>section:nth-child(4)::after{display:none}
+  .rcl-world .rcl-news-card h3{max-width:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .rcl-world .rcl-hero .rcl-button::after{display:none}
+}
