@@ -99,7 +99,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,news,posts}:
         </section>
 
         <section className="rcl-home-news">
-          <div className="rcl-home-section-head"><div><p>804 NOW</p><h2>WHAT'S HAPPENING</h2></div><Link href="/social">VIEW ALL <FaArrowRight/></Link></div>
+          <div className="rcl-home-section-head"><div><p>804 NOW</p><h2>WHAT&apos;S HAPPENING</h2></div><Link href="/social">VIEW ALL <FaArrowRight/></Link></div>
           <div className="rcl-home-news-grid">{posts.length?posts.map(p=><Link href="/social" key={p.id}><span>{(p.author?.display_name||p.author?.first_name||'RCL')[0]}</span><div><b>{p.author?.display_name||[p.author?.first_name,p.author?.last_name].filter(Boolean).join(' ')||'RCL COMMUNITY'}</b><small>RCL COMMUNITY</small><p>{p.body}</p></div></Link>):<div className="rcl-home-empty">No community updates yet.</div>}</div>
         </section>
 
