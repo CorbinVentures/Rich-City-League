@@ -99,9 +99,7 @@ export default async function LabModulePage({ params }: { params: Promise<{ modu
 
   return (
     <main className="min-h-screen bg-[#05080d] pb-24 text-white">
-      <section className="relative overflow-hidden border-b border-white/10 bg-[#07111c]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(77,163,255,.18),transparent_30%),radial-gradient(circle_at_25%_70%,rgba(255,107,26,.14),transparent_25%),linear-gradient(180deg,#07111c,#030509)]" />
-        <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+      <section className="rcl-lab-hero relative overflow-hidden border-b border-rcl-orange/30 bg-[linear-gradient(90deg,rgba(3,7,13,.98)_0%,rgba(3,7,13,.84)_38%,rgba(3,7,13,.48)_68%,rgba(3,7,13,.82)_100%),linear-gradient(180deg,rgba(3,7,13,.18)_25%,rgba(3,7,13,.96)_100%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=90')] bg-cover bg-center">\n        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,79,22,.08),transparent_42%,rgba(21,159,255,.08))]" />\n        <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
           <Link href="/lab" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.2em] text-white/40 hover:text-white">
             <FaArrowLeft /> Back to The Lab
           </Link>
