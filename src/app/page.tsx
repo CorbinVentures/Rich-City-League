@@ -1,132 +1,29 @@
-import Link from 'next/link';
-import { Container } from '@/components/Container';
-import { SplashIntro } from '@/components/SplashIntro';
-import { ContentAssetBackground } from '@/components/ContentAssetBackground';
+import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
-import { formatDate, formatTime } from '@/utils/helpers';
-import {
-  FaArrowRight,
-  FaBolt,
-  FaChartLine,
-  FaCrown,
-  FaNewspaper,
-  FaPeopleGroup,
-  FaRankingStar,
-  FaShirt,
-  FaTrophy,
-} from 'react-icons/fa6';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
   const { teams, games, standings, news } = await getLeagueSnapshot();
   const client = getPublicClient();
-  const { data: posts } = client
-    ? await client.from('posts').select('id, body, created_at, author:profiles(display_name, first_name, last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3)
-    : { data: [] };
-  const upcomingGames = games.filter((game) => game.status !== 'completed').slice(0, 3);
+
+  const [{ data: playersRaw }, { data: iqRaw }, { data: postsRaw }] = client
+    ? await Promise.all([
+        client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
+        client.from('public_player_iq').select('player_id,rcl_rating,court_performance_score,exposure_index,player_archetype').order('rcl_rating', { ascending: false }).limit(20),
+        client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }];
 
   return (
-    <main className="rcl-world min-h-screen overflow-hidden pb-24 text-white lg:pb-0">
-      <SplashIntro />
-      <section className="rcl-hero relative overflow-hidden">
-        <ContentAssetBackground assetKey="homepage.hero" opacity={0.55} className="z-0" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/25" aria-hidden="true" />
-        <div className="rcl-skyline" aria-hidden="true" />
-        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-20">
-          <div className="max-w-3xl">
-            <p className="rcl-kicker"><FaBolt /> 804 · RICHMOND, VIRGINIA</p>
-            <h1 className="rcl-display mt-5 max-w-xl text-5xl font-black uppercase leading-[.86] tracking-tight sm:text-8xl">
-              RICH CITY<br /><span className="text-rcl-orange">BUILDS DIFFERENT.</span>
-            </h1>
-            <p className="mt-6 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
-              PLAY. COMPETE. CONNECT. GROW.
-            </p>
-            <Link href="/city" className="rcl-button mt-8 inline-flex items-center gap-3">
-              Enter the city <FaArrowRight />
-            </Link>
-          </div>
-        </Container>
-      </section>
-
-      <Container maxWidth="xl" className="rcl-home-content relative z-10 space-y-12 sm:space-y-20">
-        <section aria-labelledby="destinations">
-          <SectionHeader eyebrow="STEP INTO THE WORLD" title="Find your court" id="destinations" />
-          <div className="rcl-shortcuts rcl-court-grid">
-            <Destination href="/dashboard" icon={<FaCrown />} title="My Career" subtitle="Build your legacy" />
-            <Destination href="/social" icon={<FaPeopleGroup />} title="Rich City Feed" subtitle="What's happening" />
-            <Destination href="/stats" icon={<FaChartLine />} title="Player IQ" subtitle="See your impact" />
-            <Destination href="/fantasy" icon={<FaTrophy />} title="Fantasy" subtitle="Build & compete" />
-            <Destination href="/shop" icon={<FaShirt />} title="The Shop" subtitle="Gear the culture" />
-          </div>
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
-          <div>
-            <SectionHeader eyebrow="THE COURT" title="Next game" href="/games" />
-            {upcomingGames.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2">{upcomingGames.map((game) => <GameCard key={game.id} game={game} teams={teams} />)}</div> : <EmptyState>Schedules are loading. Check back soon.</EmptyState>}
-          </div>
-          <div>
-            <SectionHeader eyebrow="THE LEAGUE" title="Standings" href="/standings" />
-            <div className="rcl-panel mt-5 divide-y divide-white/10">
-              {standings.slice(0, 5).map((standing, index) => (
-                <Link href="/standings" key={standing.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-white/5">
-                  <span className="w-5 font-mono text-xs text-rcl-orange">{String(index + 1).padStart(2, '0')}</span>
-                  <span className="flex-1 truncate text-sm font-bold">{teams.find((team) => team.id === standing.team_id)?.name ?? 'Team'}</span>
-                  <span className="text-xs text-slate-400">{standing.wins}W - {standing.losses}L</span>
-                </Link>
-              ))}
-              {!standings.length && <EmptyState>Standings appear after games are logged.</EmptyState>}
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader eyebrow="804 NOW" title="What's happening in the city" href="/social" />
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {posts?.length ? posts.map((post: any) => <SocialCard key={post.id} post={post} />) : <EmptyState>No community updates yet. Be the first to post.</EmptyState>}
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 p-6 sm:p-8">
-          <ContentAssetBackground assetKey="homepage.featured" opacity={0.20} className="z-0" />
-          <div className="relative z-10">
-            <SectionHeader eyebrow="THE STAGE" title="Latest from RCL" href="/news" />
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {news.slice(0, 3).map((item) => (
-                <Link href={'/news/' + item.slug} key={item.id} className="rcl-news-card">
-                  <div className="flex items-start justify-between gap-4"><FaNewspaper className="text-rcl-orange" /><FaArrowRight className="text-slate-500" /></div>
-                  <p className="mt-8 text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL NEWS</p>
-                  <h3 className="mt-2 font-display text-xl font-bold leading-tight">{item.title}</h3>
-                  <p className="mt-3 text-xs text-slate-500">{item.published_at ? formatDate(item.published_at) : 'RCL newsroom'}</p>
-                </Link>
-              ))}
-              {!news.length && <EmptyState>RCL stories will appear here.</EmptyState>}
-            </div>
-          </div>
-        </section>
-      </Container>
-    </main>
+    <RCLHomeExperience
+      teams={teams}
+      games={games}
+      standings={standings}
+      players={(playersRaw ?? []) as any}
+      iq={(iqRaw ?? []) as any}
+      news={news}
+      posts={(postsRaw ?? []) as any}
+    />
   );
 }
-
-function SectionHeader({ eyebrow, title, href, id }: { eyebrow: string; title: string; href?: string; id?: string }) {
-  return <div id={id} className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">{eyebrow}</p><h2 className="mt-1 font-display text-2xl font-black uppercase sm:text-3xl">{title}</h2></div>{href && <Link href={href} className="rcl-link">View all <FaArrowRight /></Link>}</div>;
-}
-
-function Destination({ href, icon, title, subtitle }: { href: string; icon: React.ReactNode; title: string; subtitle: string }) {
-  return <Link href={href} aria-label={`${title}: ${subtitle}`} className="rcl-destination group"><span className="rcl-destination-icon">{icon}</span><span className="min-w-0"><strong>{title}</strong><small>{subtitle}</small></span><FaArrowRight aria-hidden="true" className="ml-auto shrink-0 text-slate-500" /></Link>;
-}
-
-function GameCard({ game, teams }: { game: Awaited<ReturnType<typeof getLeagueSnapshot>>['games'][number]; teams: Awaited<ReturnType<typeof getLeagueSnapshot>>['teams'] }) {
-  const home = teams.find((team) => team.id === game.home_team_id)?.name ?? 'Home team';
-  const away = teams.find((team) => team.id === game.away_team_id)?.name ?? 'Away team';
-  return <Link href={'/games/' + game.id} className="rcl-game-card"><div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400"><span>{game.status}</span><span>{formatDate(game.scheduled_at)}</span></div><div className="mt-6 flex items-center justify-between gap-3 text-center font-display font-bold"><span className="flex-1">{away}</span><span className="text-xs text-rcl-orange">VS</span><span className="flex-1">{home}</span></div><div className="mt-5 flex justify-between text-xs text-slate-400"><span>{game.venue_id ? 'Richmond, VA' : 'RCL Court'}</span><span>{formatTime(game.scheduled_at)}</span></div></Link>;
-}
-
-function SocialCard({ post }: { post: any }) {
-  const author = post.author?.display_name || [post.author?.first_name, post.author?.last_name].filter(Boolean).join(' ') || 'RCL Community';
-  return <Link href="/social" className="rcl-panel block p-5 transition hover:-translate-y-1 hover:border-rcl-blue"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-rcl-blue font-bold">{author[0]}</span><div><p className="text-sm font-bold">{author}</p><p className="text-[10px] uppercase tracking-wider text-slate-500">RCL community</p></div></div><p className="mt-5 line-clamp-3 text-sm leading-6 text-slate-300">{post.body}</p></Link>;
-}
-
-function EmptyState({ children }: { children: React.ReactNode }) { return <div className="rcl-panel border-dashed p-8 text-center text-sm text-slate-500">{children}</div>; }
