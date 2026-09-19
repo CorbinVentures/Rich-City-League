@@ -111,9 +111,9 @@ export default function LeagueAppsAdminHub() {
   }, [isAdmin]);
 
   if (loading) return <main className="min-h-screen bg-rcl-black p-10 text-white/50"><AdminWorkspace />Loading command center…</main>;
-  if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-10 text-white"><h1 className="rcl-display text-4xl uppercase">Admin access required.</h1><Link href="/dashboard" className="rcl-link mt-5">Return to dashboard <FaArrowRight /></Link></main>;
+  if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-10 text-white"><AdminWorkspace /><h1 className="rcl-display text-4xl uppercase">Admin access required.</h1><Link href="/dashboard" className="rcl-link mt-5">Return to dashboard <FaArrowRight /></Link></main>;
 
-  return <main className="rcl-admin-hub min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-admin-hub min-h-screen bg-rcl-black pb-24 text-white"><AdminWorkspace />
     <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(255,107,26,.16),transparent_32rem),linear-gradient(145deg,#09111d,#05070b)]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
         <Link href="/admin" className="text-[10px] font-black uppercase tracking-[.2em] text-white/35 hover:text-rcl-orange">← Command Center</Link>
