@@ -48,6 +48,7 @@ export function SiteHeader() {
   }, [user, supabase]);
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'staff';
+  if (pathname === '/') return null;
 
   const primaryNav = [
     { label: 'HOME', href: '/', icon: FaHouse },
