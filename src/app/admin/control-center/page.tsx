@@ -97,7 +97,7 @@ export default function AdminControlCenterPage() {
     try { permissions = JSON.parse(permissionsRaw || '{}'); } catch { setMessage('Staff permissions must be valid JSON.'); return; }
     const { error } = await (db as any).from('staff').upsert({ id: staffId, profile_id: profileId, title: title || 'Staff', permissions } as never, { onConflict: 'profile_id' });
     if (error) setMessage(error.message);
-    else { await audit('ADMIN_STAFF_PERMISSIONS', `Updated staff permissions for ${id}`); setMessage('Staff permissions saved.'); await load(); }
+    else { await audit('ADMIN_STAFF_PERMISSIONS', `Updated staff permissions for ${staffId}`); setMessage('Staff permissions saved.'); await load(); }
   }
 
   async function assignCommissioner(event: React.FormEvent) {
