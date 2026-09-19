@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { SplashIntro } from '@/components/SplashIntro';
@@ -118,7 +117,7 @@ export default async function HomePage() {
             <div className="grid gap-4 md:grid-cols-3">
               {(players ?? []).map((player) => (
                 <Link href={`/players/${player.id}`} key={player.id} className="rcl-fx-player-image group p-4">
-                  {player.photo_url && <Image src={player.photo_url} alt="" fill className="object-cover opacity-70 transition duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />}
+                  {player.photo_url && <img src={player.photo_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-500 group-hover:scale-105" />}
                   <div className="mt-auto">
                     <span className="text-[9px] font-black tracking-[.16em] text-rcl-orange">PLAYER PROFILE</span>
                     <h3 className="mt-2 font-display text-2xl font-black uppercase">{player.first_name} {player.last_name}</h3>
