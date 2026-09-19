@@ -73,6 +73,7 @@ export default function LeagueOperationsPage() {
   async function createDraft(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !draftForm.season_id) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('drafts').insert({ ...draftForm, rounds: Number(draftForm.rounds), roster_limit: Number(draftForm.roster_limit), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Draft created in setup mode.');
     if (!error) void load();
