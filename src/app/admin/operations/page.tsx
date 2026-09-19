@@ -121,14 +121,14 @@ export default function LeagueOperationsPage() {
   }
 
   if (authLoading || busy) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><div className="h-8 w-72 animate-pulse rounded bg-white/10" /></Container></main>;
-  if (!profile || !isStaff) return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-bold">League operations access required</h1><p className="mt-3 text-gray-400">This command center is limited to authorized league staff.</p></Container></main>;
+  if (!profile || !isStaff) return <main><AdminWorkspace /><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-bold">League operations access required</h1><p className="mt-3 text-gray-400">This command center is limited to authorized league staff.</p></Container></main>;
 
   const availableOrderTeams = teams.filter((team) => {
     const selectedDraft = drafts.find((draft) => draft.id === orderDraftId);
     return selectedDraft ? teamSeasonLinks.some((link) => link.team_id === team.id && link.season_id === selectedDraft.season_id) : false;
   });
 
-  return <main className="min-h-screen pb-20"><Container maxWidth="xl" className="py-10">
+  return <main className="min-h-screen pb-20"><AdminWorkspace /><Container maxWidth="xl" className="py-10">
     <Link href="/admin" className="text-sm text-rcl-gold">← Command center</Link>
     <p className="mt-8 text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">RCL league operations</p>
     <h1 className="mt-2 font-display text-5xl font-bold">The league room</h1>
