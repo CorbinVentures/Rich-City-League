@@ -13,7 +13,6 @@ import {
   FaFlask,
   FaPeopleGroup,
   FaPlay,
-  FaShirt,
   FaUsers,
 } from 'react-icons/fa6';
 
