@@ -97,6 +97,7 @@ export default function LeagueOperationsPage() {
 
   async function updateDraft(id: string, status: Draft['status']) {
     if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const action = status === 'OPEN' ? 'OPEN' : status === 'PAUSED' ? 'PAUSE' : 'COMPLETE';
     const { error } = await db.rpc('manage_draft_clock' as never, {
       target_draft: id,
@@ -110,6 +111,7 @@ export default function LeagueOperationsPage() {
   async function saveDraftOrder(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !orderDraftId || orderValues.some((teamId) => !teamId)) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.rpc('configure_draft_order' as never, {
       target_draft: orderDraftId,
       ordered_teams: orderValues,
