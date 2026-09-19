@@ -69,6 +69,7 @@ export function SiteHeader() {
     { label: 'DRAFT NIGHT', href: '/draft', icon: FaCrown },
     { label: 'STANDINGS', href: '/standings', icon: FaFolderOpen },
     { label: 'STATS', href: '/stats', icon: FaChartSimple },
+    { label: 'GAME IQ', href: '/game-iq', icon: FaChartSimple },
     { label: 'SOCIAL', href: '/social', icon: FaUsers },
     { label: 'MESSAGES', href: '/messages', icon: FaComments },
   ];
