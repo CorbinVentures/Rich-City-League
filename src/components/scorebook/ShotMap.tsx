@@ -54,6 +54,9 @@ function ShotDot({
     <button
       type="button"
       aria-label={`${made ? 'Made' : 'Missed'} ${shot.shot_value ?? 2}-point shot${shot.shot_zone ? ` from ${zoneLabel(shot.shot_zone)}` : ''}`}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+      }}
       onClick={(event) => {
         event.stopPropagation();
         onSelect();
