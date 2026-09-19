@@ -18,7 +18,7 @@ const items = [
   { label: 'LeagueApps', href: '/admin/leagueapps', icon: FaPlug },
   { label: 'Shop', href: '/admin/shop', icon: FaShirt },
   { label: 'Control Center', href: '/admin/control-center', icon: FaShieldHalved },
- { label: 'Governance', href: '/admin/governance', icon: FaUserGear },
+ { label: 'Governance', href: '/admin/governance', icon: FaShieldHalved },
  { label: 'Recognition', href: '/admin/recognition', icon: FaTrophy },
 ];
 
