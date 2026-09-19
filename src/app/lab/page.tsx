@@ -112,10 +112,7 @@ export default function LabPage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#05080d] pb-24 text-white">
-      <section className="relative overflow-hidden border-b border-white/10 bg-[#07111c]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_55%_40%,rgba(35,133,220,.28),transparent_28%),radial-gradient(circle_at_85%_25%,rgba(255,107,26,.2),transparent_22%),linear-gradient(180deg,#07111c,#030509)]" />
-        <div className="absolute inset-x-0 bottom-0 h-48 opacity-50 bg-[linear-gradient(180deg,transparent,rgba(2,5,9,.95)),repeating-linear-gradient(90deg,transparent_0_72px,rgba(77,163,255,.08)_73px_74px)]" />
-        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16">
+      <section className="rcl-lab-hero relative overflow-hidden border-b border-rcl-orange/30 bg-[linear-gradient(90deg,rgba(3,7,13,.98)_0%,rgba(3,7,13,.84)_38%,rgba(3,7,13,.48)_68%,rgba(3,7,13,.82)_100%),linear-gradient(180deg,rgba(3,7,13,.18)_25%,rgba(3,7,13,.96)_100%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=90')] bg-cover bg-center">\n        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,79,22,.08),transparent_42%,rgba(21,159,255,.08))]" />\n        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16">
           <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr_.65fr] lg:items-center">
             <div>
               <p className="flex items-center gap-2 text-[10px] font-black tracking-[.3em] text-rcl-orange"><FaBolt /> RCL PERFORMANCE LAB</p>
