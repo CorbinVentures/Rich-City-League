@@ -25,3 +25,18 @@
 .rcl-fx-table-row{display:grid;grid-template-columns:2rem 1fr auto;gap:.75rem;align-items:center;border-bottom:1px solid rgba(255,255,255,.055);padding:.85rem .2rem}.rcl-fx-table-row:last-child{border-bottom:0}.rcl-fx-rank{color:var(--rcl-fx-orange);font-size:.6rem;font-weight:900}
 .rcl-site-header{background:rgba(3,7,12,.82)!important;border-bottom-color:rgba(111,185,235,.16)!important;backdrop-filter:blur(22px) saturate(150%)}.rcl-site-header-inner{max-width:92rem!important}.rcl-brand-mark{border-color:#159fff!important;background:linear-gradient(145deg,#0c2942,#06101c)!important;color:#fff!important;box-shadow:0 0 24px rgba(17,156,255,.20)!important}.rcl-site-header nav a{font-size:.57rem!important;letter-spacing:.14em!important}.rcl-site-header nav a:hover{background:rgba(17,156,255,.08)!important;color:#fff!important}.rcl-site-header .rcl-brand>div:last-child span:nth-child(2){color:#20a8ff!important}
 @media(max-width:639px){.rcl-future-hero{min-height:34rem;background-position:center top}.rcl-fx-title{font-size:4.4rem}.rcl-fx-shortcut{min-width:15.5rem}.rcl-fx-score{font-size:3.25rem}}
+
+/* Mockup fidelity overrides for the stable homepage structure */
+.rcl-world .rcl-hero{min-height:42rem!important;background:linear-gradient(90deg,rgba(3,7,12,.96) 0%,rgba(3,7,12,.80) 42%,rgba(3,7,12,.20) 100%),linear-gradient(180deg,rgba(3,7,12,.05),#05080d 96%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=88') center 34%/cover no-repeat!important;border-bottom:1px solid rgba(120,190,235,.16)}
+.rcl-world .rcl-hero .rcl-skyline{opacity:.35}
+.rcl-world .rcl-hero h1.rcl-display{font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif!important;font-size:clamp(4.5rem,9vw,9rem)!important;line-height:.76!important;letter-spacing:-.045em!important;text-shadow:0 18px 55px rgba(0,0,0,.55)}
+.rcl-world .rcl-hero h1 .text-rcl-orange{color:#ff5a1f!important;font-style:italic;transform:skewX(-8deg);display:inline-block}
+.rcl-world .rcl-hero h1+p{max-width:34rem;color:#d4dde6;font-size:.75rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.rcl-world .rcl-hero .rcl-button{background:linear-gradient(135deg,#0f9fff,#0672e8);color:#fff;border-radius:.8rem;box-shadow:0 12px 40px rgba(0,137,255,.25)}
+.rcl-world .rcl-home-content{margin-top:-3rem}
+.rcl-world .rcl-shortcuts{gap:.7rem}
+.rcl-world .rcl-destination{min-height:7.5rem;border-color:rgba(120,190,235,.18);background:linear-gradient(145deg,rgba(12,29,46,.94),rgba(6,12,19,.98))!important}
+.rcl-world .rcl-destination-icon{background:rgba(17,156,255,.10);color:#18a7ff}
+.rcl-world .rcl-panel,.rcl-world .rcl-game-card,.rcl-world .rcl-news-card{border-color:rgba(120,190,235,.16)!important;background:linear-gradient(145deg,rgba(14,29,45,.88),rgba(5,10,17,.95))!important;box-shadow:0 24px 70px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.03)!important}
+.rcl-world .rcl-game-card:hover,.rcl-world .rcl-news-card:hover{border-color:rgba(17,156,255,.52)!important}
+@media(max-width:639px){.rcl-world .rcl-hero{min-height:35rem!important;background-position:center top!important}.rcl-world .rcl-hero h1.rcl-display{font-size:4.35rem!important}.rcl-world .rcl-home-content{margin-top:-1.5rem}}
