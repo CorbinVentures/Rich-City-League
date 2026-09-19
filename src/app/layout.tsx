@@ -18,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><SiteHeader /><AdminControlShortcut />{children}</body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><SiteHeader /><AdminControlShortcut /><div className="rcl-platform-root">{children}</div></body></html>;
 }
