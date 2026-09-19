@@ -30,8 +30,8 @@ export default async function HomePage() {
       ])
     : [{ data: [] }, { data: [] }];
 
-  const posts = postResult.data ?? [];
-  const players = playerResult.data ?? [];
+  const posts = (postResult.data ?? []) as Array<{ id: string; body: string | null; created_at: string; author?: { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null }>;
+  const players = (playerResult.data ?? []) as Array<{ id: string; first_name: string; last_name: string; position: string | null; photo_url: string | null }>;
   const liveGame = snapshot.games.find((game) => game.status === 'live');
   const nextGames = snapshot.games.filter((game) => game.status !== 'completed' && game.status !== 'cancelled').slice(0, 3);
   const featuredGame = liveGame ?? nextGames[0];
@@ -133,7 +133,7 @@ export default async function HomePage() {
           <div>
             <MockupSectionHead title="COMMUNITY FEED" href="/social" />
             <div className="rcl-feed-panel">
-              {posts.slice(0, 2).map((post: any) => {
+              {posts.slice(0, 2).map((post) => {
                 const author = post.author?.display_name || [post.author?.first_name, post.author?.last_name].filter(Boolean).join(' ') || 'RCL Community';
                 return <Link href="/social" key={post.id} className="rcl-feed-post"><span>{author[0]}</span><div><b>{author}</b><small>RCL COMMUNITY · {formatDate(post.created_at)}</small><p>{post.body}</p></div></Link>;
               })}
