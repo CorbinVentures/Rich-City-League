@@ -35,9 +35,11 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
             .eq('id', signedInUser.id)
             .maybeSingle();
 
+          const accessProfile = signedInProfile as { role?: string | null; is_active?: boolean | null } | null;
+
           if (
-            signedInProfile?.is_active &&
-            (signedInProfile.role === 'admin' || signedInProfile.role === 'coach')
+            accessProfile?.is_active === true &&
+            (accessProfile.role === 'admin' || accessProfile.role === 'coach')
           ) {
             destination = '/portal/scorebook';
           }
