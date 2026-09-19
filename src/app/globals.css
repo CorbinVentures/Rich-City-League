@@ -819,3 +819,65 @@ body:has(.rcl-mock-home) .rcl-platform-root{
   padding:0 !important;
   min-height:100vh;
 }
+
+
+/* =========================================================
+   RCL ADMIN COMMAND DECK
+   One consistent navigation layer across every /admin route.
+   ========================================================= */
+.rcl-admin-workspace{
+  position:relative;
+  z-index:20;
+  margin:0 auto;
+  padding:18px 24px 0;
+  max-width:1400px;
+}
+.rcl-admin-workspace-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:1rem;
+  padding:0 2px 12px;
+}
+.rcl-admin-workspace-head div{display:flex;align-items:baseline;gap:10px}
+.rcl-admin-workspace-head span{font-size:8px;font-weight:950;letter-spacing:.24em;color:#ff4f16}
+.rcl-admin-workspace-head b{font-family:Impact,Haettenschweiler,sans-serif;font-size:19px;letter-spacing:.02em}
+.rcl-admin-workspace-head small{font-size:7px;font-weight:900;letter-spacing:.18em;color:#718398}
+.rcl-admin-workspace nav{
+  display:flex;gap:4px;overflow-x:auto;padding:5px;
+  border:1px solid rgba(38,160,235,.24);
+  border-radius:12px;
+  background:linear-gradient(145deg,rgba(7,21,34,.96),rgba(3,10,17,.98));
+  box-shadow:0 18px 50px rgba(0,0,0,.24);
+  scrollbar-width:none;
+}
+.rcl-admin-workspace nav::-webkit-scrollbar{display:none}
+.rcl-admin-workspace nav a{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  min-height:38px;padding:0 12px;border-radius:8px;
+  color:#7d90a3;text-decoration:none;white-space:nowrap;
+  font-size:8px;font-weight:950;letter-spacing:.07em;text-transform:uppercase;
+  border:1px solid transparent;
+}
+.rcl-admin-workspace nav a svg{font-size:12px;color:#159fff}
+.rcl-admin-workspace nav a:hover{color:#fff;background:rgba(21,159,255,.08)}
+.rcl-admin-workspace nav a.active{
+  color:#fff;background:linear-gradient(90deg,rgba(255,79,22,.18),rgba(21,159,255,.08));
+  border-color:rgba(255,79,22,.34);
+  box-shadow:inset 3px 0 #ff4f16;
+}
+.rcl-admin-workspace nav a.active svg{color:#ff4f16}
+.rcl-admin-hub,.rcl-admin-workspace~*{}
+.rcl-admin-workspace + section{margin-top:0}
+@media(max-width:1023px){
+  .rcl-admin-workspace{padding:14px 16px 0}
+}
+@media(max-width:699px){
+  .rcl-admin-workspace{padding:12px 10px 0}
+  .rcl-admin-workspace-head{padding-bottom:9px}
+  .rcl-admin-workspace-head b{font-size:16px}
+  .rcl-admin-workspace-head small{font-size:6px}
+  .rcl-admin-workspace nav{padding:4px}
+  .rcl-admin-workspace nav a{min-height:35px;padding:0 10px;font-size:7px}
+  .rcl-admin-workspace nav a svg{font-size:11px}
+}
