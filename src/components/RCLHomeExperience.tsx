@@ -4,19 +4,24 @@ import Link from 'next/link';
 import { useState } from 'react';
 import {
   FaArrowRight, FaBars, FaBell, FaCalendarDays, FaChartLine, FaComments, FaCrown,
-  FaFlask, FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar,
-  FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass
+  FaFlask, FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar, FaPlay,
+  FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass, FaListOl, FaUserTie, FaGear
 } from 'react-icons/fa6';
 
 type NavItem = { label:string; href:string; icon: any };
 const nav: NavItem[] = [
   {label:'Home',href:'/',icon:FaHouse},{label:'The Lab',href:'/lab',icon:FaFlask},
   {label:'Players',href:'/players',icon:FaUser},{label:'Teams',href:'/teams',icon:FaUsers},
-  {label:'Schedule',href:'/games',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
+  {label:'Schedule',href:'/schedule',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
   {label:'Standings',href:'/standings',icon:FaFolderOpen},{label:'Stats',href:'/stats',icon:FaChartLine},
   {label:'Draft Night',href:'/draft',icon:FaCrown},{label:'Social',href:'/social',icon:FaPeopleGroup},
-  {label:'News',href:'/news',icon:FaNewspaper},{label:'Community',href:'/communities',icon:FaComments},
-  {label:'Awards',href:'/awards',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
+  {label:'News',href:'/news',icon:FaNewspaper},{label:'Media',href:'/media',icon:FaPlay},
+  {label:'Community',href:'/communities',icon:FaPeopleGroup},{label:'Rankings',href:'/rankings',icon:FaListOl},
+  {label:'Fantasy',href:'/fantasy',icon:FaTrophy},{label:'Leaderboards',href:'/leaderboards',icon:FaListOl},
+  {label:'Game IQ',href:'/game-iq',icon:FaChartLine},{label:'Messages',href:'/messages',icon:FaComments},
+  {label:'Friends',href:'/friends',icon:FaUsers},{label:'Coaches',href:'/coaches',icon:FaUserTie},
+  {label:'Awards',href:'/badges',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
+  {label:'Notifications',href:'/notifications',icon:FaBell},{label:'About',href:'/about',icon:FaBasketball}
 ];
 const quick = [
   {title:'THE LAB',sub:'TRAIN. IMPROVE.',href:'/lab',icon:FaFlask,image:'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=700&q=82'},
