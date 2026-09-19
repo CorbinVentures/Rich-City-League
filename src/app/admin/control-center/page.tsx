@@ -30,7 +30,7 @@ export default function AdminControlCenterPage() {
   const [stats, setStats] = useState({ users: 0, reports: 0, posts: 0, comments: 0, leagues: 0 });
 
   const load = useCallback(async () => {
-    if (!supabase || !isAdmin) return;
+    if (!db || !isAdmin) return;
     setBusy(true);
     const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult] = await Promise.all([
       db.from('profiles').select('*').order('created_at', { ascending: false }),
@@ -90,19 +90,19 @@ export default function AdminControlCenterPage() {
   }
 
   async function moderateComment(id: string) {
-    if (!supabase) return;
+    if (!db) return;
     const { error } = await db?.from('comments').delete().eq('id', id);
     if (!error) { await audit('ADMIN_COMMENT_DELETE', `Deleted comment ${id}`); await load(); }
   }
 
   async function updateReport(id: string, status: string) {
-    if (!supabase) return;
+    if (!db) return;
     const { error } = await db?.from('reports').update({ status, reviewed_by: user?.id } as never).eq('id', id);
     if (!error) { await audit('ADMIN_REPORT_REVIEW', `Set report ${id} to ${status}`); await load(); }
   }
 
   async function toggleLeague(id: string, active: boolean) {
-    if (!supabase) return;
+    if (!db) return;
     const { error } = await db?.from('leagues').update({ is_active: active } as never).eq('id', id);
     if (!error) { await audit('ADMIN_LEAGUE_STATUS', `${active ? 'Activated' : 'Deactivated'} league ${id}`); await load(); }
   }
@@ -115,7 +115,7 @@ export default function AdminControlCenterPage() {
       const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
       const path = `site/${asset.asset_key}/${Date.now()}-${safeName}`;
 
-      const { data: uploaded, error: uploadError } = await supabase.storage
+      const { data: uploaded, error: uploadError } = await db.storage
         .from('media')
         .upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
       if (uploadError || !uploaded?.path) {
@@ -123,13 +123,13 @@ export default function AdminControlCenterPage() {
         return;
       }
 
-      const { data: publicUrl } = supabase.storage.from('media').getPublicUrl(uploaded.path);
+      const { data: publicUrl } = db.storage.from('media').getPublicUrl(uploaded.path);
       if (!publicUrl?.publicUrl) {
         setMessage(`Upload succeeded, but no public URL was returned for ${asset.title}.`);
         return;
       }
 
-      const { data: updated, error: updateError } = await supabase
+      const { data: updated, error: updateError } = await db
         .from('content_assets')
         .update({ image_url: publicUrl.publicUrl, storage_path: uploaded.path, updated_by: user.id } as never)
         .eq('id', asset.id)
@@ -141,7 +141,7 @@ export default function AdminControlCenterPage() {
         return;
       }
 
-      const { data: verified, error: verifyError } = await supabase
+      const { data: verified, error: verifyError } = await db
         .from('content_assets')
         .select('image_url,storage_path,updated_at')
         .eq('id', asset.id)
@@ -162,14 +162,14 @@ export default function AdminControlCenterPage() {
     }
   }
   async function updateAsset(asset: any, patch: Record<string, unknown>) {
-    if (!supabase || !user) return;
+    if (!db || !user) return;
     const { error } = await db?.from('content_assets').update({ ...patch, updated_by: user.id } as never).eq('id', asset.id);
     if (error) setMessage(error.message);
     else { await audit('ADMIN_CONTENT_ASSET_UPDATE', `Updated site asset ${asset.asset_key}`); await load(); }
   }
 
   async function deleteMedia(id: string) {
-    if (!supabase) return;
+    if (!db) return;
     const item = media.find((m) => m.id === id);
     if (!item) return;
     if (!window.confirm(`Delete ${item.title || 'this media'}?`)) return;
@@ -179,13 +179,13 @@ export default function AdminControlCenterPage() {
   }
 
   async function publishNews(id: string, status: 'published' | 'draft' | 'archived') {
-    if (!supabase) return;
+    if (!db) return;
     const { error } = await db?.from('news').update({ status } as never).eq('id', id);
     if (!error) { await audit('ADMIN_NEWS_STATUS', `Set news ${id} to ${status}`); await load(); }
   }
 
   async function updateSetting(key: string, raw: string) {
-    if (!supabase) return;
+    if (!db) return;
     let value: unknown;
     try { value = JSON.parse(raw); } catch { setMessage(`Invalid JSON for ${key}.`); return; }
     const { error } = await db?.from('site_settings').update({ value } as never).eq('key', key);
@@ -194,7 +194,7 @@ export default function AdminControlCenterPage() {
   }
 
   async function broadcast() {
-    if (!supabase || !user) return;
+    if (!db || !user) return;
     const title = window.prompt('Announcement title:');
     const body = window.prompt('Announcement message:');
     if (!title || !body) return;
