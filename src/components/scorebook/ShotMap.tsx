@@ -37,7 +37,7 @@ function courtPoint(event: PointerEvent<HTMLDivElement>, element: HTMLDivElement
 }
 
 function zoneLabel(zone: string) {
-  return zone.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return zone.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function ShotDot({
