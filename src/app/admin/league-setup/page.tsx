@@ -78,15 +78,15 @@ export default function LeagueSetupPage() {
   const button='rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-40';
 
   if(authLoading||busy) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><div className="h-8 w-64 animate-pulse rounded bg-white/10"/><div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/5"/></Container></main>;
-  if(!profile||!isStaff) return <main><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-black uppercase">League setup access required</h1><p className="mt-3 text-gray-400">This workspace is limited to league staff and administrators.</p></Container></main>;
+  if(!profile||!isStaff) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><h1 className="font-display text-3xl font-black uppercase">League setup access required</h1><p className="mt-3 text-gray-400">This workspace is limited to league staff and administrators.</p></Container></main>;
 
-  if (!client) return <main><Container maxWidth="xl" className="py-16"><p className="text-red-300">Supabase is not configured.</p></Container></main>;
+  if (!client) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><p className="text-red-300">Supabase is not configured.</p></Container></main>;
 
   const seasonDivisions=divisions.filter(d=>d.season_id===division.seasonId);
   const gameDivisions=divisions.filter(d=>d.season_id===game.seasonId);
   const seasonTeams=teamSeasons.filter(ts=>ts.season_id===game.seasonId).map(ts=>teams.find(t=>t.id===ts.team_id)).filter((t):t is Team=>Boolean(t));
 
-  return <main className="min-h-screen bg-[#05080d] pb-20 text-white"><Container maxWidth="xl" className="py-10">
+  return <main className="min-h-screen bg-[#05080d] pb-20 text-white"><AdminWorkspace /><Container maxWidth="xl" className="py-10">
     <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.28em] text-rcl-orange">RCL DATA FOUNDATION</p><h1 className="mt-2 font-display text-4xl font-black uppercase">League setup</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/50">Build the real competition hierarchy in order: league → season → division → teams → team seasons → games. This does not seed demo production records.</p></div><Link href="/portal/scorebook" className="rounded-xl border border-white/10 bg-white/[.04] px-4 py-3 text-xs font-black uppercase tracking-widest">Open Scorebook</Link></div>
     {(message||error)&&<div className={`mt-6 rounded-2xl border p-4 text-sm \${error?'border-red-400/20 bg-red-400/10 text-red-200':'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'}`}>{error??message}</div>}
     <section className="mt-8 grid gap-3 sm:grid-cols-4 lg:grid-cols-8">{Object.entries(counts).map(([label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4"><p className="text-[9px] font-black uppercase tracking-widest text-white/35">{label.replace(/([A-Z])/g,' $1')}</p><p className="mt-2 font-display text-2xl font-black">{value}</p></div>)}</section>
