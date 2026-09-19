@@ -7,6 +7,7 @@ import { formatDate, formatTime } from '@/utils/helpers';
 import {
   FaArrowRight,
   FaCalendarDays,
+  FaFlask,
   FaBolt,
   FaChartLine,
   FaCrown,
