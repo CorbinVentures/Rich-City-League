@@ -6,6 +6,7 @@ import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
 import {
   FaArrowRight,
+  FaCalendarDays,
   FaBolt,
   FaChartLine,
   FaCrown,
