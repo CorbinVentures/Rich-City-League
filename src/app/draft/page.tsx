@@ -88,6 +88,7 @@ export default function DraftNightPage() {
   const draftInitializedRef = useRef(false);
   const knownPickIdsRef = useRef<Set<string>>(new Set());
   const previousSecondsRef = useRef<number | null>(null);
+  const seconds = draft?.clock_deadline_at && draft.status === 'OPEN' ? Math.max(0, Math.ceil((new Date(draft.clock_deadline_at).getTime() - now) / 1000)) : null;
 
   const load = useCallback(async () => {
     if (!supabase) return setLoading(false);
@@ -190,7 +191,6 @@ export default function DraftNightPage() {
 
   const current = order.find((item) => item.pick_number === draft?.current_pick);
   const currentTeam = teams.find((team) => team.id === current?.team_id);
-  const seconds = draft?.clock_deadline_at && draft.status === 'OPEN' ? Math.max(0, Math.ceil((new Date(draft.clock_deadline_at).getTime() - now) / 1000)) : null;
   const picked = new Set(picks.map((pick) => pick.player_id));
   const ratings = new Map(iq.map((entry) => [entry.player_id, entry.rcl_rating]));
   const available = players
