@@ -1,32 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getSupabaseClient } from '@/lib/supabase';
-import {
-  FaHouse, FaCalendarDays, FaChartSimple, FaUsers, FaUser, FaFolderOpen, FaNewspaper,
-  FaPlay, FaListOl, FaUserTie, FaGear, FaBars, FaXmark, FaBell, FaComments,
-  FaPeopleGroup, FaCrown, FaTrophy, FaShirt, FaMagnifyingGlass, FaFlask, FaBasketball
-} from 'react-icons/fa6';
+import { RCL_ADMIN_NAV_ITEM, RCL_NAV_ITEMS, type RCLNavItem } from '@/lib/rcl-navigation';
 
-type NavItem={label:string;href:string;icon:any};
-
-const nav:NavItem[]=[
-  {label:'Home',href:'/',icon:FaHouse},{label:'The Lab',href:'/lab',icon:FaFlask},
-  {label:'Players',href:'/players',icon:FaUser},{label:'Teams',href:'/teams',icon:FaUsers},
-  {label:'Schedule',href:'/schedule',icon:FaCalendarDays},{label:'Games',href:'/games',icon:FaBasketball},
-  {label:'Standings',href:'/standings',icon:FaFolderOpen},{label:'Stats',href:'/stats',icon:FaChartSimple},
-  {label:'Draft Night',href:'/draft',icon:FaCrown},{label:'Social',href:'/social',icon:FaPeopleGroup},
-  {label:'News',href:'/news',icon:FaNewspaper},{label:'Media',href:'/media',icon:FaPlay},
-  {label:'Community',href:'/communities',icon:FaPeopleGroup},{label:'Rankings',href:'/rankings',icon:FaListOl},
-  {label:'Fantasy',href:'/fantasy',icon:FaTrophy},{label:'Leaderboards',href:'/leaderboards',icon:FaListOl},
-  {label:'Game IQ',href:'/game-iq',icon:FaChartSimple},{label:'Messages',href:'/messages',icon:FaComments},
-  {label:'Friends',href:'/friends',icon:FaUsers},{label:'Coaches',href:'/coaches',icon:FaUserTie},
-  {label:'Awards',href:'/badges',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
-  {label:'Notifications',href:'/notifications',icon:FaBell},{label:'About',href:'/about',icon:FaBasketball}
-];
 
 export function SiteHeader(){
   const pathname=usePathname();
@@ -46,7 +22,7 @@ export function SiteHeader(){
   if(pathname==='/')return null;
 
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
-  const links=isAdmin?[...nav,{label:'Admin',href:'/admin',icon:FaGear}]:nav;
+  const links=isAdmin?[...RCL_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_NAV_ITEMS;
   const active=(href:string)=>pathname===href||(href!=='/'&&pathname.startsWith(href));
 
   return <>
