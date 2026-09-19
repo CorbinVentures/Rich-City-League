@@ -426,15 +426,16 @@ export default function ScorebookPage() {
             <div className="mt-2 grid max-h-[330px] grid-cols-2 gap-2 overflow-y-auto pr-1">
               {teamPlayers.map((player) => {
                 const stat = stats.find((item) => item.player_id === player.id);
-                return <button key={player.id} onClick={() => setSelectedPlayerId(player.id)} className={`rounded-xl border p-3 text-left ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button          <ShotMap
+                return <button key={player.id} onClick={() => setSelectedPlayerId(player.id)} className={`rounded-xl border p-3 text-left ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
+              })}
+            </div>
+          </div>
+
+          <ShotMap
             events={events}
             pendingShot={pendingShot}
             onLocationSelect={(x, y) => setPendingShot({ x, y, zone: zoneFromCoordinates(x, y) })}
           />
-
-dingShot.y}%` }} />}
-            </div>
-          </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Selected player</p>
