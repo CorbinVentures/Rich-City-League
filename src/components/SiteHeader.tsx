@@ -144,14 +144,23 @@ export function SiteHeader() {
               const Icon = link.icon;
               return <Link key={link.href} href={link.href} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] ${active ? 'text-rcl-orange' : 'text-gray-500'}`}><Icon className="h-4 w-4" /><span>{link.label}</span></Link>;
             })}
-            <Link href="/more" aria-label="Open RCL Hub" className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] ${pathname.startsWith('/more') ? 'text-rcl-orange' : 'text-gray-500'}`}><FaBars className="h-4 w-4" /><span>MORE</span></Link>
+            <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open full RCL navigation" className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[8px] font-black tracking-[.12em] ${mobileMenuOpen ? 'text-rcl-orange' : 'text-gray-500'}`}><FaBars className="h-4 w-4" /><span>MORE</span></button>
           </div>
         </nav>
       )}
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm lg:hidden font-display">
-          <div className="w-full max-w-xs border-l border-white/10 bg-[#05080d] p-6 shadow-[0_0_50px_rgba(0,0,0,.9)]">
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/80 backdrop-blur-sm lg:hidden font-display" onClick={() => setMobileMenuOpen(false)}>
+          <div className="relative flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-rcl-blue/20 bg-[#05080d] shadow-[0_0_70px_rgba(0,0,0,.9)]" onClick={(event) => event.stopPropagation()}>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(15,159,255,.14),transparent_32%),linear-gradient(145deg,rgba(9,22,36,.95),rgba(3,7,13,.98))]" />
+            <div className="relative flex min-h-32 items-center gap-4 border-b border-white/10 px-5">
+              <div className="grid h-14 w-14 place-items-center rounded-2xl border-2 border-rcl-blue/40 bg-[#0b1c2d] text-2xl font-black text-white shadow-[0_0_30px_rgba(15,159,255,.14)]">R</div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-base font-black tracking-[.18em] text-white">RICH CITY <span className="text-rcl-blue">LEAGUE</span></span>
+                <span className="mt-1 block text-[8px] font-bold tracking-[.3em] text-slate-500">804 · RICHMOND, VIRGINIA</span>
+              </div>
+              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[.03] text-white/70 hover:border-rcl-orange hover:text-rcl-orange"><FaXmark className="h-4 w-4" /></button>
+            </div>
             <div className="flex items-center justify-between border-b border-white/10 pb-5">
               <div><span className="block text-sm font-black tracking-widest text-white">RCL NAVIGATION</span><span className="mt-1 block text-[9px] tracking-widest text-slate-600">RICHMOND · BASKETBALL · CULTURE</span></div>
               <button onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" className="grid h-9 w-9 place-items-center rounded-lg border border-white/10"><FaXmark className="h-4 w-4" /></button>
