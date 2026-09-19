@@ -66,6 +66,18 @@ export default function ScorebookPage() {
     ? actionGroups.filter((group) => group.label === 'SCORING' || group.label === 'MISTAKES / FOULS')
     : actionGroups;
 
+  const modeConfig = mode === 'quick'
+    ? {
+        label: 'QUICK',
+        description: 'Fast game-day entry. Scoring, turnovers and fouls only.',
+        features: ['2PT / 3PT / FT', 'Turnovers', 'Fouls', 'Undo last play'],
+      }
+    : {
+        label: 'PRO',
+        description: 'Full game capture with shot map, assists, lineups, substitutions, analytics and AI Coach.',
+        features: ['Shot map', 'Assists', 'Lineups + minutes', 'Advanced analytics', 'AI Coach'],
+      };
+
   const isStaff = profile?.role === 'admin';
   const isCoach = profile?.role === 'coach';
 
@@ -386,9 +398,19 @@ export default function ScorebookPage() {
           </div>
         </div>
 
-        <div className="mt-3 rounded-2xl border border-white/10 bg-white/[.025] px-4 py-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-white/35">{mode === 'quick' ? 'QUICK SCOREBOOK' : 'PRO SCOREBOOK'}</p>
-          <p className="mt-1 text-xs text-white/45">{mode === 'quick' ? 'Fast stat entry: scoring, turnovers and fouls. Advanced Game IQ tools stay out of the way.' : 'Full game capture: shot map, assists, lineups, substitutions, advanced analytics and AI Coach.'}</p>
+        <div className={`mt-3 rounded-2xl border px-4 py-3 ${mode === 'quick' ? 'border-rcl-orange/20 bg-rcl-orange/[.04]' : 'border-rcl-gold/20 bg-rcl-gold/[.04]'}`}>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'bg-rcl-gold text-black'}`}>{modeConfig.label} MODE</span>
+                <p className="text-[9px] font-black uppercase tracking-widest text-white/35">GAME CAPTURE PROFILE</p>
+              </div>
+              <p className="mt-2 text-xs text-white/55">{modeConfig.description}</p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {modeConfig.features.map((feature) => <span key={feature} className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-white/45">{feature}</span>)}
+            </div>
+          </div>
         </div>
 
         {error && <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
@@ -457,11 +479,14 @@ export default function ScorebookPage() {
             events={events}
             pendingShot={pendingShot}
             onLocationSelect={(x, y) => setPendingShot({ x, y, zone: zoneFromCoordinates(x, y) })}
-          /> : <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5">
+          /> : <div className="rounded-3xl border border-rcl-orange/15 bg-gradient-to-br from-rcl-orange/[.07] to-white/[.02] p-5">
             <p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">Quick mode</p>
             <h3 className="mt-2 font-display text-2xl font-black uppercase">Record the play. Keep moving.</h3>
             <p className="mt-2 text-xs leading-5 text-white/40">Shot locations, lineup tracking, substitutions and advanced Game IQ analytics are available in Pro mode.</p>
-            <button type="button" onClick={() => void changeScorebookMode('pro')} className="mt-4 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Switch to Pro</button>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {modeConfig.features.slice(0, 4).map((feature) => <div key={feature} className="rounded-xl border border-white/10 bg-black/20 p-3"><p className="text-[8px] font-black uppercase tracking-widest text-white/30">QUICK</p><p className="mt-1 text-[10px] font-black uppercase">{feature}</p></div>)}
+            </div>
+            <button type="button" onClick={() => void changeScorebookMode('pro')} className="mt-4 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Switch to Pro for full Game IQ</button>
           </div>}
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
