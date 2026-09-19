@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { RCL_ADMIN_NAV_ITEM, RCL_NAV_ITEMS, type RCLNavItem } from '@/lib/rcl-navigation';
-
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { getSupabaseClient } from '@/lib/supabase';
+import { FaGear, FaBars, FaXmark, FaMagnifyingGlass, FaBell, FaHouse, FaUser, FaPeopleGroup, FaCalendarDays } from 'react-icons/fa6';
+import { RCL_ADMIN_NAV_ITEM, RCL_NAV_ITEMS } from '@/lib/rcl-navigation';
 
 export function SiteHeader(){
   const pathname=usePathname();
