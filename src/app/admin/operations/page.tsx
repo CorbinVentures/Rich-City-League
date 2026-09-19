@@ -21,6 +21,7 @@ export default function LeagueOperationsPage() {
   const [cases, setCases] = useState<DisciplineCase[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [tryoutRegistrations, setTryoutRegistrations] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
   const [seasons, setSeasons] = useState<Array<{ id: string; name: string }>>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamSeasonLinks, setTeamSeasonLinks] = useState<Array<{ team_id: string; season_id: string }>>([]);
@@ -37,7 +38,7 @@ export default function LeagueOperationsPage() {
     if (!supabase || !isStaff) return;
     const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     setBusy(true);
-    const [sessionResult, draftResult, poolResult, requestResult, caseResult, transactionResult, registrationResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
+    const [sessionResult, draftResult, poolResult, requestResult, caseResult, transactionResult, registrationResult, registrationReviewResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
       db.from('tryout_sessions').select('*').order('starts_at'),
       db.from('drafts').select('*').order('created_at', { ascending: false }),
       db.from('draft_pools').select('*').order('updated_at', { ascending: false }),
@@ -45,11 +46,12 @@ export default function LeagueOperationsPage() {
       db.from('discipline_cases').select('*').order('created_at', { ascending: false }),
       db.from('league_transactions').select('*').order('updated_at', { ascending: false }),
       db.from('tryout_registrations').select('*, player:players(id,first_name,last_name), session:tryout_sessions(id,starts_at)').order('created_at', { ascending: false }).limit(100),
+      db.from('registrations').select('*').order('submitted_at', { ascending: false }).limit(100),
       db.from('seasons').select('id,name').order('start_date', { ascending: false }),
       db.from('teams').select('*').eq('is_active', true).order('name'),
       db.from('team_seasons').select('team_id,season_id'),
     ]);
-    if (sessionResult.error || draftResult.error || poolResult.error || requestResult.error || caseResult.error || transactionResult.error || registrationResult.error || seasonResult.error || teamResult.error || teamSeasonResult.error) {
+    if (sessionResult.error || draftResult.error || poolResult.error || requestResult.error || caseResult.error || transactionResult.error || registrationResult.error || registrationReviewResult.error || seasonResult.error || teamResult.error || teamSeasonResult.error) {
       setMessage('Unable to load league operations.');
     } else {
       setSessions((sessionResult.data ?? []) as TryoutSession[]);
@@ -59,6 +61,7 @@ export default function LeagueOperationsPage() {
       setCases((caseResult.data ?? []) as DisciplineCase[]);
       setTransactions((transactionResult.data ?? []) as any[]);
       setTryoutRegistrations((registrationResult.data ?? []) as any[]);
+      setRegistrations((registrationReviewResult.data ?? []) as any[]);
       setSeasons((seasonResult.data ?? []) as Array<{ id: string; name: string }>);
       setTeams((teamResult.data ?? []) as Team[]);
       setTeamSeasonLinks((teamSeasonResult.data ?? []) as Array<{ team_id: string; season_id: string }>);
@@ -120,6 +123,13 @@ export default function LeagueOperationsPage() {
       decided_at: ['DECIDED', 'FINAL', 'CLOSED'].includes(String(patch.status)) ? new Date().toISOString() : null,
     } as never).eq('id', id);
     setMessage(error ? error.message : 'Discipline case updated.');
+    if (!error) void load();
+  }
+
+  async function updateRegistration(id: string, status: string) {
+    if (!db || !profile) return;
+    const { error } = await db.from('registrations').update({ status, reviewed_at: new Date().toISOString(), reviewed_by: profile.id } as never).eq('id', id);
+    setMessage(error ? error.message : 'Registration reviewed.');
     if (!error) void load();
   }
 
@@ -210,6 +220,7 @@ export default function LeagueOperationsPage() {
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Request center</h2><div className="mt-5 space-y-3">{requests.slice(0, 8).map((r) => <div key={r.id} className="rounded-lg border border-white/10 p-4"><div className="flex justify-between gap-3"><div><p className="font-semibold">{r.subject}</p><p className="mt-1 text-xs text-gray-500">{r.category}</p></div><select value={r.status} onChange={(e) => void updateRequest(r.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white">{['SUBMITTED','UNDER_REVIEW','NEEDS_INFORMATION','APPROVED','DENIED','RESOLVED','CLOSED'].map((v) => <option key={v}>{v}</option>)}</select></div></div>)}{requests.length === 0 && <p className="text-sm text-gray-500">No requests are waiting for staff.</p>}</div></section>
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Discipline center</h2><div className="mt-5 space-y-3">{cases.slice(0, 12).map((c) => <div key={c.id} className="rounded-lg border border-white/10 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold">{c.description.slice(0, 80)}</p><p className="mt-2 text-xs text-gray-500">Incident {c.incident_date} · case {c.id.slice(0, 8)}</p></div><select value={c.status} onChange={(e) => void updateDiscipline(c.id, { status: e.target.value })} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white">{['OPEN','UNDER_REVIEW','DECIDED','APPEALED','FINAL','CLOSED'].map((v) => <option key={v}>{v}</option>)}</select></div><div className="mt-3 flex flex-wrap gap-2"><select value={c.sanction ?? ''} onChange={(e) => void updateDiscipline(c.id, { sanction: e.target.value || null })} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white"><option value="">No sanction</option>{['WARNING','FINE','GAME_SUSPENSION','MULTI_GAME_SUSPENSION','PROBATION','GAME_REMOVAL','ROSTER_RESTRICTION','LEAGUE_SUSPENSION','DISMISSAL'].map((v) => <option key={v}>{v}</option>)}</select><input defaultValue={c.decision ?? ''} onBlur={(e) => { if (e.target.value !== (c.decision ?? '')) void updateDiscipline(c.id, { decision: e.target.value || null }); }} placeholder="Decision" className="min-w-48 flex-1 rounded border border-white/10 bg-black/30 p-2 text-xs text-white" /></div></div>)}{cases.length === 0 && <p className="text-sm text-gray-500">No disciplinary cases.</p>}</div></section>
     </div>
+    <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-bold">Registration review</h2><span className="text-xs text-white/35">{registrations.length} recent</span></div><div className="mt-5 max-h-96 space-y-2 overflow-auto">{registrations.map((r) => <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-xs"><div><p className="font-semibold">{r.first_name} {r.last_name}</p><p className="mt-1 text-white/35">{r.email} · {r.status}</p></div><select value={r.status} onChange={(e) => void updateRegistration(r.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-2 text-white">{['pending','approved','waitlisted','rejected','withdrawn'].map((v) => <option key={v}>{v}</option>)}</select></div>)}{registrations.length === 0 && <p className="text-sm text-gray-500">No registration records.</p>}</div></section>
     <div className="mt-8 grid gap-8 lg:grid-cols-3">
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Draft eligibility</h2><div className="mt-5 max-h-80 space-y-2 overflow-auto">{pool.slice(0, 50).map((p) => <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-xs"><span className="truncate">{p.player_id}</span><button type="button" onClick={() => void updateDraftPool(p.id, !p.eligible)} className={p.eligible ? 'rounded bg-rcl-orange px-3 py-1 font-bold text-black' : 'rounded border border-white/20 px-3 py-1 font-bold text-white/60'}>{p.eligible ? 'ELIGIBLE' : 'HOLD'}</button></div>)}{pool.length === 0 && <p className="text-sm text-gray-500">No draft pool records.</p>}</div></section>
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Tryout attendance</h2><div className="mt-5 max-h-80 space-y-2 overflow-auto">{tryoutRegistrations.slice(0, 50).map((r) => <div key={r.id} className="rounded-lg border border-white/10 p-3 text-xs"><p className="font-semibold">{r.player?.first_name ?? 'Player'} {r.player?.last_name ?? ''}</p><p className="mt-1 text-white/35">{r.session?.starts_at ? new Date(r.session.starts_at).toLocaleString() : 'Session'}</p><div className="mt-2 flex flex-wrap gap-1">{['PRESENT','ABSENT','EXCUSED','LATE'].map((v) => <button key={v} type="button" onClick={() => void updateAttendance(r.id, v)} className="rounded border border-white/10 px-2 py-1 text-[9px] font-bold hover:border-rcl-orange">{v}</button>)}</div></div>)}{tryoutRegistrations.length === 0 && <p className="text-sm text-gray-500">No tryout registrations.</p>}</div></section>
