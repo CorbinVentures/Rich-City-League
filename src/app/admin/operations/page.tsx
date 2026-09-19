@@ -81,6 +81,7 @@ export default function LeagueOperationsPage() {
 
   async function updateRequest(id: string, status: string) {
     if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('league_requests').update({ status } as never).eq('id', id);
     setMessage(error ? error.message : 'Request status updated.');
     if (!error) void load();
