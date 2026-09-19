@@ -62,6 +62,9 @@ export default function ScorebookPage() {
   const [coachAnswer, setCoachAnswer] = useState('');
   const [coachAskBusy, setCoachAskBusy] = useState(false);
   const coachPrompts = ['Why did we lose?', 'What changed in Q3?', 'Which lineup worked best?', 'Where were we inefficient?', 'What should we review?', 'Who impacted the game?'];
+  const activeActionGroups = mode === 'quick'
+    ? actionGroups.filter((group) => group.label === 'SCORING' || group.label === 'MISTAKES / FOULS')
+    : actionGroups;
 
   const isStaff = profile?.role === 'admin';
   const isCoach = profile?.role === 'coach';
@@ -118,6 +121,7 @@ export default function ScorebookPage() {
       setStartingFive(currentLineup?.player_ids ?? []);
       setPeriod(1);
       setClock(game ? formatClock(game.period_length_seconds) : '10:00');
+      setMode(game?.scorebook_mode ?? 'pro');
       setSelectedTeamId(game?.home_team_id ?? '');
       setSelectedPlayerId('');
       setAssistPlayerId('');
@@ -259,6 +263,13 @@ export default function ScorebookPage() {
     }
   }
 
+  async function changeScorebookMode(nextMode: 'quick' | 'pro') {
+    setMode(nextMode);
+    setPendingShot(null);
+    setCoachAnswer('');
+    setAiInsight('');
+  }
+
   async function runGameIQ() {
     if (!selectedGameId) return;
     setAiBusy(true);
@@ -281,7 +292,11 @@ export default function ScorebookPage() {
 
   async function askGameIQ(question = coachQuestion) {
     const normalized = question.trim();
-    if (!selectedGameId || !normalized || coachAskBusy) return;
+    if (!selectedGameId) {
+      setError('Select a game before using AI Coach.');
+      return;
+    }
+    if (!normalized || coachAskBusy) return;
     setCoachAskBusy(true);
     setError('');
     setCoachAnswer('');
@@ -366,32 +381,38 @@ export default function ScorebookPage() {
             <p className="mt-2 max-w-3xl text-sm text-white/45">Record the play once. RCL calculates the box score, advanced metrics, shot profile, leaderboards, player profiles and downstream league data.</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setMode('quick')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-white/5'}`}>Quick</button>
-            <button onClick={() => setMode('pro')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'pro' ? 'bg-rcl-gold text-black' : 'border border-white/10 bg-white/5'}`}>Pro</button>
+            <button type="button" onClick={() => void changeScorebookMode('quick')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-white/5'}`}>Quick</button>
+            <button type="button" onClick={() => void changeScorebookMode('pro')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'pro' ? 'bg-rcl-gold text-black' : 'border border-white/10 bg-white/5'}`}>Pro</button>
           </div>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-white/10 bg-white/[.025] px-4 py-3">
+          <p className="text-[9px] font-black uppercase tracking-widest text-white/35">{mode === 'quick' ? 'QUICK SCOREBOOK' : 'PRO SCOREBOOK'}</p>
+          <p className="mt-1 text-xs text-white/45">{mode === 'quick' ? 'Fast stat entry: scoring, turnovers and fouls. Advanced Game IQ tools stay out of the way.' : 'Full game capture: shot map, assists, lineups, substitutions, advanced analytics and AI Coach.'}</p>
         </div>
 
         {error && <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
         {message && <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</div>}
         <div className="mt-4 flex flex-wrap gap-2">
-          <button disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>
-          <button disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
+          {mode === 'pro' && <button type="button" disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>}
+          <button type="button" disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
         </div>
-        <section className="mt-4 rounded-3xl border border-rcl-orange/20 bg-rcl-orange/[.06] p-4">
+        {mode === 'pro' && <section className="mt-4 rounded-3xl border border-rcl-orange/20 bg-rcl-orange/[.06] p-4">
           <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">RCL GAME IQ™ · AI COACH</p><p className="mt-1 text-xs text-white/40">Ask questions against the official event stream, box score, lineup data and deterministic analytics.</p></div><span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">AI COACH</span></div>
           <div className="mt-4 flex flex-wrap gap-2">{coachPrompts.map((prompt) => <button key={prompt} onClick={() => { setCoachQuestion(prompt); void askGameIQ(prompt); }} disabled={coachAskBusy || !selectedGameId} className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[9px] font-black uppercase tracking-wide text-white/60 hover:border-rcl-gold/40 hover:text-white disabled:opacity-30">{prompt}</button>)}</div>
           <div className="mt-3 flex gap-2">
-            <input value={coachQuestion} onChange={(e) => setCoachQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void askGameIQ(); }} placeholder="Ask Game IQ about this game…" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-white outline-none placeholder:text-white/25" />
-            <button onClick={() => void askGameIQ()} disabled={coachAskBusy || !coachQuestion.trim()} className="rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">{coachAskBusy ? 'Thinking…' : 'Ask'}</button>
+            <input value={coachQuestion} onChange={(e) => setCoachQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void askGameIQ(); }} disabled={!selectedGameId || coachAskBusy} placeholder={selectedGameId ? 'Ask Game IQ about this game…' : 'Select a game first…'} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-white outline-none placeholder:text-white/25 disabled:opacity-50" />
+            <button type="button" onClick={() => void askGameIQ()} disabled={coachAskBusy || !coachQuestion.trim() || !selectedGameId} className="rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">{coachAskBusy ? 'Thinking…' : 'Ask'}</button>
           </div>
           {coachAnswer && <div className="mt-4 rounded-2xl border border-rcl-gold/15 bg-black/20 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-rcl-gold">Game IQ answer</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/75">{coachAnswer}</p></div>}
           {aiInsight && <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-white/30">Postgame report</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/65">{aiInsight}</p></div>}
-        </section>
+        </section>}
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <label className="text-[9px] font-black uppercase tracking-widest text-white/35">Game</label>
             <select value={selectedGameId} onChange={(e) => { setSelectedGameId(e.target.value); void loadGameData(e.target.value); }} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white">
+              {games.length === 0 && <option value="">No games available</option>}
               {games.map((game) => <option key={game.id} value={game.id}>{teamName(game.home_team_id)} vs {teamName(game.away_team_id)} · {new Date(game.scheduled_at).toLocaleDateString()}</option>)}
             </select>
             {selectedGame && <div className="mt-4 space-y-2 text-xs text-white/50"><p>{new Date(selectedGame.scheduled_at).toLocaleString()}</p><p>{selectedGame.venue_id ? 'Venue assigned' : 'Venue not assigned'}</p><p>{selectedGame.period_count} periods · {Math.floor(selectedGame.period_length_seconds / 60)} min</p></div>}
@@ -431,11 +452,16 @@ export default function ScorebookPage() {
             </div>
           </div>
 
-          <ShotMap
+          {mode === 'pro' ? <ShotMap
             events={events}
             pendingShot={pendingShot}
             onLocationSelect={(x, y) => setPendingShot({ x, y, zone: zoneFromCoordinates(x, y) })}
-          />
+          /> : <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5">
+            <p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">Quick mode</p>
+            <h3 className="mt-2 font-display text-2xl font-black uppercase">Record the play. Keep moving.</h3>
+            <p className="mt-2 text-xs leading-5 text-white/40">Shot locations, lineup tracking, substitutions and advanced Game IQ analytics are available in Pro mode.</p>
+            <button type="button" onClick={() => void changeScorebookMode('pro')} className="mt-4 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Switch to Pro</button>
+          </div>}
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Selected player</p>
@@ -445,7 +471,7 @@ export default function ScorebookPage() {
           </div>
         </section>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+        {mode === 'pro' && <section className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <div className="flex items-center justify-between">
               <div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Lineup Lab</p><p className="mt-1 text-xs text-white/40">Set the five on the floor. RCL derives minutes and plus/minus from the substitution timeline.</p></div>
@@ -468,9 +494,9 @@ export default function ScorebookPage() {
             <button disabled={!subOut || !subIn || busy} onClick={() => void saveSubstitution()} className="mt-3 w-full rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-orange disabled:opacity-30">Record Substitution</button>
             <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
           </div>
-        </section>
+        </section>}
 
-        {analytics && (
+        {mode === 'pro' && analytics && (
           <section className="mt-4 grid gap-4 lg:grid-cols-[1.15fr_1fr]">
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
               <div className="flex items-center justify-between">
@@ -516,7 +542,7 @@ export default function ScorebookPage() {
           </section>
         )}
 
-        {analytics && (
+        {mode === 'pro' && analytics && (
           <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.25fr]">
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
               <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Shot Zone Efficiency</p>
@@ -540,7 +566,7 @@ export default function ScorebookPage() {
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            {actionGroups.map((group) => <div key={group.label} className="mb-5 last:mb-0"><p className="mb-2 text-[9px] font-black uppercase tracking-widest text-white/35">{group.label}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{group.actions.map(([label, type, value, made]) => <button key={label} disabled={!selectedPlayerId || busy} onClick={() => void recordAction(type as GameEvent['event_type'], value, value ? value as 1|2|3 : null, made)} className="min-h-14 rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-left text-[10px] font-black uppercase tracking-wider transition hover:border-rcl-orange/50 hover:bg-rcl-orange/10 disabled:cursor-not-allowed disabled:opacity-30">{label}<span className="mt-1 block text-[8px] font-normal text-white/30">{selectedPlayerId ? 'Tap to record' : 'Select player first'}</span></button>)}</div></div>)}
+            {activeActionGroups.map((group) => <div key={group.label} className="mb-5 last:mb-0"><p className="mb-2 text-[9px] font-black uppercase tracking-widest text-white/35">{group.label}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{group.actions.map(([label, type, value, made]) => <button key={label} disabled={!selectedPlayerId || busy} onClick={() => void recordAction(type as GameEvent['event_type'], value, value ? value as 1|2|3 : null, made)} className="min-h-14 rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-left text-[10px] font-black uppercase tracking-wider transition hover:border-rcl-orange/50 hover:bg-rcl-orange/10 disabled:cursor-not-allowed disabled:opacity-30">{label}<span className="mt-1 block text-[8px] font-normal text-white/30">{selectedPlayerId ? 'Tap to record' : 'Select player first'}</span></button>)}</div></div>)}
             <div className="mt-5 flex gap-2"><button disabled={!events.length || busy} onClick={() => void undoLast()} className="rounded-xl border border-white/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white/60 disabled:opacity-30">Undo last play</button><button disabled={!selectedPlayerId || busy} onClick={() => void recordAction('assist')} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-30">Record assist</button></div>
           </div>
 
