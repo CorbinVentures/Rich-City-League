@@ -6,7 +6,7 @@ import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { Container } from '@/components/Container';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { FaShieldHalved, FaUsersGear, FaUserTie, FaBasketball, FaClipboardList } from 'react-icons/fa6';
+import { FaShieldHalved, FaUsersGear, FaClipboardList } from 'react-icons/fa6';
 
 const roles = ['fan','player','coach','staff','admin'] as const;
 
@@ -117,7 +117,7 @@ export default function AdminGovernancePage() {
     if(!error){await audit('ADMIN_REMOVE_COMMISSIONER',`Removed commissioner assignment ${id}`);await load();}
   }
 
-  const label=(p:Profile)=>p.display_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||'RCL User';
+  const label=(p?:Profile)=>p?.display_name||[p?.first_name,p?.last_name].filter(Boolean).join(' ')||'RCL User';
   const staffProfiles=profiles.filter(p=>['staff','admin'].includes(p.role));
   const coachProfiles=profiles.filter(p=>['coach','staff','admin'].includes(p.role));
 
@@ -145,13 +145,13 @@ export default function AdminGovernancePage() {
         <section className="rcl-platform-panel p-6">
           <p className="rcl-kicker">STAFF ACCESS</p><h2 className="rcl-display mt-2 text-2xl uppercase">Staff assignments</h2>
           <form onSubmit={addStaff} className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><select required value={staffProfile} onChange={e=>setStaffProfile(e.target.value)} className="rcl-admin-field"><option value="">Staff/admin profile</option>{staffProfiles.map(p=><option key={p.id} value={p.id}>{label(p)}</option>)}</select><input value={staffTitle} onChange={e=>setStaffTitle(e.target.value)} className="rcl-admin-field" placeholder="Title"/><button className="rcl-button">Grant</button></form>
-          <div className="mt-5 space-y-2">{staff.map(s=><div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 p-3 text-xs"><span>{label(profiles.find(p=>p.id===s.profile_id) as Profile)} · {s.title}</span><button onClick={()=>void removeStaff(s.id)} className="text-red-300">REMOVE</button></div>)}</div>
+          <div className="mt-5 space-y-2">{staff.map(s=><div key={s.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 p-3 text-xs"><span>{label(profiles.find(p=>p.id===s.profile_id))} · {s.title}</span><button onClick={()=>void removeStaff(s.id)} className="text-red-300">REMOVE</button></div>)}</div>
         </section>
 
         <section className="rcl-platform-panel p-6">
           <p className="rcl-kicker">TEAM AUTHORITY</p><h2 className="rcl-display mt-2 text-2xl uppercase">Coach assignments</h2>
           <form onSubmit={addCoach} className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto]"><select required value={teamId} onChange={e=>setTeamId(e.target.value)} className="rcl-admin-field"><option value="">Team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select><select required value={coachProfile} onChange={e=>setCoachProfile(e.target.value)} className="rcl-admin-field"><option value="">Coach profile</option>{coachProfiles.map(p=><option key={p.id} value={p.id}>{label(p)}</option>)}</select><input value={coachTitle} onChange={e=>setCoachTitle(e.target.value)} className="rcl-admin-field" placeholder="Title"/><button className="rcl-button">Assign</button></form>
-          <div className="mt-5 space-y-2">{coaches.map(c=><div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 p-3 text-xs"><span>{teams.find(t=>t.id===c.team_id)?.name||'Team'} · {label(profiles.find(p=>p.id===c.profile_id) as Profile)} · {c.title}</span><button onClick={()=>void removeCoach(c.id)} className="text-red-300">REMOVE</button></div>)}</div>
+          <div className="mt-5 space-y-2">{coaches.map(c=><div key={c.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 p-3 text-xs"><span>{teams.find(t=>t.id===c.team_id)?.name||'Team'} · {label(profiles.find(p=>p.id===c.profile_id))} · {c.title}</span><button onClick={()=>void removeCoach(c.id)} className="text-red-300">REMOVE</button></div>)}</div>
         </section>
 
         <section className="rcl-platform-panel p-6">
