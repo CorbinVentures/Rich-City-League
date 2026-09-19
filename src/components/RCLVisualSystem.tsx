@@ -172,6 +172,167 @@ export function RCLVisualSystem() {
         nav[aria-label="Primary mobile navigation"] > div { min-height:3.9rem !important; height:3.9rem !important; }
         nav[aria-label="Primary mobile navigation"] a { min-height:3.65rem !important; height:3.65rem !important; }
       }
+
+      /* ===== GLOBAL BASKETBALL BRAND ENFORCEMENT ===== */
+      :root {
+        --rcl-court-orange: #ff4f16;
+        --rcl-court-blue: #159fff;
+        --rcl-court-bg: #03070d;
+        --rcl-court-panel: #071522;
+        --rcl-court-text: #f6f8fb;
+        --rcl-court-muted: #7d90a3;
+      }
+
+      /* Every route inherits the same arena/court atmosphere. */
+      .rcl-platform-root {
+        background:
+          radial-gradient(circle at 88% 8%, rgba(21,159,255,.045), transparent 25rem),
+          radial-gradient(circle at 8% 82%, rgba(255,79,22,.04), transparent 23rem),
+          linear-gradient(90deg, transparent 0 49.8%, rgba(255,79,22,.018) 49.9% 50.1%, transparent 50.2%);
+      }
+
+      .rcl-platform-root main {
+        color: var(--rcl-court-text);
+      }
+
+      .rcl-platform-root main::after {
+        content: "";
+        position: absolute;
+        top: 2.5rem;
+        right: -11rem;
+        width: 30rem;
+        height: 30rem;
+        border: 1px solid rgba(255,79,22,.035);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4rem rgba(21,159,255,.018), 0 0 0 9rem rgba(255,255,255,.01);
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      /* Remove legacy light surfaces that can escape the RCL visual system. */
+      .rcl-platform-root [class~="bg-white"],
+      .rcl-platform-root [class~="bg-gray-50"],
+      .rcl-platform-root [class~="bg-gray-100"],
+      .rcl-platform-root [class~="bg-slate-50"],
+      .rcl-platform-root [class~="bg-zinc-50"],
+      .rcl-platform-root [class~="bg-neutral-50"] {
+        background: linear-gradient(145deg, rgba(14,24,37,.96), rgba(5,9,15,.98)) !important;
+        color: var(--rcl-court-text) !important;
+      }
+
+      .rcl-platform-root [class~="text-black"],
+      .rcl-platform-root [class~="text-gray-900"],
+      .rcl-platform-root [class~="text-gray-800"],
+      .rcl-platform-root [class~="text-gray-700"],
+      .rcl-platform-root [class~="text-slate-900"],
+      .rcl-platform-root [class~="text-zinc-900"] {
+        color: var(--rcl-court-text) !important;
+      }
+
+      .rcl-platform-root [class~="text-gray-500"],
+      .rcl-platform-root [class~="text-gray-600"],
+      .rcl-platform-root [class~="text-slate-500"],
+      .rcl-platform-root [class~="text-slate-600"],
+      .rcl-platform-root [class~="text-zinc-500"],
+      .rcl-platform-root [class~="text-zinc-600"] {
+        color: var(--rcl-court-muted) !important;
+      }
+
+      .rcl-platform-root [class~="border-gray-200"],
+      .rcl-platform-root [class~="border-gray-300"],
+      .rcl-platform-root [class~="border-slate-200"],
+      .rcl-platform-root [class~="border-zinc-200"],
+      .rcl-platform-root [class~="border-neutral-200"] {
+        border-color: rgba(255,255,255,.09) !important;
+      }
+
+      /* Shared form language: broadcast controls rather than generic web forms. */
+      .rcl-platform-root input,
+      .rcl-platform-root textarea,
+      .rcl-platform-root select {
+        color: var(--rcl-court-text) !important;
+        background:
+          linear-gradient(145deg, rgba(11,23,36,.96), rgba(4,9,15,.96)) !important;
+        border-color: rgba(21,159,255,.18) !important;
+      }
+
+      .rcl-platform-root input::placeholder,
+      .rcl-platform-root textarea::placeholder {
+        color: #65798d !important;
+      }
+
+      .rcl-platform-root select option {
+        background: #071522 !important;
+        color: #f6f8fb !important;
+      }
+
+      /* Tables / scoreboards / lists get an RCL broadcast treatment. */
+      .rcl-platform-root table thead {
+        background: linear-gradient(90deg, rgba(255,79,22,.08), rgba(21,159,255,.045)) !important;
+      }
+
+      .rcl-platform-root table th {
+        color: #7d90a3 !important;
+        font-weight: 900 !important;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .rcl-platform-root table tbody tr {
+        border-color: rgba(255,255,255,.07) !important;
+      }
+
+      .rcl-platform-root table tbody tr:hover {
+        background: rgba(255,79,22,.045) !important;
+      }
+
+      /* Generic bordered blocks become dark arena modules without changing their data. */
+      .rcl-platform-root [class*="border-white/10"],
+      .rcl-platform-root [class*="border-white/15"] {
+        border-color: rgba(255,255,255,.09) !important;
+      }
+
+      .rcl-platform-root .font-display,
+      .rcl-platform-root h1,
+      .rcl-platform-root h2,
+      .rcl-platform-root h3 {
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: -.02em;
+      }
+
+      /* Orange = live/attention. Blue = navigation/action. */
+      .rcl-platform-root [class*="text-rcl-gold"],
+      .rcl-platform-root [class*="text-rcl-orange"] {
+        color: var(--rcl-court-orange) !important;
+      }
+
+      .rcl-platform-root [class*="bg-rcl-gold"],
+      .rcl-platform-root [class*="bg-rcl-red"] {
+        background: linear-gradient(135deg, var(--rcl-court-orange), #d93d0b) !important;
+        color: #05070b !important;
+      }
+
+      .rcl-platform-root [class*="border-rcl-gold"],
+      .rcl-platform-root [class*="border-rcl-red"] {
+        border-color: rgba(255,79,22,.45) !important;
+      }
+
+      /* Give every route a subtle basketball broadcast kicker when it has a main heading. */
+      .rcl-platform-root main > :first-child {
+        border-top-color: rgba(255,79,22,.22);
+      }
+
+      /* Mobile: keep the court motif quiet and preserve usable content space. */
+      @media (max-width: 639px) {
+        .rcl-platform-root main::after {
+          top: 6rem;
+          right: -16rem;
+          width: 28rem;
+          height: 28rem;
+          opacity: .75;
+        }
+      }
     `}</style>
   );
 }
