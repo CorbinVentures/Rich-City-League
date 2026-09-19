@@ -8,7 +8,7 @@ import {
   FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass
 } from 'react-icons/fa6';
 
-type NavItem = { label:string; href:string; icon: typeof FaHouse };
+type NavItem = { label:string; href:string; icon: any };
 const nav: NavItem[] = [
   {label:'Home',href:'/',icon:FaHouse},{label:'The Lab',href:'/lab',icon:FaFlask},
   {label:'Players',href:'/players',icon:FaUser},{label:'Teams',href:'/teams',icon:FaUsers},
@@ -84,7 +84,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,news,posts}:
         <section>
           <div className="rcl-home-section-head"><div><p>THE COURT</p><h2>NEXT GAME</h2></div><Link href="/games">VIEW ALL <FaArrowRight/></Link></div>
           <div className="rcl-home-game-card">
-            {next.length ? <div className="rcl-home-game-grid">{next.map(g=><Link href={'/games/'+g.id} key={g.id}><small>{new Date(g.scheduled_at).toLocaleDateString(undefined,{month:'short',day:'numeric'})} · {new Date(g.scheduled_at).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</small><div><b>{team(g.away_team_id)?.name??'AWAY'}</b><strong>VS</strong><b>{team(g.home_team_id)?.name??'HOME'}</b></div><span>RICHMOND, VIRGINIA</span></Link>)}</div> : <div className="rcl-home-empty">Schedules are loading. Check back soon.</div>}
+            {next.length ? <div className="rcl-home-game-grid">{next.map(g=><Link href={'/games/'+g.id} key={g.id}><small>{new Date(g.scheduled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/New_York'})} · {new Date(g.scheduled_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})}</small><div><b>{team(g.away_team_id)?.name??'AWAY'}</b><strong>VS</strong><b>{team(g.home_team_id)?.name??'HOME'}</b></div><span>RICHMOND, VIRGINIA</span></Link>)}</div> : <div className="rcl-home-empty">Schedules are loading. Check back soon.</div>}
           </div>
         </section>
 
