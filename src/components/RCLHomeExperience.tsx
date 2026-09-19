@@ -19,9 +19,9 @@ const nav: NavItem[] = [
   {label:'Awards',href:'/awards',icon:FaTrophy},{label:'Shop',href:'/shop',icon:FaShirt},
 ];
 const quick = [
-  {title:'THE LAB',sub:'TRAIN. IMPROVE.',href:'/lab',icon:FaFlask},
-  {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown},
-  {title:'JOIN A LEAGUE',sub:"MEN'S · WOMEN'S · YOUTH",href:'/registration',icon:FaTrophy},
+  {title:'THE LAB',sub:'TRAIN. IMPROVE.',href:'/lab',icon:FaFlask,image:'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=700&q=82'},
+  {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
+  {title:'JOIN A LEAGUE',sub:"MEN'S · WOMEN'S · YOUTH",href:'/register',icon:FaTrophy,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
 ];
 
 type Team = {id:string;name:string;logo_url?:string|null};
@@ -31,7 +31,8 @@ type Player = {id:string;first_name:string;last_name:string;photo_url?:string|nu
 type IQ = {player_id:string;rcl_rating:number;court_performance_score:number;exposure_index:number;player_archetype?:string|null};
 type News = {id:string;slug:string;title:string;published_at?:string|null};
 type Post = {id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
-type Props = {teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];news:News[];posts:Post[]};
+type Stat={player_id:string;points:number;assists:number};
+type Props = {teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[]};
 
 const fallbackPlayers = [
   'https://images.unsplash.com/photo-1519861531473-920026218c5e?auto=format&fit=crop&w=700&q=85',
@@ -39,12 +40,14 @@ const fallbackPlayers = [
   'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=85'
 ];
 
-export function RCLHomeExperience({teams,games,standings,players,iq,news,posts}:Props) {
+export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,posts}:Props) {
   const [menuOpen,setMenuOpen]=useState(false);
   const team = (id:string) => teams.find(t=>t.id===id);
   const next = games.filter(g=>g.status!=='completed').slice(0,3);
   const featured = players.slice(0,3);
   const rankMap = new Map(iq.map(x=>[x.player_id,x]));
+  const statMap = new Map<string,{gp:number;points:number;assists:number}>();
+  for(const s of stats){const cur=statMap.get(s.player_id)??{gp:0,points:0,assists:0};cur.gp+=1;cur.points+=Number(s.points)||0;cur.assists+=Number(s.assists)||0;statMap.set(s.player_id,cur);}
   const topStandings = [...standings].sort((a,b)=>(a.rank??99)-(b.rank??99)).slice(0,4);
   return <main className="rcl-mock-home">
     <aside className="rcl-home-sidebar">
@@ -78,7 +81,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,news,posts}:
       <div className="rcl-home-content">
         <section className="rcl-home-quick">
           <div className="rcl-home-section-head"><div><p>STEP INTO THE WORLD</p><h2>FIND YOUR COURT</h2></div><b>01</b></div>
-          <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card"><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
+          <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card" style={{backgroundImage:\`linear-gradient(90deg,rgba(3,8,13,.96),rgba(3,8,13,.48)),url(\${q.image})\`}}><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
         </section>
 
         <section>
@@ -95,7 +98,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,news,posts}:
 
         <section>
           <div className="rcl-home-section-head"><div><p>THE CITY</p><h2>FEATURED PLAYERS</h2></div><Link href="/players">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-player-row">{featured.map((p,i)=>{const q=rankMap.get(p.id);return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><img src={p.photo_url||fallbackPlayers[i%fallbackPlayers.length]} alt=""/><div/><small>#{p.jersey_number??i+1} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span>{q?.player_archetype??'RCL PLAYER'} <b>{q?.rcl_rating?Math.round(q.rcl_rating):'—'} RATING</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
+          <div className="rcl-home-player-row">{featured.map((p,i)=>{const q=rankMap.get(p.id); const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><img src={p.photo_url||fallbackPlayers[i%fallbackPlayers.length]} alt=""/><div/><small>#{p.jersey_number??i+1} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{ppg?ppg.toFixed(1):'—'} PPG</b><b>{apg?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
         </section>
 
         <section className="rcl-home-news">
