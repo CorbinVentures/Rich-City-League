@@ -20,32 +20,34 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
     setMessage('');
     try {
       if (mode === 'sign-in') {
+        // Capture the requested destination BEFORE authentication. Supabase can
+        // update the browser session during sign-in, so the redirect target
+        // must not depend on a post-login session/profile query succeeding.
+        const requestedNext = new URLSearchParams(window.location.search).get('next');
+        const hasExplicitNext = Boolean(requestedNext);
+        let destination = getSafeNextPath(requestedNext);
+
         await signIn(email, password);
 
-        // Resolve the user's role after authentication so staff land in the
-        // basketball operations workspace instead of the player/fan career hub.
-        const client = (await import('@/lib/supabase')).getSupabaseClient();
-        const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
-        let destination = getSafeNextPath(new URLSearchParams(window.location.search).get('next'));
+        if (!hasExplicitNext) {
+          // No explicit destination: resolve staff routing after authentication.
+          const client = (await import('@/lib/supabase')).getSupabaseClient();
+          const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
 
-        if (!new URLSearchParams(window.location.search).get('next') && signedInUser && client) {
-          const { data: signedInProfile } = await client
-            .from('profiles')
-            .select('role, is_active')
-            .eq('id', signedInUser.id)
-            .maybeSingle();
-
-          const accessProfile = signedInProfile as { role?: string | null; is_active?: boolean | null } | null;
-
-          if (
-            accessProfile?.is_active === true &&
-            (accessProfile.role === 'admin' || accessProfile.role === 'coach')
-          ) {
-            destination = '/portal/scorebook';
+          if (signedInUser && client) {
+            const { data: signedInProfile } = await client
+              .from('profiles')
+              .select('role, is_active')
+              .eq('id', signedInUser.id)
+              .maybeSingle();
+            const accessProfile = signedInProfile as { role?: string | null; is_active?: boolean | null } | null;
+            if (accessProfile?.is_active === true && (accessProfile.role === 'admin' || accessProfile.role === 'coach')) {
+              destination = '/portal/scorebook';
+            }
           }
         }
 
-        router.push(destination);
+        router.replace(destination);
       } else if (mode === 'sign-up') {
         if (password !== confirmation) {
           setMessage('Passwords do not match.');
