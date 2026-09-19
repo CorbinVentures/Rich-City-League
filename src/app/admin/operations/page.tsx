@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
@@ -119,7 +120,7 @@ export default function LeagueOperationsPage() {
     setMessage(error ? error.message : 'Draft order saved.');
   }
 
-  if (authLoading || busy) return <main><Container maxWidth="xl" className="py-16"><div className="h-8 w-72 animate-pulse rounded bg-white/10" /></Container></main>;
+  if (authLoading || busy) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><div className="h-8 w-72 animate-pulse rounded bg-white/10" /></Container></main>;
   if (!profile || !isStaff) return <main><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-bold">League operations access required</h1><p className="mt-3 text-gray-400">This command center is limited to authorized league staff.</p></Container></main>;
 
   const availableOrderTeams = teams.filter((team) => {
