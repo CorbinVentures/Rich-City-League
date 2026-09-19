@@ -803,3 +803,19 @@ img, video, canvas, svg { max-width: 100%; }
 @media(prefers-reduced-motion:reduce){
   .rcl-platform-root button,.rcl-platform-root a{transition:none!important}
 }
+
+
+/* Homepage owns its own source-of-truth shell. Never allow the universal
+   internal-page header/sidebar/bottom nav to render over it, even during
+   client navigation or hydration. */
+body:has(.rcl-mock-home) .rcl-universal-sidebar,
+body:has(.rcl-mock-home) .rcl-universal-topbar,
+body:has(.rcl-mock-home) .rcl-universal-bottom,
+body:has(.rcl-mock-home) .rcl-universal-drawer-backdrop{
+  display:none !important;
+}
+body:has(.rcl-mock-home) .rcl-platform-root{
+  margin:0 !important;
+  padding:0 !important;
+  min-height:100vh;
+}
