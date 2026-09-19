@@ -514,3 +514,410 @@
 .rcl-home-bottom,.rcl-home-drawer-backdrop{display:none}
 @media(max-width:1023px){.rcl-home-sidebar{display:none}.rcl-home-main{width:100%;margin-left:0}.rcl-home-content{max-width:900px}.rcl-home-bottom{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:0;right:0;bottom:0;z-index:44;min-height:66px;padding-bottom:max(env(safe-area-inset-bottom),4px);border-top:1px solid rgba(255,255,255,.1);background:rgba(3,7,13,.94);backdrop-filter:blur(22px)}.rcl-home-bottom a,.rcl-home-bottom button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:none;color:#748497;font-size:8px;font-weight:950;letter-spacing:.12em}.rcl-home-bottom svg{font-size:17px}.rcl-home-bottom .active{color:var(--mx-orange)}.rcl-home-drawer-backdrop{position:fixed;display:block;inset:0;z-index:60;background:rgba(0,0,0,.78);backdrop-filter:blur(4px)}.rcl-home-drawer{width:min(380px,88vw);height:100%;padding:20px 14px;background:linear-gradient(180deg,#071522,#030912);border-right:1px solid rgba(35,163,244,.28);box-shadow:25px 0 70px rgba(0,0,0,.55);overflow:auto}.rcl-drawer-head{position:relative;padding:12px 10px 24px}.rcl-drawer-head button{display:grid;place-items:center;margin-left:auto;width:40px;height:40px;border:1px solid rgba(255,255,255,.1);border-radius:50%;background:rgba(255,255,255,.03);color:#c4ced8}.rcl-drawer nav{display:grid;gap:3px;margin-top:22px}.rcl-drawer-foot{display:grid;gap:6px;margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,.08)}.rcl-drawer-foot a{display:flex;justify-content:space-between;padding:12px;color:#8597a8;font-size:10px;font-weight:900;letter-spacing:.12em;text-decoration:none}.rcl-drawer-foot a:first-child{color:#fff}}
 @media(max-width:639px){.rcl-home-topbar{height:72px;padding:0 14px}.rcl-home-wordmark b{font-size:10px}.rcl-home-wordmark>span{width:38px;height:38px}.rcl-home-hero{min-height:560px}.rcl-home-hero-copy{padding:135px 28px 65px}.rcl-home-hero h1{font-size:clamp(62px,16vw,83px);line-height:.71}.rcl-home-tagline{font-size:9px;letter-spacing:.14em}.rcl-home-cta{width:100%;min-width:0}.rcl-home-content{padding:28px 16px 90px}.rcl-home-section-head h2{font-size:25px}.rcl-home-quick-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:5px}.rcl-home-quick-card{min-width:265px;scroll-snap-align:start}.rcl-home-game-grid,.rcl-home-player-row,.rcl-home-news-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.rcl-home-game-grid>a,.rcl-home-news-grid>a{min-width:285px;scroll-snap-align:start;border-right:1px solid rgba(255,255,255,.06)}.rcl-home-player-card{min-width:235px;scroll-snap-align:start}.rcl-standing-head,.rcl-home-standings>a{grid-template-columns:25px 1fr 38px 38px 48px 38px;padding-left:11px;padding-right:11px}.rcl-home-latest{display:block}.rcl-home-latest>div:first-child{border-right:0;border-bottom:1px solid rgba(255,255,255,.07)}.rcl-home-latest>div:last-child{display:flex;overflow-x:auto}.rcl-home-latest a{min-width:245px}.rcl-home-code{right:17px}.rcl-home-player-card h3{font-size:24px}}
+
+
+/* =========================================================
+   RCL SOURCE-OF-TRUTH TABLET / PHONE FIDELITY PASS
+   Matches the supplied 706px reference composition:
+   sidebar + main canvas + bottom navigation.
+   ========================================================= */
+
+@media (min-width: 700px) and (max-width: 1023px) {
+  .rcl-mock-home {
+    min-width: 0;
+  }
+
+  .rcl-home-sidebar {
+    display: block !important;
+    width: 212px !important;
+    padding: 12px 9px 10px !important;
+  }
+
+  .rcl-home-sidebar-brand {
+    gap: 9px !important;
+    padding: 4px 7px 13px !important;
+  }
+
+  .rcl-home-logo {
+    width: 48px !important;
+    height: 48px !important;
+    flex: 0 0 48px !important;
+    border-radius: 14px !important;
+    font-size: 21px !important;
+  }
+
+  .rcl-home-sidebar-brand b,
+  .rcl-home-sidebar-brand strong {
+    font-size: 9px !important;
+    letter-spacing: .14em !important;
+  }
+
+  .rcl-home-sidebar-brand small {
+    font-size: 6px !important;
+    margin-top: 5px !important;
+  }
+
+  .rcl-home-sidebar nav {
+    margin-top: 10px !important;
+    display: grid !important;
+    gap: 1px !important;
+  }
+
+  .rcl-home-sidebar nav a {
+    min-height: 39px !important;
+    padding: 0 7px !important;
+    gap: 11px !important;
+    border-left-width: 3px !important;
+    border-radius: 0 7px 7px 0 !important;
+    font-size: 9px !important;
+    letter-spacing: .05em !important;
+  }
+
+  .rcl-home-sidebar nav a svg {
+    width: 15px !important;
+    font-size: 15px !important;
+    color: #39adff;
+  }
+
+  .rcl-home-sidebar-bottom {
+    margin-top: 8px !important;
+  }
+
+  .rcl-home-profile {
+    padding: 8px 6px !important;
+  }
+
+  .rcl-sidebar-motto {
+    min-height: 130px !important;
+    margin-top: 9px !important;
+    padding: 13px 10px !important;
+  }
+
+  .rcl-sidebar-motto b,
+  .rcl-sidebar-motto span {
+    font-size: 16px !important;
+  }
+
+  .rcl-sidebar-motto small {
+    margin-top: 18px !important;
+    font-size: 6px !important;
+  }
+
+  .rcl-home-main {
+    width: calc(100% - 212px) !important;
+    margin-left: 212px !important;
+  }
+
+  .rcl-home-topbar {
+    height: 62px !important;
+    padding: 0 13px !important;
+  }
+
+  .rcl-home-wordmark {
+    gap: 8px !important;
+  }
+
+  .rcl-home-wordmark > span {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .rcl-home-wordmark b {
+    font-size: 8px !important;
+    letter-spacing: .14em !important;
+  }
+
+  .rcl-home-tools {
+    gap: 5px !important;
+  }
+
+  .rcl-home-tools a,
+  .rcl-home-tools button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .rcl-home-hero {
+    min-height: 423px !important;
+    height: 423px !important;
+  }
+
+  .rcl-home-hero-image {
+    background-position: 67% center !important;
+    background-image:
+      linear-gradient(90deg, rgba(2,5,9,.93) 0%, rgba(2,5,9,.64) 47%, rgba(2,5,9,.14) 100%),
+      linear-gradient(180deg, rgba(2,5,9,.08), #03070d 100%),
+      url('https://images.unsplash.com/photo-1763740348881-dfd4712b65fc?auto=format&fit=crop&w=1600&q=82') !important;
+  }
+
+  .rcl-home-hero-copy {
+    max-width: 100% !important;
+    padding: 88px 22px 30px !important;
+  }
+
+  .rcl-home-kicker {
+    margin-bottom: 16px !important;
+    font-size: 8px !important;
+    letter-spacing: .18em !important;
+  }
+
+  .rcl-home-kicker:before {
+    width: 4px !important;
+    height: 15px !important;
+    margin-right: 7px !important;
+  }
+
+  .rcl-home-hero h1 {
+    font-size: clamp(52px, 9vw, 70px) !important;
+    line-height: .72 !important;
+  }
+
+  .rcl-home-tagline {
+    margin: 16px 0 !important;
+    font-size: 7px !important;
+    letter-spacing: .13em !important;
+  }
+
+  .rcl-home-cta {
+    min-width: 0 !important;
+    width: 76% !important;
+    min-height: 46px !important;
+    border-radius: 10px !important;
+    font-size: 8px !important;
+  }
+
+  .rcl-home-code {
+    right: 13px !important;
+    bottom: 13px !important;
+    font-size: 6px !important;
+  }
+
+  .rcl-home-content {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 19px 16px 82px !important;
+  }
+
+  .rcl-home-quick {
+    margin-bottom: 27px !important;
+  }
+
+  .rcl-home-section-head {
+    margin-bottom: 11px !important;
+  }
+
+  .rcl-home-section-head p {
+    margin-bottom: 4px !important;
+    font-size: 7px !important;
+    letter-spacing: .2em !important;
+  }
+
+  .rcl-home-section-head h2 {
+    font-size: 22px !important;
+  }
+
+  .rcl-home-section-head > b {
+    font-size: 31px !important;
+  }
+
+  .rcl-home-section-head > a {
+    font-size: 7px !important;
+  }
+
+  .rcl-home-quick-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    overflow: visible !important;
+  }
+
+  .rcl-home-quick-card {
+    min-width: 0 !important;
+    min-height: 100px !important;
+    padding: 9px !important;
+    gap: 7px !important;
+    border-radius: 9px !important;
+    background-position: center !important;
+    background-size: cover !important;
+  }
+
+  .rcl-home-quick-card > span {
+    width: 31px !important;
+    height: 31px !important;
+    flex: 0 0 31px !important;
+    border-radius: 9px !important;
+    font-size: 13px !important;
+  }
+
+  .rcl-home-quick-card b {
+    font-size: 7px !important;
+    letter-spacing: .06em !important;
+  }
+
+  .rcl-home-quick-card small {
+    margin-top: 4px !important;
+    font-size: 5.5px !important;
+  }
+
+  .rcl-home-quick-card > svg {
+    font-size: 11px !important;
+  }
+
+  .rcl-home-game-card,
+  .rcl-home-standings {
+    border-radius: 10px !important;
+  }
+
+  .rcl-home-game-card {
+    margin-bottom: 28px !important;
+  }
+
+  .rcl-home-game-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .rcl-home-game-grid > a {
+    padding: 13px !important;
+    border-right: 0 !important;
+  }
+
+  .rcl-home-game-grid > a:not(:first-child) {
+    display: none;
+  }
+
+  .rcl-home-game-grid small {
+    font-size: 6px !important;
+  }
+
+  .rcl-home-game-grid > a div {
+    margin-top: 13px !important;
+  }
+
+  .rcl-home-game-grid b {
+    font-size: 8px !important;
+  }
+
+  .rcl-home-game-grid strong {
+    font-size: 14px !important;
+  }
+
+  .rcl-home-game-grid span {
+    margin-top: 9px !important;
+    font-size: 5.5px !important;
+  }
+
+  .rcl-home-empty {
+    padding: 28px 12px !important;
+    font-size: 9px !important;
+  }
+
+  .rcl-home-player-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .rcl-home-player-card {
+    min-width: 0 !important;
+    min-height: 174px !important;
+    border-radius: 9px !important;
+  }
+
+  .rcl-home-player-card > small {
+    left: 9px !important;
+    bottom: 51px !important;
+    font-size: 5.5px !important;
+  }
+
+  .rcl-home-player-card h3 {
+    left: 9px !important;
+    bottom: 22px !important;
+    font-size: 16px !important;
+  }
+
+  .rcl-home-player-card > span {
+    left: 9px !important;
+    right: 9px !important;
+    bottom: 8px !important;
+    font-size: 5px !important;
+  }
+
+  .rcl-home-bottom {
+    left: 212px !important;
+    min-height: 60px !important;
+  }
+
+  .rcl-home-bottom a,
+  .rcl-home-bottom button {
+    min-height: 57px !important;
+    font-size: 6.5px !important;
+    gap: 3px !important;
+  }
+
+  .rcl-home-bottom svg {
+    font-size: 15px !important;
+  }
+
+  .rcl-home-news-grid,
+  .rcl-home-latest {
+    font-size: 8px !important;
+  }
+}
+
+/* The home drawer needs explicit nav-link styling; the previous shell only
+   styled the container, which caused unstyled white text/icon stacking. */
+.rcl-home-drawer nav a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 40px !important;
+  padding: 0 10px !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: #a9b8c8 !important;
+  text-decoration: none !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: .04em !important;
+  line-height: 1 !important;
+}
+
+.rcl-home-drawer nav a svg {
+  width: 17px !important;
+  min-width: 17px !important;
+  color: #35aaff !important;
+}
+
+.rcl-home-drawer nav a.active,
+.rcl-home-drawer nav a:hover {
+  color: #fff !important;
+  border-left-color: #ff4f16 !important;
+  background: linear-gradient(90deg, rgba(21,159,255,.16), rgba(21,159,255,.02)) !important;
+}
+
+.rcl-home-drawer nav a.active svg,
+.rcl-home-drawer nav a:hover svg {
+  color: #ff4f16 !important;
+}
+
+@media (max-width: 699px) {
+  .rcl-home-drawer {
+    width: min(620px, 88vw) !important;
+    padding: 18px 12px !important;
+  }
+
+  .rcl-home-drawer nav {
+    gap: 1px !important;
+    margin-top: 14px !important;
+  }
+
+  .rcl-home-drawer nav a {
+    min-height: 42px !important;
+    font-size: 11px !important;
+  }
+
+  .rcl-home-drawer nav a svg {
+    width: 18px !important;
+    min-width: 18px !important;
+  }
+}
