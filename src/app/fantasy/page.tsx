@@ -47,7 +47,7 @@ type PlayerStatRow = {
   turnovers: number;
 };
 type FantasyTeamActivity = Pick<FantasyTeam, 'id' | 'name' | 'created_at'>;
-type ScoringRules = Record<string, number>;
+type ScoringRules = { points: number; rebounds: number; assists: number; steals: number; blocks: number; turnovers: number; [key: string]: number };
 
 const starterPositions = ['PG', 'SG', 'SF', 'PF', 'C'];
 const rosterLimit = 8;
@@ -257,7 +257,7 @@ export default function FantasyPage() {
       setMessage('Your starting lineup is full. Move a starter to the bench first.');
       return;
     }
-    const result = await supabase.from('fantasy_rosters').update({ roster_slot: rosterSlot }).eq('fantasy_team_id', team.id).eq('player_id', playerId);
+    const result = await supabase.from('fantasy_rosters').update({ roster_slot: rosterSlot } as never).eq('fantasy_team_id', team.id).eq('player_id', playerId);
     if (!result.error) {
       setRoster(current => current.map(item => item.player_id === playerId ? { ...item, roster_slot: rosterSlot } : item));
       setMessage(null);
@@ -552,7 +552,7 @@ function RuleRow({ label, value }: { label: string; value: number }) {
 }
 
 function labelRule(key: string) {
-  return key === 'points' ? 'Points' : key === 'rebounds' ? 'Rebounds' : key === 'assists' ? 'Assists' : key === 'steals' ? 'Steals' : key === 'blocks' ? 'Blocks' : key === 'turnovers' ? 'Turnovers' : key.replaceAll('_', ' ');
+  return key === 'points' ? 'Points' : key === 'rebounds' ? 'Rebounds' : key === 'assists' ? 'Assists' : key === 'steals' ? 'Steals' : key === 'blocks' ? 'Blocks' : key === 'turnovers' ? 'Turnovers' : key.split('_').join(' ');
 }
 
 function getTeamName(teams: FantasyTeam[], id: string) {
