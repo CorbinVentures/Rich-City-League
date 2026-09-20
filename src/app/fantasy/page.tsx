@@ -11,8 +11,6 @@ import {
   FaChevronRight,
   FaCircleInfo,
   FaClock,
-  FaCrown,
-  FaGear,
   FaListOl,
   FaMagnifyingGlass,
   FaNewspaper,
