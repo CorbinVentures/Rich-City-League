@@ -1,4 +1,5 @@
 'use client';
+// CI diagnostic: verify the fantasy dashboard build before merging further changes.
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
