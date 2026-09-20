@@ -184,7 +184,7 @@ export default function FantasyPage() {
     const live = matchups.find(item => item.status === 'live');
     if (live) return live.week_number;
     const upcoming = matchups.find(item => item.status === 'scheduled');
-    return upcoming?.week_number ?? matchups.at(-1)?.week_number ?? 1;
+    return upcoming?.week_number ?? matchups[matchups.length - 1]?.week_number ?? 1;
   }, [matchups]);
 
   const nextMatchup = useMemo(() => {
