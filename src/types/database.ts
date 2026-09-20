@@ -77,6 +77,7 @@ export interface Database {
       fantasy_teams: { Row: FantasyTeam; Insert: Insert<FantasyTeam>; Update: Update<FantasyTeam> };
       fantasy_rosters: { Row: FantasyRoster; Insert: FantasyRoster; Update: Partial<FantasyRoster> };
       fantasy_scores: { Row: FantasyScore; Insert: Insert<FantasyScore>; Update: Update<FantasyScore> };
+      fantasy_matchups: { Row: FantasyMatchup; Insert: Insert<FantasyMatchup>; Update: Update<FantasyMatchup> };
       shop_categories: { Row: ShopCategory; Insert: Insert<ShopCategory>; Update: Update<ShopCategory> };
       shop_collections: { Row: ShopCollection; Insert: Insert<ShopCollection>; Update: Update<ShopCollection> };
       products: { Row: Product; Insert: Insert<Product>; Update: Update<Product> };
