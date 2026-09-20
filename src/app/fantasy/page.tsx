@@ -4,17 +4,14 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FaArrowRight,
-  FaArrowsRotate,
   FaBasketball,
   FaBolt,
   FaChartLine,
   FaChevronRight,
-  FaCircleInfo,
   FaClock,
   FaListOl,
   FaMagnifyingGlass,
   FaNewspaper,
-  FaRightLeft,
   FaTrophy,
   FaUsers,
 } from 'react-icons/fa6';
@@ -283,7 +280,7 @@ export default function FantasyPage() {
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/65">Real players. Real games. Real bragging rights. Build your squad, watch official RCL stats update, and compete with the basketball community.</p>
             <div className="mt-7 flex flex-wrap gap-3">
               {!team && <Link href={user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-[10px] font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user ? 'Join League' : 'Sign in to play'}</Link>}
-              <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-[10px] font-black uppercase tracking-widest text-white hover:border-white/30"><FaCircleInfo /> How it works</a>
+              <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-[10px] font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
             </div>
             <div className="mt-7 grid max-w-3xl grid-cols-3 gap-3">
               <Metric label="ROSTER" value={`${rosterLimit} spots`} />
@@ -296,7 +293,7 @@ export default function FantasyPage() {
 
       <Container maxWidth="xl" className="py-7">
         {!user && <Notice icon={<FaUsers />} tone="blue">Sign in as a fan to create and manage your fantasy team. The player pool, rules and official scoring remain public.</Notice>}
-        {user && profile?.role !== 'fan' && <Notice icon={<FaCircleInfo />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
+        {user && profile?.role !== 'fan' && <Notice icon={<FaBolt />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
         {message && <Notice icon={<FaBolt />} tone="orange">{message}</Notice>}
         {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. This page is ready; once the league opens a fantasy season, the draft room will activate automatically.</Notice>}
 
@@ -393,7 +390,7 @@ export default function FantasyPage() {
 
             <section id="matchups">
               <Panel>
-                <SectionHeader icon={<FaRightLeft />} title="Matchups" link="#rules" linkLabel="Rules" />
+                <SectionHeader icon={<FaUsers />} title="Matchups" link="#rules" linkLabel="Rules" />
                 <div className="mt-4 overflow-x-auto">
                   <table className="w-full min-w-[620px] text-left">
                     <thead><tr className="border-b border-white/10 text-[8px] font-black uppercase tracking-widest text-white/25"><th className="px-2 py-3">Week</th><th className="px-2 py-3">Matchup</th><th className="px-2 py-3">Score</th><th className="px-2 py-3">Status</th></tr></thead>
@@ -470,7 +467,7 @@ export default function FantasyPage() {
           </Panel>
 
           <Panel>
-            <SectionHeader icon={<FaArrowsRotate />} title="Recent Activity" />
+            <SectionHeader icon={<FaClock />} title="Recent Activity" />
             <div className="mt-4 space-y-3">
               {teamActivity.map(item => <div key={item.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"><span className="text-xs font-bold">{item.name}</span><span className="text-[9px] text-white/30">joined {formatDate(item.created_at)}</span></div>)}
               {!teamActivity.length && <Empty text="No fantasy transactions or team activity yet." />}
@@ -479,7 +476,7 @@ export default function FantasyPage() {
 
           <Panel id="rules">
             <div className="flex items-center justify-between gap-3">
-              <SectionHeader icon={<FaCircleInfo />} title="Rules & Scoring" />
+              <SectionHeader icon={<FaBolt />} title="Rules & Scoring" />
               <button onClick={() => setRulesOpen(open => !open)} className="rounded-lg bg-rcl-orange px-3 py-2 text-[8px] font-black uppercase tracking-widest text-black">{rulesOpen ? 'Hide Rules' : 'View Rules'}</button>
             </div>
             <div className="mt-4 space-y-2">
