@@ -4,6 +4,7 @@ import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDumbbell, FaFilm, FaMedal, FaPlay, FaRotate, FaTriangleExclamation } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import { LabCinematicIntro } from '@/components/LabCinematicIntro';
 
 type WorkoutDrill = {
   id: string;
@@ -111,7 +112,7 @@ export default function LabPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#05080d] pb-24 text-white">
+    <><LabCinematicIntro /><main className="min-h-screen overflow-hidden bg-[#05080d] pb-24 text-white">
       <section className="rcl-lab-hero relative overflow-hidden border-b border-rcl-orange/30 bg-[linear-gradient(90deg,rgba(3,7,13,.98)_0%,rgba(3,7,13,.84)_38%,rgba(3,7,13,.48)_68%,rgba(3,7,13,.82)_100%),linear-gradient(180deg,rgba(3,7,13,.18)_25%,rgba(3,7,13,.96)_100%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=90')] bg-cover bg-center">\n        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,79,22,.08),transparent_42%,rgba(21,159,255,.08))]" />\n        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16">
           <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr_.65fr] lg:items-center">
             <div>
@@ -195,7 +196,7 @@ export default function LabPage() {
           <LabFeature id="badges" icon={<FaMedal />} title="Badge Lab" body="Turn completed work into visible progression and future RCL badges." />
         </section>
       </Container>
-    </main>
+    </main></>
   );
 }
 
