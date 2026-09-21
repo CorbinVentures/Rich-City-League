@@ -1,0 +1,16 @@
+'use client';
+import { useState } from 'react';
+import { FaLink, FaXmark } from 'react-icons/fa6';
+
+export function SocialLinkField({value,onChange}:{value:string;onChange:(value:string)=>void}){
+ const [open,setOpen]=useState(false);
+ const normalize=(raw:string)=>{const iframe=raw.match(/<iframe[^>]+src=["']([^"']+)["']/i)?.[1];const candidate=(iframe||raw).trim();try{const u=new URL(candidate.startsWith('//')?'https:'+candidate:candidate);return ['http:','https:'].includes(u.protocol)?u.toString():''}catch{return ''}};
+ if(!open&&!value)return <button type="button" onClick={()=>setOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/55 hover:border-rcl-orange/30 hover:text-white"><FaLink/> Link / Embed</button>;
+ return <div className="mt-3 flex w-full items-center gap-2 rounded-xl border border-rcl-orange/20 bg-rcl-orange/5 p-2"><FaLink className="ml-2 text-rcl-orange"/><input autoFocus value={value} onChange={e=>onChange(normalize(e.target.value)||e.target.value)} onBlur={e=>{const n=normalize(e.target.value);if(n)onChange(n)}} placeholder="Paste a link or video embed code…" className="min-w-0 flex-1 bg-transparent px-2 py-1 text-xs outline-none"/><button type="button" onClick={()=>{onChange('');setOpen(false)}} className="p-2 text-white/40"><FaXmark/></button></div>;
+}
+export function RichPostBody({body}:{body:string}){
+ const regex=/(https?:\/\/[^\s<]+)/g,parts=body.split(regex),urls=body.match(regex)||[];
+ const embed=(value:string)=>{try{const u=new URL(value),h=u.hostname.replace(/^www\./,'').toLowerCase();if(h==='youtu.be'){const id=u.pathname.split('/').filter(Boolean)[0];return id?['YouTube','https://www.youtube.com/embed/'+id]:null}if(h.endsWith('youtube.com')){const id=u.searchParams.get('v')||u.pathname.match(/\/(?:shorts|embed)\/([^/?]+)/)?.[1];return id?['YouTube','https://www.youtube.com/embed/'+id]:null}if(h.endsWith('vimeo.com')){const id=u.pathname.split('/').filter(Boolean).find(x=>/^\d+$/.test(x));return id?['Vimeo','https://player.vimeo.com/video/'+id]:null}return null}catch{return null}};
+ const embeds=urls.map(embed).filter(Boolean) as string[][];
+ return <div className="mt-4"><p className="whitespace-pre-wrap text-sm leading-6 text-white/80">{parts.map((p,i)=>/^https?:\/\//.test(p)?<a key={i} href={p} target="_blank" rel="noopener noreferrer nofollow" className="break-all font-bold text-rcl-orange underline decoration-rcl-orange/30 underline-offset-2">{p}</a>:p)}</p>{embeds.map(([provider,src],i)=><div key={src+i} className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black"><div className="aspect-video"><iframe src={src} title={provider+' video'} className="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin"/></div><p className="border-t border-white/10 px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white/30">{provider} · plays on RCL Social</p></div>)}</div>;
+}
