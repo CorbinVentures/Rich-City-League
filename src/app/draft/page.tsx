@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
+import { DraftNightIntro } from '@/components/DraftNightIntro';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
@@ -215,7 +216,7 @@ export default function DraftNightPage() {
   if (loading) return <main className="min-h-screen"><Container maxWidth="xl" className="py-20"><div className="h-96 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
 
   return (
-    <main className="rcl-draft-platform relative min-h-screen overflow-hidden pb-24"><ContentAssetBackground assetKey="draft.cover" opacity={0.12} /><div className="relative z-10">
+    <main className="rcl-draft-platform relative min-h-screen overflow-hidden pb-24"><DraftNightIntro /><ContentAssetBackground assetKey="draft.cover" opacity={0.12} /><div className="relative z-10">
       <section className="rcl-draft-hero relative overflow-hidden">
         <div className="rcl-draft-hero-grid" aria-hidden="true" />
         <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16 lg:py-20">
