@@ -39,7 +39,8 @@ grant select, insert, update on table public.registrations to authenticated;
 grant select, update on table public.rosters to authenticated;
 grant select on table public.team_seasons, public.team_coaches to authenticated;
 grant select, update on table public.games to authenticated;
-grant update on table public.seasons, public.profiles to authenticated;
+grant update on table public.seasons to authenticated;
+grant select, update on table public.profiles to authenticated;
 
 drop policy "users submit registrations" on public.registrations;
 create policy "users submit registrations"
