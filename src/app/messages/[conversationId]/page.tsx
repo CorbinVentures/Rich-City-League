@@ -18,6 +18,7 @@ export default function ConversationPage() {
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [peer, setPeer] = useState<{id:string;display_name:string|null;username:string|null;avatar_url:string|null}|null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,16 @@ export default function ConversationPage() {
     if (conversationResult.error || messageResult.error || !conversationResult.data) {
       setError(true);
     } else {
-      setConversation(conversationResult.data as Conversation);
+      const loadedConversation = conversationResult.data as Conversation;
+      setConversation(loadedConversation);
+      if (loadedConversation.conversation_type === 'direct') {
+        const membershipResult = await supabase.from('conversation_members').select('profile_id').eq('conversation_id', conversationId).neq('profile_id', user.id).limit(1).maybeSingle();
+        const peerId = (membershipResult.data as {profile_id:string}|null)?.profile_id;
+        if (peerId) {
+          const profileResult = await supabase.from('profiles').select('id,display_name,username,avatar_url').eq('id', peerId).maybeSingle();
+          setPeer(profileResult.data as {id:string;display_name:string|null;username:string|null;avatar_url:string|null}|null);
+        }
+      }
       const next = ((messageResult.data ?? []) as Message[]).reverse();
       setMessages(next);
       setHasOlder(next.length === PAGE_SIZE);
@@ -104,7 +114,7 @@ export default function ConversationPage() {
         <Link href="/messages" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-rcl-gold"><FiArrowLeft /> Back to RCL Direct</Link>
         {loading ? <div className="mt-5 h-[70vh] animate-pulse rounded-2xl border border-white/10 bg-white/[.03]" /> : error && !conversation ? <div className="mt-8 rounded-2xl border border-white/10 p-12 text-center"><p className="font-display text-xl font-bold uppercase">Messages are having a moment.</p><p className="mt-2 text-sm text-gray-500">This conversation is unavailable or you don&apos;t have access.</p><Link href="/messages" className="mt-5 inline-block text-xs font-black uppercase tracking-widest text-rcl-gold">Return to inbox</Link></div> : conversation && <div className="mt-5 grid min-h-[calc(100vh-12rem)] overflow-hidden rounded-2xl border border-white/10 bg-white/[.025] lg:grid-cols-[minmax(0,1fr)_260px]">
           <section className="flex min-h-[calc(100vh-12rem)] flex-col">
-            <header className="flex items-center gap-3 border-b border-white/10 px-4 py-4 sm:px-6"><div className="grid h-11 w-11 place-items-center rounded-full bg-rcl-navy text-sm font-black text-rcl-gold">{(conversation.title ?? 'RCL').slice(0, 2).toUpperCase()}</div><div className="min-w-0 flex-1"><p className="truncate font-display text-lg font-bold">{conversation.title ?? 'RCL conversation'}</p><p className="text-[10px] font-black uppercase tracking-widest text-rcl-gold">{conversation.conversation_type}</p></div><button type="button" aria-label="Conversation options" className="rounded p-2 text-gray-500 hover:text-white"><FiMoreHorizontal /></button></header>
+            <header className="flex items-center gap-3 border-b border-white/10 px-4 py-4 sm:px-6"><div className="grid h-11 w-11 place-items-center rounded-full bg-rcl-navy text-sm font-black text-rcl-gold">{peer?.avatar_url ? <img src={peer.avatar_url} alt="" className="h-full w-full rounded-full object-cover" /> : ((peer?.display_name ?? peer?.username ?? conversation.title ?? 'RCL').slice(0, 2).toUpperCase())}</div><div className="min-w-0 flex-1"><p className="truncate font-display text-lg font-bold">{conversation.conversation_type === 'direct' ? (peer?.display_name ?? peer?.username ?? 'RCL member') : (conversation.title ?? 'RCL conversation')}</p><p className="text-[10px] font-black uppercase tracking-widest text-rcl-gold">{conversation.conversation_type}</p></div><button type="button" aria-label="Conversation options" className="rounded p-2 text-gray-500 hover:text-white"><FiMoreHorizontal /></button></header>
             <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">{hasOlder && <button type="button" onClick={() => void loadOlder()} disabled={loadingOlder} className="mx-auto mb-5 block text-[10px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-50">{loadingOlder ? 'Loading...' : 'Load older messages'}</button>}{messages.length === 0 && <div className="grid h-full place-items-center text-center"><div><p className="font-display text-2xl font-black uppercase">Your court. Your community.</p><p className="mt-2 text-sm text-gray-500">Send the first message and start the conversation.</p></div></div>}{messages.map((message) => <div key={message.id} className={`mb-4 flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${message.sender_id === user?.id ? 'rounded-br-sm bg-rcl-gold text-black' : 'rounded-bl-sm bg-white/10 text-gray-100'}`}><p className={message.deleted_at ? 'italic opacity-50' : ''}>{message.deleted_at ? 'Message deleted' : message.body}</p><time className="mt-1 block text-[10px] opacity-60" dateTime={message.created_at}>{new Date(message.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}{message.sender_id === user?.id ? ' · SENT' : ''}</time></div></div>)}<div ref={bottomRef} /></div>
             <form onSubmit={send} className="flex gap-2 border-t border-white/10 bg-black/20 p-3 sm:p-4"><label className="sr-only" htmlFor="message-body">Write a message</label><input id="message-body" value={body} onChange={(event) => setBody(event.target.value)} maxLength={4000} placeholder="Write a message..." autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[.05] px-4 py-3 text-sm outline-none placeholder:text-gray-600 focus:border-rcl-gold" /><button type="submit" disabled={sending || !body.trim()} aria-label="Send message" className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rcl-gold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-40"><FiSend /></button></form>
           </section>
