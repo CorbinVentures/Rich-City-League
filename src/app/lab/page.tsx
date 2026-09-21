@@ -17,6 +17,8 @@ type WorkoutDrill = {
   focus: string[];
   coachingPoints: string[];
   commonMistakes: string[];
+  instructions: string[];
+  demonstrationType: 'animation' | 'video';
   skill: string;
   videoId: string;
 };
