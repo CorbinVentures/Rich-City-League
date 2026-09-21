@@ -41,8 +41,14 @@ begin
     insert into public.seasons(league_id,name,slug,start_date,end_date,status,leagueapps_program_id)
     select target_league,program_name,
       'la-'||program_id||'-'||left(regexp_replace(lower(program_name),'[^a-z0-9]+','-','g'),40),
-      (to_timestamp(start_ms/1000) at time zone 'UTC')::date,
-      (to_timestamp(end_ms/1000) at time zone 'UTC')::date,
+      least(
+        (to_timestamp(start_ms/1000) at time zone 'UTC')::date,
+        (to_timestamp(end_ms/1000) at time zone 'UTC')::date
+      ),
+      greatest(
+        (to_timestamp(start_ms/1000) at time zone 'UTC')::date,
+        (to_timestamp(end_ms/1000) at time zone 'UTC')::date
+      ),
       'draft',program_id
     from programs
     on conflict (leagueapps_program_id) where leagueapps_program_id is not null do update set
