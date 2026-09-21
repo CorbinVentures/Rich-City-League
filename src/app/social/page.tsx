@@ -176,6 +176,7 @@ export default function SocialPage() {
       <div className="min-w-0">{tab === 'feed' ? <>
         <section className="mb-4 border-b border-white/10 pb-4">
           <div className="flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {user && <Link href={`/social/profile/${user.id}`} className="w-[72px] shrink-0 text-center" aria-label="View my public profile"><span className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-rcl-blue bg-[#101722]"><Avatar author={currentProfile ?? { display_name: 'RCL Member', username: null }} /></span><span className="mt-2 block truncate text-[9px] font-bold text-white/70">My profile</span></Link>}
             {user ? <form onSubmit={createStory} className="w-[72px] shrink-0 text-center">
               <button type="button" onClick={() => storyInputRef.current?.click()} className="relative mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-dashed border-rcl-orange bg-white/[.04]" aria-label="Create story">
                 {storyPreview ? (storyFile?.type.startsWith('video/') ? <video src={storyPreview} muted className="h-full w-full object-cover" /> : <img src={storyPreview} alt="Story preview" className="h-full w-full object-cover" />) : <Avatar author={currentProfile ?? { display_name: 'RCL Member', username: null }} />}
