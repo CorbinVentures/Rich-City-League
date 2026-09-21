@@ -98,12 +98,10 @@ export default function MessagesPage() {
   const startConversation = async (person: ProfileResult) => {
     if (!supabase || !user) return;
     setStarting(person.id);
-    const conversation = await supabase.from('conversations').insert({ created_by: user.id, title: person.display_name ?? person.username ?? 'RCL member', conversation_type: 'direct' } as never).select('id').single();
-    const conversationData = conversation.data as unknown as { id: string } | null;
-    if (!conversation.error && conversationData) {
-      await supabase.from('conversation_members').insert([{ conversation_id: conversationData.id, profile_id: user.id }, { conversation_id: conversationData.id, profile_id: person.id }] as never);
-      window.location.href = `/messages/${conversationData.id}`;
-    }
+    const { data, error: conversationError } = await supabase.rpc('start_direct_conversation', { target_profile_id: person.id } as never);
+    const conversationId = data as string | null;
+    if (!conversationError && conversationId) window.location.href = `/messages/${conversationId}`;
+    else setError(true);
     setStarting(null);
   };
 
