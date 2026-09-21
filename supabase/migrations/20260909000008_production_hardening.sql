@@ -28,9 +28,10 @@ create policy "authorized users view player records"
 
 grant select on public.public_players to anon, authenticated;
 
--- RLS policies do not grant table privileges. Explicitly allow authenticated
--- applicants to insert registrations; the policy below still enforces
--- ownership, open-season, and division/season integrity.
+-- Explicitly define the least-privilege Data API surface used by registration.
+-- RLS still determines which rows are visible/writable.
+grant select on table public.seasons, public.divisions to anon, authenticated;
+grant select on table public.registrations to authenticated;
 grant insert on table public.registrations to authenticated;
 
 drop policy "users submit registrations" on public.registrations;
