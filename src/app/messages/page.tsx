@@ -46,8 +46,21 @@ export default function MessagesPage() {
     const conversations = await supabase.from('conversations').select('id,title,conversation_type,updated_at').in('id', ids).order('updated_at', { ascending: false }).limit(50);
     if (conversations.error) { setError(true); setLoading(false); return; }
     const rows = (conversations.data ?? []) as { id: string; title: string | null; conversation_type: string; updated_at: string }[];
+    const directIds = rows.filter((row) => row.conversation_type === 'direct').map((row) => row.id);
+    const peerByConversation = new Map<string, { display_name: string | null; username: string | null; avatar_url: string | null }>();
+    if (directIds.length) {
+      const peerMemberships = await supabase.from('conversation_members').select('conversation_id,profile_id').in('conversation_id', directIds).neq('profile_id', user.id);
+      const peerRows = (peerMemberships.data ?? []) as { conversation_id: string; profile_id: string }[];
+      const peerIds = [...new Set(peerRows.map((row) => row.profile_id))];
+      if (peerIds.length) {
+        const peerProfiles = await supabase.from('profiles').select('id,display_name,username,avatar_url').in('id', peerIds);
+        const profileMap = new Map(((peerProfiles.data ?? []) as { id:string; display_name:string|null; username:string|null; avatar_url:string|null }[]).map((profile) => [profile.id, profile]));
+        peerRows.forEach((row) => { const peer = profileMap.get(row.profile_id); if (peer) peerByConversation.set(row.conversation_id, peer); });
+      }
+    }
     const next = await Promise.all(rows.map(async (conversation) => {
       const membershipRow = memberships.find((row) => row.conversation_id === conversation.id);
+      const peer = peerByConversation.get(conversation.id);
       const latest = await supabase.from('messages').select('body,created_at,sender_id').eq('conversation_id', conversation.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
       const latestData = latest.data as { body: string; created_at: string } | null;
       const unread = membershipRow?.last_read_at
@@ -55,12 +68,12 @@ export default function MessagesPage() {
         : await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('conversation_id', conversation.id).neq('sender_id', user.id);
       return {
         id: conversation.id,
-        title: conversation.title ?? 'RCL conversation',
+        title: conversation.conversation_type === 'direct' ? (peer?.display_name ?? peer?.username ?? 'RCL member') : (conversation.title ?? 'RCL conversation'),
         type: labelType(conversation.conversation_type),
         preview: latestData?.body ?? '',
         updatedAt: latestData?.created_at ?? conversation.updated_at,
         unread: unread.count ?? 0,
-        avatarUrl: null,
+        avatarUrl: conversation.conversation_type === 'direct' ? (peer?.avatar_url ?? null) : null,
       };
     }));
     setItems(next.sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)));
