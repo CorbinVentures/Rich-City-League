@@ -161,6 +161,12 @@ export default function AdminDashboardPage() {
     } as never);
   };
 
+  const handleVipToggle = async (targetUserId: string, enabled: boolean) => {
+    if (!supabase) return;
+    const { error } = await (supabase.from('profiles') as any).update({ is_vip: enabled, vip_label: 'VIP' }).eq('id', targetUserId);
+    if (!error) { await postAuditLog(enabled ? 'GRANT_VIP' : 'REVOKE_VIP', `${enabled ? 'Granted' : 'Revoked'} VIP verification for user ID ${targetUserId}`); loadDashboardData(); }
+  };
+
   // Manage Role Updates
   const handleUpdateRole = async (targetUserId: string, newRole: string) => {
     if (!supabase) return;
@@ -578,7 +584,7 @@ export default function AdminDashboardPage() {
                         <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
                           <th className="pb-3">USER NAME</th>
                           <th className="pb-3">EMAIL</th>
-                          <th className="pb-3">CURRENT ROLE</th>
+                          <th className="pb-3">CURRENT ROLE</th><th className="pb-3">VIP STATUS</th>
                           <th className="pb-3 text-right">ASSIGN ROLE</th>
                         </tr>
                       </thead>
@@ -594,7 +600,7 @@ export default function AdminDashboardPage() {
                                 {usr.role || 'user'}
                               </span>
                             </td>
-                            <td className="py-4 text-right">
+                            <td className="py-4"><button type="button" onClick={() => void handleVipToggle(usr.id, !usr.is_vip)} className={`rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${usr.is_vip ? 'border-amber-300/40 bg-amber-400/15 text-amber-300' : 'border-white/10 text-gray-500 hover:text-white'}`}>{usr.is_vip ? '✓ VIP VERIFIED' : 'GRANT VIP'}</button></td><td className="py-4 text-right">
                               <select
                                 value={usr.role || 'user'}
                                 onChange={(e) => handleUpdateRole(usr.id, e.target.value)}
