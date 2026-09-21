@@ -2,10 +2,9 @@
 
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDumbbell, FaFilm, FaMedal, FaPlay, FaRotate, FaTriangleExclamation } from 'react-icons/fa6';
+import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaDumbbell, FaFilm, FaMedal, FaPlay } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
-import { MotionDemo } from '@/components/MotionDemo';
 import './lab-redesign.css';
 
 type WorkoutDrill = {
