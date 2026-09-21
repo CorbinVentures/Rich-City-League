@@ -31,8 +31,7 @@ grant select on public.public_players to anon, authenticated;
 -- Explicitly define the least-privilege Data API surface used by registration.
 -- RLS still determines which rows are visible/writable.
 grant select on table public.seasons, public.divisions to anon, authenticated;
-grant select on table public.registrations to authenticated;
-grant insert on table public.registrations to authenticated;
+grant select, insert, update on table public.registrations to authenticated;
 
 drop policy "users submit registrations" on public.registrations;
 create policy "users submit registrations"
