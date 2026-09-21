@@ -40,9 +40,13 @@ export default function ProfilePage() {
     const profileResult = await writeClient.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null, location: location.trim() || null, avatar_url: avatarUrl.trim() || null, cover_url: coverUrl.trim() || null, profile_visibility: visibility }).eq('id', user.id);
     if (profileResult.error) { setError('Unable to save your profile details.'); return; }
     const requestedRole = role === 'official' ? 'coach' : role;
-    const roleRequest: Partial<Database['public']['Tables']['profile_roles']['Insert']> = { profile_id: user.id, role: requestedRole, status: role === 'fan' ? 'active' : 'pending', verified_at: null, verified_by: null };
-    const roleResult = await writeClient.from('profile_roles').upsert(roleRequest);
-    if (roleResult.error) { setError('Unable to submit your role request.'); return; }
+    const existingRole = await writeClient.from('profile_roles').select('role,status').eq('profile_id', user.id).eq('role', requestedRole).maybeSingle();
+    if (existingRole.error) { setError(existingRole.error.message || 'Unable to verify your role.'); return; }
+    if (!existingRole.data) {
+      const roleRequest: Partial<Database['public']['Tables']['profile_roles']['Insert']> = { profile_id: user.id, role: requestedRole, status: 'pending', verified_at: null, verified_by: null };
+      const roleResult = await writeClient.from('profile_roles').insert(roleRequest);
+      if (roleResult.error) { setError(roleResult.error.message || 'Unable to submit your role request.'); return; }
+    }
     if (role === 'fan') { const existingFan = await writeClient.from('fan_profiles').select('profile_id').eq('profile_id', user.id).maybeSingle(); if (existingFan.error) { setError(existingFan.error.message || 'Unable to verify your fan profile.'); return; } if (!existingFan.data) { const fanResult = await writeClient.from('fan_profiles').insert({ profile_id: user.id, favorite_team_id: null, fan_level: 1, games_attended: 0 }); if (fanResult.error) { setError(fanResult.error.message || 'Unable to create your fan profile.'); return; } } }
     setSaved(true);
   };
