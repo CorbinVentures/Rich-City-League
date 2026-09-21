@@ -268,7 +268,7 @@ export default function FantasyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#05080d] pb-24 text-white">
+    <main className="min-h-screen bg-[#05080d] pb-24 text-white"><FantasyCinematicIntro />
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-[#07111e]">
         <ContentAssetBackground assetKey="draft.cover" opacity={0.34} className="object-[center_30%]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,7,12,.98)_0%,rgba(3,7,12,.83)_45%,rgba(3,7,12,.3)_100%)]" />
