@@ -6,6 +6,7 @@ import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDum
 import { Container } from '@/components/Container';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
 import { MotionDemo } from '@/components/MotionDemo';
+import './lab-redesign.css';
 
 type WorkoutDrill = {
   id: string;
