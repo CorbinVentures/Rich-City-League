@@ -64,10 +64,32 @@ function libraryDrill(drill: typeof RCL_DRILL_LIBRARY[number], index: number): W
   };
 }
 
+function shuffled<T>(items: T[]) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function compatibleDrills(input: WorkoutRequest) {
+  const allowed = getDrillsForSkill(input.skill).filter((drill) => {
+    const difficultyRank = levels.indexOf(input.level);
+    const drillRank = levels.indexOf(drill.difficulty as WorkoutRequest['level']);
+    const levelOk = drillRank < 0 || drillRank <= Math.min(levels.length - 1, difficultyRank + 1);
+    const equipmentOk = drill.equipment.every((item) => item === 'None' || input.equipment.includes(item));
+    return levelOk && equipmentOk;
+  });
+  return allowed.length >= 2 ? allowed : getDrillsForSkill(input.skill);
+}
+
 function fallbackWorkout(input: WorkoutRequest): Workout {
-  const drills = getDrillsForSkill(input.skill).slice(0, 3).map(libraryDrill);
+  const pool = compatibleDrills(input);
+  const drillCount = input.length <= 15 ? 2 : input.length <= 45 ? 3 : input.length <= 60 ? 4 : 5;
+  const drills = shuffled(pool).slice(0, Math.min(drillCount, pool.length)).map(libraryDrill);
   return {
-    title: `${input.skill} consistency session`,
+    title: `${input.skill} ${['development','game-speed','skill-build','performance'][Math.floor(Math.random()*4)]} session`,
     skill: input.skill,
     minutes: input.length,
     difficulty: input.level,
@@ -90,7 +112,8 @@ function normalizeWorkout(value: unknown, input: WorkoutRequest): Workout | null
     if (!item || typeof item !== 'object') return null;
     const raw = item as Record<string, unknown>;
     const slug = typeof raw.videoSlug === 'string' ? raw.videoSlug : typeof raw.slug === 'string' ? raw.slug : '';
-    const libraryEntry = getDrillsForSkill(input.skill).find((drill) => drill.slug === slug) ?? getDrillsForSkill(input.skill)[index % getDrillsForSkill(input.skill).length];
+    const pool = compatibleDrills(input);
+    const libraryEntry = pool.find((drill) => drill.slug === slug) ?? pool[index % pool.length];
     if (!libraryEntry) return null;
     const base = libraryDrill(libraryEntry, index);
     return {
@@ -125,10 +148,10 @@ async function readProviderResponse(input: WorkoutRequest, apiKey: string) {
       headers: { Authorization: ['Bearer', apiKey].join(' '), 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
-        temperature: 0.5,
+        temperature: 0.9,
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: 'You are an expert basketball development coach. Return JSON with title, goal, warmup string[], drills object[], finisher, and coachingNotes string[]. Each drill must reference one of these known videoSlug values and never include a URL: ' + getDrillsForSkill(input.skill).map((drill) => drill.slug).join(', ') },
+          { role: 'system', content: 'You are an expert basketball development coach. Return JSON with title, goal, warmup string[], drills object[], finisher, and coachingNotes string[]. Every drill MUST belong to the requested skill category. Vary drill selection, order, prescriptions, warmup, finisher, title, and coaching emphasis between requests. Respect the requested level, available equipment, environment, duration, and goal. Do not substitute drills from another category. Each drill must reference one of these allowed videoSlug values and never include a URL: ' + compatibleDrills(input).map((drill) => drill.slug).join(', ') },
           { role: 'user', content: JSON.stringify(input) },
         ],
       }),
