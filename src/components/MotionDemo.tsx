@@ -16,7 +16,7 @@ export function MotionDemo({title,skill,prescription,coachingPoints,commonMistak
   <div className="motion-stage">
    <div className="motion-floor"/><div className="motion-hoop"><i/><b/></div><div className="motion-arc"/>
    <div className={'motion-model '+view+(playing?' is-playing':'')}>
-    <span className="motion-head"/><span className="motion-body"/><i className="arm left"/><i className="arm right"/><i className="leg left"/><i className="leg right"/><em className="motion-ball"/>
+    <div className="athlete-shadow"/><span className="athlete-neck"/><span className="motion-head"><i className="ear"/><i className="face"/><i className="hair"/></span><span className="motion-body"><b className="jersey">RCL<small>11</small></b></span><i className="upper-arm left"/><i className="forearm left"/><i className="upper-arm right"/><i className="forearm right"/><i className="thigh left"/><i className="shin left"/><i className="thigh right"/><i className="shin right"/><i className="shoe left"/><i className="shoe right"/><em className="motion-ball"/>
    </div>
    <div className="callout elbow"><b>ELBOW ALIGNMENT</b><span>Under the ball</span></div>
    <div className="callout balance"><b>BALANCE</b><span>Stay centered</span></div>
