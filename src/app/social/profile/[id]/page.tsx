@@ -10,7 +10,7 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
   const { id } = await params;
   const client = getPublicClient();
   if (!client) notFound();
-  const { data: profile } = await client.from('profiles').select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,created_at').eq('id', id).eq('is_active', true).maybeSingle() as any;
+  const { data: profile } = await client.from('profiles').select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,created_at,is_vip,vip_label').eq('id', id).eq('is_active', true).maybeSingle() as any;
   if (!profile || profile.profile_visibility === 'private') notFound();
   const [{ data: posts }, { count: followers }, { count: following }] = await Promise.all([
     client.from('posts').select('id,author_id,body,media_urls,created_at').or(`author_id.eq.${id},target_profile_id.eq.${id}`).eq('status', 'published').order('created_at', { ascending: false }).limit(40) as any,
@@ -29,7 +29,7 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
         <div className="h-44 overflow-hidden bg-gradient-to-br from-rcl-navy to-black sm:h-60">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
         <div className="px-5 pb-6">
           <div className="-mt-14 flex items-end justify-between gap-4"><div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-rcl-orange text-4xl font-black text-black">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0,1).toUpperCase()}</div><Link href="/social" className="mb-2 rounded-xl border border-white/15 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-white/70">RCL Social</Link></div>
-          <h1 className="mt-4 font-display text-3xl font-black uppercase">{name}</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-2"><h1 className="font-display text-3xl font-black uppercase">{name}</h1>{profile.is_vip&&<span title="RCL VIP verified member" className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-gradient-to-r from-amber-400/20 to-orange-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-[.14em] text-amber-300"><span className="grid h-4 w-4 place-items-center rounded-full bg-amber-300 text-[8px] text-black">✓</span>{profile.vip_label||'VIP'}</span>}</div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 text-sm leading-6 text-white/65">{profile.bio}</p>}<PublicProfileActions profileId={profile.id} profileName={name} />
