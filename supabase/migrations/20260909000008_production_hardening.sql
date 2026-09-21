@@ -33,6 +33,14 @@ grant select on public.public_players to anon, authenticated;
 grant select on table public.seasons, public.divisions to anon, authenticated;
 grant select, insert, update on table public.registrations to authenticated;
 
+-- Coach and staff operations are also mediated by RLS. Grant the SQL
+-- operations those policies are designed to authorize so policy evaluation,
+-- rather than a missing table ACL, is the security boundary.
+grant select, update on table public.rosters to authenticated;
+grant select on table public.team_seasons, public.team_coaches to authenticated;
+grant select, update on table public.games to authenticated;
+grant update on table public.seasons, public.profiles to authenticated;
+
 drop policy "users submit registrations" on public.registrations;
 create policy "users submit registrations"
   on public.registrations
