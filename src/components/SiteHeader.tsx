@@ -23,7 +23,7 @@ export function SiteHeader(){
     return()=>{supabase.removeChannel(channel);};
   },[user,supabase]);
 
-  if(pathname==='/'||pathname==='/social'||pathname.startsWith('/social/'))return null;
+  if(pathname==='/'||pathname==='/social'||pathname.startsWith('/social/')||pathname==='/profile'||pathname.startsWith('/profile/'))return null;
 
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
   const links=isAdmin?[...RCL_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_NAV_ITEMS;
