@@ -131,7 +131,7 @@ function normalizeWorkout(value: unknown, input: WorkoutRequest): Workout | null
       commonMistakes: base.commonMistakes,
       demonstrationType: 'animation' as const,
     };
-  }).filter((item): item is WorkoutDrill => item !== null).slice(0, 8) : [];
+  }).filter((item) => item !== null).slice(0, 8) : [];
   const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
   if (!title || !drills.length) return null;
   return {
