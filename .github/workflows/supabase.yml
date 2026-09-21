@@ -16,20 +16,37 @@ jobs:
   validate:
     name: Validate migrations
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          # Pin the CLI so CI is reproducible and does not depend on GitHub's
-          # release API at job startup.
           version: 2.115.0
+      - name: Verify Docker runtime
+        run: |
+          docker version
+          docker info
+          docker system df
       - name: Start local database for validation
-        run: supabase start
+        run: |
+          set -o pipefail
+          supabase start --debug 2>&1 | tee /tmp/supabase-start.log
       - name: Validate complete migration sequence
         run: supabase db reset --local
       - name: Validate migration files
         run: supabase db lint --local
       - name: Run database authorization tests
         run: supabase test db --local
+      - name: Capture Supabase diagnostics
+        if: failure()
+        run: |
+          echo "=== Supabase status ==="
+          supabase status || true
+          echo "=== Supabase start log ==="
+          cat /tmp/supabase-start.log || true
+          echo "=== Docker containers ==="
+          docker ps -a || true
+          echo "=== Docker disk usage ==="
+          docker system df || true

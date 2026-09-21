@@ -168,7 +168,7 @@ export function useAuth() {
     };
   }, [supabase]);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, metadata?: Record<string, string>) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     try {
       setError(null);
@@ -176,7 +176,7 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${getAuthSiteUrl()}/auth/sign-in` },
+        options: { emailRedirectTo: `${getAuthSiteUrl()}/auth/sign-in`, data: metadata },
       });
       if (error) throw error;
       setUser(data.user);
