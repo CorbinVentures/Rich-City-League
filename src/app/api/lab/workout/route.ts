@@ -18,6 +18,8 @@ export type WorkoutDrill = {
   focus: string[];
   coachingPoints: string[];
   commonMistakes: string[];
+  instructions: string[];
+  demonstrationType: 'animation' | 'video';
   skill: string;
   difficulty: string;
   equipment: string[];
@@ -56,6 +58,8 @@ function libraryDrill(drill: typeof RCL_DRILL_LIBRARY[number], index: number): W
     focus: drill.tags.slice(0, 3),
     coachingPoints: drill.coachingPoints,
     commonMistakes: drill.commonMistakes,
+    instructions: drill.instructions,
+    demonstrationType: 'animation',
     skill: drill.skill,
     difficulty: drill.difficulty,
     equipment: drill.equipment,
@@ -122,6 +126,10 @@ function normalizeWorkout(value: unknown, input: WorkoutRequest): Workout | null
       description: typeof raw.description === 'string' && raw.description.trim() ? raw.description.trim() : base.description,
       prescription: typeof raw.prescription === 'string' && raw.prescription.trim() ? raw.prescription.trim() : base.prescription,
       focus: asStringArray(raw.focus).length ? asStringArray(raw.focus) : base.focus,
+      instructions: base.instructions,
+      coachingPoints: base.coachingPoints,
+      commonMistakes: base.commonMistakes,
+      demonstrationType: 'animation' as const,
     };
   }).filter((item): item is WorkoutDrill => item !== null).slice(0, 8) : [];
   const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
