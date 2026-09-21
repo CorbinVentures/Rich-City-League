@@ -112,28 +112,23 @@ export default function LabPage() {
   }
 
   return (
-    <><LabCinematicIntro /><main className="min-h-screen overflow-hidden bg-[#05080d] pb-24 text-white">
-      <section className="rcl-lab-hero relative overflow-hidden border-b border-rcl-orange/30 bg-[linear-gradient(90deg,rgba(3,7,13,.98)_0%,rgba(3,7,13,.84)_38%,rgba(3,7,13,.48)_68%,rgba(3,7,13,.82)_100%),linear-gradient(180deg,rgba(3,7,13,.18)_25%,rgba(3,7,13,.96)_100%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=90')] bg-cover bg-center">\n        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,79,22,.08),transparent_42%,rgba(21,159,255,.08))]" />\n        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16">
-          <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr_.65fr] lg:items-center">
-            <div>
-              <p className="flex items-center gap-2 text-[10px] font-black tracking-[.3em] text-rcl-orange"><FaBolt /> RCL PERFORMANCE LAB</p>
-              <h1 className="mt-5 font-display text-6xl font-black uppercase leading-[.78] sm:text-8xl">The<br /><span className="text-rcl-blue">Lab.</span></h1>
-              <p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Train. Create. Analyze. Evolve.<br />Richmond builds different.</p>
-              <div className="mt-8 h-px w-28 bg-rcl-orange" />
+    <><LabCinematicIntro /><main className="relative min-h-screen overflow-hidden bg-[#03070c] pb-24 text-white"><div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0"><div className="absolute inset-0 bg-[linear-gradient(rgba(21,159,218,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,218,.035)_1px,transparent_1px)] bg-[size:44px_44px]" /><div className="absolute -right-[28%] top-[18%] h-[68vh] w-[105vw] rotate-[-8deg] border-[3px] border-white/[.045] bg-[repeating-linear-gradient(90deg,rgba(83,44,18,.14)_0_42px,rgba(43,24,13,.16)_43px_84px)]"><div className="absolute left-[31%] top-0 h-[48%] w-[38%] border-x-[3px] border-b-[3px] border-white/[.07]" /><div className="absolute left-[38%] top-[33%] h-[34%] w-[24%] rounded-full border-[3px] border-white/[.07]" /><div className="absolute bottom-[4%] left-[6%] h-[78%] w-[88%] rounded-[0_0_50%_50%] border-x-[3px] border-b-[3px] border-white/[.06]" /></div><div className="absolute right-[5%] top-[14%] h-[42vh] w-[42vh] rounded-full bg-rcl-blue/[.055] blur-3xl" /><div className="absolute -left-[8%] bottom-[8%] h-[38vh] w-[38vh] rounded-full bg-rcl-orange/[.045] blur-3xl" /><div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,12,.12),rgba(3,7,12,.72)_65%,#03070c)]" /></div>
+      <section className="rcl-lab-hero relative z-10 overflow-hidden border-b border-rcl-orange/25 bg-[#050b12]/80">
+        <div aria-hidden="true" className="absolute inset-0">
+          <div className="absolute -right-24 -top-24 h-[430px] w-[430px] rounded-full border border-rcl-blue/10" />
+          <div className="absolute -right-6 top-12 h-[310px] w-[310px] rounded-full border border-rcl-blue/10" />
+          <div className="absolute right-[18%] top-0 h-full w-px bg-gradient-to-b from-transparent via-rcl-orange/30 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(21,159,218,.12),transparent_24%),radial-gradient(circle_at_88%_65%,rgba(255,84,25,.08),transparent_18%)]" />
+        </div>
+        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16">
+          <div className="grid gap-10 lg:grid-cols-[.9fr_1.1fr_.65fr] lg:items-center">
+            <div><p className="flex items-center gap-2 text-[10px] font-black tracking-[.3em] text-rcl-orange"><FaBolt /> RCL PERFORMANCE LAB</p><h1 className="mt-5 font-display text-6xl font-black uppercase leading-[.78] sm:text-8xl">The<br /><span className="text-rcl-blue">Lab.</span></h1><p className="mt-6 max-w-sm text-sm leading-7 text-white/55">Train. Create. Analyze. Evolve.<br />Richmond builds different.</p><div className="mt-8 h-px w-28 bg-rcl-orange" /></div>
+            <div className="relative mx-auto h-[330px] w-full max-w-lg overflow-hidden rounded-3xl border border-rcl-blue/20 bg-black/25 shadow-[0_0_80px_rgba(21,159,218,.08)]">
+              <div className="absolute inset-[8%] rotate-[-6deg] border-2 border-white/15 bg-[repeating-linear-gradient(90deg,rgba(97,50,20,.32)_0_28px,rgba(51,28,15,.36)_29px_56px)]"><div className="absolute left-[31%] top-0 h-[48%] w-[38%] border-x-2 border-b-2 border-white/25" /><div className="absolute left-[39%] top-[34%] h-[31%] w-[22%] rounded-full border-2 border-white/25" /><div className="absolute bottom-[5%] left-[7%] h-[76%] w-[86%] rounded-[0_0_50%_50%] border-x-2 border-b-2 border-white/20" /><div className="absolute left-[46%] top-[7%] h-9 w-9 rounded-full border-[5px] border-rcl-orange shadow-[0_0_20px_rgba(255,84,25,.5)]" /></div>
+              <div className="absolute left-5 top-5 border-l-2 border-rcl-blue bg-black/70 px-3 py-2 text-[8px] font-black tracking-[.18em] text-white/60"><span className="text-rcl-blue">LIVE COURT</span><br />PLAYER DEVELOPMENT GRID</div>
+              <div className="absolute bottom-5 right-5 text-right"><p className="text-[8px] font-black tracking-[.2em] text-white/25">READ THE GAME</p><p className="mt-1 font-display text-xl font-black uppercase text-rcl-orange">Build the player.</p></div>
             </div>
-
-            <div className="relative mx-auto flex h-[330px] w-full max-w-md items-end justify-center">
-              <div className="absolute bottom-0 h-[275px] w-[210px] rounded-[48%_48%_8%_8%] bg-[linear-gradient(90deg,#05070b,#17283a_48%,#05070b)] shadow-[0_0_90px_rgba(30,126,205,.25)]" />
-              <div className="absolute bottom-[230px] h-20 w-20 rounded-full bg-[radial-gradient(circle_at_35%_30%,#50657b,#080b10_70%)] shadow-[0_0_45px_rgba(77,163,255,.2)]" />
-              <div className="absolute bottom-[260px] h-8 w-28 rounded-full bg-[#05070b]" />
-              <div className="absolute bottom-5 h-44 w-80 rounded-[50%] border border-rcl-blue/20 bg-rcl-blue/5 blur-2xl" />
-              <span className="absolute bottom-2 font-black uppercase tracking-[.3em] text-white/15">MORE THAN A GAME</span>
-            </div>
-
-            <div className="hidden border-l border-white/10 pl-7 lg:block">
-              <p className="font-black text-4xl uppercase leading-[.88]">Harder<br />Smarter<br /><span className="text-rcl-orange">Better.</span></p>
-              <p className="mt-5 text-[9px] font-black tracking-[.28em] text-white/30">RICHMOND, VIRGINIA</p>
-            </div>
+            <div className="hidden border-l border-white/10 pl-7 lg:block"><p className="font-black text-4xl uppercase leading-[.88]">Harder<br />Smarter<br /><span className="text-rcl-orange">Better.</span></p><p className="mt-5 text-[9px] font-black tracking-[.28em] text-white/30">RICHMOND, VIRGINIA</p></div>
           </div>
         </Container>
       </section>
