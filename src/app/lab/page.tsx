@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaDumbbell, FaFilm, FaMedal, FaPlay } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
+import { DrillAnimation } from '@/components/DrillAnimation';
 import './lab-redesign.css';
 
 type WorkoutDrill = {
@@ -155,7 +156,7 @@ export default function LabPage() {
 
     {screen==='drill'&&workout&&drill&&<section className="labx-shell drill"><div className="labx-crumb">THE LAB <i>›</i> WORKOUT <i>›</i> DRILL {activeDrill+1}<span>{activeDrill+1} OF {workout.drills.length}</span></div>
       <div className="labx-drill-head"><h1>{drill.title}</h1><h3>{drill.prescription} <i>•</i> {Math.max(5,Math.round(drill.duration/60))} minutes</h3><p>{drill.description}</p><div className="labx-pills">{drill.focus.map(x=><span key={x}>{x}</span>)}</div></div>
-      <div className="labx-video"><div className="labx-play"><FaPlay/></div><div className="labx-video-bar"><span>🔊 0:00 / 0:45</span><i/><b>⚙ ⛶</b></div></div>
+      <DrillAnimation skill={drill.skill} title={drill.title} focus={drill.focus} />
       <nav className="labx-drill-tabs">{(['coaching','breakdown','mistakes','variations'] as const).map(x=><button key={x} className={drillTab===x?'active':''} onClick={()=>setDrillTab(x)}>{x}</button>)}</nav>
       <div className="labx-drill-body">
        {drillTab==='coaching'&&<><h4>KEY FOCUS</h4><div className="labx-coaching"><ul>{drill.coachingPoints.map(x=><li key={x}><FaCheck/> {x}</li>)}</ul><div className="labx-court"><i/><b>↗</b></div></div></>}
