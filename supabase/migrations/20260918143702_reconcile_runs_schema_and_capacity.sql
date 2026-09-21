@@ -8,8 +8,21 @@ alter table public.runs
 alter table public.runs
   add column if not exists max_players integer not null default 10;
 
-update public.runs
-set max_players = coalesce(capacity, max_players);
+-- Older production databases may have used a capacity column, while a clean
+-- migration replay creates runs from the canonical schema without it.
+-- Only copy legacy capacity values when that legacy column actually exists.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'runs'
+      and column_name = 'capacity'
+  ) then
+    execute 'update public.runs set max_players = coalesce(capacity, max_players)';
+  end if;
+end $$;
 
 do $$
 begin
