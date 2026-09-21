@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
+import { FantasyCinematicIntro } from '@/components/FantasyCinematicIntro';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { FantasyRoster, FantasySeason, FantasyTeam, PublicPlayer } from '@/types/database';
