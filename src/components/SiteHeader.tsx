@@ -28,7 +28,7 @@ export function SiteHeader(){
   const socialChildPaths=['/friends','/messages','/notifications','/communities','/runs','/settings'];
   const isSocialChild=socialChildPaths.some(path=>pathname===path||pathname.startsWith(path+'/'));
   if(isSocialChild)return <>
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-5xl items-center gap-3 px-4">
         <Link href="/social" aria-label="Back to Social" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-orange/30 bg-black/50 font-black text-rcl-orange">←</Link>
         <Link href="/social" className="hidden text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange sm:block">RCL Social</Link>
