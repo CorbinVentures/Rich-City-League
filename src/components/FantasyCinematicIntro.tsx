@@ -18,7 +18,7 @@ export function FantasyCinematicIntro(){
    <article><FaTrophy/><p><b>COMPETE WITH THE LEAGUE</b><span>Climb the leaderboard.</span></p></article>
    <article><FaCrown/><p><b>WIN REAL GLORY</b><span>Bragging rights are forever.</span></p></article>
   </div>
-  <div className="fi-center"><small>REAL PLAYERS. REAL GAMES. REAL STAKES.</small><div className="fi-crown"><FaCrown/></div><h1>RCL <em>FANTASY</em></h1><h2>BUILD YOUR <span>LEGACY</span></h2><p>DRAFT · MANAGE · COMPETE · WIN</p><button onClick={close}>LET'S PLAY <FaArrowRight/></button></div>
+  <div className="fi-center"><small>REAL PLAYERS. REAL GAMES. REAL STAKES.</small><div className="fi-crown"><FaCrown/></div><h1>RCL <em>FANTASY</em></h1><h2>BUILD YOUR <span>LEGACY</span></h2><p>DRAFT · MANAGE · COMPETE · WIN</p><button onClick={close}>LET&apos;S PLAY <FaArrowRight/></button></div>
   <div className="fi-ball"><i/><b>RCL</b><small>FANTASY</small></div>
   <div className="fi-panels"><article><b>DRAFT</b><span>THE TALENT.</span></article><article><b>MANAGE</b><span>THE JOURNEY.</span></article><article><b>COMPETE</b><span>EVERY WEEK.</span></article><article><b>BE A</b><span>LEGEND.</span></article></div>
   <div className="fi-tag">FANTASY<br/><b>BUILT DIFFERENT.</b></div>
