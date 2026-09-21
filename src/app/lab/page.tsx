@@ -113,7 +113,7 @@ export default function LabPage() {
   }
 
   return (
-    <><LabCinematicIntro /><main className="relative min-h-screen overflow-hidden bg-[#03070c] pb-24 text-white"><div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0"><div className="absolute inset-0 bg-[linear-gradient(rgba(21,159,218,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,218,.035)_1px,transparent_1px)] bg-[size:44px_44px]" /><div className="absolute -right-[28%] top-[18%] h-[68vh] w-[105vw] rotate-[-8deg] border-[3px] border-white/[.045] bg-[repeating-linear-gradient(90deg,rgba(83,44,18,.14)_0_42px,rgba(43,24,13,.16)_43px_84px)]"><div className="absolute left-[31%] top-0 h-[48%] w-[38%] border-x-[3px] border-b-[3px] border-white/[.07]" /><div className="absolute left-[38%] top-[33%] h-[34%] w-[24%] rounded-full border-[3px] border-white/[.07]" /><div className="absolute bottom-[4%] left-[6%] h-[78%] w-[88%] rounded-[0_0_50%_50%] border-x-[3px] border-b-[3px] border-white/[.06]" /></div><div className="absolute right-[5%] top-[14%] h-[42vh] w-[42vh] rounded-full bg-rcl-blue/[.055] blur-3xl" /><div className="absolute -left-[8%] bottom-[8%] h-[38vh] w-[38vh] rounded-full bg-rcl-orange/[.045] blur-3xl" /><div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,12,.12),rgba(3,7,12,.72)_65%,#03070c)]" /></div>
+    <><LabCinematicIntro /><main className="lab-page relative min-h-screen overflow-hidden bg-[#03070c] pb-24 text-white"><div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0"><div className="absolute inset-0 bg-[linear-gradient(rgba(21,159,218,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,218,.035)_1px,transparent_1px)] bg-[size:44px_44px]" /><div className="absolute -right-[28%] top-[18%] h-[68vh] w-[105vw] rotate-[-8deg] border-[3px] border-white/[.045] bg-[repeating-linear-gradient(90deg,rgba(83,44,18,.14)_0_42px,rgba(43,24,13,.16)_43px_84px)]"><div className="absolute left-[31%] top-0 h-[48%] w-[38%] border-x-[3px] border-b-[3px] border-white/[.07]" /><div className="absolute left-[38%] top-[33%] h-[34%] w-[24%] rounded-full border-[3px] border-white/[.07]" /><div className="absolute bottom-[4%] left-[6%] h-[78%] w-[88%] rounded-[0_0_50%_50%] border-x-[3px] border-b-[3px] border-white/[.06]" /></div><div className="absolute right-[5%] top-[14%] h-[42vh] w-[42vh] rounded-full bg-rcl-blue/[.055] blur-3xl" /><div className="absolute -left-[8%] bottom-[8%] h-[38vh] w-[38vh] rounded-full bg-rcl-orange/[.045] blur-3xl" /><div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,12,.12),rgba(3,7,12,.72)_65%,#03070c)]" /></div>
       <section className="rcl-lab-hero relative z-10 overflow-hidden border-b border-rcl-orange/25 bg-[#050b12]/80">
         <div aria-hidden="true" className="absolute inset-0">
           <div className="absolute -right-24 -top-24 h-[430px] w-[430px] rounded-full border border-rcl-blue/10" />
@@ -134,8 +134,8 @@ export default function LabPage() {
         </Container>
       </section>
 
-      <Container maxWidth="xl" className="relative z-20 -mt-10">
-        <section id="player-lab" className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0a111b]/95 shadow-2xl backdrop-blur-xl">
+      <Container maxWidth="xl" className="relative z-20 -mt-10 lab-content">
+        <div className="lab-strip"><span>THE LAB</span><b>TRAINING</b><span>PLAYER DEVELOPMENT</span><span>FILM</span><span>IQ</span><span>BADGES</span></div><section id="player-lab" className="lab-panel overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0a111b]/95 shadow-2xl backdrop-blur-xl">
           <div className="grid md:grid-cols-[1.3fr_.7fr]">
             <div className="p-6 sm:p-8">
               <p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">PLAYER LAB</p>
@@ -153,22 +153,22 @@ export default function LabPage() {
           </div>
         </section>
 
-        <section id="challenges" className="mt-6 rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-6 shadow-xl">
+        <section id="challenges" className="lab-panel mt-6 rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-6 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div><p className="text-[9px] font-black tracking-[.25em] text-rcl-blue">SKILL CHALLENGE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">The 804 Shootout</h2><p className="mt-2 max-w-xl text-xs leading-6 text-white/40">Make 10 three-pointers and build your shot confidence. Challenges belong here so they are separate from workout creation.</p></div>
             <div className="flex items-center gap-4"><div><p className="text-2xl font-black">0<span className="text-white/20"> / 10</span></p><p className="text-[8px] font-black tracking-widest text-white/25">SHOTS MADE</p></div><span className="rounded-lg bg-rcl-orange/10 px-3 py-2 text-[9px] font-black text-rcl-orange">+250 XP</span><span className="rounded-lg border border-white/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-white/30">READY</span></div>
           </div>
         </section>
 
-        <section className="mt-8" aria-labelledby="lab-systems">
+        <section className="lab-systems mt-8" aria-labelledby="lab-systems">
           <div className="flex items-end justify-between gap-4"><div><p className="text-[9px] font-black tracking-[.25em] text-white/30">EXPLORE THE SYSTEM</p><h2 id="lab-systems" className="mt-1 font-display text-2xl font-black uppercase">Choose your system</h2></div><span className="text-[8px] font-black uppercase tracking-widest text-white/25">6 systems</span></div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {modules.map(({ title, body, icon: Icon, path }) => <Link key={title} href={path} className="group min-h-[145px] rounded-xl border border-white/10 bg-[#0a111b] p-4 transition hover:-translate-y-1 hover:border-rcl-orange/60"><div className="grid h-10 w-10 place-items-center rounded-lg bg-white/5 text-rcl-orange transition group-hover:bg-rcl-orange group-hover:text-black"><Icon /></div><h3 className="mt-7 font-display text-sm font-black uppercase">{title}</h3><p className="mt-1 text-[9px] uppercase tracking-widest text-white/30">{body}</p></Link>)}
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
-          <form id="training" onSubmit={generate} className="rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-5 shadow-xl sm:p-7">
+        <section className="lab-workspace mt-8 grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
+          <form id="training" onSubmit={generate} className="lab-builder rounded-[1.5rem] border border-white/10 bg-[#0a111b] p-5 shadow-xl sm:p-7">
             <div className="flex items-center justify-between"><div><p className="text-[9px] font-black tracking-[.22em] text-rcl-orange">TRAINING SYSTEM</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Build your workout</h2></div><span className="rounded-full bg-rcl-orange/10 px-3 py-1 text-[8px] font-black text-rcl-orange">STEP 01</span></div>
             <Field label="Development focus"><div className="grid grid-cols-2 gap-2">{skills.map((item) => <button type="button" key={item} onClick={() => setSkill(item)} className={`rounded-lg border p-3 text-left text-[10px] font-bold transition ${skill === item ? 'border-rcl-orange bg-rcl-orange/10 text-white' : 'border-white/10 bg-black/20 text-white/45 hover:border-white/25'}`}>{item}</button>)}</div></Field>
             <Field label="Experience"><div className="grid grid-cols-4 gap-2">{levels.map((item) => <button type="button" key={item} onClick={() => setLevel(item)} className={`rounded-lg border p-2.5 text-[9px] font-black uppercase ${level === item ? 'border-rcl-orange bg-rcl-orange text-black' : 'border-white/10 text-white/45'}`}>{item}</button>)}</div></Field>
@@ -186,13 +186,15 @@ export default function LabPage() {
           </section>
         </section>
 
-        <section className="mt-8 grid gap-4 sm:grid-cols-3">
+        <section className="lab-bottom mt-8 grid gap-4 sm:grid-cols-3">
           <LabFeature id="film-room" icon={<FaFilm />} title="Film Room" body="Turn game footage into lessons. Study, clip and build a smarter player." />
           <LabFeature id="iq" icon={<FaBrain />} title="Basketball IQ" body="Daily reads, situations and decisions designed to sharpen how you see the game." />
           <LabFeature id="badges" icon={<FaMedal />} title="Badge Lab" body="Turn completed work into visible progression and future RCL badges." />
         </section>
       </Container>
-    </main></>
+    <style jsx global>{`
+.lab-page{background-image:radial-gradient(circle at 78% 12%,rgba(21,159,218,.08),transparent 24%),radial-gradient(circle at 18% 58%,rgba(255,84,25,.06),transparent 20%)}.rcl-lab-hero{min-height:560px;display:flex;align-items:center}.rcl-lab-hero:after{content:"RCL // PERFORMANCE DEVELOPMENT";position:absolute;right:-85px;bottom:80px;transform:rotate(-90deg);font-size:9px;font-weight:900;letter-spacing:.28em;color:rgba(255,255,255,.12)}.lab-content{max-width:1180px}.lab-strip{display:flex;align-items:center;gap:22px;overflow:auto;margin-bottom:18px;padding:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(3,8,13,.94);font-size:8px;font-weight:900;letter-spacing:.14em;color:rgba(255,255,255,.32);white-space:nowrap}.lab-strip span:first-child{color:#159fda}.lab-strip b{color:#ff5a1f}.lab-panel,.lab-builder,.lab-bottom article{background:linear-gradient(145deg,rgba(8,17,26,.98),rgba(3,8,13,.98));border-color:rgba(89,119,138,.24)!important}.lab-panel{position:relative}.lab-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(21,159,218,.025),transparent)}.lab-systems>div:last-child>a{position:relative;overflow:hidden;background:linear-gradient(150deg,#09131c,#050a0e);border-color:rgba(89,119,138,.22)}.lab-systems>div:last-child>a:after{content:"";position:absolute;right:-18px;bottom:-25px;width:70px;height:70px;border:1px solid rgba(21,159,218,.1);border-radius:50%}.lab-workspace{align-items:start}.lab-builder{position:sticky;top:86px}.lab-builder button,.lab-builder select,.lab-builder textarea{transition:.2s}.lab-builder button:hover{transform:translateY(-1px)}.lab-bottom article{min-height:190px;position:relative;overflow:hidden}.lab-bottom article:after{content:"";position:absolute;right:-35px;bottom:-35px;width:110px;height:110px;border:1px solid rgba(255,84,25,.09);border-radius:50%}
+@media(max-width:1023px){.rcl-lab-hero{min-height:auto}.lab-builder{position:relative;top:auto}.rcl-lab-hero:after{display:none}}@media(max-width:700px){.rcl-lab-hero>div{padding-top:34px;padding-bottom:70px}.lab-content{margin-top:-42px}.lab-strip{margin-inline:-2px;gap:16px}.lab-panel{border-radius:18px!important}.lab-workspace{gap:18px}.lab-builder{border-radius:18px!important;padding:18px!important}.lab-systems>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-bottom{grid-template-columns:1fr}.lab-bottom article{min-height:150px}.rcl-lab-hero h1{font-size:64px}}`}</style></main></>
   );
 }
 
