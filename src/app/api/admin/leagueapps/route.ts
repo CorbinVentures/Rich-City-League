@@ -87,8 +87,7 @@ export async function GET(request: Request) {
       if (records.length < 1000) break;
     }
 
-    const status = batches >= maxBatches ? 'partial' : 'success';
-    await db.from('leagueapps_sync_state').upsert({
+    // Keep the public RCL player directory reconciled after registration syncs.\n    // The database function is idempotent and keyed by LeagueApps userId.\n    if (resource === 'registrations-2') {\n      const { error: materializeError } = await db.rpc('materialize_leagueapps_players');\n      if (materializeError) throw new Error(`LeagueApps player reconciliation failed: ${materializeError.message}`);\n    }\n\n    const status = batches >= maxBatches ? 'partial' : 'success';\n    await db.from('leagueapps_sync_state').upsert({
       resource,
       last_updated: cursor.lastUpdated,
       last_id: cursor.lastId,
