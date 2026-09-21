@@ -32,7 +32,7 @@ export function SiteHeader(){
       <div className="mx-auto flex h-20 max-w-5xl items-center gap-3 px-4">
         <Link href="/social" aria-label="Back to Social" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-orange/30 bg-black/50 font-black text-rcl-orange">←</Link>
         <Link href="/social" className="hidden text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange sm:block">RCL Social</Link>
-        <Link href="/search" className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-2xl border border-rcl-blue/40 bg-[#07111b] px-4 text-white/40"><FaMagnifyingGlass/><span className="truncate text-sm">Search players, teams, runs…</span></Link>
+        <Link href="/search" className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-2xl border border-rcl-blue/40 bg-[#07111b] px-4 text-white/40"><FaMagnifyingGlass/><span className="truncate text-sm">Search members, players, teams, games…</span></Link>
         <Link href="/notifications" aria-label="Notifications" className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-white/60"><FaBell/>{unreadCount>0&&<em className="absolute right-1 top-1 rounded-full bg-rcl-orange px-1 text-[8px] not-italic text-black">{unreadCount>9?'9+':unreadCount}</em>}</Link>
       </div>
     </header>
