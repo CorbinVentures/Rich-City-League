@@ -24,6 +24,7 @@ export default function LeagueSetupPage() {
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState<string|null>(null);
   const [message,setMessage]=useState<string|null>(null);
+  const [leagueAppsSyncing,setLeagueAppsSyncing]=useState(false);
 
   const [league,setLeague]=useState({name:'Rich City League',slug:'rich-city-league',description:''});
   const [season,setSeason]=useState({leagueId:'',name:'',slug:'',startDate:'',endDate:'',status:'draft' as Season['status']});
@@ -74,6 +75,32 @@ export default function LeagueSetupPage() {
     } finally { setSaving(false); }
   }
 
+  async function syncLeagueAppsStructure() {
+    setLeagueAppsSyncing(true); setError(null); setMessage(null);
+    try {
+      const { data: sessionData } = await client!.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Your admin session is unavailable. Please sign in again.');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const registrationResponse = await fetch('/api/admin/leagueapps?action=sync&resource=registrations-2', { cache:'no-store', headers });
+      const registrationData = await registrationResponse.json();
+      if (!registrationResponse.ok) throw new Error(registrationData.error || 'LeagueApps registration sync failed.');
+
+      const structureResponse = await fetch('/api/admin/leagueapps?action=materialize-structure', { cache:'no-store', headers });
+      const structureData = await structureResponse.json();
+      if (!structureResponse.ok) throw new Error(structureData.error || 'LeagueApps structure sync failed.');
+
+      const result = structureData.result ?? {};
+      setMessage(`LeagueApps synced: ${result.seasons ?? 0} season(s), ${result.teams ?? 0} team(s), ${result.teamSeasons ?? 0} team assignment(s) reconciled.`);
+      await load();
+    } catch (syncError) {
+      setError(syncError instanceof Error ? syncError.message : 'LeagueApps structure sync failed.');
+    } finally {
+      setLeagueAppsSyncing(false);
+    }
+  }
+
   const field='mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-rcl-orange/60';
   const label='block text-[9px] font-black uppercase tracking-[.18em] text-white/45';
   const button='rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-40';
@@ -89,6 +116,12 @@ export default function LeagueSetupPage() {
 
   return <main className="min-h-screen bg-[#05080d] pb-20 text-white"><AdminWorkspace /><Container maxWidth="xl" className="py-10">
     <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.28em] text-rcl-orange">RCL DATA FOUNDATION</p><h1 className="mt-2 font-display text-4xl font-black uppercase">League setup</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/50">Build the real competition hierarchy in order: league → season → division → teams → team seasons → games. This does not seed demo production records.</p></div><Link href="/portal/scorebook" className="rounded-xl border border-white/10 bg-white/[.04] px-4 py-3 text-xs font-black uppercase tracking-widest">Open Scorebook</Link></div>
+    <section className="mt-8 rounded-3xl border border-rcl-orange/25 bg-rcl-orange/[.04] p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="text-[9px] font-black uppercase tracking-[.22em] text-rcl-orange">LEAGUEAPPS SOURCE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Sync league structure</h2><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Pull the latest LeagueApps registration structure into RCL and reconcile seasons, teams, divisions and team-season assignments. Existing LeagueApps-linked records update instead of duplicating.</p></div>
+        <button type="button" onClick={() => void syncLeagueAppsStructure()} disabled={leagueAppsSyncing} className={button}>{leagueAppsSyncing?'Syncing LeagueApps…':'Sync from LeagueApps'}</button>
+      </div>
+    </section>
     {(message||error)&&<div className={`mt-6 rounded-2xl border p-4 text-sm \${error?'border-red-400/20 bg-red-400/10 text-red-200':'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'}`}>{error??message}</div>}
     <section className="mt-8 grid gap-3 sm:grid-cols-4 lg:grid-cols-8">{Object.entries(counts).map(([label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4"><p className="text-[9px] font-black uppercase tracking-widest text-white/35">{label.replace(/([A-Z])/g,' $1')}</p><p className="mt-2 font-display text-2xl font-black">{value}</p></div>)}</section>
 
