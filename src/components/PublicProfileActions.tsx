@@ -52,27 +52,10 @@ export function PublicProfileActions({ profileId, profileName }: { profileId: st
   const sendMessage = async () => {
     if (!requireAuth() || !supabase || user!.id === profileId) return;
     setBusy('message'); setError('');
-    const mine = await supabase.from('conversation_members').select('conversation_id').eq('profile_id', user!.id);
-    const ids = ((mine.data ?? []) as { conversation_id: string }[]).map(x => x.conversation_id);
-    if (ids.length) {
-      const shared = await supabase.from('conversation_members').select('conversation_id').eq('profile_id', profileId).in('conversation_id', ids);
-      const sharedIds = ((shared.data ?? []) as { conversation_id: string }[]).map(x => x.conversation_id);
-      if (sharedIds.length) {
-        const direct = await supabase.from('conversations').select('id').in('id', sharedIds).eq('conversation_type', 'direct').limit(1).maybeSingle();
-        if (direct.data) { window.location.href = `/messages/${(direct.data as { id: string }).id}`; return; }
-      }
-    }
-    const conversation = await supabase.from('conversations').insert({
-      created_by: user!.id, title: profileName, conversation_type: 'direct',
-    } as never).select('id').single();
-    const row = conversation.data as { id: string } | null;
-    if (conversation.error || !row) { setError(conversation.error?.message ?? 'Could not start this conversation.'); setBusy(null); return; }
-    const members = await supabase.from('conversation_members').insert([
-      { conversation_id: row.id, profile_id: user!.id },
-      { conversation_id: row.id, profile_id: profileId },
-    ] as never);
-    if (members.error) { setError(members.error.message); setBusy(null); return; }
-    window.location.href = `/messages/${row.id}`;
+    const { data, error: conversationError } = await supabase.rpc('start_direct_conversation', { target_profile_id: profileId } as never);
+    const conversationId = data as string | null;
+    if (conversationError || !conversationId) { setError(conversationError?.message ?? 'Could not start this conversation.'); setBusy(null); return; }
+    window.location.href = `/messages/${conversationId}`;
   };
 
   const ownProfile = user?.id === profileId;
