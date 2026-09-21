@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
@@ -32,9 +31,8 @@ const tabs: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
 type Filter = 'all' | 'following' | 'runs' | 'highlights' | 'players' | 'teams' | 'communities';
 
 export default function SocialPage() {
-  const searchParams = useSearchParams();
-  const view = searchParams.get('view');
   const { user } = useAuth();
+  const [view, setView] = useState<string | null>(null);
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [posts, setPosts] = useState<Post[]>([]); const [stories, setStories] = useState<Story[]>([]); const [currentProfile, setCurrentProfile] = useState<Author | null>(null);
   const [following, setFollowing] = useState<string[]>([]); const [saved, setSaved] = useState<string[]>([]); const [level, setLevel] = useState<{ level: number; xp: number } | null>(null);
@@ -46,6 +44,7 @@ export default function SocialPage() {
   const [storyIndex, setStoryIndex] = useState<number | null>(null); const [composerOpen, setComposerOpen] = useState(false); const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
   const [publishing, setPublishing] = useState(false); const [publishingStory, setPublishingStory] = useState(false);
   const mediaInputRef = useRef<HTMLInputElement | null>(null); const storyInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => { setView(new URLSearchParams(window.location.search).get('view')); }, []);
 
   const signInForSocial = () => { window.location.href = '/auth/sign-in?redirect=/social'; };
   const openComposer = () => { if (!user) { signInForSocial(); return; } setComposerOpen(true); };
@@ -187,7 +186,7 @@ export default function SocialPage() {
               {(story.trim() || storyFile) && <button disabled={publishingStory} className="mt-1 text-[8px] font-black uppercase tracking-wider text-rcl-orange disabled:opacity-30">{publishingStory ? 'Posting…' : 'Share'}</button>}
               {!story.trim() && !storyFile && <span className="mt-1 block truncate text-[9px] font-bold text-white/70">Your story</span>}
             </form> : <button onClick={signInForSocial} className="w-[72px] shrink-0 text-center"><span className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-rcl-orange/50 bg-white/[.04] text-rcl-orange"><FaPlus /></span><span className="mt-2 block text-[9px] font-bold text-white/70">Add story</span></button>}
-            {stories.map((item, index) => <button key={item.id} onClick={() => void viewStory(index)} className="w-[72px] shrink-0 text-center">
+            {(view === 'stories' ? stories.filter((item) => item.author_id === user?.id) : stories).map((item, index) => <button key={item.id} onClick={() => void viewStory(index)} className="w-[72px] shrink-0 text-center">
               <span className="relative mx-auto block h-16 w-16 rounded-full bg-gradient-to-br from-rcl-orange via-rcl-gold to-rcl-orange p-[2px]">
                 <span className="block h-full w-full overflow-hidden rounded-full border-2 border-[#05080d] bg-[#101722]">
                   {item.media_url ? (isVideoUrl(item.media_url) ? <video src={item.media_url} muted playsInline className="h-full w-full object-cover" /> : <img src={item.media_url} alt="" className="h-full w-full object-cover" />) : <span className="grid h-full w-full place-items-center"><Avatar author={item.author} /></span>}
