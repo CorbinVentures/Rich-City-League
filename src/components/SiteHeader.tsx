@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaGear, FaBars, FaXmark, FaMagnifyingGlass, FaBell, FaHouse, FaUser, FaPeopleGroup, FaCalendarDays } from 'react-icons/fa6';
+import { FaGear, FaBars, FaXmark, FaMagnifyingGlass, FaBell, FaHouse, FaUser, FaPeopleGroup, FaCalendarDays, FaBasketball } from 'react-icons/fa6';
 import { RCL_ADMIN_NAV_ITEM, RCL_NAV_ITEMS } from '@/lib/rcl-navigation';
 
 export function SiteHeader(){
@@ -24,6 +24,27 @@ export function SiteHeader(){
   },[user,supabase]);
 
   if(pathname==='/'||pathname==='/social'||pathname.startsWith('/social/')||pathname==='/profile'||pathname.startsWith('/profile/'))return null;
+
+  const socialChildPaths=['/friends','/messages','/notifications','/communities','/runs','/settings'];
+  const isSocialChild=socialChildPaths.some(path=>pathname===path||pathname.startsWith(path+'/'));
+  if(isSocialChild)return <>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-5xl items-center gap-3 px-4">
+        <Link href="/social" aria-label="Back to Social" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-orange/30 bg-black/50 font-black text-rcl-orange">←</Link>
+        <Link href="/social" className="hidden text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange sm:block">RCL Social</Link>
+        <Link href="/search" className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-2xl border border-rcl-blue/40 bg-[#07111b] px-4 text-white/40"><FaMagnifyingGlass/><span className="truncate text-sm">Search players, teams, runs…</span></Link>
+        <Link href="/notifications" aria-label="Notifications" className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-white/60"><FaBell/>{unreadCount>0&&<em className="absolute right-1 top-1 rounded-full bg-rcl-orange px-1 text-[8px] not-italic text-black">{unreadCount>9?'9+':unreadCount}</em>}</Link>
+      </div>
+    </header>
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080b10]/95 px-4 py-2 backdrop-blur-xl">
+      <div className="mx-auto grid max-w-3xl grid-cols-4 gap-2">
+        <Link href="/social" className="flex items-center justify-center gap-2 rounded-2xl px-3 py-3 text-[10px] font-black uppercase text-white/50"><span>⚡</span>Feed</Link>
+        <Link href="/friends" className={`flex items-center justify-center gap-2 rounded-2xl px-3 py-3 text-[10px] font-black uppercase ${pathname.startsWith('/friends')?'bg-rcl-orange text-black':'border border-white/10 text-white/50'}`}><span>◉</span>Discover</Link>
+        <Link href="/runs" className={`flex items-center justify-center gap-2 rounded-2xl px-3 py-3 text-[10px] font-black uppercase ${pathname.startsWith('/runs')?'bg-rcl-orange text-black':'border border-white/10 text-white/50'}`}><FaBasketball/>Runs</Link>
+        <Link href="/social?view=highlights" className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 px-3 py-3 text-[10px] font-black uppercase text-white/50"><span>▶</span>Highlights</Link>
+      </div>
+    </nav>
+  </>;
 
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
   const links=isAdmin?[...RCL_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_NAV_ITEMS;
