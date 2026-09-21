@@ -33,7 +33,7 @@ type Filter = 'all' | 'following' | 'runs' | 'highlights' | 'players' | 'teams' 
 export default function SocialPage() {
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
-  const [posts, setPosts] = useState<Post[]>([]); const [stories, setStories] = useState<Story[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]); const [stories, setStories] = useState<Story[]>([]); const [currentProfile, setCurrentProfile] = useState<Author | null>(null);
   const [following, setFollowing] = useState<string[]>([]); const [saved, setSaved] = useState<string[]>([]); const [level, setLevel] = useState<{ level: number; xp: number } | null>(null);
   const [loading, setLoading] = useState(true); const [error, setError] = useState('');
   const [body, setBody] = useState(''); const [mediaFile, setMediaFile] = useState<File | null>(null); const [mediaPreview, setMediaPreview] = useState('');
@@ -60,21 +60,25 @@ export default function SocialPage() {
       const { data: basePosts, error: postsError } = await supabase.from('posts').select('id,author_id,body,media_urls,created_at').eq('status', 'published').order('created_at', { ascending: false }).limit(100);
       if (postsError) throw postsError;
       const safePosts = (basePosts ?? []) as unknown as Array<Omit<Post, 'author' | 'comments' | 'reactions'>>;
-      const postIds = safePosts.map((p) => p.id); const authorIds = [...new Set(safePosts.map((p) => p.author_id))];
-      const [authorsResult, commentsResult, reactionsResult, storiesResult, followsResult, savedResult, levelResult] = await Promise.all([
-        authorIds.length ? supabase.from('profiles').select('id,display_name,username,avatar_url,role').in('id', authorIds) : Promise.resolve({ data: [], error: null }),
+      const postIds = safePosts.map((p) => p.id);
+      const [commentsResult, reactionsResult, storiesResult, followsResult, savedResult, levelResult, currentProfileResult] = await Promise.all([
         postIds.length ? supabase.from('comments').select('id,post_id,author_id,body,created_at').in('post_id', postIds).order('created_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
         postIds.length ? supabase.from('reactions').select('post_id,user_id,type').in('post_id', postIds) : Promise.resolve({ data: [], error: null }),
         supabase.from('stories').select('id,body,media_url,expires_at,author_id').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(20),
         user ? supabase.from('follows').select('following_id').eq('follower_id', user.id) : Promise.resolve({ data: [], error: null }),
         user ? supabase.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),
         user ? supabase.from('user_levels').select('level,xp').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+        user ? supabase.from('profiles').select('id,display_name,username,avatar_url,role').eq('id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
       ]);
+      const comments = (commentsResult.data ?? []) as unknown as Comment[]; const storyRows = (storiesResult.data ?? []) as unknown as Story[];
+      const identityIds = [...new Set([...safePosts.map((p) => p.author_id), ...comments.map((item) => item.author_id), ...storyRows.map((item) => item.author_id).filter((id): id is string => Boolean(id)), ...(user ? [user.id] : [])])];
+      const authorsResult = identityIds.length ? await supabase.from('profiles').select('id,display_name,username,avatar_url,role').in('id', identityIds) : { data: [], error: null };
       const authors = (authorsResult.data ?? []) as unknown as Array<Author & { id: string }>;
       const authorMap = new Map(authors.map((a) => [a.id, a]));
-      const comments = (commentsResult.data ?? []) as unknown as Comment[]; const reactionsData = (reactionsResult.data ?? []) as unknown as Reaction[]; const storyRows = (storiesResult.data ?? []) as unknown as Story[];
+      const reactionsData = (reactionsResult.data ?? []) as unknown as Reaction[];
       setPosts(safePosts.map((p) => ({ ...p, author: authorMap.get(p.author_id), comments: comments.filter((c) => c.post_id === p.id).map((c) => ({ ...c, author: authorMap.get(c.author_id) })), reactions: reactionsData.filter((r) => r.post_id === p.id) })));
       setStories(storyRows.map((s) => ({ ...s, author: authorMap.get(s.author_id ?? '') })));
+      setCurrentProfile((currentProfileResult.data as Author | null) ?? (user ? authorMap.get(user.id) ?? null : null));
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((r) => r.following_id));
       setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((r) => r.post_id));
       const levelData = levelResult.data as { level?: number; xp?: number } | null;
@@ -101,12 +105,12 @@ export default function SocialPage() {
   const createPost = async (e: React.FormEvent) => {
     e.preventDefault(); if (!supabase || !user) { signInForSocial(); return; } if (!body.trim() && !mediaFile) return;
     setPublishing(true); setError('');
-    try { const mediaUrl = mediaFile ? await uploadMedia(mediaFile, 'posts') : ''; const { data, error: insertError } = await supabase.from('posts').insert({ author_id: user.id, body: body.trim(), media_urls: mediaUrl ? [mediaUrl] : [], status: 'published' } as never).select('id,author_id,body,media_urls,created_at').single(); if (insertError) throw insertError; setBody(''); setMediaFile(null); setComposerOpen(false); void trackActivity('post_created', 'post', (data as { id?: string } | null)?.id); if (data) setPosts((current) => [{ ...(data as unknown as Post), author: { id: user.id, display_name: 'You', username: null, avatar_url: null, role: 'member' }, comments: [], reactions: [] }, ...current]); }
+    try { const mediaUrl = mediaFile ? await uploadMedia(mediaFile, 'posts') : ''; const { data, error: insertError } = await supabase.from('posts').insert({ author_id: user.id, body: body.trim(), media_urls: mediaUrl ? [mediaUrl] : [], status: 'published' } as never).select('id,author_id,body,media_urls,created_at').single(); if (insertError) throw insertError; setBody(''); setMediaFile(null); setComposerOpen(false); void trackActivity('post_created', 'post', (data as { id?: string } | null)?.id); if (data) setPosts((current) => [{ ...(data as unknown as Post), author: currentProfile ?? { id: user.id, display_name: 'RCL Member', username: null, avatar_url: null, role: null }, comments: [], reactions: [] }, ...current]); }
     catch (publishError) { const message = publishError instanceof Error ? publishError.message : (publishError && typeof publishError === 'object' && 'message' in publishError ? String((publishError as { message?: unknown }).message ?? '') : ''); console.error('Unable to publish social post', publishError); setError(message || 'We could not publish that post.'); } finally { setPublishing(false); }
   };
   const createStory = async (e: React.FormEvent) => {
     e.preventDefault(); if (!supabase || !user) { signInForSocial(); return; } if (!story.trim() && !storyFile) return; setPublishingStory(true); setError('');
-    try { const mediaUrl = storyFile ? await uploadMedia(storyFile, 'stories') : null; const type = mediaUrl ? (storyFile?.type.startsWith('video/') ? 'video' : 'photo') : 'text'; const { data, error: storyError } = await supabase.from('stories').insert({ author_id: user.id, story_type: type, body: story.trim() || null, media_url: mediaUrl, audience: 'public' } as never).select('id,body,media_url,expires_at,author_id').single(); if (storyError) throw storyError; if (data) setStories((current) => [{ ...(data as unknown as Story), author: { id: user.id, display_name: 'You', username: null } }, ...current]); setStory(''); setStoryFile(null); }
+    try { const mediaUrl = storyFile ? await uploadMedia(storyFile, 'stories') : null; const type = mediaUrl ? (storyFile?.type.startsWith('video/') ? 'video' : 'photo') : 'text'; const { data, error: storyError } = await supabase.from('stories').insert({ author_id: user.id, story_type: type, body: story.trim() || null, media_url: mediaUrl, audience: 'public' } as never).select('id,body,media_url,expires_at,author_id').single(); if (storyError) throw storyError; if (data) setStories((current) => [{ ...(data as unknown as Story), author: currentProfile ?? { id: user.id, display_name: 'RCL Member', username: null } }, ...current]); setStory(''); setStoryFile(null); }
     catch (storyError) { const message = storyError instanceof Error ? storyError.message : (storyError && typeof storyError === 'object' && 'message' in storyError ? String((storyError as { message?: unknown }).message ?? '') : ''); console.error('Unable to publish social story', storyError); setError(message || 'We could not publish that story.'); } finally { setPublishingStory(false); }
   };
   const react = async (postId: string, type: string) => {
@@ -125,7 +129,7 @@ export default function SocialPage() {
   };
   const addComment = async (postId: string) => {
     if (!supabase || !user) { signInForSocial(); return; } const text = comment[postId]?.trim(); if (!text) return; setComment((current) => ({ ...current, [postId]: '' }));
-    const optimistic: Comment = { id: `local-${Date.now()}`, post_id: postId, author_id: user.id, body: text, created_at: new Date().toISOString(), author: { id: user.id, display_name: 'You', username: null } }; setPosts((current) => current.map((p) => p.id === postId ? { ...p, comments: [...(p.comments ?? []), optimistic] } : p));
+    const optimistic: Comment = { id: `local-${Date.now()}`, post_id: postId, author_id: user.id, body: text, created_at: new Date().toISOString(), author: currentProfile ?? { id: user.id, display_name: 'RCL Member', username: null } }; setPosts((current) => current.map((p) => p.id === postId ? { ...p, comments: [...(p.comments ?? []), optimistic] } : p));
     const { error: commentError } = await supabase.from('comments').insert({ post_id: postId, author_id: user.id, body: text, parent_id: null } as never); if (commentError) { setError(commentError.message); void load(); } else { void trackActivity('comment', 'post', postId); }
   };
   const sharePost = async (post: Post) => { const url = `${window.location.origin}/social#post-${post.id}`; try { if (navigator.share) { await navigator.share({ title: 'Rich City Social', text: post.body.slice(0, 120), url }); void trackActivity('share', 'post', post.id); } else { await navigator.clipboard.writeText(url); void trackActivity('share', 'post', post.id); setError('Post link copied to your clipboard.'); window.setTimeout(() => setError(''), 2200); } } catch { /* cancelled */ } };
