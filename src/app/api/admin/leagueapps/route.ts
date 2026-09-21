@@ -35,6 +35,12 @@ export async function GET(request: Request) {
     });
   }
 
+  if (action === 'materialize-structure') {
+    const { data, error } = await db.rpc('materialize_leagueapps_structure');
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, result: data });
+  }
+
   if (action !== 'sync') {
     return NextResponse.json({ error: 'Unknown action.' }, { status: 400 });
   }
