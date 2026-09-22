@@ -106,6 +106,24 @@ export default function LeagueAppsAdminHub() {
     }
   }
 
+  async function runCompetitionSync() {
+    setSyncing('competition');
+    setSyncMessage('');
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/admin/leagueapps?action=sync-competition', { method: 'GET', cache: 'no-store', headers });
+      const data = await response.json();
+      if (!response.ok && response.status !== 207) throw new Error(data.error || 'Competition sync failed.');
+      const summary = `Schedule sync: ${data.gamesUpserted ?? 0} game(s), ${data.teamsSeen ?? 0} team record(s), ${data.locations ?? 0} location(s).`;
+      setSyncMessage(data.warnings?.length ? `${summary} ${data.warnings.length} warning(s): ${data.warnings.slice(0, 3).join(' · ')}` : summary);
+      await loadIntegrationStatus();
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? error.message : 'Competition sync failed.');
+    } finally {
+      setSyncing(null);
+    }
+  }
+
   useEffect(() => {
     if (isAdmin) void loadIntegrationStatus();
   }, [isAdmin]);
@@ -145,6 +163,7 @@ export default function LeagueAppsAdminHub() {
           <div className="flex flex-wrap gap-2">
             <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runSync('members-2')} className="rcl-admin-chip disabled:opacity-30"><FaPeopleGroup /> {syncing === 'members-2' ? 'Syncing…' : 'Sync Members'}</button>
             <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runSync('registrations-2')} className="rcl-admin-chip disabled:opacity-30"><FaRotate /> {syncing === 'registrations-2' ? 'Syncing…' : 'Sync Registrations'}</button>
+            <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runCompetitionSync()} className="rcl-admin-chip disabled:opacity-30"><FaCalendarDays /> {syncing === 'competition' ? 'Syncing…' : 'Sync Schedule & Results'}</button>
           </div>
         </div>
         {syncMessage && <p className="mt-4 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3 text-xs text-white/65">{syncMessage}</p>}
