@@ -19,7 +19,11 @@ const destinations = [
 
 export default async function CityPage() {
   const { games, teams } = await getLeagueSnapshot();
-  const upcomingGames = games.filter((game) => game.status !== 'completed').slice(0, 3);
+  const now = Date.now();
+  const upcomingGames = games
+    .filter((game) => game.status !== 'completed' && new Date(game.scheduled_at).getTime() >= now)
+    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+    .slice(0, 3);
 
   return (
     <main className="rcl-world min-h-screen pb-24 text-white lg:pb-12">
