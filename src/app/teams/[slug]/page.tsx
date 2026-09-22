@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getTeamDetail, getLeagueSnapshot } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
+import { getTeamTheme } from '@/lib/team-themes';
 
 export const revalidate = 60;
 
@@ -35,28 +36,30 @@ export default async function TeamDetailPage({ params, searchParams }: { params:
   const totals=playerStats.reduce((s,x)=>({pts:s.pts+x.points,reb:s.reb+x.rebounds,ast:s.ast+x.assists,stl:s.stl+x.steals,blk:s.blk+x.blocks}),{pts:0,reb:0,ast:0,stl:0,blk:0});
   const gp=new Set(playerStats.map(x=>x.game_id)).size;
   const avg=(v:number)=>gp?(v/gp).toFixed(1):'—';
-  const accent=team.primary_color??'#ff6b1a';
-  const secondary=team.secondary_color??'#102235';
+  const theme=getTeamTheme(team.slug,team.primary_color,team.secondary_color);
+  const accent=theme.accent;
+  const secondary=theme.secondary;
 
-  return <main className="min-h-screen bg-[#05090d] pb-24 text-white" style={{'--team-accent':accent,'--team-secondary':secondary} as React.CSSProperties}>
+  return <main className="min-h-screen pb-24 text-white" style={{backgroundColor:theme.surface,'--team-accent':accent,'--team-secondary':secondary,'--team-glow':theme.glow} as React.CSSProperties}>
     <section className="relative overflow-hidden border-b border-white/10">
-      <div className="absolute inset-0 opacity-70" style={{background:`radial-gradient(circle at 75% 20%, ${accent}33, transparent 34%),linear-gradient(115deg,#05090d,${secondary}55,#05090d)`}}/>
+      <div className="absolute inset-0 opacity-95" style={{background:theme.atmosphere}}/>
+      <div className="absolute -right-10 top-0 select-none font-display text-[9rem] font-black uppercase leading-none tracking-tighter text-white/[.025] sm:text-[14rem]" aria-hidden="true">{theme.motif}</div>
       <div className="absolute inset-0 opacity-[.07] bg-[radial-gradient(circle_at_center,white_1px,transparent_1px)] bg-[length:22px_22px]"/>
       <div className="relative mx-auto max-w-7xl px-5 pb-8 pt-12 sm:pt-16">
-        <p className="text-[10px] font-black uppercase tracking-[.3em]" style={{color:accent}}>Rich City League · Team Network</p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><p className="text-[10px] font-black uppercase tracking-[.3em]" style={{color:accent}}>Rich City League · Team Network</p><span className="text-[9px] font-black uppercase tracking-[.28em] text-white/35">{theme.tagline}</span></div>
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end">
-          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={160} height={160} className="h-32 w-32 rounded-2xl bg-black/50 object-contain p-2 shadow-2xl sm:h-40 sm:w-40"/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
+          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={160} height={160} className="h-32 w-32 rounded-2xl border border-white/10 bg-black/55 object-contain p-2 shadow-2xl sm:h-40 sm:w-40" style={{boxShadow:`0 20px 70px ${theme.glow}22`}}/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
           <div className="flex-1"><h1 className="font-display text-4xl font-black uppercase leading-none sm:text-6xl">{team.name}</h1><p className="mt-3 text-xs font-black uppercase tracking-[.2em] text-white/55">{team.city??'Richmond'}, Virginia · {division?.name??'Rich City League'}</p>{team.description&&<p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{team.description}</p>}</div>
           <div className="flex gap-3"><div className="min-w-24 border border-white/10 bg-black/30 px-5 py-4 text-center"><p className="text-[9px] uppercase tracking-widest text-white/40">Record</p><p className="mt-1 font-display text-3xl font-black">{record?`${record.wins}–${record.losses}`:'0–0'}</p></div></div>
         </div>
       </div>
     </section>
 
-    <nav className="sticky top-0 z-20 border-b border-white/10 bg-[#05090d]/95 backdrop-blur" aria-label={`${team.name} navigation`}>
+    <nav className="sticky top-0 z-20 border-b border-white/10 backdrop-blur" style={{backgroundColor:`${theme.surface}f2`}} aria-label={`${team.name} navigation`}>
       <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">{tabs.map(([key,label])=><Link key={key} href={key==='home'?`/teams/${team.slug}`:`/teams/${team.slug}?view=${key}`} className={`whitespace-nowrap border-b-2 px-4 py-4 text-[10px] font-black uppercase tracking-widest ${tab===key?'text-white':'border-transparent text-white/40 hover:text-white'}`} style={tab===key?{borderColor:accent}:undefined}>{label}</Link>)}</div>
     </nav>
 
-    <div className="mx-auto max-w-7xl px-5 py-9">
+    <div className="mx-auto max-w-7xl px-5 py-9" style={{backgroundImage:`linear-gradient(180deg, ${theme.glow}08, transparent 420px)`}}>
       {tab==='home'&&<div className="grid gap-6 lg:grid-cols-[1.5fr_.8fr]">
         <section className="border border-white/10 bg-white/[.025] p-6"><Eyebrow color={accent}>Next game</Eyebrow>{upcoming[0]?<><div className="mt-5 flex items-end justify-between gap-5"><div><p className="text-xs font-black uppercase tracking-widest text-white/40">{formatDate(upcoming[0].scheduled_at)} · {formatTime(upcoming[0].scheduled_at)}</p><h2 className="mt-3 font-display text-3xl font-black uppercase">vs {opponent(upcoming[0])}</h2><p className="mt-2 text-sm text-white/45">{venues.find(v=>v.id===upcoming[0].venue_id)?.name??'Venue TBA'}</p></div><Link href={`/games/${upcoming[0].id}`} className="text-xs font-black uppercase tracking-widest" style={{color:accent}}>Game details →</Link></div></>:<Empty text="No upcoming game is scheduled."/>}</section>
         <section className="border border-white/10 bg-white/[.025] p-6"><Eyebrow color={accent}>Team quick info</Eyebrow><dl className="mt-5 space-y-4 text-sm"><Row a="Division" b={division?.name??'Pending'}/><Row a="Season" b={currentSeason?.name??'Pending'}/><Row a="Roster" b={`${currentRoster.length} players`}/><Row a="Coaches" b={coaches.length?String(coaches.length):'Pending'}/></dl></section>
