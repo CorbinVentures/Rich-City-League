@@ -171,7 +171,6 @@ export async function GET(request: Request) {
             .eq('season_id', season.id);
           if (seasonTeamsError) throw new Error(seasonTeamsError.message);
 
-          const normalizeName = (value: unknown) => String(value ?? '').trim().toLowerCase().replace(/\\s+/g, ' ');
           const seasonTeamByName = new Map<string, { teamId: string; teamSeasonId: string }>();
           for (const row of seasonTeams ?? []) {
             const team = Array.isArray(row.teams) ? row.teams[0] : row.teams;
