@@ -279,14 +279,22 @@ export async function GET(request: Request) {
               }
             }
 
-            const { error } = await db.from('games').upsert({
+            const gamePayload = {
               leagueapps_game_id: gameId, season_id: season.id, division_id: divisionId,
               home_team_id: homeTeamId, away_team_id: awayTeamId, venue_id: venueId,
               scheduled_at: scheduledAt, status, home_score: homeScore, away_score: awayScore,
               notes: String(item.notes ?? item.gameNotes ?? '').trim() || null,
               updated_at: new Date().toISOString(),
-            }, { onConflict: 'leagueapps_game_id' });
-            if (error) throw new Error(`game ${gameId}: ${error.message}`);
+            };
+            // leagueapps_game_id is protected by a partial unique index. PostgREST
+            // cannot target that index via ON CONFLICT(column), so resolve first.
+            const { data: existingGame, error: gameLookupError } = await db.from('games')
+              .select('id').eq('leagueapps_game_id', gameId).maybeSingle();
+            if (gameLookupError) throw new Error(`game ${gameId}: ${gameLookupError.message}`);
+            const gameWrite = existingGame?.id
+              ? await db.from('games').update(gamePayload).eq('id', existingGame.id)
+              : await db.from('games').insert(gamePayload);
+            if (gameWrite.error) throw new Error(`game ${gameId}: ${gameWrite.error.message}`);
             gamesUpserted += 1;
           }
         } catch (programError) {
