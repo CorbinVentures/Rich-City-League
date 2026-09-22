@@ -38,7 +38,11 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
   const {profile}=useAuth();
   const menuLinks = profile?.role==='admin'||profile?.role==='staff' ? [...nav,RCL_ADMIN_NAV_ITEM] : nav;
   const team = (id:string) => teams.find(t=>t.id===id);
-  const next = games.filter(g=>g.status!=='completed').slice(0,3);
+  const now = Date.now();
+  const next = [...games]
+    .filter(g => !['completed', 'cancelled'].includes(g.status) && new Date(g.scheduled_at).getTime() >= now)
+    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+    .slice(0, 3);
   const featured = players.slice(0,3);
   const rankMap = new Map(iq.map(x=>[x.player_id,x]));
   const statMap = new Map<string,{gp:number;points:number;assists:number}>();
