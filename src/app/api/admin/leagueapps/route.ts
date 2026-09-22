@@ -216,10 +216,14 @@ export async function GET(request: Request) {
             // LeagueApps Public API schedule records use team1/team2 names on the
             // v1 endpoint. Newer payload variants may also expose explicit team IDs.
             // Resolve by ID first, then by the program-scoped team name mapping.
-            const team1Ref = item.team1Id ?? item.team1ID ?? item.awayTeamId ?? item.awayTeamID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
-            const team2Ref = item.team2Id ?? item.team2ID ?? item.homeTeamId ?? item.homeTeamID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
-            const team1Name = String(item.team1 ?? item.awayTeamName ?? (item.awayTeam as Record<string, unknown> | undefined)?.name ?? '').trim();
-            const team2Name = String(item.team2 ?? item.homeTeamName ?? (item.homeTeam as Record<string, unknown> | undefined)?.name ?? '').trim();
+            const team1Value = item.team1;
+            const team2Value = item.team2;
+            const team1Object = team1Value && typeof team1Value === 'object' ? team1Value as Record<string, unknown> : undefined;
+            const team2Object = team2Value && typeof team2Value === 'object' ? team2Value as Record<string, unknown> : undefined;
+            const team1Ref = item.team1Id ?? item.team1ID ?? team1Object?.id ?? team1Object?.teamId ?? item.awayTeamId ?? item.awayTeamID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id ?? team1Value;
+            const team2Ref = item.team2Id ?? item.team2ID ?? team2Object?.id ?? team2Object?.teamId ?? item.homeTeamId ?? item.homeTeamID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id ?? team2Value;
+            const team1Name = String(item.team1Name ?? team1Object?.name ?? item.awayTeamName ?? (item.awayTeam as Record<string, unknown> | undefined)?.name ?? (typeof team1Value === 'string' && !/^\\d+$/.test(team1Value.trim()) ? team1Value : '')).trim();
+            const team2Name = String(item.team2Name ?? team2Object?.name ?? item.homeTeamName ?? (item.homeTeam as Record<string, unknown> | undefined)?.name ?? (typeof team2Value === 'string' && !/^\\d+$/.test(team2Value.trim()) ? team2Value : '')).trim();
 
             const resolveScheduledTeam = (externalRef: unknown, teamName: string) => {
               const externalId = Number(externalRef);
@@ -320,6 +324,7 @@ export async function GET(request: Request) {
         }
       }
 
+      if (errors.length) console.warn('[LeagueApps competition sync]', { programs: scope?.map((p: any) => p.program_id), teamsSeen, gamesUpserted, warnings: errors.slice(0, 50) });
       return NextResponse.json({ ok: errors.length === 0, programs: scope?.length ?? 0, locations: locations.length, teamsSeen, gamesUpserted, warnings: errors.slice(0, 50) }, { status: errors.length ? 207 : 200 });
     } catch (error) {
       return NextResponse.json({ error: error instanceof Error ? error.message : 'Competition sync failed.' }, { status: 502 });
