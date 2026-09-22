@@ -145,11 +145,9 @@ function getPublicConfig() {
 async function fetchLeagueAppsPublic(path: string) {
   const config = getPublicConfig();
   const url = new URL(`${config.apiBaseUrl}/v1/sites/${config.siteId}/${path.replace(/^\//, '')}`);
+  url.searchParams.set('api-key', config.apiKey);
   const response = await fetch(url, {
-    headers: {
-      accept: 'application/json',
-      'x-api-key': config.apiKey,
-    },
+    headers: { accept: 'application/json' },
     cache: 'no-store',
   });
   if (!response.ok) {
