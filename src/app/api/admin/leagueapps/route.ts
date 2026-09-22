@@ -121,6 +121,7 @@ export async function GET(request: Request) {
 
       let teamsSeen = 0;
       let gamesUpserted = 0;
+      const currentTeamIds = new Set<string>();
       const errors: string[] = [];
 
       for (const program of scope ?? []) {
@@ -155,6 +156,7 @@ export async function GET(request: Request) {
               teamId = createdTeam.id;
               existingByName.set(normalizeName(teamName), teamId);
             }
+            currentTeamIds.add(teamId);
             const { error: tsError } = await db.from('team_seasons').upsert({
               team_id: teamId, season_id: season.id,
             }, { onConflict: 'team_id,season_id' });
@@ -257,6 +259,15 @@ export async function GET(request: Request) {
         } catch (programError) {
           errors.push(`${programId}: ${programError instanceof Error ? programError.message : 'sync failed'}`);
         }
+      }
+
+      // Only teams belonging to the selected upcoming LeagueApps program(s) are active
+      // on current RCL public surfaces. Historical teams remain stored for history.
+      if (currentTeamIds.size) {
+        const { error: deactivateError } = await db.from('teams').update({ is_active: false, updated_at: new Date().toISOString() }).eq('league_id', league.id);
+        if (deactivateError) errors.push(`team activation: ${deactivateError.message}`);
+        const { error: activateError } = await db.from('teams').update({ is_active: true, updated_at: new Date().toISOString() }).in('id', [...currentTeamIds]);
+        if (activateError) errors.push(`team activation: ${activateError.message}`);
       }
 
       // Standings are RCL-derived from the official completed LeagueApps results.
