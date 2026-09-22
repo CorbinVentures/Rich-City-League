@@ -91,12 +91,20 @@ export async function GET(request: Request) {
         const startDate = start.toISOString().slice(0,10);
         const endDate = end.toISOString().slice(0,10);
         const slug = `la-${program.program_id}-${normalizeName(program.program_name).replace(/[^a-z0-9]+/g,'-').slice(0,40)}`;
-        const { error: seasonUpsertError } = await db.from('seasons').upsert({
+        const seasonPayload = {
           league_id: league.id, name: program.program_name, slug,
-          start_date: startDate, end_date: endDate, status: 'registration',
+          start_date: startDate, end_date: endDate, status: 'registration' as const,
           leagueapps_program_id: program.program_id, updated_at: new Date().toISOString(),
-        }, { onConflict: 'leagueapps_program_id' });
-        if (seasonUpsertError) throw new Error(`program ${program.program_id}: ${seasonUpsertError.message}`);
+        };
+        // leagueapps_program_id is protected by a partial unique index. PostgREST cannot
+        // target that index with ON CONFLICT(column), so resolve then insert/update explicitly.
+        const { data: existingSeason, error: seasonLookupError } = await db.from('seasons')
+          .select('id').eq('leagueapps_program_id', program.program_id).maybeSingle();
+        if (seasonLookupError) throw new Error(`program ${program.program_id}: ${seasonLookupError.message}`);
+        const seasonWrite = existingSeason?.id
+          ? await db.from('seasons').update(seasonPayload).eq('id', existingSeason.id)
+          : await db.from('seasons').insert(seasonPayload);
+        if (seasonWrite.error) throw new Error(`program ${program.program_id}: ${seasonWrite.error.message}`);
       }
 
       const locations = await fetchLeagueAppsLocations();
