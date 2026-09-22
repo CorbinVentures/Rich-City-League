@@ -93,7 +93,7 @@ export async function GET(request: Request) {
         const slug = `la-${program.program_id}-${normalizeName(program.program_name).replace(/[^a-z0-9]+/g,'-').slice(0,40)}`;
         const { error: seasonUpsertError } = await db.from('seasons').upsert({
           league_id: league.id, name: program.program_name, slug,
-          start_date: startDate, end_date: endDate, status: 'draft',
+          start_date: startDate, end_date: endDate, status: 'registration',
           leagueapps_program_id: program.program_id, updated_at: new Date().toISOString(),
         }, { onConflict: 'leagueapps_program_id' });
         if (seasonUpsertError) throw new Error(`program ${program.program_id}: ${seasonUpsertError.message}`);
