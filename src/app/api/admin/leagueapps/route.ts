@@ -213,15 +213,30 @@ export async function GET(request: Request) {
             const gameId = Number(item.id ?? item.gameId ?? item.gameID);
             if (!Number.isFinite(gameId)) continue;
 
-            const homeRef = item.homeTeamId ?? item.homeTeamID ?? item.team1Id ?? item.team1ID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
-            const awayRef = item.awayTeamId ?? item.awayTeamID ?? item.team2Id ?? item.team2ID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
-            const homeId = Number(homeRef);
-            const awayId = Number(awayRef);
-            if (!Number.isFinite(homeId) || !Number.isFinite(awayId) || homeId === awayId) continue;
+            // LeagueApps Public API schedule records use team1/team2 names on the
+            // v1 endpoint. Newer payload variants may also expose explicit team IDs.
+            // Resolve by ID first, then by the program-scoped team name mapping.
+            const team1Ref = item.team1Id ?? item.team1ID ?? item.awayTeamId ?? item.awayTeamID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
+            const team2Ref = item.team2Id ?? item.team2ID ?? item.homeTeamId ?? item.homeTeamID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
+            const team1Name = String(item.team1 ?? item.awayTeamName ?? (item.awayTeam as Record<string, unknown> | undefined)?.name ?? '').trim();
+            const team2Name = String(item.team2 ?? item.homeTeamName ?? (item.homeTeam as Record<string, unknown> | undefined)?.name ?? '').trim();
 
-            const homeTeamId = programTeamMap.get(homeId);
-            const awayTeamId = programTeamMap.get(awayId);
-            if (!homeTeamId || !awayTeamId) { errors.push(`${programId} game ${gameId}: unresolved program team mapping (${homeId} vs ${awayId})`); continue; }
+            const resolveScheduledTeam = (externalRef: unknown, teamName: string) => {
+              const externalId = Number(externalRef);
+              if (Number.isFinite(externalId)) {
+                const byId = programTeamMap.get(externalId);
+                if (byId) return byId;
+              }
+              return teamName ? seasonTeamByName.get(normalizeName(teamName))?.teamId : undefined;
+            };
+
+            // LeagueApps' schedule UI/API represents team1 as away and team2 as home.
+            const awayTeamId = resolveScheduledTeam(team1Ref, team1Name);
+            const homeTeamId = resolveScheduledTeam(team2Ref, team2Name);
+            if (!homeTeamId || !awayTeamId || homeTeamId === awayTeamId) {
+              errors.push(`${programId} game ${gameId}: unresolved schedule teams ("${team1Name || String(team1Ref ?? '')}" vs "${team2Name || String(team2Ref ?? '')}")`);
+              continue;
+            }
 
             const rawTime = item.startTime ?? item.startDate ?? item.gameDate ?? item.date ?? item.startsAt;
             let scheduledAt: string | null = null;
@@ -234,8 +249,8 @@ export async function GET(request: Request) {
             }
             if (!scheduledAt || scheduledAt === 'Invalid Date') { errors.push(`game ${gameId}: missing start time`); continue; }
 
-            const homeScoreRaw = item.homeScore ?? item.homeTeamScore;
-            const awayScoreRaw = item.awayScore ?? item.awayTeamScore;
+            const homeScoreRaw = item.homeScore ?? item.homeTeamScore ?? item.team2Score;
+            const awayScoreRaw = item.awayScore ?? item.awayTeamScore ?? item.team1Score;
             const homeScore = Number.isFinite(Number(homeScoreRaw)) ? Math.max(0, Number(homeScoreRaw)) : 0;
             const awayScore = Number.isFinite(Number(awayScoreRaw)) ? Math.max(0, Number(awayScoreRaw)) : 0;
             const state = String(item.status ?? item.gameStatus ?? '').toLowerCase();
@@ -243,7 +258,12 @@ export async function GET(request: Request) {
             const status = state.includes('cancel') ? 'cancelled' : state.includes('postpon') ? 'postponed' : (state.includes('complete') || state.includes('final') || scored) ? 'completed' : 'scheduled';
 
             const locationRef = item.locationId ?? item.locationID ?? (item.location as Record<string, unknown> | undefined)?.id;
-            const venueId = locationRef == null ? null : (locationMap.get(String(locationRef)) ?? null);
+            const locationName = String(item.locationName ?? (item.location as Record<string, unknown> | undefined)?.name ?? '').trim();
+            let venueId = locationRef == null ? null : (locationMap.get(String(locationRef)) ?? null);
+            if (!venueId && locationName) {
+              const { data: venueByName } = await db.from('venues').select('id').eq('name', locationName).maybeSingle();
+              venueId = venueByName?.id ?? null;
+            }
             const divisionName = String(item.divisionName ?? item.subProgramName ?? '').trim();
             let divisionId: string | null = null;
             if (divisionName) {
