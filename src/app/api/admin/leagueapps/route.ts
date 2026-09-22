@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
-import { fetchLeagueAppsBatch, fetchLeagueAppsLocations, fetchLeagueAppsProgramSchedule, fetchLeagueAppsProgramTeams, getLeagueAppsConfigStatus, getLeagueAppsPublicConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
+import { fetchLeagueAppsBatch, fetchLeagueAppsLocations, fetchLeagueAppsProgramSchedule, fetchLeagueAppsProgramTeams, fetchLeagueAppsSitePrograms, getLeagueAppsConfigStatus, getLeagueAppsPublicConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,13 +38,66 @@ export async function GET(request: Request) {
 
   if (action === 'sync-competition') {
     try {
-      const { data: scope, error: scopeError } = await db.from('leagueapps_program_scope')
+      const { data: approvedScope, error: scopeError } = await db.from('leagueapps_program_scope')
         .select('program_id,program_name').eq('scope', 'mens').eq('enabled', true).order('program_id');
       if (scopeError) throw new Error(scopeError.message);
 
-      // Refresh structure first so every public-API program can resolve to an RCL season/team.
-      const { error: structureError } = await db.rpc('materialize_leagueapps_structure');
-      if (structureError) throw new Error(`LeagueApps structure reconciliation failed: ${structureError.message}`);
+      // Competition data must come from LeagueApps' current Public API program list.
+      // Registrations cannot discover a brand-new program with zero registrants.
+      const publicPrograms = await fetchLeagueAppsSitePrograms();
+      const normalizeName = (value: unknown) => String(value ?? '').trim().toLowerCase().replace(/\\s+/g, ' ');
+      const approvedNames = new Set((approvedScope ?? []).map((p: any) => normalizeName(p.program_name)));
+      const toMillis = (value: unknown): number | null => {
+        if (typeof value === 'number' && Number.isFinite(value)) return value < 10_000_000_000 ? value * 1000 : value;
+        if (typeof value === 'string' && value.trim()) {
+          const n = Number(value);
+          if (Number.isFinite(n) && /^\\d+$/.test(value.trim())) return n < 10_000_000_000 ? n * 1000 : n;
+          const parsed = Date.parse(value);
+          return Number.isNaN(parsed) ? null : parsed;
+        }
+        return null;
+      };
+      const now = Date.now();
+      const discovered = publicPrograms.map((p: any) => {
+        const programId = Number(p.id ?? p.programId ?? p.programID);
+        const programName = String(p.name ?? p.programName ?? '').trim();
+        const state = String(p.state ?? p.programState ?? p.status ?? '').trim().toLowerCase();
+        const startMs = toMillis(p.startDate ?? p.startTime ?? p.programStartDate);
+        const endMs = toMillis(p.endDate ?? p.endTime ?? p.programEndDate);
+        return { raw: p, programId, programName, state, startMs, endMs };
+      }).filter((p: any) => Number.isFinite(p.programId) && p.programName && approvedNames.has(normalizeName(p.programName)));
+
+      const upcoming = discovered.filter((p: any) =>
+        p.state.includes('upcoming') ||
+        (p.startMs !== null && p.startMs >= now) ||
+        (p.endMs !== null && p.endMs >= now && !p.state.includes('completed'))
+      );
+      // Prefer the newest approved upcoming program for each approved program name.
+      const selectedByName = new Map<string, any>();
+      for (const p of upcoming.sort((a: any,b: any) => (b.startMs ?? 0) - (a.startMs ?? 0))) {
+        const key = normalizeName(p.programName);
+        if (!selectedByName.has(key)) selectedByName.set(key, p);
+      }
+      const scope = [...selectedByName.values()].map((p: any) => ({ program_id: p.programId, program_name: p.programName, start_ms: p.startMs, end_ms: p.endMs }));
+      if (!scope.length) throw new Error('No approved upcoming LeagueApps programs were discovered from the Public API.');
+
+      const { data: league, error: leagueError } = await db.from('leagues').select('id').eq('is_active', true).order('created_at').limit(1).maybeSingle();
+      if (leagueError || !league?.id) throw new Error(leagueError?.message ?? 'No active RCL league exists.');
+
+      // Materialize the selected upcoming program directly from Public API metadata.
+      for (const program of scope) {
+        const start = program.start_ms ? new Date(program.start_ms) : new Date();
+        const end = program.end_ms ? new Date(program.end_ms) : new Date(start.getTime() + 120 * 86400000);
+        const startDate = start.toISOString().slice(0,10);
+        const endDate = end.toISOString().slice(0,10);
+        const slug = `la-${program.program_id}-${normalizeName(program.program_name).replace(/[^a-z0-9]+/g,'-').slice(0,40)}`;
+        const { error: seasonUpsertError } = await db.from('seasons').upsert({
+          league_id: league.id, name: program.program_name, slug,
+          start_date: startDate, end_date: endDate, status: 'draft',
+          leagueapps_program_id: program.program_id, updated_at: new Date().toISOString(),
+        }, { onConflict: 'leagueapps_program_id' });
+        if (seasonUpsertError) throw new Error(`program ${program.program_id}: ${seasonUpsertError.message}`);
+      }
 
       const locations = await fetchLeagueAppsLocations();
       const locationMap = new Map<string, string>();
