@@ -136,7 +136,7 @@ type LeagueAppsPublicRecord = Record<string, unknown>;
 
 function getPublicConfig() {
   const siteId = process.env.LEAGUEAPPS_SITE_ID?.trim();
-  const apiKey = process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim();
+  const apiKey = (process.env.LEAGUEAPPS_CLIENT_ID || process.env.LEAGUEAPPS_PUBLIC_API_KEY)?.trim();
   const apiBaseUrl = (process.env.LEAGUEAPPS_PUBLIC_API_BASE_URL || 'https://api.leagueapps.com').replace(/\/$/, '');
   if (!siteId || !apiKey) throw new Error('LeagueApps Public API integration is not configured.');
   return { siteId, apiKey, apiBaseUrl };
@@ -185,8 +185,9 @@ export async function fetchLeagueAppsLocations() {
 
 export function getLeagueAppsPublicConfigStatus() {
   return {
-    configured: Boolean(process.env.LEAGUEAPPS_SITE_ID?.trim() && process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim()),
+    configured: Boolean(process.env.LEAGUEAPPS_SITE_ID?.trim() && (process.env.LEAGUEAPPS_CLIENT_ID?.trim() || process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim())),
     siteId: process.env.LEAGUEAPPS_SITE_ID?.trim() ?? null,
     publicApiKeyPresent: Boolean(process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim()),
+    usingPrivateClientId: Boolean(process.env.LEAGUEAPPS_CLIENT_ID?.trim()),
   };
 }
