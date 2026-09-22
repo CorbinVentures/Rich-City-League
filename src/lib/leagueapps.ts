@@ -130,3 +130,60 @@ export async function fetchLeagueAppsBatch(
   const records = await response.json() as Array<Record<string, unknown>>;
   return records;
 }
+
+
+type LeagueAppsPublicRecord = Record<string, unknown>;
+
+function getPublicConfig() {
+  const siteId = process.env.LEAGUEAPPS_SITE_ID?.trim();
+  const apiKey = process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim();
+  const apiBaseUrl = (process.env.LEAGUEAPPS_PUBLIC_API_BASE_URL || 'https://api.leagueapps.com').replace(/\/$/, '');
+  if (!siteId || !apiKey) throw new Error('LeagueApps Public API integration is not configured.');
+  return { siteId, apiKey, apiBaseUrl };
+}
+
+async function fetchLeagueAppsPublic(path: string) {
+  const config = getPublicConfig();
+  const url = new URL(`${config.apiBaseUrl}/v1/sites/${config.siteId}/${path.replace(/^\//, '')}`);
+  url.searchParams.set('api_key', config.apiKey);
+  const response = await fetch(url, { headers: { accept: 'application/json' }, cache: 'no-store' });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`LeagueApps Public API request failed (${response.status}): ${detail.slice(0, 300)}`);
+  }
+  return response.json() as Promise<unknown>;
+}
+
+function publicRows(payload: unknown, keys: string[]): LeagueAppsPublicRecord[] {
+  if (Array.isArray(payload)) return payload.filter((row): row is LeagueAppsPublicRecord => Boolean(row && typeof row === 'object'));
+  if (!payload || typeof payload !== 'object') return [];
+  const record = payload as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (Array.isArray(value)) return value.filter((row): row is LeagueAppsPublicRecord => Boolean(row && typeof row === 'object'));
+  }
+  return [];
+}
+
+export async function fetchLeagueAppsProgramSchedule(programId: number) {
+  const payload = await fetchLeagueAppsPublic(`programs/${programId}/schedule`);
+  return publicRows(payload, ['games', 'schedule', 'events', 'items']);
+}
+
+export async function fetchLeagueAppsProgramTeams(programId: number) {
+  const payload = await fetchLeagueAppsPublic(`programs/${programId}/teams`);
+  return publicRows(payload, ['teams', 'items']);
+}
+
+export async function fetchLeagueAppsLocations() {
+  const payload = await fetchLeagueAppsPublic('locations');
+  return publicRows(payload, ['locations', 'items']);
+}
+
+export function getLeagueAppsPublicConfigStatus() {
+  return {
+    configured: Boolean(process.env.LEAGUEAPPS_SITE_ID?.trim() && process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim()),
+    siteId: process.env.LEAGUEAPPS_SITE_ID?.trim() ?? null,
+    publicApiKeyPresent: Boolean(process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim()),
+  };
+}
