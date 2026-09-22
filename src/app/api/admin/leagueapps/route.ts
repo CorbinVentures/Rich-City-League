@@ -135,6 +135,32 @@ export async function GET(request: Request) {
           if (!season?.id) { errors.push(`${programId}: no RCL season mapping`); continue; }
           teamsSeen += publicTeams.length;
 
+          // Materialize teams/team-seasons from the Public API itself. This is essential
+          // for upcoming programs that legitimately have zero registrations.
+          const { data: leagueTeams, error: leagueTeamsError } = await db.from('teams').select('id,name').eq('league_id', league.id);
+          if (leagueTeamsError) throw new Error(leagueTeamsError.message);
+          const existingByName = new Map<string,string>((leagueTeams ?? []).map((t: any) => [normalizeName(t.name), t.id]));
+          for (const publicTeam of publicTeams) {
+            const externalTeamId = Number(publicTeam.id ?? publicTeam.teamId ?? publicTeam.teamID);
+            const teamName = String(publicTeam.name ?? publicTeam.teamName ?? '').trim();
+            if (!Number.isFinite(externalTeamId) || !teamName) continue;
+            let teamId = existingByName.get(normalizeName(teamName));
+            if (!teamId) {
+              const slugBase = normalizeName(teamName).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,35) || 'team';
+              const { data: createdTeam, error: teamError } = await db.from('teams').insert({
+                league_id: league.id, name: teamName, slug: `la-team-${externalTeamId}-${slugBase}`,
+                is_active: true, leagueapps_team_id: externalTeamId,
+              }).select('id').single();
+              if (teamError) throw new Error(`team ${externalTeamId}: ${teamError.message}`);
+              teamId = createdTeam.id;
+              existingByName.set(normalizeName(teamName), teamId);
+            }
+            const { error: tsError } = await db.from('team_seasons').upsert({
+              team_id: teamId, season_id: season.id,
+            }, { onConflict: 'team_id,season_id' });
+            if (tsError) throw new Error(`team-season ${externalTeamId}: ${tsError.message}`);
+          }
+
           // LeagueApps team IDs are program-scoped/historical. Build an explicit
           // program -> external team -> RCL team mapping before importing games.
           const { data: seasonTeams, error: seasonTeamsError } = await db
