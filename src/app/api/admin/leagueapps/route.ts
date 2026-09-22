@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
-import { fetchLeagueAppsBatch, getLeagueAppsConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
+import { fetchLeagueAppsBatch, fetchLeagueAppsLocations, fetchLeagueAppsProgramSchedule, fetchLeagueAppsProgramTeams, getLeagueAppsConfigStatus, getLeagueAppsPublicConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,9 +30,146 @@ export async function GET(request: Request) {
     const { data: state, error } = await db.from('leagueapps_sync_state').select('*').order('resource');
     return NextResponse.json({
       configured: getLeagueAppsConfigStatus(),
+      publicConfigured: getLeagueAppsPublicConfigStatus(),
       state: error ? [] : (state ?? []),
       checkedAt: new Date().toISOString(),
     });
+  }
+
+  if (action === 'sync-competition') {
+    try {
+      const { data: scope, error: scopeError } = await db.from('leagueapps_program_scope')
+        .select('program_id,program_name').eq('scope', 'mens').eq('enabled', true).order('program_id');
+      if (scopeError) throw new Error(scopeError.message);
+
+      // Refresh structure first so every public-API program can resolve to an RCL season/team.
+      const { error: structureError } = await db.rpc('materialize_leagueapps_structure');
+      if (structureError) throw new Error(`LeagueApps structure reconciliation failed: ${structureError.message}`);
+
+      const locations = await fetchLeagueAppsLocations();
+      const locationMap = new Map<string, string>();
+      for (const location of locations) {
+        const externalId = String(location.id ?? location.locationId ?? '');
+        const name = String(location.name ?? location.locationName ?? '').trim();
+        if (!externalId || !name) continue;
+        const { data: existing } = await db.from('venues').select('id').eq('name', name).maybeSingle();
+        let venueId = existing?.id as string | undefined;
+        if (!venueId) {
+          const address = String(location.address ?? location.address1 ?? '').trim() || null;
+          const city = String(location.city ?? '').trim() || null;
+          const state = String(location.state ?? '').trim() || null;
+          const postal_code = String(location.zip ?? location.zipCode ?? location.postalCode ?? '').trim() || null;
+          const { data: created, error } = await db.from('venues').insert({ name, address, city, state, postal_code, amenities: { leagueapps_location_id: externalId } }).select('id').single();
+          if (error) throw new Error(error.message);
+          venueId = created.id;
+        }
+        if (venueId) locationMap.set(externalId, venueId);
+      }
+
+      let teamsSeen = 0;
+      let gamesUpserted = 0;
+      const errors: string[] = [];
+
+      for (const program of scope ?? []) {
+        const programId = Number(program.program_id);
+        try {
+          const [{ data: season, error: seasonError }, publicTeams, schedule] = await Promise.all([
+            db.from('seasons').select('id').eq('leagueapps_program_id', programId).maybeSingle(),
+            fetchLeagueAppsProgramTeams(programId),
+            fetchLeagueAppsProgramSchedule(programId),
+          ]);
+          if (seasonError) throw new Error(seasonError.message);
+          if (!season?.id) { errors.push(`${programId}: no RCL season mapping`); continue; }
+          teamsSeen += publicTeams.length;
+
+          for (const item of schedule) {
+            const gameId = Number(item.id ?? item.gameId ?? item.gameID);
+            if (!Number.isFinite(gameId)) continue;
+
+            const homeRef = item.homeTeamId ?? item.homeTeamID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
+            const awayRef = item.awayTeamId ?? item.awayTeamID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
+            const homeId = Number(homeRef);
+            const awayId = Number(awayRef);
+            if (!Number.isFinite(homeId) || !Number.isFinite(awayId) || homeId === awayId) continue;
+
+            const [{ data: home }, { data: away }] = await Promise.all([
+              db.from('teams').select('id').eq('leagueapps_team_id', homeId).maybeSingle(),
+              db.from('teams').select('id').eq('leagueapps_team_id', awayId).maybeSingle(),
+            ]);
+            if (!home?.id || !away?.id) { errors.push(`game ${gameId}: unresolved team mapping`); continue; }
+
+            const rawTime = item.startTime ?? item.startDate ?? item.gameDate ?? item.date ?? item.startsAt;
+            let scheduledAt: string | null = null;
+            if (typeof rawTime === 'number') scheduledAt = new Date(rawTime < 10_000_000_000 ? rawTime * 1000 : rawTime).toISOString();
+            else if (typeof rawTime === 'string' && rawTime.trim()) {
+              const numeric = Number(rawTime);
+              scheduledAt = Number.isFinite(numeric) && /^\d+$/.test(rawTime)
+                ? new Date(numeric < 10_000_000_000 ? numeric * 1000 : numeric).toISOString()
+                : new Date(rawTime).toISOString();
+            }
+            if (!scheduledAt || scheduledAt === 'Invalid Date') { errors.push(`game ${gameId}: missing start time`); continue; }
+
+            const homeScoreRaw = item.homeScore ?? item.homeTeamScore;
+            const awayScoreRaw = item.awayScore ?? item.awayTeamScore;
+            const homeScore = Number.isFinite(Number(homeScoreRaw)) ? Math.max(0, Number(homeScoreRaw)) : 0;
+            const awayScore = Number.isFinite(Number(awayScoreRaw)) ? Math.max(0, Number(awayScoreRaw)) : 0;
+            const state = String(item.status ?? item.gameStatus ?? '').toLowerCase();
+            const scored = homeScoreRaw !== undefined && homeScoreRaw !== null && awayScoreRaw !== undefined && awayScoreRaw !== null;
+            const status = state.includes('cancel') ? 'cancelled' : state.includes('postpon') ? 'postponed' : (state.includes('complete') || state.includes('final') || scored) ? 'completed' : 'scheduled';
+
+            const locationRef = item.locationId ?? item.locationID ?? (item.location as Record<string, unknown> | undefined)?.id;
+            const venueId = locationRef == null ? null : (locationMap.get(String(locationRef)) ?? null);
+            const divisionName = String(item.divisionName ?? item.subProgramName ?? '').trim();
+            let divisionId: string | null = null;
+            if (divisionName) {
+              const { data: division } = await db.from('divisions').select('id').eq('season_id', season.id).eq('name', divisionName).maybeSingle();
+              if (division?.id) divisionId = division.id;
+              else {
+                const { data: created, error } = await db.from('divisions').insert({ season_id: season.id, name: divisionName, age_group: 'Adult', gender: 'Open', leagueapps_program_id: programId }).select('id').single();
+                if (!error) divisionId = created.id;
+              }
+            }
+
+            const { error } = await db.from('games').upsert({
+              leagueapps_game_id: gameId, season_id: season.id, division_id: divisionId,
+              home_team_id: home.id, away_team_id: away.id, venue_id: venueId,
+              scheduled_at: scheduledAt, status, home_score: homeScore, away_score: awayScore,
+              notes: String(item.notes ?? item.gameNotes ?? '').trim() || null,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'leagueapps_game_id' });
+            if (error) throw new Error(`game ${gameId}: ${error.message}`);
+            gamesUpserted += 1;
+          }
+        } catch (programError) {
+          errors.push(`${programId}: ${programError instanceof Error ? programError.message : 'sync failed'}`);
+        }
+      }
+
+      // Standings are RCL-derived from the official completed LeagueApps results.
+      for (const program of scope ?? []) {
+        const programId = Number(program.program_id);
+        const { data: season } = await db.from('seasons').select('id').eq('leagueapps_program_id', programId).maybeSingle();
+        if (!season?.id) continue;
+        const { data: teamSeasons } = await db.from('team_seasons').select('team_id,division_id').eq('season_id', season.id);
+        const { data: games } = await db.from('games').select('home_team_id,away_team_id,home_score,away_score').eq('season_id', season.id).eq('status', 'completed');
+        const table = new Map<string, { wins:number; losses:number; ties:number; pf:number; pa:number; division_id:string|null }>();
+        for (const ts of teamSeasons ?? []) table.set(ts.team_id, { wins:0, losses:0, ties:0, pf:0, pa:0, division_id:ts.division_id ?? null });
+        for (const game of games ?? []) {
+          const h=table.get(game.home_team_id), a=table.get(game.away_team_id); if (!h || !a) continue;
+          h.pf+=game.home_score; h.pa+=game.away_score; a.pf+=game.away_score; a.pa+=game.home_score;
+          if (game.home_score>game.away_score) { h.wins++; a.losses++; } else if (game.away_score>game.home_score) { a.wins++; h.losses++; } else { h.ties++; a.ties++; }
+        }
+        const rows=[...table.entries()].map(([team_id,s])=>({season_id:season.id,division_id:s.division_id,team_id,wins:s.wins,losses:s.losses,ties:s.ties,points_for:s.pf,points_against:s.pa,updated_at:new Date().toISOString()}));
+        if (rows.length) {
+          const { error } = await db.from('standings').upsert(rows,{onConflict:'season_id,team_id'});
+          if (error) errors.push(`${programId} standings: ${error.message}`);
+        }
+      }
+
+      return NextResponse.json({ ok: errors.length === 0, programs: scope?.length ?? 0, locations: locations.length, teamsSeen, gamesUpserted, warnings: errors.slice(0, 50) }, { status: errors.length ? 207 : 200 });
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : 'Competition sync failed.' }, { status: 502 });
+    }
   }
 
   if (action === 'materialize-structure') {
