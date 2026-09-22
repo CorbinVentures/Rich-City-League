@@ -25,6 +25,7 @@ export default function LeagueSetupPage() {
   const [error,setError]=useState<string|null>(null);
   const [message,setMessage]=useState<string|null>(null);
   const [leagueAppsSyncing,setLeagueAppsSyncing]=useState(false);
+  const [logoUploading,setLogoUploading]=useState<string|null>(null);
 
   const [league,setLeague]=useState({name:'Rich City League',slug:'rich-city-league',description:''});
   const [season,setSeason]=useState({leagueId:'',name:'',slug:'',startDate:'',endDate:'',status:'draft' as Season['status']});
@@ -101,6 +102,27 @@ export default function LeagueSetupPage() {
     }
   }
 
+  async function uploadTeamLogo(teamId: string, file: File) {
+    if (!client || profile?.role !== 'admin') return;
+    if (!file.type.startsWith('image/')) { setError('Team logos must be image files.'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Team logos must be 5 MB or smaller.'); return; }
+    setLogoUploading(teamId); setError(null); setMessage(null);
+    try {
+      const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g,'') || 'png';
+      const path = `teams/${teamId}/logo-${Date.now()}.${extension}`;
+      const { data: uploaded, error: uploadError } = await client.storage.from('media').upload(path, file, { upsert:false, contentType:file.type, cacheControl:'3600' });
+      if (uploadError) throw uploadError;
+      const publicUrl = client.storage.from('media').getPublicUrl(uploaded.path).data.publicUrl;
+      if (!publicUrl) throw new Error('Logo uploaded but no public URL was returned.');
+      const { error: updateError } = await client.from('teams').update({ logo_url:publicUrl, updated_at:new Date().toISOString() } as never).eq('id',teamId);
+      if (updateError) throw updateError;
+      setMessage('Team logo updated across RCL.');
+      await load();
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Unable to upload team logo.');
+    } finally { setLogoUploading(null); }
+  }
+
   const field='mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none focus:border-rcl-orange/60';
   const label='block text-[9px] font-black uppercase tracking-[.18em] text-white/45';
   const button='rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-40';
@@ -123,6 +145,13 @@ export default function LeagueSetupPage() {
       </div>
     </section>
     {(message||error)&&<div className={`mt-6 rounded-2xl border p-4 text-sm \${error?'border-red-400/20 bg-red-400/10 text-red-200':'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'}`}>{error??message}</div>}
+    {profile?.role==='admin'&&<section className="mt-8 rounded-3xl border border-white/10 bg-white/[.025] p-6">
+      <div><p className="text-[9px] font-black uppercase tracking-[.22em] text-rcl-orange">TEAM BRANDING</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Team logos</h2><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Upload the official logo once. It is saved to the team record and follows that team across every RCL surface that uses team branding.</p></div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{teams.filter(team=>team.is_active).map(team=><div key={team.id} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+        {team.logo_url?<img src={team.logo_url} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover"/>:<div className="h-14 w-14 shrink-0 rounded-xl border border-dashed border-white/15" style={{backgroundColor:team.primary_color??'#111827'}}/>}
+        <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{team.name}</p><label className="mt-2 inline-flex cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-[9px] font-black uppercase tracking-widest hover:border-rcl-orange/50">{logoUploading===team.id?'Uploading…':team.logo_url?'Replace logo':'Upload logo'}<input type="file" accept="image/*" className="sr-only" disabled={logoUploading!==null} onChange={e=>{const file=e.target.files?.[0];if(file)void uploadTeamLogo(team.id,file);e.currentTarget.value='';}}/></label></div>
+      </div>)}</div>
+    </section>}
     <section className="mt-8 grid gap-3 sm:grid-cols-4 lg:grid-cols-8">{Object.entries(counts).map(([label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4"><p className="text-[9px] font-black uppercase tracking-widest text-white/35">{label.replace(/([A-Z])/g,' $1')}</p><p className="mt-2 font-display text-2xl font-black">{value}</p></div>)}</section>
 
     <div className="mt-8 grid gap-6 lg:grid-cols-2">
