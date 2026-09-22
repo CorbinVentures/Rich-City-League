@@ -186,9 +186,47 @@ export async function GET(request: Request) {
             }
             if (!teamId) throw new Error(`team ${externalTeamId}: RCL team ID was not resolved`);
             currentTeamIds.add(teamId);
-            const { error: tsError } = await db.from('team_seasons').upsert({
+
+            // LeagueApps can represent a team grouping as a division or sub-program.
+            // Resolve it from the actual Public Teams payload and persist it on the
+            // team-season so every RCL surface has one authoritative assignment.
+            const divisionValue = publicTeam.division;
+            const subProgramValue = publicTeam.subProgram ?? publicTeam.subprogram;
+            const divisionObject = divisionValue && typeof divisionValue === 'object' ? divisionValue as Record<string, unknown> : undefined;
+            const subProgramObject = subProgramValue && typeof subProgramValue === 'object' ? subProgramValue as Record<string, unknown> : undefined;
+            const divisionName = String(
+              publicTeam.divisionName ??
+              divisionObject?.name ??
+              publicTeam.subProgramName ??
+              publicTeam.subprogramName ??
+              subProgramObject?.name ??
+              (typeof divisionValue === 'string' ? divisionValue : '') ??
+              (typeof subProgramValue === 'string' ? subProgramValue : '')
+            ).trim();
+            let teamDivisionId: string | null = null;
+            if (divisionName) {
+              const { data: existingDivision, error: divisionLookupError } = await db.from('divisions')
+                .select('id').eq('season_id', season.id).eq('name', divisionName).maybeSingle();
+              if (divisionLookupError) throw new Error(`division "${divisionName}": ${divisionLookupError.message}`);
+              teamDivisionId = existingDivision?.id ?? null;
+              if (!teamDivisionId) {
+                const { data: createdDivision, error: divisionCreateError } = await db.from('divisions').insert({
+                  season_id: season.id, name: divisionName, age_group: 'Adult', gender: 'Open',
+                  leagueapps_program_id: programId,
+                }).select('id').single();
+                if (divisionCreateError) throw new Error(`division "${divisionName}": ${divisionCreateError.message}`);
+                teamDivisionId = createdDivision.id;
+              }
+            }
+
+            const teamSeasonPayload: Record<string, unknown> = {
               team_id: teamId, season_id: season.id,
-            }, { onConflict: 'team_id,season_id' });
+            };
+            if (teamDivisionId) teamSeasonPayload.division_id = teamDivisionId;
+            const { error: tsError } = await db.from('team_seasons').upsert(
+              teamSeasonPayload,
+              { onConflict: 'team_id,season_id' }
+            );
             if (tsError) throw new Error(`team-season ${externalTeamId}: ${tsError.message}`);
           }
 
