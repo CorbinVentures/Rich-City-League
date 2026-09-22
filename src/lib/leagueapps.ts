@@ -136,7 +136,9 @@ type LeagueAppsPublicRecord = Record<string, unknown>;
 
 function getPublicConfig() {
   const siteId = process.env.LEAGUEAPPS_SITE_ID?.trim();
-  const apiKey = (process.env.LEAGUEAPPS_CLIENT_ID || process.env.LEAGUEAPPS_PUBLIC_API_KEY)?.trim();
+  const publicApiKey = process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim();
+  const privateClientId = process.env.LEAGUEAPPS_CLIENT_ID?.trim();
+  const apiKey = publicApiKey || privateClientId;
   const apiBaseUrl = (process.env.LEAGUEAPPS_PUBLIC_API_BASE_URL || 'https://api.leagueapps.com').replace(/\/$/, '');
   if (!siteId || !apiKey) throw new Error('LeagueApps Public API integration is not configured.');
   return { siteId, apiKey, apiBaseUrl };
@@ -145,11 +147,11 @@ function getPublicConfig() {
 async function fetchLeagueAppsPublic(path: string) {
   const config = getPublicConfig();
   const url = new URL(`${config.apiBaseUrl}/v1/sites/${config.siteId}/${path.replace(/^\//, '')}`);
+  // LeagueApps Public API v1 authenticates with x-api-key as a query parameter.
+  // Keep this server-side so the credential is never exposed to the browser.
+  url.searchParams.set('x-api-key', config.apiKey);
   const response = await fetch(url, {
-    headers: {
-      accept: 'application/json',
-      'x-api-key': config.apiKey,
-    },
+    headers: { accept: 'application/json' },
     cache: 'no-store',
   });
   if (!response.ok) {
@@ -187,7 +189,7 @@ export async function fetchLeagueAppsLocations() {
 
 export function getLeagueAppsPublicConfigStatus() {
   return {
-    configured: Boolean(process.env.LEAGUEAPPS_SITE_ID?.trim() && (process.env.LEAGUEAPPS_CLIENT_ID?.trim() || process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim())),
+    configured: Boolean(process.env.LEAGUEAPPS_SITE_ID?.trim() && (process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim() || process.env.LEAGUEAPPS_CLIENT_ID?.trim())),
     siteId: process.env.LEAGUEAPPS_SITE_ID?.trim() ?? null,
     publicApiKeyPresent: Boolean(process.env.LEAGUEAPPS_PUBLIC_API_KEY?.trim()),
     usingPrivateClientId: Boolean(process.env.LEAGUEAPPS_CLIENT_ID?.trim()),
