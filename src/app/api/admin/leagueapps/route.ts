@@ -153,9 +153,11 @@ export async function GET(request: Request) {
                 is_active: true, leagueapps_team_id: externalTeamId,
               }).select('id').single();
               if (teamError) throw new Error(`team ${externalTeamId}: ${teamError.message}`);
-              teamId = createdTeam.id;
-              existingByName.set(normalizeName(teamName), teamId);
+              const createdTeamId = createdTeam.id;
+              teamId = createdTeamId;
+              existingByName.set(normalizeName(teamName), createdTeamId);
             }
+            if (!teamId) throw new Error(`team ${externalTeamId}: RCL team ID was not resolved`);
             currentTeamIds.add(teamId);
             const { error: tsError } = await db.from('team_seasons').upsert({
               team_id: teamId, season_id: season.id,
