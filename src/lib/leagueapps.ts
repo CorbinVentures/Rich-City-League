@@ -145,8 +145,13 @@ function getPublicConfig() {
 async function fetchLeagueAppsPublic(path: string) {
   const config = getPublicConfig();
   const url = new URL(`${config.apiBaseUrl}/v1/sites/${config.siteId}/${path.replace(/^\//, '')}`);
-  url.searchParams.set('api_key', config.apiKey);
-  const response = await fetch(url, { headers: { accept: 'application/json' }, cache: 'no-store' });
+  const response = await fetch(url, {
+    headers: {
+      accept: 'application/json',
+      'x-api-key': config.apiKey,
+    },
+    cache: 'no-store',
+  });
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(`LeagueApps Public API request failed (${response.status}): ${detail.slice(0, 300)}`);
