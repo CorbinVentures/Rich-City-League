@@ -213,8 +213,8 @@ export async function GET(request: Request) {
             const gameId = Number(item.id ?? item.gameId ?? item.gameID);
             if (!Number.isFinite(gameId)) continue;
 
-            const homeRef = item.homeTeamId ?? item.homeTeamID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
-            const awayRef = item.awayTeamId ?? item.awayTeamID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
+            const homeRef = item.homeTeamId ?? item.homeTeamID ?? item.team1Id ?? item.team1ID ?? (item.homeTeam as Record<string, unknown> | undefined)?.id;
+            const awayRef = item.awayTeamId ?? item.awayTeamID ?? item.team2Id ?? item.team2ID ?? (item.awayTeam as Record<string, unknown> | undefined)?.id;
             const homeId = Number(homeRef);
             const awayId = Number(awayRef);
             if (!Number.isFinite(homeId) || !Number.isFinite(awayId) || homeId === awayId) continue;
