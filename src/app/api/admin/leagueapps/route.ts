@@ -82,6 +82,43 @@ export async function GET(request: Request) {
           if (!season?.id) { errors.push(`${programId}: no RCL season mapping`); continue; }
           teamsSeen += publicTeams.length;
 
+          // LeagueApps team IDs are program-scoped/historical. Build an explicit
+          // program -> external team -> RCL team mapping before importing games.
+          const { data: seasonTeams, error: seasonTeamsError } = await db
+            .from('team_seasons')
+            .select('id,team_id,teams!inner(id,name)')
+            .eq('season_id', season.id);
+          if (seasonTeamsError) throw new Error(seasonTeamsError.message);
+
+          const normalizeName = (value: unknown) => String(value ?? '').trim().toLowerCase().replace(/\\s+/g, ' ');
+          const seasonTeamByName = new Map<string, { teamId: string; teamSeasonId: string }>();
+          for (const row of seasonTeams ?? []) {
+            const team = Array.isArray(row.teams) ? row.teams[0] : row.teams;
+            if (team?.id && team?.name) seasonTeamByName.set(normalizeName(team.name), { teamId: team.id, teamSeasonId: row.id });
+          }
+
+          const programTeamMap = new Map<number, string>();
+          for (const publicTeam of publicTeams) {
+            const externalTeamId = Number(publicTeam.id ?? publicTeam.teamId ?? publicTeam.teamID);
+            const teamName = String(publicTeam.name ?? publicTeam.teamName ?? '').trim();
+            if (!Number.isFinite(externalTeamId) || !teamName) continue;
+            const mapped = seasonTeamByName.get(normalizeName(teamName));
+            if (!mapped) {
+              errors.push(`${programId} team ${externalTeamId}: no RCL team-season match for "${teamName}"`);
+              continue;
+            }
+            programTeamMap.set(externalTeamId, mapped.teamId);
+            const { error: mappingError } = await db.from('leagueapps_team_mappings').upsert({
+              program_id: programId,
+              leagueapps_team_id: externalTeamId,
+              team_id: mapped.teamId,
+              team_season_id: mapped.teamSeasonId,
+              team_name: teamName,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'program_id,leagueapps_team_id' });
+            if (mappingError) throw new Error(`team mapping ${externalTeamId}: ${mappingError.message}`);
+          }
+
           for (const item of schedule) {
             const gameId = Number(item.id ?? item.gameId ?? item.gameID);
             if (!Number.isFinite(gameId)) continue;
@@ -92,20 +129,18 @@ export async function GET(request: Request) {
             const awayId = Number(awayRef);
             if (!Number.isFinite(homeId) || !Number.isFinite(awayId) || homeId === awayId) continue;
 
-            const [{ data: home }, { data: away }] = await Promise.all([
-              db.from('teams').select('id').eq('leagueapps_team_id', homeId).maybeSingle(),
-              db.from('teams').select('id').eq('leagueapps_team_id', awayId).maybeSingle(),
-            ]);
-            if (!home?.id || !away?.id) { errors.push(`game ${gameId}: unresolved team mapping`); continue; }
+            const homeTeamId = programTeamMap.get(homeId);
+            const awayTeamId = programTeamMap.get(awayId);
+            if (!homeTeamId || !awayTeamId) { errors.push(`${programId} game ${gameId}: unresolved program team mapping (${homeId} vs ${awayId})`); continue; }
 
             const rawTime = item.startTime ?? item.startDate ?? item.gameDate ?? item.date ?? item.startsAt;
             let scheduledAt: string | null = null;
-            if (typeof rawTime === 'number') scheduledAt = new Date(rawTime < 10_000_000_000 ? rawTime * 1000 : rawTime).toISOString();
+            if (typeof rawTime === 'number') { const d = new Date(rawTime < 10_000_000_000 ? rawTime * 1000 : rawTime); if (!Number.isNaN(d.getTime())) scheduledAt = d.toISOString(); }
             else if (typeof rawTime === 'string' && rawTime.trim()) {
               const numeric = Number(rawTime);
               scheduledAt = Number.isFinite(numeric) && /^\d+$/.test(rawTime)
-                ? new Date(numeric < 10_000_000_000 ? numeric * 1000 : numeric).toISOString()
-                : new Date(rawTime).toISOString();
+                ? (() => { const d = new Date(numeric < 10_000_000_000 ? numeric * 1000 : numeric); return Number.isNaN(d.getTime()) ? null : d.toISOString(); })()
+                : (() => { const d = new Date(rawTime); return Number.isNaN(d.getTime()) ? null : d.toISOString(); })();
             }
             if (!scheduledAt || scheduledAt === 'Invalid Date') { errors.push(`game ${gameId}: missing start time`); continue; }
 
@@ -132,7 +167,7 @@ export async function GET(request: Request) {
 
             const { error } = await db.from('games').upsert({
               leagueapps_game_id: gameId, season_id: season.id, division_id: divisionId,
-              home_team_id: home.id, away_team_id: away.id, venue_id: venueId,
+              home_team_id: homeTeamId, away_team_id: awayTeamId, venue_id: venueId,
               scheduled_at: scheduledAt, status, home_score: homeScore, away_score: awayScore,
               notes: String(item.notes ?? item.gameNotes ?? '').trim() || null,
               updated_at: new Date().toISOString(),
