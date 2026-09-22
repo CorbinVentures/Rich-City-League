@@ -172,6 +172,11 @@ function publicRows(payload: unknown, keys: string[]): LeagueAppsPublicRecord[] 
   return [];
 }
 
+export async function fetchLeagueAppsSitePrograms() {
+  const payload = await fetchLeagueAppsPublic('programs');
+  return publicRows(payload, ['programs', 'items', 'data']);
+}
+
 export async function fetchLeagueAppsProgramSchedule(programId: number) {
   const payload = await fetchLeagueAppsPublic(`programs/${programId}/schedule`);
   return publicRows(payload, ['games', 'schedule', 'events', 'items']);
