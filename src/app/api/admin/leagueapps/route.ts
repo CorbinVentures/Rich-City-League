@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { fetchLeagueAppsBatch, fetchLeagueAppsLocations, fetchLeagueAppsProgramSchedule, fetchLeagueAppsProgramTeams, fetchLeagueAppsSitePrograms, getLeagueAppsConfigStatus, getLeagueAppsPublicConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
 
@@ -12,19 +13,37 @@ function unauthorized(message = 'Admin access required.') {
 export async function GET(request: Request) {
   const authorization = request.headers.get('authorization');
   const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1] ?? null;
-  const supabase = await getServerSupabaseClient(bearerToken);
-  if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) return unauthorized('Your admin session was not recognized by the server. Please sign in again.');
-
-  const db = supabase as any;
-  const { data: profile, error: profileError } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  if (profileError) return NextResponse.json({ error: 'Unable to verify your admin role.' }, { status: 500 });
-  if (profile?.role !== 'admin') return unauthorized('Admin role required.');
-
   const url = new URL(request.url);
   const action = url.searchParams.get('action') ?? 'status';
+
+  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>. Cron is allowed only
+  // to run the competition sync and uses a server-only Supabase service key.
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  const isCron = Boolean(cronSecret && bearerToken && bearerToken === cronSecret);
+  let db: any;
+
+  if (isCron) {
+    if (action !== 'sync-competition') return unauthorized('Cron access is limited to competition sync.');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)?.trim();
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({ error: 'Automatic sync requires a server-only Supabase service key.' }, { status: 503 });
+    }
+    db = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  } else {
+    const supabase = await getServerSupabaseClient(bearerToken);
+    if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return unauthorized('Your admin session was not recognized by the server. Please sign in again.');
+
+    db = supabase as any;
+    const { data: profile, error: profileError } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    if (profileError) return NextResponse.json({ error: 'Unable to verify your admin role.' }, { status: 500 });
+    if (profile?.role !== 'admin') return unauthorized('Admin role required.');
+  }
 
   if (action === 'status') {
     const { data: state, error } = await db.from('leagueapps_sync_state').select('*').order('resource');
