@@ -173,7 +173,7 @@ function publicRows(payload: unknown, keys: string[]): LeagueAppsPublicRecord[] 
 }
 
 export async function fetchLeagueAppsSitePrograms() {
-  const payload = await fetchLeagueAppsPublic('programs');
+  const payload = await fetchLeagueAppsPublic('programs/current');
   return publicRows(payload, ['programs', 'items', 'data']);
 }
 
