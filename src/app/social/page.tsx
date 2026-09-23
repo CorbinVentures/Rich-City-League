@@ -22,6 +22,7 @@ type Comment = { id: string; post_id: string; author_id: string; body: string; c
 type Reaction = { user_id: string; post_id: string; type: string };
 type Post = { id: string; author_id: string; body: string; media_urls: string[]; created_at: string; author?: Author; comments?: Comment[]; reactions?: Reaction[] };
 type Story = { id: string; body: string | null; media_url?: string | null; expires_at: string; author_id?: string; author?: Author };
+type Community = { id: string; name: string; slug: string; description: string | null; community_type: string | null };
 type Tab = 'feed' | 'discover' | 'runs' | 'highlights' | 'communities' | 'messages' | 'notifications';
 const tabs: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'feed', label: 'Feed', icon: <FaBolt /> }, { id: 'discover', label: 'Discover', icon: <FaCompass /> },
@@ -37,6 +38,7 @@ export default function SocialPage() {
   const [view, setView] = useState<string | null>(null);
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [posts, setPosts] = useState<Post[]>([]); const [stories, setStories] = useState<Story[]>([]); const [currentProfile, setCurrentProfile] = useState<Author | null>(null);
+  const [suggestedProfiles, setSuggestedProfiles] = useState<Author[]>([]); const [communities, setCommunities] = useState<Community[]>([]);
   const [following, setFollowing] = useState<string[]>([]); const [saved, setSaved] = useState<string[]>([]); const [level, setLevel] = useState<{ level: number; xp: number } | null>(null);
   const [loading, setLoading] = useState(true); const [error, setError] = useState('');
   const [body, setBody] = useState(''); const [linkInput, setLinkInput] = useState(''); const [mediaFile, setMediaFile] = useState<File | null>(null); const [mediaPreview, setMediaPreview] = useState('');
@@ -66,7 +68,7 @@ export default function SocialPage() {
       if (postsError) throw postsError;
       const safePosts = (basePosts ?? []) as unknown as Array<Omit<Post, 'author' | 'comments' | 'reactions'>>;
       const postIds = safePosts.map((p) => p.id);
-      const [commentsResult, reactionsResult, storiesResult, followsResult, savedResult, levelResult, currentProfileResult] = await Promise.all([
+      const [commentsResult, reactionsResult, storiesResult, followsResult, savedResult, levelResult, currentProfileResult, suggestedResult, communitiesResult] = await Promise.all([
         postIds.length ? supabase.from('comments').select('id,post_id,author_id,body,created_at').in('post_id', postIds).order('created_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
         postIds.length ? supabase.from('reactions').select('post_id,user_id,type').in('post_id', postIds) : Promise.resolve({ data: [], error: null }),
         supabase.from('stories').select('id,body,media_url,expires_at,author_id').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(20),
@@ -74,9 +76,12 @@ export default function SocialPage() {
         user ? supabase.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),
         user ? supabase.from('user_levels').select('level,xp').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
         user ? supabase.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label').eq('id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+        supabase.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label').eq('is_active', true).eq('profile_visibility', 'public').order('created_at', { ascending: false }).limit(12),
+        supabase.from('communities').select('id,name,slug,description,community_type').eq('privacy', 'public').order('created_at', { ascending: false }).limit(6),
       ]);
       const comments = (commentsResult.data ?? []) as unknown as Comment[]; const storyRows = (storiesResult.data ?? []) as unknown as Story[];
-      const identityIds = [...new Set([...safePosts.map((p) => p.author_id), ...comments.map((item) => item.author_id), ...storyRows.map((item) => item.author_id).filter((id): id is string => Boolean(id)), ...(user ? [user.id] : [])])];
+      const suggestedRows = (suggestedResult.data ?? []) as unknown as Array<Author & { id: string }>;
+      const identityIds = [...new Set([...safePosts.map((p) => p.author_id), ...comments.map((item) => item.author_id), ...storyRows.map((item) => item.author_id).filter((id): id is string => Boolean(id)), ...suggestedRows.map((item) => item.id), ...(user ? [user.id] : [])])];
       const authorsResult = identityIds.length ? await supabase.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label').in('id', identityIds) : { data: [], error: null };
       const authors = (authorsResult.data ?? []) as unknown as Array<Author & { id: string }>;
       const levelIds = authors.map((author) => author.id);
@@ -90,6 +95,8 @@ export default function SocialPage() {
       setCurrentProfile(user ? ({ ...((currentProfileResult.data as Author | null) ?? {}), ...(authorMap.get(user.id) ?? {}) } as Author) : null);
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((r) => r.following_id));
       setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((r) => r.post_id));
+      setSuggestedProfiles(suggestedRows.map((profile) => authorMap.get(profile.id) ?? profile).filter((profile) => profile.id !== user?.id).sort((a,b) => (b.rep ?? 0) - (a.rep ?? 0)).slice(0,6));
+      setCommunities((communitiesResult.data ?? []) as unknown as Community[]);
       const levelData = levelResult.data as { level?: number; xp?: number } | null;
       setLevel(levelData?.level ? { level: levelData.level, xp: levelData.xp ?? 0 } : null);
     } catch (loadError) { console.error('Unable to load the social timeline', loadError); setError(loadError instanceof Error ? loadError.message : 'We could not load the social timeline.'); setPosts([]); }
