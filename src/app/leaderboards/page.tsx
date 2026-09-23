@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
 import { getPublicClient } from '@/lib/public-data';
 import LeaderboardExperience from '@/components/LeaderboardExperience';
+import type { PublicPlayer, PublicPlayerIQ } from '@/types/database';
 
 export const metadata: Metadata = {
   title: 'RCL Rankings | Richmond Basketball Player Stats',
@@ -32,20 +33,47 @@ export default async function LeaderboardsPage() {
     client.from('user_levels').select('profile_id, xp, level, current_streak'),
     client.from('profiles').select('id, display_name, username').eq('is_active', true),
   ]);
+  const playerRows: PublicPlayer[] = (players.data ?? []).flatMap((row) => row.id ? [{
+    id: row.id,
+    first_name: row.first_name ?? '',
+    last_name: row.last_name ?? '',
+    jersey_number: row.jersey_number,
+    position: row.position,
+    height_inches: row.height_inches,
+    hometown: row.hometown,
+    photo_url: row.photo_url,
+    is_active: row.is_active ?? true,
+  }] : []);
+  const iqRows: PublicPlayerIQ[] = (iq.data ?? []).flatMap((row) => row.player_id ? [{
+    player_id: row.player_id,
+    rcl_rating: row.rcl_rating ?? 0,
+    court_performance_score: row.court_performance_score ?? 0,
+    skill_profile_score: row.skill_profile_score ?? 0,
+    teammate_grade_score: row.teammate_grade_score ?? 0,
+    community_popularity_score: row.community_popularity_score ?? 0,
+    growth_consistency_score: row.growth_consistency_score ?? 0,
+    exposure_index: row.exposure_index ?? 0,
+    player_archetype: row.player_archetype,
+    rating_trend: row.rating_trend === 'rising' || row.rating_trend === 'declining' ? row.rating_trend : 'stable',
+    previous_rating: row.previous_rating,
+    rating_change: row.rating_change ?? 0,
+    games_evaluated: row.games_evaluated ?? 0,
+    last_calculated_at: row.last_calculated_at,
+  }] : []);
   const communityRows = (community.data ?? []) as { profile_id: string; xp: number; level: number; current_streak: number }[];
 
   return (
     <LeaderboardShell>
       <LeaderboardExperience
         seasons={seasons.data ?? []}
-        players={players.data ?? []}
+        players={playerRows}
         games={games.data ?? []}
         stats={stats.data ?? []}
         teams={teams.data ?? []}
         rosters={rosters.data ?? []}
         teamSeasons={teamSeasons.data ?? []}
         standings={standings.data ?? []}
-        iq={iq.data ?? []}
+        iq={iqRows}
         badges={badges.data ?? []}
         playerBadges={playerBadges.data ?? []}
         community={communityRows.map((row) => {

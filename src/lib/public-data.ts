@@ -5,6 +5,18 @@ import { getSupabaseConfig } from '@/lib/supabase-config';
 type PublicClient = SupabaseClient<Database>;
 type QueryResult<T> = { data: T; error: { message: string } | null };
 
+function normalizeGame(row: Database['public']['Tables']['games']['Row']): Game {
+  const scorebookStatus = row.scorebook_status;
+  return {
+    ...row,
+    scorebook_mode: row.scorebook_mode === 'pro' ? 'pro' : 'quick',
+    scorebook_status:
+      scorebookStatus === 'live' || scorebookStatus === 'paused' || scorebookStatus === 'final' || scorebookStatus === 'locked'
+        ? scorebookStatus
+        : 'not_started',
+  };
+}
+
 export type LeagueSnapshot = {
   leagues: League[];
   seasons: Season[];
@@ -84,7 +96,7 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
     divisions: divisions.data ?? [],
     teams: teams.data ?? [],
     teamSeasons: teamSeasons.data ?? [],
-    games: games.data ?? [],
+    games: (games.data ?? []).map(normalizeGame),
     standings: standings.data ?? [],
     news: news.data ?? [],
     venues: venues.data ?? [],
@@ -174,7 +186,7 @@ export async function getPlayerDetail(id: string): Promise<PlayerDetailData | nu
   if (teamsResult.error || seasonsResult.error || gamesResult.error || divisionsResult.error) {
     console.error('Public player related data query failed; serving partial data', teamsResult.error ?? seasonsResult.error ?? gamesResult.error ?? divisionsResult.error);
   }
-  return { player, rosters, teamSeasons, teams: teamsResult.data ?? [], seasons: seasonsResult.data ?? [], divisions: divisionsResult.data ?? [], games: gamesResult.data ?? [], stats: statsResult.data ?? [], iq: iqResult.data ?? null, iqHistory: iqHistoryResult.data ?? [] };
+  return { player, rosters, teamSeasons, teams: teamsResult.data ?? [], seasons: seasonsResult.data ?? [], divisions: divisionsResult.data ?? [], games: (gamesResult.data ?? []).map(normalizeGame), stats: statsResult.data ?? [], iq: iqResult.data ?? null, iqHistory: iqHistoryResult.data ?? [] };
 }
 
 export async function getSocialFeed() {

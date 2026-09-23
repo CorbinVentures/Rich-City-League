@@ -10,7 +10,7 @@ export const revalidate = 60;
 type TeamGroup = { id: string; name: string; players: PublicPlayer[] };
 type TeamSeasonRow = { id: string; team_id: string };
 type TeamRow = { id: string; name: string };
-type RosterRow = { player_id: string; team_season_id: string; status: string };
+type RosterRow = { player_id: string; team_season_id: string };
 
 export default async function PlayersPage() {
   const client = getPublicClient();
@@ -19,7 +19,7 @@ export default async function PlayersPage() {
     client.from('public_players').select('*').order('last_name').order('first_name'),
     client.from('seasons').select('id').eq('status', 'active').order('start_date', { ascending: false }).limit(1),
     client.from('teams').select('id,name').eq('is_active', true).order('name'),
-    client.from('rosters').select('player_id,team_season_id,status').eq('status', 'ACTIVE'),
+    client.from('rosters').select('player_id,team_season_id').is('left_at', null),
   ]);
   if (error) return <main><Container maxWidth="xl" className="py-16"><p className="text-red-300">Player directory is temporarily unavailable.</p></Container></main>;
   const players = (playersRaw ?? []) as PublicPlayer[];

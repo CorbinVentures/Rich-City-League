@@ -23,7 +23,17 @@ export default async function StatsPage() {
     error = [playerResult, teamResult, playersResult, teamsResult].find((result) => result.error) ? 'Statistics are temporarily unavailable.' : null;
     playerStats = playerResult.data ?? [];
     teamStats = teamResult.data ?? [];
-    players = playersResult.data ?? [];
+    players = (playersResult.data ?? []).flatMap((row) => row.id ? [{
+      id: row.id,
+      first_name: row.first_name ?? '',
+      last_name: row.last_name ?? '',
+      jersey_number: row.jersey_number,
+      position: row.position,
+      height_inches: row.height_inches,
+      hometown: row.hometown,
+      photo_url: row.photo_url,
+      is_active: row.is_active ?? true,
+    }] : []);
     teams = teamsResult.data ?? [];
   }
   const playerById = new Map(players.map((player) => [player.id, player]));

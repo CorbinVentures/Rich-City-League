@@ -86,7 +86,17 @@ export function useAuth() {
         .eq('id', currentUser.id)
         .single();
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
-      if (mounted && currentRequestId === requestId) setProfile(profileData);
+      if (mounted && currentRequestId === requestId) {
+        if (!profileData) {
+          setProfile(null);
+          return;
+        }
+        const visibility = profileData.profile_visibility;
+        setProfile({
+          ...profileData,
+          profile_visibility: visibility === 'public' || visibility === 'friends' || visibility === 'private' ? visibility : undefined,
+        });
+      }
     };
 
     const applySession = async (currentUser: User | null, event?: string) => {
