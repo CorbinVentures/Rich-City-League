@@ -3,7 +3,7 @@ begin;
 -- Harden social REP against reversible-action farming and self-engagement.
 create table if not exists public.social_rep_claims (
   profile_id uuid not null references public.profiles(id) on delete cascade,
-  action_type text not null check (action_type in ('post','comment','reaction','follow')),
+  action_type text not null check (action_type in ('posts','comments','reactions','follows')),
   target_id uuid not null,
   claimed_at timestamptz not null default now(),
   primary key(profile_id,action_type,target_id)
@@ -13,7 +13,7 @@ alter table public.social_rep_claims enable row level security;
 
 create or replace function public.award_social_rep()
 returns trigger language plpgsql security definer set search_path=public as $$
-declare actor uuid; reward integer; reason_name text; source_name text; source_uuid uuid; target_uuid uuid; owner uuid; claimed boolean:=false;
+declare actor uuid; reward integer; reason_name text; source_name text; source_uuid uuid; target_uuid uuid; owner uuid; claim_rows integer:=0;
 begin
   if tg_table_name='posts' then
     actor:=new.author_id; reward:=20; reason_name:='quality_content'; source_name:='post'; source_uuid:=new.id; target_uuid:=new.id;
@@ -35,8 +35,8 @@ begin
   insert into public.social_rep_claims(profile_id,action_type,target_id)
   values(actor,tg_table_name::text,target_uuid)
   on conflict do nothing;
-  get diagnostics claimed = row_count;
-  if not claimed then return new; end if;
+  get diagnostics claim_rows = row_count;
+  if claim_rows=0 then return new; end if;
 
   insert into public.user_levels(profile_id) values(actor) on conflict do nothing;
   insert into public.xp_transactions(profile_id,amount,reason,source_type,source_id)
