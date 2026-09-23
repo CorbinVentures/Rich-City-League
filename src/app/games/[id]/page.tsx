@@ -30,7 +30,15 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
     teamStats = teamResult.data ?? [];
     if (playerStats.length) {
       const result = await client.from('public_players').select('*').in('id', playerStats.map((stat) => stat.player_id));
-      players = result.data ?? [];
+      players = (result.data ?? [])
+        .filter((player): player is typeof player & { id: string } => player.id !== null)
+        .map((player) => ({
+          ...player,
+          id: player.id,
+          first_name: player.first_name ?? '',
+          last_name: player.last_name ?? '',
+          is_active: player.is_active ?? false,
+        }));
     }
   }
   const playerById = new Map(players.map((player) => [player.id, player]));
