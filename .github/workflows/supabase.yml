@@ -19,16 +19,17 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-    env:
-      # Use Supabase CLI's default public ECR mirror instead of GHCR, which is
-      # aggressively rate-limiting GitHub-hosted runners.
-      SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
-      SUPABASE_USE_SLIM_IMAGES: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
           version: 2.115.0
+      - name: Pin CI image registry after CLI setup
+        run: |
+          # setup-cli@v1 exports GHCR after installation. Override it through
+          # GITHUB_ENV so every subsequent step uses Docker Hub instead.
+          echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+          echo "SUPABASE_USE_SLIM_IMAGES=true" >> "$GITHUB_ENV"
       - name: Verify Docker runtime
         run: |
           docker version
