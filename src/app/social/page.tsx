@@ -256,7 +256,7 @@ export default function SocialPage() {
 
 function RepFeedback({ feedback }: { feedback: { amount: number; from: number; to: number; oldLevel: number; newLevel: number } }) {
   const leveled = feedback.newLevel > feedback.oldLevel;
-  const progress = Math.min(100, Math.max(4, (feedback.to % 1000) / 10));
+  const progress = reputationProgress(feedback.to, feedback.newLevel).percent;
   return <div className={`rcl-rep-feedback ${leveled ? 'is-level-up' : ''}`}>
     <div className="rcl-rep-feedback-ring" style={{'--feedback-progress': progress + '%'} as React.CSSProperties}><FaBolt /></div>
     <div><small>{leveled ? 'LEVEL UP' : 'REPUTATION'}</small><strong>{leveled ? `LEVEL ${feedback.newLevel}` : `+${feedback.amount} REP`}</strong><span>{leveled ? `You reached Level ${feedback.newLevel}` : `${formatRep(feedback.to)} total REP`}</span></div>
