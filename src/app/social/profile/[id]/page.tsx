@@ -47,4 +47,4 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
   </main>;
 }
 
-function repReasonLabel(reason:string){ return ({quality_content:'Quality content',meaningful_engagement:'Meaningful engagement',community_contribution:'Community contribution',profile_completed:'Profile completed',joined_team:'Joined a team',played_game:'Played a game',won_game:'Won a game',stat_milestone:'Stat milestone',invite_teammate:'Invited a teammate'} as Record<string,string>)[reason] || reason.replaceAll('_',' '); }
+function repReasonLabel(reason:string){ return ({quality_content:'Quality content',meaningful_engagement:'Meaningful engagement',community_contribution:'Community contribution',profile_completed:'Profile completed',joined_team:'Joined a team',played_game:'Played a game',won_game:'Won a game',stat_milestone:'Stat milestone',invite_teammate:'Invited a teammate'} as Record<string,string>)[reason] || reason.split('_').join(' '); }
