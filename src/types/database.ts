@@ -7,8 +7,7 @@ export type Json =
   | Json[];
 
 type Row<T> = T;
-type Insert<T> = Omit<T, 'id' | 'created_at' | 'updated_at'> &
-  Partial<Pick<T, Extract<keyof T, 'id' | 'created_at' | 'updated_at'>>>;
+type Insert<T> = Partial<T> & Pick<T, Exclude<keyof T, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'started_at' | 'assessed_at' | 'captured_at'>>;
 type Update<T> = Partial<T>;
 
 export interface Database {
