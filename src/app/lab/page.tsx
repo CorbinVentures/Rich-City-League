@@ -66,7 +66,7 @@ function readHistory(): Workout[] {
 
 export default function LabPage() {
   const { user } = useAuth();
-  const db = useMemo(() => getSupabaseClient() as any, []);
+  const db = useMemo(() => getSupabaseClient(), []);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [skill, setSkill] = useState(skills[0]);
   const [level, setLevel] = useState(levels[1]);
