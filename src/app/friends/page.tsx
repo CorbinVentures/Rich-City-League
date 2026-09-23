@@ -7,7 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 
-type FriendProfile = SocialIdentityAuthor;
+type FriendProfile = SocialIdentityAuthor & { id: string };
 type FriendRow = { id: string; requester_id: string; addressee_id: string; status: string; requester?: FriendProfile; addressee?: FriendProfile };
 
 export default function FriendsPage() {
