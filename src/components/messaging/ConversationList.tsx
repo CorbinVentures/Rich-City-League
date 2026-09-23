@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FiMessageCircle } from 'react-icons/fi';
+import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 
 export type ConversationListItem = {
   id: string;
@@ -11,6 +12,7 @@ export type ConversationListItem = {
   updatedAt: string;
   unread: number;
   avatarUrl: string | null;
+  identity?: SocialIdentityAuthor | null;
 };
 
 function formatDate(value: string) {
@@ -29,13 +31,8 @@ export function ConversationRow({ item }: { item: ConversationListItem }) {
       className="group flex min-h-[84px] items-center gap-3 border-b border-white/[0.07] px-4 py-4 transition hover:bg-white/[0.05] focus-visible:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rcl-gold"
       aria-label={`Open conversation with ${item.title}${item.unread ? `, ${item.unread} unread` : ''}`}
     >
-      <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-white/10 bg-rcl-navy text-sm font-black text-rcl-gold">
-        {item.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.avatarUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          item.title.slice(0, 2).toUpperCase()
-        )}
+      <div className="relative shrink-0">
+        {item.identity ? <SocialIdentity author={item.identity} compact link={false} /> : <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-white/10 bg-rcl-navy text-sm font-black text-rcl-gold">{item.avatarUrl ? <img src={item.avatarUrl} alt="" className="h-full w-full object-cover" /> : item.title.slice(0, 2).toUpperCase()}</div>}
         {item.unread > 0 && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-rcl-black bg-rcl-gold" />}
       </div>
       <div className="min-w-0 flex-1">
