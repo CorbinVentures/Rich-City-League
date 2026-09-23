@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowLeft, FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
+import { reputationProgress, reputationStatus } from '@/lib/reputation';
 
 export const revalidate = 30;
 
@@ -24,7 +25,7 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
   const { data: authors } = authorIds.length ? await client.from('profiles').select('id,display_name,username,avatar_url').in('id', authorIds) as any : { data: [] };
   const authorMap = new Map((authors ?? []).map((author:any) => [author.id, author]));
   const name = profile.display_name || profile.username || 'RCL Member';
-  const rep = repLevel?.xp ?? 0; const socialLevel = repLevel?.level ?? 1; const repLabel = rep >= 1000 ? (rep/1000).toFixed(1)+'K' : String(rep); const levelStart = socialLevel <= 1 ? 0 : 100 * (socialLevel-1) * (socialLevel-1); const nextLevelXp = 100 * socialLevel * socialLevel; const progress = Math.min(100, Math.max(4, ((rep-levelStart)/(nextLevelXp-levelStart))*100)); const repRows = (repLedger ?? []) as Array<{id:string;amount:number;reason:string;source_type:string|null;created_at:string}>;
+  const rep = repLevel?.xp ?? 0; const socialLevel = repLevel?.level ?? 1; const repLabel = rep >= 1000 ? (rep/1000).toFixed(1)+'K' : String(rep); const repProgress = reputationProgress(rep, socialLevel); const progress = repProgress.percent; const nextLevelXp = repProgress.next; const repStatus = reputationStatus(socialLevel); const repRows = (repLedger ?? []) as Array<{id:string;amount:number;reason:string;source_type:string|null;created_at:string}>;
   return <main className={'rcl-social-profile min-h-screen bg-[#05080d] pb-24 text-white '+(profile.is_vip?'is-vip':'')}>
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl"><div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4"><Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70" aria-label="Back to Social"><FaArrowLeft /></Link><div><p className="text-[9px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL Social</p><p className="text-sm font-black">{name}</p></div></div></header>
     <div className="mx-auto max-w-3xl">
@@ -36,7 +37,7 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 text-sm leading-6 text-white/65">{profile.bio}</p>}<PublicProfileActions profileId={profile.id} profileName={name} />
-          <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>Reputation</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span></div><div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
+          <div className={`rcl-profile-status-banner status-${repStatus.key}`}><small>REPUTATION STATUS</small><strong>{repStatus.label}</strong><span>Level {socialLevel} · {repProgress.remaining} REP to Level {socialLevel+1}</span></div><div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>Reputation</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span></div><div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
         </div>
       </section>
       <section className="px-4 pt-5"><div className="rcl-profile-rep-ledger"><div className="rcl-rep-ledger-heading"><div><small>REPUTATION</small><h2>REP Activity</h2></div><span>{nextLevelXp-rep} REP to Level {socialLevel+1}</span></div>{repRows.length ? <div>{repRows.slice(0,6).map((item)=><article key={item.id}><b>+{item.amount}</b><span><strong>{repReasonLabel(item.reason)}</strong><small>{item.source_type || 'RCL activity'} · {new Date(item.created_at).toLocaleDateString()}</small></span></article>)}</div> : <p>Your REP history will appear here as you contribute to RCL.</p>}</div></section><section className="px-4 py-5"><div className="mb-4 flex items-center gap-2"><FaBasketball className="text-rcl-orange"/><h2 className="font-display text-xl font-black uppercase">Timeline</h2></div>
