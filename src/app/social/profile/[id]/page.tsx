@@ -12,28 +12,30 @@ export default async function SocialPublicProfilePage({ params }: { params: Prom
   if (!client) notFound();
   const { data: profile } = await client.from('profiles').select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,created_at,is_vip,vip_label').eq('id', id).eq('is_active', true).maybeSingle() as any;
   if (!profile || profile.profile_visibility === 'private') notFound();
-  const [{ data: posts }, { count: followers }, { count: following }] = await Promise.all([
+  const [{ data: posts }, { count: followers }, { count: following }, { data: repLevel }] = await Promise.all([
     client.from('posts').select('id,author_id,body,media_urls,created_at').or(`author_id.eq.${id},target_profile_id.eq.${id}`).eq('status', 'published').order('created_at', { ascending: false }).limit(40) as any,
     client.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', id) as any,
     client.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id) as any,
+    client.from('user_levels').select('xp,level').eq('profile_id', id).maybeSingle() as any,
   ]);
   const postRows = (posts ?? []) as Array<{ id:string; author_id:string; body:string; media_urls:string[]; created_at:string }>;
   const authorIds = [...new Set(postRows.map((post) => post.author_id))];
   const { data: authors } = authorIds.length ? await client.from('profiles').select('id,display_name,username,avatar_url').in('id', authorIds) as any : { data: [] };
   const authorMap = new Map((authors ?? []).map((author:any) => [author.id, author]));
   const name = profile.display_name || profile.username || 'RCL Member';
-  return <main className="min-h-screen bg-[#05080d] pb-24 text-white">
+  const rep = repLevel?.xp ?? 0; const socialLevel = repLevel?.level ?? 1; const repLabel = rep >= 1000 ? (rep/1000).toFixed(1)+'K' : String(rep); const progress = Math.min(100, Math.max(6, (rep % 1000) / 10));
+  return <main className={'rcl-social-profile min-h-screen bg-[#05080d] pb-24 text-white '+(profile.is_vip?'is-vip':'')}>
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl"><div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4"><Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70" aria-label="Back to Social"><FaArrowLeft /></Link><div><p className="text-[9px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL Social</p><p className="text-sm font-black">{name}</p></div></div></header>
     <div className="mx-auto max-w-3xl">
       <section className="relative border-b border-white/10 bg-[#09111a]">
         <div className="h-44 overflow-hidden bg-gradient-to-br from-rcl-navy to-black sm:h-60">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
         <div className="px-5 pb-6">
-          <div className="-mt-14 flex items-end justify-between gap-4"><div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-rcl-orange text-4xl font-black text-black">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0,1).toUpperCase()}</div><Link href="/social" className="mb-2 rounded-xl border border-white/15 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-white/70">RCL Social</Link></div>
+          <div className="-mt-14 flex items-end justify-between gap-4"><div className="rcl-profile-rep-ring" style={{'--profile-progress':progress+'%'} as React.CSSProperties}><div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-rcl-orange text-4xl font-black text-black">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0,1).toUpperCase()}</div><em>{socialLevel}</em></div><Link href="/social" className="mb-2 rounded-xl border border-white/15 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-white/70">RCL Social</Link></div>
           <div className="mt-4 flex flex-wrap items-center gap-2"><h1 className="font-display text-3xl font-black uppercase">{name}</h1>{profile.is_vip&&<span title="RCL VIP verified member" className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-gradient-to-r from-amber-400/20 to-orange-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-[.14em] text-amber-300"><span className="grid h-4 w-4 place-items-center rounded-full bg-amber-300 text-[8px] text-black">✓</span>{profile.vip_label||'VIP'}</span>}</div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 text-sm leading-6 text-white/65">{profile.bio}</p>}<PublicProfileActions profileId={profile.id} profileName={name} />
-          <div className="mt-5 flex gap-5 text-xs"><span><b className="text-white">{following ?? 0}</b> <span className="text-white/35">Following</span></span><span><b className="text-white">{followers ?? 0}</b> <span className="text-white/35">Followers</span></span></div>
+          <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>Reputation</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span></div><div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
         </div>
       </section>
       <section className="px-4 py-5"><div className="mb-4 flex items-center gap-2"><FaBasketball className="text-rcl-orange"/><h2 className="font-display text-xl font-black uppercase">Timeline</h2></div>
