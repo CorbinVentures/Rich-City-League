@@ -10,6 +10,9 @@ type Row<T> = T;
 type Insert<T> = Partial<T> & Pick<T, Exclude<keyof T, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'started_at' | 'assessed_at' | 'captured_at'>>;
 type Update<T> = Partial<T>;
 
+type TableDef<T> = { Row: T; Insert: Insert<T>; Update: Update<T>; Relationships: [] };
+type ViewDef<T> = { Row: T; Relationships: [] };
+
 export interface Database {
   public: {
     Tables: {
@@ -103,17 +106,17 @@ export interface Database {
       discipline_categories: { Row: DisciplineCategory; Insert: Insert<DisciplineCategory>; Update: Update<DisciplineCategory> };
       discipline_cases: { Row: DisciplineCase; Insert: Insert<DisciplineCase>; Update: Update<DisciplineCase> };
       discipline_appeals: { Row: DisciplineAppeal; Insert: Insert<DisciplineAppeal>; Update: Update<DisciplineAppeal> };
-      lab_sessions: { Row: LabSession; Insert: Insert<LabSession>; Update: Update<LabSession>; Relationships: [] };
-      lab_program_enrollments: { Row: LabProgramEnrollment; Insert: Insert<LabProgramEnrollment>; Update: Update<LabProgramEnrollment>; Relationships: [] };
-      lab_assessments: { Row: LabAssessment; Insert: Insert<LabAssessment>; Update: Update<LabAssessment>; Relationships: [] };
-      lab_notebook_entries: { Row: LabNotebookEntry; Insert: Insert<LabNotebookEntry>; Update: Update<LabNotebookEntry>; Relationships: [] };
-      lab_film_entries: { Row: LabFilmEntry; Insert: Insert<LabFilmEntry>; Update: Update<LabFilmEntry>; Relationships: [] };
-      lab_challenge_attempts: { Row: LabChallengeAttempt; Insert: Insert<LabChallengeAttempt>; Update: Update<LabChallengeAttempt>; Relationships: [] };
-      lab_proof_snapshots: { Row: LabProofSnapshot; Insert: Insert<LabProofSnapshot>; Update: Update<LabProofSnapshot>; Relationships: [] };
+      lab_sessions: TableDef<LabSession>;
+      lab_program_enrollments: TableDef<LabProgramEnrollment>;
+      lab_assessments: TableDef<LabAssessment>;
+      lab_notebook_entries: TableDef<LabNotebookEntry>;
+      lab_film_entries: TableDef<LabFilmEntry>;
+      lab_challenge_attempts: TableDef<LabChallengeAttempt>;
+      lab_proof_snapshots: TableDef<LabProofSnapshot>;
     };
     Views: {
-      public_players: { Row: PublicPlayer };
-      public_player_iq: { Row: PublicPlayerIQ };
+      public_players: ViewDef<PublicPlayer>;
+      public_player_iq: ViewDef<PublicPlayerIQ>;
     };
     Functions: {
       record_draft_pick: { Args: { target_draft: string; target_team: string; target_player: string }; Returns: DraftPick };
@@ -139,6 +142,7 @@ export interface Database {
       game_status: 'scheduled' | 'live' | 'completed' | 'cancelled' | 'postponed';
       content_status: 'draft' | 'published' | 'archived';
     };
+    CompositeTypes: Record<string, never>;
   };
 }
 
