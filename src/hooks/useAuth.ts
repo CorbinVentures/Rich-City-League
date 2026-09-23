@@ -87,6 +87,10 @@ export function useAuth() {
         .single();
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
       if (mounted && currentRequestId === requestId) {
+        if (!profileData) {
+          setProfile(null);
+          return;
+        }
         const visibility = profileData.profile_visibility;
         setProfile({
           ...profileData,
