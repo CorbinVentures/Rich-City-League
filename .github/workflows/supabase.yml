@@ -19,6 +19,11 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+    env:
+      # Use Supabase CLI's default public ECR mirror instead of GHCR, which is
+      # aggressively rate-limiting GitHub-hosted runners.
+      SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
+      SUPABASE_USE_SLIM_IMAGES: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
