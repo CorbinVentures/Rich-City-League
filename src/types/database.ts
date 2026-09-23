@@ -104,6 +104,13 @@ export interface Database {
       discipline_categories: { Row: DisciplineCategory; Insert: Insert<DisciplineCategory>; Update: Update<DisciplineCategory> };
       discipline_cases: { Row: DisciplineCase; Insert: Insert<DisciplineCase>; Update: Update<DisciplineCase> };
       discipline_appeals: { Row: DisciplineAppeal; Insert: Insert<DisciplineAppeal>; Update: Update<DisciplineAppeal> };
+      lab_sessions: { Row: LabSession; Insert: Insert<LabSession>; Update: Update<LabSession> };
+      lab_program_enrollments: { Row: LabProgramEnrollment; Insert: Insert<LabProgramEnrollment>; Update: Update<LabProgramEnrollment> };
+      lab_assessments: { Row: LabAssessment; Insert: Insert<LabAssessment>; Update: Update<LabAssessment> };
+      lab_notebook_entries: { Row: LabNotebookEntry; Insert: Insert<LabNotebookEntry>; Update: Update<LabNotebookEntry> };
+      lab_film_entries: { Row: LabFilmEntry; Insert: Insert<LabFilmEntry>; Update: Update<LabFilmEntry> };
+      lab_challenge_attempts: { Row: LabChallengeAttempt; Insert: Insert<LabChallengeAttempt>; Update: Update<LabChallengeAttempt> };
+      lab_proof_snapshots: { Row: LabProofSnapshot; Insert: Insert<LabProofSnapshot>; Update: Update<LabProofSnapshot> };
     };
     Views: {
       public_players: { Row: PublicPlayer };
@@ -122,6 +129,9 @@ export interface Database {
       record_game_event: { Args: { target_game_id: string; p_period_number: number; p_clock_seconds: number; p_event_type: string; p_team_id?: string | null; p_player_id?: string | null; p_secondary_player_id?: string | null; p_player_in_id?: string | null; p_player_out_id?: string | null; p_points?: number; p_shot_value?: number | null; p_shot_result?: string | null; p_shot_x?: number | null; p_shot_y?: number | null; p_shot_zone?: string | null; p_foul_type?: string | null; p_turnover_type?: string | null; p_metadata?: Json }; Returns: GameEvent };
       void_game_event: { Args: { target_event_id: string }; Returns: GameEvent };
       finalize_game_scorebook: { Args: { target_game_id: string }; Returns: Game };
+      complete_lab_session: { Args: { target_session: string }; Returns: LabSession };
+      refresh_lab_proof: { Args: { target_profile: string }; Returns: undefined };
+      share_lab_achievement: { Args: { achievement_title: string; achievement_body: string }; Returns: string };
     };
     Enums: {
       app_role: 'player' | 'coach' | 'fan' | 'staff' | 'admin';
@@ -278,3 +288,11 @@ export interface CartItem { cart_id: string; variant_id: string; quantity: numbe
 export interface Order { id: string; order_number: string; user_id: string | null; customer_email: string; customer_name: string | null; shipping_address: Json; subtotal: number; shipping: number; tax: number; total: number; payment_status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | 'PARTIALLY_REFUNDED'; fulfillment_status: 'UNFULFILLED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'; tracking_number: string | null; created_at: string; updated_at: string; }
 export interface OrderItem { id: string; order_id: string; product_id: string | null; variant_id: string | null; product_snapshot: Json; variant_snapshot: Json | null; quantity: number; unit_price: number; created_at: string; }
 export interface InventoryAdjustment { id: string; variant_id: string; quantity_delta: number; reason: string; created_by: string | null; created_at: string; }
+
+export interface LabSession { id:string; profile_id:string; title:string; skill:string; duration_minutes:number; status:'planned'|'in_progress'|'completed'; source:'builder'|'program'|'coach'|'challenge'; workout:Json; completed_at:string|null; created_at:string; }
+export interface LabProgramEnrollment { id:string; profile_id:string; program_key:string; program_name:string; total_sessions:number; completed_sessions:number; focus:string|null; status:'active'|'completed'|'paused'; started_at:string; completed_at:string|null; }
+export interface LabAssessment { id:string; profile_id:string; category:'scoring'|'creation'|'playmaking'|'defense'|'athleticism'|'iq'; score:number; verification_status:'self'|'coach'|'rcl_verified'; notes:string|null; assessed_at:string; created_at:string; }
+export interface LabNotebookEntry { id:string; profile_id:string; session_id:string|null; title:string; body:string; visibility:'private'|'coach'; created_at:string; updated_at:string; }
+export interface LabFilmEntry { id:string; profile_id:string; title:string; media_url:string|null; possession_type:string|null; lesson:string; visibility:'private'|'coach'; created_at:string; }
+export interface LabChallengeAttempt { id:string; profile_id:string; challenge_key:string; challenge_name:string; result:number; attempts:number|null; verification_status:'self'|'coach'|'rcl_verified'; created_at:string; }
+export interface LabProofSnapshot { id:string; profile_id:string; category:string; lab_score:number|null; game_metric:string; game_value:number|null; games_sampled:number; captured_at:string; }
