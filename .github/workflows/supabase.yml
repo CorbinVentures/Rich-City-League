@@ -32,7 +32,20 @@ jobs:
       - name: Start local database for validation
         run: |
           set -o pipefail
-          supabase start --debug 2>&1 | tee /tmp/supabase-start.log
+          for attempt in 1 2 3 4; do
+            echo "Supabase start attempt $attempt of 4"
+            if supabase start --debug 2>&1 | tee /tmp/supabase-start.log; then
+              exit 0
+            fi
+            if grep -Eqi 'toomanyrequests|429|rate.?limit|failed to pull docker image|download failed' /tmp/supabase-start.log && [ "$attempt" -lt 4 ]; then
+              delay=$((attempt * 30))
+              echo "Registry pull was rate limited; waiting before retry."
+              sleep "$delay"
+              continue
+            fi
+            exit 1
+          done
+          exit 1
       - name: Validate complete migration sequence
         run: supabase db reset --local
       - name: Validate migration files
