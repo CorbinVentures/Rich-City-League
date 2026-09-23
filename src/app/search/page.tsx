@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaMagnifyingGlass, FaUser, FaBasketball, FaRegComment, FaCalendarDays, FaNewspaper } from 'react-icons/fa6';
+import { FaMagnifyingGlass, FaBasketball, FaRegComment, FaCalendarDays, FaNewspaper } from 'react-icons/fa6';
+import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 
-type Member = { id:string; display_name:string|null; username:string|null; first_name:string|null; last_name:string|null; avatar_url:string|null; role:string|null; is_vip?:boolean; vip_label?:string|null };
+type Member = SocialIdentityAuthor & { id:string; first_name:string|null; last_name:string|null; role:string|null };
 type Player = { id:string; profile_id:string|null; first_name:string; last_name:string; position:string|null; hometown:string|null; jersey_number:string|null };
 type Team = { id:string; name:string; slug:string; division?:string|null };
 type Game = { id:string; scheduled_at:string; status:string; home_score:number; away_score:number; home_team?:{name:string}|null; away_team?:{name:string}|null; venue?:{name:string;city?:string|null}|null };
@@ -47,7 +48,11 @@ export default function GlobalSearchPage() {
       ]);
       const failures=[memberResult,playerResult,teamResult,gameResult,newsResult,postResult].filter(x=>x.error);
       if(failures.length===6)throw failures[0].error;
-      setMembers((memberResult.data??[]) as Member[]);
+      const memberRows=(memberResult.data??[]) as Member[];
+      const memberIds=memberRows.map(member=>member.id);
+      const levelResult=memberIds.length ? await supabase.from('user_levels').select('profile_id,xp,level').in('profile_id',memberIds) : { data: [], error: null };
+      const levelMap=new Map(((levelResult.data??[]) as Array<{profile_id:string;xp:number;level:number}>).map(row=>[row.profile_id,row]));
+      setMembers(memberRows.map(member=>{const rep=levelMap.get(member.id);return {...member,rep:rep?.xp??0,level:rep?.level??1};}));
       setPlayers((playerResult.data??[]) as Player[]);
       setTeams((teamResult.data??[]) as Team[]);
       const needle=term.toLowerCase();
@@ -72,7 +77,7 @@ export default function GlobalSearchPage() {
       {error&&<p className="mt-6 rounded-xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-300">{error}</p>}
       {!loading&&active&&!error&&<div className="mt-7"><div className="mb-6 flex items-center justify-between"><p className="text-[10px] font-black uppercase tracking-widest text-white/35">Results for “{query.trim()}”</p><span className="text-xs font-black text-rcl-orange">{total} found</span></div>
         {total===0?<div className="rounded-3xl border border-dashed border-white/15 p-12 text-center text-sm text-white/35">No RCL results match that search. Try a shorter name or different keyword.</div>:<div className="space-y-9">
-          {members.length>0&&<Group title="Members" count={members.length}>{members.map(m=>{const name=m.display_name||[m.first_name,m.last_name].filter(Boolean).join(' ')||m.username||'RCL Member';return <Link key={m.id} href={`/social/profile/${m.id}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-orange/50"><span className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-rcl-orange font-black text-black">{m.avatar_url?<img src={m.avatar_url} alt="" className="h-full w-full object-cover"/>:name[0]}</span><div className="min-w-0 flex-1"><p className="truncate font-bold">{name} {m.is_vip&&<span className="ml-1 text-[9px] text-amber-300">✓ {m.vip_label||'VIP'}</span>}</p><p className="text-[10px] uppercase tracking-wider text-white/35">{m.username?`@${m.username} · `:''}{m.role||'member'}</p></div><FaUser className="text-white/20"/></Link>})}</Group>}
+          {members.length>0&&<Group title="Members" count={members.length}>{members.map(m=><div key={m.id} className="rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-orange/50"><SocialIdentity author={m}/>{m.role&&<p className="mt-2 pl-14 text-[9px] font-black uppercase tracking-wider text-white/30">{m.role}</p>}</div>)}</Group>}
           {players.length>0&&<Group title="Players" count={players.length}>{players.map(p=><Link key={p.id} href={`/players/${p.id}`} className="rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-orange/50"><p className="font-bold">{p.first_name} {p.last_name}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">{p.position||'Player'}{p.jersey_number?` · #${p.jersey_number}`:''}{p.hometown?` · ${p.hometown}`:''}</p></Link>)}</Group>}
           {teams.length>0&&<Group title="Teams" count={teams.length}>{teams.map(t=><Link key={t.id} href={`/teams/${t.slug}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-orange/50"><FaBasketball className="text-rcl-orange"/><b>{t.name}</b></Link>)}</Group>}
           {games.length>0&&<Group title="Games & venues" count={games.length}>{games.map(g=><Link key={g.id} href={`/games/${g.id}`} className="rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-orange/50"><div className="flex gap-3"><FaCalendarDays className="mt-1 text-rcl-orange"/><div><b>{g.away_team?.name||'Away'} @ {g.home_team?.name||'Home'}</b><p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">{new Date(g.scheduled_at).toLocaleDateString()} · {g.venue?.name||'Venue TBA'} · {g.status}</p></div></div></Link>)}</Group>}

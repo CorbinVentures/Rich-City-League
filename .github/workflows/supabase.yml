@@ -24,6 +24,12 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.115.0
+      - name: Pin CI image registry after CLI setup
+        run: |
+          # setup-cli@v1 exports GHCR after installation. Override it through
+          # GITHUB_ENV so every subsequent step uses Docker Hub instead.
+          echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+          echo "SUPABASE_USE_SLIM_IMAGES=true" >> "$GITHUB_ENV"
       - name: Verify Docker runtime
         run: |
           docker version
@@ -32,7 +38,20 @@ jobs:
       - name: Start local database for validation
         run: |
           set -o pipefail
-          supabase start --debug 2>&1 | tee /tmp/supabase-start.log
+          for attempt in 1 2 3 4; do
+            echo "Supabase start attempt $attempt of 4"
+            if supabase start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor --debug 2>&1 | tee /tmp/supabase-start.log; then
+              exit 0
+            fi
+            if grep -Eqi 'toomanyrequests|429|rate.?limit|failed to pull docker image|download failed' /tmp/supabase-start.log && [ "$attempt" -lt 4 ]; then
+              delay=$((attempt * 30))
+              echo "Registry pull was rate limited; waiting before retry."
+              sleep "$delay"
+              continue
+            fi
+            exit 1
+          done
+          exit 1
       - name: Validate complete migration sequence
         run: supabase db reset --local
       - name: Validate migration files
