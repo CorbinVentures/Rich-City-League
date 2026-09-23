@@ -13,7 +13,7 @@ type Update<T> = Partial<T>;
 type TableDef<T> = { Row: T; Insert: Insert<T>; Update: Update<T>; Relationships: [] };
 type ViewDef<T> = { Row: T; Insert: never; Update: never; Relationships: [] };
 
-export interface Database {
+interface LegacyDatabase {
   public: {
     Tables: {
       profiles: { Row: Row<ProfileRow>; Insert: Insert<ProfileRow>; Update: Update<ProfileRow>; Relationships: [] };
@@ -145,6 +145,8 @@ export interface Database {
     CompositeTypes: Record<string, never>;
   };
 }
+
+export type Database = import('./database.generated').Database;
 
 export interface ProfileRow { id: string; username: string | null; first_name: string | null; last_name: string | null; display_name: string | null; avatar_url: string | null; cover_url?: string | null; bio: string | null; phone: string | null; location?: string | null; profile_visibility?: 'public' | 'friends' | 'private'; role: Database['public']['Enums']['app_role']; is_active: boolean; created_at: string; updated_at: string; }
 export interface League { id: string; name: string; slug: string; description: string | null; city: string; state: string; is_active: boolean; created_at: string; updated_at: string; }
