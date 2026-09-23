@@ -44,14 +44,6 @@ const lengths = [15, 30, 45, 60, 90];
 const environments = ['Indoor court', 'Outdoor court', 'Gym', 'Home / no equipment'];
 const equipment = ['Basketball', 'Cones', 'Resistance bands', 'Weights', 'Agility ladder', 'None'];
 
-const modules = [
-  { title: 'Training', body: 'Build the work.', icon: FaDumbbell, path: '/lab/training' },
-  { title: 'Player Lab', body: 'Build your player.', icon: FaChartLine, path: '/lab/player-lab' },
-  { title: 'Film Room', body: 'Study the game.', icon: FaFilm, path: '/lab/film-room' },
-  { title: 'Basketball IQ', body: 'Think faster.', icon: FaBrain, path: '/lab/iq' },
-  { title: 'Skill Challenges', body: 'Daily grind.', icon: FaBolt, path: '/lab/challenges' },
-  { title: 'Badge Lab', body: 'Track your progression.', icon: FaMedal, path: '/lab/badges' },
-];
 
 function readHistory(): Workout[] {
   try {
