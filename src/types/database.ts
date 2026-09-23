@@ -103,13 +103,13 @@ export interface Database {
       discipline_categories: { Row: DisciplineCategory; Insert: Insert<DisciplineCategory>; Update: Update<DisciplineCategory> };
       discipline_cases: { Row: DisciplineCase; Insert: Insert<DisciplineCase>; Update: Update<DisciplineCase> };
       discipline_appeals: { Row: DisciplineAppeal; Insert: Insert<DisciplineAppeal>; Update: Update<DisciplineAppeal> };
-      lab_sessions: { Row: LabSession; Insert: Insert<LabSession>; Update: Update<LabSession> };
-      lab_program_enrollments: { Row: LabProgramEnrollment; Insert: Insert<LabProgramEnrollment>; Update: Update<LabProgramEnrollment> };
-      lab_assessments: { Row: LabAssessment; Insert: Insert<LabAssessment>; Update: Update<LabAssessment> };
-      lab_notebook_entries: { Row: LabNotebookEntry; Insert: Insert<LabNotebookEntry>; Update: Update<LabNotebookEntry> };
-      lab_film_entries: { Row: LabFilmEntry; Insert: Insert<LabFilmEntry>; Update: Update<LabFilmEntry> };
-      lab_challenge_attempts: { Row: LabChallengeAttempt; Insert: Insert<LabChallengeAttempt>; Update: Update<LabChallengeAttempt> };
-      lab_proof_snapshots: { Row: LabProofSnapshot; Insert: Insert<LabProofSnapshot>; Update: Update<LabProofSnapshot> };
+      lab_sessions: { Row: LabSession; Insert: Insert<LabSession>; Update: Update<LabSession>; Relationships: [] };
+      lab_program_enrollments: { Row: LabProgramEnrollment; Insert: Insert<LabProgramEnrollment>; Update: Update<LabProgramEnrollment>; Relationships: [] };
+      lab_assessments: { Row: LabAssessment; Insert: Insert<LabAssessment>; Update: Update<LabAssessment>; Relationships: [] };
+      lab_notebook_entries: { Row: LabNotebookEntry; Insert: Insert<LabNotebookEntry>; Update: Update<LabNotebookEntry>; Relationships: [] };
+      lab_film_entries: { Row: LabFilmEntry; Insert: Insert<LabFilmEntry>; Update: Update<LabFilmEntry>; Relationships: [] };
+      lab_challenge_attempts: { Row: LabChallengeAttempt; Insert: Insert<LabChallengeAttempt>; Update: Update<LabChallengeAttempt>; Relationships: [] };
+      lab_proof_snapshots: { Row: LabProofSnapshot; Insert: Insert<LabProofSnapshot>; Update: Update<LabProofSnapshot>; Relationships: [] };
     };
     Views: {
       public_players: { Row: PublicPlayer };
