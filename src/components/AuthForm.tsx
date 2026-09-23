@@ -31,6 +31,8 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   const [coachExperience, setCoachExperience] = useState('');
   const [fanInterests, setFanInterests] = useState('');
   const [message, setMessage] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,7 +56,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
       } else if (mode === 'sign-up') {
         if (step < 3) { setStep((current) => current + 1); return; }
         if (password !== confirmation) { setStep(1); setMessage('Passwords do not match.'); return; }
-        if (!firstName.trim() || !lastName.trim() || !username.trim()) { setMessage('Complete the required profile fields.'); return; }
+        if (!firstName.trim() || !lastName.trim() || !username.trim() || !dateOfBirth) { setMessage('Complete the required profile fields and age screen.'); return; }
+        const birth = new Date(dateOfBirth + 'T00:00:00'); const now = new Date(); let age = now.getFullYear()-birth.getFullYear(); const md=now.getMonth()-birth.getMonth(); if(md<0||(md===0&&now.getDate()<birth.getDate())) age--;
+        if (Number.isNaN(birth.getTime()) || age < 13) { setMessage('RCL Social accounts are currently available only to users age 13 or older.'); return; }
+        if (!acceptedLegal) { setMessage('Review and accept the Terms and Privacy Policy to create an account.'); return; }
         const { session } = await signUp(email, password, {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -70,6 +75,9 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
           coach_role: coachRole.trim(),
           coach_experience: coachExperience.trim(),
           fan_interests: fanInterests.trim(),
+          date_of_birth: dateOfBirth,
+          legal_terms_accepted_at: new Date().toISOString(),
+          privacy_policy_acknowledged_at: new Date().toISOString(),
         });
         setStep(4);
         setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
@@ -114,12 +122,14 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
 
       {mode === 'sign-up' && step === 3 && <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">First name<input required value={firstName} onChange={e=>setFirstName(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Last name<input required value={lastName} onChange={e=>setLastName(e.target.value)} className={inputClass}/></label></div>
+        <label className="block text-sm font-semibold">Date of birth <span className="font-normal text-gray-500">(used for age-appropriate access)</span><input required type="date" value={dateOfBirth} onChange={e=>setDateOfBirth(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">Username<input required placeholder="@yourname" value={username} onChange={e=>setUsername(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">Display name <span className="font-normal text-gray-500">(optional)</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">City / location<input value={location} onChange={e=>setLocation(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">Bio<textarea rows={3} value={bio} onChange={e=>setBio(e.target.value)} className={inputClass}/></label>
         {profileType === 'player' && <><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Position<input placeholder="PG, SG, SF..." value={position} onChange={e=>setPosition(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Height<input placeholder={'6\'5"'} value={height} onChange={e=>setHeight(e.target.value)} className={inputClass}/></label></div><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Jersey #<input value={jersey} onChange={e=>setJersey(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Experience<input placeholder="College, rec..." value={experience} onChange={e=>setExperience(e.target.value)} className={inputClass}/></label></div><p className="text-xs text-gray-500">RCL ratings, badges, stats and teammate grades are verified by league activity and cannot be self-entered.</p></>}
         {profileType === 'coach' && <><label className="block text-sm font-semibold">Coaching role<input placeholder="Head coach, assistant..." value={coachRole} onChange={e=>setCoachRole(e.target.value)} className={inputClass}/></label><label className="block text-sm font-semibold">Coaching experience<textarea rows={3} value={coachExperience} onChange={e=>setCoachExperience(e.target.value)} className={inputClass}/></label></>}
+        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/70"><input required type="checkbox" checked={acceptedLegal} onChange={e=>setAcceptedLegal(e.target.checked)} className="mt-1"/><span>I agree to the <Link className="text-rcl-gold" href="/legal/terms">Terms of Service</Link> and acknowledge the <Link className="text-rcl-gold" href="/legal/privacy">Privacy Policy</Link> and <Link className="text-rcl-gold" href="/legal/community-guidelines">Community Guidelines</Link>.</span></label>
         {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
       </div>}
 
