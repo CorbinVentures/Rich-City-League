@@ -61,16 +61,17 @@ export default function SocialPage() {
     const { data } = await supabase.from('user_levels').select('xp,level').eq('profile_id', user.id).maybeSingle();
     const level = data as unknown as { xp?: number; level?: number } | null;
     if (level?.xp === undefined) return;
+    const authoritativeRep = level.xp;
     setCurrentProfile((current) => {
       if (!current) return current;
       const previousRep = current.rep ?? 0;
       const previousLevel = current.level ?? 1;
       const nextLevel = level.level ?? previousLevel;
-      if (level.xp > previousRep) {
-        setRepFeedback({ amount: level.xp - previousRep, from: previousRep, to: level.xp, oldLevel: previousLevel, newLevel: nextLevel });
+      if (authoritativeRep > previousRep) {
+        setRepFeedback({ amount: authoritativeRep - previousRep, from: previousRep, to: authoritativeRep, oldLevel: previousLevel, newLevel: nextLevel });
         window.setTimeout(() => setRepFeedback(null), nextLevel > previousLevel ? 3200 : 1900);
       }
-      return { ...current, rep: level.xp, level: nextLevel };
+      return { ...current, rep: authoritativeRep, level: nextLevel };
     });
   };
   const trackActivity = async (activity_type: string, entity_type?: string, entity_id?: string, metadata: Record<string, unknown> = {}) => {
