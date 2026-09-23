@@ -1,5 +1,5 @@
 import { createBrowserClient as createSupabaseBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/types/database';
+import type { Database } from '@/types/database.generated';
 import { getSupabaseConfig } from '@/lib/supabase-config';
 
 function createBrowserClient(flowType: 'pkce' | 'implicit', noStore = false) {
