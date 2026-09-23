@@ -6,6 +6,7 @@ import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
 import { SocialCinematicIntro } from '@/components/SocialCinematicIntro';
 import { RichPostBody, SocialLinkField } from '@/components/SocialRichContent';
+import { SocialIdentity } from '@/components/SocialIdentity';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { rankSocialPosts } from '@/lib/social-feed';
@@ -264,16 +265,7 @@ function RepFeedback({ feedback }: { feedback: { amount: number; from: number; t
     <div><small>{leveled ? 'LEVEL UP' : 'REPUTATION'}</small><strong>{leveled ? `LEVEL ${feedback.newLevel}` : `+${feedback.amount} REP`}</strong><span>{leveled ? `You reached Level ${feedback.newLevel}` : `${formatRep(feedback.to)} total REP`}</span></div>
   </div>;
 }
-function SocialIdentity({ author, compact = false }: { author?: Author; compact?: boolean }) {
-  const rep = author?.rep ?? 0; const level = author?.level ?? 1; const progress = reputationProgress(rep, level); const status = reputationStatus(level);
-  return <span className={`rcl-social-identity ${compact ? 'is-compact' : ''}`}>
-    <span className={`rcl-rep-avatar status-${status.key} ${author?.is_vip ? 'is-vip' : ''}`} style={{'--rep-progress': progress.percent + '%'} as React.CSSProperties}>
-      <span className="rcl-rep-avatar-core">{author?.avatar_url ? <img src={author.avatar_url} alt="" /> : <b>{(author?.display_name?.trim()?.[0] ?? 'R').toUpperCase()}</b>}</span>
-      {level > 1 && <em>{level}</em>}
-    </span>
-    {!compact && <small className={`rcl-rep-status status-${status.key}`}>{status.label}</small>}
-  </span>;
-}
+
 function Avatar({ author }: { author?: Author }) { return <SocialIdentity author={author} compact />; }
 function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) { return <button type="button" onClick={onClick} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/10 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/45 hover:border-rcl-orange/30 hover:text-white">{icon}<span>{label}</span></button>; }
 function PostCard({ post, userId, following, saved, openComments, comment, onCommentChange, onToggleComments, onComment, onReact, reactionBurst, onSave, onShare, onFollow, onDelete }: { post: Post; userId?: string; following: boolean; saved: boolean; openComments: boolean; comment: string; onCommentChange: (value: string) => void; onToggleComments: () => void; onComment: () => void; onReact: (type: string) => void; reactionBurst: string | null; onSave: () => void; onShare: () => void; onFollow: () => void; onDelete?: () => void }) {
