@@ -1,12 +1,14 @@
 'use client';
 
-import { FormEvent, ReactNode, useEffect, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDumbbell, FaFilm, FaMedal, FaPlay } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
 import { DrillAnimation } from '@/components/DrillAnimation';
 import { LabDashboard } from '@/components/LabDashboard';
+import { getSupabaseClient } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 import './lab-redesign.css';
 
 type WorkoutDrill = {
@@ -65,6 +67,9 @@ function readHistory(): Workout[] {
 }
 
 export default function LabPage() {
+  const { user } = useAuth();
+  const db = useMemo(() => getSupabaseClient() as any, []);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [skill, setSkill] = useState(skills[0]);
   const [level, setLevel] = useState(levels[1]);
   const [length, setLength] = useState(45);
@@ -108,6 +113,10 @@ export default function LabPage() {
       }
       const next = [payload.workout, ...history.filter((item) => item.title !== payload.workout?.title)].slice(0, 6);
       setWorkout(payload.workout);
+      if (user && db) {
+        const saved = await db.from('lab_sessions').insert({profile_id:user.id,title:payload.workout.title,skill:payload.workout.skill,duration_minutes:payload.workout.minutes,status:'planned',source:'builder',workout:payload.workout}).select('id').single();
+        if (!saved.error) setSessionId(saved.data.id);
+      }
       setActiveDrill(0);
       setScreen('workout');
       setHistory(next);
@@ -123,7 +132,7 @@ export default function LabPage() {
 
   const drill = workout?.drills[activeDrill];
   const goDrill = (index:number) => { setActiveDrill(index); setDrillTab('coaching'); setScreen('drill'); window.scrollTo({top:0,behavior:'smooth'}); };
-  const nextDrill = () => { if(!workout)return; if(activeDrill < workout.drills.length-1) goDrill(activeDrill+1); else setScreen('workout'); };
+  const nextDrill = async () => { if(!workout)return; if(activeDrill < workout.drills.length-1) goDrill(activeDrill+1); else { if(sessionId&&db){await db.from('lab_sessions').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',sessionId); const active=await db.from('lab_program_enrollments').select('id,completed_sessions,total_sessions').eq('profile_id',user?.id).eq('status','active').limit(1).maybeSingle(); if(active.data){const done=Math.min(active.data.total_sessions,active.data.completed_sessions+1);await db.from('lab_program_enrollments').update({completed_sessions:done,status:done>=active.data.total_sessions?'completed':'active',completed_at:done>=active.data.total_sessions?new Date().toISOString():null}).eq('id',active.data.id)}} setScreen('home'); } };
 
   return <><LabCinematicIntro/><main className="labx">
     <div className="labx-bg"/>
