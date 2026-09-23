@@ -47,14 +47,18 @@ export default function MessagesPage() {
     if (conversations.error) { setError(true); setLoading(false); return; }
     const rows = (conversations.data ?? []) as { id: string; title: string | null; conversation_type: string; updated_at: string }[];
     const directIds = rows.filter((row) => row.conversation_type === 'direct').map((row) => row.id);
-    const peerByConversation = new Map<string, { display_name: string | null; username: string | null; avatar_url: string | null }>();
+    const peerByConversation = new Map<string, { id: string; display_name: string | null; username: string | null; avatar_url: string | null; is_vip?: boolean | null; vip_label?: string | null; rep?: number; level?: number }>();
     if (directIds.length) {
       const peerMemberships = await supabase.from('conversation_members').select('conversation_id,profile_id').in('conversation_id', directIds).neq('profile_id', user.id);
       const peerRows = (peerMemberships.data ?? []) as { conversation_id: string; profile_id: string }[];
       const peerIds = [...new Set(peerRows.map((row) => row.profile_id))];
       if (peerIds.length) {
-        const peerProfiles = await supabase.from('profiles').select('id,display_name,username,avatar_url').in('id', peerIds);
-        const profileMap = new Map(((peerProfiles.data ?? []) as { id:string; display_name:string|null; username:string|null; avatar_url:string|null }[]).map((profile) => [profile.id, profile]));
+        const [peerProfiles, peerLevels] = await Promise.all([
+          supabase.from('profiles').select('id,display_name,username,avatar_url,is_vip,vip_label').in('id', peerIds),
+          supabase.from('user_levels').select('profile_id,xp,level').in('profile_id', peerIds),
+        ]);
+        const levelMap = new Map(((peerLevels.data ?? []) as { profile_id:string; xp:number; level:number }[]).map((row) => [row.profile_id, row]));
+        const profileMap = new Map(((peerProfiles.data ?? []) as { id:string; display_name:string|null; username:string|null; avatar_url:string|null; is_vip?:boolean|null; vip_label?:string|null }[]).map((profile) => { const rep = levelMap.get(profile.id); return [profile.id, { ...profile, rep: rep?.xp ?? 0, level: rep?.level ?? 1 }]; }));
         peerRows.forEach((row) => { const peer = profileMap.get(row.profile_id); if (peer) peerByConversation.set(row.conversation_id, peer); });
       }
     }
@@ -74,6 +78,7 @@ export default function MessagesPage() {
         updatedAt: latestData?.created_at ?? conversation.updated_at,
         unread: unread.count ?? 0,
         avatarUrl: conversation.conversation_type === 'direct' ? (peer?.avatar_url ?? null) : null,
+        identity: conversation.conversation_type === 'direct' ? (peer ?? null) : null,
       };
     }));
     setItems(next.sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)));
