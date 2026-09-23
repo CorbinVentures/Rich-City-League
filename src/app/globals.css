@@ -1020,3 +1020,21 @@ textarea.rcl-admin-field{min-height:90px;resize:vertical}
 .rcl-premium-bottom-nav>div{gap:4px}.rcl-premium-bottom-nav button,.rcl-premium-bottom-nav a{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0!important;border-radius:14px!important;background:transparent!important;padding:7px 2px!important;color:rgba(255,255,255,.38)!important;font-size:13px}.rcl-premium-bottom-nav span{font-size:7px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.rcl-premium-bottom-nav .active{color:#f6c65b!important}.rcl-premium-bottom-nav .create{margin-top:-21px;height:48px;width:48px;justify-self:center;border:1px solid rgba(246,198,91,.45)!important;border-radius:17px!important;background:linear-gradient(145deg,#f6c65b,#e4a52d)!important;color:#08090b!important;box-shadow:0 8px 24px rgba(246,198,91,.2)}.rcl-premium-bottom-nav .create span{display:none}
 @media(min-width:640px){.rcl-social-wordmark{display:flex}}
 @media(max-width:639px){.rcl-social-premium-header>div{padding-left:12px!important;padding-right:12px!important}.rcl-social-page>div>div[class*="py-4"]{padding-top:0!important}.rcl-feed-mode{top:64px;margin-bottom:0;padding-top:4px}.rcl-story-rail{padding:16px 4px 18px}.rcl-quick-composer{margin-top:2px}}
+
+/* Social mobile refinement — clean consumer-social hierarchy */
+.rcl-social-page{background:#050608!important}
+.rcl-social-page>div{background:radial-gradient(circle at 50% 0,rgba(246,198,91,.035),transparent 24rem)}
+.rcl-social-premium-header{height:58px}.rcl-social-premium-header>div{height:58px!important}
+.rcl-social-icon-button{height:38px;width:38px;border-radius:12px}
+.rcl-social-search{height:38px;border-color:rgba(255,255,255,.075);border-radius:13px;background:#0a0d11}
+.rcl-feed-mode{height:38px;gap:0;margin:0;border-bottom-color:rgba(255,255,255,.055)}
+.rcl-feed-mode button{flex:1;font-size:9px;letter-spacing:.06em}.rcl-feed-mode button.active:after{left:35%;right:35%}
+.rcl-story-rail{margin-bottom:0!important;border-bottom-color:rgba(255,255,255,.055)!important;padding:13px 4px!important}
+.rcl-story-rail>div{min-height:74px;align-items:center}.rcl-story-empty{min-width:180px;padding-left:5px;color:rgba(255,255,255,.25);font-size:9px;line-height:1.4}
+.rcl-quick-composer{margin:12px 0!important;border:0!important;border-radius:0!important;background:transparent!important;padding:0!important}
+.rcl-quick-composer>div:first-child{align-items:center}.rcl-quick-composer>div:first-child>button:last-child{min-height:42px;border-color:rgba(255,255,255,.075)!important;border-radius:14px!important;background:#0a0d11!important;font-size:12px!important}
+.rcl-quick-composer>div:last-child{margin-top:7px!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px!important}
+.rcl-quick-composer>div:last-child button{min-width:0!important;justify-content:center!important;border:0!important;background:transparent!important;padding:7px 2px!important;font-size:0!important;color:rgba(255,255,255,.35)!important}
+.rcl-quick-composer>div:last-child button svg{font-size:13px!important}.rcl-quick-composer>div:last-child button:nth-child(1):after{content:"Media"}.rcl-quick-composer>div:last-child button:nth-child(2):after{content:"Run"}.rcl-quick-composer>div:last-child button:nth-child(3):after{content:"Tag"}.rcl-quick-composer>div:last-child button:nth-child(4):after{content:"Highlight"}.rcl-quick-composer>div:last-child button:after{margin-left:5px;font-size:7px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+.rcl-premium-bottom-nav{padding-top:5px!important;padding-bottom:4px!important}.rcl-premium-bottom-nav .create{margin-top:-15px!important;height:43px!important;width:43px!important;border-radius:50%!important}.rcl-premium-bottom-nav button,.rcl-premium-bottom-nav a{padding:5px 2px!important}.rcl-premium-bottom-nav span{font-size:6px!important}
+@media(max-width:639px){.rcl-feed-mode{top:58px!important}.rcl-social-page .rcl-premium-post{margin-left:-12px;margin-right:-12px}.rcl-social-page main{padding-bottom:68px}}
