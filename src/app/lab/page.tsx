@@ -6,6 +6,7 @@ import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDum
 import { Container } from '@/components/Container';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
 import { DrillAnimation } from '@/components/DrillAnimation';
+import { LabDashboard } from '@/components/LabDashboard';
 import './lab-redesign.css';
 
 type WorkoutDrill = {
@@ -128,14 +129,7 @@ export default function LabPage() {
     <div className="labx-bg"/>
     <header className="labx-head"><button onClick={()=>setScreen('home')} aria-label="Lab home">☰</button><div className="labx-logo">♛<b>RICH CITY</b><small>LEAGUE</small></div><div className="labx-head-actions">⌕ <span>DC</span></div></header>
 
-    {screen==='home'&&<section className="labx-home">
-      <div className="labx-hero-photo"><div className="labx-hero-copy"><h1>THE<br/>LAB<span>.</span></h1><b>REAL WORK.<br/>REAL DEVELOPMENT.<br/>REAL RESULTS.</b></div><div className="labx-mantra">BETTER<br/>PLAYERS.<br/>A BRIGHTER<br/>RICHMOND.</div></div>
-      <nav className="labx-launch">
-        <button onClick={()=>setScreen('build')} className="active"><FaDumbbell/><b>Build<br/>Workout</b></button>
-        <Link href="/lab/training"><FaBolt/><b>Skill<br/>Library</b></Link><Link href="/lab/film-room"><FaFilm/><b>Film<br/>Room</b></Link><Link href="/lab/iq"><FaBrain/><b>Player IQ</b></Link><Link href="/lab/badges"><FaMedal/><b>Badge Lab</b></Link>
-      </nav>
-      <div className="labx-quote"><div><b>DISCIPLINE<br/>CREATES<br/>FREEDOM.</b><button onClick={()=>setScreen('build')}>→</button></div><strong>“THE WORK<br/>ALWAYS WINS.”</strong></div>
-    </section>}
+    {screen==='home'&&<LabDashboard onBuild={()=>setScreen('build')} />}
 
     {screen==='build'&&<section className="labx-shell"><div className="labx-crumb">THE LAB <i>›</i> BUILD WORKOUT <span>STEP 1 OF 2</span></div>
       <form onSubmit={generate} className="labx-builder"><h1>BUILD YOUR WORKOUT</h1><p>Customize your session. Get a training plan built for your goals.</p>
