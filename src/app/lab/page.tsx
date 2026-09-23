@@ -1,9 +1,7 @@
 'use client';
 
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { FaArrowLeft, FaArrowRight, FaBolt, FaBrain, FaCheck, FaChartLine, FaDumbbell, FaFilm, FaMedal, FaPlay } from 'react-icons/fa6';
-import { Container } from '@/components/Container';
+import { FaArrowLeft, FaArrowRight, FaCheck } from 'react-icons/fa6';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
 import { DrillAnimation } from '@/components/DrillAnimation';
 import { LabDashboard } from '@/components/LabDashboard';
@@ -132,7 +130,7 @@ export default function LabPage() {
 
   const drill = workout?.drills[activeDrill];
   const goDrill = (index:number) => { setActiveDrill(index); setDrillTab('coaching'); setScreen('drill'); window.scrollTo({top:0,behavior:'smooth'}); };
-  const nextDrill = async () => { if(!workout)return; if(activeDrill < workout.drills.length-1) goDrill(activeDrill+1); else { if(sessionId&&db){await db.from('lab_sessions').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',sessionId); const active=await db.from('lab_program_enrollments').select('id,completed_sessions,total_sessions').eq('profile_id',user?.id).eq('status','active').limit(1).maybeSingle(); if(active.data){const done=Math.min(active.data.total_sessions,active.data.completed_sessions+1);await db.from('lab_program_enrollments').update({completed_sessions:done,status:done>=active.data.total_sessions?'completed':'active',completed_at:done>=active.data.total_sessions?new Date().toISOString():null}).eq('id',active.data.id)}} setScreen('home'); } };
+  const nextDrill = async () => { if(!workout)return; if(activeDrill < workout.drills.length-1) goDrill(activeDrill+1); else { if(sessionId&&db){await db.rpc('complete_lab_session',{target_session:sessionId})} setScreen('home'); } };
 
   return <><LabCinematicIntro/><main className="labx">
     <div className="labx-bg"/>
