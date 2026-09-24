@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
   const protectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/account');
   const config = getSupabaseConfig();
 
-  // A referral link grants temporary preview access and immediately removes
-  // the token from the visible URL.
+  // The legacy beta referral token grants temporary preview access. Personal
+  // growth invites use ?invite= and intentionally remain separate from this wall.
   if (previewWallActive() && request.nextUrl.searchParams.get('ref') === REFERRAL_TOKEN) {
     const cleanUrl = request.nextUrl.clone();
     cleanUrl.searchParams.delete('ref');
