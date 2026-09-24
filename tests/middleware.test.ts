@@ -46,6 +46,20 @@ describe('protected route middleware', () => {
     expect(location.searchParams.get('next')).toBe('/portal/operations?view=queue');
   });
 
+
+  it('sends anonymous public visitors to the private preview wall', async () => {
+    const response = await middleware(new NextRequest('http://localhost/players'));
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get('location')!).pathname).toBe('/access');
+  });
+
+  it('allows a valid referral link and stores preview access', async () => {
+    const response = await middleware(new NextRequest('http://localhost/?ref=rcl-preview-804'));
+    expect(response.status).toBe(307);
+    expect(response.headers.get('set-cookie')).toContain('rcl_preview_access=');
+    expect(response.headers.get('location')).not.toContain('ref=');
+  });
+
   it.each(['https://evil-site.com', '//evil-site.com', 'javascript:alert(1)', '/\\evil-site.com'])(
     'rejects unsafe next destination %s',
     (next) => {
