@@ -58,7 +58,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         if (password !== confirmation) { setStep(1); setMessage('Passwords do not match.'); return; }
         if (!firstName.trim() || !lastName.trim() || !username.trim() || !dateOfBirth) { setMessage('Complete the required profile fields and age screen.'); return; }
         const birth = new Date(dateOfBirth + 'T00:00:00'); const now = new Date(); let age = now.getFullYear()-birth.getFullYear(); const md=now.getMonth()-birth.getMonth(); if(md<0||(md===0&&now.getDate()<birth.getDate())) age--;
-        if (Number.isNaN(birth.getTime()) || age < 13) { setMessage('RCL Social accounts are currently available only to users age 13 or older.'); return; }
+        if (Number.isNaN(birth.getTime()) || age < 16) { setMessage('RCL Social accounts are currently available only to users age 16 or older.'); return; }
         if (!acceptedLegal) { setMessage('Review and accept the Terms and Privacy Policy to create an account.'); return; }
         const { session } = await signUp(email, password, {
           first_name: firstName.trim(),
