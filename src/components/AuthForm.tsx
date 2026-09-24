@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSafeNextPath } from '@/lib/auth-redirect';
 
@@ -34,6 +34,13 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [signupHasSession, setSignupHasSession] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+
+  useEffect(() => {
+    if (mode !== 'sign-up') return;
+    const invite = new URLSearchParams(window.location.search).get('invite');
+    if (invite) setReferralCode(invite.toLowerCase());
+  }, [mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,6 +92,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
           privacy_policy_acknowledged_at: new Date().toISOString(),
         });
         setSignupHasSession(Boolean(session));
+        if (session && referralCode) {
+          const client = (await import('@/lib/supabase')).getSupabaseClient();
+          if (client) await (client.rpc as any)('claim_referral', { invite_code: referralCode });
+        }
         setStep(4);
         setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
       } else {
@@ -103,6 +114,8 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         <h1 className="font-display text-3xl font-bold uppercase">{title}</h1>
         <p className="mt-2 text-sm text-gray-400">{mode === 'sign-up' ? 'Create your identity inside the Rich City League community.' : 'Use your RCL account to access league tools.'}</p>
       </div>
+
+      {mode === 'sign-up' && referralCode && step < 4 && <div className="rounded-xl border border-rcl-gold/25 bg-rcl-gold/10 px-4 py-3 text-xs font-bold text-rcl-gold">You were invited by an RCL member. Finish signup to connect the referral.</div>}
 
       {mode === 'sign-up' && step < 4 && (
         <div>
