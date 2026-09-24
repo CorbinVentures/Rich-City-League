@@ -23,7 +23,7 @@ describe('protected route middleware', () => {
 
   it('redirects anonymous users away from dashboard and portal routes', async () => {
     for (const pathname of ['/dashboard', '/portal/profile', '/portal/operations']) {
-      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`, { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
 
       expect(response.status).toBe(307);
       expect(response.headers.get('location')).toContain('/auth/sign-in');
@@ -39,7 +39,7 @@ describe('protected route middleware', () => {
   });
 
   it('preserves only the internal destination in the sign-in redirect', async () => {
-    const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue'));
+    const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue', { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
     const location = new URL(response.headers.get('location')!);
 
     expect(location.pathname).toBe('/auth/sign-in');
