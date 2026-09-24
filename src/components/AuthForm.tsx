@@ -44,6 +44,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         const hasExplicitNext = Boolean(requestedNext);
         let destination = getSafeNextPath(requestedNext);
         await signIn(email, password);
+        // The temporary preview wall uses its own site-access cookie in addition to
+        // Supabase auth. Grant that cookie after a successful member sign-in so
+        // subsequent route requests do not bounce authenticated users back to /access.
+        document.cookie = `rcl_preview_access=rcl-beta-2026; Path=/; SameSite=Lax; Expires=${new Date(Date.UTC(2026, 9, 1)).toUTCString()}${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         if (!hasExplicitNext) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
