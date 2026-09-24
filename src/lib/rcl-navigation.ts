@@ -1,13 +1,14 @@
 import {
   FaHouse, FaCalendarDays, FaChartSimple, FaUsers, FaUser, FaFolderOpen, FaNewspaper,
   FaPlay, FaListOl, FaUserTie, FaBell, FaComments, FaPeopleGroup, FaCrown,
-  FaTrophy, FaShirt, FaFlask, FaBasketball, FaGear
+  FaTrophy, FaShirt, FaFlask, FaBasketball, FaGear, FaCompass
 } from 'react-icons/fa6';
 
 export type RCLNavItem = { label:string; href:string; icon:any };
 
 export const RCL_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/',icon:FaHouse},
+  {label:'Explore RCL',href:'/explore',icon:FaCompass},
   {label:'The Lab',href:'/lab',icon:FaFlask},
   {label:'Players',href:'/players',icon:FaUser},
   {label:'Teams',href:'/teams',icon:FaUsers},

@@ -33,6 +33,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   const [message, setMessage] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [signupHasSession, setSignupHasSession] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +80,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
           legal_terms_accepted_at: new Date().toISOString(),
           privacy_policy_acknowledged_at: new Date().toISOString(),
         });
+        setSignupHasSession(Boolean(session));
         setStep(4);
         setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
       } else {
@@ -133,7 +135,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
       </div>}
 
-      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City League</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCL Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href="/auth/sign-in" className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">Continue to RCL</Link></div>}
+      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City League</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCL Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={signupHasSession ? "/explore" : "/auth/sign-in?next=/explore"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">Explore RCL</Link></div>}
 
       {(error || (message && step !== 4)) && <p className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
       {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
