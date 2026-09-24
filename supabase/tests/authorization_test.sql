@@ -4,12 +4,12 @@ select plan(14);
 
 set role postgres;
 
-insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at)
+insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
 values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'authenticated', 'authenticated', 'player@example.test', 'not-used', now()),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated', 'coach@example.test', 'not-used', now()),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated', 'staff@example.test', 'not-used', now()),
-  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now())
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'authenticated', 'authenticated', 'player@example.test', 'not-used', now(), '{"date_of_birth":"1990-01-01"}'::jsonb),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated', 'coach@example.test', 'not-used', now(), '{"date_of_birth":"1990-01-01"}'::jsonb),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated', 'staff@example.test', 'not-used', now(), '{"date_of_birth":"1990-01-01"}'::jsonb),
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'authenticated', 'authenticated', 'admin@example.test', 'not-used', now(), '{"date_of_birth":"1990-01-01"}'::jsonb)
 on conflict (id) do nothing;
 
 delete from public.profiles where id in (
