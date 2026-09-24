@@ -94,7 +94,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         setSignupHasSession(Boolean(session));
         if (session && referralCode) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
-          if (client) await client.rpc('claim_referral', { invite_code: referralCode });
+          if (client) await (client.rpc as any)('claim_referral', { invite_code: referralCode });
         }
         setStep(4);
         setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
