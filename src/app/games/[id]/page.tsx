@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Container } from '@/components/Container';
 import { LiveGameScore } from '@/components/LiveGameScore';
+import { PerformanceShareCard } from '@/components/PerformanceShareCard';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import type { PlayerGameStats, PublicPlayer, TeamGameStats } from '@/types/database';
 import { formatDate, formatTime } from '@/utils/helpers';
@@ -44,6 +45,9 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
   const playerById = new Map(players.map((player) => [player.id, player]));
   const topScorer = [...playerStats].sort((a, b) => b.points - a.points)[0];
   const teamStat = (teamId: string) => teamStats.find((stat) => stat.team_id === teamId);
+  const topScorerPlayer = topScorer ? playerById.get(topScorer.player_id) : undefined;
+  const topScorerTeam = topScorer ? snapshot.teams.find((team) => team.id === topScorer.team_id) : undefined;
+  const topScorerOpponent = topScorerTeam?.id === home?.id ? away : home;
 
   return <main><Container maxWidth="xl" className="py-10 sm:py-16">
     <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">{game.status} · {season?.name ?? 'RCL'}</p><p className="text-xs uppercase tracking-widest text-gray-500">{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)}</p></div>
@@ -55,6 +59,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
       <section className="border border-white/10 bg-white/[.025] p-5 sm:p-7"><Heading>Top performers</Heading>{topScorer ? <div className="mt-5"><p className="text-xs uppercase tracking-widest text-gray-500">Scoring leader</p><p className="mt-2 font-display text-2xl font-black uppercase">{playerById.get(topScorer.player_id) ? `${playerById.get(topScorer.player_id)?.first_name} ${playerById.get(topScorer.player_id)?.last_name}` : 'Player'}</p><p className="mt-1 text-rcl-gold">{topScorer.points} PTS · {topScorer.rebounds} REB · {topScorer.assists} AST</p></div> : <p className="mt-5 text-sm text-gray-500">Player of the game will be announced when official stats are recorded.</p>}</section>
     </div>
     <section className="mt-6 border border-white/10 bg-white/[.025] p-5 sm:p-7"><Heading>Box score</Heading>{playerStats.length ? <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="text-[10px] uppercase tracking-widest text-gray-500"><tr>{['Player', 'MIN', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO', 'FG', '3PT', 'FT'].map((heading) => <th key={heading} className="px-3 py-3">{heading}</th>)}</tr></thead><tbody>{playerStats.map((stat) => { const player = playerById.get(stat.player_id); return <tr key={stat.id} className="border-t border-white/5"><td className="px-3 py-3 font-semibold">{player ? `${player.first_name} ${player.last_name}` : 'Player'}</td><td className="px-3 py-3 text-gray-400">{stat.minutes ?? '—'}</td><td className="px-3 py-3 font-bold">{stat.points}</td><td className="px-3 py-3">{stat.rebounds}</td><td className="px-3 py-3">{stat.assists}</td><td className="px-3 py-3">{stat.steals}</td><td className="px-3 py-3">{stat.blocks}</td><td className="px-3 py-3">{stat.turnovers}</td><td className="px-3 py-3">{stat.field_goals_made}/{stat.field_goals_attempted}</td><td className="px-3 py-3">{stat.three_pointers_made}/{stat.three_pointers_attempted}</td><td className="px-3 py-3">{stat.free_throws_made}/{stat.free_throws_attempted}</td></tr>; })}</tbody></table></div> : <p className="mt-5 text-sm text-gray-500">Official player statistics will appear after they are recorded.</p>}</section>
+    {topScorer && topScorerPlayer && <section className="mt-6"><PerformanceShareCard playerName={`${topScorerPlayer.first_name} ${topScorerPlayer.last_name}`} teamName={topScorerTeam?.name} opponentName={topScorerOpponent?.name} points={topScorer.points} rebounds={topScorer.rebounds} assists={topScorer.assists} steals={topScorer.steals} blocks={topScorer.blocks} gameUrl={`/games/${game.id}`} /></section>}
     {game.notes && <section className="mt-6 border border-white/10 p-5"><Heading>Game notes</Heading><p className="mt-3 text-sm text-gray-400">{game.notes}</p></section>}
   </Container></main>;
 }
