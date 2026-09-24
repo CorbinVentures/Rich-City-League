@@ -17,8 +17,8 @@ begin
   requested_role := case requested_type when 'player' then 'player'::public.app_role when 'coach' then 'coach'::public.app_role when 'fan' then 'fan'::public.app_role else 'fan'::public.app_role end;
   safe_profile_role := case when requested_role = 'fan'::public.app_role then 'fan'::public.app_role else 'player'::public.app_role end;
   begin dob := nullif(new.raw_user_meta_data ->> 'date_of_birth','')::date; exception when others then dob := null; end;
-  if dob is null or dob > current_date - interval '13 years' then
-    raise exception 'RCL social accounts require a valid age of 13 or older';
+  if dob is null or dob > current_date - interval '16 years' then
+    raise exception 'RCL social accounts require a valid age of 16 or older';
   end if;
   insert into public.profiles(id,username,first_name,last_name,display_name,bio,location,role,date_of_birth,legal_terms_accepted_at,privacy_policy_acknowledged_at)
   values(new.id,nullif(trim(new.raw_user_meta_data->>'username'),''),nullif(trim(new.raw_user_meta_data->>'first_name'),''),nullif(trim(new.raw_user_meta_data->>'last_name'),''),coalesce(nullif(trim(new.raw_user_meta_data->>'display_name'),''),new.email),nullif(trim(new.raw_user_meta_data->>'bio'),''),nullif(trim(new.raw_user_meta_data->>'location'),''),safe_profile_role,dob,nullif(new.raw_user_meta_data->>'legal_terms_accepted_at','')::timestamptz,nullif(new.raw_user_meta_data->>'privacy_policy_acknowledged_at','')::timestamptz);
@@ -70,3 +70,11 @@ grant execute on function public.rcl_record_social_usage(integer) to authenticat
 grant execute on function public.create_privacy_request(text,text) to authenticated;
 
 create index if not exists intimate_image_requests_deadline_idx on public.intimate_image_removal_requests(status,deadline_at);
+
+
+-- RCL Social is 16+. Retire the unused under-16 parental/time-limit workflow.
+drop table if exists public.minor_parental_consents cascade;
+drop table if exists public.social_usage_daily cascade;
+drop function if exists public.rcl_social_usage_status();
+drop function if exists public.rcl_record_social_usage(integer);
+drop function if exists public.rcl_social_limit_minutes(uuid);
