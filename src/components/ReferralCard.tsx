@@ -12,9 +12,9 @@ export function ReferralCard() {
   useEffect(()=>{ void (async()=>{
     const supabase=getSupabaseClient(); if(!supabase) return;
     const { data:{ user } }=await supabase.auth.getUser(); if(!user) return;
-    const { data: code }=await supabase.rpc('ensure_referral_code',{ target_profile:user.id });
+    const { data: code }=await (supabase.rpc as any)('ensure_referral_code',{ target_profile:user.id });
     if(!code) return;
-    const { data }=await supabase.rpc('referral_stats',{ target_profile:user.id });
+    const { data }=await (supabase.rpc as any)('referral_stats',{ target_profile:user.id });
     const row=Array.isArray(data)?data[0]:data;
     setStats({code:String(row?.code??code),qualified_referrals:Number(row?.qualified_referrals??0),rep_earned:Number(row?.rep_earned??0)});
   })();},[]);
