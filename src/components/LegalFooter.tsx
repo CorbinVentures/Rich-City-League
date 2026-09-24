@@ -1,0 +1,4 @@
+import Link from 'next/link';
+
+const links=[['Terms','/legal/terms'],['Privacy','/legal/privacy'],['Community Guidelines','/legal/community-guidelines'],['Copyright / DMCA','/legal/dmca'],['Safety','/legal/safety'],['Privacy Requests','/settings/privacy']];
+export function LegalFooter(){return <footer className="border-t border-white/10 bg-black/80 px-5 py-8 text-white"><div className="mx-auto flex max-w-7xl flex-col gap-4 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} Rich City League. Richmond, Virginia.</p><nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">{links.map(([label,href])=><Link key={href} href={href} className="hover:text-rcl-gold">{label}</Link>)}</nav></div></footer>}
