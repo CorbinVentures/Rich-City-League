@@ -39,7 +39,14 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
   useEffect(() => {
     if (mode !== 'sign-up') return;
     const invite = new URLSearchParams(window.location.search).get('invite');
-    if (invite) setReferralCode(invite.toLowerCase());
+    if (invite) {
+      const normalized = invite.toLowerCase();
+      setReferralCode(normalized);
+      window.localStorage.setItem('rcl_pending_referral', normalized);
+    } else {
+      const pending = window.localStorage.getItem('rcl_pending_referral');
+      if (pending) setReferralCode(pending);
+    }
   }, [mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -51,6 +58,14 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         const hasExplicitNext = Boolean(requestedNext);
         let destination = getSafeNextPath(requestedNext);
         await signIn(email, password);
+        const pendingReferral = window.localStorage.getItem('rcl_pending_referral');
+        if (pendingReferral) {
+          const client = (await import('@/lib/supabase')).getSupabaseClient();
+          if (client) {
+            const { data: claimed } = await (client.rpc as any)('claim_referral', { invite_code: pendingReferral });
+            if (claimed) window.localStorage.removeItem('rcl_pending_referral');
+          }
+        }
         // The temporary preview wall uses its own site-access cookie in addition to
         // Supabase auth. Grant that cookie after a successful member sign-in so
         // subsequent route requests do not bounce authenticated users back to /access.
@@ -94,7 +109,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
         setSignupHasSession(Boolean(session));
         if (session && referralCode) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
-          if (client) await (client.rpc as any)('claim_referral', { invite_code: referralCode });
+          if (client) {
+            const { data: claimed } = await (client.rpc as any)('claim_referral', { invite_code: referralCode });
+            if (claimed) window.localStorage.removeItem('rcl_pending_referral');
+          }
         }
         setStep(4);
         setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
