@@ -8,6 +8,8 @@ export type SocialIdentityAuthor = {
   avatar_url?: string | null;
   is_vip?: boolean | null;
   vip_label?: string | null;
+  is_system_account?: boolean | null;
+  system_account_key?: string | null;
   rep?: number;
   level?: number;
 };
@@ -23,7 +25,7 @@ export function SocialIdentity({ author, compact = false, link = true }: { autho
       <span>{author?.avatar_url ? <img src={author.avatar_url} alt="" /> : name.slice(0,1).toUpperCase()}</span>
       {!compact && <em>{level}</em>}
     </span>
-    {!compact && <span className="rcl-social-identity-copy"><b>{name}{author?.is_vip && <i>{author.vip_label || 'VIP'}</i>}</b><small>{formatReputation(rep)} REP · {status.label} · LVL {level}</small></span>}
+    {!compact && <span className="rcl-social-identity-copy"><b>{name}{author?.is_system_account && <i>RCL OFFICIAL</i>}{!author?.is_system_account && author?.is_vip && <i>{author.vip_label || 'VIP'}</i>}</b><small>{author?.is_system_account ? 'Official RCL Automated Account' : `${formatReputation(rep)} REP · ${status.label} · LVL ${level}`}</small></span>}
   </span>;
   return link && author?.id ? <Link href={`/social/profile/${author.id}`} className="rcl-social-identity-link">{identity}</Link> : identity;
 }
