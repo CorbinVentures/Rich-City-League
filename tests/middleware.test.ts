@@ -11,7 +11,7 @@ vi.mock('@supabase/ssr', () => ({
   }),
 }));
 
-import { middleware } from '../middleware';
+import { middleware } from '../src/middleware';
 import { getSafeNextPath } from '../src/lib/auth-redirect';
 
 describe('protected route middleware', () => {
