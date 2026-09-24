@@ -9,7 +9,7 @@ import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
 import { PlatformChrome } from '@/components/PlatformChrome';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://richcityleague.com'),
+  metadataBase: new URL('https://richcityhoops.com'),
   title: { default: 'Rich City League', template: '%s | Rich City League' },
   description: 'Richmond basketball league platform for schedules, standings, teams, players, and news.',
   alternates: { canonical: '/' },
