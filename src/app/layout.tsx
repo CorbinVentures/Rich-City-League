@@ -9,7 +9,6 @@ import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
 import { LegalFooter } from '@/components/LegalFooter';
-import { MinorSocialUsageGuard } from '@/components/MinorSocialUsageGuard';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityleague.com'),
@@ -21,5 +20,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><SiteHeader /><AdminControlShortcut /><MinorSocialUsageGuard /><div className="rcl-platform-root">{children}</div><LegalFooter /></body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><SiteHeader /><AdminControlShortcut /><div className="rcl-platform-root">{children}</div><LegalFooter /></body></html>;
 }
