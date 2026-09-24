@@ -35,7 +35,7 @@ create table if not exists public.intimate_image_removal_requests (
  statement text not null,
  status text not null default 'open' check(status in ('open','validating','removed','rejected')),
  received_at timestamptz not null default now(),
- deadline_at timestamptz generated always as (received_at + interval '48 hours') stored,
+ deadline_at timestamptz not null default (now() + interval '48 hours'),
  removed_at timestamptz,
  reviewed_by uuid references public.profiles(id) on delete set null,
  response_note text
