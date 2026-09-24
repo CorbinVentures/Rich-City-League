@@ -112,7 +112,7 @@ begin
   if bot_id is null then raise exception 'System account not configured: %',account_key; end if;
 
   insert into public.posts(author_id,body,media_urls,status,is_automated,automation_type,automation_source_id)
-  values(bot_id,trim(post_body),'{}'::text[],'published',true,event_type,source_uuid)
+  values(bot_id,trim(post_body),'[]'::jsonb,'published',true,event_type,source_uuid)
   on conflict (automation_type,automation_source_id) where is_automated=true and automation_type is not null and automation_source_id is not null
   do update set body=excluded.body
   returning id into created_id;
@@ -133,7 +133,7 @@ begin
 
   insert into public.posts(author_id,body,media_urls,status,is_automated,automation_type,automation_source_id)
   values(bot_id,badge_icon||' BADGE UNLOCKED\n\n'||member_name||' just earned '||badge_name||'.\n\nBuild your REP. Earn your place. #RCLBadges #RCLREP',
-         '{}'::text[],'published',true,'badge_unlock',new.id)
+         '[]'::jsonb,'published',true,'badge_unlock',new.id)
   on conflict (automation_type,automation_source_id) where is_automated=true and automation_type is not null and automation_source_id is not null
   do nothing;
   return new;
@@ -156,7 +156,7 @@ begin
   insert into public.posts(author_id,body,media_urls,status,is_automated,automation_type,automation_source_id)
   values(bot_id,'🏀 NEW RCL RUN\n\n'||new.title||' • '||new.game_format||' • '||new.location||
          '\nHosted by '||host_name||'\n\nTap Runs to claim a spot. #RCLRuns #RichmondBasketball',
-         '{}'::text[],'published',true,'run_created',new.id)
+         '[]'::jsonb,'published',true,'run_created',new.id)
   on conflict (automation_type,automation_source_id) where is_automated=true and automation_type is not null and automation_source_id is not null
   do nothing;
   return new;
