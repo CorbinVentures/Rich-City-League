@@ -4,8 +4,9 @@ import { getLeagueSnapshot } from '@/lib/public-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'RCL Standings | Richmond Basketball League Table',
+  title: { absolute: 'RCL Standings | Richmond Basketball League Table' },
   description: 'Official Rich City League standings, team records, scores, streaks, and Richmond basketball results.',
+  alternates: { canonical: '/standings' },
 };
 
 export default async function StandingsPage() {
