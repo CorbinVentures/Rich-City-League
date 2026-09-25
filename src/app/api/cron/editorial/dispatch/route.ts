@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   // RVA Hoops morning desk. Vercel cron runs in UTC; timezone conversion keeps DST correct.
   if (hour === 8) accounts.push('rva-hoops');
   // RCL Business daily feature follows later in the morning.
-  if (hour === 10) accounts.push('rcl-business');
+  if (hour === 10 || hour === 12) accounts.push('rcl-business');
 
   if (!accounts.length) {
     return NextResponse.json({ ok: true, dispatched: [], reason: 'No editorial desk scheduled for this Eastern hour.' });
