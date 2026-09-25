@@ -10,7 +10,8 @@ type NewsItem = {
   cover_image_url:string|null; status:'draft'|'published'|'archived'; published_at:string|null; created_at:string; updated_at:string;
 };
 
-const emptyForm={id:'',title:'',slug:'',excerpt:'',body:'',cover_image_url:'',status:'draft' as const};
+type NewsForm={id:string;title:string;slug:string;excerpt:string;body:string;cover_image_url:string;status:'draft'|'published'|'archived'};
+const emptyForm:NewsForm={id:'',title:'',slug:'',excerpt:'',body:'',cover_image_url:'',status:'draft'};
 
 function slugify(value:string){return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,90);}
 
