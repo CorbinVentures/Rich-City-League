@@ -34,13 +34,16 @@ export type GameSummary = {
 const safePct = (made: number, attempts: number) => attempts > 0 ? made / attempts : 0;
 
 export function zoneFromCoordinates(x: number, y: number): string {
-  const distance = Math.sqrt(Math.pow(x - 50, 2) + Math.pow(y - 88, 2));
-  if (distance <= 10) return 'rim';
-  if (distance <= 22) return 'paint';
-  if (distance <= 38) return 'midrange';
-  if (y >= 72 && x < 20) return 'corner_3_left';
-  if (y >= 72 && x > 80) return 'corner_3_right';
-  if (distance >= 38) return 'above_break_3';
+  // ShotMap uses the basket at the TOP baseline. Keep analytics geometry
+  // aligned with the visual court so a tap is classified where it appears.
+  const basketX = 50;
+  const basketY = 14;
+  const distance = Math.sqrt(Math.pow(x - basketX, 2) + Math.pow(y - basketY, 2));
+  if (distance <= 8) return 'rim';
+  if (y <= 43 && x >= 36 && x <= 64) return 'paint';
+  if (y <= 24 && x < 20) return 'corner_3_left';
+  if (y <= 24 && x > 80) return 'corner_3_right';
+  if (distance >= 36) return 'above_break_3';
   return 'midrange';
 }
 
