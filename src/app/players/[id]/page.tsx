@@ -16,6 +16,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   if (!data) notFound();
 
   const { player, rosters, teamSeasons, teams, seasons, divisions, games, stats, iq, iqHistory } = data;
+  const playerName = `${player.first_name} ${player.last_name}`;
+  const breadcrumbSchema = { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Rich City League',item:'https://richcityhoops.com/'},{'@type':'ListItem',position:2,name:'Players',item:'https://richcityhoops.com/players'},{'@type':'ListItem',position:3,name:playerName,item:`https://richcityhoops.com/players/${id}`}] };
   const client = getPublicClient();
 
   // Load earned badges
@@ -80,7 +82,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
   const currentTeam = currentTeamSeason ? teamById.get(currentTeamSeason.team_id) : null;
 
   return (
-    <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white">
+    <main><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumbSchema)}}/><div className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white">
       {/* 2K Style Player Card Hero Header */}
       <section className="relative overflow-hidden border-b border-white/10 bg-gradient-to-b from-rcl-navy/40 to-rcl-black py-16">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
