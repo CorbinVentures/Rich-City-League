@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { getPlayerDetail, getPublicClient } from '@/lib/public-data';
@@ -94,7 +95,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               {/* Photo Frame */}
               <div className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl border-4 border-rcl-gold bg-black/60 shadow-[0_0_30px_rgba(255,215,0,0.2)]">
                 {player.photo_url ? (
-                  <img src={player.photo_url} alt={`${player.first_name}`} className="h-full w-full rounded-xl object-cover" />
+                  <Image src={player.photo_url} alt={playerName} fill sizes="144px" className="rounded-xl object-cover" />
                 ) : (
                   <span className="font-display text-4xl font-black text-rcl-gold uppercase">
                     {player.first_name?.[0]}{player.last_name?.[0]}
