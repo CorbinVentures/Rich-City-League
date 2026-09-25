@@ -1,5 +1,5 @@
 'use client';
-import {Suspense,useMemo,useRef,useState} from 'react';
+import {Suspense,useEffect,useRef,useState} from 'react';
 import {Canvas,useFrame} from '@react-three/fiber';
 import {ContactShadows,Environment,PerspectiveCamera} from '@react-three/drei';
 import * as THREE from 'three';
@@ -33,14 +33,14 @@ const camera:Record<View,[number,number,number]>={front:[0,1.45,6],quarter:[3.6,
 function Limb({a,b,r=.095}:{a:THREE.Vector3;b:THREE.Vector3;r?:number}){const mid=a.clone().add(b).multiplyScalar(.5),len=a.distanceTo(b),q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize());return <mesh position={mid} quaternion={q}><capsuleGeometry args={[r,Math.max(.01,len-r*2),8,14]}/><meshStandardMaterial color="#171b20" roughness={.58} metalness={.05}/></mesh>}
 function Avatar({move,t}:{move:Move;t:number}){
  const root=useRef<THREE.Group>(null),ball=useRef<THREE.Mesh>(null);
- useFrame(()=>{if(!root.current)return;const p=t*Math.PI*2,attack=Math.sin(Math.min(1,t*1.8)*Math.PI),load=Math.max(0,Math.sin(p));root.current.position.y=(move.kind==='shoot'||move.kind==='finish'||move.kind==='rebound')?Math.max(0,Math.sin((t-.55)*Math.PI*2))*.22:0;root.current.position.x=move.kind==='defense'?Math.sin(p)*.55:move.kind==='pullup'?t*.55-.25:0;root.current.rotation.y=move.kind==='handle'?Math.sin(p)*.08:0;if(ball.current){let x=.48,y=1.12,z=.12;if(move.kind==='handle'||move.kind==='pullup'){x=Math.sin(p)*.48;y=.38+Math.abs(Math.cos(p))*1.0}else if(move.kind==='shoot'){y=1.25+t*1.25;x=.18+t*.08}else if(move.kind==='finish'){x=.45;y=1.05+t*.9}else if(move.kind==='rebound'){x=.25;y=1.6-Math.abs(t-.5)*.8}ball.current.position.set(x,y,z)}});
+ useFrame(()=>{if(!root.current)return;const p=t*Math.PI*2;root.current.position.y=(move.kind==='shoot'||move.kind==='finish'||move.kind==='rebound')?Math.max(0,Math.sin((t-.55)*Math.PI*2))*.22:0;root.current.position.x=move.kind==='defense'?Math.sin(p)*.55:move.kind==='pullup'?t*.55-.25:0;root.current.rotation.y=move.kind==='handle'?Math.sin(p)*.08:0;if(ball.current){let x=.48,y=1.12,z=.12;if(move.kind==='handle'||move.kind==='pullup'){x=Math.sin(p)*.48;y=.38+Math.abs(Math.cos(p))*1.0}else if(move.kind==='shoot'){y=1.25+t*1.25;x=.18+t*.08}else if(move.kind==='finish'){x=.45;y=1.05+t*.9}else if(move.kind==='rebound'){x=.25;y=1.6-Math.abs(t-.5)*.8}ball.current.position.set(x,y,z)}});
  const hip=new THREE.Vector3(0,1.0,0),neck=new THREE.Vector3(0,1.78,0),ls=new THREE.Vector3(-.28,1.67,0),rs=new THREE.Vector3(.28,1.67,0),le=new THREE.Vector3(-.48,1.28,.03),re=new THREE.Vector3(.48,1.28,.03),lw=new THREE.Vector3(-.42,.94,.08),rw=new THREE.Vector3(.42,.94,.08),lk=new THREE.Vector3(-.23,.53,.03),rk=new THREE.Vector3(.23,.53,.03),la=new THREE.Vector3(-.25,.06,.08),ra=new THREE.Vector3(.25,.06,.08);
  return <group ref={root}>
   <mesh position={[0,1.94,0]}><sphereGeometry args={[.19,24,24]}/><meshStandardMaterial color="#7d513d"/></mesh>
   <mesh position={[0,1.38,0]} scale={[.48,.72,.26]}><capsuleGeometry args={[.48,.45,8,18]}/><meshStandardMaterial color="#101820"/></mesh>
   <mesh position={[0,1.47,.255]}><planeGeometry args={[.55,.42]}/><meshStandardMaterial color="#ff5a1f"/></mesh>
-  <Limb a={ls} b={le}/><Limb a={le} b={lw} r=.08/><Limb a={rs} b={re}/><Limb a={re} b={rw} r=.08/>
-  <Limb a={hip.clone().add(new THREE.Vector3(-.15,0,0))} b={lk} r=.12/><Limb a={lk} b={la} r=.105/><Limb a={hip.clone().add(new THREE.Vector3(.15,0,0))} b={rk} r=.12/><Limb a={rk} b={ra} r=.105/>
+  <Limb a={ls} b={le}/><Limb a={le} b={lw} r={.08}/><Limb a={rs} b={re}/><Limb a={re} b={rw} r={.08}/>
+  <Limb a={hip.clone().add(new THREE.Vector3(-.15,0,0))} b={lk} r={.12}/><Limb a={lk} b={la} r={.105}/><Limb a={hip.clone().add(new THREE.Vector3(.15,0,0))} b={rk} r={.12}/><Limb a={rk} b={ra} r={.105}/>
   <mesh position={[-.25,.035,.17]} scale={[.14,.06,.3]}><boxGeometry/><meshStandardMaterial color="#f2f4f6"/></mesh><mesh position={[.25,.035,.17]} scale={[.14,.06,.3]}><boxGeometry/><meshStandardMaterial color="#f2f4f6"/></mesh>
   <mesh ref={ball}><sphereGeometry args={[.135,24,24]}/><meshStandardMaterial color="#f36a21" roughness={.72}/></mesh>
  </group>
@@ -61,4 +61,4 @@ export function DrillAnimation({title,focus,drillId}:Props){
   <footer><small>COACHING</small><b>{move.cue}</b><span>{focus.slice(0,3).join(' • ')}</span></footer>
  </section>
 }
-function useFrameSafe(playing:boolean,speed:number,setT:React.Dispatch<React.SetStateAction<number>>,last:React.MutableRefObject<number>){useMemo(()=>0,[]);useState(()=>{if(typeof window==='undefined')return 0;let raf=0;const loop=(n:number)=>{if(!last.current)last.current=n;if(playing)setT(x=>(x+(n-last.current)/(6500/speed))%1);last.current=n;raf=requestAnimationFrame(loop)};raf=requestAnimationFrame(loop);return()=>cancelAnimationFrame(raf)});}
+function useFrameSafe(playing:boolean,speed:number,setT:React.Dispatch<React.SetStateAction<number>>,last:React.MutableRefObject<number>){useEffect(()=>{let raf=0;const loop=(n:number)=>{if(!last.current)last.current=n;if(playing)setT(x=>(x+(n-last.current)/(6500/speed))%1);last.current=n;raf=requestAnimationFrame(loop)};raf=requestAnimationFrame(loop);return()=>cancelAnimationFrame(raf)},[playing,speed,setT,last]);}
