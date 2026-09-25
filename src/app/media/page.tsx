@@ -1,9 +1,12 @@
+import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = { title:{absolute:'RCL Media | Richmond Basketball Highlights & Live'}, description:'Watch Rich City League live coverage and explore Richmond basketball photos, highlights, interviews and RCL media.', alternates:{canonical:'/media'} };
 
 export default async function MediaPage() {
   const client = getPublicClient();
