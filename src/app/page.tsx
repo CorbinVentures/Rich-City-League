@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
+
+export const metadata: Metadata = { title: 'Rich City League | Richmond VA Basketball League', description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
 
 export const revalidate = 60;
 
