@@ -5,9 +5,10 @@ import LeaderboardExperience from '@/components/LeaderboardExperience';
 import type { PublicPlayer, PublicPlayerIQ } from '@/types/database';
 
 export const metadata: Metadata = {
-  title: 'RCL Rankings | Richmond Basketball Player Stats',
+  title: { absolute: 'RCL Rankings | Richmond Basketball Player Stats' },
   description: 'Rich City League rankings, official player stats, team standings, Player IQ, badges, and community XP.',
   keywords: ['RCL rankings', 'Richmond basketball rankings', 'RCL player stats', 'Richmond basketball players'],
+  alternates: { canonical: '/leaderboards' },
 };
 
 export const revalidate = 60;
