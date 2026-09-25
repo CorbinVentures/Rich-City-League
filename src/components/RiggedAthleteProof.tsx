@@ -25,7 +25,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#071019;color:#fff;fon
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js/examples/jsm/loaders/GLTFLoader.js';
 const CHARACTER='/lab3d/athlete.gltf';
-const MOTION='/lab3d/UAL1_Standard.glb';
+const MOTION='/lab3d/jog-proof.glb';
 const stage=document.getElementById('stage'), loading=document.getElementById('loading');
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x071019); scene.fog=new THREE.Fog(0x071019,7,15);
 const camera=new THREE.PerspectiveCamera(36,1,.05,50);
