@@ -3,7 +3,8 @@ import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { news } = await getLeagueSnapshot();
