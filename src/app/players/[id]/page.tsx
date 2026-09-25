@@ -8,7 +8,7 @@ import { FaAward, FaBolt, FaCircleCheck } from 'react-icons/fa6';
 import { calculatePlayerIQ } from '@/lib/player-iq';
 
 export const revalidate = 60;
-export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{const {id}=await params;const data=await getPlayerDetail(id);if(!data)return{title:'RCL Player',robots:{index:false,follow:false}};const p=data.player;const name=`${p.first_name} ${p.last_name}`;const description=`${name} Rich City League player profile: position, team history, official stats, ratings and achievements from Richmond basketball.`;return{title:`${name} | Richmond Basketball Player`,description,alternates:{canonical:`/players/${id}`},openGraph:{type:'profile',url:`/players/${id}`,title:`${name} | Rich City League`,description,images:p.photo_url?[{url:p.photo_url,alt:name}]:undefined}};}
+export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{const {id}=await params;const data=await getPlayerDetail(id);if(!data)return{title:'RCL Player',robots:{index:false,follow:false}};const p=data.player;const name=`${p.first_name} ${p.last_name}`;const description=`${name} Rich City League player profile: position, team history, official stats, ratings and achievements from Richmond basketball.`;return{title:{absolute:`${name} | Richmond Basketball Player | RCL`},description,alternates:{canonical:`/players/${id}`},openGraph:{type:'profile',url:`/players/${id}`,title:`${name} | Rich City League`,description,images:p.photo_url?[{url:p.photo_url,alt:name}]:undefined}};}
 
 export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
