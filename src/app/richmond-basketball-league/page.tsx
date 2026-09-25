@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Container } from '@/components/Container';
 
 export const metadata: Metadata = {
-  title: "Men's Basketball League Richmond VA | Join Rich City League",
+  title: { absolute: "Men's Basketball League Richmond VA | Rich City League" },
   description: "Looking for a men's basketball league in Richmond, VA? Join Rich City League for organized competition, player profiles, official stats, rankings, community, runs and year-round RVA basketball.",
   alternates:{canonical:'/richmond-basketball-league'},
   openGraph:{url:'/richmond-basketball-league',title:"Men's Basketball League Richmond VA | Rich City League",description:'Competitive Richmond basketball with official stats, player profiles, community and year-round hoops culture.'}
