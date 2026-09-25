@@ -178,29 +178,39 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
       >
         <svg viewBox="0 0 50 47" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
+            <linearGradient id="court-base" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#9f6737" />
+              <stop offset="48%" stopColor="#b97a43" />
+              <stop offset="100%" stopColor="#9a6134" />
+            </linearGradient>
             <pattern id="court-hardwood" width="5" height="4.7" patternUnits="userSpaceOnUse">
-              <rect width="5" height="4.7" fill="#b9783f" />
-              <path d="M0 0H5M0 4.7H5" stroke="rgba(76,39,18,.22)" strokeWidth=".08" />
-              <path d="M2.5 0V4.7" stroke="rgba(255,235,195,.10)" strokeWidth=".06" />
+              <rect width="5" height="4.7" fill="url(#court-base)" />
+              <path d="M0 0H5M0 4.7H5" stroke="rgba(54,28,14,.20)" strokeWidth=".07" />
+              <path d="M2.5 0V4.7" stroke="rgba(255,239,207,.08)" strokeWidth=".05" />
             </pattern>
+            <radialGradient id="court-vignette" cx="50%" cy="42%" r="70%">
+              <stop offset="55%" stopColor="#000" stopOpacity="0" />
+              <stop offset="100%" stopColor="#130a05" stopOpacity=".18" />
+            </radialGradient>
           </defs>
 
           {/* Regulation 50' x 47' NCAA/NBA-style half-court reference surface. */}
           <rect width="50" height="47" fill="url(#court-hardwood)" />
-          <rect x=".35" y=".35" width="49.3" height="46.3" fill="none" stroke="#f8f7f3" strokeWidth=".28" />
+          <rect width="50" height="47" fill="url(#court-vignette)" />
+          <rect x=".35" y=".35" width="49.3" height="46.3" fill="none" stroke="#fffaf0" strokeWidth=".24" />
 
           {/* Lane: 16' wide, 19' from baseline to free-throw line. */}
-          <rect x="17" y=".35" width="16" height="18.65" fill="rgba(9,12,16,.13)" stroke="#f8f7f3" strokeWidth=".28" />
-          <circle cx="25" cy="19" r="6" fill="none" stroke="#f8f7f3" strokeWidth=".28" />
-          <path d="M19 19A6 6 0 0 0 31 19" fill="none" stroke="#f8f7f3" strokeWidth=".22" strokeDasharray=".7 .7" />
+          <rect x="17" y=".35" width="16" height="18.65" fill="rgba(12,15,20,.18)" stroke="#fffaf0" strokeWidth=".26" />
+          <circle cx="25" cy="19" r="6" fill="none" stroke="#fffaf0" strokeWidth=".26" />
+          <path d="M19 19A6 6 0 0 0 31 19" fill="none" stroke="#fffaf0" strokeWidth=".20" strokeDasharray=".7 .7" />
 
           {/* Backboard, rim and restricted area: basket center 5.25' from baseline. */}
-          <line x1="22" y1="4" x2="28" y2="4" stroke="#f8f7f3" strokeWidth=".32" />
+          <line x1="22" y1="4" x2="28" y2="4" stroke="#fffaf0" strokeWidth=".30" />
           <circle cx="25" cy="5.25" r=".75" fill="none" stroke="#ff641f" strokeWidth=".34" />
           <path d="M21 5.25A4 4 0 0 0 29 5.25" fill="none" stroke="#f8f7f3" strokeWidth=".28" />
 
           {/* Regulation three-point geometry: 22' corners into a 23.75' arc. */}
-          <path d="M3 0V14.15M47 0V14.15" fill="none" stroke="#f8f7f3" strokeWidth=".3" />
+          <path d="M3 0V14.15M47 0V14.15" fill="none" stroke="#fffaf0" strokeWidth=".27" />
           <path d="M3 14.15A23.75 23.75 0 0 0 47 14.15" fill="none" stroke="#f8f7f3" strokeWidth=".3" />
 
           {/* Half-court boundary and center-circle reference. */}
@@ -230,7 +240,7 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
         {pendingShot && (
           <span
             aria-hidden="true"
-            className="absolute z-30 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rcl-orange bg-rcl-orange/20 shadow-[0_0_24px_rgba(255,100,31,.65)]"
+            className="absolute z-30 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rcl-orange bg-rcl-orange/15 shadow-[0_0_18px_rgba(255,100,31,.55)]"
             style={{ left: `${pendingShot.x}%`, top: `${pendingShot.y}%` }}
           >
             <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rcl-orange" />
@@ -238,7 +248,7 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
         )}
 
         {pendingShot && (
-          <div className="pointer-events-none absolute left-1/2 top-3 z-40 -translate-x-1/2 rounded-full border border-rcl-orange/40 bg-[#10151d]/95 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-rcl-orange backdrop-blur">
+          <div className="pointer-events-none absolute bottom-3 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full border border-rcl-orange/35 bg-[#0b1017]/90 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-rcl-orange shadow-lg backdrop-blur">
             {zoneLabel(pendingShot.zone)} · Location selected
           </div>
         )}
