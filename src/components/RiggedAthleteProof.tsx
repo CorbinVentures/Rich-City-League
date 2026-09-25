@@ -17,12 +17,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#071019;color:#fff;fon
 .views{position:absolute;right:14px;top:14px;display:flex;gap:6px;z-index:3}.views button{border:1px solid #2c3d4d;background:#0c1721;color:#aebdca;border-radius:999px;padding:8px 10px;font-size:10px;font-weight:900;cursor:pointer}.views button.on{background:#ff5b16;border-color:#ff5b16;color:#fff}
 .badge{position:absolute;left:18px;bottom:16px;background:rgba(6,14,22,.82);border:1px solid #263847;border-radius:12px;padding:10px 12px;font-size:10px;color:#9fb0be}.badge b{color:#fff}
 .loading{position:absolute;inset:0;display:grid;place-items:center;background:#071019;z-index:5;font-size:12px;letter-spacing:.12em;color:#9fb0be}.error{color:#ff8a62;padding:24px}
-</style></head><body><div id="stage"></div><div class="loading" id="loading">LOADING RIGGED ATHLETE…</div>
+</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script></head><body><div id="stage"></div><div class="loading" id="loading">LOADING RIGGED ATHLETE…</div>
 <div class="hud"><small>RCL LAB · RIGGED ATHLETE PROOF</small><b>${safeTitle}</b><span>Quaternius humanoid · self-hosted rig validation</span></div>
 <div class="views"><button data-v="front" class="on">FRONT</button><button data-v="quarter">3/4</button><button data-v="side">SIDE</button><button data-v="back">BACK</button></div>
 <div class="badge"><b>PIPELINE VALIDATION</b> · Self-hosted athlete validation — basketball-specific motion remains disabled until its clip is packaged.</div>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import * as THREE from 'three';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
 const CHARACTER='/lab3d/athlete.glb';
 const MOTION=null;
