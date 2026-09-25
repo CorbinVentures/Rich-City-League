@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import type { Game, Season, Standing, Team, Venue } from '@/types/database';
 import { formatDate, formatTime } from '@/utils/helpers';
@@ -108,9 +109,9 @@ function GameCard({ game, teamById, venueById, live }: { game: Game; teamById: M
   return <Link href={`/games/${game.id}`} className={`block border p-5 transition hover:border-rcl-gold/70 ${live ? 'border-rcl-gold/60 bg-rcl-gold/[.06]' : 'border-white/10 bg-white/[.025]'}`}>
     <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500"><span className={game.status === 'live' ? 'text-red-400' : 'text-rcl-gold'}>{game.status === 'live' ? '● Live now' : game.status}</span><span>{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)}</span></div>
     <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-      <div className="flex items-center gap-3">{away?.logo_url ? <img src={away.logo_url} alt="" className="h-12 w-12 shrink-0 rounded-lg bg-black object-contain p-1" /> : null}<div><p className="font-display text-xl font-black uppercase">{away?.short_name ?? away?.name ?? 'Away team'}</p>{game.status === 'completed' && <p className="mt-1 font-display text-4xl font-black">{game.away_score}</p>}</div></div>
+      <div className="flex items-center gap-3">{away?.logo_url ? <Image src={away.logo_url} alt={`${away.name} logo`} width={48} height={48} sizes="48px" className="h-12 w-12 shrink-0 rounded-lg bg-black object-contain p-1" /> : null}<div><p className="font-display text-xl font-black uppercase">{away?.short_name ?? away?.name ?? 'Away team'}</p>{game.status === 'completed' && <p className="mt-1 font-display text-4xl font-black">{game.away_score}</p>}</div></div>
       <span className="text-xs font-black text-gray-600">VS</span>
-      <div className="flex items-center justify-end gap-3 text-right"><div><p className="font-display text-xl font-black uppercase">{home?.short_name ?? home?.name ?? 'Home team'}</p>{game.status === 'completed' && <p className="mt-1 font-display text-4xl font-black">{game.home_score}</p>}</div>{home?.logo_url ? <img src={home.logo_url} alt="" className="h-12 w-12 shrink-0 rounded-lg bg-black object-contain p-1" /> : null}</div>
+      <div className="flex items-center justify-end gap-3 text-right"><div><p className="font-display text-xl font-black uppercase">{home?.short_name ?? home?.name ?? 'Home team'}</p>{game.status === 'completed' && <p className="mt-1 font-display text-4xl font-black">{game.home_score}</p>}</div>{home?.logo_url ? <Image src={home.logo_url} alt={`${home.name} logo`} width={48} height={48} sizes="48px" className="h-12 w-12 shrink-0 rounded-lg bg-black object-contain p-1" /> : null}</div>
     </div>
     <p className="mt-5 border-t border-white/10 pt-3 text-xs uppercase tracking-wider text-gray-500">{venue?.name ?? 'Venue TBA'}{venue?.city ? ` · ${venue.city}` : ''}<span className="float-right text-rcl-gold">Game details →</span></p>
   </Link>;
