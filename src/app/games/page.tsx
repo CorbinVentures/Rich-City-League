@@ -5,8 +5,9 @@ import { getLeagueSnapshot } from '@/lib/public-data';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: 'RCL Game Center | Richmond Basketball Schedule & Scores',
+  title: { absolute: 'Richmond Basketball Schedule & Scores | RCL' },
   description: 'Rich City League schedules, live scores, game results, standings, and player performances.',
+  alternates: { canonical: '/games' },
 };
 
 export default async function GamesPage() {

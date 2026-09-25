@@ -4,7 +4,7 @@ import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { NewsDirectory } from '@/components/PublicDirectory';
 
-export const metadata: Metadata = { title:'Richmond Basketball News | RCL Newsroom', description:'Rich City League news, Richmond basketball stories, league updates, player features and community coverage from the 804.', alternates:{canonical:'/news'} };
+export const metadata: Metadata = { title:{ absolute:'Richmond Basketball News | RCL Newsroom' }, description:'Rich City League news, Richmond basketball stories, league updates, player features and community coverage from the 804.', alternates:{canonical:'/news'} };
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
