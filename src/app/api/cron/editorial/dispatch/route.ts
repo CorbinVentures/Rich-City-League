@@ -33,17 +33,9 @@ export async function GET(request: Request) {
   // Research is deliberately delegated to a configured server-side provider.
   // The provider must return sourced candidates; the publisher independently
   // requires source attribution and deduplicates before anything goes live.
-  const researchUrl = process.env.EDITORIAL_RESEARCH_ENDPOINT?.trim();
-  const researchSecret = process.env.EDITORIAL_RESEARCH_SECRET?.trim();
-  if (!researchUrl || !researchSecret) {
-    return NextResponse.json({
-      ok: false,
-      dispatched: [],
-      error: 'Editorial research provider is not configured. Nothing was published.',
-    }, { status: 503 });
-  }
-
   const origin = new URL(request.url).origin;
+  const researchUrl = process.env.EDITORIAL_RESEARCH_ENDPOINT?.trim() || `${origin}/api/cron/editorial/research`;
+  const researchSecret = process.env.EDITORIAL_RESEARCH_SECRET?.trim() || secret;
   const results = [];
 
   for (const account of accounts) {
