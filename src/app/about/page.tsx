@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
+
+export const metadata: Metadata = { title:'About RCL | Richmond Basketball Since 2011', description:'Learn the history and mission of Rich City League, a Richmond-born basketball organization founded in 2011 and rebuilt as a year-round basketball ecosystem.', alternates:{canonical:'/about'} };
 
 const timeline = [
   ['2011', 'THE BEGINNING', 'Rich City League is founded in Richmond with a mission centered on high-level competition, community pride, and the love of basketball.'],
