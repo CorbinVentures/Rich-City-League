@@ -4,6 +4,10 @@
     {
       "path": "/api/admin/leagueapps?action=sync-competition",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/editorial/dispatch",
+      "schedule": "0 * * * *"
     }
   ]
 }
