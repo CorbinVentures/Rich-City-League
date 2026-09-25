@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   publisher: 'Rich City League',
   category: 'sports',
   keywords: ['Richmond basketball league','Richmond VA basketball','RVA basketball','adult basketball Richmond VA','mens basketball league Richmond','Rich City League','RCL basketball','Richmond hoops','basketball runs Richmond VA'],
-  openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City League', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community with competition, player stats, profiles, runs, fantasy, media and culture.', url: 'https://richcityhoops.com' },
-  twitter: { card: 'summary_large_image', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community.' },
+  openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City League', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community with competition, player stats, profiles, runs, fantasy, media and culture.', url: 'https://richcityhoops.com', images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Rich City League — Richmond basketball, competition and community' }] },
+  twitter: { card: 'summary_large_image', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community.', images: ['/opengraph-image'] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
