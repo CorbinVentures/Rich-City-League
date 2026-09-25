@@ -3,7 +3,8 @@ import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { NewsDirectory } from '@/components/PublicDirectory';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function NewsPage() {
   const { news } = await getLeagueSnapshot();
