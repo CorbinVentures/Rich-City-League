@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,6 +7,7 @@ import { formatDate, formatTime } from '@/utils/helpers';
 import { getTeamTheme } from '@/lib/team-themes';
 
 export const revalidate = 60;
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const data=await getTeamDetail(slug);if(!data)return{title:'RCL Team',robots:{index:false,follow:false}};const t=data.team;const description=`${t.name} official Rich City League team page: roster, schedule, results, stats and news from Richmond, Virginia basketball.`;return{title:`${t.name} | Richmond Basketball Team`,description,alternates:{canonical:`/teams/${slug}`},openGraph:{url:`/teams/${slug}`,title:`${t.name} | Rich City League`,description,images:t.logo_url?[{url:t.logo_url,alt:`${t.name} logo`}]:undefined}};}
 
 const tabs = [
   ['home','Home'], ['roster','Roster'], ['schedule','Schedule'], ['stats','Stats'], ['news','News'], ['media','Media'], ['history','History'],
