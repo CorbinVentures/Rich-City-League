@@ -3,7 +3,7 @@ import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
 const SITE='https://richcityhoops.com';
 const core=[
-  ['',1,'daily'],['/about',.9,'monthly'],['/richmond-basketball-league',1,'weekly'],['/news',.9,'daily'],['/players',.9,'daily'],['/teams',.9,'daily'],['/games',.9,'daily'],['/standings',.85,'daily'],['/leaderboards',.85,'daily'],['/schedule',.85,'daily'],['/stats',.8,'daily'],['/runs',.8,'daily'],['/communities',.75,'daily'],['/fantasy',.75,'weekly'],['/draft',.7,'weekly'],['/media',.7,'weekly'],['/faq',.7,'monthly'],['/register',.95,'weekly'],['/join',.7,'monthly']
+  ['',1,'daily'],['/about',.9,'monthly'],['/richmond-basketball-league',1,'weekly'],['/richmond-basketball-runs',.9,'daily'],['/news',.9,'daily'],['/players',.9,'daily'],['/teams',.9,'daily'],['/games',.9,'daily'],['/standings',.85,'daily'],['/leaderboards',.85,'daily'],['/schedule',.85,'daily'],['/stats',.8,'daily'],['/runs',.8,'daily'],['/communities',.75,'daily'],['/fantasy',.75,'weekly'],['/draft',.7,'weekly'],['/media',.7,'weekly'],['/faq',.7,'monthly'],['/register',.95,'weekly'],['/join',.7,'monthly']
 ] as const;
 
 export const dynamic='force-dynamic';
