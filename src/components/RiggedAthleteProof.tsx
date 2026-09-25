@@ -22,10 +22,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#071019;color:#fff;fon
 <div class="views"><button data-v="front" class="on">FRONT</button><button data-v="quarter">3/4</button><button data-v="side">SIDE</button><button data-v="back">BACK</button></div>
 <div class="badge"><b>PIPELINE VALIDATION</b> · Jog cycle only — not presented as basketball-specific mocap.</div>
 <script type="module">
-import * as THREE from 'https://esm.sh/three@0.170.0';
-import { GLTFLoader } from 'https://esm.sh/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
-const CHARACTER='https://raw.githubusercontent.com/programasweights/avatar/main/public/assets/character.glb';
-const MOTION='https://raw.githubusercontent.com/richardanaya/metaverse-avatar/master/anims/UAL1_Standard.glb';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js/examples/jsm/loaders/GLTFLoader.js';
+const CHARACTER='/lab3d/athlete.gltf';
+const MOTION='/lab3d/UAL1_Standard.glb';
 const stage=document.getElementById('stage'), loading=document.getElementById('loading');
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x071019); scene.fog=new THREE.Fog(0x071019,7,15);
 const camera=new THREE.PerspectiveCamera(36,1,.05,50);
