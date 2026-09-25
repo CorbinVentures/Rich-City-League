@@ -34,8 +34,14 @@ export async function GET(request: Request) {
   // The provider must return sourced candidates; the publisher independently
   // requires source attribution and deduplicates before anything goes live.
   const origin = new URL(request.url).origin;
-  const researchUrl = process.env.EDITORIAL_RESEARCH_ENDPOINT?.trim() || `${origin}/api/cron/editorial/research`;
-  const researchSecret = process.env.EDITORIAL_RESEARCH_SECRET?.trim() || secret;
+  const configuredResearchUrl = process.env.EDITORIAL_RESEARCH_ENDPOINT?.trim();
+  const researchUrl = configuredResearchUrl || `${origin}/api/cron/editorial/research`;
+  // The built-in research route authenticates with CRON_SECRET. Only use a
+  // separate research secret when dispatching to an explicitly configured
+  // external research provider.
+  const researchSecret = configuredResearchUrl
+    ? (process.env.EDITORIAL_RESEARCH_SECRET?.trim() || secret)
+    : secret;
   const results = [];
 
   for (const account of accounts) {
@@ -53,7 +59,10 @@ export async function GET(request: Request) {
     });
 
     if (!research.ok) {
-      results.push({ account, ok: false, stage: 'research', status: research.status });
+      const detail = await research.json().catch(() => ({}));
+      const failure = { account, ok: false, stage: 'research', status: research.status, ...detail };
+      console.error('[editorial-dispatch] research failed', failure);
+      results.push(failure);
       continue;
     }
 
@@ -65,7 +74,10 @@ export async function GET(request: Request) {
       signal: AbortSignal.timeout(30_000),
     });
     const outcome = await publish.json().catch(() => ({}));
-    results.push({ account, ok: publish.ok, stage: 'publish', status: publish.status, ...outcome });
+    const result = { account, ok: publish.ok, stage: 'publish', status: publish.status, ...outcome };
+    if (publish.ok) console.info('[editorial-dispatch] published', result);
+    else console.error('[editorial-dispatch] publish failed', result);
+    results.push(result);
   }
 
   return NextResponse.json({ ok: results.every(result => result.ok), dispatched: results });
