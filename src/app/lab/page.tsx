@@ -3,7 +3,20 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaCheck } from 'react-icons/fa6';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
-import { DrillAnimation } from '@/components/DrillAnimation';
+import dynamic from 'next/dynamic';
+
+const DrillAnimation = dynamic(
+  () => import('@/components/DrillAnimation').then((mod) => mod.DrillAnimation),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="avatar3d-loading" role="status" aria-live="polite">
+        <span>RCL LAB</span>
+        <strong>Loading athlete model…</strong>
+      </div>
+    ),
+  },
+);
 import { LabDashboard } from '@/components/LabDashboard';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
