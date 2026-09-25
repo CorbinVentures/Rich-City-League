@@ -19,7 +19,6 @@ const items = [
   { label: 'LeagueApps', href: '/admin/leagueapps', icon: FaPlug, description: 'LeagueApps connection, status and data sync' },
   { label: 'Shop', href: '/admin/shop', icon: FaShirt, description: 'Products, orders and storefront administration' },
   { label: 'Site Control', href: '/admin/control-center', icon: FaShieldHalved, description: 'Site content, platform controls and administrative tools' },
-  { label: 'Governance', href: '/admin/governance', icon: FaShieldHalved, description: 'Rules, permissions and governance settings' },
   { label: 'Recognition', href: '/admin/recognition', icon: FaTrophy, description: 'Awards, badges and recognition programs' },
 ];
 

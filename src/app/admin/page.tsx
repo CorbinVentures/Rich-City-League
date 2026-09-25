@@ -462,14 +462,6 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex gap-2">
-              <Link href="/admin/leagueapps" className="rounded-xl border border-rcl-orange/40 bg-rcl-orange/10 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-rcl-orange hover:bg-rcl-orange hover:text-black">LEAGUEAPPS CONTROL</Link>
-              <Link
-                href="/admin/operations"
-                className="rounded-xl bg-rcl-orange px-4 py-2.5 text-xs font-black uppercase tracking-widest text-black hover:bg-rcl-gold"
-              >
-                LEAGUE OPERATIONS
-              </Link>
-              <Link href="/admin/league-setup" className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold">DATA FOUNDATION</Link>
               <button 
                 onClick={loadDashboardData} 
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold"
