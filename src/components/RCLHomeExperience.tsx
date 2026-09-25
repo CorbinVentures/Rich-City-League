@@ -72,7 +72,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
           <p className="rcl-home-kicker">⚡ 804 · RICHMOND, VIRGINIA</p>
           <h1>RICH CITY<br/><span>BUILDS<br/>DIFFERENT.</span></h1>
           <p className="rcl-home-tagline">PLAY. COMPETE. CONNECT. GROW.</p>
-          <Link href="/city" className="rcl-home-cta">ENTER THE CITY <FaArrowRight/></Link>
+          <div className="flex flex-wrap gap-3"><Link href="/city" className="rcl-home-cta">ENTER THE CITY <FaArrowRight/></Link><Link href="/richmond-basketball-league" className="rcl-home-cta">JOIN RICHMOND BASKETBALL <FaArrowRight/></Link></div>
         </div>
         <small className="rcl-home-code">RCL / 804</small>
       </section>
@@ -104,6 +104,8 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
           <div className="rcl-home-section-head"><div><p>804 NOW</p><h2>WHAT&apos;S HAPPENING</h2></div><Link href="/social">VIEW ALL <FaArrowRight/></Link></div>
           <div className="rcl-home-news-grid">{posts.length?posts.map(p=><Link href="/social" key={p.id}><span>{(p.author?.display_name||p.author?.first_name||'RCL')[0]}</span><div><b>{p.author?.display_name||[p.author?.first_name,p.author?.last_name].filter(Boolean).join(' ')||'RCL COMMUNITY'}</b><small>RCL COMMUNITY</small><p>{p.body}</p></div></Link>):<div className="rcl-home-empty">No community updates yet.</div>}</div>
         </section>
+
+        <section className="border-y border-white/10 py-10"><p className="rcl-home-kicker">RICHMOND, VIRGINIA BASKETBALL</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Looking for your next league?</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">Discover competitive Richmond basketball, official player stats, teams, rankings and the year-round RCL community.</p><div className="mt-5 flex flex-wrap gap-4 text-xs font-black uppercase tracking-wider"><Link href="/richmond-basketball-league" className="text-rcl-orange">Richmond Basketball League →</Link><Link href="/register" className="text-rcl-gold">Register →</Link><Link href="/faq">League FAQ →</Link></div></section>
 
         <section className="rcl-home-latest">
           <div><p>THE STAGE</p><h2>LATEST FROM RCL</h2></div>
