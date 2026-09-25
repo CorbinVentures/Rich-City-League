@@ -1,9 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { ContentAssetBackground } from '@/components/ContentAssetBackground';
 import { getPublicClient } from '@/lib/public-data';
 import type { PublicPlayer } from '@/types/database';
 import { FaBasketball, FaUsers } from 'react-icons/fa6';
+
+export const metadata: Metadata = { title:'Richmond Basketball Players | RCL Player Directory', description:'Explore active Rich City League basketball players, team rosters, positions and player profiles from Richmond, Virginia.', alternates:{canonical:'/players'} };
 
 export const revalidate = 60;
 

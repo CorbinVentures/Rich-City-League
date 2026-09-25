@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Container } from '@/components/Container';
@@ -8,6 +9,7 @@ import type { PlayerGameStats, PublicPlayer, TeamGameStats } from '@/types/datab
 import { formatDate, formatTime } from '@/utils/helpers';
 
 export const revalidate = 60;
+export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{const {id}=await params;const snapshot=await getLeagueSnapshot();const g=snapshot.games.find(x=>x.id===id);if(!g)return{title:'RCL Game',robots:{index:false,follow:false}};const home=snapshot.teams.find(t=>t.id===g.home_team_id)?.name??'Home';const away=snapshot.teams.find(t=>t.id===g.away_team_id)?.name??'Away';const title=`${away} vs ${home} | RCL Game`;const description=`Official Rich City League game page for ${away} vs ${home}: schedule, score, box score and player stats from Richmond basketball.`;return{title,description,alternates:{canonical:`/games/${id}`},openGraph:{url:`/games/${id}`,title,description}};}
 
 export default async function GameDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const snapshot = await getLeagueSnapshot();

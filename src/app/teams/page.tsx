@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { TeamsDirectory } from '@/components/PublicDirectory';
+
+export const metadata: Metadata = { title:'Richmond Basketball Teams | Rich City League', description:'Explore Rich City League teams, rosters, records and divisions competing in Richmond, Virginia basketball.', alternates:{canonical:'/teams'} };
 
 export const revalidate = 60;
 
