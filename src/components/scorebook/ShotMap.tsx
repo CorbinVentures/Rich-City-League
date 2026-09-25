@@ -200,24 +200,23 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
           <rect width="100" height="100" fill="url(#court-lines)" />
           <rect x="3" y="4" width="94" height="92" rx="1.5" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth=".8" />
 
-          {/* Paint */}
-          <rect x="31" y="59" width="38" height="37" fill="url(#paint-fill)" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
-          <circle cx="50" cy="59" r="11.5" fill="none" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
-          <path d="M38.5 59A11.5 11.5 0 0 0 61.5 59" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".7" strokeDasharray="2 2" />
+          {/* Basket is at the TOP baseline, matching the coaching view. */}
+          <rect x="31" y="4" width="38" height="37" fill="url(#paint-fill)" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
+          <circle cx="50" cy="41" r="11.5" fill="none" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
+          <path d="M38.5 41A11.5 11.5 0 0 1 61.5 41" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".7" strokeDasharray="2 2" />
 
-          {/* Three point arc */}
-          <path d="M12 96V81.5A38 38 0 0 1 88 81.5V96" fill="none" stroke="rgba(255,107,26,.9)" strokeWidth="1.25" filter="url(#orange-glow)" />
-          <path d="M12 96V81.5M88 81.5V96" stroke="rgba(255,107,26,.95)" strokeWidth="1.25" />
+          {/* Three-point line opens toward midcourt. */}
+          <path d="M12 4V18.5A38 38 0 0 0 88 18.5V4" fill="none" stroke="rgba(255,107,26,.9)" strokeWidth="1.25" filter="url(#orange-glow)" />
+          <path d="M12 4V18.5M88 18.5V4" stroke="rgba(255,107,26,.95)" strokeWidth="1.25" />
 
-          {/* Restricted area, backboard and rim */}
-          <path d="M42 91A8 8 0 0 1 58 91" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth=".75" />
-          <rect x="42" y="84" width="16" height="3" rx=".5" fill="none" stroke="rgba(255,255,255,.92)" strokeWidth=".85" />
-          <circle cx="50" cy="89" r="2.3" fill="none" stroke="rgba(255,107,26,1)" strokeWidth="1.15" filter="url(#orange-glow)" />
-          <path d="M48.2 90.2L49 92.1L50 90.2L51 92.1L51.8 90.2" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".45" />
+          {/* Restricted area, backboard, rim and net */}
+          <path d="M42 9A8 8 0 0 0 58 9" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth=".75" />
+          <rect x="42" y="13" width="16" height="1.5" rx=".4" fill="none" stroke="rgba(255,255,255,.92)" strokeWidth=".85" />
+          <circle cx="50" cy="16.5" r="2.3" fill="none" stroke="rgba(255,107,26,1)" strokeWidth="1.15" filter="url(#orange-glow)" />
+          <path d="M48.2 17.7L49 20L50 17.7L51 20L51.8 17.7" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".45" />
 
-          {/* Center court */}
-          <path d="M46 4A4 4 0 0 0 54 4" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth=".65" />
-          <path d="M48.5 4A1.5 1.5 0 0 0 51.5 4" fill="none" stroke="rgba(255,255,255,.25)" strokeWidth=".45" />
+          {/* Midcourt reference at the bottom edge. */}
+          <path d="M39 96A11 11 0 0 1 61 96" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth=".65" />
         </svg>
 
         {viewMode === 'heat' && filteredShots.map((shot) => (
@@ -281,8 +280,48 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 pb-4 text-[8px] font-black uppercase tracking-widest text-white/40">
         <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full border border-emerald-200 bg-emerald-300/75" />Made</span>
         <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full border border-rose-200 bg-rose-400/65" />Missed</span>
-        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full border border-rcl-gold bg-rcl-gold/30" />Next shot</span>
+        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full border border-rcl-orange bg-rcl-orange/30" />Next shot</span>
+        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full border border-dashed border-rcl-gold" />Player zone</span>
         <span className="ml-auto text-white/20">{filteredShots.length}/{shots.length} shown</span>
+      </div>
+
+      <div className="mx-3 mb-3 overflow-hidden rounded-[22px] border border-white/10 bg-[#0b1119]">
+        <div className="border-b border-white/10 px-4 py-3">
+          <p className="text-[10px] font-black uppercase tracking-[.18em] text-white">How to use the shot chart</p>
+        </div>
+        <div className="grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['1', 'Select a player', 'Choose the team and player before logging a play.'],
+            ['2', 'Tap the court', 'Tap the exact shot location. Orange marks the pending shot.'],
+            ['3', 'Set the result', 'Use 2PT/3PT Made or Miss. The chart saves location, zone and result.'],
+            ['4', 'View & analyze', 'Filter All, Made or Missed. Heat view reveals shooting concentration.'],
+          ].map(([step, title, copy]) => (
+            <div key={step} className="bg-[#0b1119] p-4">
+              <div className="flex items-center gap-2">
+                <span className="grid h-6 w-6 place-items-center rounded-full border border-rcl-orange/60 text-[9px] font-black text-rcl-orange">{step}</span>
+                <p className="text-[9px] font-black uppercase tracking-wider text-white">{title}</p>
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-white/45">{copy}</p>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-white/10 p-4">
+          <p className="text-[9px] font-black uppercase tracking-[.18em] text-white">Court zones</p>
+          <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+            {[
+              ['At rim', '0–3 ft', 'Inside the paint around the basket.'],
+              ['Midrange', '3–16 ft', 'Paint edge, elbows and midrange.'],
+              ['Three point', 'Beyond arc', 'Shots outside the 3PT line.'],
+              ['Key lines', 'Reference', 'Paint, free-throw line, rim and 3PT arc.'],
+            ].map(([title, range, copy]) => (
+              <div key={title} className="rounded-xl border border-white/10 bg-white/[.025] p-3">
+                <p className="text-[9px] font-black uppercase text-white">{title}</p>
+                <p className="mt-1 text-[8px] font-black uppercase tracking-widest text-rcl-orange">{range}</p>
+                <p className="mt-2 text-[9px] leading-4 text-white/35">{copy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
