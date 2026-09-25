@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export function ContentAssetBackground({ assetKey, opacity = 0.22, className = '' }: { assetKey: string; opacity?: number; className?: string }) {
@@ -14,5 +15,5 @@ export function ContentAssetBackground({ assetKey, opacity = 0.22, className = '
     return () => { active = false; };
   }, [assetKey]);
   if (!url) return null;
-  return <img src={url} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${className}`} style={{ opacity }} />;
+  return <Image src={url} alt="" aria-hidden="true" fill sizes="100vw" className={`pointer-events-none object-cover ${className}`} style={{ opacity }} />;
 }
