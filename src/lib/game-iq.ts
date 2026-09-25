@@ -34,16 +34,29 @@ export type GameSummary = {
 const safePct = (made: number, attempts: number) => attempts > 0 ? made / attempts : 0;
 
 export function zoneFromCoordinates(x: number, y: number): string {
-  // ShotMap uses the basket at the TOP baseline. Keep analytics geometry
-  // aligned with the visual court so a tap is classified where it appears.
-  const basketX = 50;
-  const basketY = 14;
-  const distance = Math.sqrt(Math.pow(x - basketX, 2) + Math.pow(y - basketY, 2));
-  if (distance <= 8) return 'rim';
-  if (y <= 43 && x >= 36 && x <= 64) return 'paint';
-  if (y <= 24 && x < 20) return 'corner_3_left';
-  if (y <= 24 && x > 80) return 'corner_3_right';
-  if (distance >= 36) return 'above_break_3';
+  // Convert the UI's percentage coordinates into real half-court feet.
+  // ShotMap is a 50' wide x 47' long half court with the basket centered
+  // 5.25' from the top baseline. Zone classification therefore follows
+  // the same physical geometry that is drawn on screen.
+  const courtX = (x / 100) * 50;
+  const courtY = (y / 100) * 47;
+  const basketX = 25;
+  const basketY = 5.25;
+  const dx = courtX - basketX;
+  const dy = courtY - basketY;
+  const distanceFeet = Math.hypot(dx, dy);
+
+  // Practical scoring zones. Restricted area is a 4' arc; the lane is
+  // 16' wide and extends 19' from the baseline.
+  if (distanceFeet <= 4) return 'rim';
+  if (courtX >= 17 && courtX <= 33 && courtY <= 19) return 'paint';
+
+  // NBA-style 3PT geometry used by the rendered chart: corner lines are
+  // 3' from each sideline and meet the 23.75' arc near 14.15' depth.
+  if (courtX <= 3 && courtY <= 14.15) return 'corner_3_left';
+  if (courtX >= 47 && courtY <= 14.15) return 'corner_3_right';
+  if (distanceFeet >= 23.75) return 'above_break_3';
+
   return 'midrange';
 }
 
