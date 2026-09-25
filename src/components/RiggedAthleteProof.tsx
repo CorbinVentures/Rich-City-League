@@ -23,7 +23,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#071019;color:#fff;fon
 <div class="badge"><b>PIPELINE VALIDATION</b> · Self-hosted athlete validation — basketball-specific motion remains disabled until its clip is packaged.</div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
 const CHARACTER='/lab3d/athlete.glb';
 const MOTION=null;
 const stage=document.getElementById('stage'), loading=document.getElementById('loading');
