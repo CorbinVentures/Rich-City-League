@@ -5,7 +5,7 @@ import { faqItems } from '@/lib/faq-data';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Rich City League FAQ | Richmond Basketball League | RCL',
+  title: { absolute: 'Rich City League FAQ | Richmond Basketball League' },
   description: "Learn everything about the Rich City League — registration, basketball tryouts, player evaluations, the RCL draft, teams, coaches, schedules, rules, fantasy basketball, social features, news, media, and the league's Richmond history since 2011.",
   alternates: { canonical: '/faq' },
   openGraph: {
