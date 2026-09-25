@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { RCL_NAV_ITEMS, RCL_ADMIN_NAV_ITEM } from '@/lib/rcl-navigation';
@@ -97,7 +98,7 @@ export function RCLHomeExperience({teams,games,standings,players,iq,stats,news,p
 
         <section>
           <div className="rcl-home-section-head"><div><p>THE CITY</p><h2>FEATURED PLAYERS</h2></div><Link href="/players">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-player-row">{featured.map((p,i)=>{const q=rankMap.get(p.id); const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><img src={p.photo_url||fallbackPlayers[i%fallbackPlayers.length]} alt=""/><div/><small>#{p.jersey_number??i+1} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{ppg?ppg.toFixed(1):'—'} PPG</b><b>{apg?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
+          <div className="rcl-home-player-row">{featured.map((p,i)=>{const q=rankMap.get(p.id); const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><Image src={p.photo_url||fallbackPlayers[i%fallbackPlayers.length]} alt={`${p.first_name} ${p.last_name}`} width={700} height={700} sizes="(max-width: 768px) 80vw, 30vw" /><div/><small>#{p.jersey_number??i+1} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{ppg?ppg.toFixed(1):'—'} PPG</b><b>{apg?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
         </section>
 
         <section className="rcl-home-news">
