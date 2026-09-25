@@ -38,19 +38,19 @@ export function RiggedAthleteProof({ title }: Props) {
     const grid=new THREE.GridHelper(10,20,0x315064,0x142a38); grid.position.y=.004; scene.add(grid);
     let mixer:any=null;
     const clock=new THREE.Clock();
-    new GLTFLoader().load('/lab3d/athlete.glb',(model)=>{
+    new GLTFLoader().load('/lab3d/athlete.glb',(model:any)=>{
       if(disposed) return;
       const athlete=model.scene;
-      athlete.traverse((o)=>{const mesh=o as THREE.Mesh;if(mesh.isMesh){mesh.castShadow=true;mesh.receiveShadow=true;}});
+      athlete.traverse((o:any)=>{const mesh:any=o;if(mesh.isMesh){mesh.castShadow=true;mesh.receiveShadow=true;}});
       const box=new THREE.Box3().setFromObject(athlete),size=new THREE.Vector3(),center=new THREE.Vector3();
       box.getSize(size); box.getCenter(center);
       athlete.position.set(-center.x,-box.min.y,-center.z);
       athlete.scale.setScalar(2.15/Math.max(size.y,.001));
       scene.add(athlete);
-      const clip=model.animations.find(a=>/Idle|Jog/i.test(a.name))||model.animations[0];
+      const clip=model.animations.find((a:any)=>/Idle|Jog/i.test(a.name))||model.animations[0];
       if(clip){mixer=new THREE.AnimationMixer(athlete);mixer.clipAction(clip).play();}
       setStatus('ready');
-    },undefined,(err)=>{console.error('RCL athlete load failed',err);if(!disposed)setStatus('error');});
+    },undefined,(err:any)=>{console.error('RCL athlete load failed',err);if(!disposed)setStatus('error');});
     const resize=()=>{const w=mount.clientWidth,h=mount.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();};
     const ro=new ResizeObserver(resize); ro.observe(mount); resize();
     const positions:Record<View,any>={front:new THREE.Vector3(0,1.25,5.2),quarter:new THREE.Vector3(3.7,1.5,4.1),side:new THREE.Vector3(5.2,1.3,0),back:new THREE.Vector3(0,1.3,-5.2)};
