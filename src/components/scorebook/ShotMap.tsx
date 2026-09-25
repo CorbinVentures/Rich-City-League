@@ -178,45 +178,61 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
       >
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
-            <linearGradient id="court-floor" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#16212c" />
-              <stop offset="50%" stopColor="#111a23" />
-              <stop offset="100%" stopColor="#0d151d" />
+            <linearGradient id="arena-shell" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#05090d" /><stop offset="48%" stopColor="#101419" /><stop offset="100%" stopColor="#030609" />
             </linearGradient>
-            <pattern id="court-lines" width="8" height="8" patternUnits="userSpaceOnUse">
-              <path d="M0 0V8" stroke="rgba(255,255,255,.018)" strokeWidth=".5" />
+            <linearGradient id="hardwood" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#a8652f" /><stop offset="45%" stopColor="#c28243" /><stop offset="100%" stopColor="#8f5229" />
+            </linearGradient>
+            <linearGradient id="paint-dark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#18110e" /><stop offset="100%" stopColor="#101216" />
+            </linearGradient>
+            <pattern id="wood-planks" width="12" height="7" patternUnits="userSpaceOnUse">
+              <rect width="12" height="7" fill="url(#hardwood)" />
+              <path d="M0 0H12M0 7H12M6 0V7" stroke="rgba(32,15,7,.28)" strokeWidth=".25" />
+              <path d="M1 2.2C3 1.6 4 2.8 6 2.1S9 1.8 11 2.4M1 5C3 4.5 5 5.5 7 4.8S10 4.4 12 5" fill="none" stroke="rgba(255,224,170,.10)" strokeWidth=".22" />
             </pattern>
-            <filter id="orange-glow" x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur stdDeviation=".9" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            <pattern id="black-planks" width="10" height="7" patternUnits="userSpaceOnUse">
+              <rect width="10" height="7" fill="#111216" />
+              <path d="M0 0H10M0 7H10M5 0V7" stroke="rgba(255,255,255,.035)" strokeWidth=".25" />
+            </pattern>
+            <filter id="court-orange-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation=".85" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
-            <radialGradient id="paint-fill" cx="50%" cy="70%" r="75%">
-              <stop offset="0%" stopColor="rgba(255,107,26,.09)" />
-              <stop offset="100%" stopColor="rgba(255,107,26,0)" />
-            </radialGradient>
+            <filter id="rim-glow" x="-120%" y="-120%" width="340%" height="340%">
+              <feGaussianBlur stdDeviation=".65" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
           </defs>
 
-          <rect width="100" height="100" fill="url(#court-floor)" />
-          <rect width="100" height="100" fill="url(#court-lines)" />
-          <rect x="3" y="4" width="94" height="92" rx="1.5" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth=".8" />
+          {/* Industrial arena shell + hardwood playing surface. */}
+          <rect width="100" height="100" fill="url(#arena-shell)" />
+          <rect x="2" y="2" width="96" height="96" rx="2" fill="#090b0e" stroke="#ff641f" strokeWidth=".7" filter="url(#court-orange-glow)" />
+          <rect x="8" y="6" width="84" height="88" fill="url(#wood-planks)" stroke="rgba(255,255,255,.88)" strokeWidth=".55" />
+          <rect x="8" y="6" width="9" height="88" fill="url(#black-planks)" />
+          <rect x="83" y="6" width="9" height="88" fill="url(#black-planks)" />
+          <path d="M17 6V94M83 6V94" stroke="#ff641f" strokeWidth=".55" filter="url(#court-orange-glow)" />
 
-          {/* Basket is at the TOP baseline, matching the coaching view. */}
-          <rect x="31" y="4" width="38" height="37" fill="url(#paint-fill)" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
-          <circle cx="50" cy="41" r="11.5" fill="none" stroke="rgba(255,255,255,.7)" strokeWidth=".75" />
-          <path d="M38.5 41A11.5 11.5 0 0 1 61.5 41" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".7" strokeDasharray="2 2" />
+          {/* RCL black paint and regulation half-court geometry. */}
+          <rect x="36" y="6" width="28" height="37" fill="url(#paint-dark)" stroke="rgba(255,255,255,.92)" strokeWidth=".6" />
+          <circle cx="50" cy="43" r="10.5" fill="none" stroke="rgba(255,255,255,.92)" strokeWidth=".6" />
+          <path d="M39.5 43A10.5 10.5 0 0 0 60.5 43" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth=".55" strokeDasharray="1.7 1.7" />
+          <path d="M18 6V22A36 36 0 0 0 82 22V6" fill="none" stroke="#ff641f" strokeWidth=".85" filter="url(#court-orange-glow)" />
+          <path d="M18 6V22M82 22V6" stroke="rgba(255,255,255,.95)" strokeWidth=".42" />
+          <path d="M43 13A7 7 0 0 0 57 13" fill="none" stroke="rgba(255,255,255,.9)" strokeWidth=".55" />
 
-          {/* Three-point line opens toward midcourt. */}
-          <path d="M12 4V18.5A38 38 0 0 0 88 18.5V4" fill="none" stroke="rgba(255,107,26,.9)" strokeWidth="1.25" filter="url(#orange-glow)" />
-          <path d="M12 4V18.5M88 18.5V4" stroke="rgba(255,107,26,.95)" strokeWidth="1.25" />
+          {/* Physical backboard, rim and net treatment from approved mockup. */}
+          <rect x="43" y="8.5" width="14" height="2.1" rx=".25" fill="#e9e9e7" stroke="#fff" strokeWidth=".35" />
+          <rect x="46.5" y="9.1" width="7" height="1" fill="none" stroke="#9d9d9b" strokeWidth=".25" />
+          <path d="M50 10.6V13.1" stroke="#d9d9d6" strokeWidth=".6" />
+          <ellipse cx="50" cy="14" rx="3.2" ry="1.35" fill="none" stroke="#ff641f" strokeWidth=".8" filter="url(#rim-glow)" />
+          <path d="M47.2 14.6L48.3 18M48.5 14.9L49.4 18.5M50 15.2V18.8M51.5 14.9L50.6 18.5M52.8 14.6L51.7 18M48.3 18H51.7" fill="none" stroke="rgba(255,255,255,.88)" strokeWidth=".28" />
 
-          {/* Restricted area, backboard, rim and net */}
-          <path d="M42 9A8 8 0 0 0 58 9" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth=".75" />
-          <rect x="42" y="13" width="16" height="1.5" rx=".4" fill="none" stroke="rgba(255,255,255,.92)" strokeWidth=".85" />
-          <circle cx="50" cy="16.5" r="2.3" fill="none" stroke="rgba(255,107,26,1)" strokeWidth="1.15" filter="url(#orange-glow)" />
-          <path d="M48.2 17.7L49 20L50 17.7L51 20L51.8 17.7" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth=".45" />
-
-          {/* Midcourt reference at the bottom edge. */}
-          <path d="M39 96A11 11 0 0 1 61 96" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth=".65" />
+          {/* Midcourt mark and Richmond skyline silhouette. */}
+          <path d="M39 94A11 11 0 0 1 61 94" fill="#121419" stroke="rgba(255,255,255,.8)" strokeWidth=".55" />
+          <path d="M17 88L20 88V85H22V87H24V82H26V86H29V83H31V87H34V84H36V88H39V85H41V87H44V83H46V88H49V84H51V87H54V82H56V86H59V84H61V88H64V85H67V87H70V83H72V88H75V85H78V87H83V94H17Z" fill="#101216" opacity=".94" />
+          <text x="12.6" y="72" transform="rotate(-90 12.6 72)" fill="rgba(255,255,255,.9)" fontSize="4.1" fontWeight="900" letterSpacing=".8">RICH CITY</text>
+          <text x="87.4" y="29" transform="rotate(90 87.4 29)" fill="rgba(255,255,255,.9)" fontSize="4.1" fontWeight="900" letterSpacing=".65">LEAGUE</text>
+          <text x="50" y="92.1" textAnchor="middle" fill="#ff641f" fontSize="4.8" fontWeight="900" fontStyle="italic">RCL</text>
         </svg>
 
         {viewMode === 'heat' && filteredShots.map((shot) => (
@@ -240,15 +256,15 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
         {pendingShot && (
           <span
             aria-hidden="true"
-            className="absolute z-30 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rcl-gold bg-rcl-gold/20 shadow-[0_0_24px_rgba(255,196,0,.45)]"
+            className="absolute z-30 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rcl-orange bg-rcl-orange/20 shadow-[0_0_24px_rgba(255,100,31,.65)]"
             style={{ left: `${pendingShot.x}%`, top: `${pendingShot.y}%` }}
           >
-            <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rcl-gold" />
+            <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rcl-orange" />
           </span>
         )}
 
         {pendingShot && (
-          <div className="pointer-events-none absolute left-1/2 top-3 z-40 -translate-x-1/2 rounded-full border border-rcl-gold/30 bg-[#10151d]/90 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-rcl-gold backdrop-blur">
+          <div className="pointer-events-none absolute left-1/2 top-3 z-40 -translate-x-1/2 rounded-full border border-rcl-orange/40 bg-[#10151d]/95 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-rcl-orange backdrop-blur">
             {zoneLabel(pendingShot.zone)} · Location selected
           </div>
         )}
