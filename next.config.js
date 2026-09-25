@@ -17,8 +17,11 @@ const nextConfig = {
     ];
   },
   images: {
-    domains: ['localhost', 'images.unsplash.com', 'via.placeholder.com'],
-    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+    ],
   },
 };
 
