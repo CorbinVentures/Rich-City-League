@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import './RiggedAthleteProof.css';
 
 type Props = { title: string };
@@ -17,6 +15,12 @@ export function RiggedAthleteProof({ title }: Props) {
     const mount=mountRef.current;
     if(!mount) return;
     let disposed=false;
+    let cleanup=()=>{};
+    (async()=>{
+    const importModule=(url:string)=>import(/* webpackIgnore: true */ url);
+    const THREE:any=await importModule('/lab3d/vendor/three.module.min.js');
+    const { GLTFLoader }:any=await importModule('/lab3d/vendor/GLTFLoader.js');
+    if(disposed) return;
     const scene=new THREE.Scene();
     scene.background=new THREE.Color(0x071019);
     scene.fog=new THREE.Fog(0x071019,7,15);
@@ -32,7 +36,7 @@ export function RiggedAthleteProof({ title }: Props) {
     const floor=new THREE.Mesh(new THREE.CircleGeometry(5.5,64),new THREE.MeshStandardMaterial({color:0x0c1822,roughness:.9,metalness:.05}));
     floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
     const grid=new THREE.GridHelper(10,20,0x315064,0x142a38); grid.position.y=.004; scene.add(grid);
-    let mixer:THREE.AnimationMixer|null=null;
+    let mixer:any=null;
     const clock=new THREE.Clock();
     new GLTFLoader().load('/lab3d/athlete.glb',(model)=>{
       if(disposed) return;
@@ -49,9 +53,11 @@ export function RiggedAthleteProof({ title }: Props) {
     },undefined,(err)=>{console.error('RCL athlete load failed',err);if(!disposed)setStatus('error');});
     const resize=()=>{const w=mount.clientWidth,h=mount.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();};
     const ro=new ResizeObserver(resize); ro.observe(mount); resize();
-    const positions:Record<View,THREE.Vector3>={front:new THREE.Vector3(0,1.25,5.2),quarter:new THREE.Vector3(3.7,1.5,4.1),side:new THREE.Vector3(5.2,1.3,0),back:new THREE.Vector3(0,1.3,-5.2)};
+    const positions:Record<View,any>={front:new THREE.Vector3(0,1.25,5.2),quarter:new THREE.Vector3(3.7,1.5,4.1),side:new THREE.Vector3(5.2,1.3,0),back:new THREE.Vector3(0,1.3,-5.2)};
     renderer.setAnimationLoop(()=>{mixer?.update(Math.min(clock.getDelta(),.05));camera.position.lerp(positions[view],.09);camera.lookAt(0,1.08,0);renderer.render(scene,camera);});
-    return()=>{disposed=true;ro.disconnect();renderer.setAnimationLoop(null);renderer.dispose();mount.replaceChildren();};
+    cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);renderer.dispose();mount.replaceChildren();};
+    })().catch((err)=>{console.error('RCL renderer init failed',err);if(!disposed)setStatus('error');});
+    return()=>{disposed=true;cleanup();};
   },[view]);
 
   return <section className="rigged-proof">
