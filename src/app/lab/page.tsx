@@ -3,7 +3,7 @@
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaCheck } from 'react-icons/fa6';
 import { LabCinematicIntro } from '@/components/LabCinematicIntro';
-import { DrillAnimation } from '@/components/DrillAnimation';
+import { RiggedAthleteProof } from '@/components/RiggedAthleteProof';
 import { LabDashboard } from '@/components/LabDashboard';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -151,7 +151,7 @@ export default function LabPage() {
 
     {screen==='drill'&&workout&&drill&&<section className="labx-shell drill"><div className="labx-crumb">THE LAB <i>›</i> WORKOUT <i>›</i> DRILL {activeDrill+1}<span>{activeDrill+1} OF {workout.drills.length}</span></div>
       <div className="labx-drill-head labx-drill-hero"><small>{drill.skill.toUpperCase()} · MOTION SESSION</small><h1>{drill.title}</h1><p>{drill.description}</p><div className="labx-drill-meta"><b>{drill.prescription}</b><b>~{Math.max(5,Math.round(drill.duration/60))} MIN</b><b>{workout.difficulty.toUpperCase()}</b></div><div className="labx-pills">{drill.focus.map(x=><span key={x}>{x}</span>)}</div></div>
-      <DrillAnimation drillId={drill.id} skill={drill.skill} title={drill.title} focus={drill.focus} />
+      <RiggedAthleteProof title={drill.title} />
       <section className="labx-howto"><div><small>ONE AVATAR</small><b>Same athlete. Every drill.</b><span>Movement changes by workout while the avatar identity stays consistent.</span></div><div><small>FULL BODY</small><b>Feet → hips → hands</b><span>Study the entire kinetic chain instead of a floating ball or static pose.</span></div><div><small>ALL ANGLES</small><b>Front · 3/4 · Side · Back</b><span>Every camera view is projected from the same underlying motion.</span></div></section><nav className="labx-drill-tabs">{(['coaching','breakdown','mistakes','variations'] as const).map(x=><button key={x} className={drillTab===x?'active':''} onClick={()=>setDrillTab(x)}>{x}</button>)}</nav>
       <div className="labx-drill-body">
        {drillTab==='coaching'&&<><h4>HOW TO PERFORM THIS DRILL</h4><div className="labx-instructions">{drill.instructions.map((x,i)=><p key={x}><b>{String(i+1).padStart(2,'0')}</b><span>{x}</span></p>)}</div><h4>KEY COACHING CUES</h4><div className="labx-coaching"><ul>{drill.coachingPoints.map(x=><li key={x}><FaCheck/> {x}</li>)}</ul><div className="labx-court"><i/><b>↗</b></div></div></>}
