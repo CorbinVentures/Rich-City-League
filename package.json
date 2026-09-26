@@ -34,7 +34,8 @@
     "lab:motion:reconstruct-ready": "npm run lab:motion:solve-ready && node scripts/reconstruct-quaternius-ready-stance.mjs",
     "lab:motion:bake-ready": "npm run lab:motion:reconstruct-ready && node scripts/bake-quaternius-ready-stance.mjs",
     "prebuild": "npm run lab:motion:bake-ready",
-    "lab:motion:validate-anatomy": "node scripts/validate-quaternius-anatomical-rig.mjs"
+    "lab:motion:validate-anatomy": "node scripts/validate-quaternius-anatomical-rig.mjs",
+    "lab:v4:target": "npm run lab:motion:analyze-rig && npm run lab:motion:validate-anatomy && node scripts/build-quaternius-ready-stance-v4.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
