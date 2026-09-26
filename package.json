@@ -29,11 +29,12 @@
     "lab:motion:tracks": "node scripts/generate-stationary-dribble-tracks.mjs",
     "lab:motion:analyze-rig": "node scripts/analyze-quaternius-rig.mjs",
     "lab:motion:rig-report": "npm run lab:motion:analyze-rig && node scripts/validate-quaternius-rig-report.mjs",
-    "lab:motion:ready-stance": "npm run lab:motion:rig-report && node scripts/build-quaternius-ready-stance.mjs",
+    "lab:motion:ready-stance": "npm run lab:motion:rig-report && npm run lab:motion:validate-anatomy && node scripts/build-quaternius-ready-stance.mjs",
     "lab:motion:solve-ready": "npm run lab:motion:ready-stance && node scripts/solve-quaternius-ready-stance.mjs",
     "lab:motion:reconstruct-ready": "npm run lab:motion:solve-ready && node scripts/reconstruct-quaternius-ready-stance.mjs",
     "lab:motion:bake-ready": "npm run lab:motion:reconstruct-ready && node scripts/bake-quaternius-ready-stance.mjs",
-    "prebuild": "npm run lab:motion:bake-ready"
+    "prebuild": "npm run lab:motion:bake-ready",
+    "lab:motion:validate-anatomy": "node scripts/validate-quaternius-anatomical-rig.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
