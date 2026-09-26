@@ -53,7 +53,7 @@ export function RiggedAthleteProof({title}:Props){
       if(!bakedClip)throw new Error('Baked full-rig crouch clip missing');
       const mixer=new THREE.AnimationMixer(athlete);
       const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`BAKED FULL-RIG PROOF · ${bakedClip.name}`);
+      setMotion(`NATURAL MOTION BASE · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
@@ -70,8 +70,16 @@ export function RiggedAthleteProof({title}:Props){
         seam.rotation.set(rot[0],rot[1],rot[2]);ball.add(seam);
       }
 
-      const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3();
+      const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
       const clock=new THREE.Clock();let elapsed=0;
+      // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
+      // 100% baked animation; no runtime bone rotations are applied.
+      const smooth=(t:number)=>t*t*(3-2*t);
+      const bounceHeight=(phase:number)=>{
+        // phase 0 = hand contact, .5 = floor contact, 1 = next hand contact.
+        const d=phase<.5?smooth(phase*2):smooth((1-phase)*2);
+        return 1-d;
+      };
       const resize=()=>{const w=mount.clientWidth,h=mount.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();};
       const ro=new ResizeObserver(resize);ro.observe(mount);resize();
       const positions:Record<View,any>={front:new THREE.Vector3(0,1.25,5.2),quarter:new THREE.Vector3(3.7,1.5,4.1),side:new THREE.Vector3(5.2,1.3,0),back:new THREE.Vector3(0,1.3,-5.2)};
@@ -79,12 +87,22 @@ export function RiggedAthleteProof({title}:Props){
 
       renderer.setAnimationLoop(()=>{
         const delta=Math.min(clock.getDelta(),.05);elapsed+=delta;mixer.update(delta);
-        const cycle=(elapsed%1.2)/1.2,left=cycle<.5,local=left?cycle*2:(cycle-.5)*2;
-        const contact=Math.pow(Math.abs(Math.cos(local*Math.PI)),.72);
-        const activeHand=left?leftHand:rightHand;
-        if(activeHand){activeHand.getWorldPosition(handWorld);ballTarget.set(handWorld.x+(left?-.03:.03),.16+Math.max(.22,handWorld.y-.16)*contact,handWorld.z+.08);}
-        else{ballTarget.set(left?-.34:.34,.16+.62*contact,.3);}
-        ball.position.lerp(ballTarget,.55);ball.rotation.x+=delta*4.5;ball.rotation.z+=(left?-1:1)*delta*3.2;
+        // One controlled dribble per side. A short hand-contact dwell prevents the ball
+        // from looking magnetized or independently sinusoidal.
+        const cycle=(elapsed%1.36)/1.36,left=cycle<.5,phase=left?cycle*2:(cycle-.5)*2;
+        const activeHand=left?leftHand:rightHand;activeHand.getWorldPosition(handWorld);
+        const handY=Math.max(.72,handWorld.y-.035),floorY=.125;
+        const h=bounceHeight(phase);
+        const side=left?-1:1;
+        const lateral=handWorld.x+side*(.025+.035*Math.sin(phase*Math.PI));
+        const forward=handWorld.z+.055;
+        ballTarget.set(lateral,floorY+(handY-floorY)*h,forward);
+        // Snap cleanly at hand/floor contacts, ease through flight for believable control.
+        const nearContact=phase<.08||phase>.92||Math.abs(phase-.5)<.055;
+        const follow=nearContact?.72:.42;
+        prevBall.copy(ball.position);ball.position.lerp(ballTarget,follow);
+        const travel=ball.position.distanceTo(prevBall);
+        ball.rotation.x+=travel/.12;ball.rotation.z+=side*travel/.16;
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
@@ -93,13 +111,13 @@ export function RiggedAthleteProof({title}:Props){
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Full-rig baked-animation proof using the Quaternius-authored skeleton clip. No runtime bone posing. This validates the production playback path before the basketball-specific clip is introduced.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Natural-motion staging pass: proven baked full-body stance with hand-synchronized ball timing. Runtime bone posing remains disabled while the basketball-specific baked clip is authored.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>BAKED FULL-RIG PROOF</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>NATURAL MOTION STAGING</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
