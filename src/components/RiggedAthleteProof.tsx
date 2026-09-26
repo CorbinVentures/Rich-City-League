@@ -44,62 +44,24 @@ export function RiggedAthleteProof({title}:Props){
 
       setStatus('loading-motion');
 
-      // Build the basketball clip from the rig's measured rest pose.
-      // Each target is expressed in parent-local anatomical directions derived
-      // from the actual child-bone vectors, rather than assumed Euler axes.
+      // Baked full-rig proof: use the existing Quaternius animation asset exactly
+      // as authored. No runtime bone posing, guessed Euler offsets, or partial tracks.
+      const motionModel=await load('/lab3d/UAL1_Standard.glb');if(disposed)return;
+      const clips=motionModel.animations||[];
+      const bakedClip=clips.find((a:any)=>a.name==='Crouch_Idle_Loop')
+        || clips.find((a:any)=>a.name==='Crouch_Fwd_Loop');
+      if(!bakedClip)throw new Error('Baked full-rig crouch clip missing');
+      const mixer=new THREE.AnimationMixer(athlete);
+      const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
+      setMotion(`BAKED FULL-RIG PROOF · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
         for(const n of names){const exact=bones[n.toLowerCase()];if(exact)return exact;}
         return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));
       };
-      const pelvis=findBone('pelvis','hips','hip'),spine=findBone('spine_01','spine1','spine');
-      const leftUpper=findBone('upperarm_l','leftupperarm','arm_l'),rightUpper=findBone('upperarm_r','rightupperarm','arm_r');
-      const leftFore=findBone('lowerarm_l','leftforearm','forearm_l'),rightFore=findBone('lowerarm_r','rightforearm','forearm_r');
-      const leftThigh=findBone('thigh_l','leftupleg','upleg_l'),rightThigh=findBone('thigh_r','rightupleg','upleg_r');
-      const leftCalf=findBone('calf_l','leftleg','leg_l'),rightCalf=findBone('calf_r','rightleg','leg_r');
-      const leftFoot=findBone('foot_l','leftfoot'),rightFoot=findBone('foot_r','rightfoot');
       const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
-      const required={pelvis,spine,leftUpper,rightUpper,leftFore,rightFore,leftThigh,rightThigh,leftCalf,rightCalf,leftFoot,rightFoot,leftHand,rightHand};
-      if(Object.values(required).some(v=>!v))throw new Error('Basketball clip: required rig bones missing');
-
-      // Capture exact rest transforms before animation.
-      const rest=new Map<any,{q:any,p:any}>();
-      Object.values(required).forEach((bone:any)=>rest.set(bone,{q:bone.quaternion.clone(),p:bone.position.clone()}));
-      const restQ=(bone:any)=>rest.get(bone)!.q.clone();
-      const qLocal=(bone:any,x:number,y:number,z:number)=>restQ(bone).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z,'XYZ'))).toArray();
-      const times=[0,.15,.3,.45,.6,.75,.9,1.05,1.2];
-      const tracks:any[]=[];
-      const addQ=(bone:any,poses:number[][])=>tracks.push(new THREE.QuaternionKeyframeTrack(`${bone.name}.quaternion`,times,poses.flatMap(p=>qLocal(bone,p[0],p[1],p[2]))));
-
-      // Root translation is measured from the real rest position. This creates
-      // visible center-of-mass loading without changing the athlete's scale.
-      const rootBase=rest.get(pelvis)!.p;
-      const rootValues=times.flatMap((_,i)=>{
-        const phase=i/(times.length-1)*Math.PI*2;
-        return [rootBase.x+Math.sin(phase)*.018,rootBase.y-.10+Math.cos(phase*2)*.012,rootBase.z+.035];
-      });
-      tracks.push(new THREE.VectorKeyframeTrack(`${pelvis.name}.position`,times,rootValues));
-
-      // Strong full-body basketball pose. The large, symmetric lower-body load
-      // intentionally makes a failed axis mapping obvious during device review.
-      addQ(pelvis,[[-.28,0,.05],[-.31,0,.04],[-.34,0,0],[-.31,0,-.04],[-.28,0,-.05],[-.31,0,-.04],[-.34,0,0],[-.31,0,.04],[-.28,0,.05]]);
-      addQ(spine,[[.20,0,-.05],[.18,0,-.03],[.16,0,0],[.18,0,.03],[.20,0,.05],[.18,0,.03],[.16,0,0],[.18,0,-.03],[.20,0,-.05]]);
-      addQ(leftThigh,[[.58,0,.18],[.62,0,.16],[.66,0,.13],[.62,0,.10],[.58,0,.08],[.54,0,.10],[.52,0,.13],[.54,0,.16],[.58,0,.18]]);
-      addQ(rightThigh,[[.58,0,-.18],[.54,0,-.16],[.52,0,-.13],[.54,0,-.10],[.58,0,-.08],[.62,0,-.10],[.66,0,-.13],[.62,0,-.16],[.58,0,-.18]]);
-      addQ(leftCalf,[[-.95,0,0],[-1.02,0,0],[-1.08,0,0],[-1.02,0,0],[-.95,0,0],[-.90,0,0],[-.86,0,0],[-.90,0,0],[-.95,0,0]]);
-      addQ(rightCalf,[[-.95,0,0],[-.90,0,0],[-.86,0,0],[-.90,0,0],[-.95,0,0],[-1.02,0,0],[-1.08,0,0],[-1.02,0,0],[-.95,0,0]]);
-      addQ(leftUpper,[[.95,.10,.55],[1.08,.08,.48],[1.22,.05,.38],[1.08,.04,.28],[.88,.03,.22],[.72,.03,.26],[.66,.05,.34],[.78,.08,.46],[.95,.10,.55]]);
-      addQ(rightUpper,[[.88,-.03,-.22],[.72,-.03,-.26],[.66,-.05,-.34],[.78,-.08,-.46],[.95,-.10,-.55],[1.08,-.08,-.48],[1.22,-.05,-.38],[1.08,-.04,-.28],[.88,-.03,-.22]]);
-      addQ(leftFore,[[-1.05,0,.08],[-1.22,0,.06],[-1.42,0,.03],[-1.20,0,0],[-.95,0,-.02],[-.78,0,0],[-.72,0,.03],[-.86,0,.06],[-1.05,0,.08]]);
-      addQ(rightFore,[[-.95,0,.02],[-.78,0,0],[-.72,0,-.03],[-.86,0,-.06],[-1.05,0,-.08],[-1.22,0,-.06],[-1.42,0,-.03],[-1.20,0,0],[-.95,0,.02]]);
-      addQ(leftFoot,[[.18,0,0],[.20,0,0],[.22,0,0],[.20,0,0],[.18,0,0],[.16,0,0],[.15,0,0],[.16,0,0],[.18,0,0]]);
-      addQ(rightFoot,[[.18,0,0],[.16,0,0],[.15,0,0],[.16,0,0],[.18,0,0],[.20,0,0],[.22,0,0],[.20,0,0],[.18,0,0]]);
-
-      const basketballClip=new THREE.AnimationClip('RCL_Stationary_Handle_RigAudit_v2',1.2,tracks);
-      const mixer=new THREE.AnimationMixer(athlete);
-      const action=mixer.clipAction(basketballClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion('RCL_Stationary_Handle_RigAudit_v2');
+      if(!leftHand||!rightHand)throw new Error('Full-rig proof: hand bones missing');
       const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
       ball.castShadow=true;scene.add(ball);
       const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
@@ -131,13 +93,13 @@ export function RiggedAthleteProof({title}:Props){
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Rig-audited basketball keyframe test using captured rest transforms, full lower-body load, alternating arm chain and synchronized ball contact.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Full-rig baked-animation proof using the Quaternius-authored skeleton clip. No runtime bone posing. This validates the production playback path before the basketball-specific clip is introduced.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>RIG-AUDITED BASKETBALL CLIP</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>BAKED FULL-RIG PROOF</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
