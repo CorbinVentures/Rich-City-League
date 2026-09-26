@@ -47,6 +47,39 @@ export function RiggedAthleteProof({title}:Props){
       // Author a dedicated basketball stance/handle clip on the athlete's exact rig.
       // We deliberately do not reuse generic crouch/idle clips: the clip below owns
       // the basketball pose and is played through AnimationMixer like a normal asset.
+      const bones:Record<string,any>={};
+      athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
+      const findBone=(...names:string[])=>{
+        for(const n of names){const exact=bones[n.toLowerCase()];if(exact)return exact;}
+        return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));
+      };
+      const pelvis=findBone('pelvis','hips','hip'),spine=findBone('spine_01','spine1','spine');
+      const leftUpper=findBone('upperarm_l','leftupperarm','arm_l'),rightUpper=findBone('upperarm_r','rightupperarm','arm_r');
+      const leftFore=findBone('lowerarm_l','leftforearm','forearm_l'),rightFore=findBone('lowerarm_r','rightforearm','forearm_r');
+      const leftThigh=findBone('thigh_l','leftupleg','upleg_l'),rightThigh=findBone('thigh_r','rightupleg','upleg_r');
+      const leftCalf=findBone('calf_l','leftleg','leg_l'),rightCalf=findBone('calf_r','rightleg','leg_r');
+      const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
+      const required={pelvis,spine,leftUpper,rightUpper,leftFore,rightFore,leftThigh,rightThigh,leftCalf,rightCalf,leftHand,rightHand};
+      if(Object.values(required).some(v=>!v))throw new Error('Basketball clip: required rig bones missing');
+
+      const q=(bone:any,x:number,y:number,z:number)=>bone.quaternion.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z,'XYZ'))).toArray();
+      const times=[0,.3,.6,.9,1.2];
+      const tracks:any[]=[];
+      const addQ=(bone:any,poses:number[][])=>tracks.push(new THREE.QuaternionKeyframeTrack(`${bone.name}.quaternion`,times,poses.flatMap(p=>q(bone,p[0],p[1],p[2]))));
+      addQ(pelvis,[[-.22,0,.04],[-.25,0,.02],[-.22,0,-.04],[-.25,0,-.02],[-.22,0,.04]]);
+      addQ(spine,[[.16,0,-.04],[.13,0,.03],[.16,0,.04],[.13,0,-.03],[.16,0,-.04]]);
+      addQ(leftThigh,[[.42,0,.12],[.48,0,.1],[.42,0,.08],[.38,0,.1],[.42,0,.12]]);
+      addQ(rightThigh,[[.42,0,-.12],[.38,0,-.1],[.42,0,-.08],[.48,0,-.1],[.42,0,-.12]]);
+      addQ(leftCalf,[[-.7,0,0],[-.78,0,0],[-.7,0,0],[-.64,0,0],[-.7,0,0]]);
+      addQ(rightCalf,[[-.7,0,0],[-.64,0,0],[-.7,0,0],[-.78,0,0],[-.7,0,0]]);
+      addQ(leftUpper,[[.78,.05,.34],[1.05,.02,.4],[.72,.03,.22],[.5,.02,.16],[.78,.05,.34]]);
+      addQ(rightUpper,[[.72,-.03,-.22],[.5,-.02,-.16],[.78,-.05,-.34],[1.05,-.02,-.4],[.72,-.03,-.22]]);
+      addQ(leftFore,[[-1.0,0,0],[-1.32,0,0],[-.88,0,0],[-.72,0,0],[-1.0,0,0]]);
+      addQ(rightFore,[[-.88,0,0],[-.72,0,0],[-1.0,0,0],[-1.32,0,0],[-.88,0,0]]);
+      const basketballClip=new THREE.AnimationClip('RCL_Stationary_Handle_v1',1.2,tracks);
+      const mixer=new THREE.AnimationMixer(athlete);
+      mixer.clipAction(basketballClip).reset().setLoop(THREE.LoopRepeat,Infinity).play();
+      setMotion('RCL_Stationary_Handle_v1');
       const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
       ball.castShadow=true;scene.add(ball);
       const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
