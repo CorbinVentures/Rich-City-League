@@ -54,5 +54,12 @@ metrics.bakedLeftIpsilateral=(actualKneeL.x-cx)*(actualFootL.x-cx)>0;metrics.bak
 const failures=[];if(!metrics.bakedLeftIpsilateral||!metrics.bakedRightIpsilateral||!metrics.bakedKneesSeparated)failures.push('baked-knee-centerline-cross');if(metrics.bakedKneeSpan<metrics.bakedStanceWidth*.28)failures.push('baked-knee-base-too-narrow');
 metrics.bakedLeftKneeFootDx=Math.abs(actualKneeL.x-actualFootL.x);metrics.bakedRightKneeFootDx=Math.abs(actualKneeR.x-actualFootR.x);
 if(metrics.bakedLeftKneeFootDx>metrics.bakedStanceWidth*.38||metrics.bakedRightKneeFootDx>metrics.bakedStanceWidth*.38)failures.push('baked-knee-foot-tracking');if(metrics.rootTranslationError>.001)failures.push('root-space-translation');if(Math.max(metrics.leftHandError,metrics.rightHandError)>.04)failures.push('reconstructed-hand-error');if(Math.max(metrics.leftFootError,metrics.rightFootError)>.04)failures.push('reconstructed-foot-error');if(Math.min(metrics.leftKneeClearance,metrics.rightKneeClearance)<.18)failures.push('reconstructed-knee-floor');
+// Orientation/deformation gates: feet must preserve their calibrated bind-world
+// orientation and limb frames must remain finite/unit after reconstruction.
+const qdot=(a,b)=>Math.abs(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]);
+metrics.leftFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.foot_l],bind.foot_l.worldRotation)))*180/Math.PI;
+metrics.rightFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.foot_r],bind.foot_r.worldRotation)))*180/Math.PI;
+if(Math.max(metrics.leftFootWorldOrientationErrorDeg,metrics.rightFootWorldOrientationErrorDeg)>.25)failures.push('foot-world-orientation');
+for(const n of [...Object.keys(desired),'foot_l','foot_r'])if(localQ[by[n]].some(v=>!Number.isFinite(v)))failures.push('nonfinite-orientation-'+n);
 const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries([...Object.keys(desired),'foot_l','foot_r'].map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
 fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(failures.length)process.exit(1);
