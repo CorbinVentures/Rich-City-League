@@ -46,14 +46,14 @@ export function RiggedAthleteProof({title}:Props){
 
       // Playback layer only: load the basketball-specific baked action by exact name.
       // Never silently fall back to a generic locomotion/crouch animation.
-      const motionModel=await load('/lab3d/RCL_Stationary_Alternating_Pound_v1.glb');if(disposed)return;
+      const motionModel=await load('/lab3d/RCL_Ready_Stance_v2.glb');if(disposed)return;
       const clips=motionModel.animations||[];
-      const expectedClip='RCL_Stationary_Alternating_Pound_v1';
+      const expectedClip='RCL_Ready_Stance_v2';
       const bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
       const mixer=new THREE.AnimationMixer(athlete);
       const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`BASKETBALL MOTION · ${bakedClip.name}`);
+      setMotion(`VALIDATED STATIC STANCE · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
@@ -63,7 +63,7 @@ export function RiggedAthleteProof({title}:Props){
       const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
       if(!leftHand||!rightHand)throw new Error('Full-rig proof: hand bones missing');
       const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
-      ball.castShadow=true;scene.add(ball);
+      ball.castShadow=true;ball.visible=false;scene.add(ball);
       const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
       for(const rot of [[0,0,0],[0,Math.PI/2,0]]){
         const seam=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:65},(_,i)=>{const a=i/64*Math.PI*2;return new THREE.Vector3(Math.cos(a)*.121,Math.sin(a)*.121,0);})),seamMat);
@@ -117,7 +117,7 @@ export function RiggedAthleteProof({title}:Props){
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>STATIONARY DRIBBLE</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>V2 STATIC VALIDATION</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
