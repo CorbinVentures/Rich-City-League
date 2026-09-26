@@ -26,7 +26,8 @@
     "lab:motion:author": "node scripts/author-stationary-dribble.mjs",
     "lab:motion:check-target": "npm run lab:motion:author && npm run lab:motion:validate -- public/lab3d/motion/stationary-dribble-target-report.json",
     "lab:motion:bake": "node scripts/bake-lab-motion-glb.mjs",
-    "lab:motion:tracks": "node scripts/generate-stationary-dribble-tracks.mjs"
+    "lab:motion:tracks": "node scripts/generate-stationary-dribble-tracks.mjs",
+    "lab:motion:analyze-rig": "node scripts/analyze-quaternius-rig.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
