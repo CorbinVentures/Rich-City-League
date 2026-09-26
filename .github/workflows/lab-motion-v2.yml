@@ -1,15 +1,17 @@
 name: Lab Motion V2 Validation
-'on':
+
+on:
   pull_request:
     paths:
       - 'src/lib/lab-motion-**'
       - 'src/lib/lab-quaternius-**'
       - 'scripts/*quaternius*'
+      - 'scripts/bake-quaternius-ready-stance.mjs'
       - 'public/lab3d/athlete.glb'
       - 'package.json'
       - '.github/workflows/lab-motion-v2.yml'
-      - 'scripts/bake-quaternius-ready-stance.mjs'
   workflow_dispatch:
+
 jobs:
   canonical-athlete:
     runs-on: ubuntu-latest
@@ -19,10 +21,13 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - name: Analyze canonical athlete and solve ready stance
+      - name: Analyze canonical athlete and bake validated ready stance
         run: npm run lab:motion:bake-ready
-      - name: Publish measured reports
+      - name: Publish measured reports and static GLB
         uses: actions/upload-artifact@v4
         with:
           name: lab-motion-v2-reports
-          path: |\n            public/lab3d/motion/*.json\n            public/lab3d/RCL_Ready_Stance_v2.glb
+          path: |
+            public/lab3d/motion/*.json
+            public/lab3d/RCL_Ready_Stance_v2.glb
+          if-no-files-found: error
