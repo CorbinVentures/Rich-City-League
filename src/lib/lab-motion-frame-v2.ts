@@ -1,0 +1,18 @@
+import type {RigAnalysis,V3,Q} from './lab-rig-analysis';import {solveLimb,type ReadyStance} from './lab-motion-v2';import {aimBoneWorld,continuous,localFromWorld,qMul} from './lab-motion-orientation-v2';
+export type Frame={local:Record<string,Q>;world:Record<string,Q>;points:Record<string,V3>;metrics:{leftKneeY:number;rightKneeY:number;shoulderSpan:number;handSpan:number;leftFootError:number;rightFootError:number}};
+const sub=(a:V3,b:V3):V3=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),dist=(a:V3,b:V3)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z),norm=(v:V3):V3=>{const n=Math.hypot(v.x,v.y,v.z)||1;return{x:v.x/n,y:v.y/n,z:v.z/n}};
+const at=(r:RigAnalysis,n:string)=>r.worldPosition[r.byName[n]];
+export function solveReadyFrame(r:RigAnalysis,s:ReadyStance,prev:Record<string,Q>={}):Frame{
+ const req=['pelvis','thigh_l','calf_l','foot_l','thigh_r','calf_r','foot_r','upperarm_l','lowerarm_l','hand_l','upperarm_r','lowerarm_r','hand_r'];for(const n of req)if(r.byName[n]===undefined)throw new Error('Missing '+n);
+ const seg=(a:string,b:string)=>dist(at(r,a),at(r,b));const hipL={x:s.pelvis.x+(at(r,'thigh_l').x-at(r,'pelvis').x),y:s.pelvis.y,z:s.pelvis.z},hipR={x:s.pelvis.x+(at(r,'thigh_r').x-at(r,'pelvis').x),y:s.pelvis.y,z:s.pelvis.z};
+ const L=solveLimb(hipL,s.leftFoot,s.leftKneePole,seg('thigh_l','calf_l'),seg('calf_l','foot_l')),R=solveLimb(hipR,s.rightFoot,s.rightKneePole,seg('thigh_r','calf_r'),seg('calf_r','foot_r'));
+ const shoulderL={x:s.pelvis.x+(at(r,'upperarm_l').x-at(r,'pelvis').x),y:s.pelvis.y+(at(r,'upperarm_l').y-at(r,'pelvis').y)*.92,z:s.pelvis.z+(at(r,'upperarm_l').z-at(r,'pelvis').z)},shoulderR={x:s.pelvis.x+(at(r,'upperarm_r').x-at(r,'pelvis').x),y:shoulderL.y,z:shoulderL.z};
+ const AL=solveLimb(shoulderL,s.leftHand,s.leftElbowPole,seg('upperarm_l','lowerarm_l'),seg('lowerarm_l','hand_l')),AR=solveLimb(shoulderR,s.rightHand,s.rightElbowPole,seg('upperarm_r','lowerarm_r'),seg('lowerarm_r','hand_r'));
+ const world:Record<string,Q>={},local:Record<string,Q>={};world.pelvis=r.worldRotation[r.byName.pelvis];local.pelvis=r.nodes[r.byName.pelvis].rotation;
+ const set=(name:string,parent:string,dir:V3,pole?:V3)=>{const i=r.byName[name],w=aimBoneWorld(r.worldRotation[i],r.primaryAxis[name],norm(dir),pole),l=localFromWorld(world[parent]||r.worldRotation[r.nodes[i].parent??i],w);world[name]=w;local[name]=prev[name]?continuous(prev[name],l):l};
+ set('thigh_l','pelvis',sub(L.joint,hipL),L.bendNormal);set('calf_l','thigh_l',sub(L.end,L.joint),L.bendNormal);set('thigh_r','pelvis',sub(R.joint,hipR),R.bendNormal);set('calf_r','thigh_r',sub(R.end,R.joint),R.bendNormal);
+ set('upperarm_l','pelvis',sub(AL.joint,shoulderL),AL.bendNormal);set('lowerarm_l','upperarm_l',sub(AL.end,AL.joint),AL.bendNormal);set('upperarm_r','pelvis',sub(AR.joint,shoulderR),AR.bendNormal);set('lowerarm_r','upperarm_r',sub(AR.end,AR.joint),AR.bendNormal);
+ for(const n of ['foot_l','foot_r','hand_l','hand_r']){const i=r.byName[n];local[n]=r.nodes[i].rotation;world[n]=r.worldRotation[i]}
+ return{local,world,points:{hipL,hipR,kneeL:L.joint,kneeR:R.joint,footL:L.end,footR:R.end,shoulderL,shoulderR,elbowL:AL.joint,elbowR:AR.joint,handL:AL.end,handR:AR.end},metrics:{leftKneeY:L.joint.y,rightKneeY:R.joint.y,shoulderSpan:dist(shoulderL,shoulderR),handSpan:dist(AL.end,AR.end),leftFootError:dist(L.end,s.leftFoot),rightFootError:dist(R.end,s.rightFoot)}};
+}
+export function gateFrame(f:Frame,floorY:number){const m=f.metrics;const reasons:string[]=[];if(m.leftKneeY-floorY<.18||m.rightKneeY-floorY<.18)reasons.push('knee-floor-clearance');if(m.handSpan>m.shoulderSpan*1.65)reasons.push('t-pose-envelope');if(m.leftFootError>.025||m.rightFootError>.025)reasons.push('foot-lock');return{pass:reasons.length===0,reasons}}
