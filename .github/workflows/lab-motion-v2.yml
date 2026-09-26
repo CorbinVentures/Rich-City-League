@@ -18,7 +18,7 @@ jobs:
           node-version: 22
       - run: npm ci
       - name: Analyze canonical athlete and solve ready stance
-        run: npm run lab:motion:solve-ready
+        run: npm run lab:motion:reconstruct-ready
       - name: Publish measured reports
         uses: actions/upload-artifact@v4
         with:
