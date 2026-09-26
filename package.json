@@ -28,7 +28,8 @@
     "lab:motion:bake": "node scripts/bake-lab-motion-glb.mjs",
     "lab:motion:tracks": "node scripts/generate-stationary-dribble-tracks.mjs",
     "lab:motion:analyze-rig": "node scripts/analyze-quaternius-rig.mjs",
-    "lab:motion:rig-report": "npm run lab:motion:analyze-rig && node scripts/validate-quaternius-rig-report.mjs"
+    "lab:motion:rig-report": "npm run lab:motion:analyze-rig && node scripts/validate-quaternius-rig-report.mjs",
+    "lab:motion:ready-stance": "npm run lab:motion:rig-report && node scripts/build-quaternius-ready-stance.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
