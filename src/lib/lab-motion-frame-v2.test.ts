@@ -1,0 +1,35 @@
+import { describe, it, expect } from 'vitest';
+import { analyzeRig } from './lab-rig-analysis';
+import { basketballReadyStance } from './lab-motion-v2';
+import { gateFrame, solveReadyFrame } from './lab-motion-frame-v2';
+
+const rig = analyzeRig([
+  { name: 'pelvis', children: [1, 4, 7, 10], translation: [0, 1, 0] },
+  { name: 'thigh_l', children: [2], translation: [-.18, 0, 0] },
+  { name: 'calf_l', children: [3], translation: [0, -.48, 0] },
+  { name: 'foot_l', translation: [0, -.48, .08] },
+  { name: 'thigh_r', children: [5], translation: [.18, 0, 0] },
+  { name: 'calf_r', children: [6], translation: [0, -.48, 0] },
+  { name: 'foot_r', translation: [0, -.48, .08] },
+  { name: 'upperarm_l', children: [8], translation: [-.32, .55, 0] },
+  { name: 'lowerarm_l', children: [9], translation: [-.36, 0, 0] },
+  { name: 'hand_l', translation: [-.34, 0, 0] },
+  { name: 'upperarm_r', children: [11], translation: [.32, .55, 0] },
+  { name: 'lowerarm_r', children: [12], translation: [.36, 0, 0] },
+  { name: 'hand_r', translation: [.34, 0, 0] },
+]);
+
+describe('V2 full basketball frame', () => {
+  it('solves and gates reconstructed stance', () => {
+    const s = basketballReadyStance(rig);
+    const f = solveReadyFrame(rig, s);
+    const g = gateFrame(f, Math.min(s.leftFoot.y, s.rightFoot.y));
+    expect(f.metrics.leftFootError).toBeLessThan(.026);
+    expect(f.metrics.rightFootError).toBeLessThan(.026);
+    expect(g.reasons).not.toContain('t-pose-envelope');
+    expect(Object.keys(f.local)).toEqual(expect.arrayContaining([
+      'thigh_l', 'calf_l', 'upperarm_l', 'lowerarm_l',
+      'thigh_r', 'calf_r', 'upperarm_r', 'lowerarm_r',
+    ]));
+  });
+});

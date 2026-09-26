@@ -1,0 +1,36 @@
+name: Lab Motion V2 Validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/lab-motion-**'
+      - 'src/lib/lab-quaternius-**'
+      - 'scripts/*quaternius*'
+      - 'scripts/bake-quaternius-ready-stance.mjs'
+      - 'public/lab3d/athlete.glb'
+      - 'package.json'
+      - '.github/workflows/lab-motion-v2.yml'
+  workflow_dispatch:
+
+jobs:
+  canonical-athlete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Analyze canonical athlete and bake validated ready stance
+        run: npm run lab:motion:bake-ready
+      - name: Verify static GLB structure
+        run: |
+          node -e "const fs=require('fs');const b=fs.readFileSync('public/lab3d/RCL_Ready_Stance_v2.glb');if(b.toString('ascii',0,4)!=='glTF')throw Error('bad GLB');const n=b.readUInt32LE(12),g=JSON.parse(b.toString('utf8',20,20+n).trim()),a=(g.animations||[]).find(x=>x.name==='RCL_Ready_Stance_v2');if(!a)throw Error('static stance clip missing');if(a.channels.length<9)throw Error('insufficient stance channels');console.log({bytes:b.length,channels:a.channels.length,nodes:(g.nodes||[]).length,skins:(g.skins||[]).length})"
+      - name: Publish measured reports and static GLB
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-motion-v2-reports
+          path: |
+            public/lab3d/motion/*.json
+            public/lab3d/RCL_Ready_Stance_v2.glb
+          if-no-files-found: error
