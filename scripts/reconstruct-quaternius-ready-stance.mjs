@@ -16,6 +16,7 @@ function qBasis(primary,secondary){
 }
 function qFromTo(a,b){const u=norm(a),v=norm(b),d=Math.max(-1,Math.min(1,dot(u,v)));if(d>.999999)return[0,0,0,1];if(d<-.999999){let ax=norm(cross(u,Math.abs(u.x)<.8?{x:1,y:0,z:0}:{x:0,y:1,z:0}));return[ax.x,ax.y,ax.z,0]}const c=cross(u,v),ss=Math.sqrt((1+d)*2);return qn([c.x/ss,c.y/ss,c.z/ss,ss/2])}
 const localQ=N.map(n=>n.localRotation||[0,0,0,1]),localT=N.map(n=>n.localTranslation||[0,0,0]),worldQ=[],worldP=[];
+const bodyForward=V(s.frame.forward),bodyUp=V(s.frame.up),bodyLateral=V(s.frame.lateral);
 const desired={thigh_l:sub(P.kneeL,P.hipL),calf_l:sub(P.footL,P.kneeL),thigh_r:sub(P.kneeR,P.hipR),calf_r:sub(P.footR,P.kneeR),upperarm_l:sub(P.elbowL,P.shoulderL),lowerarm_l:sub(P.handL,P.elbowL),upperarm_r:sub(P.elbowR,P.shoulderR),lowerarm_r:sub(P.handR,P.elbowR)};
 const chainPlane={thigh_l:norm(cross(sub(P.kneeL,P.hipL),sub(P.footL,P.kneeL))),calf_l:norm(cross(sub(P.kneeL,P.hipL),sub(P.footL,P.kneeL))),thigh_r:norm(cross(sub(P.kneeR,P.hipR),sub(P.footR,P.kneeR))),calf_r:norm(cross(sub(P.kneeR,P.hipR),sub(P.footR,P.kneeR))),upperarm_l:norm(cross(sub(P.elbowL,P.shoulderL),sub(P.handL,P.elbowL))),lowerarm_l:norm(cross(sub(P.elbowL,P.shoulderL),sub(P.handL,P.elbowL))),upperarm_r:norm(cross(sub(P.elbowR,P.shoulderR),sub(P.handR,P.elbowR))),lowerarm_r:norm(cross(sub(P.elbowR,P.shoulderR),sub(P.handR,P.elbowR)))};
 const bind=Object.fromEntries(r.joints.filter(j=>!j.missing).map(j=>[j.name,j]));
@@ -23,14 +24,20 @@ function solve(i){const n=N[i],pi=n.parentIndex;if(pi!==null)solve(pi);const par
  if(desired[n.name]){const b=bind[n.name];const bindPrimary=V(b.primaryWorldAxis),targetPrimary=norm(desired[n.name]);
   // Calibrated two-axis frame: primary controls endpoint; bend-plane normal controls twist.
   // This removes the unconstrained axial twist left by swing-only reconstruction.
-  let bindSecondary;
-  if(n.name.startsWith('thigh_')){const calf=bind[n.name==='thigh_l'?'calf_l':'calf_r'];bindSecondary=norm(cross(bindPrimary,V(calf.primaryWorldAxis)))}
-  else if(n.name.startsWith('upperarm_')){const low=bind[n.name==='upperarm_l'?'lowerarm_l':'lowerarm_r'];bindSecondary=norm(cross(bindPrimary,V(low.primaryWorldAxis)))}
-  else bindSecondary=chainPlane[n.name];
-  if(len(bindSecondary)<1e-5)bindSecondary=Math.abs(bindPrimary.y)<.9?norm(cross(bindPrimary,{x:0,y:1,z:0})):norm(cross(bindPrimary,{x:1,y:0,z:0}));
-  let targetSecondary=chainPlane[n.name];if(len(targetSecondary)<1e-5)targetSecondary=bindSecondary;
+  // Preserve anatomical facing around the limb axis. Bend-plane normals are not
+  // valid twist references for a skinned humanoid and caused the V4 thigh bulges.
+  // Project the calibrated body-forward vector into each bone's normal plane.
+  let bindSecondary=sub(bodyForward,{x:bindPrimary.x*dot(bodyForward,bindPrimary),y:bindPrimary.y*dot(bodyForward,bindPrimary),z:bindPrimary.z*dot(bodyForward,bindPrimary)});
+  if(len(bindSecondary)<1e-5)bindSecondary=sub(bodyLateral,{x:bindPrimary.x*dot(bodyLateral,bindPrimary),y:bindPrimary.y*dot(bodyLateral,bindPrimary),z:bindPrimary.z*dot(bodyLateral,bindPrimary)});
+  bindSecondary=norm(bindSecondary);
+  let targetSecondary=sub(bodyForward,{x:targetPrimary.x*dot(bodyForward,targetPrimary),y:targetPrimary.y*dot(bodyForward,targetPrimary),z:targetPrimary.z*dot(bodyForward,targetPrimary)});
+  if(len(targetSecondary)<1e-5)targetSecondary=sub(bodyLateral,{x:targetPrimary.x*dot(bodyLateral,targetPrimary),y:targetPrimary.y*dot(bodyLateral,targetPrimary),z:targetPrimary.z*dot(bodyLateral,targetPrimary)});
+  targetSecondary=norm(targetSecondary);
   const bindFrame=qBasis(bindPrimary,bindSecondary),targetFrame=qBasis(targetPrimary,targetSecondary),delta=qm(targetFrame,qc(bindFrame));
   const desiredWorld=qm(delta,b.worldRotation);localQ[i]=qm(qc(parentQ),desiredWorld)}
+ // Feet must stay planted in their calibrated bind-world orientation instead of
+ // inheriting the calf swing (the prior build visibly balanced on heel/edge).
+ if(n.name==='foot_l'||n.name==='foot_r'){localQ[i]=qm(qc(parentQ),bind[n.name].worldRotation)}
  worldQ[i]=qm(parentQ,localQ[i]);const t=V(localT[i]);worldP[i]=pi===null?t:{x:parentP.x+rot(parentQ,t).x,y:parentP.y+rot(parentQ,t).y,z:parentP.z+rot(parentQ,t).z};
 }
 const pelvisI=by.pelvis,pelvisParent=N[pelvisI].parentIndex,deltaWorld=sub(P.pelvis,V(N[pelvisI].worldPosition));
@@ -47,5 +54,12 @@ metrics.bakedLeftIpsilateral=(actualKneeL.x-cx)*(actualFootL.x-cx)>0;metrics.bak
 const failures=[];if(!metrics.bakedLeftIpsilateral||!metrics.bakedRightIpsilateral||!metrics.bakedKneesSeparated)failures.push('baked-knee-centerline-cross');if(metrics.bakedKneeSpan<metrics.bakedStanceWidth*.28)failures.push('baked-knee-base-too-narrow');
 metrics.bakedLeftKneeFootDx=Math.abs(actualKneeL.x-actualFootL.x);metrics.bakedRightKneeFootDx=Math.abs(actualKneeR.x-actualFootR.x);
 if(metrics.bakedLeftKneeFootDx>metrics.bakedStanceWidth*.38||metrics.bakedRightKneeFootDx>metrics.bakedStanceWidth*.38)failures.push('baked-knee-foot-tracking');if(metrics.rootTranslationError>.001)failures.push('root-space-translation');if(Math.max(metrics.leftHandError,metrics.rightHandError)>.04)failures.push('reconstructed-hand-error');if(Math.max(metrics.leftFootError,metrics.rightFootError)>.04)failures.push('reconstructed-foot-error');if(Math.min(metrics.leftKneeClearance,metrics.rightKneeClearance)<.18)failures.push('reconstructed-knee-floor');
-const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries(Object.keys(desired).map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
+// Orientation/deformation gates: feet must preserve their calibrated bind-world
+// orientation and limb frames must remain finite/unit after reconstruction.
+const qdot=(a,b)=>Math.abs(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]);
+metrics.leftFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.foot_l],bind.foot_l.worldRotation)))*180/Math.PI;
+metrics.rightFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.foot_r],bind.foot_r.worldRotation)))*180/Math.PI;
+if(Math.max(metrics.leftFootWorldOrientationErrorDeg,metrics.rightFootWorldOrientationErrorDeg)>.25)failures.push('foot-world-orientation');
+for(const n of [...Object.keys(desired),'foot_l','foot_r'])if(localQ[by[n]].some(v=>!Number.isFinite(v)))failures.push('nonfinite-orientation-'+n);
+const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries([...Object.keys(desired),'foot_l','foot_r'].map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
 fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(failures.length)process.exit(1);
