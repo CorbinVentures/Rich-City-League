@@ -111,13 +111,13 @@ export function RiggedAthleteProof({title}:Props){
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Natural-motion staging pass: proven baked full-body stance with hand-synchronized ball timing. Runtime bone posing remains disabled while the basketball-specific baked clip is authored.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Joint-authored basketball motion rebuild in progress. The generic crouch clip is no longer presented as a finished dribble. Each joint chain and ball-contact phase is being matched to basketball-specific movement research.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>NATURAL MOTION STAGING</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>JOINT-AUTHORED DRIBBLE REBUILD</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
