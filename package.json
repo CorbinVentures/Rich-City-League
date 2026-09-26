@@ -24,7 +24,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
     "lab:motion:validate": "node scripts/validate-lab-motion.mjs",
     "lab:motion:author": "node scripts/author-stationary-dribble.mjs",
-    "lab:motion:check-target": "npm run lab:motion:author && npm run lab:motion:validate -- public/lab3d/motion/stationary-dribble-target-report.json"
+    "lab:motion:check-target": "npm run lab:motion:author && npm run lab:motion:validate -- public/lab3d/motion/stationary-dribble-target-report.json",
+    "lab:motion:bake": "node scripts/bake-lab-motion-glb.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
