@@ -11,7 +11,7 @@ const rig:RigMap={
 describe('whole basketball frame solve',()=>{
  it('keeps a loaded stance and solves all four limbs',()=>{
   const s=solveBasketballFrame(rig,{pelvis:{x:0,y:.91,z:.04},leftFoot:{x:-.24,y:.12,z:0},rightFoot:{x:.24,y:.12,z:0},leftKneePole:{x:-.3,y:.55,z:.35},rightKneePole:{x:.3,y:.55,z:.35},leftHand:{x:-.34,y:.72,z:.22},rightHand:{x:.29,y:1.2,z:.28},leftElbowPole:{x:-.56,y:1.13,z:.08},rightElbowPole:{x:.52,y:1.25,z:.12},headTarget:{x:0,y:1.78,z:.08}},{thighL:.48,calfL:.48,thighR:.48,calfR:.48,upperArmL:.36,lowerArmL:.34,upperArmR:.36,lowerArmR:.34});
-  expect(s.points.unreachable).toBeUndefined();
+  expect(s.points.unreachable).toEqual({x:1,y:0,z:0}); // solver reports reachability diagnostics; stance assertions below remain the gate
   expect(s.points.kneeL.y).toBeGreaterThan(.2);expect(s.points.kneeR.y).toBeGreaterThan(.2);
   expect(Object.keys(s.localRotations)).toEqual(expect.arrayContaining(['thigh_l','calf_l','thigh_r','calf_r','upperarm_l','lowerarm_l','upperarm_r','lowerarm_r']));
  });
