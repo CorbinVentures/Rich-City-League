@@ -21,7 +21,12 @@
     "test": "vitest run",
     "test:rls": "command -v supabase >/dev/null 2>&1 && supabase status >/dev/null 2>&1 || { echo 'Local Supabase is unavailable. Start it with npm run db:start before running RLS tests.' >&2; exit 1; }; supabase test db --local",
     "test:all": "npm run test && npm run test:rls",
-    "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
+    "lab:motion:validate": "node scripts/validate-lab-motion.mjs",
+    "lab:motion:author": "node scripts/author-stationary-dribble.mjs",
+    "lab:motion:check-target": "npm run lab:motion:author && npm run lab:motion:validate -- public/lab3d/motion/stationary-dribble-target-report.json",
+    "lab:motion:bake": "node scripts/bake-lab-motion-glb.mjs",
+    "lab:motion:tracks": "node scripts/generate-stationary-dribble-tracks.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
