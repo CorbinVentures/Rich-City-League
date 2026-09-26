@@ -1,0 +1,24 @@
+{
+  "clip": "RCL_Stationary_Alternating_Pound_v1",
+  "fps": 60,
+  "frames": 83,
+  "events": [
+    {"type":"CONTROL","time":0},
+    {"type":"PUSH","time":0.08},
+    {"type":"RELEASE","time":0.24},
+    {"type":"FLOOR_CONTACT","time":0.34},
+    {"type":"REACQUIRE","time":0.58}
+  ],
+  "metrics": {
+    "maxFootSlideM": 0,
+    "minPelvisHeightM": 0.91,
+    "minKneeFloorClearanceM": 0.38,
+    "maxContactHandBallM": 0.04,
+    "maxFloorPenetrationM": 0,
+    "maxQuaternionNormError": 0,
+    "maxLoopPositionErrorM": 0,
+    "maxTPoseScore": 0.12
+  },
+  "status": "TARGET_CONTRACT_ONLY",
+  "note": "These are target constraints, not measured GLB results. Do not treat this report as asset approval."
+}
