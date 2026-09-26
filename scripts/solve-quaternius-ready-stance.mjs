@@ -5,7 +5,18 @@ const r=JSON.parse(fs.readFileSync(rp,'utf8')),s=JSON.parse(fs.readFileSync(sp,'
 const V=a=>Array.isArray(a)?{x:a[0],y:a[1],z:a[2]}:a,sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),add=(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}),mul=(a,k)=>({x:a.x*k,y:a.y*k,z:a.z*k}),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>({x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}),len=a=>Math.hypot(a.x,a.y,a.z),norm=a=>mul(a,1/(len(a)||1)),dist=(a,b)=>len(sub(a,b));
 function limb(root,target,pole,l1,l2){let d=sub(target,root),D=len(d),reach=Math.min(Math.max(D,Math.abs(l1-l2)+1e-6),l1+l2-1e-6),x=norm(d),pv=sub(pole,root),n=norm(cross(x,pv));if(len(n)<1e-6)n=norm(cross(x,{x:0,y:1,z:0}));const y=norm(cross(n,x)),a=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-a*a)),joint=add(add(root,mul(x,a)),mul(y,h)),end=add(root,mul(x,reach));return{joint,end,bendNormal:n,reachable:D<=l1+l2+1e-5}}
 const pel=s.target.pelvis,bindPel=V(J.pelvis.worldPosition),offset=n=>sub(V(J[n].worldPosition),bindPel),hipL=add(pel,offset('thigh_l')),hipR=add(pel,offset('thigh_r')),shoulderL=add(pel,offset('upperarm_l')),shoulderR=add(pel,offset('upperarm_r'));
-const LL=limb(hipL,s.target.leftFoot,s.target.leftKneePole,J.thigh_l.segmentLength,J.calf_l.segmentLength),LR=limb(hipR,s.target.rightFoot,s.target.rightKneePole,J.thigh_r.segmentLength,J.calf_r.segmentLength),AL=limb(shoulderL,s.target.leftHand,s.target.leftElbowPole,J.upperarm_l.segmentLength,J.lowerarm_l.segmentLength),AR=limb(shoulderR,s.target.rightHand,s.target.rightElbowPole,J.upperarm_r.segmentLength,J.lowerarm_r.segmentLength);
+function plantedLeg(root,target,side,l1,l2){
+ const d=sub(target,root),D=len(d),reach=Math.min(Math.max(D,Math.abs(l1-l2)+1e-6),l1+l2-1e-6),u=norm(d);
+ // Basketball bend reference: forward (+Z) with a smaller outward component.
+ // Project it perpendicular to the planted hip->foot axis so the knee cannot
+ // accidentally select the mirrored/inward IK branch.
+ let pref={x:side*.35,y:0,z:1},bend=sub(pref,mul(u,dot(pref,u)));
+ if(len(bend)<1e-6)bend={x:side,y:0,z:0};bend=norm(bend);
+ const a=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-a*a));
+ const joint=add(add(root,mul(u,a)),mul(bend,h)),end=add(root,mul(u,reach));
+ return{joint,end,bendNormal:norm(cross(u,bend)),reachable:D<=l1+l2+1e-5};
+}
+const LL=plantedLeg(hipL,s.target.leftFoot,-1,J.thigh_l.segmentLength,J.calf_l.segmentLength),LR=plantedLeg(hipR,s.target.rightFoot,1,J.thigh_r.segmentLength,J.calf_r.segmentLength),AL=limb(shoulderL,s.target.leftHand,s.target.leftElbowPole,J.upperarm_l.segmentLength,J.lowerarm_l.segmentLength),AR=limb(shoulderR,s.target.rightHand,s.target.rightElbowPole,J.upperarm_r.segmentLength,J.lowerarm_r.segmentLength);
 const angle=(a,b,c)=>{const u=norm(sub(a,b)),v=norm(sub(c,b));return Math.acos(Math.max(-1,Math.min(1,dot(u,v))))*180/Math.PI},floor=Math.min(s.target.leftFoot.y,s.target.rightFoot.y);
 const points={pelvis:pel,hipL,hipR,kneeL:LL.joint,kneeR:LR.joint,footL:LL.end,footR:LR.end,shoulderL,shoulderR,elbowL:AL.joint,elbowR:AR.joint,handL:AL.end,handR:AR.end};
 const centerX=pel.x,stanceWidth=Math.abs(LL.end.x-LR.end.x),kneeSpan=Math.abs(LL.joint.x-LR.joint.x),leftIpsilateral=(LL.joint.x-centerX)*(LL.end.x-centerX)>0,rightIpsilateral=(LR.joint.x-centerX)*(LR.end.x-centerX)>0,kneesSeparated=(LL.joint.x-centerX)*(LR.joint.x-centerX)<0;
