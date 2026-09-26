@@ -12,7 +12,7 @@ export function RiggedAthleteProof({title}:Props){
   const viewRef=useRef<View>('front');
   const [status,setStatus]=useState<Status>('loading-athlete');
   const [view,setView]=useState<View>('front');
-  const [motion,setMotion]=useState('Preparing stance');
+  const [motion,setMotion]=useState('Authoring basketball stance');
 
   useEffect(()=>{viewRef.current=view;},[view]);
 
@@ -43,21 +43,43 @@ export function RiggedAthleteProof({title}:Props){
       athlete.position.set(-center.x,-box.min.y,-center.z);athlete.scale.setScalar(2.15/Math.max(size.y,.001));scene.add(athlete);
 
       setStatus('loading-motion');
-      const library=await load('/lab3d/UAL1_Standard.glb');if(disposed)return;
-      const clips=library.animations||[];
-      const stanceClip=clips.find((a:any)=>/^Crouch$/i.test(a.name))
-        || clips.find((a:any)=>/Crouch.*Idle|Idle.*Crouch/i.test(a.name))
-        || clips.find((a:any)=>/^Idle$/i.test(a.name));
-      if(!stanceClip)throw new Error('No compatible stance animation found');
-      const mixer=new THREE.AnimationMixer(athlete);
-      mixer.clipAction(stanceClip).reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(stanceClip.name);
 
-      const bones:Record<string,any>={};athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
-      const findBone=(...names:string[])=>{for(const n of names){if(bones[n.toLowerCase()])return bones[n.toLowerCase()];}return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));};
-      const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
+      // Author a dedicated basketball stance/handle clip on the athlete's exact rig.
+      // We deliberately do not reuse generic crouch/idle clips: the clip below owns
+      // the basketball pose and is played through AnimationMixer like a normal asset.
+      const bones:Record<string,any>={};
+      athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
+      const findBone=(...names:string[])=>{
+        for(const n of names){const exact=bones[n.toLowerCase()];if(exact)return exact;}
+        return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));
+      };
+      const pelvis=findBone('pelvis','hips','hip'),spine=findBone('spine_01','spine1','spine');
+      const leftUpper=findBone('upperarm_l','leftupperarm','arm_l'),rightUpper=findBone('upperarm_r','rightupperarm','arm_r');
       const leftFore=findBone('lowerarm_l','leftforearm','forearm_l'),rightFore=findBone('lowerarm_r','rightforearm','forearm_r');
+      const leftThigh=findBone('thigh_l','leftupleg','upleg_l'),rightThigh=findBone('thigh_r','rightupleg','upleg_r');
+      const leftCalf=findBone('calf_l','leftleg','leg_l'),rightCalf=findBone('calf_r','rightleg','leg_r');
+      const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
+      const required={pelvis,spine,leftUpper,rightUpper,leftFore,rightFore,leftThigh,rightThigh,leftCalf,rightCalf,leftHand,rightHand};
+      if(Object.values(required).some(v=>!v))throw new Error('Basketball clip: required rig bones missing');
 
+      const q=(bone:any,x:number,y:number,z:number)=>bone.quaternion.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(x,y,z,'XYZ'))).toArray();
+      const times=[0,.3,.6,.9,1.2];
+      const tracks:any[]=[];
+      const addQ=(bone:any,poses:number[][])=>tracks.push(new THREE.QuaternionKeyframeTrack(`${bone.name}.quaternion`,times,poses.flatMap(p=>q(bone,p[0],p[1],p[2]))));
+      addQ(pelvis,[[-.22,0,.04],[-.25,0,.02],[-.22,0,-.04],[-.25,0,-.02],[-.22,0,.04]]);
+      addQ(spine,[[.16,0,-.04],[.13,0,.03],[.16,0,.04],[.13,0,-.03],[.16,0,-.04]]);
+      addQ(leftThigh,[[.42,0,.12],[.48,0,.1],[.42,0,.08],[.38,0,.1],[.42,0,.12]]);
+      addQ(rightThigh,[[.42,0,-.12],[.38,0,-.1],[.42,0,-.08],[.48,0,-.1],[.42,0,-.12]]);
+      addQ(leftCalf,[[-.7,0,0],[-.78,0,0],[-.7,0,0],[-.64,0,0],[-.7,0,0]]);
+      addQ(rightCalf,[[-.7,0,0],[-.64,0,0],[-.7,0,0],[-.78,0,0],[-.7,0,0]]);
+      addQ(leftUpper,[[.78,.05,.34],[1.05,.02,.4],[.72,.03,.22],[.5,.02,.16],[.78,.05,.34]]);
+      addQ(rightUpper,[[.72,-.03,-.22],[.5,-.02,-.16],[.78,-.05,-.34],[1.05,-.02,-.4],[.72,-.03,-.22]]);
+      addQ(leftFore,[[-1.0,0,0],[-1.32,0,0],[-.88,0,0],[-.72,0,0],[-1.0,0,0]]);
+      addQ(rightFore,[[-.88,0,0],[-.72,0,0],[-1.0,0,0],[-1.32,0,0],[-.88,0,0]]);
+      const basketballClip=new THREE.AnimationClip('RCL_Stationary_Handle_v1',1.2,tracks);
+      const mixer=new THREE.AnimationMixer(athlete);
+      mixer.clipAction(basketballClip).reset().setLoop(THREE.LoopRepeat,Infinity).play();
+      setMotion('RCL_Stationary_Handle_v1');
       const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
       ball.castShadow=true;scene.add(ball);
       const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
@@ -78,8 +100,6 @@ export function RiggedAthleteProof({title}:Props){
         const cycle=(elapsed%1.2)/1.2,left=cycle<.5,local=left?cycle*2:(cycle-.5)*2;
         const contact=Math.pow(Math.abs(Math.cos(local*Math.PI)),.72);
         const activeHand=left?leftHand:rightHand;
-        const activeFore=left?leftFore:rightFore;
-        if(activeFore){activeFore.rotation.z+=Math.sin(local*Math.PI*2)*.055;}
         if(activeHand){activeHand.getWorldPosition(handWorld);ballTarget.set(handWorld.x+(left?-.03:.03),.16+Math.max(.22,handWorld.y-.16)*contact,handWorld.z+.08);}
         else{ballTarget.set(left?-.34:.34,.16+.62*contact,.3);}
         ball.position.lerp(ballTarget,.55);ball.rotation.x+=delta*4.5;ball.rotation.z+=(left?-1:1)*delta*3.2;
@@ -91,13 +111,13 @@ export function RiggedAthleteProof({title}:Props){
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Animation-clip stance foundation with synchronized basketball contact. This replaces the bind-pose bone prototype.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Authored basketball keyframe clip: loaded stance, alternating arm chain and synchronized ball contact. One athlete, one timeline, four camera angles.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>STANCE CLIP + BALL</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>AUTHORED BASKETBALL CLIP</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
