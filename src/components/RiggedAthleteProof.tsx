@@ -46,14 +46,14 @@ export function RiggedAthleteProof({title}:Props){
 
       // Baked full-rig proof: use the existing Quaternius animation asset exactly
       // as authored. No runtime bone posing, guessed Euler offsets, or partial tracks.
-      const motionModel=await load('/lab3d/UAL1_Standard.glb');if(disposed)return;
+      const motionModel=await load('/lab3d/RCL_Stationary_Alternating_Pound_v1.glb');if(disposed)return;
       const clips=motionModel.animations||[];
       const bakedClip=clips.find((a:any)=>a.name==='Crouch_Idle_Loop')
         || clips.find((a:any)=>a.name==='Crouch_Fwd_Loop');
       if(!bakedClip)throw new Error('Baked full-rig crouch clip missing');
       const mixer=new THREE.AnimationMixer(athlete);
       const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`NATURAL MOTION BASE · ${bakedClip.name}`);
+      setMotion(`BASKETBALL MOTION · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
