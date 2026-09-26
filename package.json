@@ -32,7 +32,8 @@
     "lab:motion:ready-stance": "npm run lab:motion:rig-report && node scripts/build-quaternius-ready-stance.mjs",
     "lab:motion:solve-ready": "npm run lab:motion:ready-stance && node scripts/solve-quaternius-ready-stance.mjs",
     "lab:motion:reconstruct-ready": "npm run lab:motion:solve-ready && node scripts/reconstruct-quaternius-ready-stance.mjs",
-    "lab:motion:bake-ready": "npm run lab:motion:reconstruct-ready && node scripts/bake-quaternius-ready-stance.mjs"
+    "lab:motion:bake-ready": "npm run lab:motion:reconstruct-ready && node scripts/bake-quaternius-ready-stance.mjs",
+    "prebuild": "npm run lab:motion:bake-ready"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
