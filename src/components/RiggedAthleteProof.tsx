@@ -12,7 +12,7 @@ export function RiggedAthleteProof({title}:Props){
   const viewRef=useRef<View>('front');
   const [status,setStatus]=useState<Status>('loading-athlete');
   const [view,setView]=useState<View>('front');
-  const [motion,setMotion]=useState('Authoring basketball stance');
+  const [motion,setMotion]=useState('Reference basketball stance');
 
   useEffect(()=>{viewRef.current=view;},[view]);
 
@@ -46,9 +46,9 @@ export function RiggedAthleteProof({title}:Props){
 
       // Playback layer only: load the basketball-specific baked action by exact name.
       // Never silently fall back to a generic locomotion/crouch animation.
-      const motionModel=await load('/lab3d/RCL_Ready_Stance_v2.glb');if(disposed)return;
+      const motionModel=await load('/lab3d/RCL_Ready_Stance_v4.glb');if(disposed)return;
       const clips=motionModel.animations||[];
-      const expectedClip='RCL_Ready_Stance_v2';
+      const expectedClip='RCL_Ready_Stance_v4';
       const bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
       const mixer=new THREE.AnimationMixer(athlete);
@@ -117,7 +117,7 @@ export function RiggedAthleteProof({title}:Props){
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>V2 STATIC VALIDATION</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>V4 REFERENCE STANCE</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
