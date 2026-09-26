@@ -1,0 +1,26 @@
+name: Lab Motion V2 Validation
+on:
+  pull_request:
+    paths:
+      - 'src/lib/lab-motion-**'
+      - 'src/lib/lab-quaternius-**'
+      - 'scripts/*quaternius*'
+      - 'public/lab3d/athlete.glb'
+      - 'package.json'
+  workflow_dispatch:
+jobs:
+  canonical-athlete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Analyze canonical athlete and solve ready stance
+        run: npm run lab:motion:solve-ready
+      - name: Publish measured reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-motion-v2-reports
+          path: public/lab3d/motion/*.json
