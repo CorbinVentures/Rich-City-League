@@ -19,7 +19,7 @@ const parentBindQ=pelvisParent===null?[0,0,0,1]:N[pelvisParent].worldRotation;
 const deltaLocal=rot(qc(parentBindQ),deltaWorld);
 localT[pelvisI]=[localT[pelvisI][0]+deltaLocal.x,localT[pelvisI][1]+deltaLocal.y,localT[pelvisI][2]+deltaLocal.z];
 for(let i=0;i<N.length;i++)solve(i);
-const rootTranslationError=dist(worldP[pelvisI],P.pelvis);
+const rootTranslationError=len(sub(worldP[pelvisI],P.pelvis));
 const gp=n=>worldP[by[n]],dist=(a,b)=>len(sub(a,b)),floor=Math.min(P.footL.y,P.footR.y);
 const metrics={rootTranslationError,leftHandError:dist(gp('hand_l'),P.handL),rightHandError:dist(gp('hand_r'),P.handR),leftFootError:dist(gp('foot_l'),P.footL),rightFootError:dist(gp('foot_r'),P.footR),leftKneeError:dist(gp('calf_l'),P.kneeL),rightKneeError:dist(gp('calf_r'),P.kneeR),leftElbowError:dist(gp('lowerarm_l'),P.elbowL),rightElbowError:dist(gp('lowerarm_r'),P.elbowR),leftKneeClearance:gp('calf_l').y-floor,rightKneeClearance:gp('calf_r').y-floor};
 const failures=[];if(metrics.rootTranslationError>.001)failures.push('root-space-translation');if(Math.max(metrics.leftHandError,metrics.rightHandError)>.04)failures.push('reconstructed-hand-error');if(Math.max(metrics.leftFootError,metrics.rightFootError)>.04)failures.push('reconstructed-foot-error');if(Math.min(metrics.leftKneeClearance,metrics.rightKneeClearance)<.18)failures.push('reconstructed-knee-floor');
