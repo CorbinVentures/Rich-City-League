@@ -7,6 +7,8 @@ on:
       - 'scripts/*quaternius*'
       - 'public/lab3d/athlete.glb'
       - 'package.json'
+      - '.github/workflows/lab-motion-v2.yml'
+      - 'scripts/bake-quaternius-ready-stance.mjs'
   workflow_dispatch:
 jobs:
   canonical-athlete:
