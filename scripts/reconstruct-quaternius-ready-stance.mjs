@@ -52,18 +52,29 @@ const pelvisI=by.pelvis,pelvisParent=N[pelvisI].parentIndex,deltaWorld=sub(P.pel
 const parentBindQ=pelvisParent===null?[0,0,0,1]:N[pelvisParent].worldRotation;
 const deltaLocal=rot(qc(parentBindQ),deltaWorld);
 localT[pelvisI]=[localT[pelvisI][0]+deltaLocal.x,localT[pelvisI][1]+deltaLocal.y,localT[pelvisI][2]+deltaLocal.z];
-// The hinge changes the shoulder parent frames. Reconstruct once, then solve the
-// arm chains again in those hinged frames so hand/elbow task targets remain exact.
+// The hinge changes the shoulder parent frames. Reconstruct once, then solve
+// a fresh two-bone arm IK from the ACTUAL hinged shoulder roots. The authored
+// pre-hinge elbow is not a valid endpoint after its parent chain moves.
 worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
+const armLengths={l:[bind.upperarm_l.segmentLength,bind.lowerarm_l.segmentLength],r:[bind.upperarm_r.segmentLength,bind.lowerarm_r.segmentLength]};
+const armTargets={};
 for(const side of ['l','r']){
-  for(const [bone,targetPoint] of [['upperarm_'+side,P['elbow'+side.toUpperCase()]],['lowerarm_'+side,P['hand'+side.toUpperCase()]]]){
+  const upper='upperarm_'+side,lower='lowerarm_'+side,handKey='hand'+side.toUpperCase(),elbowKey='elbow'+side.toUpperCase();
+  const root=worldP[by[upper]],hand=P[handKey],[l1,l2]=armLengths[side],d=sub(hand,root),D=len(d),u=norm(d);
+  if(D>l1+l2-1e-6)throw new Error('V4.2 '+side+' hand target unreachable after trunk hinge: '+D+' > '+(l1+l2));
+  const a=(l1*l1-l2*l2+D*D)/(2*D),h=Math.sqrt(Math.max(0,l1*l1-a*a));
+  let pole=sub(P[elbowKey],root);pole=sub(pole,mul(u,dot(pole,u)));if(len(pole)<1e-5)pole=sub(bodyLateral,mul(u,dot(bodyLateral,u)));pole=norm(pole);
+  armTargets[side]={elbow:{x:root.x+u.x*a+pole.x*h,y:root.y+u.y*a+pole.y*h,z:root.z+u.z*a+pole.z*h},hand};
+}
+for(const side of ['l','r']){
+  for(const [bone,targetPoint] of [['upperarm_'+side,armTargets[side].elbow],['lowerarm_'+side,armTargets[side].hand]]){
+    worldQ.length=0;worldP.length=0;for(let j=0;j<N.length;j++)solve(j);
     const i=by[bone],pi=N[i].parentIndex,parentQ=pi===null?[0,0,0,1]:worldQ[pi],root=worldP[i],b=bind[bone];
     const bindPrimary=norm(V(b.primaryWorldAxis)),targetPrimary=norm(sub(targetPoint,root));
     let bs=sub(bodyForward,mul(bindPrimary,dot(bodyForward,bindPrimary)));if(len(bs)<1e-5)bs=sub(bodyLateral,mul(bindPrimary,dot(bodyLateral,bindPrimary)));bs=norm(bs);
     let ts=sub(bodyForward,mul(targetPrimary,dot(bodyForward,targetPrimary)));if(len(ts)<1e-5)ts=sub(bodyLateral,mul(targetPrimary,dot(bodyLateral,targetPrimary)));ts=norm(ts);
     const desiredWorld=qm(qm(qBasis(targetPrimary,ts),qc(qBasis(bindPrimary,bs))),b.worldRotation);
     localQ[i]=qm(qc(parentQ),desiredWorld);
-    worldQ.length=0;worldP.length=0;for(let j=0;j<N.length;j++)solve(j);
   }
 }
 // Recompute hierarchy after the hinge, pelvis translation, and arm re-solve.
