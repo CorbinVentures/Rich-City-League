@@ -106,7 +106,8 @@ const stanceRatio=metrics.bakedStanceWidth/s.metrics.shoulderSpan,kneeFootLimit=
 metrics.stanceToShoulderRatio=stanceRatio;
 if(stanceRatio<1.20||stanceRatio>1.50)failures.push('blueprint-stance-width');
 if(metrics.bakedLeftKneeFootDx>kneeFootLimit||metrics.bakedRightKneeFootDx>kneeFootLimit)failures.push('blueprint-knee-over-foot');
-const pelvisForward=dot(gp('pelvis'),bodyForward),lhForward=dot(gp('hand_l'),bodyForward),rhForward=dot(gp('hand_r'),bodyForward);
+// Quaternius anatomical forward is opposite the cross-product frame.forward axis (same signed frame used by the target generator's knee/hand gates).
+const anatomicalForward=mul(bodyForward,-1),pelvisForward=dot(gp('pelvis'),anatomicalForward),lhForward=dot(gp('hand_l'),anatomicalForward),rhForward=dot(gp('hand_r'),anatomicalForward);
 metrics.leftHandForwardOfPelvis=lhForward-pelvisForward;metrics.rightHandForwardOfPelvis=rhForward-pelvisForward;
 if(Math.min(metrics.leftHandForwardOfPelvis,metrics.rightHandForwardOfPelvis)<.08)failures.push('blueprint-hands-not-forward');
 const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries([...Object.keys(desired),'foot_l','foot_r','spine_01','spine_02','spine_03'].map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
