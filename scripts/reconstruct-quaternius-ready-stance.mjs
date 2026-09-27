@@ -18,6 +18,7 @@ function qFromTo(a,b){const u=norm(a),v=norm(b),d=Math.max(-1,Math.min(1,dot(u,v
 const localQ=N.map(n=>n.localRotation||[0,0,0,1]),localT=N.map(n=>n.localTranslation||[0,0,0]),worldQ=[],worldP=[];
 const bodyForward=V(s.frame.forward),bodyUp=V(s.frame.up),bodyLateral=V(s.frame.lateral);
 const desired={thigh_l:sub(P.kneeL,P.hipL),calf_l:sub(P.footL,P.kneeL),thigh_r:sub(P.kneeR,P.hipR),calf_r:sub(P.footR,P.kneeR),upperarm_l:sub(P.elbowL,P.shoulderL),lowerarm_l:sub(P.handL,P.elbowL),upperarm_r:sub(P.elbowR,P.shoulderR),lowerarm_r:sub(P.handR,P.elbowR)};
+let lockSolvedArms=false;
 const chainPlane={thigh_l:norm(cross(sub(P.kneeL,P.hipL),sub(P.footL,P.kneeL))),calf_l:norm(cross(sub(P.kneeL,P.hipL),sub(P.footL,P.kneeL))),thigh_r:norm(cross(sub(P.kneeR,P.hipR),sub(P.footR,P.kneeR))),calf_r:norm(cross(sub(P.kneeR,P.hipR),sub(P.footR,P.kneeR))),upperarm_l:norm(cross(sub(P.elbowL,P.shoulderL),sub(P.handL,P.elbowL))),lowerarm_l:norm(cross(sub(P.elbowL,P.shoulderL),sub(P.handL,P.elbowL))),upperarm_r:norm(cross(sub(P.elbowR,P.shoulderR),sub(P.handR,P.elbowR))),lowerarm_r:norm(cross(sub(P.elbowR,P.shoulderR),sub(P.handR,P.elbowR)))};
 const bind=Object.fromEntries(r.joints.filter(j=>!j.missing).map(j=>[j.name,j]));
 function solve(i){const n=N[i],pi=n.parentIndex;if(pi!==null)solve(pi);const parentQ=pi===null?[0,0,0,1]:worldQ[pi],parentP=pi===null?{x:0,y:0,z:0}:worldP[pi];
@@ -69,22 +70,16 @@ for(const side of ['l','r']){
   let pole=sub(P[elbowKey],root);pole=sub(pole,mul(u,dot(pole,u)));if(len(pole)<1e-5)pole=sub(bodyLateral,mul(u,dot(bodyLateral,u)));pole=norm(pole);
   armTargets[side]={elbow:{x:root.x+u.x*a+pole.x*h,y:root.y+u.y*a+pole.y*h,z:root.z+u.z*a+pole.z*h},hand,rawD,solvedD,maxReach};
 }
+// From this point forward every hierarchy reconstruction must use the post-hinge
+// arm vectors. Otherwise solve() silently overwrites the IK result with stale
+// pre-hinge V4 arm directions.
 for(const side of ['l','r']){
-  for(const [bone,targetPoint] of [['upperarm_'+side,armTargets[side].elbow],['lowerarm_'+side,armTargets[side].hand]]){
-    worldQ.length=0;worldP.length=0;for(let j=0;j<N.length;j++)solve(j);
-    const i=by[bone],pi=N[i].parentIndex,parentQ=pi===null?[0,0,0,1]:worldQ[pi],root=worldP[i],b=bind[bone];
-    const bindPrimary=norm(V(b.primaryWorldAxis)),targetPrimary=norm(sub(targetPoint,root));
-    let bs=sub(bodyForward,mul(bindPrimary,dot(bodyForward,bindPrimary)));if(len(bs)<1e-5)bs=sub(bodyLateral,mul(bindPrimary,dot(bodyLateral,bindPrimary)));bs=norm(bs);
-    let ts=sub(bodyForward,mul(targetPrimary,dot(bodyForward,targetPrimary)));if(len(ts)<1e-5)ts=sub(bodyLateral,mul(targetPrimary,dot(bodyLateral,targetPrimary)));ts=norm(ts);
-    // Match the reconstruction convention used by solve(): the bind frame is
-    // expressed in calibrated WORLD space, so the frame delta must be applied to
-    // the bone's bind WORLD rotation before conversion back into the current
-    // parent's local frame.
-    const delta=qm(qBasis(targetPrimary,ts),qc(qBasis(bindPrimary,bs)));
-    const desiredWorld=qm(delta,b.worldRotation);
-    localQ[i]=qm(qc(parentQ),desiredWorld);
-  }
+  desired['upperarm_'+side]=sub(armTargets[side].elbow,worldP[by['upperarm_'+side]]);
+  desired['lowerarm_'+side]=sub(armTargets[side].hand,armTargets[side].elbow);
 }
+lockSolvedArms=true;
+// Reconstruct through the single authoritative hierarchy solver using the
+// post-hinge IK directions.
 // Recompute hierarchy after the hinge, pelvis translation, and arm re-solve.
 worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
 const rootTranslationError=len(sub(worldP[pelvisI],P.pelvis));
