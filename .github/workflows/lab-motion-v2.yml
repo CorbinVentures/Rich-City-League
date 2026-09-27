@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       - name: Rebuild and validate full basketball training library
         run: npm run lab:library:verify
-      - name: Verify all canonical GLB clips use task-space training engine
+      - name: Verify all canonical GLB clips use task-space training engine V2
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -43,9 +43,9 @@ jobs:
             const n=b.readUInt32LE(12),g=JSON.parse(b.toString('utf8',20,20+n).trim()),a=(g.animations||[]).find(x=>x.name===name);
             if(!a)throw Error('clip missing '+name);
             if(a.channels.length<18)throw Error(name+' missing full-body task-space tracks');
-            if(a.extras?.engine!=='RCL_TASK_SPACE_IK_V1'||a.extras?.qualityGate!==true)throw Error(name+' missing task-space quality gate');
+            if(a.extras?.engine!=='RCL_TASK_SPACE_IK_V2'||a.extras?.phaseModel!=='basketball-training-v3'||a.extras?.qualityGate!==true||a.extras?.stableHandWorldOrientation!==true||a.extras?.armsInFront!==true)throw Error(name+' missing V2 task-space quality contract');
           }
-          console.log({motions:clips.length,engine:'RCL_TASK_SPACE_IK_V1'});
+          console.log({motions:clips.length,engine:'RCL_TASK_SPACE_IK_V2',phaseModel:'basketball-training-v3'});
           NODE
       - name: Publish motion plans, quality reports, and rebuilt GLBs
         uses: actions/upload-artifact@v4
