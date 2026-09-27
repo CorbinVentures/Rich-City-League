@@ -26,7 +26,6 @@ export function RiggedAthleteProof({title}:Props){
   const [reviewResult,setReviewResult]=useState<'pending'|'pass'|'needs-fix'>('pending');
   const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null),seekRef=useRef<((frame:number)=>void)|null>(null);
 
-
   useEffect(()=>{viewRef.current=view;},[view]);
   useEffect(()=>{pausedRef.current=paused;},[paused]);
   useEffect(()=>{speedRef.current=speed;},[speed]);
@@ -58,48 +57,26 @@ export function RiggedAthleteProof({title}:Props){
       athlete.position.set(-center.x,-box.min.y,-center.z);athlete.scale.setScalar(2.15/Math.max(size.y,.001));scene.add(athlete);
 
       setStatus('loading-motion');
-
-      // Playback layer only: load the basketball-specific baked action by exact name.
-      // Never silently fall back to a generic locomotion/crouch animation.
       const selected=LAB_MOTIONS.find(m=>m.id===motionId);if(!selected)throw new Error('Unknown Lab motion: '+motionId);
       const motionModel=await load(selected.file);if(disposed)return;
-      const clips=motionModel.animations||[];
-      const expectedClip=selected.clip;
-      const bakedClip=clips.find((a:any)=>a.name===expectedClip);
+      const clips=motionModel.animations||[],expectedClip=selected.clip,bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
-      const mixer=new THREE.AnimationMixer(athlete);
-      const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
+      const mixer=new THREE.AnimationMixer(athlete),action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
       setMotion(`BAKED ${selected.category.toUpperCase()} MOTION · ${bakedClip.name}`);
-      const bones:Record<string,any>={};
-      athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
-      const findBone=(...names:string[])=>{
-        for(const n of names){const exact=bones[n.toLowerCase()];if(exact)return exact;}
-        return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));
-      };
-      const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
-      if(!leftHand||!rightHand)throw new Error('Full-rig proof: hand bones missing');
-      const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
-      ball.castShadow=true;ball.visible=selected.ball;scene.add(ball);
-      const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
-      for(const rot of [[0,0,0],[0,Math.PI/2,0]]){
-        const seam=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:65},(_,i)=>{const a=i/64*Math.PI*2;return new THREE.Vector3(Math.cos(a)*.121,Math.sin(a)*.121,0);})),seamMat);
-        seam.rotation.set(rot[0],rot[1],rot[2]);ball.add(seam);
-      }
+      const bones:Record<string,any>={};athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
+      const findBone=(...names:string[])=>{for(const n of names){const exact=bones[n.toLowerCase()];if(exact)return exact;}return Object.values(bones).find((b:any)=>names.some(n=>b.name.toLowerCase().includes(n.toLowerCase())));};
+      const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');if(!leftHand||!rightHand)throw new Error('Full-rig proof: hand bones missing');
 
-      const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
-      resetRef.current=()=>{action.reset().play();prevBall.set(0,0,0);setFrame(0);};
-      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;prevBall.set(0,0,0);setFrame(Math.round(action.time*selected.fps));};
-      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;prevBall.set(0,0,0);setFrame(Math.round(t*selected.fps));};
-      const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
+      const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));ball.castShadow=true;ball.visible=false;scene.add(ball);
+      const seamMat=new THREE.LineBasicMaterial({color:0x24130b});for(const rot of [[0,0,0],[0,Math.PI/2,0]]){const seam=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:65},(_,i)=>{const a=i/64*Math.PI*2;return new THREE.Vector3(Math.cos(a)*.121,Math.sin(a)*.121,0);})),seamMat);seam.rotation.set(rot[0],rot[1],rot[2]);ball.add(seam);}
+
+      resetRef.current=()=>{action.reset().play();setFrame(0);};
+      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;setFrame(Math.round(action.time*selected.fps));};
+      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;setFrame(Math.round(t*selected.fps));};
+      const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),contactBall=new THREE.Vector3(),ballTarget=new THREE.Vector3();
       const clock=new THREE.Clock();
-      // Ball position is derived from the same baked AnimationAction timeline as the athlete.
-      // That keeps pause, speed, frame-step, restart, and scrub operations frame-accurate.
-      const smooth=(t:number)=>t*t*(3-2*t);
-      const bounceHeight=(phase:number)=>{
-        // phase 0 = hand contact, .5 = floor contact, 1 = next hand contact.
-        const d=phase<.5?smooth(phase*2):smooth((1-phase)*2);
-        return 1-d;
-      };
+      const smooth=(t:number)=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
+      const bounceHeight=(phase:number)=>{const d=phase<.5?smooth(phase*2):smooth((1-phase)*2);return 1-d;};
       const resize=()=>{const w=mount.clientWidth,h=mount.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(h,1);camera.updateProjectionMatrix();};
       const ro=new ResizeObserver(resize);ro.observe(mount);resize();
       const positions:Record<View,any>={front:new THREE.Vector3(0,1.25,5.2),quarter:new THREE.Vector3(3.7,1.5,4.1),side:new THREE.Vector3(5.2,1.3,0),back:new THREE.Vector3(0,1.3,-5.2)};
@@ -107,24 +84,23 @@ export function RiggedAthleteProof({title}:Props){
 
       renderer.setAnimationLoop(()=>{
         const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*selected.fps));}
-        rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
-        leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
-        const motionPhase=selected.duration>0?(action.time%selected.duration)/selected.duration:0;
+        // The ball is a scene child, so use scene/world hand coordinates directly. Converting
+        // the hands into athlete-local space and then assigning those values to a scene child
+        // caused the ball to drift through the face, torso, and hips after athlete scaling.
+        leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);
+        const phase=selected.duration>0?(action.time%selected.duration)/selected.duration:0;
+        let showBall=false;
+        contactBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);
         if(selected.id==='dribble-stance'){
-          const phase=motionPhase,contact=bounceHeight(phase),floorY=.13,handY=Math.max(floorY+.25,rightWorld.y-.08);
-          ballTarget.set(rightWorld.x+.08,floorY+(handY-floorY)*contact,rightWorld.z+.04);
+          showBall=phase>.05&&phase<.95;const contact=bounceHeight(phase),floorY=.12,handY=Math.max(floorY+.18,rightWorld.y-.06);ballTarget.set(rightWorld.x,floorY+(handY-floorY)*contact,rightWorld.z+.08);
         }else if(selected.id==='chest-pass'){
-          const phase=motionPhase;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.08;
-          if(phase<.48){ballTarget.copy(chestBall);releaseOrigin.copy(chestBall);}
-          else if(phase<.76){const t=smooth((phase-.48)/.28);ballTarget.copy(releaseOrigin).lerp(new THREE.Vector3(releaseOrigin.x,releaseOrigin.y,releaseOrigin.z+.78),t);}
-          else {const t=smooth((phase-.76)/.24);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
+          showBall=phase>.06&&phase<.86;contactBall.z+=.11;contactBall.y+=.01;
+          if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.74*t;ballTarget.y+=.05*t;}
         }else if(selected.id==='set-shot'){
-          const phase=motionPhase;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
-          if(phase<.48){const pocket=smooth(phase/.48);ballTarget.copy(chestBall);ballTarget.y+=.38*pocket;ballTarget.z+=.10*pocket;releaseOrigin.copy(ballTarget);}
-          else if(phase<.82){const t=smooth((phase-.48)/.34);ballTarget.copy(releaseOrigin);ballTarget.y+=.82*t-.30*t*t;ballTarget.z+=.32*t;}
-          else {const t=smooth((phase-.82)/.18);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
+          showBall=phase>.08&&phase<.90;contactBall.z+=.11;contactBall.y+=.02;
+          if(phase<.62)ballTarget.copy(contactBall);else{const t=smooth((phase-.62)/.24);ballTarget.copy(rightWorld);ballTarget.z+=.11+.42*t;ballTarget.y+=.03+.58*t-.12*t*t;}
         }
-        if(selected.ball){if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);}
+        ball.visible=selected.ball&&showBall;if(ball.visible)ball.position.copy(ballTarget);
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{resetRef.current=null;stepRef.current=null;seekRef.current=null;ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
