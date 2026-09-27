@@ -9,3 +9,11 @@
 .rigged-native__views button.on{background:#ff5b16;border-color:#ff5b16;color:#fff}
 .rigged-native__badge{position:absolute;left:18px;bottom:16px;background:rgba(6,14,22,.82);border:1px solid #263847;border-radius:12px;padding:10px 12px;font-size:10px;color:#9fb0be}
 .rigged-native__badge b{color:#fff}
+
+.rigged-motion-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin:1rem 0}
+.rigged-motion-picker button{min-width:0;text-align:left;padding:.75rem .85rem;border:1px solid rgba(255,255,255,.12);border-radius:.8rem;background:rgba(7,16,25,.72);color:inherit;cursor:pointer}
+.rigged-motion-picker button small{display:block;opacity:.62;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;margin-bottom:.2rem}
+.rigged-motion-picker button b{display:block;font-size:.82rem;line-height:1.2}
+.rigged-motion-picker button.on{border-color:rgba(255,112,38,.9);box-shadow:0 0 0 1px rgba(255,112,38,.25) inset}
+.rigged-motion-picker button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+@media(max-width:720px){.rigged-motion-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
