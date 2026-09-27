@@ -45,7 +45,7 @@ function solve(i){const n=N[i],pi=n.parentIndex;if(pi!==null)solve(pi);const par
 // lateral axis while preserving the lower-body solution. Distribution avoids a
 // single-bone kink and keeps the head/chest readable.
 const qAxis=(axis,ang)=>{const a=norm(axis),h=ang/2,s=Math.sin(h);return[a.x*s,a.y*s,a.z*s,Math.cos(h)]};
-const trunkHingeDeg=10,spineWeights={spine_01:.45,spine_02:.35,spine_03:.20};
+const trunkHingeDeg=18,spineWeights={spine_01:.45,spine_02:.35,spine_03:.20};
 for(const [name,w] of Object.entries(spineWeights)){const i=by[name];if(i!==undefined)localQ[i]=qm(qAxis(bodyLateral,-trunkHingeDeg*Math.PI/180*w),localQ[i])}
 // Apply the solved pelvis translation before re-solving the arms so their world
 // targets and shoulder roots are expressed in the same task-space frame.
@@ -99,6 +99,15 @@ metrics.rightFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.
 if(Math.max(metrics.leftFootWorldOrientationErrorDeg,metrics.rightFootWorldOrientationErrorDeg)>.25)failures.push('foot-world-orientation');
 for(const n of [...Object.keys(desired),'foot_l','foot_r'])if(localQ[by[n]].some(v=>!Number.isFinite(v)))failures.push('nonfinite-orientation-'+n);
 metrics.trunkHingeDeg=trunkHingeDeg;metrics.leftArmAuthoredReach=armTargets.l.rawD;metrics.rightArmAuthoredReach=armTargets.r.rawD;metrics.leftArmSolvedReach=armTargets.l.solvedD;metrics.rightArmSolvedReach=armTargets.r.solvedD;metrics.leftArmMaxReach=armTargets.l.maxReach;metrics.rightArmMaxReach=armTargets.r.maxReach;
-if(trunkHingeDeg<7||trunkHingeDeg>15)failures.push('trunk-hinge-envelope');
+// Blueprint acceptance gates: athletic hinge, moderate stance, knees tracking near feet,
+// and active hands in front of the pelvis. These supplement endpoint reconstruction.
+if(trunkHingeDeg<15||trunkHingeDeg>25)failures.push('trunk-hinge-envelope');
+const stanceRatio=metrics.bakedStanceWidth/s.metrics.shoulderSpan,kneeFootLimit=metrics.bakedStanceWidth*.24;
+metrics.stanceToShoulderRatio=stanceRatio;
+if(stanceRatio<1.20||stanceRatio>1.50)failures.push('blueprint-stance-width');
+if(metrics.bakedLeftKneeFootDx>kneeFootLimit||metrics.bakedRightKneeFootDx>kneeFootLimit)failures.push('blueprint-knee-over-foot');
+const pelvisForward=dot(gp('pelvis'),bodyForward),lhForward=dot(gp('hand_l'),bodyForward),rhForward=dot(gp('hand_r'),bodyForward);
+metrics.leftHandForwardOfPelvis=lhForward-pelvisForward;metrics.rightHandForwardOfPelvis=rhForward-pelvisForward;
+if(Math.min(metrics.leftHandForwardOfPelvis,metrics.rightHandForwardOfPelvis)<.08)failures.push('blueprint-hands-not-forward');
 const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries([...Object.keys(desired),'foot_l','foot_r','spine_01','spine_02','spine_03'].map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
 fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(failures.length)process.exit(1);
