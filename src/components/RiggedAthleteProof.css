@@ -32,3 +32,8 @@
 .rigged-review-context{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
 .rigged-review-context button{border:1px solid rgba(255,255,255,.14);border-radius:.6rem;background:transparent;color:inherit;padding:.4rem .6rem;font-size:.68rem;font-weight:800;letter-spacing:.04em;cursor:pointer}
 .rigged-review-context button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+
+.rigged-scrubber{display:grid;grid-template-columns:auto minmax(120px,1fr) auto;gap:.65rem;align-items:center;margin:.35rem 0 .75rem;font-size:.68rem;font-weight:800;letter-spacing:.04em}
+.rigged-scrubber input{width:100%;accent-color:currentColor}
+.rigged-scrubber output{font-variant-numeric:tabular-nums;opacity:.7}
+@media(max-width:560px){.rigged-scrubber{grid-template-columns:1fr auto}.rigged-scrubber input{grid-column:1/-1;grid-row:2}}
