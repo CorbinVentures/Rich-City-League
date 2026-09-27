@@ -18,6 +18,7 @@ export function RiggedAthleteProof({title}:Props){
   const [paused,setPaused]=useState(false);
   const [speed,setSpeed]=useState<0.5|1|1.5>(1);
   const [frame,setFrame]=useState(0);
+  const [copied,setCopied]=useState(false);
   const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null);
 
   useEffect(()=>{viewRef.current=view;},[view]);
@@ -126,12 +127,14 @@ export function RiggedAthleteProof({title}:Props){
   },[motionId]);
 
   const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
+  const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/30).toFixed(2)}s`;
+  const copyReviewContext=async()=>{try{await navigator.clipboard.writeText(reviewContext);setCopied(true);window.setTimeout(()=>setCopied(false),1400);}catch{setCopied(false);}};
   return <section className="rigged-proof">
     <div className="rigged-proof__top"><div><small>THE LAB · {selectedMotion.category.toUpperCase()}</small><h2>{selectedMotion.label}</h2><p>Canonical Ready-V4 basketball motion. Select any engineering-complete action below to inspect the same athlete, rig, camera views, and baked timeline.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-motion-picker" role="group" aria-label="Basketball motion">
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
     </div>
-    <div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/30).toFixed(2)}s</span></div>
+    <div className="rigged-review-context"><div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/30).toFixed(2)}s</span></div><button type="button" onClick={copyReviewContext}>{copied?'COPIED':'COPY REVIEW POINT'}</button></div>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
       <button type="button" onClick={()=>resetRef.current?.()}>RESTART</button>
