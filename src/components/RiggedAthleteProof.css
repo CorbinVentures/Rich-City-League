@@ -37,3 +37,6 @@
 .rigged-scrubber input{width:100%;accent-color:currentColor}
 .rigged-scrubber output{font-variant-numeric:tabular-nums;opacity:.7}
 @media(max-width:560px){.rigged-scrubber{grid-template-columns:1fr auto}.rigged-scrubber input{grid-column:1/-1;grid-row:2}}
+
+.rigged-motion-picker.is-reviewing{box-shadow:0 0 0 1px currentColor inset}
+.rigged-review-context>button[aria-pressed="true"]{font-weight:900}
