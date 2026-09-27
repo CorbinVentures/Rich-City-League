@@ -35,14 +35,18 @@ export function bakeMotion(id,opts={}){
  const bind=Object.fromEntries(rig.joints.filter(j=>!j.missing).map(j=>[j.name,j]));
  const readyT=nodes.map(n=>[...(n.translation||[0,0,0])]),readyQ=nodes.map(n=>[...(n.rotation||[0,0,0,1])]);
  for(const ch of ready.channels){const vals=readAccessor(g,bin,ready.samplers[ch.sampler].output),value=vals[0],i=ch.target.node;if(ch.target.path==='translation')readyT[i]=[...value];if(ch.target.path==='rotation')readyQ[i]=[...value]}
- const twistForward=V(target.frame.forward),lateral=norm(V(target.frame.lateral)),up=norm(V(target.frame.up)),forward=norm(mul(twistForward,-1));
+ const rigForward=V(target.frame.forward),rigLateral=V(target.frame.lateral),anatomicalForward=mul(rigForward,-1);
+ // Training movement happens on the court plane. The rig's anatomical frame is pitched,
+ // so using it directly for forward travel drove planted feet below the floor. Project
+ // forward/lateral to world XZ and use true world Y for vertical load/lift.
+ const lateral=norm({x:rigLateral.x,y:0,z:rigLateral.z}),up={x:0,y:1,z:0},forward=norm({x:anatomicalForward.x,y:0,z:anatomicalForward.z});
  const legScale=(bind.thigh_l.segmentLength+bind.calf_l.segmentLength+bind.thigh_r.segmentLength+bind.calf_r.segmentLength)/2;
  const localT=readyT.map(v=>[...v]),localQ=readyQ.map(v=>[...v]),worldP=[],worldQ=[];
  function evaluate(){worldP.length=0;worldQ.length=0;const solve=i=>{if(worldP[i])return;const p=parent[i],t=V(localT[i]),q=localQ[i];if(p===null){worldP[i]=t;worldQ[i]=q;return}solve(p);worldQ[i]=qm(worldQ[p],q);worldP[i]=add(worldP[p],rot(worldQ[p],t))};nodes.forEach((_,i)=>solve(i))}
  evaluate();const readyWP=worldP.map(v=>({...v})),readyWQ=worldQ.map(q=>[...q]),floorY=Math.min(readyWP[by.foot_l].y,readyWP[by.foot_r].y),readyPelvis={...readyWP[by.pelvis]};
  const resetPose=()=>{for(let i=0;i<nodes.length;i++){localT[i]=[...readyT[i]];localQ[i]=[...readyQ[i]]}evaluate()};
  const setPelvisWorld=targetP=>{const i=by.pelvis,p=parent[i],pq=p===null?[0,0,0,1]:worldQ[p],pp=p===null?{x:0,y:0,z:0}:worldP[p];localT[i]=A(rot(qc(pq),sub(targetP,pp)));evaluate()};
- const secondaryFor=primary=>{let s=sub(twistForward,mul(primary,dot(twistForward,primary)));if(len(s)<1e-5)s=sub(lateral,mul(primary,dot(lateral,primary)));return norm(s)};
+ const secondaryFor=primary=>{let s=sub(rigForward,mul(primary,dot(rigForward,primary)));if(len(s)<1e-5)s=sub(lateral,mul(primary,dot(lateral,primary)));return norm(s)};
  const setBoneToward=(name,targetDir)=>{const i=by[name],p=parent[i],pq=p===null?[0,0,0,1]:worldQ[p],b=bind[name],bp=norm(V(b.primaryWorldAxis)),tp=norm(targetDir),delta=qm(qBasis(tp,secondaryFor(tp)),qc(qBasis(bp,secondaryFor(bp)))),desiredWorld=qm(delta,b.worldRotation);localQ[i]=qm(qc(pq),desiredWorld);evaluate()};
  const setWorldOrientation=(name,qWorld)=>{const i=by[name],p=parent[i],pq=p===null?[0,0,0,1]:worldQ[p];localQ[i]=qm(qc(pq),qWorld);evaluate()};
  const rotateWorld=(name,axis,deg)=>{if(Math.abs(deg)<1e-7)return;const i=by[name],p=parent[i],pq=p===null?[0,0,0,1]:worldQ[p],axisParent=rot(qc(pq),axis);localQ[i]=qm(qAxis(axisParent,deg*Math.PI/180),localQ[i]);evaluate()};
