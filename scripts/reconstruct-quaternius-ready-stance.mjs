@@ -46,6 +46,20 @@ function solve(i){const n=N[i],pi=n.parentIndex;if(pi!==null)solve(pi);const par
 const qAxis=(axis,ang)=>{const a=norm(axis),h=ang/2,s=Math.sin(h);return[a.x*s,a.y*s,a.z*s,Math.cos(h)]};
 const trunkHingeDeg=10,spineWeights={spine_01:.45,spine_02:.35,spine_03:.20};
 for(const [name,w] of Object.entries(spineWeights)){const i=by[name];if(i!==undefined)localQ[i]=qm(qAxis(bodyLateral,-trunkHingeDeg*Math.PI/180*w),localQ[i])}
+// The hinge changes the shoulder parent frames. Reconstruct once, then solve the
+// arm chains again in those hinged frames so hand/elbow task targets remain exact.
+worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
+for(const side of ['l','r']){
+  for(const [bone,targetPoint] of [['upperarm_'+side,P['elbow'+side.toUpperCase()]],['lowerarm_'+side,P['hand'+side.toUpperCase()]]]){
+    const i=by[bone],pi=N[i].parentIndex,parentQ=pi===null?[0,0,0,1]:worldQ[pi],root=worldP[i],b=bind[bone];
+    const bindPrimary=norm(V(b.primaryWorldAxis)),targetPrimary=norm(sub(targetPoint,root));
+    let bs=sub(bodyForward,mul(bindPrimary,dot(bodyForward,bindPrimary)));if(len(bs)<1e-5)bs=sub(bodyLateral,mul(bindPrimary,dot(bodyLateral,bindPrimary)));bs=norm(bs);
+    let ts=sub(bodyForward,mul(targetPrimary,dot(bodyForward,targetPrimary)));if(len(ts)<1e-5)ts=sub(bodyLateral,mul(targetPrimary,dot(bodyLateral,targetPrimary)));ts=norm(ts);
+    const desiredWorld=qm(qm(qBasis(targetPrimary,ts),qc(qBasis(bindPrimary,bs))),b.worldRotation);
+    localQ[i]=qm(qc(parentQ),desiredWorld);
+    worldQ.length=0;worldP.length=0;for(let j=0;j<N.length;j++)solve(j);
+  }
+}
 const pelvisI=by.pelvis,pelvisParent=N[pelvisI].parentIndex,deltaWorld=sub(P.pelvis,V(N[pelvisI].worldPosition));
 const parentBindQ=pelvisParent===null?[0,0,0,1]:N[pelvisParent].worldRotation;
 const deltaLocal=rot(qc(parentBindQ),deltaWorld);
