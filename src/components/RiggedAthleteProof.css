@@ -52,3 +52,8 @@
 .rigged-review-notes{display:grid;gap:.35rem;margin:.25rem 0 .8rem;font-size:.68rem;font-weight:900;letter-spacing:.05em}
 .rigged-review-notes textarea{width:100%;resize:vertical;border:1px solid rgba(255,255,255,.14);border-radius:.65rem;background:rgba(0,0,0,.18);color:inherit;padding:.6rem;font:inherit;letter-spacing:normal}
 .rigged-review-notes textarea:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+
+.rigged-review-result{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin:.25rem 0 .65rem;font-size:.68rem;font-weight:900;letter-spacing:.05em}
+.rigged-review-result button{border:1px solid rgba(255,255,255,.14);border-radius:.55rem;background:transparent;color:inherit;padding:.38rem .58rem;font-size:.68rem;font-weight:900}
+.rigged-review-result button[aria-pressed="true"]{box-shadow:0 0 0 1px currentColor inset}
+.rigged-review-result button:disabled{opacity:.35;cursor:not-allowed}
