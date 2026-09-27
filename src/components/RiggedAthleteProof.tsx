@@ -12,7 +12,7 @@ export function RiggedAthleteProof({title}:Props){
   const viewRef=useRef<View>('front');
   const [status,setStatus]=useState<Status>('loading-athlete');
   const [view,setView]=useState<View>('front');
-  const [motion,setMotion]=useState('Reference basketball stance');
+  const [motion,setMotion]=useState('Defensive Slide V1');
 
   useEffect(()=>{viewRef.current=view;},[view]);
 
@@ -46,14 +46,14 @@ export function RiggedAthleteProof({title}:Props){
 
       // Playback layer only: load the basketball-specific baked action by exact name.
       // Never silently fall back to a generic locomotion/crouch animation.
-      const motionModel=await load('/lab3d/RCL_Ready_Stance_v4.glb');if(disposed)return;
+      const motionModel=await load('/lab3d/RCL_Defensive_Slide_v1.glb');if(disposed)return;
       const clips=motionModel.animations||[];
-      const expectedClip='RCL_Ready_Stance_v4';
+      const expectedClip='RCL_Defensive_Slide_v1';
       const bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
       const mixer=new THREE.AnimationMixer(athlete);
-      const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`VALIDATED STATIC STANCE · ${bakedClip.name}`);
+      const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopPingPong,Infinity).play();
+      setMotion(`BAKED DEFENSIVE MOTION · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
@@ -71,7 +71,7 @@ export function RiggedAthleteProof({title}:Props){
       }
 
       const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
-      const clock=new THREE.Clock();let elapsed=0;
+      const clock=new THREE.Clock();
       // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
       // 100% baked animation; no runtime bone rotations are applied.
       const smooth=(t:number)=>t*t*(3-2*t);
@@ -86,38 +86,22 @@ export function RiggedAthleteProof({title}:Props){
       camera.position.copy(positions.front);setStatus('ready');
 
       renderer.setAnimationLoop(()=>{
-        const delta=Math.min(clock.getDelta(),.05);elapsed+=delta;mixer.update(delta);
-        // One controlled dribble per side. A short hand-contact dwell prevents the ball
-        // from looking magnetized or independently sinusoidal.
-        const cycle=(elapsed%1.36)/1.36,left=cycle<.5,phase=left?cycle*2:(cycle-.5)*2;
-        const activeHand=left?leftHand:rightHand;activeHand.getWorldPosition(handWorld);
-        const handY=Math.max(.72,handWorld.y-.035),floorY=.125;
-        const h=bounceHeight(phase);
-        const side=left?-1:1;
-        const lateral=handWorld.x+side*(.025+.035*Math.sin(phase*Math.PI));
-        const forward=handWorld.z+.055;
-        ballTarget.set(lateral,floorY+(handY-floorY)*h,forward);
-        // Snap cleanly at hand/floor contacts, ease through flight for believable control.
-        const nearContact=phase<.08||phase>.92||Math.abs(phase-.5)<.055;
-        const follow=nearContact?.72:.42;
-        prevBall.copy(ball.position);ball.position.lerp(ballTarget,follow);
-        const travel=ball.position.distanceTo(prevBall);
-        ball.rotation.x+=travel/.12;ball.rotation.z+=side*travel/.16;
+        const delta=Math.min(clock.getDelta(),.05);mixer.update(delta);
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
-    })().catch(err=>{console.error('RCL stationary handle clip failed',err);if(!disposed)setStatus('error');});
+    })().catch(err=>{console.error('RCL defensive slide clip failed',err);if(!disposed)setStatus('error');});
     return()=>{disposed=true;cleanup();};
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · BALL HANDLING</small><h2>Stationary Ball-Handling Series</h2><p>Basketball-specific baked motion preview. One athlete, one animation timeline, four synchronized camera views.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · DEFENSE</small><h2>Defensive Slide V1</h2><p>Validated full-body defensive movement preview. Lead step, trail recovery, active hands, and torso counterbalance on one baked timeline.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
       {status==='error'&&<div className="rigged-native__status rigged-native__status--error">DRILL PREVIEW FAILED</div>}
       <div className="rigged-native__views">{(['front','quarter','side','back'] as View[]).map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)}>{v==='quarter'?'3/4':v.toUpperCase()}</button>)}</div>
-      <div className="rigged-native__badge"><b>V4 REFERENCE STANCE</b> · {motion} · Same athlete / same timeline</div>
+      <div className="rigged-native__badge"><b>READY V4 ANCHORED</b> · {motion} · Same athlete / same timeline</div>
     </div>
   </section>;
 }
