@@ -84,8 +84,8 @@ export function RiggedAthleteProof({title}:Props){
       const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
       const ballClock=new THREE.Clock(false);ballClock.start();
       resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);setFrame(0);};
-      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/30);action.paused=true;setFrame(Math.round(action.time*30));};
-      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/30));mixer.setTime(t);action.time=t;setFrame(Math.round(t*30));};
+      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;setFrame(Math.round(action.time*selected.fps));};
+      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;setFrame(Math.round(t*selected.fps));};
       const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
       const clock=new THREE.Clock();
       // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
@@ -102,7 +102,7 @@ export function RiggedAthleteProof({title}:Props){
       camera.position.copy(positions.front);setStatus('ready');
 
       renderer.setAnimationLoop(()=>{
-        const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*30));}
+        const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*selected.fps));}
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
         if(pausedRef.current){ballClock.stop();}else if(!ballClock.running){ballClock.start();}
@@ -129,15 +129,15 @@ export function RiggedAthleteProof({title}:Props){
   },[motionId]);
 
   const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
-  const durationFrames=Math.round(selectedMotion.duration*30);
-  const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/30).toFixed(2)}s`;
+  const durationFrames=Math.round(selectedMotion.duration*selectedMotion.fps);
+  const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/selectedMotion.fps).toFixed(2)}s`;
   const copyReviewContext=async()=>{try{await navigator.clipboard.writeText(reviewContext);setCopied(true);window.setTimeout(()=>setCopied(false),1400);}catch{setCopied(false);}};
   return <section className="rigged-proof">
     <div className="rigged-proof__top"><div><small>THE LAB · {selectedMotion.category.toUpperCase()}</small><h2>{selectedMotion.label}</h2><p>Canonical Ready-V4 basketball motion. Select any engineering-complete action below to inspect the same athlete, rig, camera views, and baked timeline.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-motion-picker" role="group" aria-label="Basketball motion">
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
     </div>
-    <div className="rigged-review-context"><div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/30).toFixed(2)}s</span></div><button type="button" onClick={copyReviewContext}>{copied?'COPIED':'COPY REVIEW POINT'}</button></div>
+    <div className="rigged-review-context"><div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/selectedMotion.fps).toFixed(2)}s</span></div><button type="button" onClick={copyReviewContext}>{copied?'COPIED':'COPY REVIEW POINT'}</button></div>
     <label className="rigged-scrubber"><span>SCRUB TIMELINE</span><input type="range" min="0" max={durationFrames} step="1" value={Math.min(frame,durationFrames)} onChange={e=>{setPaused(true);seekRef.current?.(Number(e.target.value));}}/><output>{Math.min(frame,durationFrames)} / {durationFrames}</output></label>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
