@@ -52,5 +52,26 @@ for(const [name,side,role] of [['thigh_r','lead','thigh'],['calf_r','lead','calf
  channels.push({sampler:si,target:{node,path:'rotation'}});
 }
 
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'leg-mechanics-layer',legMechanics:'ready-relative-quaternion-deltas',leadFoot:'foot_r',trailFoot:'foot_l',noCrossing:true}});
+// Layer 4: upper-body counterbalance and active hands.
+// Small ready-relative deltas keep the chest quiet while the arms respond opposite
+// the travel phase. All deltas return to identity at both boundaries.
+const qz=a=>[0,0,Math.sin(a/2),Math.cos(a/2)];
+for(const [name,side,role] of [['upperarm_r','right','upper'],['lowerarm_r','right','lower'],['upperarm_l','left','upper'],['lowerarm_l','left','lower']]){
+ const node=nodes.get(name),baseQ=readyRot(name),vals=[];
+ for(const f of plan.frames){
+   const p=f.time/plan.duration,envelope=Math.sin(Math.PI*p);
+   const direction=side==='right'?-1:1;
+   const deg=(role==='upper'?5:7)*envelope*direction;
+   vals.push(...qmul(baseQ,qz(deg*Math.PI/180)));
+ }
+ const out=floats(vals,'VEC4',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'rotation'}});
+}
+for(const [name,deg] of [['spine_01',2.5],['spine_02',1.5]]){
+ const node=nodes.get(name),baseQ=readyRot(name),vals=[];
+ for(const f of plan.frames){const p=f.time/plan.duration,envelope=Math.sin(Math.PI*p);vals.push(...qmul(baseQ,qz(deg*envelope*Math.PI/180)))}
+ const out=floats(vals,'VEC4',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;channels.push({sampler:si,target:{node,path:'rotation'}});
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'upper-body-layer',upperBody:'active-hands-counterbalance',legMechanics:'ready-relative-quaternion-deltas',leadFoot:'foot_r',trailFoot:'foot_l',noCrossing:true}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked defensive slide foundation',outPath,'frames='+plan.frames.length);
