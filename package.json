@@ -39,7 +39,8 @@
     "lab:v4:build": "npm run lab:v4:target && node scripts/reconstruct-quaternius-ready-stance.mjs && node scripts/bake-quaternius-ready-stance.mjs",
     "lab:defensive-slide:author": "node scripts/author-defensive-slide.mjs",
     "lab:defensive-slide:validate": "npm run lab:v4:build && npm run lab:defensive-slide:author",
-    "lab:defensive-slide:bake": "npm run lab:defensive-slide:validate && node scripts/bake-defensive-slide.mjs"
+    "lab:defensive-slide:bake": "npm run lab:defensive-slide:validate && node scripts/bake-defensive-slide.mjs",
+    "lab:defensive-slide:verify": "npm run lab:defensive-slide:bake && node scripts/validate-defensive-slide-glb.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
