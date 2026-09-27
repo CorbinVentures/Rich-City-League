@@ -17,7 +17,7 @@ export function RiggedAthleteProof({title}:Props){
   const [motionId,setMotionId]=useState<LabMotionId>('set-shot');
   const [paused,setPaused]=useState(false);
   const [speed,setSpeed]=useState<0.5|1|1.5>(1);
-  const pausedRef=useRef(false),speedRef=useRef(1);
+  const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null);
 
   useEffect(()=>{viewRef.current=view;},[view]);
   useEffect(()=>{pausedRef.current=paused;},[paused]);
@@ -80,6 +80,7 @@ export function RiggedAthleteProof({title}:Props){
 
       const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
       const ballClock=new THREE.Clock(false);ballClock.start();
+      resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);};
       const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
       const clock=new THREE.Clock();
       // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
@@ -117,7 +118,7 @@ export function RiggedAthleteProof({title}:Props){
         if(selected.ball){if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);}
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
-      cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
+      cleanup=()=>{resetRef.current=null;ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
     })().catch(err=>{console.error('RCL Lab motion clip failed',err);if(!disposed)setStatus('error');});
     return()=>{disposed=true;cleanup();};
   },[motionId]);
@@ -130,6 +131,7 @@ export function RiggedAthleteProof({title}:Props){
     </div>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
+      <button type="button" onClick={()=>resetRef.current?.()}>RESTART</button>
       {([0.5,1,1.5] as const).map(v=><button type="button" key={v} className={speed===v?'on':''} aria-pressed={speed===v} onClick={()=>setSpeed(v)}>{v}×</button>)}
     </div>
     <div className="rigged-native">
