@@ -17,6 +17,7 @@ export function RiggedAthleteProof({title}:Props){
   const [motionId,setMotionId]=useState<LabMotionId>('set-shot');
   const [paused,setPaused]=useState(false);
   const [speed,setSpeed]=useState<0.5|1|1.5>(1);
+  const [frame,setFrame]=useState(0);
   const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null);
 
   useEffect(()=>{viewRef.current=view;},[view]);
@@ -80,8 +81,8 @@ export function RiggedAthleteProof({title}:Props){
 
       const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
       const ballClock=new THREE.Clock(false);ballClock.start();
-      resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);};
-      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/30);action.paused=true;};
+      resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);setFrame(0);};
+      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/30);action.paused=true;setFrame(Math.round(action.time*30));};
       const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
       const clock=new THREE.Clock();
       // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
@@ -98,7 +99,7 @@ export function RiggedAthleteProof({title}:Props){
       camera.position.copy(positions.front);setStatus('ready');
 
       renderer.setAnimationLoop(()=>{
-        const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current)mixer.update(delta*speedRef.current);
+        const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*30));}
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
         if(pausedRef.current){ballClock.stop();}else if(!ballClock.running){ballClock.start();}
@@ -130,6 +131,7 @@ export function RiggedAthleteProof({title}:Props){
     <div className="rigged-motion-picker" role="group" aria-label="Basketball motion">
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
     </div>
+    <div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/30).toFixed(2)}s</span></div>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
       <button type="button" onClick={()=>resetRef.current?.()}>RESTART</button>
