@@ -33,7 +33,7 @@
     "lab:motion:solve-ready": "npm run lab:motion:ready-stance && node scripts/solve-quaternius-ready-stance.mjs",
     "lab:motion:reconstruct-ready": "npm run lab:motion:solve-ready && node scripts/reconstruct-quaternius-ready-stance.mjs",
     "lab:motion:bake-ready": "npm run lab:motion:reconstruct-ready && node scripts/bake-quaternius-ready-stance.mjs",
-    "prebuild": "npm run lab:v4:build",
+    "prebuild": "npm run lab:library:build",
     "lab:motion:validate-anatomy": "node scripts/validate-quaternius-anatomical-rig.mjs",
     "lab:v4:target": "npm run lab:motion:analyze-rig && npm run lab:motion:validate-anatomy && node scripts/build-quaternius-ready-stance-v4.mjs",
     "lab:v4:build": "npm run lab:v4:target && node scripts/reconstruct-quaternius-ready-stance.mjs && node scripts/bake-quaternius-ready-stance.mjs",
@@ -56,6 +56,7 @@
     "lab:shot:author": "node scripts/author-shot.mjs",
     "lab:shot:bake": "npm run lab:v4:build && npm run lab:shot:author && node scripts/bake-shot.mjs",
     "lab:shot:verify": "npm run lab:shot:bake && node scripts/validate-shot-glb.mjs",
+    "lab:library:build": "npm run lab:v4:build && npm run lab:defensive-slide:author && node scripts/bake-defensive-slide.mjs && npm run lab:closeout:author && node scripts/bake-closeout.mjs && npm run lab:triple-threat-jab:author && node scripts/bake-triple-threat-jab.mjs && npm run lab:dribble-stance:author && node scripts/bake-dribble-stance.mjs && npm run lab:pass:author && node scripts/bake-pass.mjs && npm run lab:shot:author && node scripts/bake-shot.mjs && node scripts/validate-lab-motion-library.mjs && node scripts/validate-lab-motion-registry.mjs",
     "lab:library:verify": "npm run lab:defensive-slide:bake && npm run lab:closeout:bake && npm run lab:triple-threat-jab:bake && npm run lab:dribble-stance:bake && npm run lab:pass:bake && npm run lab:shot:bake && node scripts/validate-lab-motion-library.mjs && node scripts/validate-lab-motion-registry.mjs"
   },
   "dependencies": {
