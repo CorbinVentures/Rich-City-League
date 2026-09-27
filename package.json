@@ -54,7 +54,8 @@
     "lab:pass:bake": "npm run lab:v4:build && npm run lab:pass:author && node scripts/bake-pass.mjs",
     "lab:pass:verify": "npm run lab:pass:bake && node scripts/validate-pass-glb.mjs",
     "lab:shot:author": "node scripts/author-shot.mjs",
-    "lab:shot:bake": "npm run lab:v4:build && npm run lab:shot:author && node scripts/bake-shot.mjs"
+    "lab:shot:bake": "npm run lab:v4:build && npm run lab:shot:author && node scripts/bake-shot.mjs",
+    "lab:shot:verify": "npm run lab:shot:bake && node scripts/validate-shot-glb.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
