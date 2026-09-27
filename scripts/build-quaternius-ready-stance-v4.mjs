@@ -10,7 +10,7 @@ const lateral=norm(sub(hipR,hipL)),up=norm(sub(P('spine_03'),pel)),forward=norm(
 // Visual reference supplied by project owner: wide symmetrical defensive/ready base,
 // hips lowered, knees separated and tracking toward feet, torso centered, hands low/wide.
 // Dimensionless ratios are athlete-relative and validated below; they are not claimed as universal biomechanics.
-const stance=Math.max(shoulderSpan*1.32,hipSpan*1.85),pelvisDrop=leg*.13;
+const stance=Math.max(shoulderSpan*1.32,hipSpan*1.85),pelvisDrop=leg*.145;
 // Sagittal correction: sit the pelvis BACK in the stance. The previous negative
 // forward offset drove the hips toward the knees and produced the backwards-bent
 // side silhouette. `forward` is the calibrated athlete-facing axis.
@@ -36,7 +36,7 @@ const LL=solveLeg(HL,FL,-1,J.thigh_l.segmentLength,J.calf_l.segmentLength),RR=so
 const torsoForward=leg*.145,torsoDrop=leg*.035;
 const SL=add(add(add(targetPel,hipOffset('upperarm_l')),mul(forward,torsoForward)),mul(up,-torsoDrop)),
       SR=add(add(add(targetPel,hipOffset('upperarm_r')),mul(forward,torsoForward)),mul(up,-torsoDrop));
-function solveArm(root,side,l1,l2){const hand=add(add(add(targetPel,mul(lateral,side*stance*.475)),mul(up,leg*.17)),mul(forward,-leg*.095)),d=sub(hand,root),D=len(d),u=norm(d),reach=Math.min(D,l1+l2-1e-5),a=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-a*a));let bend=add(mul(lateral,side*.72),mul(forward,-.55));bend=norm(sub(bend,mul(u,dot(bend,u))));return{joint:add(add(root,mul(u,a)),mul(bend,h)),end:hand,reachable:D<=l1+l2};}
+function solveArm(root,side,l1,l2){const hand=add(add(add(targetPel,mul(lateral,side*stance*.49)),mul(up,leg*.18)),mul(forward,-leg*.095)),d=sub(hand,root),D=len(d),u=norm(d),reach=Math.min(D,l1+l2-1e-5),a=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-a*a));let bend=add(mul(lateral,side*.82),mul(forward,-.55));bend=norm(sub(bend,mul(u,dot(bend,u))));return{joint:add(add(root,mul(u,a)),mul(bend,h)),end:hand,reachable:D<=l1+l2};}
 const AL=solveArm(SL,-1,J.upperarm_l.segmentLength,J.lowerarm_l.segmentLength),AR=solveArm(SR,1,J.upperarm_r.segmentLength,J.lowerarm_r.segmentLength);
 const angle=(a,b,c)=>Math.acos(Math.max(-1,Math.min(1,dot(norm(sub(a,b)),norm(sub(c,b))))))*180/Math.PI;
 const torso={shoulderForward:torsoForward,shoulderDrop:torsoDrop};
