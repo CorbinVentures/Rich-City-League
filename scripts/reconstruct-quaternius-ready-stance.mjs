@@ -46,6 +46,12 @@ function solve(i){const n=N[i],pi=n.parentIndex;if(pi!==null)solve(pi);const par
 const qAxis=(axis,ang)=>{const a=norm(axis),h=ang/2,s=Math.sin(h);return[a.x*s,a.y*s,a.z*s,Math.cos(h)]};
 const trunkHingeDeg=10,spineWeights={spine_01:.45,spine_02:.35,spine_03:.20};
 for(const [name,w] of Object.entries(spineWeights)){const i=by[name];if(i!==undefined)localQ[i]=qm(qAxis(bodyLateral,-trunkHingeDeg*Math.PI/180*w),localQ[i])}
+// Apply the solved pelvis translation before re-solving the arms so their world
+// targets and shoulder roots are expressed in the same task-space frame.
+const pelvisI=by.pelvis,pelvisParent=N[pelvisI].parentIndex,deltaWorld=sub(P.pelvis,V(N[pelvisI].worldPosition));
+const parentBindQ=pelvisParent===null?[0,0,0,1]:N[pelvisParent].worldRotation;
+const deltaLocal=rot(qc(parentBindQ),deltaWorld);
+localT[pelvisI]=[localT[pelvisI][0]+deltaLocal.x,localT[pelvisI][1]+deltaLocal.y,localT[pelvisI][2]+deltaLocal.z];
 // The hinge changes the shoulder parent frames. Reconstruct once, then solve the
 // arm chains again in those hinged frames so hand/elbow task targets remain exact.
 worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
@@ -60,11 +66,7 @@ for(const side of ['l','r']){
     worldQ.length=0;worldP.length=0;for(let j=0;j<N.length;j++)solve(j);
   }
 }
-const pelvisI=by.pelvis,pelvisParent=N[pelvisI].parentIndex,deltaWorld=sub(P.pelvis,V(N[pelvisI].worldPosition));
-const parentBindQ=pelvisParent===null?[0,0,0,1]:N[pelvisParent].worldRotation;
-const deltaLocal=rot(qc(parentBindQ),deltaWorld);
-localT[pelvisI]=[localT[pelvisI][0]+deltaLocal.x,localT[pelvisI][1]+deltaLocal.y,localT[pelvisI][2]+deltaLocal.z];
-// Recompute hierarchy after injecting the distributed trunk hinge.
+// Recompute hierarchy after the hinge, pelvis translation, and arm re-solve.
 worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
 const rootTranslationError=len(sub(worldP[pelvisI],P.pelvis));
 const gp=n=>worldP[by[n]],dist=(a,b)=>len(sub(a,b)),floor=Math.min(P.footL.y,P.footR.y);
