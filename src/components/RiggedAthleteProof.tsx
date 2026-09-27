@@ -133,7 +133,9 @@ export function RiggedAthleteProof({title}:Props){
 
   const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
   const durationFrames=Math.round(selectedMotion.duration*selectedMotion.fps);
-  const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/selectedMotion.fps).toFixed(2)}s`;
+  const reviewCount=reviewDone.filter(Boolean).length;
+  const reviewComplete=reviewCount===reviewChecks.length;
+  const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/selectedMotion.fps).toFixed(2)}s · QA ${reviewCount}/${reviewChecks.length}${reviewComplete?' COMPLETE':''}`;
   const copyReviewContext=async()=>{try{await navigator.clipboard.writeText(reviewContext);setCopied(true);window.setTimeout(()=>setCopied(false),1400);}catch{setCopied(false);}};
   const startReview=()=>{setReviewMode(true);setReviewDone(reviewChecks.map(()=>false));setPaused(true);setSpeed(1);resetRef.current?.();};
   return <section className="rigged-proof">
@@ -142,7 +144,7 @@ export function RiggedAthleteProof({title}:Props){
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
     </div>
     <div className="rigged-review-context"><button type="button" aria-pressed={reviewMode} onClick={()=>reviewMode?setReviewMode(false):startReview()}>{reviewMode?'EXIT REVIEW':'START REVIEW'}</button><div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/selectedMotion.fps).toFixed(2)}s</span></div><button type="button" onClick={copyReviewContext}>{copied?'COPIED':'COPY REVIEW POINT'}</button></div>
-    {reviewMode&&<fieldset className="rigged-review-checklist"><legend>VISUAL QA · {selectedMotion.label}</legend>{reviewChecks.map((item,i)=><label key={item}><input type="checkbox" checked={reviewDone[i]} onChange={()=>setReviewDone(v=>v.map((x,j)=>j===i?!x:x))}/><span>{item}</span></label>)}</fieldset>}
+    {reviewMode&&<fieldset className={`rigged-review-checklist${reviewComplete?' is-complete':''}`}><legend>VISUAL QA · {selectedMotion.label} · {reviewCount}/{reviewChecks.length}{reviewComplete?' COMPLETE':''}</legend>{reviewChecks.map((item,i)=><label key={item}><input type="checkbox" checked={reviewDone[i]} onChange={()=>setReviewDone(v=>v.map((x,j)=>j===i?!x:x))}/><span>{item}</span></label>)}</fieldset>}
     <label className="rigged-scrubber"><span>SCRUB TIMELINE</span><input type="range" min="0" max={durationFrames} step="1" value={Math.min(frame,durationFrames)} onChange={e=>{setPaused(true);seekRef.current?.(Number(e.target.value));}}/><output>{Math.min(frame,durationFrames)} / {durationFrames}</output></label>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>

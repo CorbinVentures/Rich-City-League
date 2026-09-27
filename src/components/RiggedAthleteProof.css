@@ -45,3 +45,6 @@
 .rigged-review-checklist legend{padding:0 .35rem;font-size:.7rem;font-weight:900;letter-spacing:.06em}
 .rigged-review-checklist label{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700}
 @media(max-width:640px){.rigged-review-checklist{grid-template-columns:1fr 1fr}}
+
+.rigged-review-checklist.is-complete{box-shadow:0 0 0 1px currentColor inset}
+.rigged-review-checklist.is-complete legend{font-weight:950}
