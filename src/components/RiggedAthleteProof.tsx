@@ -19,7 +19,8 @@ export function RiggedAthleteProof({title}:Props){
   const [speed,setSpeed]=useState<0.5|1|1.5>(1);
   const [frame,setFrame]=useState(0);
   const [copied,setCopied]=useState(false);
-  const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null);
+  const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null),seekRef=useRef<((frame:number)=>void)|null>(null);
+  const durationFrames=motionId==='closeout'||motionId==='set-shot'?41:motionId==='defensive-slide'||motionId==='triple-threat-jab'?36:motionId==='chest-pass'?35:30;
 
   useEffect(()=>{viewRef.current=view;},[view]);
   useEffect(()=>{pausedRef.current=paused;},[paused]);
@@ -84,6 +85,7 @@ export function RiggedAthleteProof({title}:Props){
       const ballClock=new THREE.Clock(false);ballClock.start();
       resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);setFrame(0);};
       stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/30);action.paused=true;setFrame(Math.round(action.time*30));};
+      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/30));mixer.setTime(t);action.time=t;setFrame(Math.round(t*30));};
       const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
       const clock=new THREE.Clock();
       // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
@@ -121,7 +123,7 @@ export function RiggedAthleteProof({title}:Props){
         if(selected.ball){if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);}
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
-      cleanup=()=>{resetRef.current=null;stepRef.current=null;ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
+      cleanup=()=>{resetRef.current=null;stepRef.current=null;seekRef.current=null;ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
     })().catch(err=>{console.error('RCL Lab motion clip failed',err);if(!disposed)setStatus('error');});
     return()=>{disposed=true;cleanup();};
   },[motionId]);
@@ -135,6 +137,7 @@ export function RiggedAthleteProof({title}:Props){
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
     </div>
     <div className="rigged-review-context"><div className="rigged-timeline" aria-live="polite"><b>FRAME {frame}</b><span>{(frame/30).toFixed(2)}s</span></div><button type="button" onClick={copyReviewContext}>{copied?'COPIED':'COPY REVIEW POINT'}</button></div>
+    <label className="rigged-scrubber"><span>SCRUB TIMELINE</span><input type="range" min="0" max={durationFrames} step="1" value={Math.min(frame,durationFrames)} onChange={e=>{setPaused(true);seekRef.current?.(Number(e.target.value));}}/><output>{Math.min(frame,durationFrames)} / {durationFrames}</output></label>
     <div className="rigged-playback" role="group" aria-label="Animation playback">
       <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
       <button type="button" onClick={()=>resetRef.current?.()}>RESTART</button>
