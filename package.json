@@ -48,7 +48,8 @@
     "lab:triple-threat-jab:bake": "npm run lab:v4:build && npm run lab:triple-threat-jab:author && node scripts/bake-triple-threat-jab.mjs",
     "lab:triple-threat-jab:verify": "npm run lab:triple-threat-jab:bake && node scripts/validate-triple-threat-jab-glb.mjs",
     "lab:dribble-stance:author": "node scripts/author-dribble-stance.mjs",
-    "lab:dribble-stance:bake": "npm run lab:v4:build && npm run lab:dribble-stance:author && node scripts/bake-dribble-stance.mjs"
+    "lab:dribble-stance:bake": "npm run lab:v4:build && npm run lab:dribble-stance:author && node scripts/bake-dribble-stance.mjs",
+    "lab:dribble-stance:verify": "npm run lab:dribble-stance:bake && node scripts/validate-dribble-stance-glb.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
