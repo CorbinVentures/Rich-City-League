@@ -87,14 +87,13 @@ export function RiggedAthleteProof({title}:Props){
       }
 
       const handWorld=new THREE.Vector3(),ballTarget=new THREE.Vector3(),prevBall=new THREE.Vector3();
-      const ballClock=new THREE.Clock(false);ballClock.start();
-      resetRef.current=()=>{action.reset().play();ballClock.stop();ballClock.start();prevBall.set(0,0,0);setFrame(0);};
-      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;setFrame(Math.round(action.time*selected.fps));};
-      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;setFrame(Math.round(t*selected.fps));};
+      resetRef.current=()=>{action.reset().play();prevBall.set(0,0,0);setFrame(0);};
+      stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;prevBall.set(0,0,0);setFrame(Math.round(action.time*selected.fps));};
+      seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;prevBall.set(0,0,0);setFrame(Math.round(t*selected.fps));};
       const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),chestBall=new THREE.Vector3(),releaseOrigin=new THREE.Vector3();
       const clock=new THREE.Clock();
-      // Ball timing follows a smooth push → floor → recovery cycle. The athlete remains
-      // 100% baked animation; no runtime bone rotations are applied.
+      // Ball position is derived from the same baked AnimationAction timeline as the athlete.
+      // That keeps pause, speed, frame-step, restart, and scrub operations frame-accurate.
       const smooth=(t:number)=>t*t*(3-2*t);
       const bounceHeight=(phase:number)=>{
         // phase 0 = hand contact, .5 = floor contact, 1 = next hand contact.
@@ -110,17 +109,17 @@ export function RiggedAthleteProof({title}:Props){
         const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*selected.fps));}
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
-        if(pausedRef.current){ballClock.stop();}else if(!ballClock.running){ballClock.start();}
+        const motionPhase=selected.duration>0?(action.time%selected.duration)/selected.duration:0;
         if(selected.id==='dribble-stance'){
-          const phase=(ballClock.getElapsedTime()%1.0),contact=bounceHeight(phase),floorY=.13,handY=Math.max(floorY+.25,rightWorld.y-.08);
+          const phase=motionPhase,contact=bounceHeight(phase),floorY=.13,handY=Math.max(floorY+.25,rightWorld.y-.08);
           ballTarget.set(rightWorld.x+.08,floorY+(handY-floorY)*contact,rightWorld.z+.04);
         }else if(selected.id==='chest-pass'){
-          const phase=(ballClock.getElapsedTime()%1.15)/1.15;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.08;
+          const phase=motionPhase;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.08;
           if(phase<.48){ballTarget.copy(chestBall);releaseOrigin.copy(chestBall);}
           else if(phase<.76){const t=smooth((phase-.48)/.28);ballTarget.copy(releaseOrigin).lerp(new THREE.Vector3(releaseOrigin.x,releaseOrigin.y,releaseOrigin.z+.78),t);}
           else {const t=smooth((phase-.76)/.24);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
         }else if(selected.id==='set-shot'){
-          const phase=(ballClock.getElapsedTime()%1.35)/1.35;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
+          const phase=motionPhase;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
           if(phase<.48){const pocket=smooth(phase/.48);ballTarget.copy(chestBall);ballTarget.y+=.38*pocket;ballTarget.z+=.10*pocket;releaseOrigin.copy(ballTarget);}
           else if(phase<.82){const t=smooth((phase-.48)/.34);ballTarget.copy(releaseOrigin);ballTarget.y+=.82*t-.30*t*t;ballTarget.z+=.32*t;}
           else {const t=smooth((phase-.82)/.18);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
