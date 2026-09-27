@@ -50,7 +50,8 @@
     "lab:dribble-stance:author": "node scripts/author-dribble-stance.mjs",
     "lab:dribble-stance:bake": "npm run lab:v4:build && npm run lab:dribble-stance:author && node scripts/bake-dribble-stance.mjs",
     "lab:dribble-stance:verify": "npm run lab:dribble-stance:bake && node scripts/validate-dribble-stance-glb.mjs",
-    "lab:pass:author": "node scripts/author-pass.mjs"
+    "lab:pass:author": "node scripts/author-pass.mjs",
+    "lab:pass:bake": "npm run lab:v4:build && npm run lab:pass:author && node scripts/bake-pass.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
