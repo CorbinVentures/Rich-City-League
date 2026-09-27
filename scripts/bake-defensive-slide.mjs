@@ -30,5 +30,27 @@ for(const [name,side] of [['foot_r','lead'],['foot_l','trail']]){
  channels.push({sampler:si,target:{node,path:'translation'}});
 }
 
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'footwork-layer',leadFoot:'foot_r',trailFoot:'foot_l',noCrossing:true}});
+// Layer 3: leg articulation layered on top of the proven V4 rotations.
+// We use small local quaternion deltas only, with the same sign on each thigh/calf
+// pair that preserves the already-correct anatomical knee direction. Deltas are
+// zero at frame 0/end, so Ready V4 is reproduced exactly at both boundaries.
+const qmul=(a,b)=>{const q=[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];const n=Math.hypot(...q)||1;return q.map(v=>v/n)};
+const qx=a=>[Math.sin(a/2),0,0,Math.cos(a/2)];
+const readyRot=name=>{const n=nodes.get(name);if(n==null)throw Error('missing '+name);const ch=ready.channels.find(ch=>ch.target.node===n&&ch.target.path==='rotation');if(!ch)throw Error('ready stance missing rotation '+name);const acc=g.accessors[ready.samplers[ch.sampler].output],bv=g.bufferViews[acc.bufferView],start=(bv.byteOffset||0)+(acc.byteOffset||0);return [0,1,2,3].map(i=>bin.readFloatLE(start+i*4))};
+for(const [name,side,role] of [['thigh_r','lead','thigh'],['calf_r','lead','calf'],['thigh_l','trail','thigh'],['calf_l','trail','calf']]){
+ const node=nodes.get(name),baseQ=readyRot(name),vals=[];
+ for(const f of plan.frames){
+   const p=f.time/plan.duration;
+   const envelope=Math.sin(Math.PI*p);
+   const timing=side==='lead'?smooth01(Math.min(1,p/.45)):(p<.28?0:smooth01((p-.28)/.55));
+   // modest articulation: enough to make the step read without overriding V4 biomechanics
+   const deg=(role==='thigh'?7:10)*envelope*timing;
+   const signed=(role==='thigh'?-1:1)*deg*Math.PI/180;
+   vals.push(...qmul(baseQ,qx(signed)));
+ }
+ const out=floats(vals,'VEC4',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'rotation'}});
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'leg-mechanics-layer',legMechanics:'ready-relative-quaternion-deltas',leadFoot:'foot_r',trailFoot:'foot_l',noCrossing:true}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked defensive slide foundation',outPath,'frames='+plan.frames.length);
