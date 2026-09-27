@@ -33,5 +33,23 @@ for(const [name,role,side] of [['thigh_r','thigh','jab'],['calf_r','calf','jab']
  addRotation(name,vals);
 }
 
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,pivotFoot:plan.pivotFoot,jabFoot:plan.jabFoot,pivotLocked:true,noCrossing:true,phase:'leg-mechanics-layer',legMechanics:'ready-relative-jab-pivot-load'}});
+// Layer 3: controlled torso sell and ball-ready upper body. Rotation stays modest:
+// the trunk follows the authored torsoTurn while the arms counterbalance without
+// abandoning the triple-threat window. All deltas return to Ready V4 at boundaries.
+const qy=a=>[0,Math.sin(a/2),0,Math.cos(a/2)],qz=a=>[0,0,Math.sin(a/2),Math.cos(a/2)];
+for(const [name,share] of [['spine_01',.42],['spine_02',.58]]){
+ const baseQ=readyRot(name),vals=[];
+ for(const f of plan.frames)vals.push(...qmul(baseQ,qy(f.torsoTurn*share*Math.PI/180)));
+ addRotation(name,vals);
+}
+for(const [name,side,role] of [['upperarm_r',-1,'upper'],['lowerarm_r',-1,'lower'],['upperarm_l',1,'upper'],['lowerarm_l',1,'lower']]){
+ const baseQ=readyRot(name),vals=[];
+ for(const f of plan.frames){
+   const deg=(role==='upper'?4.5:6)*f.attack*side;
+   vals.push(...qmul(baseQ,qz(deg*Math.PI/180)));
+ }
+ addRotation(name,vals);
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,pivotFoot:plan.pivotFoot,jabFoot:plan.jabFoot,pivotLocked:true,noCrossing:true,phase:'upper-body-layer',upperBody:'controlled-torso-sell-ball-ready',legMechanics:'ready-relative-jab-pivot-load'}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked triple-threat jab foundation',outPath,'frames='+plan.frames.length);
