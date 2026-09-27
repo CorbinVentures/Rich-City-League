@@ -42,7 +42,8 @@
     "lab:defensive-slide:bake": "npm run lab:defensive-slide:validate && node scripts/bake-defensive-slide.mjs",
     "lab:defensive-slide:verify": "npm run lab:defensive-slide:bake && node scripts/validate-defensive-slide-glb.mjs",
     "lab:closeout:author": "node scripts/author-closeout.mjs",
-    "lab:closeout:bake": "npm run lab:v4:build && npm run lab:closeout:author && node scripts/bake-closeout.mjs"
+    "lab:closeout:bake": "npm run lab:v4:build && npm run lab:closeout:author && node scripts/bake-closeout.mjs",
+    "lab:closeout:verify": "npm run lab:closeout:bake && node scripts/validate-closeout-glb.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
