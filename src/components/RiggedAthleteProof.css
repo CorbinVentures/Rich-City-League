@@ -57,3 +57,8 @@
 .rigged-review-result button{border:1px solid rgba(255,255,255,.14);border-radius:.55rem;background:transparent;color:inherit;padding:.38rem .58rem;font-size:.68rem;font-weight:900}
 .rigged-review-result button[aria-pressed="true"]{box-shadow:0 0 0 1px currentColor inset}
 .rigged-review-result button:disabled{opacity:.35;cursor:not-allowed}
+
+.rigged-review-nav{display:grid;grid-template-columns:1fr auto 1fr;gap:.55rem;align-items:center;margin:.35rem 0 .7rem}
+.rigged-review-nav button{border:1px solid rgba(255,255,255,.14);border-radius:.55rem;background:transparent;color:inherit;padding:.42rem .55rem;font-size:.68rem;font-weight:900}
+.rigged-review-nav button:last-child{justify-self:stretch}
+.rigged-review-nav strong{font-size:.7rem;font-variant-numeric:tabular-nums}
