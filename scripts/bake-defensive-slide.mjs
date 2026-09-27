@@ -8,9 +8,27 @@ const nodes=new Map((g.nodes||[]).map((n,i)=>[n.name,i])),pelvis=nodes.get('pelv
 const ready=(g.animations||[]).find(a=>a.name==='RCL_Ready_Stance_v4');if(!ready)throw Error('frozen ready stance clip missing');
 g.bufferViews??=[];g.accessors??=[];const pad=()=>{const p=(4-bin.length%4)%4;if(p)bin=Buffer.concat([bin,Buffer.alloc(p)])};
 const floats=(vals,type,count)=>{pad();const start=bin.length,b=Buffer.alloc(vals.length*4);vals.forEach((v,i)=>b.writeFloatLE(v,i*4));bin=Buffer.concat([bin,b]);const bv=g.bufferViews.push({buffer:0,byteOffset:start,byteLength:b.length})-1;return g.accessors.push({bufferView:bv,componentType:5126,count,type})-1};
-const times=plan.frames.map(f=>f.time),time=floats(times,'SCALAR',times.length);
+const times=plan.frames.map(f=>f.time),time=floats(times,'SCALAR',times.length);const smooth01=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
 const base=g.nodes[pelvis].translation||[0,0,0],positions=[];
 for(const f of plan.frames)positions.push(base[0]+f.lateralOffset,base[1]+f.pelvisHeightOffset,base[2]);
 const output=floats(positions,'VEC3',plan.frames.length),samplers=[{input:time,output,interpolation:'LINEAR'}],channels=[{sampler:0,target:{node:pelvis,path:'translation'}}];
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'translation-foundation'}});
+// Layer 2: authored defensive footwork. Translate feet relative to the moving pelvis:
+// lead/right foot opens first, trail/left foot follows later, and both return to the
+// canonical ready-stance offsets at the final frame. This intentionally leaves the
+// proven Ready V4 joint rotations untouched while establishing non-crossing step timing.
+for(const [name,side] of [['foot_r','lead'],['foot_l','trail']]){
+ const node=nodes.get(name);if(node==null)throw Error('missing '+name);
+ const bind=g.nodes[node].translation||[0,0,0],vals=[];
+ for(const f of plan.frames){
+   const p=f.time/plan.duration;
+   const step=side==='lead'?(p<.5?smooth01(p/.5):1):(p<.35?0:smooth01((p-.35)/.65));
+   const recover=p<.5?1:1-smooth01((p-.5)/.5);
+   const localShift=(side==='lead'?.19:.15)*step*recover;
+   vals.push(bind[0]+localShift,bind[1],bind[2]);
+ }
+ const out=floats(vals,'VEC3',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'translation'}});
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,validatedNoCrossing:true,phase:'footwork-layer',leadFoot:'foot_r',trailFoot:'foot_l',noCrossing:true}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked defensive slide foundation',outPath,'frames='+plan.frames.length);
