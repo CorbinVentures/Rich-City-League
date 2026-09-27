@@ -38,7 +38,7 @@ function jab(p){
 
 function dribble(p){
  const f=frameBase(p<.18?'control-top':p<.52?'pound-down':p<.78?'recover-up':'reset',p),activity=Math.sin(Math.PI*p)**2,down=Math.sin(Math.PI*p)**2;
- f.pelvis=[0,-.025*activity,0];f.torso.pitch=4.5*activity;f.feet.l=[0,0,0];f.feet.r=[0,0,0];f.hands.r=hand('pelvis',[.30,lerp(.40,.22,down),.24],activity);f.hands.l=hand('pelvis',[-.31,.44,.31],activity);f.armPole={l:[-.50,-.12,.34],r:[.34,-.16,.34]};f.wrist.rPitch=8*down;f.wrist.lYaw=-4*activity;return f;
+ f.pelvis=[0,-.025*activity,0];f.torso.pitch=4.5*activity;f.feet.l=[0,0,0];f.feet.r=[0,0,0];f.hands.r=hand('pelvis',[.30,lerp(.36,.08,down),.24],activity);f.hands.l=hand('pelvis',[-.31,.44,.31],activity);f.armPole={l:[-.50,-.12,.34],r:[.34,-.16,.34]};f.wrist.rPitch=8*down;f.wrist.lYaw=-4*activity;return f;
 }
 
 function chestPass(p){
