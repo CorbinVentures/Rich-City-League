@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const rp=process.argv[2]||'public/lab3d/motion/quaternius-rig-analysis.json',sp=process.argv[3]||'public/lab3d/motion/quaternius-ready-v4.json',out=process.argv[4]||'public/lab3d/motion/quaternius-ready-v4-reconstruction.json';
 const r=JSON.parse(fs.readFileSync(rp,'utf8')),s=JSON.parse(fs.readFileSync(sp,'utf8'));if(!r.allNodes)throw new Error('Rig report missing allNodes');
 const N=r.allNodes,by=Object.fromEntries(N.map((n,i)=>[n.name,i])),P=s.points;
-const V=a=>Array.isArray(a)?{x:a[0],y:a[1],z:a[2]}:a,A=a=>[a.x,a.y,a.z],sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),len=a=>Math.hypot(a.x,a.y,a.z),norm=a=>{const l=len(a)||1;return{x:a.x/l,y:a.y/l,z:a.z/l}},dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>({x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x});
+const V=a=>Array.isArray(a)?{x:a[0],y:a[1],z:a[2]}:a,A=a=>[a.x,a.y,a.z],sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),mul=(a,k)=>({x:a.x*k,y:a.y*k,z:a.z*k}),len=a=>Math.hypot(a.x,a.y,a.z),norm=a=>{const l=len(a)||1;return{x:a.x/l,y:a.y/l,z:a.z/l}},dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,cross=(a,b)=>({x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x});
 const qn=q=>{const n=Math.hypot(...q)||1;return q.map(x=>x/n)},qm=(a,b)=>qn([a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]]),qc=q=>[-q[0],-q[1],-q[2],q[3]];
 const rot=(q,v)=>{const [x,y,z,w]=q,tx=2*(y*v.z-z*v.y),ty=2*(z*v.x-x*v.z),tz=2*(x*v.y-y*v.x);return{x:v.x+w*tx+(y*tz-z*ty),y:v.y+w*ty+(z*tx-x*tz),z:v.z+w*tz+(x*ty-y*tx)}};
 function qBasis(primary,secondary){
