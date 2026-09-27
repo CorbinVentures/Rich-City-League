@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import './RiggedAthleteProof.css';
+import { LAB_MOTIONS, type LabMotionId } from '@/lib/labMotionLibrary';
 
 type Props={title:string};
 type View='front'|'quarter'|'side'|'back';
@@ -12,7 +13,8 @@ export function RiggedAthleteProof({title}:Props){
   const viewRef=useRef<View>('front');
   const [status,setStatus]=useState<Status>('loading-athlete');
   const [view,setView]=useState<View>('front');
-  const [motion,setMotion]=useState('Defensive Slide V1');
+  const [motion,setMotion]=useState('Set Shot V1');
+  const [motionId,setMotionId]=useState<LabMotionId>('set-shot');
 
   useEffect(()=>{viewRef.current=view;},[view]);
 
@@ -46,14 +48,15 @@ export function RiggedAthleteProof({title}:Props){
 
       // Playback layer only: load the basketball-specific baked action by exact name.
       // Never silently fall back to a generic locomotion/crouch animation.
-      const motionModel=await load('/lab3d/RCL_Set_Shot_v1.glb');if(disposed)return;
+      const selected=LAB_MOTIONS.find(m=>m.id===motionId);if(!selected)throw new Error('Unknown Lab motion: '+motionId);
+      const motionModel=await load(selected.file);if(disposed)return;
       const clips=motionModel.animations||[];
-      const expectedClip='RCL_Set_Shot_v1';
+      const expectedClip=selected.clip;
       const bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
       const mixer=new THREE.AnimationMixer(athlete);
       const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`BAKED SHOT MOTION · ${bakedClip.name}`);
+      setMotion(`BAKED ${selected.category.toUpperCase()} MOTION · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
@@ -63,7 +66,7 @@ export function RiggedAthleteProof({title}:Props){
       const leftHand=findBone('hand_l','lefthand'),rightHand=findBone('hand_r','righthand');
       if(!leftHand||!rightHand)throw new Error('Full-rig proof: hand bones missing');
       const ball=new THREE.Mesh(new THREE.SphereGeometry(.12,32,20),new THREE.MeshStandardMaterial({color:0xd85b16,roughness:.72,metalness:.02}));
-      ball.castShadow=true;ball.visible=true;scene.add(ball);
+      ball.castShadow=true;ball.visible=selected.ball;scene.add(ball);
       const seamMat=new THREE.LineBasicMaterial({color:0x24130b});
       for(const rot of [[0,0,0],[0,Math.PI/2,0]]){
         const seam=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:65},(_,i)=>{const a=i/64*Math.PI*2;return new THREE.Vector3(Math.cos(a)*.121,Math.sin(a)*.121,0);})),seamMat);
@@ -100,12 +103,14 @@ export function RiggedAthleteProof({title}:Props){
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
-    })().catch(err=>{console.error('RCL set shot clip failed',err);if(!disposed)setStatus('error');});
+    })().catch(err=>{console.error('RCL Lab motion clip failed',err);if(!disposed)setStatus('error');});
     return()=>{disposed=true;cleanup();};
-  },[]);
+  },[motionId]);
 
+  const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · SHOOTING</small><h2>Set Shot V1</h2><p>Ready-V4-anchored two-foot set shot. Balanced load, compact shot pocket, right-hand release, passive guide hand, wrist finish, and synchronized ball trajectory.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · {selectedMotion.category.toUpperCase()}</small><h2>{selectedMotion.label}</h2><p>Canonical Ready-V4 basketball motion. Select any engineering-complete action below to inspect the same athlete, rig, camera views, and baked timeline.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-native__views">{LAB_MOTIONS.map(m=><button key={m.id} className={motionId===m.id?'on':''} onClick={()=>setMotionId(m.id)}>{m.label}</button>)}</div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
