@@ -46,14 +46,14 @@ export function RiggedAthleteProof({title}:Props){
 
       // Playback layer only: load the basketball-specific baked action by exact name.
       // Never silently fall back to a generic locomotion/crouch animation.
-      const motionModel=await load('/lab3d/RCL_Chest_Pass_v1.glb');if(disposed)return;
+      const motionModel=await load('/lab3d/RCL_Set_Shot_v1.glb');if(disposed)return;
       const clips=motionModel.animations||[];
-      const expectedClip='RCL_Chest_Pass_v1';
+      const expectedClip='RCL_Set_Shot_v1';
       const bakedClip=clips.find((a:any)=>a.name===expectedClip);
       if(!bakedClip)throw new Error(`Basketball clip missing: ${expectedClip}. Found: ${clips.map((a:any)=>a.name).join(', ')||'none'}`);
       const mixer=new THREE.AnimationMixer(athlete);
       const action=mixer.clipAction(bakedClip);action.reset().setLoop(THREE.LoopRepeat,Infinity).play();
-      setMotion(`BAKED PASS MOTION · ${bakedClip.name}`);
+      setMotion(`BAKED SHOT MOTION · ${bakedClip.name}`);
       const bones:Record<string,any>={};
       athlete.traverse((o:any)=>{if(o.isBone)bones[o.name.toLowerCase()]=o;});
       const findBone=(...names:string[])=>{
@@ -90,22 +90,22 @@ export function RiggedAthleteProof({title}:Props){
       renderer.setAnimationLoop(()=>{
         const delta=Math.min(clock.getDelta(),.05);mixer.update(delta);
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
-        const phase=(ballClock.getElapsedTime()%1.15)/1.15;
+        const phase=(ballClock.getElapsedTime()%1.35)/1.35;
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
-        chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.08;
-        if(phase<.48){ballTarget.copy(chestBall);releaseOrigin.copy(chestBall);}
-        else if(phase<.76){const t=(phase-.48)/.28;ballTarget.copy(releaseOrigin).lerp(new THREE.Vector3(releaseOrigin.x,releaseOrigin.y,releaseOrigin.z+.78),smooth(t));}
-        else {const t=(phase-.76)/.24;ballTarget.copy(chestBall).lerp(releaseOrigin,smooth(t));}
+        chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
+        if(phase<.48){const pocket=smooth(phase/.48);ballTarget.copy(chestBall);ballTarget.y+=.38*pocket;ballTarget.z+=.10*pocket;releaseOrigin.copy(ballTarget);}
+        else if(phase<.82){const t=smooth((phase-.48)/.34);ballTarget.copy(releaseOrigin);ballTarget.y+=.82*t-.30*t*t;ballTarget.z+=.32*t;}
+        else {const t=smooth((phase-.82)/.18);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
         if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
-    })().catch(err=>{console.error('RCL chest pass clip failed',err);if(!disposed)setStatus('error');});
+    })().catch(err=>{console.error('RCL set shot clip failed',err);if(!disposed)setStatus('error');});
     return()=>{disposed=true;cleanup();};
   },[]);
 
   return <section className="rigged-proof">
-    <div className="rigged-proof__top"><div><small>THE LAB · PASSING</small><h2>Chest Pass V1</h2><p>Ready-V4-anchored two-hand chest pass. Protected load, symmetric extension, wrist finish, and synchronized ball release through the target line.</p></div><span>DRILL PREVIEW</span></div>
+    <div className="rigged-proof__top"><div><small>THE LAB · SHOOTING</small><h2>Set Shot V1</h2><p>Ready-V4-anchored two-foot set shot. Balanced load, compact shot pocket, right-hand release, passive guide hand, wrist finish, and synchronized ball trajectory.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
