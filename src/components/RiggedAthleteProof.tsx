@@ -20,7 +20,7 @@ export function RiggedAthleteProof({title}:Props){
   const [frame,setFrame]=useState(0);
   const [copied,setCopied]=useState(false);
   const pausedRef=useRef(false),speedRef=useRef(1),resetRef=useRef<(()=>void)|null>(null),stepRef=useRef<(()=>void)|null>(null),seekRef=useRef<((frame:number)=>void)|null>(null);
-  const durationFrames=motionId==='closeout'||motionId==='set-shot'?41:motionId==='defensive-slide'||motionId==='triple-threat-jab'?36:motionId==='chest-pass'?35:30;
+
 
   useEffect(()=>{viewRef.current=view;},[view]);
   useEffect(()=>{pausedRef.current=paused;},[paused]);
@@ -129,6 +129,7 @@ export function RiggedAthleteProof({title}:Props){
   },[motionId]);
 
   const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
+  const durationFrames=Math.round(selectedMotion.duration*30);
   const reviewContext=`${selectedMotion.label} · ${view==='quarter'?'3/4':view.toUpperCase()} · Frame ${frame} / ${(frame/30).toFixed(2)}s`;
   const copyReviewContext=async()=>{try{await navigator.clipboard.writeText(reviewContext);setCopied(true);window.setTimeout(()=>setCopied(false),1400);}catch{setCopied(false);}};
   return <section className="rigged-proof">
