@@ -15,8 +15,13 @@ export function RiggedAthleteProof({title}:Props){
   const [view,setView]=useState<View>('front');
   const [motion,setMotion]=useState('Set Shot V1');
   const [motionId,setMotionId]=useState<LabMotionId>('set-shot');
+  const [paused,setPaused]=useState(false);
+  const [speed,setSpeed]=useState<0.5|1|1.5>(1);
+  const pausedRef=useRef(false),speedRef=useRef(1);
 
   useEffect(()=>{viewRef.current=view;},[view]);
+  useEffect(()=>{pausedRef.current=paused;},[paused]);
+  useEffect(()=>{speedRef.current=speed;},[speed]);
 
   useEffect(()=>{
     const mount=mountRef.current;if(!mount)return;
@@ -91,9 +96,10 @@ export function RiggedAthleteProof({title}:Props){
       camera.position.copy(positions.front);setStatus('ready');
 
       renderer.setAnimationLoop(()=>{
-        const delta=Math.min(clock.getDelta(),.05);mixer.update(delta);
+        const delta=Math.min(clock.getDelta(),.05);if(!pausedRef.current)mixer.update(delta*speedRef.current);
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
+        if(pausedRef.current){ballClock.stop();}else if(!ballClock.running){ballClock.start();}
         if(selected.id==='dribble-stance'){
           const phase=(ballClock.getElapsedTime()%1.0),contact=bounceHeight(phase),floorY=.13,handY=Math.max(floorY+.25,rightWorld.y-.08);
           ballTarget.set(rightWorld.x+.08,floorY+(handY-floorY)*contact,rightWorld.z+.04);
@@ -121,6 +127,10 @@ export function RiggedAthleteProof({title}:Props){
     <div className="rigged-proof__top"><div><small>THE LAB · {selectedMotion.category.toUpperCase()}</small><h2>{selectedMotion.label}</h2><p>Canonical Ready-V4 basketball motion. Select any engineering-complete action below to inspect the same athlete, rig, camera views, and baked timeline.</p></div><span>DRILL PREVIEW</span></div>
     <div className="rigged-motion-picker" role="group" aria-label="Basketball motion">
       {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
+    </div>
+    <div className="rigged-playback" role="group" aria-label="Animation playback">
+      <button type="button" aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?'PLAY':'PAUSE'}</button>
+      {([0.5,1,1.5] as const).map(v=><button type="button" key={v} className={speed===v?'on':''} aria-pressed={speed===v} onClick={()=>setSpeed(v)}>{v}×</button>)}
     </div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
