@@ -46,7 +46,8 @@
     "lab:closeout:verify": "npm run lab:closeout:bake && node scripts/validate-closeout-glb.mjs",
     "lab:triple-threat-jab:author": "node scripts/author-triple-threat-jab.mjs",
     "lab:triple-threat-jab:bake": "npm run lab:v4:build && npm run lab:triple-threat-jab:author && node scripts/bake-triple-threat-jab.mjs",
-    "lab:triple-threat-jab:verify": "npm run lab:triple-threat-jab:bake && node scripts/validate-triple-threat-jab-glb.mjs"
+    "lab:triple-threat-jab:verify": "npm run lab:triple-threat-jab:bake && node scripts/validate-triple-threat-jab-glb.mjs",
+    "lab:dribble-stance:author": "node scripts/author-dribble-stance.mjs"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.0",
