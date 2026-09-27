@@ -59,12 +59,15 @@ worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
 const armLengths={l:[bind.upperarm_l.segmentLength,bind.lowerarm_l.segmentLength],r:[bind.upperarm_r.segmentLength,bind.lowerarm_r.segmentLength]};
 const armTargets={};
 for(const side of ['l','r']){
-  const upper='upperarm_'+side,lower='lowerarm_'+side,handKey='hand'+side.toUpperCase(),elbowKey='elbow'+side.toUpperCase();
-  const root=worldP[by[upper]],hand=P[handKey],[l1,l2]=armLengths[side],d=sub(hand,root),D=len(d),u=norm(d);
-  if(D>l1+l2-1e-6)throw new Error('V4.2 '+side+' hand target unreachable after trunk hinge: '+D+' > '+(l1+l2));
-  const a=(l1*l1-l2*l2+D*D)/(2*D),h=Math.sqrt(Math.max(0,l1*l1-a*a));
+  const upper='upperarm_'+side,handKey='hand'+side.toUpperCase(),elbowKey='elbow'+side.toUpperCase();
+  const root=worldP[by[upper]],authoredHand=P[handKey],[l1,l2]=armLengths[side],raw=sub(authoredHand,root),rawD=len(raw),maxReach=l1+l2,reachMargin=.012;
+  // The torso hinge changes the real shoulder root. Preserve the authored low/wide
+  // hand direction, but derive the final task target from that post-hinge root and
+  // the measured arm envelope instead of asking the skeleton to overextend.
+  const solvedD=Math.min(rawD,maxReach-reachMargin),u=norm(raw),hand={x:root.x+u.x*solvedD,y:root.y+u.y*solvedD,z:root.z+u.z*solvedD};
+  const a=(l1*l1-l2*l2+solvedD*solvedD)/(2*solvedD),h=Math.sqrt(Math.max(0,l1*l1-a*a));
   let pole=sub(P[elbowKey],root);pole=sub(pole,mul(u,dot(pole,u)));if(len(pole)<1e-5)pole=sub(bodyLateral,mul(u,dot(bodyLateral,u)));pole=norm(pole);
-  armTargets[side]={elbow:{x:root.x+u.x*a+pole.x*h,y:root.y+u.y*a+pole.y*h,z:root.z+u.z*a+pole.z*h},hand};
+  armTargets[side]={elbow:{x:root.x+u.x*a+pole.x*h,y:root.y+u.y*a+pole.y*h,z:root.z+u.z*a+pole.z*h},hand,rawD,solvedD,maxReach};
 }
 for(const side of ['l','r']){
   for(const [bone,targetPoint] of [['upperarm_'+side,armTargets[side].elbow],['lowerarm_'+side,armTargets[side].hand]]){
@@ -81,7 +84,7 @@ for(const side of ['l','r']){
 worldQ.length=0;worldP.length=0;for(let i=0;i<N.length;i++)solve(i);
 const rootTranslationError=len(sub(worldP[pelvisI],P.pelvis));
 const gp=n=>worldP[by[n]],dist=(a,b)=>len(sub(a,b)),floor=Math.min(P.footL.y,P.footR.y);
-const metrics={rootTranslationError,leftHandError:dist(gp('hand_l'),P.handL),rightHandError:dist(gp('hand_r'),P.handR),leftFootError:dist(gp('foot_l'),P.footL),rightFootError:dist(gp('foot_r'),P.footR),leftKneeError:dist(gp('calf_l'),P.kneeL),rightKneeError:dist(gp('calf_r'),P.kneeR),leftElbowError:dist(gp('lowerarm_l'),P.elbowL),rightElbowError:dist(gp('lowerarm_r'),P.elbowR),leftKneeClearance:gp('calf_l').y-floor,rightKneeClearance:gp('calf_r').y-floor};
+const metrics={rootTranslationError,leftHandError:dist(gp('hand_l'),armTargets.l.hand),rightHandError:dist(gp('hand_r'),armTargets.r.hand),leftFootError:dist(gp('foot_l'),P.footL),rightFootError:dist(gp('foot_r'),P.footR),leftKneeError:dist(gp('calf_l'),P.kneeL),rightKneeError:dist(gp('calf_r'),P.kneeR),leftElbowError:dist(gp('lowerarm_l'),armTargets.l.elbow),rightElbowError:dist(gp('lowerarm_r'),armTargets.r.elbow),leftKneeClearance:gp('calf_l').y-floor,rightKneeClearance:gp('calf_r').y-floor};
 const cx=P.pelvis.x,actualKneeL=gp('calf_l'),actualKneeR=gp('calf_r'),actualFootL=gp('foot_l'),actualFootR=gp('foot_r');
 metrics.bakedKneeSpan=Math.abs(actualKneeL.x-actualKneeR.x);metrics.bakedStanceWidth=Math.abs(actualFootL.x-actualFootR.x);
 metrics.bakedLeftIpsilateral=(actualKneeL.x-cx)*(actualFootL.x-cx)>0;metrics.bakedRightIpsilateral=(actualKneeR.x-cx)*(actualFootR.x-cx)>0;metrics.bakedKneesSeparated=(actualKneeL.x-cx)*(actualKneeR.x-cx)<0;
@@ -95,7 +98,7 @@ metrics.leftFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.f
 metrics.rightFootWorldOrientationErrorDeg=2*Math.acos(Math.min(1,qdot(worldQ[by.foot_r],bind.foot_r.worldRotation)))*180/Math.PI;
 if(Math.max(metrics.leftFootWorldOrientationErrorDeg,metrics.rightFootWorldOrientationErrorDeg)>.25)failures.push('foot-world-orientation');
 for(const n of [...Object.keys(desired),'foot_l','foot_r'])if(localQ[by[n]].some(v=>!Number.isFinite(v)))failures.push('nonfinite-orientation-'+n);
-metrics.trunkHingeDeg=trunkHingeDeg;
+metrics.trunkHingeDeg=trunkHingeDeg;metrics.leftArmAuthoredReach=armTargets.l.rawD;metrics.rightArmAuthoredReach=armTargets.r.rawD;metrics.leftArmSolvedReach=armTargets.l.solvedD;metrics.rightArmSolvedReach=armTargets.r.solvedD;metrics.leftArmMaxReach=armTargets.l.maxReach;metrics.rightArmMaxReach=armTargets.r.maxReach;
 if(trunkHingeDeg<7||trunkHingeDeg>15)failures.push('trunk-hinge-envelope');
 const report={sourceRig:rp,sourceSolve:sp,pelvisLocalTranslation:localT[pelvisI],pelvisParentWorld:pelvisParent===null?null:N[pelvisParent].worldRotation,metrics,gate:{pass:!failures.length,failures},localRotations:Object.fromEntries([...Object.keys(desired),'foot_l','foot_r','spine_01','spine_02','spine_03'].map(n=>[n,localQ[by[n]]])),worldPoints:{pelvis:A(gp('pelvis')),kneeL:A(gp('calf_l')),kneeR:A(gp('calf_r')),footL:A(gp('foot_l')),footR:A(gp('foot_r')),elbowL:A(gp('lowerarm_l')),elbowR:A(gp('lowerarm_r')),handL:A(gp('hand_l')),handR:A(gp('hand_r'))}};
 fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(failures.length)process.exit(1);
