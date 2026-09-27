@@ -93,13 +93,22 @@ export function RiggedAthleteProof({title}:Props){
       renderer.setAnimationLoop(()=>{
         const delta=Math.min(clock.getDelta(),.05);mixer.update(delta);
         rightHand.getWorldPosition(handWorld);athlete.worldToLocal(handWorld);
-        const phase=(ballClock.getElapsedTime()%1.35)/1.35;
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);athlete.worldToLocal(leftWorld);athlete.worldToLocal(rightWorld);
-        chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
-        if(phase<.48){const pocket=smooth(phase/.48);ballTarget.copy(chestBall);ballTarget.y+=.38*pocket;ballTarget.z+=.10*pocket;releaseOrigin.copy(ballTarget);}
-        else if(phase<.82){const t=smooth((phase-.48)/.34);ballTarget.copy(releaseOrigin);ballTarget.y+=.82*t-.30*t*t;ballTarget.z+=.32*t;}
-        else {const t=smooth((phase-.82)/.18);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
-        if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);
+        if(selected.id==='dribble-stance'){
+          const phase=(ballClock.getElapsedTime()%1.0),contact=bounceHeight(phase),floorY=.13,handY=Math.max(floorY+.25,rightWorld.y-.08);
+          ballTarget.set(rightWorld.x+.08,floorY+(handY-floorY)*contact,rightWorld.z+.04);
+        }else if(selected.id==='chest-pass'){
+          const phase=(ballClock.getElapsedTime()%1.15)/1.15;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.08;
+          if(phase<.48){ballTarget.copy(chestBall);releaseOrigin.copy(chestBall);}
+          else if(phase<.76){const t=smooth((phase-.48)/.28);ballTarget.copy(releaseOrigin).lerp(new THREE.Vector3(releaseOrigin.x,releaseOrigin.y,releaseOrigin.z+.78),t);}
+          else {const t=smooth((phase-.76)/.24);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
+        }else if(selected.id==='set-shot'){
+          const phase=(ballClock.getElapsedTime()%1.35)/1.35;chestBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);chestBall.z+=.06;
+          if(phase<.48){const pocket=smooth(phase/.48);ballTarget.copy(chestBall);ballTarget.y+=.38*pocket;ballTarget.z+=.10*pocket;releaseOrigin.copy(ballTarget);}
+          else if(phase<.82){const t=smooth((phase-.48)/.34);ballTarget.copy(releaseOrigin);ballTarget.y+=.82*t-.30*t*t;ballTarget.z+=.32*t;}
+          else {const t=smooth((phase-.82)/.18);ballTarget.copy(chestBall).lerp(releaseOrigin,t);}
+        }
+        if(selected.ball){if(prevBall.lengthSq()===0)prevBall.copy(ballTarget);prevBall.lerp(ballTarget,.5);ball.position.copy(prevBall);}
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
       });
       cleanup=()=>{ro.disconnect();renderer.setAnimationLoop(null);mixer.stopAllAction();renderer.dispose();mount.replaceChildren();};
