@@ -24,3 +24,7 @@
 .rigged-playback button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 
 .rigged-playback button:disabled{opacity:.38;cursor:not-allowed}
+
+.rigged-timeline{display:flex;align-items:baseline;gap:.55rem;margin:.15rem 0 .55rem;font-variant-numeric:tabular-nums}
+.rigged-timeline b{font-size:.78rem;letter-spacing:.08em}
+.rigged-timeline span{font-size:.75rem;opacity:.62}
