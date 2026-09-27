@@ -17,5 +17,12 @@ const addRot=(name,axis,degFn)=>{const base=readyRot(name),v=[];for(const f of p
 addRot('upperarm_r',qz,f=>-18*f.armExtend);addRot('upperarm_l',qz,f=>18*f.armExtend);
 addRot('lowerarm_r',qx,f=>-24*f.armExtend);addRot('lowerarm_l',qx,f=>-24*f.armExtend);
 addRot('spine_01',qx,f=>-f.torsoLean*.45);addRot('spine_02',qx,f=>-f.torsoLean*.55);
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,passType:plan.passType,feetPlanted:true,symmetricRelease:true,noOverheadFlare:true,phase:'body-mechanics-foundation'}});
+// Layer 2: wrist finish. The release is driven by the authored release envelope,
+// so both hands finish together and return exactly to Ready V4.
+for(const [name,side] of [['hand_r',-1],['hand_l',1]]){
+ if(nodes.get(name)==null)throw Error('missing '+name);
+ addRot(name,qz,f=>side*f.wristSnap);
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,passType:plan.passType,feetPlanted:true,symmetricRelease:true,noOverheadFlare:true,phase:'release-layer',release:'symmetric-wrist-finish'}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked chest pass foundation',outPath,'tracks='+channels.length);
