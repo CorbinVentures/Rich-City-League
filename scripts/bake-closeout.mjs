@@ -51,5 +51,26 @@ for(const [name,phase,role] of [['thigh_r',0,'thigh'],['calf_r',0,'calf'],['thig
  channels.push({sampler:si,target:{node,path:'rotation'}});
 }
 
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,noFlyBy:true,controlledDeceleration:true,phase:'leg-mechanics-layer',legMechanics:'ready-relative-choppy-step-deltas',footwork:'alternating-choppy-brake'}});
+// Layer 4: late high-hands contest. Use Ready-V4-relative arm deltas driven by the
+// authored contest envelope; the hands rise only after space is closed and return
+// exactly to the canonical stance. A tiny upper-spine counterbalance prevents a
+// backward lean while contesting.
+const qz=a=>[0,0,Math.sin(a/2),Math.cos(a/2)];
+for(const [name,side,role] of [['upperarm_r',-1,'upper'],['lowerarm_r',-1,'lower'],['upperarm_l',1,'upper'],['lowerarm_l',1,'lower']]){
+ const node=nodes.get(name),baseQ=readyRot(name),arm=[];
+ for(const f of plan.frames){
+   const deg=(role==='upper'?34:18)*f.contest*side;
+   arm.push(...qmul(baseQ,qz(deg*Math.PI/180)));
+ }
+ const out=floats(arm,'VEC4',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'rotation'}});
+}
+for(const [name,deg] of [['spine_01',-2.5],['spine_02',-2]]){
+ const node=nodes.get(name),baseQ=readyRot(name),sp=[];
+ for(const f of plan.frames)sp.push(...qmul(baseQ,qx(deg*f.contest*Math.PI/180)));
+ const out=floats(sp,'VEC4',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'rotation'}});
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,noFlyBy:true,controlledDeceleration:true,phase:'contest-layer',contest:'late-high-hands',legMechanics:'ready-relative-choppy-step-deltas',footwork:'alternating-choppy-brake'}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked closeout foundation',outPath,'frames='+plan.frames.length);
