@@ -9,7 +9,10 @@ const time=floats(plan.frames.map(f=>f.time),'SCALAR',plan.frames.length),sample
 const pb=g.nodes[nodes.get('pelvis')].translation||[0,0,0],pv=[];for(const f of plan.frames)pv.push(pb[0],pb[1]+f.pelvisHeightOffset,pb[2]);add(nodes.get('pelvis'),'translation',pv,'VEC3');
 for(const n of ['foot_r','foot_l']){const node=nodes.get(n),base=g.nodes[node].translation||[0,0,0],v=[];for(const _ of plan.frames)v.push(...base);add(node,'translation',v,'VEC3')}
 const qmul=(a,b)=>{const q=[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];const n=Math.hypot(...q)||1;return q.map(v=>v/n)},qx=a=>[Math.sin(a/2),0,0,Math.cos(a/2)],qz=a=>[0,0,Math.sin(a/2),Math.cos(a/2)];
-const readyRot=name=>{const node=nodes.get(name),ch=ready.channels.find(ch=>ch.target.node===node&&ch.target.path==='rotation');if(!ch)throw Error('ready rotation missing '+name);const a=g.accessors[ready.samplers[ch.sampler].output],v=g.bufferViews[a.bufferView],s=(v.byteOffset||0)+(a.byteOffset||0);return [0,1,2,3].map(i=>bin.readFloatLE(s+i*4))};
+// Ready V4 intentionally omits rotation tracks for joints that remain in bind
+// pose. Use the node's bind quaternion as the canonical Ready baseline when a
+// rotation channel is absent (notably hand_r / hand_l).
+const readyRot=name=>{const node=nodes.get(name),ch=ready.channels.find(ch=>ch.target.node===node&&ch.target.path==='rotation');if(!ch)return g.nodes[node].rotation||[0,0,0,1];const a=g.accessors[ready.samplers[ch.sampler].output],v=g.bufferViews[a.bufferView],s=(v.byteOffset||0)+(a.byteOffset||0);return [0,1,2,3].map(i=>bin.readFloatLE(s+i*4))};
 const addRot=(name,axis,degFn)=>{const base=readyRot(name),v=[];for(const f of plan.frames)v.push(...qmul(base,axis(degFn(f)*Math.PI/180)));add(nodes.get(name),'rotation',v,'VEC4')};
 // Right shooting chain rises compactly; left guide hand supports with materially smaller motion.
 addRot('upperarm_r',qz,f=>-42*f.armRaise);addRot('lowerarm_r',qx,f=>-58*f.shootElbow);
