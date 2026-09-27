@@ -76,7 +76,12 @@ for(const side of ['l','r']){
     const bindPrimary=norm(V(b.primaryWorldAxis)),targetPrimary=norm(sub(targetPoint,root));
     let bs=sub(bodyForward,mul(bindPrimary,dot(bodyForward,bindPrimary)));if(len(bs)<1e-5)bs=sub(bodyLateral,mul(bindPrimary,dot(bodyLateral,bindPrimary)));bs=norm(bs);
     let ts=sub(bodyForward,mul(targetPrimary,dot(bodyForward,targetPrimary)));if(len(ts)<1e-5)ts=sub(bodyLateral,mul(targetPrimary,dot(bodyLateral,targetPrimary)));ts=norm(ts);
-    const desiredWorld=qm(qm(qBasis(targetPrimary,ts),qc(qBasis(bindPrimary,bs))),b.worldRotation);
+    // Match the reconstruction convention used by solve(): the bind frame is
+    // expressed in calibrated WORLD space, so the frame delta must be applied to
+    // the bone's bind WORLD rotation before conversion back into the current
+    // parent's local frame.
+    const delta=qm(qBasis(targetPrimary,ts),qc(qBasis(bindPrimary,bs)));
+    const desiredWorld=qm(delta,b.worldRotation);
     localQ[i]=qm(qc(parentQ),desiredWorld);
   }
 }
