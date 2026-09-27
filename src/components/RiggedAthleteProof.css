@@ -28,3 +28,7 @@
 .rigged-timeline{display:flex;align-items:baseline;gap:.55rem;margin:.15rem 0 .55rem;font-variant-numeric:tabular-nums}
 .rigged-timeline b{font-size:.78rem;letter-spacing:.08em}
 .rigged-timeline span{font-size:.75rem;opacity:.62}
+
+.rigged-review-context{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.rigged-review-context button{border:1px solid rgba(255,255,255,.14);border-radius:.6rem;background:transparent;color:inherit;padding:.4rem .6rem;font-size:.68rem;font-weight:800;letter-spacing:.04em;cursor:pointer}
+.rigged-review-context button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
