@@ -119,7 +119,9 @@ export function RiggedAthleteProof({title}:Props){
   const selectedMotion=LAB_MOTIONS.find(m=>m.id===motionId)!;
   return <section className="rigged-proof">
     <div className="rigged-proof__top"><div><small>THE LAB · {selectedMotion.category.toUpperCase()}</small><h2>{selectedMotion.label}</h2><p>Canonical Ready-V4 basketball motion. Select any engineering-complete action below to inspect the same athlete, rig, camera views, and baked timeline.</p></div><span>DRILL PREVIEW</span></div>
-    <div className="rigged-native__views">{LAB_MOTIONS.map(m=><button key={m.id} className={motionId===m.id?'on':''} onClick={()=>setMotionId(m.id)}>{m.label}</button>)}</div>
+    <div className="rigged-motion-picker" role="group" aria-label="Basketball motion">
+      {LAB_MOTIONS.map(m=><button key={m.id} type="button" aria-pressed={motionId===m.id} className={motionId===m.id?'on':''} onClick={()=>{setStatus('loading-motion');setMotionId(m.id);}}><small>{m.category}</small><b>{m.label}</b></button>)}
+    </div>
     <div className="rigged-native">
       <div ref={mountRef} className="rigged-native__stage"/>
       {(status==='loading-athlete'||status==='loading-motion')&&<div className="rigged-native__status">{status==='loading-motion'?'LOADING ATHLETIC STANCE…':'LOADING ATHLETE…'}</div>}
