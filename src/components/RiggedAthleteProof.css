@@ -22,3 +22,5 @@
 .rigged-playback button{border:1px solid rgba(255,255,255,.14);border-radius:.65rem;background:rgba(7,16,25,.72);color:inherit;padding:.5rem .7rem;font-weight:700;cursor:pointer}
 .rigged-playback button.on,.rigged-playback button[aria-pressed="true"]{border-color:rgba(255,112,38,.9)}
 .rigged-playback button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+
+.rigged-playback button:disabled{opacity:.38;cursor:not-allowed}
