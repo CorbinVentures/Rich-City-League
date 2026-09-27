@@ -48,3 +48,7 @@
 
 .rigged-review-checklist.is-complete{box-shadow:0 0 0 1px currentColor inset}
 .rigged-review-checklist.is-complete legend{font-weight:950}
+
+.rigged-review-notes{display:grid;gap:.35rem;margin:.25rem 0 .8rem;font-size:.68rem;font-weight:900;letter-spacing:.05em}
+.rigged-review-notes textarea{width:100%;resize:vertical;border:1px solid rgba(255,255,255,.14);border-radius:.65rem;background:rgba(0,0,0,.18);color:inherit;padding:.6rem;font:inherit;letter-spacing:normal}
+.rigged-review-notes textarea:focus-visible{outline:2px solid currentColor;outline-offset:2px}
