@@ -24,7 +24,7 @@ jobs:
       - name: Analyze canonical athlete and bake validated ready stance
         run: npm run lab:v4:build
       - name: Author and validate defensive slide contract
-        run: npm run lab:defensive-slide:bake
+        run: npm run lab:defensive-slide:verify
       - name: Verify defensive slide GLB structure
         run: |
           node -e "const fs=require('fs');const b=fs.readFileSync('public/lab3d/RCL_Defensive_Slide_v1.glb');if(b.toString('ascii',0,4)!=='glTF')throw Error('bad defensive slide GLB');const n=b.readUInt32LE(12),g=JSON.parse(b.toString('utf8',20,20+n).trim()),a=(g.animations||[]).find(x=>x.name==='RCL_Defensive_Slide_v1');if(!a)throw Error('defensive slide clip missing');if(a.channels.length<13)throw Error('defensive slide missing full-body mechanics tracks');if(a.extras?.canonicalStartEnd!=='RCL_Ready_Stance_v4')throw Error('defensive slide lost ready stance anchor');console.log({channels:a.channels.length,canonical:a.extras.canonicalStartEnd})"
