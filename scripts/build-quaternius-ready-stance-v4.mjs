@@ -24,7 +24,10 @@ function solveLeg(root,end,side,l1,l2){
  const d=sub(end,root),D=len(d),u=norm(d),reach=Math.min(D,l1+l2-1e-5),a=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-a*a));
  // Blueprint: knees advance toward toes with only a small outward component.
  // This avoids the exaggerated bowed-femur V silhouette from V4.
- let bend=add(mul(forward,1.0),mul(lateral,side*.12));bend=sub(bend,mul(u,dot(bend,u)));bend=norm(bend);
+ // The Quaternius rig's anatomical knee flexion is opposite the cross-product
+ // frame direction used by the previous solver. Use the anatomical sagittal pole
+ // explicitly so the knee joint moves toward the toes rather than behind the hip.
+ let bend=add(mul(forward,-1.0),mul(lateral,side*.12));bend=sub(bend,mul(u,dot(bend,u)));bend=norm(bend);
  return{joint:add(add(root,mul(u,a)),mul(bend,h)),end,reachable:D<=l1+l2};
 }
 const LL=solveLeg(HL,FL,-1,J.thigh_l.segmentLength,J.calf_l.segmentLength),RR=solveLeg(HR,FR,1,J.thigh_r.segmentLength,J.calf_r.segmentLength);
@@ -42,6 +45,8 @@ const kneeL=angle(HL,LL.joint,FL),kneeR=angle(HR,RR.joint,FR),stanceWidth=dist(F
 // Side-view biomechanics gate. Knees must be forward of ankles while the pelvis
 // remains behind the knees. This catches the exact backwards-knee failure that
 // front/back-only validation missed.
-const fproj=p=>dot(p,forward),kneeAdvanceL=fproj(LL.joint)-fproj(FL),kneeAdvanceR=fproj(RR.joint)-fproj(FR),hipBehindKneeL=fproj(LL.joint)-fproj(HL),hipBehindKneeR=fproj(RR.joint)-fproj(HR);
+// Anatomical forward is opposite `frame.forward` for this asset. Validate in that
+// signed frame so a mathematically passing pose cannot still bend the knees backward.
+const anatomicalForward=mul(forward,-1),fproj=p=>dot(p,anatomicalForward),kneeAdvanceL=fproj(LL.joint)-fproj(FL),kneeAdvanceR=fproj(RR.joint)-fproj(FR),hipBehindKneeL=fproj(LL.joint)-fproj(HL),hipBehindKneeR=fproj(RR.joint)-fproj(HR);
 const center=targetPel.x,fail=[];if(!LL.reachable||!RR.reachable||!AL.reachable||!AR.reachable)fail.push('unreachable');if((LL.joint.x-center)*(FL.x-center)<=0||(RR.joint.x-center)*(FR.x-center)<=0)fail.push('crossed-knee');if(kneeSpan<stanceWidth*.38)fail.push('collapsed-knee-base');if(kneeL<90||kneeL>150||kneeR<90||kneeR>150)fail.push('knee-flexion');if(Math.abs(FL.y-FR.y)>.002)fail.push('uneven-foot-floor');if(dist(AL.end,AR.end)<dist(SL,SR)*1.25)fail.push('hands-not-wide-enough');if(Math.min(kneeAdvanceL,kneeAdvanceR)<leg*.035)fail.push('side-knees-not-forward-of-ankles');if(Math.min(hipBehindKneeL,hipBehindKneeR)<leg*.025)fail.push('side-hips-not-behind-knees');
 const report={version:'RCL_READY_V5_BLUEPRINT',reference:'approved Athletic Stance Blueprint V1.0: hips back, knees tracking over toes, moderate wide base, forward active hands',frame:{lateral,up,forward},points,metrics:{stanceWidth,kneeSpan,kneeL,kneeR,pelvisDrop,handSpan:dist(AL.end,AR.end),shoulderSpan:dist(SL,SR),torsoForward,torsoDrop,pelvisSitBack,kneeAdvanceL,kneeAdvanceR,hipBehindKneeL,hipBehindKneeR},gate:{pass:!fail.length,failures:fail}};fs.writeFileSync(out,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(fail.length)process.exit(1);
