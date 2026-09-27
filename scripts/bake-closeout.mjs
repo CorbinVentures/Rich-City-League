@@ -11,5 +11,25 @@ const floats=(vals,type,count)=>{pad();const start=bin.length,b=Buffer.alloc(val
 const times=plan.frames.map(f=>f.time),time=floats(times,'SCALAR',times.length),base=g.nodes[pelvis].translation||[0,0,0],vals=[];
 for(const f of plan.frames)vals.push(base[0],base[1]+f.pelvisHeightOffset,base[2]+f.forwardOffset);
 const output=floats(vals,'VEC3',plan.frames.length),samplers=[{input:time,output,interpolation:'LINEAR'}],channels=[{sampler:0,target:{node:pelvis,path:'translation'}}];
-g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,noFlyBy:true,controlledDeceleration:true,phase:'translation-foundation'}});
+// Layer 2: alternating choppy closeout steps. Feet move in short forward pulses,
+// then both settle exactly back to their Ready V4 local offsets. This keeps the
+// foundation rig-safe while making the braking cadence explicit before joint rotation.
+const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
+for(const [name,phase] of [['foot_r',0],['foot_l',.5]]){
+ const node=nodes.get(name);if(node==null)throw Error('missing '+name);
+ const bind=g.nodes[node].translation||[0,0,0],foot=[];
+ for(const f of plan.frames){
+   const p=f.time/plan.duration;
+   const approach=Math.min(1,p/.62);
+   const cadence=Math.max(0,Math.sin((approach*3+phase)*Math.PI));
+   const brake=p<.52?1:1-smooth((p-.52)/.48);
+   const stride=.115*cadence*brake;
+   const lift=.026*cadence*brake;
+   foot.push(bind[0],bind[1]+lift,bind[2]+stride);
+ }
+ const out=floats(foot,'VEC3',plan.frames.length),si=samplers.push({input:time,output:out,interpolation:'LINEAR'})-1;
+ channels.push({sampler:si,target:{node,path:'translation'}});
+}
+
+g.animations.push({name:plan.clip,samplers,channels,extras:{canonicalStartEnd:plan.canonicalStartEnd,contract:planPath,noFlyBy:true,controlledDeceleration:true,phase:'footwork-layer',footwork:'alternating-choppy-brake'}});
 g.buffers[0].byteLength=bin.length;let j=Buffer.from(JSON.stringify(g)),jp=(4-j.length%4)%4;if(jp)j=Buffer.concat([j,Buffer.alloc(jp,0x20)]);pad();const total=12+8+j.length+8+bin.length,o=Buffer.alloc(total);o.write('glTF',0);o.writeUInt32LE(2,4);o.writeUInt32LE(total,8);o.writeUInt32LE(j.length,12);o.writeUInt32LE(0x4e4f534a,16);j.copy(o,20);const bo=20+j.length;o.writeUInt32LE(bin.length,bo);o.writeUInt32LE(0x004e4942,bo+4);bin.copy(o,bo+8);fs.writeFileSync(outPath,o);console.log('Baked closeout foundation',outPath,'frames='+plan.frames.length);
