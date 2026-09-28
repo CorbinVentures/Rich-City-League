@@ -115,7 +115,7 @@ export default async function RankingsPage() {
         <SectionHeading icon={<FaChartLine />} eyebrow="Leadership results" title="Coach standings" />
         {coaches.length ? <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{coaches.map((coach: any, index: number) => {
           const profile = coach.profile;
-          const name = profile?.display_name ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Coach';
+          const name = profile?.display_name ?? ([profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Coach');
           return <Link href={`/coaches/${coach.profile_id}`} key={coach.id} className="group rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-5 transition hover:-translate-y-1 hover:border-rcl-blue/45"><div className="flex items-start justify-between gap-4"><span className="font-display text-xl font-black text-rcl-orange">{String(index + 1).padStart(2,'0')}</span><FaStar className="text-rcl-blue/35"/></div><p className="mt-5 text-xs font-black uppercase tracking-[.16em] text-rcl-blue">{coach.title || 'Coach'}</p><h3 className="mt-1 font-display text-xl font-black uppercase group-hover:text-rcl-blue">{name}</h3><div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4"><div><p className="text-xs uppercase text-white/30">Wins</p><p className="mt-1 font-display text-2xl font-black">{coach.wins}</p></div><div className="text-right"><p className="text-xs uppercase text-white/30">Win rate</p><p className="mt-1 font-display text-2xl font-black">{coach.pct}%</p></div></div></Link>;
         })}</div> : <EmptyState text="Coach standings will appear once current-season team results are available." />}
       </section>
