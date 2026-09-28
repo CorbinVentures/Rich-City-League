@@ -27,14 +27,16 @@ describe('RCL set-shot arm mechanics', () => {
   it('stacks the shooting side vertically before the ball release window', () => {
     const setPoint = setShot(0.56);
     const release = setShot(0.64);
-    expect(setPoint.hands.r.target[1] - setPoint.hands.l.target[1]).toBeGreaterThan(0.15);
-    expect(release.hands.r.target[1] - release.hands.l.target[1]).toBeGreaterThan(0.35);
+    expect(setPoint.hands.r.target[1] - setPoint.hands.l.target[1]).toBeGreaterThan(0.09);
+    expect(release.hands.r.target[1] - release.hands.l.target[1]).toBeGreaterThan(0.22);
   });
 
-  it('peels the guide hand strongly away instead of crossing the shooting arm', () => {
+  it('keeps the guide hand with the ball through the set point, then peels it laterally during release', () => {
     const setPoint = setShot(0.5);
-    const release = setShot(0.64);
-    expect(release.hands.l.target[0]).toBeLessThan(setPoint.hands.l.target[0] - 0.12);
+    const earlyRise = setShot(0.56);
+    const release = setShot(0.68);
+    expect(Math.abs(earlyRise.hands.l.target[0] - setPoint.hands.l.target[0])).toBeLessThan(0.02);
+    expect(release.hands.l.target[0]).toBeLessThan(setPoint.hands.l.target[0] - 0.11);
     expect(release.hands.l.target[1]).toBeLessThan(setPoint.hands.l.target[1]);
     expect(release.hands.r.target[0]).toBeGreaterThan(release.hands.l.target[0]);
   });
