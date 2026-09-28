@@ -13,7 +13,7 @@ export function SocialCreateIntent() {
 
     let cancelled = false;
     let attempt = 0;
-    let timer: ReturnType<typeof setTimeout> | null = null;
+    let timer: number | null = null;
 
     const open = () => {
       if (cancelled) return;
@@ -31,7 +31,7 @@ export function SocialCreateIntent() {
     timer = window.setTimeout(open, 50);
     return () => {
       cancelled = true;
-      if (timer) window.clearTimeout(timer);
+      if (timer !== null) window.clearTimeout(timer);
     };
   }, [pathname]);
 
