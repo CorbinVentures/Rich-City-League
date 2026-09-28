@@ -71,7 +71,7 @@ export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
     items: [
       { label: 'Profile', href: '/profile', icon: FaUser },
       { label: 'REP + Badges', href: '/badges', icon: FaTrophy },
-      { label: 'Friends', href: '/friends', icon: FaUsers },
+      { label: 'People', href: '/friends', icon: FaUsers },
     ],
   },
 ];
