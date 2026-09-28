@@ -1,8 +1,8 @@
 export const metadata = {"title": "Sign in", "description": "Sign in to your Rich City League account."};
 
-import { Container } from '@/components/Container';
 import { AuthForm } from '@/components/AuthForm';
+import { AuthShell } from '@/components/AuthShell';
 
 export default function SignInPage() {
-  return <main><Container maxWidth="sm" className="py-16"><AuthForm mode="sign-in" /></Container></main>;
+  return <AuthShell mode="sign-in"><AuthForm mode="sign-in" /></AuthShell>;
 }

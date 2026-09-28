@@ -3,7 +3,6 @@
   .rcl-social-page aside nav > a[href="/communities"],
   .rcl-social-page aside nav > a[href="/messages"],
   .rcl-social-page aside nav > a[href="/notifications"],
-  .rcl-social-page aside nav > a[href="/lab"],
   .rcl-social-page aside nav > a[href="/games"] {
     display: none !important;
   }

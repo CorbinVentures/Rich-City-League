@@ -1,8 +1,8 @@
 export const metadata = {"title": "Reset your password", "description": "Recover access to your Rich City League account."};
 
-import { Container } from '@/components/Container';
 import { AuthForm } from '@/components/AuthForm';
+import { AuthShell } from '@/components/AuthShell';
 
 export default function ForgotPasswordPage() {
-  return <main><Container maxWidth="sm" className="py-16"><AuthForm mode="reset" /></Container></main>;
+  return <AuthShell mode="reset"><AuthForm mode="reset" /></AuthShell>;
 }
