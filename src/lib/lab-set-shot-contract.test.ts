@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { MOTION_SPECS } from '../../scripts/lib/basketball-motion-specs.mjs';
 
-const setShot = MOTION_SPECS['set-shot'].frame as (p: number) => {
+type SetShotFrame = {
   ball: number[];
   hands: { l: { target: number[] }; r: { target: number[] } };
   armPole: { l: number[]; r: number[] };
 };
+
+const setShot = MOTION_SPECS['set-shot'].frame as unknown as (p: number) => SetShotFrame;
 
 describe('RCL set-shot basketball mechanics', () => {
   it('authors the basketball first and keeps the shooting wrist directly under/behind it', () => {
