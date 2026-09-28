@@ -15,7 +15,7 @@ const lerpV=(a,b,t)=>add(mul(a,1-t),mul(b,t));
 const qn=q=>{const n=Math.hypot(...q)||1;return q.map(v=>v/n)};
 const qm=(a,b)=>qn([a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]]);
 const qc=q=>[-q[0],-q[1],-q[2],q[3]];
-const rot=(q,v)=>{v=V(v);const [x,y,z,w]=q,tx=2*(y*v.z-z*v.y),ty=2*(z*vx-x*vz),tz=2*(x*vy-y*vx);return{x:v.x+w*tx+(y*tz-z*ty),y:v.y+w*ty+(z*tx-x*tz),z:v.z+w*tz+(x*ty-y*tx)}};
+const rot=(q,v)=>{v=V(v);const [x,y,z,w]=q,tx=2*(y*v.z-z*v.y),ty=2*(z*v.x-x*v.z),tz=2*(x*v.y-y*v.x);return{x:v.x+w*tx+(y*tz-z*ty),y:v.y+w*ty+(z*tx-x*tz),z:v.z+w*tz+(x*ty-y*tx)}};
 const qAxis=(axis,ang)=>{axis=norm(axis);const s=Math.sin(ang/2);return[axis.x*s,axis.y*s,axis.z*s,Math.cos(ang/2)]};
 const clamp01=t=>Math.max(0,Math.min(1,t));
 const smooth01=t=>{t=clamp01(t);return t*t*(3-2*t)};
