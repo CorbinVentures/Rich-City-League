@@ -1,0 +1,256 @@
+/* Mobile-only scorebook density pass.
+ * The Scorebook keeps its desktop console layout, but phones get a faster,
+ * native-app-like scoring surface with no oversized sticky overlay.
+ */
+
+@media (max-width: 767px) {
+  .rcl-scorebook-immersive {
+    min-height: 100svh;
+    background: #03070d;
+    overflow-x: hidden;
+  }
+
+  .rcl-scorebook-immersive main {
+    min-height: 100svh;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* The large desktop scoreboard should scroll naturally on phones instead of
+     sitting over the roster and stat controls. */
+  .rcl-scorebook-immersive main > div > header {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10 !important;
+    padding: 8px 10px !important;
+    background: #03070d !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div {
+    gap: 8px !important;
+  }
+
+  /* Game selector row */
+  .rcl-scorebook-immersive main > div > header > div > div:first-child {
+    gap: 8px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:first-child > a {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:first-child > div > p {
+    display: none !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header select {
+    min-height: 42px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Compact scoreboard */
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) {
+    padding: 7px 8px !important;
+    border-radius: 16px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) > div {
+    gap: 6px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) button {
+    padding: 5px 4px !important;
+    border-radius: 11px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) button p:first-child {
+    font-size: 9px !important;
+    letter-spacing: .08em !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) button p:last-child {
+    font-size: 30px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) > div > div {
+    min-width: 96px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) > div > div > div {
+    gap: 4px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(2) > div > div button {
+    min-width: 24px !important;
+    height: 24px !important;
+    padding: 0 4px !important;
+    border-radius: 7px !important;
+    font-size: 8px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header input[aria-label="Game clock"] {
+    margin-top: 3px !important;
+    font-size: 24px !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Status/finalize becomes one slim row. */
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(3) {
+    min-height: 34px;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(3) p:first-child {
+    display: none !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(3) p:last-child {
+    font-size: 9px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > header > div > div:nth-child(3) button {
+    padding: 7px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Team + roster becomes a compact horizontal control strip. */
+  .rcl-scorebook-immersive main aside:first-of-type {
+    padding: 9px 10px 10px !important;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:first-child {
+    display: none !important;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:nth-child(2) {
+    margin-top: 0 !important;
+    gap: 6px !important;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:nth-child(2) button {
+    padding: 9px 10px !important;
+    text-align: center !important;
+    border-radius: 11px !important;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:nth-child(3) {
+    display: flex !important;
+    max-height: none !important;
+    gap: 7px !important;
+    margin-top: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-right: 0 !important;
+    padding-bottom: 2px !important;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:nth-child(3) > button {
+    flex: 0 0 145px;
+    min-width: 145px;
+    padding: 9px 10px !important;
+    border-radius: 11px !important;
+    scroll-snap-align: start;
+  }
+
+  .rcl-scorebook-immersive main aside:first-of-type > div:nth-child(3) > div {
+    flex: 1 0 100%;
+    min-height: 58px;
+    padding: 12px !important;
+    display: grid;
+    place-items: center;
+    line-height: 1.45;
+  }
+
+  /* Main scoring card: less decoration, more controls above the fold. */
+  .rcl-scorebook-immersive main > div > div > section {
+    padding: 10px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section > div {
+    padding: 12px !important;
+    border-radius: 18px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section > div > div:first-child {
+    gap: 8px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section h1 {
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section h1 + p {
+    margin-top: 4px !important;
+    font-size: 10px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section > div > div.mt-4 {
+    margin-top: 12px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section button[class*="min-h-16"] {
+    min-height: 52px !important;
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section button[class*="min-h-16"] > span:first-child {
+    font-size: 13px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section button[class*="min-h-16"] > span:last-child {
+    margin-top: 2px !important;
+    font-size: 8px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 14px !important;
+  }
+
+  /* Utility tools remain secondary and compact. */
+  .rcl-scorebook-immersive main > div > div > section > div > div.mt-5.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+  }
+
+  .rcl-scorebook-immersive main > div > div > section > div > div.mt-5.grid button {
+    padding: 9px 8px !important;
+  }
+
+  /* Player line / recent plays are review information, not the primary mobile
+     scoring surface, so keep them compact below the action grid. */
+  .rcl-scorebook-immersive main aside:nth-of-type(2) {
+    padding: 10px !important;
+  }
+
+  .rcl-scorebook-immersive main aside:nth-of-type(2) > div:first-child {
+    padding: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .rcl-scorebook-immersive main aside:nth-of-type(2) > div:nth-child(2) {
+    min-height: 180px !important;
+    margin-top: 8px !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Advanced drawer must stay above Safari's bottom UI and remain easy to close. */
+  .rcl-scorebook-immersive section.fixed {
+    max-height: 82svh !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
