@@ -6,17 +6,13 @@ import {
   FaArrowLeft,
   FaBasketball,
   FaBell,
-  FaBookmark,
   FaComments,
   FaCompass,
-  FaFire,
   FaHouse,
   FaImage,
   FaMagnifyingGlass,
   FaPeopleGroup,
   FaPlus,
-  FaRetweet,
-  FaUser,
   FaUserGroup,
   FaVideo,
   FaXmark,
@@ -121,8 +117,8 @@ export default function NetworkHome() {
   const [publishingStory, setPublishingStory] = useState(false);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
 
-  const mediaInputRef = useRef<HTMLInputElement | null>(null);
-  const storyInputRef = useRef<HTMLInputElement | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const storyInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -438,10 +434,10 @@ export default function NetworkHome() {
     const postById = new Map(postsWithReposts.map((post) => [post.id, post]));
     let candidates: NetworkFeedItem[] = postsWithReposts.map((post) => ({ key: `post:${post.id}`, post, feed_at: post.created_at }));
     if (!focusPostId) {
-      candidates.push(...reposts.map((repost) => {
+      for (const repost of reposts) {
         const post = postById.get(repost.post_id);
-        return post ? { key: `repost:${repost.id}`, post, feed_at: repost.created_at, repost } : null;
-      }).filter((item): item is NetworkFeedItem => Boolean(item)));
+        if (post) candidates.push({ key: `repost:${repost.id}`, post, feed_at: repost.created_at, repost });
+      }
     }
 
     const query = search.trim().toLowerCase();
@@ -482,7 +478,7 @@ export default function NetworkHome() {
   return (
     <main className="min-h-screen bg-[#03070d] pb-24 text-white lg:pb-0">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#03070d]/95 backdrop-blur-xl">
-        <Container maxWidth="xl" className="flex h-16 items-center gap-3 px-3 sm:h-18 sm:px-4">
+        <Container maxWidth="xl" className="flex h-16 items-center gap-3 px-3 sm:h-20 sm:px-4">
           <Link href="/social" className="flex shrink-0 items-center gap-2" aria-label="RCL Network home">
             <span className="grid h-10 w-10 place-items-center rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 font-black text-rcl-blue">RCL</span>
             <span className="hidden sm:block"><b className="block text-xs font-black uppercase tracking-[.18em]">RCL Network</b><small className="text-[10px] font-bold uppercase tracking-[.14em] text-white/25">Richmond basketball</small></span>
@@ -501,7 +497,7 @@ export default function NetworkHome() {
       <Container maxWidth="xl" className="py-4 sm:py-5">
         <div className="grid gap-5 lg:grid-cols-[210px_minmax(0,680px)_minmax(260px,1fr)] xl:grid-cols-[220px_minmax(0,720px)_310px]">
           <aside className="hidden lg:block">
-            <div className="sticky top-20 space-y-1">
+            <div className="sticky top-24 space-y-1">
               {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold transition ${href === '/social' ? 'bg-rcl-blue/10 text-rcl-blue' : 'text-white/50 hover:bg-white/[.04] hover:text-white'}`}><Icon/><span>{label}</span></Link>)}
               <div className="my-3 border-t border-white/10"/>
               {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCL Network</Link>}
@@ -523,22 +519,22 @@ export default function NetworkHome() {
 
             {!focusPostId && <div className="grid grid-cols-3 rounded-xl border border-white/10 bg-[#07111b] p-1"><FeedModeButton active={mode === 'for-you'} onClick={() => setMode('for-you')}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => setMode('following')}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => setMode('trending')}>Trending</FeedModeButton></div>}
 
-            {loading ? <LoadingFeed/> : feedItems.length ? feedItems.map((item) => <NetworkPostCard key={item.key} item={item} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined}/>) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer}/>}          
+            {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item) => <NetworkPostCard key={item.key} item={item} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
           </div>
 
           <aside className="hidden xl:block">
-            <div className="sticky top-20 space-y-4">
+            <div className="sticky top-24 space-y-4">
               <SideCard title="People to know" href="/friends">
-                <div className="space-y-2">{suggestedProfiles.slice(0,4).map((profile) => <div key={profile.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.03]"><SocialIdentity author={profile} compact/><Link href={`/social/profile/${profile.id}`} className="min-w-0 flex-1"><b className="block truncate text-xs">{profile.display_name || profile.username || 'RCL Member'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">{formatRep(profile.rep ?? 0)} REP</small></Link>{profile.id && profile.id !== user?.id && <button onClick={() => void toggleFollow(profile.id!)} className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${following.includes(profile.id) ? 'text-rcl-blue' : 'border border-white/10 text-white/45'}`}>{following.includes(profile.id) ? 'Following' : 'Follow'}</button>}</div>)}</div>
+                <div className="space-y-2">{suggestedProfiles.slice(0, 4).map((profile) => <div key={profile.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.03]"><SocialIdentity author={profile} compact/><Link href={`/social/profile/${profile.id}`} className="min-w-0 flex-1"><b className="block truncate text-xs">{profile.display_name || profile.username || 'RCL Member'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">{formatRep(profile.rep ?? 0)} REP</small></Link>{profile.id && profile.id !== user?.id && <button onClick={() => void toggleFollow(profile.id!)} className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${following.includes(profile.id) ? 'text-rcl-blue' : 'border border-white/10 text-white/45'}`}>{following.includes(profile.id) ? 'Following' : 'Follow'}</button>}</div>)}</div>
               </SideCard>
 
-              {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0,3).map((run) => <Link key={run.id} href="/runs" className="block rounded-xl border border-white/[.06] p-3 hover:border-rcl-orange/25"><b className="block text-xs">{run.title}</b><small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-rcl-orange">{formatRunTime(run.starts_at)} · {run.court_name || run.location || 'RCL court'}</small></Link>)}</div></SideCard>}
+              {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0, 3).map((run) => <Link key={run.id} href="/runs" className="block rounded-xl border border-white/[.06] p-3 hover:border-rcl-orange/25"><b className="block text-xs">{run.title}</b><small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-rcl-orange">{formatRunTime(run.starts_at)} · {run.court_name || run.location || 'RCL court'}</small></Link>)}</div></SideCard>}
 
-              {communities.length > 0 && <SideCard title="Communities" href="/communities"><div className="space-y-1">{communities.slice(0,3).map((community) => <Link key={community.id} href={`/communities/${community.slug}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[.03]"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rcl-blue/10 text-rcl-blue"><FaPeopleGroup/></span><span className="min-w-0"><b className="block truncate text-xs">{community.name}</b><small className="text-[10px] uppercase tracking-wider text-white/25">{community.community_type?.replace(/_/g, ' ') || 'Community'}</small></span></Link>)}</div></SideCard>}
+              {communities.length > 0 && <SideCard title="Communities" href="/communities"><div className="space-y-1">{communities.slice(0, 3).map((community) => <Link key={community.id} href={`/communities/${community.slug}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[.03]"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rcl-blue/10 text-rcl-blue"><FaPeopleGroup/></span><span className="min-w-0"><b className="block truncate text-xs">{community.name}</b><small className="text-[10px] uppercase tracking-wider text-white/25">{community.community_type?.replace(/_/g, ' ') || 'Community'}</small></span></Link>)}</div></SideCard>}
 
-              {officialActivity.length > 0 && <SideCard title="Official activity" href="/social"><div className="space-y-2">{officialActivity.slice(0,3).map((post) => <Link key={post.id} href={`/social/post/${post.id}`} className="block rounded-xl border border-rcl-blue/10 bg-rcl-blue/[.025] p-3 hover:border-rcl-blue/30"><small className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">RCL Official</small><p className="mt-1 line-clamp-2 text-xs leading-5 text-white/40">{post.body}</p></Link>)}</div></SideCard>}
+              {officialActivity.length > 0 && <SideCard title="Official activity" href="/social"><div className="space-y-2">{officialActivity.slice(0, 3).map((post) => <Link key={post.id} href={`/social/post/${post.id}`} className="block rounded-xl border border-rcl-blue/10 bg-rcl-blue/[.025] p-3 hover:border-rcl-blue/30"><small className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">RCL Official</small><p className="mt-1 line-clamp-2 text-xs leading-5 text-white/40">{post.body}</p></Link>)}</div></SideCard>}
 
-              {user && <ReferralCard/>}
+              {user && <ReferralCard />}
             </div>
           </aside>
         </div>
@@ -546,21 +542,21 @@ export default function NetworkHome() {
 
       {composerOpen && <ComposerModal currentProfile={currentProfile} body={body} setBody={setBody} linkInput={linkInput} setLinkInput={setLinkInput} mediaFile={mediaFile} mediaPreview={mediaPreview} setMediaFile={setMediaFile} mediaInputRef={mediaInputRef} publishing={publishing} onClose={() => setComposerOpen(false)} onSubmit={(event) => void createPost(event)} />}
       {storyComposerOpen && <StoryComposer currentProfile={currentProfile} body={storyBody} setBody={setStoryBody} file={storyFile} preview={storyPreview} setFile={setStoryFile} inputRef={storyInputRef} publishing={publishingStory} onClose={() => setStoryComposerOpen(false)} onSubmit={(event) => void createStory(event)} />}
-      {storyIndex !== null && stories[storyIndex] && <StoryViewer stories={stories} index={storyIndex} onClose={() => setStoryIndex(null)} onIndex={setStoryIndex}/>}    
+      {storyIndex !== null && stories[storyIndex] && <StoryViewer stories={stories} index={storyIndex} onClose={() => setStoryIndex(null)} onIndex={setStoryIndex} />}
     </main>
   );
 }
 
 function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { stories: Story[]; user: { id: string } | null; currentProfile: NetworkAuthor | null; onCreate: () => void; onOpen: (index: number) => void }) {
-  return <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#08111b]/80 p-3"><div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"><button onClick={onCreate} className="w-[70px] shrink-0 text-center"><span className="relative mx-auto grid h-15 w-15 place-items-center rounded-full border-2 border-dashed border-rcl-orange/60 bg-white/[.03]"><SocialIdentity author={currentProfile ?? { display_name: user ? 'You' : 'Guest', username: null }} compact/><span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-[#08111b] bg-rcl-orange text-xs text-black"><FaPlus/></span></span><span className="mt-2 block truncate text-[10px] font-black uppercase tracking-wider text-white/45">Your story</span></button>{stories.map((story, index) => <button key={story.id} onClick={() => onOpen(index)} className="w-[70px] shrink-0 text-center"><span className="mx-auto block h-15 w-15 rounded-full bg-gradient-to-br from-rcl-orange to-rcl-blue p-[2px]"><span className="grid h-full w-full place-items-center overflow-hidden rounded-full border-2 border-[#08111b] bg-[#101722]">{story.media_url ? isVideoUrl(story.media_url) ? <video src={story.media_url} muted playsInline className="h-full w-full object-cover"/> : <img src={story.media_url} alt="" className="h-full w-full object-cover"/> : <SocialIdentity author={story.author} compact/>}</span></span><span className="mt-2 block truncate text-[10px] font-bold text-white/45">{story.author?.display_name || story.author?.username || 'RCL'}</span></button>)}</div></section>;
+  return <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#08111b]/80 p-3"><div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"><button onClick={onCreate} className="w-[70px] shrink-0 text-center"><span className="relative mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-rcl-orange/60 bg-white/[.03]"><SocialIdentity author={currentProfile ?? { display_name: user ? 'You' : 'Guest', username: null }} compact/><span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-[#08111b] bg-rcl-orange text-xs text-black"><FaPlus/></span></span><span className="mt-2 block truncate text-[10px] font-black uppercase tracking-wider text-white/45">Your story</span></button>{stories.map((story, index) => <button key={story.id} onClick={() => onOpen(index)} className="w-[70px] shrink-0 text-center"><span className="mx-auto block h-16 w-16 rounded-full bg-gradient-to-br from-rcl-orange to-rcl-blue p-[2px]"><span className="grid h-full w-full place-items-center overflow-hidden rounded-full border-2 border-[#08111b] bg-[#101722]">{story.media_url ? isVideoUrl(story.media_url) ? <video src={story.media_url} muted playsInline className="h-full w-full object-cover"/> : <img src={story.media_url} alt="" className="h-full w-full object-cover"/> : <SocialIdentity author={story.author} compact/>}</span></span><span className="mt-2 block truncate text-[10px] font-bold text-white/45">{story.author?.display_name || story.author?.username || 'RCL'}</span></button>)}</div></section>;
 }
 
-function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement | null>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
+function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
   const chooseFile = (file: File | null) => { if (!file) return; const issue = socialMediaError(file); if (!issue) setMediaFile(file); };
   return <div className="fixed inset-0 z-[90] grid place-items-end bg-black/75 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-white/10 bg-[#09131e] p-5 shadow-2xl sm:max-w-xl sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Create</p><h2 className="font-display text-2xl font-black uppercase">Post to RCL Network</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/50"><FaXmark/></button></div><div className="mt-5 flex gap-3"><SocialIdentity author={currentProfile} compact/><textarea autoFocus value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={5} placeholder="What is happening in Richmond basketball?" className="min-h-32 flex-1 resize-none bg-transparent text-base leading-7 outline-none placeholder:text-white/25"/></div>{mediaPreview && <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black">{mediaFile?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(mediaPreview)} controls className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Preview" className="max-h-72 w-full object-contain"/>}<button type="button" onClick={() => setMediaFile(null)} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70"><FaXmark/></button></div>}<SocialLinkField value={linkInput} onChange={setLinkInput}/><div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4"><div><button type="button" onClick={() => mediaInputRef.current?.click()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black uppercase tracking-wider text-white/50"><FaImage/> Photo / video</button><input ref={mediaInputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/></div><button disabled={publishing || (!body.trim() && !mediaFile && !linkInput.trim())} className="min-h-11 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-35">{publishing ? 'Posting…' : 'Post'}</button></div></form></div>;
 }
 
-function StoryComposer({ currentProfile, body, setBody, file, preview, setFile, inputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; file: File | null; preview: string; setFile: (file: File | null) => void; inputRef: React.RefObject<HTMLInputElement | null>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
+function StoryComposer({ currentProfile, body, setBody, file, preview, setFile, inputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; file: File | null; preview: string; setFile: (file: File | null) => void; inputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
   const chooseFile = (next: File | null) => { if (!next) return; const issue = socialMediaError(next); if (!issue) setFile(next); };
   return <div className="fixed inset-0 z-[90] grid place-items-end bg-black/80 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="w-full rounded-t-3xl border border-white/10 bg-[#09131e] p-5 sm:max-w-md sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">24 hours</p><h2 className="font-display text-2xl font-black uppercase">Add story</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10"><FaXmark/></button></div><div className="mt-5 flex items-center gap-3"><SocialIdentity author={currentProfile} compact/><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={240} rows={3} placeholder="Add a caption…" className="flex-1 resize-none rounded-xl border border-white/10 bg-black/15 p-3 text-sm outline-none"/></div><button type="button" onClick={() => inputRef.current?.click()} className="mt-4 grid min-h-52 w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-rcl-blue/25 bg-rcl-blue/[.025]">{preview ? file?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(preview)} muted className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(preview)} alt="Story preview" className="max-h-72 w-full object-contain"/> : <span className="text-center"><FaImage className="mx-auto text-3xl text-rcl-blue"/><b className="mt-3 block text-xs font-black uppercase">Choose photo or video</b></span>}</button><input ref={inputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/><button disabled={publishing || (!body.trim() && !file)} className="mt-4 min-h-12 w-full rounded-xl bg-rcl-orange text-xs font-black uppercase tracking-wider text-black disabled:opacity-35">{publishing ? 'Sharing…' : 'Share story'}</button></form></div>;
 }
@@ -575,7 +571,7 @@ function FeedModeButton({ active, onClick, children }: { active: boolean; onClic
 }
 
 function LoadingFeed() {
-  return <div className="space-y-4">{[1,2,3].map((item) => <div key={item} className="h-64 animate-pulse rounded-2xl border border-white/10 bg-white/[.025]"/>)}</div>;
+  return <div className="space-y-4">{[1, 2, 3].map((item) => <div key={item} className="h-64 animate-pulse rounded-2xl border border-white/10 bg-white/[.025]"/>)}</div>;
 }
 
 function FeedEmpty({ user, followingMode, onCreate }: { user: boolean; followingMode: boolean; onCreate: () => void }) {
