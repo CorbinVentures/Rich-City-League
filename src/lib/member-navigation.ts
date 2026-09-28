@@ -27,7 +27,7 @@ export const RCL_MEMBER_PRIMARY_NAV: RCLMemberNavItem[] = [
   { label: 'Explore', href: '/explore', icon: FaCompass },
   { label: 'Create', href: '/social?compose=1', icon: FaPlus, action: 'create' },
   { label: 'League', href: '/league', icon: FaBasketball },
-  { label: 'Profile', href: '/profile', icon: FaUser },
+  { label: 'Profile', href: '/social/profile/me', icon: FaUser },
 ];
 
 export const RCL_MEMBER_DESKTOP_NAV: RCLMemberNavItem[] = [
@@ -35,7 +35,7 @@ export const RCL_MEMBER_DESKTOP_NAV: RCLMemberNavItem[] = [
   { label: 'Explore', href: '/explore', icon: FaCompass },
   { label: 'Create', href: '/social?compose=1', icon: FaPlus, action: 'create' },
   { label: 'League', href: '/league', icon: FaBasketball },
-  { label: 'Profile', href: '/profile', icon: FaUser },
+  { label: 'Profile', href: '/social/profile/me', icon: FaUser },
 ];
 
 export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
@@ -69,9 +69,9 @@ export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
     label: 'Identity',
     description: 'Your basketball identity and reputation',
     items: [
-      { label: 'Profile', href: '/profile', icon: FaUser },
+      { label: 'Edit Profile', href: '/profile', icon: FaUser },
       { label: 'REP + Badges', href: '/badges', icon: FaTrophy },
-      { label: 'Friends', href: '/friends', icon: FaUsers },
+      { label: 'People', href: '/friends', icon: FaUsers },
     ],
   },
 ];
