@@ -69,7 +69,7 @@ export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
     label: 'Identity',
     description: 'Your basketball identity and reputation',
     items: [
-      { label: 'Profile', href: '/profile', icon: FaUser },
+      { label: 'Edit Profile', href: '/profile', icon: FaUser },
       { label: 'REP + Badges', href: '/badges', icon: FaTrophy },
       { label: 'People', href: '/friends', icon: FaUsers },
     ],
