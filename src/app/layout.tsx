@@ -4,6 +4,7 @@ import './rcl-future.css';
 import './rcl-basketball-branding.css';
 import '@/components/RclSplashMockup.css';
 import './rcl-accessibility.css';
+import './rcl-corporate-polish.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
