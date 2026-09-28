@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DraftConfiguredRules } from '@/components/DraftConfiguredRules';
 
 export const metadata: Metadata = {
   title: 'RCL Draft Night',
@@ -18,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function DraftLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <>{children}<DraftConfiguredRules /></>;
 }
