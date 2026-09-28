@@ -15,12 +15,10 @@ Reviewed the source route inventory (91 page files), shared navigation and style
 | Navigation | Drawers lacked modal keyboard behavior; active links matched unrelated prefixes; profile and highlights links were inaccurate | Shared native modal drawer with focus restoration and Escape handling, segment-aware active states, corrected destinations and skip link |
 | Homepage | Hardcoded member identity, fabricated notification indicator, stock portraits presented as players, invented jersey numbers and games-behind values | Session-based identity, honest missing-photo states, real jersey data, calculated games behind and standings scoped to one season/division |
 | Empty states | Empty schedules were labeled as loading; news could be blank | Accurate schedule, standings, player and news messages |
-| Forms | Unlabeled inputs and silent save failures | Accessible names added; Film Room, Challenges and Communities have visible labels and loading, saving, success, failure and signed-out states |
-| Saved work | Film/community drafts could disappear after failure | Clear draft only on successful creation, prevent duplicate submissions, show actual account/device save status |
+| Forms | Unlabeled inputs and silent save failures | Communities have visible labels and loading, saving, success, failure and signed-out states |
+| Saved work | Community drafts could disappear after failure | Clear draft only on successful creation and prevent duplicate submissions |
 | Error recovery | No shared app-level loading, error or not-found experience | Branded loading, recoverable error, root-error and 404 screens |
 | Metadata | Duplicate page titles and missing names for key client routes | Page-specific titles/descriptions; private account pages retain or receive noindex metadata |
-
-Film Room link input is limited to HTTP(S). Challenge results and player assessments reject invalid numeric values. Supabase table definitions and relevant access policies were checked read-only; no database schema, production records or authentication controls were changed.
 
 Social media selection now allowlists supported MIME types and size, gives local previews only for validated base64 media, and derives upload extensions from the MIME type. Preview-wall middleware keeps `/auth/*` reachable even when preview authentication configuration is temporarily unavailable, while protected routes still return a clear 503 in that state.
 
@@ -43,7 +41,7 @@ Before treating this as fully polished, review the deployed branch after unlocki
 
 1. Homepage, directories, game center, standings, player/team details and news at desktop and narrow widths; check long names, empty data and horizontal overflow.
 2. Drawer open/close, Tab/Shift+Tab containment, Escape, focus restoration, skip link and mobile bottom-navigation clearance.
-3. Signed-in Film Room, Challenges and Communities success/failure flows with approved test data.
+3. Signed-in Communities, profile, social and messaging success/failure flows with approved test data.
 4. Member profile, social, messages, notifications, shop/orders and authorized admin/scorebook screens.
 5. Error/404 screens, visible focus, readable contrast and reduced-motion behavior.
 
