@@ -210,3 +210,30 @@ $$;
 
 revoke all on function public.materialize_leagueapps_rosters() from public, anon;
 grant execute on function public.materialize_leagueapps_rosters() to authenticated, service_role;
+
+-- Both the admin sync and the server-only cron already mark registrations-2 as
+-- success/partial only after player reconciliation succeeds. Hook roster reconciliation
+-- to that existing authoritative checkpoint so every registration sync path stays aligned.
+create or replace function public.reconcile_leagueapps_rosters_after_sync()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.resource = 'registrations-2'
+     and new.status in ('success', 'partial') then
+    perform public.materialize_leagueapps_rosters();
+  end if;
+  return new;
+end;
+$$;
+
+revoke all on function public.reconcile_leagueapps_rosters_after_sync() from public, anon, authenticated;
+
+drop trigger if exists reconcile_leagueapps_rosters_after_sync on public.leagueapps_sync_state;
+create trigger reconcile_leagueapps_rosters_after_sync
+after insert or update of last_synced_at, status, last_updated, last_id
+on public.leagueapps_sync_state
+for each row
+execute function public.reconcile_leagueapps_rosters_after_sync();
