@@ -20,7 +20,7 @@ export function SocialIdentity({ author, compact = false, link = true }: { autho
   const progress = reputationProgress(rep, level);
   const status = reputationStatus(level);
   const name = author?.display_name || author?.username || 'RCL Member';
-  const identity = <span className={`rcl-social-identity ${compact ? 'is-compact' : ''}`}>
+  const identity = <span className={`rcl-social-identity ${compact ? 'is-compact' : ''} ${author?.is_system_account ? 'is-system' : ''}`}>
     <span className={`rcl-rep-avatar status-${status.key} ${author?.is_vip ? 'is-vip' : ''}`} style={{'--rep-progress': progress.percent + '%'} as React.CSSProperties}>
       <span>{author?.avatar_url ? <img src={author.avatar_url} alt="" /> : name.slice(0,1).toUpperCase()}</span>
       {!compact && <em>{level}</em>}
