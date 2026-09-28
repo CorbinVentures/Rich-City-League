@@ -15,7 +15,7 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
   }
 
   if (isImmersiveScorebook) {
-    return <div className="min-h-svh bg-[#03070d]"><a className="rcl-skip-link" href="#rcl-content">Skip to scorebook</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
+    return <div className="rcl-scorebook-immersive min-h-svh bg-[#03070d]"><a className="rcl-skip-link" href="#rcl-content">Skip to scorebook</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
   }
 
   return (
