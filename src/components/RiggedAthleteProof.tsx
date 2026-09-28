@@ -84,21 +84,21 @@ export function RiggedAthleteProof({title}:Props){
 
       renderer.setAnimationLoop(()=>{
         const delta=Math.min(clock.getDelta(),.05);action.paused=pausedRef.current;if(!pausedRef.current){mixer.update(delta*speedRef.current);setFrame(Math.round(action.time*selected.fps));}
-        // The ball is a scene child, so use scene/world hand coordinates directly. Converting
-        // the hands into athlete-local space and then assigning those values to a scene child
-        // caused the ball to drift through the face, torso, and hips after athlete scaling.
         leftHand.getWorldPosition(leftWorld);rightHand.getWorldPosition(rightWorld);
         const phase=selected.duration>0?(action.time%selected.duration)/selected.duration:0;
         let showBall=false;
         contactBall.copy(leftWorld).add(rightWorld).multiplyScalar(.5);
-        if(selected.id==='dribble-stance'){
-          showBall=phase>.05&&phase<.95;const contact=bounceHeight(phase),floorY=.12,handY=Math.max(floorY+.18,rightWorld.y-.06);ballTarget.set(rightWorld.x,floorY+(handY-floorY)*contact,rightWorld.z+.08);
+        if(selected.id==='triple-threat-jab'){
+          showBall=phase>.05&&phase<.95;contactBall.y+=.035;contactBall.z+=.075;ballTarget.copy(contactBall);
+        }else if(selected.id==='dribble-stance'){
+          showBall=phase>.05&&phase<.95;const contact=bounceHeight(phase),floorY=.12,handY=Math.max(floorY+.18,rightWorld.y-.07);ballTarget.set(rightWorld.x,floorY+(handY-floorY)*contact,rightWorld.z+.055);
         }else if(selected.id==='chest-pass'){
-          showBall=phase>.06&&phase<.86;contactBall.z+=.11;contactBall.y+=.01;
-          if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.74*t;ballTarget.y+=.05*t;}
+          showBall=phase>.06&&phase<.86;contactBall.y+=.025;contactBall.z+=.075;
+          if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.72*t;ballTarget.y+=.06*t;}
         }else if(selected.id==='set-shot'){
-          showBall=phase>.08&&phase<.90;contactBall.z+=.11;contactBall.y+=.02;
-          if(phase<.62)ballTarget.copy(contactBall);else{const t=smooth((phase-.62)/.24);ballTarget.copy(rightWorld);ballTarget.z+=.11+.42*t;ballTarget.y+=.03+.58*t-.12*t*t;}
+          showBall=phase>.08&&phase<.90;
+          contactBall.copy(rightWorld).lerp(leftWorld,.20);contactBall.y+=.085;contactBall.z+=.06;
+          if(phase<.62)ballTarget.copy(contactBall);else{const t=smooth((phase-.62)/.24);ballTarget.copy(rightWorld).lerp(leftWorld,.08);ballTarget.y+=.085+.54*t-.10*t*t;ballTarget.z+=.06+.46*t;}
         }
         ball.visible=selected.ball&&showBall;if(ball.visible)ball.position.copy(ballTarget);
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
