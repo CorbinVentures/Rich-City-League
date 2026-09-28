@@ -76,7 +76,7 @@ export function SiteHeader(){
     <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} groups={drawerGroups} pathname={pathname} />
   </>;
 
-  if(memberMode){
+  if(user){
     return <>
       <aside className="rcl-universal-sidebar rcl-member-sidebar">
         <Link href="/social" className="rcl-universal-brand">
