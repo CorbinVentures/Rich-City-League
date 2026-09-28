@@ -149,9 +149,11 @@ function RiggedMotionPlayer({title,skill,match}:{title:string;skill:string;match
           if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.74*t;ballTarget.y+=.05*t;}
         }else if(selected.id==='set-shot'){
           showBall=phase>.06&&phase<.92;
-          // The shooting hand owns the ball. The guide hand only supports the side and never drives ball position.
-          shotAnchor.copy(rightWorld);shotAnchor.x+=.035;shotAnchor.y+=.11;shotAnchor.z+=.075;ballTarget.copy(shotAnchor);
-          // Delay release until the shooting arm has reached the set/extension window. The arc begins from the exact anchor to avoid a jump.
+          // The shooting hand owns the ball while the guide hand contributes only during the gather/set.
+          const guideInfluence=phase<.66?.45*(1-smooth((phase-.46)/.20)):0;
+          shotAnchor.copy(rightWorld).lerp(leftWorld,guideInfluence);
+          const setLift=smooth((phase-.28)/.38);shotAnchor.y+=.08+.03*setLift;shotAnchor.z+=.05+.025*setLift;ballTarget.copy(shotAnchor);
+          // Release starts continuously from the exact contact anchor only after the arm reaches extension.
           if(phase>=.66){const t=smooth((phase-.66)/.22);ballTarget.z+=.46*t;ballTarget.y+=.62*t-.14*t*t;}
         }
         ball.visible=selected.ball&&showBall;if(ball.visible)ball.position.copy(ballTarget);
