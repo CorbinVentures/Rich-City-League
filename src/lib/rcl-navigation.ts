@@ -1,7 +1,7 @@
 import {
   FaHouse, FaCalendarDays, FaChartSimple, FaUsers, FaUser, FaFolderOpen, FaNewspaper,
   FaPlay, FaListOl, FaUserTie, FaBell, FaComments, FaPeopleGroup, FaCrown,
-  FaTrophy, FaShirt, FaFlask, FaBasketball, FaGear, FaCompass
+  FaTrophy, FaShirt, FaBasketball, FaGear, FaCompass
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 
@@ -14,7 +14,6 @@ export function isNavigationActive(pathname: string, href: string) {
 export const RCL_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/',icon:FaHouse},
   {label:'Explore RCL',href:'/explore',icon:FaCompass},
-  {label:'The Lab',href:'/lab',icon:FaFlask},
   {label:'Players',href:'/players',icon:FaUser},
   {label:'Teams',href:'/teams',icon:FaUsers},
   {label:'Schedule',href:'/schedule',icon:FaCalendarDays},
