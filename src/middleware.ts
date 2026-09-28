@@ -15,7 +15,7 @@ function previewWallActive() {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/account');
-  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/') || pathname.startsWith('/lab3d/');
+  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/');
   const config = getSupabaseConfig();
 
   // The legacy beta referral token grants temporary preview access. Personal
