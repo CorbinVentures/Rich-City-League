@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { FaArrowLeft, FaBasketball, FaShieldHalved } from 'react-icons/fa6';
 
-export function AuthShell({ children, mode }: { children: ReactNode; mode: 'sign-in' | 'sign-up' | 'reset' }) {
+export function AuthShell({ children, mode }: { children: ReactNode; mode: 'sign-in' | 'sign-up' | 'reset' | 'verify' }) {
   const copy = mode === 'sign-up'
     ? { kicker:'Build your RCL identity', title:'Join the city.', body:'Create one account for league identity, social, fantasy, community activity, badges, and the rest of the Rich City League platform.' }
-    : mode === 'reset'
-      ? { kicker:'Account recovery', title:'Get back in.', body:'Recover access securely, then return to the same RCL identity, activity, and league tools.' }
-      : { kicker:'Member access', title:'Welcome back.', body:'One account connects your RCL profile, league tools, social activity, fantasy experience, and community.' };
+    : mode === 'verify'
+      ? { kicker:'Verify your identity', title:'Check your inbox.', body:'Confirm your email address to secure your RCL identity and finish connecting your account to the league and community.' }
+      : mode === 'reset'
+        ? { kicker:'Account recovery', title:'Get back in.', body:'Recover access securely, then return to the same RCL identity, activity, and league tools.' }
+        : { kicker:'Member access', title:'Welcome back.', body:'One account connects your RCL profile, league tools, social activity, fantasy experience, and community.' };
 
   return <main className="relative min-h-svh overflow-hidden bg-rcl-black text-white">
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_8%,rgba(255,79,22,.13),transparent_30%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.13),transparent_32%)]" />
