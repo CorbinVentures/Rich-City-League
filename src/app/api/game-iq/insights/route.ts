@@ -16,12 +16,24 @@ function extractResponseText(payload: any): string {
 export async function POST(request: Request) {
   const supabase = await getServerSupabaseClient();
   if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const gameId = typeof body?.game_id === 'string' ? body.game_id : '';
   if (!gameId) return NextResponse.json({ error: 'game_id is required.' }, { status: 400 });
+
+  const [roleAccess, gameAccess] = await Promise.all([
+    supabase.rpc('has_game_iq_access' as never),
+    supabase.rpc('can_manage_game', { target_game_id: gameId } as never),
+  ]);
+  if (roleAccess.error || gameAccess.error) {
+    return NextResponse.json({ error: 'Unable to verify Game IQ access.' }, { status: 500 });
+  }
+  if (roleAccess.data !== true || gameAccess.data !== true) {
+    return NextResponse.json({ error: 'You are not authorized to analyze this game.' }, { status: 403 });
+  }
 
   const [gameResult, eventsResult, statsResult, lineupsResult, teamsResult] = await Promise.all([
     supabase.from('games').select('*').eq('id', gameId).single(),
@@ -37,7 +49,12 @@ export async function POST(request: Request) {
   const game = gameResult.data as unknown as Game | null;
   if (!game) return NextResponse.json({ error: 'Game not found.' }, { status: 404 });
   const teamNames = new Map((teamsResult.data ?? []).map((team: { id: string; name: string }) => [team.id, team.name]));
-  const analytics = game ? deriveGameAnalytics(game, (eventsResult.data ?? []) as unknown as GameEvent[], (statsResult.data ?? []) as unknown as PlayerGameStats[], (lineupsResult.data ?? []) as unknown as GameLineup[]) : null;
+  const analytics = deriveGameAnalytics(
+    game,
+    (eventsResult.data ?? []) as unknown as GameEvent[],
+    (statsResult.data ?? []) as unknown as PlayerGameStats[],
+    (lineupsResult.data ?? []) as unknown as GameLineup[],
+  );
   const payload = {
     game: {
       home: teamNames.get(game.home_team_id) ?? 'Home',
@@ -73,14 +90,8 @@ export async function POST(request: Request) {
 
   const aiResponse = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      input: prompt,
-    }),
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, input: prompt }),
   });
 
   if (!aiResponse.ok) {
@@ -89,11 +100,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Game IQ AI analysis failed.' }, { status: 502 });
   }
 
-  const aiPayload = await aiResponse.json();
-  const insight = extractResponseText(aiPayload);
+  const insight = extractResponseText(await aiResponse.json());
   if (!insight) return NextResponse.json({ error: 'Game IQ returned no analysis.' }, { status: 502 });
 
-  await supabase.from('game_ai_insights').insert({
+  const { error: insightError } = await supabase.from('game_ai_insights').insert({
     game_id: gameId,
     insight_type: 'postgame_coach_report',
     title: 'Game IQ Coach Report',
@@ -102,6 +112,7 @@ export async function POST(request: Request) {
     confidence: 0.9,
     created_by: user.id,
   } as never);
+  if (insightError) console.error('Unable to store Game IQ report', insightError);
 
   return NextResponse.json({ insight });
 }
