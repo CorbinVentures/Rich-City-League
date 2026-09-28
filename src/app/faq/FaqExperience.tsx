@@ -10,7 +10,7 @@ const featureCards = [
   { eyebrow: 'READY TO PLAY?', title: 'Registration, evaluations, tryouts, and the draft.', href: '/register', label: 'GET STARTED' },
   { eyebrow: 'COACHES CORNER', title: 'Resources, responsibilities, and opportunities.', href: '/coaches', label: 'LEARN MORE' },
   { eyebrow: 'WATCH & FOLLOW', title: 'Highlights, stories, photos, and RCL media.', href: '/media', label: 'EXPLORE MEDIA' },
-  { eyebrow: 'STILL HAVE QUESTIONS?', title: 'Start with the official registration channel.', href: '/register', label: 'CONTACT RCL' },
+  { eyebrow: 'EXPLORE THE PLATFORM', title: 'Find league, community, media, and account destinations.', href: '/explore', label: 'EXPLORE RCL' },
 ];
 
 export function FaqExperience() {
@@ -37,7 +37,7 @@ export function FaqExperience() {
             <h1 className="rcl-display mt-5 text-6xl uppercase leading-[.86] sm:text-8xl">Frequently<br /><span className="text-rcl-orange">Asked Questions</span></h1>
             <p className="mt-7 font-display text-xl font-bold uppercase tracking-wide text-white sm:text-3xl">Every question. <span className="text-rcl-orange">A bigger purpose.</span></p>
             <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300">Learn how Richmond basketball connects through the RCL — then find your way into the game, the community, and the next chapter.</p>
-            <p className="mt-6 text-xs font-black uppercase tracking-[.22em] text-slate-400">LEARN. JOIN. COMPETE. BELONG. <span className="text-rcl-orange">·</span> RICHMOND BASKETBALL SINCE 2010.</p>
+            <p className="mt-6 text-xs font-black uppercase tracking-[.22em] text-slate-400">LEARN. JOIN. COMPETE. BELONG. <span className="text-rcl-orange">·</span> RICHMOND BASKETBALL SINCE 2011.</p>
           </div>
         </Container>
       </section>
@@ -79,13 +79,13 @@ export function FaqExperience() {
 
           <aside className="space-y-6">
             <section className="faq-story-panel">
-              <p className="rcl-kicker">OUR STORY</p><h2 className="rcl-display mt-3 text-4xl uppercase">Built in Richmond.<br /><span className="text-rcl-orange">Since 2010.</span></h2>
-              <p className="mt-5 text-sm leading-6 text-slate-300">RCL is an evolving Richmond basketball and community movement. We keep the record honest: confirmed history stays visible, and unverified milestones wait for official confirmation.</p>
-              <div className="mt-7 space-y-5">{historyTimeline.map((event) => <div key={event.year} className="faq-timeline"><span>{event.year}</span><div><h3>{event.title}</h3><p>{event.body}</p></div></div>)}</div>
+              <p className="rcl-kicker">OUR STORY</p><h2 className="rcl-display mt-3 text-4xl uppercase">Built in Richmond.<br /><span className="text-rcl-orange">Since 2011.</span></h2>
+              <p className="mt-5 text-sm leading-6 text-slate-300">RCL is an evolving Richmond basketball and community movement. We keep the public record consistent: verified history stays visible, and future milestones are documented as they happen.</p>
+              <div className="mt-7 space-y-5">{historyTimeline.map((event) => <div key={`${event.year}-${event.title}`} className="faq-timeline"><span>{event.year}</span><div><h3>{event.title}</h3><p>{event.body}</p></div></div>)}</div>
             </section>
             <section className="faq-numbers">
-              <p className="rcl-kicker">BY THE NUMBERS</p><p className="mt-4 text-4xl font-black text-white">2010</p><p className="mt-1 text-xs font-black uppercase tracking-[.18em] text-slate-400">RCL STORY BEGINS</p>
-              <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-slate-500">Other league totals are omitted until they are verified by RCL administration.</p>
+              <p className="rcl-kicker">BY THE NUMBERS</p><p className="mt-4 text-4xl font-black text-white">2011</p><p className="mt-1 text-xs font-black uppercase tracking-[.18em] text-slate-400">RCL FOUNDED IN RICHMOND</p>
+              <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-slate-500">Other historical totals are shown only when they are verified by RCL administration.</p>
             </section>
           </aside>
         </div>
@@ -95,7 +95,7 @@ export function FaqExperience() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{featureCards.map((card) => <Link href={card.href} key={card.eyebrow} className="faq-feature-card"><p className="text-xs font-black tracking-[.18em] text-rcl-orange">{card.eyebrow}</p><h3 className="mt-5 font-display text-xl font-black uppercase leading-tight">{card.title}</h3><span className="mt-8 inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-300">{card.label} <FaArrowRight /></span></Link>)}</div>
         </section>
 
-        <section className="faq-closing mt-20"><p className="rcl-kicker">RICH CITY LEAGUE</p><h2 className="rcl-display mt-4 text-5xl uppercase sm:text-7xl">More than a league.<br /><span className="text-rcl-orange">A stronger Richmond.</span></h2><p className="mt-5 max-w-lg text-sm leading-6 text-slate-300">The city is the court. Find your place in the RCL.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className="rcl-button">REGISTER NOW <FaArrowRight className="ml-2 inline" /></Link><Link href="/city" className="faq-outline-button">EXPLORE RCL</Link><Link href="/register" className="faq-outline-button">CONTACT RCL</Link></div></section>
+        <section className="faq-closing mt-20"><p className="rcl-kicker">RICH CITY LEAGUE</p><h2 className="rcl-display mt-4 text-5xl uppercase sm:text-7xl">More than a league.<br /><span className="text-rcl-orange">A stronger Richmond.</span></h2><p className="mt-5 max-w-lg text-sm leading-6 text-slate-300">The city is the court. Find your place in the RCL.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className="rcl-button">REGISTER NOW <FaArrowRight className="ml-2 inline" /></Link><Link href="/explore" className="faq-outline-button">EXPLORE RCL</Link><Link href="/about" className="faq-outline-button">ABOUT RCL</Link></div></section>
       </Container>
     </main>
   );
