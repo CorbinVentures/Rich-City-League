@@ -2,13 +2,18 @@ import type { Metadata } from 'next';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
-export const metadata: Metadata = { title: 'Rich City League | Richmond VA Basketball League', description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
+export const metadata: Metadata = { title: { absolute: 'Rich City League | Richmond VA Basketball League' }, description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const { teams, games, standings, news } = await getLeagueSnapshot();
+  const { teams, games, standings, news, seasons, divisions } = await getLeagueSnapshot();
   const client = getPublicClient();
+  const season = seasons.find(item=>item.status === 'active') ?? seasons[0];
+  const seasonStandings = standings.filter(item=>item.season_id === season?.id);
+  const divisionId = seasonStandings[0]?.division_id;
+  const previewStandings = seasonStandings.filter(item=>item.division_id === divisionId);
+  const standingsLabel = [season?.name, divisions.find(item=>item.id === divisionId)?.name].filter(Boolean).join(' · ');
 
   const [{ data: playersRaw }, { data: iqRaw }, { data: statsRaw }, { data: postsRaw }] = client
     ? await Promise.all([
@@ -23,7 +28,8 @@ export default async function HomePage() {
     <RCLHomeExperience
       teams={teams}
       games={games}
-      standings={standings}
+      standings={previewStandings}
+      standingsLabel={standingsLabel}
       players={(playersRaw ?? []) as any}
       iq={(iqRaw ?? []) as any}
       stats={(statsRaw ?? []) as any}

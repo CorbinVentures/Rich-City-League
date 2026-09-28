@@ -412,13 +412,13 @@ export default function ScorebookPage() {
       <Container maxWidth="2xl" className="py-6 sm:py-10">
         <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[.3em] text-rcl-gold">RCL GAME IQ™ · LIVE SCOREBOOK</p>
+            <p className="text-xs font-black uppercase tracking-[.3em] text-rcl-gold">RCL GAME IQ™ · LIVE SCOREBOOK</p>
             <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-tight sm:text-6xl">Control the game.</h1>
             <p className="mt-2 max-w-3xl text-sm text-white/45">Record the play once. RCL calculates the box score, advanced metrics, shot profile, leaderboards, player profiles and downstream league data.</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => void changeScorebookMode('quick')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-white/5'}`}>Quick</button>
-            <button type="button" onClick={() => void changeScorebookMode('pro')} className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${mode === 'pro' ? 'bg-rcl-gold text-black' : 'border border-white/10 bg-white/5'}`}>Pro</button>
+            <button type="button" onClick={() => void changeScorebookMode('quick')} className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-white/5'}`}>Quick</button>
+            <button type="button" onClick={() => void changeScorebookMode('pro')} className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest ${mode === 'pro' ? 'bg-rcl-gold text-black' : 'border border-white/10 bg-white/5'}`}>Pro</button>
           </div>
         </div>
 
@@ -426,13 +426,13 @@ export default function ScorebookPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className={`rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'bg-rcl-gold text-black'}`}>{modeConfig.label} MODE</span>
-                <p className="text-[9px] font-black uppercase tracking-widest text-white/35">GAME CAPTURE PROFILE</p>
+                <span className={`rounded-full px-2 py-1 text-xs font-black uppercase tracking-widest ${mode === 'quick' ? 'bg-rcl-orange text-black' : 'bg-rcl-gold text-black'}`}>{modeConfig.label} MODE</span>
+                <p className="text-xs font-black uppercase tracking-widest text-white/35">GAME CAPTURE PROFILE</p>
               </div>
               <p className="mt-2 text-xs text-white/55">{modeConfig.description}</p>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {modeConfig.features.map((feature) => <span key={feature} className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-white/45">{feature}</span>)}
+              {modeConfig.features.map((feature) => <span key={feature} className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-black uppercase tracking-wide text-white/45">{feature}</span>)}
             </div>
           </div>
         </div>
@@ -440,24 +440,24 @@ export default function ScorebookPage() {
         {error && <div className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</div>}
         {message && <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</div>}
         <div className="mt-4 flex flex-wrap gap-2">
-          {mode === 'pro' && <button type="button" disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>}
-          <button type="button" disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
+          {mode === 'pro' && <button type="button" disabled={!selectedGameId || aiBusy} onClick={() => void runGameIQ()} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-rcl-gold disabled:opacity-40">{aiBusy ? 'Game IQ thinking…' : 'Ask Game IQ AI'}</button>}
+          <button type="button" disabled={!selectedGameId || busy} onClick={() => void finalizeScorebook()} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-emerald-300 disabled:opacity-40">Finalize official game</button>
         </div>
         {mode === 'pro' && <section className="mt-4 rounded-3xl border border-rcl-orange/20 bg-rcl-orange/[.06] p-4">
-          <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">RCL GAME IQ™ · AI COACH</p><p className="mt-1 text-xs text-white/40">Ask questions against the official event stream, box score, lineup data and deterministic analytics.</p></div><span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">AI COACH</span></div>
-          <div className="mt-4 flex flex-wrap gap-2">{coachPrompts.map((prompt) => <button type="button" key={prompt} onClick={() => handleCoachPrompt(prompt)} disabled={coachAskBusy || !selectedGameId} className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[9px] font-black uppercase tracking-wide text-white/60 hover:border-rcl-gold/40 hover:text-white disabled:opacity-30">{prompt}</button>)}</div>
+          <div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-widest text-rcl-orange">RCL GAME IQ™ · AI COACH</p><p className="mt-1 text-xs text-white/40">Ask questions against the official event stream, box score, lineup data and deterministic analytics.</p></div><span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-xs font-black uppercase text-rcl-orange">AI COACH</span></div>
+          <div className="mt-4 flex flex-wrap gap-2">{coachPrompts.map((prompt) => <button type="button" key={prompt} onClick={() => handleCoachPrompt(prompt)} disabled={coachAskBusy || !selectedGameId} className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-xs font-black uppercase tracking-wide text-white/60 hover:border-rcl-gold/40 hover:text-white disabled:opacity-30">{prompt}</button>)}</div>
           <div className="mt-3 flex gap-2">
-            <input type="text" value={coachQuestion} onChange={(e) => setCoachQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void askGameIQ(); }} disabled={!selectedGameId || coachAskBusy} placeholder={selectedGameId ? 'Ask Game IQ about this game…' : 'Select a game first…'} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-white outline-none placeholder:text-white/25 disabled:opacity-50" />
-            <button type="button" onClick={() => void askGameIQ()} disabled={coachAskBusy || !coachQuestion.trim() || !selectedGameId} className="rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">{coachAskBusy ? 'Thinking…' : 'Ask'}</button>
+            <input aria-label={selectedGameId ? 'Ask Game IQ about this game…' : 'Select a game first…'} type="text" value={coachQuestion} onChange={(e) => setCoachQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void askGameIQ(); }} disabled={!selectedGameId || coachAskBusy} placeholder={selectedGameId ? 'Ask Game IQ about this game…' : 'Select a game first…'} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-white outline-none placeholder:text-white/25 disabled:opacity-50" />
+            <button type="button" onClick={() => void askGameIQ()} disabled={coachAskBusy || !coachQuestion.trim() || !selectedGameId} className="rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-30">{coachAskBusy ? 'Thinking…' : 'Ask'}</button>
           </div>
-          {coachAnswer && <div className="mt-4 rounded-2xl border border-rcl-gold/15 bg-black/20 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-rcl-gold">Game IQ answer</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/75">{coachAnswer}</p></div>}
-          {aiInsight && <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-[8px] font-black uppercase tracking-widest text-white/30">Postgame report</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/65">{aiInsight}</p></div>}
+          {coachAnswer && <div className="mt-4 rounded-2xl border border-rcl-gold/15 bg-black/20 p-4"><p className="text-xs font-black uppercase tracking-widest text-rcl-gold">Game IQ answer</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/75">{coachAnswer}</p></div>}
+          {aiInsight && <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4"><p className="text-xs font-black uppercase tracking-widest text-white/30">Postgame report</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/65">{aiInsight}</p></div>}
         </section>}
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <label className="text-[9px] font-black uppercase tracking-widest text-white/35">Game</label>
-            <select value={selectedGameId} onChange={(e) => { setSelectedGameId(e.target.value); void loadGameData(e.target.value); }} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white">
+            <label className="text-xs font-black uppercase tracking-widest text-white/35">Game</label>
+            <select aria-label="Game" value={selectedGameId} onChange={(e) => { setSelectedGameId(e.target.value); void loadGameData(e.target.value); }} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm text-white">
               {games.length === 0 && <option value="">No games available</option>}
               {games.map((game) => <option key={game.id} value={game.id}>{teamName(game.home_team_id)} vs {teamName(game.away_team_id)} · {new Date(game.scheduled_at).toLocaleDateString()}</option>)}
             </select>
@@ -466,35 +466,35 @@ export default function ScorebookPage() {
 
           <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[.06] to-white/[.02] p-5">
             <div className="grid grid-cols-3 items-center text-center">
-              <div><p className="text-[10px] font-black uppercase tracking-widest text-white/35">{selectedGame ? teamName(selectedGame.home_team_id) : 'HOME'}</p><p className="mt-1 font-display text-5xl font-black">{summary?.homeScore ?? 0}</p></div>
-              <div><p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">PERIOD {period}</p><input value={clock} onChange={(e) => setClock(e.target.value)} className="mt-2 w-24 rounded-xl border border-white/10 bg-black/30 px-2 py-2 text-center font-mono text-xl font-black" /><p className="mt-2 text-[9px] text-white/30">MANUAL CLOCK</p></div>
-              <div><p className="text-[10px] font-black uppercase tracking-widest text-white/35">{selectedGame ? teamName(selectedGame.away_team_id) : 'AWAY'}</p><p className="mt-1 font-display text-5xl font-black">{summary?.awayScore ?? 0}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-widest text-white/35">{selectedGame ? teamName(selectedGame.home_team_id) : 'HOME'}</p><p className="mt-1 font-display text-5xl font-black">{summary?.homeScore ?? 0}</p></div>
+              <div><p className="text-xs font-black uppercase tracking-widest text-rcl-orange">PERIOD {period}</p><input aria-label="Game clock" value={clock} onChange={(e) => setClock(e.target.value)} className="mt-2 w-24 rounded-xl border border-white/10 bg-black/30 px-2 py-2 text-center font-mono text-xl font-black" /><p className="mt-2 text-xs text-white/30">MANUAL CLOCK</p></div>
+              <div><p className="text-xs font-black uppercase tracking-widest text-white/35">{selectedGame ? teamName(selectedGame.away_team_id) : 'AWAY'}</p><p className="mt-1 font-display text-5xl font-black">{summary?.awayScore ?? 0}</p></div>
             </div>
             <div className="mt-5 grid grid-cols-4 gap-2">
-              {[1,2,3,4].map((value) => <button key={value} onClick={() => setPeriod(value)} className={`rounded-xl px-3 py-2 text-[9px] font-black uppercase ${period === value ? 'bg-white text-black' : 'border border-white/10 text-white/45'}`}>Q{value}</button>)}
+              {[1,2,3,4].map((value) => <button key={value} onClick={() => setPeriod(value)} className={`rounded-xl px-3 py-2 text-xs font-black uppercase ${period === value ? 'bg-white text-black' : 'border border-white/10 text-white/45'}`}>Q{value}</button>)}
             </div>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Game IQ snapshot</p>
+            <p className="text-xs font-black uppercase tracking-widest text-white/35">Game IQ snapshot</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {[['EVENTS', summary?.totalEvents ?? 0], ['POSSESSIONS', summary?.possessions ?? 0], ['REB', summary?.rebounds ?? 0], ['TO', summary?.turnovers ?? 0]].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black text-white/30">{label}</p><p className="mt-1 text-xl font-black">{value}</p></div>)}
+              {[['EVENTS', summary?.totalEvents ?? 0], ['POSSESSIONS', summary?.possessions ?? 0], ['REB', summary?.rebounds ?? 0], ['TO', summary?.turnovers ?? 0]].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-xs font-black text-white/30">{label}</p><p className="mt-1 text-xl font-black">{value}</p></div>)}
             </div>
           </div>
         </section>
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_1.6fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Team</p>
+            <p className="text-xs font-black uppercase tracking-widest text-white/35">Team</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              {selectedGame && [selectedGame.home_team_id, selectedGame.away_team_id].map((teamId) => <button key={teamId} onClick={() => { setSelectedTeamId(teamId); setSelectedPlayerId(''); }} className={`rounded-xl p-3 text-left text-[10px] font-black uppercase ${selectedTeamId === teamId ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-black/20 text-white/55'}`}>{teamName(teamId)}</button>)}
+              {selectedGame && [selectedGame.home_team_id, selectedGame.away_team_id].map((teamId) => <button key={teamId} onClick={() => { setSelectedTeamId(teamId); setSelectedPlayerId(''); }} className={`rounded-xl p-3 text-left text-xs font-black uppercase ${selectedTeamId === teamId ? 'bg-rcl-orange text-black' : 'border border-white/10 bg-black/20 text-white/55'}`}>{teamName(teamId)}</button>)}
             </div>
-            <p className="mt-5 text-[9px] font-black uppercase tracking-widest text-white/35">Player</p>
+            <p className="mt-5 text-xs font-black uppercase tracking-widest text-white/35">Player</p>
             <div className="mt-2 grid max-h-[330px] grid-cols-2 gap-2 overflow-y-auto pr-1">
-              {teamPlayers.length === 0 && <div className="col-span-full rounded-xl border border-dashed border-white/10 p-4 text-center text-[10px] uppercase tracking-widest text-white/30">No active players are attached to this team for this season.</div>}
+              {teamPlayers.length === 0 && <div className="col-span-full rounded-xl border border-dashed border-white/10 p-4 text-center text-xs uppercase tracking-widest text-white/30">No active players are attached to this team for this season.</div>}
               {teamPlayers.map((player) => {
                 const stat = stats.find((item) => item.player_id === player.id);
-                return <button type="button" key={player.id} aria-pressed={selectedPlayerId === player.id} onClick={() => { setSelectedPlayerId(player.id); setAssistPlayerId(''); }} className={`rounded-xl border p-3 text-left transition ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10 ring-1 ring-rcl-gold/30' : 'border-white/10 bg-black/20 hover:border-white/25'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-[9px] text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
+                return <button type="button" key={player.id} aria-pressed={selectedPlayerId === player.id} onClick={() => { setSelectedPlayerId(player.id); setAssistPlayerId(''); }} className={`rounded-xl border p-3 text-left transition ${selectedPlayerId === player.id ? 'border-rcl-gold bg-rcl-gold/10 ring-1 ring-rcl-gold/30' : 'border-white/10 bg-black/20 hover:border-white/25'}`}><span className="text-xs font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p><p className="mt-1 text-xs text-white/35">{stat?.points ?? 0} PTS · {stat?.rebounds ?? 0} REB · {stat?.assists ?? 0} AST</p></button>;
               })}
             </div>
           </div>
@@ -504,45 +504,45 @@ export default function ScorebookPage() {
             pendingShot={pendingShot}
             onLocationSelect={(x, y) => setPendingShot({ x, y, zone: zoneFromCoordinates(x, y) })}
           /> : <div className="rounded-3xl border border-rcl-orange/15 bg-gradient-to-br from-rcl-orange/[.07] to-white/[.02] p-5">
-            <p className="text-[9px] font-black uppercase tracking-widest text-rcl-orange">Quick mode</p>
+            <p className="text-xs font-black uppercase tracking-widest text-rcl-orange">Quick mode</p>
             <h3 className="mt-2 font-display text-2xl font-black uppercase">Record the play. Keep moving.</h3>
             <p className="mt-2 text-xs leading-5 text-white/40">Shot locations, lineup tracking, substitutions and advanced Game IQ analytics are available in Pro mode.</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              {modeConfig.features.slice(0, 4).map((feature) => <div key={feature} className="rounded-xl border border-white/10 bg-black/20 p-3"><p className="text-[8px] font-black uppercase tracking-widest text-white/30">QUICK</p><p className="mt-1 text-[10px] font-black uppercase">{feature}</p></div>)}
+              {modeConfig.features.slice(0, 4).map((feature) => <div key={feature} className="rounded-xl border border-white/10 bg-black/20 p-3"><p className="text-xs font-black uppercase tracking-widest text-white/30">QUICK</p><p className="mt-1 text-xs font-black uppercase">{feature}</p></div>)}
             </div>
-            <button type="button" onClick={() => void changeScorebookMode('pro')} className="mt-4 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black">Switch to Pro for full Game IQ</button>
+            <button type="button" onClick={() => void changeScorebookMode('pro')} className="mt-4 rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black">Switch to Pro for full Game IQ</button>
           </div>}
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Selected player</p>
+            <p className="text-xs font-black uppercase tracking-widest text-white/35">Selected player</p>
             <h2 className="mt-2 font-display text-2xl font-black uppercase">{selectedPlayer ? `#${selectedPlayer.jersey_number ?? '--'} ${selectedPlayer.first_name} ${selectedPlayer.last_name}` : 'Select a player'}</h2>
-            {derived && <div className="mt-4 grid grid-cols-2 gap-2">{[['PTS', derived.points], ['REB', derived.rebounds], ['AST', derived.assists], ['STL', derived.steals], ['BLK', derived.blocks], ['TO', derived.turnovers], ['FG%', `${(derived.fg_pct * 100).toFixed(0)}%`], ['TS%', `${(derived.ts_pct * 100).toFixed(0)}%`], ['eFG%', `${(derived.efg_pct * 100).toFixed(0)}%`], ['EFF', derived.efficiency]].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}</div>}
-            {mode === 'pro' && selectedPlayerId && <><p className="mt-5 text-[9px] font-black uppercase tracking-widest text-white/35">Optional assist</p><select value={assistPlayerId} onChange={(e) => setAssistPlayerId(e.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">No assist</option>{teamPlayers.filter((p) => p.id !== selectedPlayerId).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></>}
+            {derived && <div className="mt-4 grid grid-cols-2 gap-2">{[['PTS', derived.points], ['REB', derived.rebounds], ['AST', derived.assists], ['STL', derived.steals], ['BLK', derived.blocks], ['TO', derived.turnovers], ['FG%', `${(derived.fg_pct * 100).toFixed(0)}%`], ['TS%', `${(derived.ts_pct * 100).toFixed(0)}%`], ['eFG%', `${(derived.efg_pct * 100).toFixed(0)}%`], ['EFF', derived.efficiency]].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-xs font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}</div>}
+            {mode === 'pro' && selectedPlayerId && <><p className="mt-5 text-xs font-black uppercase tracking-widest text-white/35">Optional assist</p><select aria-label="Assist player" value={assistPlayerId} onChange={(e) => setAssistPlayerId(e.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">No assist</option>{teamPlayers.filter((p) => p.id !== selectedPlayerId).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></>}
           </div>
         </section>
 
         {mode === 'pro' && <section className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
             <div className="flex items-center justify-between">
-              <div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Lineup Lab</p><p className="mt-1 text-xs text-white/40">Set the five on the floor. RCL derives minutes and plus/minus from the substitution timeline.</p></div>
-              <span className="rounded-full border border-rcl-gold/20 bg-rcl-gold/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-gold">{startingFive.length}/5 selected</span>
+              <div><p className="text-xs font-black uppercase tracking-widest text-white/35">Lineup Lab</p><p className="mt-1 text-xs text-white/40">Set the five on the floor. RCL derives minutes and plus/minus from the substitution timeline.</p></div>
+              <span className="rounded-full border border-rcl-gold/20 bg-rcl-gold/10 px-2 py-1 text-xs font-black uppercase text-rcl-gold">{startingFive.length}/5 selected</span>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {teamPlayers.map((player) => {
                 const selected = startingFive.includes(player.id);
-                return <button key={player.id} onClick={() => setStartingFive((current) => selected ? current.filter((id) => id !== player.id) : current.length < 5 ? [...current, player.id] : current)} className={`rounded-xl border p-3 text-left ${selected ? 'border-emerald-300 bg-emerald-300/10' : 'border-white/10 bg-black/20'}`}><span className="text-[9px] font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-[10px] font-black">{player.first_name} {player.last_name}</p>{selected && <p className="mt-1 text-[8px] uppercase text-emerald-300">On floor</p>}</button>;
+                return <button key={player.id} onClick={() => setStartingFive((current) => selected ? current.filter((id) => id !== player.id) : current.length < 5 ? [...current, player.id] : current)} className={`rounded-xl border p-3 text-left ${selected ? 'border-emerald-300 bg-emerald-300/10' : 'border-white/10 bg-black/20'}`}><span className="text-xs font-black text-rcl-gold">#{player.jersey_number ?? '--'}</span><p className="mt-1 text-xs font-black">{player.first_name} {player.last_name}</p>{selected && <p className="mt-1 text-xs uppercase text-emerald-300">On floor</p>}</button>;
               })}
             </div>
-            <button disabled={startingFive.length !== 5 || busy} onClick={() => void saveStartingFive()} className="mt-3 rounded-xl bg-rcl-gold px-4 py-3 text-[9px] font-black uppercase tracking-widest text-black disabled:opacity-30">Save Q{period} Starting Five</button>
+            <button disabled={startingFive.length !== 5 || busy} onClick={() => void saveStartingFive()} className="mt-3 rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black disabled:opacity-30">Save Q{period} Starting Five</button>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Substitution Desk</p>
+            <p className="text-xs font-black uppercase tracking-widest text-white/35">Substitution Desk</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <select value={subOut} onChange={(e) => setSubOut(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player OUT</option>{teamPlayers.filter((p) => activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
-              <select value={subIn} onChange={(e) => setSubIn(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player IN</option>{teamPlayers.filter((p) => p.id !== subOut && !activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+              <select aria-label="Player leaving the court" value={subOut} onChange={(e) => setSubOut(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player OUT</option>{teamPlayers.filter((p) => activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
+              <select aria-label="Player entering the court" value={subIn} onChange={(e) => setSubIn(e.target.value)} className="rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-xs text-white"><option value="">Player IN</option>{teamPlayers.filter((p) => p.id !== subOut && !activeLineup.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select>
             </div>
-            <button disabled={!subOut || !subIn || busy} onClick={() => void saveSubstitution()} className="mt-3 w-full rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-orange disabled:opacity-30">Record Substitution</button>
-            <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
+            <button disabled={!subOut || !subIn || busy} onClick={() => void saveSubstitution()} className="mt-3 w-full rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-3 text-xs font-black uppercase tracking-widest text-rcl-orange disabled:opacity-30">Record Substitution</button>
+            <div className="mt-4 grid grid-cols-2 gap-2">{stats.filter((s) => s.team_id === selectedTeamId).sort((a,b) => (b.minutes ?? 0) - (a.minutes ?? 0)).slice(0,6).map((s) => <div key={s.id} className="rounded-xl bg-black/20 p-3"><p className="text-xs text-white/30">{playerName(s.player_id)}</p><p className="mt-1 text-sm font-black">{(s.minutes ?? 0).toFixed(1)} MIN <span className="text-white/30">·</span> {s.plus_minus >= 0 ? '+' : ''}{s.plus_minus} +/-</p></div>)}</div>
           </div>
         </section>}
 
@@ -550,8 +550,8 @@ export default function ScorebookPage() {
           <section className="mt-4 grid gap-4 lg:grid-cols-[1.15fr_1fr]">
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
               <div className="flex items-center justify-between">
-                <div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Basketball Intelligence Engine</p><p className="mt-1 text-xs text-white/40">Deterministic analytics calculated from the live event stream.</p></div>
-                <span className="rounded-full border border-rcl-orange/20 bg-rcl-orange/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-orange">LIVE IQ</span>
+                <div><p className="text-xs font-black uppercase tracking-widest text-white/35">Basketball Intelligence Engine</p><p className="mt-1 text-xs text-white/40">Deterministic analytics calculated from the live event stream.</p></div>
+                <span className="rounded-full border border-rcl-orange/20 bg-rcl-orange/10 px-2 py-1 text-xs font-black uppercase text-rcl-orange">LIVE IQ</span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[
@@ -563,21 +563,21 @@ export default function ScorebookPage() {
                   ['TS%', `${selectedTeamAnalytics?.ts_pct ?? 0}%`],
                   ['TOV%', `${selectedTeamAnalytics?.turnover_rate ?? 0}%`],
                   ['ORB%', `${selectedTeamAnalytics?.offensive_rebound_rate ?? 0}%`],
-                ].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}
+                ].map(([label, value]) => <div key={label} className="rounded-xl bg-black/20 p-3"><p className="text-xs font-black text-white/30">{label}</p><p className="mt-1 text-lg font-black">{value}</p></div>)}
               </div>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {analytics.teams.map((team) => <div key={team.team_id} className="rounded-xl border border-white/5 bg-black/20 p-3">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-white/35">{teamName(team.team_id)}</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-white/35">{teamName(team.team_id)}</p>
                   <p className="mt-1 text-sm font-black">{team.points} PTS · {team.possessions} POSS</p>
-                  <p className="mt-1 text-[9px] text-white/35">ORtg {team.offensive_rating} · DRtg {team.defensive_rating} · Net {team.net_rating >= 0 ? '+' : ''}{team.net_rating}</p>
+                  <p className="mt-1 text-xs text-white/35">ORtg {team.offensive_rating} · DRtg {team.defensive_rating} · Net {team.net_rating >= 0 ? '+' : ''}{team.net_rating}</p>
                 </div>)}
               </div>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Runs & Clutch</p>
+              <p className="text-xs font-black uppercase tracking-widest text-white/35">Runs & Clutch</p>
               <div className="mt-3 space-y-2">
                 {analytics.scoring_runs.slice().reverse().slice(0, 5).map((run, index) => <div key={`${run.team_id}-${run.start_period}-${run.start_clock}-${index}`} className="flex items-center justify-between rounded-xl bg-black/20 p-3">
-                  <div><p className="text-[9px] font-black uppercase text-white/40">{teamName(run.team_id)} run</p><p className="mt-1 text-xs text-white/60">Q{run.start_period} {formatClock(run.start_clock)} → Q{run.end_period} {formatClock(run.end_clock)}</p></div>
+                  <div><p className="text-xs font-black uppercase text-white/40">{teamName(run.team_id)} run</p><p className="mt-1 text-xs text-white/60">Q{run.start_period} {formatClock(run.start_clock)} → Q{run.end_period} {formatClock(run.end_clock)}</p></div>
                   <span className="font-display text-xl font-black text-rcl-orange">{run.points}-0</span>
                 </div>)}
                 {!analytics.scoring_runs.length && <p className="rounded-xl bg-black/20 p-4 text-xs text-white/30">No 6+ point scoring run detected yet.</p>}
@@ -585,7 +585,7 @@ export default function ScorebookPage() {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {analytics.teams.map((team) => { const teamId = team.team_id;
                   const clutch = analytics.clutch[teamId];
-                  return <div key={teamId} className="rounded-xl bg-black/20 p-3"><p className="text-[8px] font-black uppercase text-white/30">{teamName(teamId)} clutch</p><p className="mt-1 text-lg font-black">{clutch.points} PTS</p><p className="text-[9px] text-white/35">{clutch.efg_pct}% eFG · {clutch.turnovers} TO</p></div>;
+                  return <div key={teamId} className="rounded-xl bg-black/20 p-3"><p className="text-xs font-black uppercase text-white/30">{teamName(teamId)} clutch</p><p className="mt-1 text-lg font-black">{clutch.points} PTS</p><p className="text-xs text-white/35">{clutch.efg_pct}% eFG · {clutch.turnovers} TO</p></div>;
                 })}
               </div>
             </div>
@@ -595,18 +595,18 @@ export default function ScorebookPage() {
         {mode === 'pro' && analytics && (
           <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.25fr]">
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Shot Zone Efficiency</p>
+              <p className="text-xs font-black uppercase tracking-widest text-white/35">Shot Zone Efficiency</p>
               <div className="mt-3 space-y-2">
-                {Object.entries(analytics.shot_zones[selectedTeamId] ?? {}).sort((a,b) => b[1].attempts - a[1].attempts).slice(0, 8).map(([zone, value]) => <div key={zone} className="flex items-center justify-between rounded-xl bg-black/20 p-3"><div><p className="text-[10px] font-black uppercase">{zone.replace(/_/g, ' ')}</p><p className="mt-1 text-[9px] text-white/30">{value.made}/{value.attempts} FG · {value.points} PTS</p></div><span className="font-black">{value.fg_pct}%</span></div>)}
+                {Object.entries(analytics.shot_zones[selectedTeamId] ?? {}).sort((a,b) => b[1].attempts - a[1].attempts).slice(0, 8).map(([zone, value]) => <div key={zone} className="flex items-center justify-between rounded-xl bg-black/20 p-3"><div><p className="text-xs font-black uppercase">{zone.replace(/_/g, ' ')}</p><p className="mt-1 text-xs text-white/30">{value.made}/{value.attempts} FG · {value.points} PTS</p></div><span className="font-black">{value.fg_pct}%</span></div>)}
                 {!Object.keys(analytics.shot_zones[selectedTeamId] ?? {}).length && <p className="py-8 text-center text-xs text-white/25">Shot-zone data appears as shots are logged.</p>}
               </div>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-              <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Lineup Combinations</p>
+              <p className="text-xs font-black uppercase tracking-widest text-white/35">Lineup Combinations</p>
               <div className="mt-3 space-y-2">
                 {analytics.lineup_combinations.filter((lineup) => lineup.team_id === selectedTeamId).slice(0, 6).map((lineup) => <div key={`${lineup.team_id}-${lineup.player_ids.join('-')}`} className="rounded-xl bg-black/20 p-3">
-                  <div className="flex items-center justify-between"><p className="text-[9px] font-black uppercase text-white/55">{lineup.player_ids.map((id) => `#${players.find((p) => p.id === id)?.jersey_number ?? '--'}`).join(' · ')}</p><span className="text-[9px] font-black text-rcl-gold">{Math.round(lineup.seconds / 60)} MIN</span></div>
-                  <p className="mt-1 text-[9px] text-white/35">{lineup.points_for}-{lineup.points_against} · {lineup.plus_minus >= 0 ? '+' : ''}{lineup.plus_minus} +/- · {lineup.possessions} possessions</p>
+                  <div className="flex items-center justify-between"><p className="text-xs font-black uppercase text-white/55">{lineup.player_ids.map((id) => `#${players.find((p) => p.id === id)?.jersey_number ?? '--'}`).join(' · ')}</p><span className="text-xs font-black text-rcl-gold">{Math.round(lineup.seconds / 60)} MIN</span></div>
+                  <p className="mt-1 text-xs text-white/35">{lineup.points_for}-{lineup.points_against} · {lineup.plus_minus >= 0 ? '+' : ''}{lineup.plus_minus} +/- · {lineup.possessions} possessions</p>
                 </div>)}
                 {!analytics.lineup_combinations.filter((lineup) => lineup.team_id === selectedTeamId).length && <p className="py-8 text-center text-xs text-white/25">Save a starting five to unlock lineup analytics.</p>}
               </div>
@@ -616,14 +616,14 @@ export default function ScorebookPage() {
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            {activeActionGroups.map((group) => <div key={group.label} className="mb-5 last:mb-0"><p className="mb-2 text-[9px] font-black uppercase tracking-widest text-white/35">{group.label}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{group.actions.map(([label, type, value, made]) => <button key={label} disabled={!selectedPlayerId || busy} onClick={() => void recordAction(type as GameEvent['event_type'], value, value ? value as 1|2|3 : null, made)} className="min-h-14 rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-left text-[10px] font-black uppercase tracking-wider transition hover:border-rcl-orange/50 hover:bg-rcl-orange/10 disabled:cursor-not-allowed disabled:opacity-30">{label}<span className="mt-1 block text-[8px] font-normal text-white/30">{selectedPlayerId ? 'Tap to record' : 'Select player first'}</span></button>)}</div></div>)}
-            <div className="mt-5 flex gap-2"><button disabled={!events.length || busy} onClick={() => void undoLast()} className="rounded-xl border border-white/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-white/60 disabled:opacity-30">Undo last play</button><button disabled={!selectedPlayerId || busy} onClick={() => void recordAction('assist')} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-3 text-[9px] font-black uppercase tracking-widest text-rcl-gold disabled:opacity-30">Record assist</button></div>
+            {activeActionGroups.map((group) => <div key={group.label} className="mb-5 last:mb-0"><p className="mb-2 text-xs font-black uppercase tracking-widest text-white/35">{group.label}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{group.actions.map(([label, type, value, made]) => <button key={label} disabled={!selectedPlayerId || busy} onClick={() => void recordAction(type as GameEvent['event_type'], value, value ? value as 1|2|3 : null, made)} className="min-h-14 rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-left text-xs font-black uppercase tracking-wider transition hover:border-rcl-orange/50 hover:bg-rcl-orange/10 disabled:cursor-not-allowed disabled:opacity-30">{label}<span className="mt-1 block text-xs font-normal text-white/30">{selectedPlayerId ? 'Tap to record' : 'Select player first'}</span></button>)}</div></div>)}
+            <div className="mt-5 flex gap-2"><button disabled={!events.length || busy} onClick={() => void undoLast()} className="rounded-xl border border-white/10 px-4 py-3 text-xs font-black uppercase tracking-widest text-white/60 disabled:opacity-30">Undo last play</button><button disabled={!selectedPlayerId || busy} onClick={() => void recordAction('assist')} className="rounded-xl border border-rcl-gold/30 bg-rcl-gold/10 px-4 py-3 text-xs font-black uppercase tracking-widest text-rcl-gold disabled:opacity-30">Record assist</button></div>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-            <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-widest text-white/35">Play-by-play</p><p className="mt-1 text-[10px] text-white/30">{events.filter((e) => !e.voided_at).length} live events</p></div><span className="rounded-full border border-rcl-gold/20 bg-rcl-gold/10 px-2 py-1 text-[8px] font-black uppercase text-rcl-gold">source of truth</span></div>
+            <div className="flex items-center justify-between"><div><p className="text-xs font-black uppercase tracking-widest text-white/35">Play-by-play</p><p className="mt-1 text-xs text-white/30">{events.filter((e) => !e.voided_at).length} live events</p></div><span className="rounded-full border border-rcl-gold/20 bg-rcl-gold/10 px-2 py-1 text-xs font-black uppercase text-rcl-gold">source of truth</span></div>
             <div className="mt-3 max-h-[430px] space-y-1 overflow-y-auto pr-1">
-              {events.filter((e) => !e.voided_at).map((event) => <div key={event.id} className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-2"><span className="w-12 shrink-0 font-mono text-[9px] text-rcl-gold">{formatClock(event.clock_seconds)}</span><div className="min-w-0 flex-1"><p className="truncate text-[10px] font-bold">{describeEvent(event, playerName(event.player_id), playerName(event.secondary_player_id))}</p><p className="text-[8px] uppercase text-white/25">{teamName(event.team_id ?? '')} · Q{event.period_number}</p></div>{event.points > 0 && <span className="font-black text-emerald-300">+{event.points}</span>}</div>)}
+              {events.filter((e) => !e.voided_at).map((event) => <div key={event.id} className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 px-3 py-2"><span className="w-12 shrink-0 font-mono text-xs text-rcl-gold">{formatClock(event.clock_seconds)}</span><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{describeEvent(event, playerName(event.player_id), playerName(event.secondary_player_id))}</p><p className="text-xs uppercase text-white/25">{teamName(event.team_id ?? '')} · Q{event.period_number}</p></div>{event.points > 0 && <span className="font-black text-emerald-300">+{event.points}</span>}</div>)}
               {!events.length && <p className="py-10 text-center text-xs text-white/25">No plays recorded yet.</p>}
             </div>
           </div>

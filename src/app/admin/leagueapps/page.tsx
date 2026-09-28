@@ -134,7 +134,7 @@ export default function LeagueAppsAdminHub() {
   return <main className="rcl-admin-hub min-h-screen bg-rcl-black pb-24 text-white"><AdminWorkspace />
     <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(255,107,26,.16),transparent_32rem),linear-gradient(145deg,#09111d,#05070b)]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-        <Link href="/admin" className="text-[10px] font-black uppercase tracking-[.2em] text-white/35 hover:text-rcl-orange">← Command Center</Link>
+        <Link href="/admin" className="text-xs font-black uppercase tracking-[.2em] text-white/35 hover:text-rcl-orange">← Command Center</Link>
         <div className="mt-8 flex flex-col justify-between gap-7 lg:flex-row lg:items-end">
           <div>
             <p className="rcl-kicker">RCL OPERATIONS · LEAGUEAPPS BRIDGE</p>
@@ -171,10 +171,10 @@ export default function LeagueAppsAdminHub() {
           {(['members-2', 'registrations-2'] as const).map((resource) => {
             const row = syncState.find(item => item.resource === resource);
             return <div key={resource} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-[9px] font-black uppercase tracking-[.18em] text-white/35">{resource === 'members-2' ? 'MEMBERS' : 'REGISTRATIONS'}</p>
+              <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">{resource === 'members-2' ? 'MEMBERS' : 'REGISTRATIONS'}</p>
               <p className="mt-2 font-display text-2xl font-black">{row?.records_synced ?? 0}</p>
-              <p className="text-[9px] uppercase tracking-wider text-rcl-orange/70">{row?.status ?? 'never synced'}</p>
-              {row?.last_error && <p className="mt-2 text-[10px] text-red-300/70">{row.last_error}</p>}
+              <p className="text-xs uppercase tracking-wider text-rcl-orange/70">{row?.status ?? 'never synced'}</p>
+              {row?.last_error && <p className="mt-2 text-xs text-red-300/70">{row.last_error}</p>}
             </div>;
           })}
         </div>
@@ -182,13 +182,13 @@ export default function LeagueAppsAdminHub() {
 
       <div className="flex gap-2 overflow-x-auto border-b border-white/10 pb-3">
         {([['all','All controls'],['leagueapps','LeagueApps'],['bridge','Connected'],['rcl','RCL native']] as const).map(([value,label]) =>
-          <button key={value} onClick={() => setFilter(value)} className={`whitespace-nowrap rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest ${filter === value ? 'bg-rcl-orange text-black' : 'border border-white/10 text-white/45 hover:text-white'}`}>{label}</button>
+          <button key={value} onClick={() => setFilter(value)} className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-black uppercase tracking-widest ${filter === value ? 'bg-rcl-orange text-black' : 'border border-white/10 text-white/45 hover:text-white'}`}>{label}</button>
         )}
       </div>
 
       <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(({ title, eyebrow, description, href, icon: Icon, state }) => {
-          const body = <><div className="flex items-start justify-between"><span className="rcl-admin-icon"><Icon /></span><span className={`rcl-admin-badge ${state}`}>{statusLabel[state]}</span></div><p className="mt-6 text-[9px] font-black tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-2 font-display text-xl font-black uppercase">{title}</h2><p className="mt-2 min-h-12 text-xs leading-5 text-white/40">{description}</p><span className="mt-5 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.16em] text-white/65">Open control <FaArrowRight /></span></>;
+          const body = <><div className="flex items-start justify-between"><span className="rcl-admin-icon"><Icon /></span><span className={`rcl-admin-badge ${state}`}>{statusLabel[state]}</span></div><p className="mt-6 text-xs font-black tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-2 font-display text-xl font-black uppercase">{title}</h2><p className="mt-2 min-h-12 text-xs leading-5 text-white/40">{description}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/65">Open control <FaArrowRight /></span></>;
           if (href?.startsWith('http')) return <a key={title} href={href} target="_blank" rel="noreferrer" className="rcl-admin-module">{body}</a>;
           if (href) return <Link key={title} href={href} className="rcl-admin-module">{body}</Link>;
           if (title === 'Data Sync') {

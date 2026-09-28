@@ -100,12 +100,12 @@ export default async function LabModulePage({ params }: { params: Promise<{ modu
   return (
     <main className="min-h-screen bg-[#05080d] pb-24 text-white">
       <section className="rcl-lab-hero relative overflow-hidden border-b border-rcl-orange/30 bg-[linear-gradient(90deg,rgba(3,7,13,.98)_0%,rgba(3,7,13,.84)_38%,rgba(3,7,13,.48)_68%,rgba(3,7,13,.82)_100%),linear-gradient(180deg,rgba(3,7,13,.18)_25%,rgba(3,7,13,.96)_100%),url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=90')] bg-cover bg-center">\n        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,79,22,.08),transparent_42%,rgba(21,159,255,.08))]" />\n        <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-          <Link href="/lab" className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[.2em] text-white/40 hover:text-white">
+          <Link href="/lab" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-white/40 hover:text-white">
             <FaArrowLeft /> Back to The Lab
           </Link>
           <div className="mt-10 flex max-w-4xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="flex items-center gap-2 text-[9px] font-black tracking-[.28em] text-rcl-orange"><Icon /> {config.kicker}</p>
+              <p className="flex items-center gap-2 text-xs font-black tracking-[.28em] text-rcl-orange"><Icon /> {config.kicker}</p>
               <h1 className="mt-4 font-display text-5xl font-black uppercase leading-[.85] sm:text-7xl">{config.title}</h1>
               <p className="mt-6 max-w-2xl text-sm leading-7 text-white/50">{config.body}</p>
             </div>
@@ -126,10 +126,10 @@ export default async function LabModulePage({ params }: { params: Promise<{ modu
         </section>
 
         <section className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c1826] to-[#05080d] p-7 sm:p-10">
-          <p className="text-[9px] font-black tracking-[.25em] text-rcl-gold">NEXT MOVE</p>
+          <p className="text-xs font-black tracking-[.25em] text-rcl-gold">NEXT MOVE</p>
           <h2 className="mt-3 max-w-2xl font-display text-3xl font-black uppercase sm:text-4xl">Keep the work connected.</h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/45">The Lab is designed as one connected development system. Move from training to competition, study, progression and your player identity without losing your place.</p>
-          <Link href={config.href} className="mt-7 inline-flex items-center gap-3 rounded-xl bg-rcl-orange px-5 py-3 text-[9px] font-black uppercase tracking-[.18em] text-black hover:bg-white">
+          <Link href={config.href} className="mt-7 inline-flex items-center gap-3 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase tracking-[.18em] text-black hover:bg-white">
             {config.cta} <FaArrowRight />
           </Link>
         </section>

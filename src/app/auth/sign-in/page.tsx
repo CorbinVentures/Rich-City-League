@@ -1,3 +1,5 @@
+export const metadata = {"title": "Sign in", "description": "Sign in to your Rich City League account."};
+
 import { Container } from '@/components/Container';
 import { AuthForm } from '@/components/AuthForm';
 

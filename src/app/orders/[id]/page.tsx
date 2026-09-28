@@ -98,7 +98,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             <h1 className="rcl-display mt-2 text-5xl uppercase">{order.order_number}</h1>
             <p className="mt-3 text-sm text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
           </div>
-          <div className="flex gap-2 text-[9px] font-black uppercase tracking-widest">
+          <div className="flex gap-2 text-xs font-black uppercase tracking-widest">
             <span className="rounded-full bg-rcl-gold/10 px-3 py-2 text-rcl-gold">Payment · {order.payment_status}</span>
             <span className="rounded-full bg-rcl-orange/10 px-3 py-2 text-rcl-orange">Fulfillment · {order.fulfillment_status}</span>
           </div>

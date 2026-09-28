@@ -60,6 +60,7 @@ export default function LabPage() {
   const { user } = useAuth();
   const db = useMemo(() => getSupabaseClient(), []);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [savedLocally, setSavedLocally] = useState(false);
   const [skill, setSkill] = useState(skills[0]);
   const [level, setLevel] = useState(levels[1]);
   const [length, setLength] = useState(45);
@@ -87,6 +88,8 @@ export default function LabPage() {
 
     setStatus('loading');
     setErrorMessage('');
+    setSessionId(null);
+    setSavedLocally(false);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 25000);
 
@@ -110,7 +113,7 @@ export default function LabPage() {
       setActiveDrill(0);
       setScreen('workout');
       setHistory(next);
-      try { window.localStorage.setItem('rcl-workouts', JSON.stringify(next)); } catch {}
+      try { window.localStorage.setItem('rcl-workouts', JSON.stringify(next)); setSavedLocally(true); } catch { setSavedLocally(false); }
       setStatus('idle');
     } catch (error) {
       setStatus('error');
@@ -135,13 +138,13 @@ export default function LabPage() {
       <Field label="Development focus"><div className="labx-grid2">{skills.map(item=><button type="button" key={item} onClick={()=>setSkill(item)} className={skill===item?'selected':''}>{item}</button>)}</div></Field>
       <Field label="Experience level"><div className="labx-levels">{levels.map(item=><button type="button" key={item} onClick={()=>setLevel(item)} className={level===item?'selected':''}>{item}</button>)}</div></Field>
       <Field label="Time"><div className="labx-times">{lengths.map(item=><button type="button" key={item} onClick={()=>setLength(item)} className={length===item?'selected blue':''}>{item}</button>)}</div></Field>
-      <Field label="Training environment"><select value={environment} onChange={e=>setEnvironment(e.target.value)}>{environments.map(item=><option key={item}>{item}</option>)}</select></Field>
+      <Field label="Training environment"><select aria-label="Training environment" value={environment} onChange={e=>setEnvironment(e.target.value)}>{environments.map(item=><option key={item}>{item}</option>)}</select></Field>
       <Field label="Equipment · Select all that apply"><div className="labx-pills">{equipment.map(item=><button type="button" key={item} onClick={()=>setSelectedEquipment(v=>v.includes(item)?v.filter(x=>x!==item):[...v,item])} className={selectedEquipment.includes(item)?'selected':''}>{item}</button>)}</div></Field>
-      <Field label="Coach note"><textarea maxLength={500} value={goal} onChange={e=>setGoal(e.target.value)} placeholder="What do you need to improve?"/></Field>
+      <Field label="Coach note"><textarea aria-label="What do you need to improve?" maxLength={500} value={goal} onChange={e=>setGoal(e.target.value)} placeholder="What do you need to improve?"/></Field>
       <button disabled={status==='loading'} className="labx-primary">{status==='loading'?'BUILDING SESSION…':'GENERATE WORKOUT'} <FaArrowRight/></button>{status==='error'&&<p className="labx-error">{errorMessage}</p>}</form>
     </section>}
 
-    {screen==='workout'&&workout&&<section className="labx-shell"><div className="labx-crumb">THE LAB <i>›</i> YOUR WORKOUT <button>SAVE</button></div>
+    {screen==='workout'&&workout&&<section className="labx-shell"><div className="labx-crumb">THE LAB <i>›</i> YOUR WORKOUT <span role="status">{sessionId ? 'SAVED TO YOUR ACCOUNT' : savedLocally ? 'SAVED ON THIS DEVICE' : 'NOT SAVED'}</span></div>
       <div className="labx-workout-head"><h1>YOUR WORKOUT</h1><h3>{workout.skill} <i>•</i> {workout.difficulty} <i>•</i> {workout.minutes} Minutes</h3><button className="labx-outline" onClick={()=>goDrill(0)}>Start Session</button></div>
       <div className="labx-worktabs"><b>Workout</b><span>Details</span><span>Notes</span></div>
       <div className="labx-session-list"><article><div className="labx-thumb warm"/><div><b>WARM UP</b><small>8 MIN</small><p>{workout.warmup.join(' · ')}</p></div><strong>›</strong></article>
@@ -165,15 +168,15 @@ export default function LabPage() {
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="mt-6 block"><span className="mb-2 block text-[9px] font-black uppercase tracking-[.2em] text-white/40">{label}</span>{children}</label>;
+  return <label className="mt-6 block"><span className="mb-2 block text-xs font-black uppercase tracking-[.2em] text-white/40">{label}</span>{children}</label>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl border border-white/10 bg-black/25 p-3"><p className="text-[8px] font-black tracking-widest text-white/30">{label}</p><p className="mt-1 text-sm font-black">{value}</p></div>;
+  return <div className="rounded-xl border border-white/10 bg-black/25 p-3"><p className="text-xs font-black tracking-widest text-white/30">{label}</p><p className="mt-1 text-sm font-black">{value}</p></div>;
 }
 
 function Mini({ title, body }: { title: string; body: string }) {
-  return <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-[9px] font-black tracking-widest text-rcl-gold">{title}</p><p className="mt-2 text-xs text-white/45">{body}</p></div>;
+  return <div className="rounded-xl border border-white/10 bg-black/20 p-4"><p className="text-xs font-black tracking-widest text-rcl-gold">{title}</p><p className="mt-2 text-xs text-white/45">{body}</p></div>;
 }
 
 function LabFeature({ id, icon, title, body }: { id: string; icon: ReactNode; title: string; body: string }) {

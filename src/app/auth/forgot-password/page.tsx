@@ -1,3 +1,5 @@
+export const metadata = {"title": "Reset your password", "description": "Recover access to your Rich City League account."};
+
 import { Container } from '@/components/Container';
 import { AuthForm } from '@/components/AuthForm';
 

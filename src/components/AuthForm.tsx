@@ -130,21 +130,21 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
     <form onSubmit={submit} className="space-y-5 rounded-2xl border border-sky-500/30 bg-white/[0.04] p-6">
       <div>
         <h1 className="font-display text-3xl font-bold uppercase">{title}</h1>
-        <p className="mt-2 text-sm text-gray-400">{mode === 'sign-up' ? 'Create your identity inside the Rich City League community.' : 'Use your RCL account to access league tools.'}</p>
+        <p className="mt-2 text-sm text-gray-400">{mode === 'sign-up' ? 'Create your identity inside the Rich City League community.' : mode === 'reset' ? 'Enter your email and we’ll send you a password recovery link.' : 'Use your RCL account to access league tools.'}</p>
       </div>
 
       {mode === 'sign-up' && referralCode && step < 4 && <div className="rounded-xl border border-rcl-gold/25 bg-rcl-gold/10 px-4 py-3 text-xs font-bold text-rcl-gold">You were invited by an RCL member. Finish signup to connect the referral.</div>}
 
       {mode === 'sign-up' && step < 4 && (
         <div>
-          <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-gray-500"><span className={step >= 1 ? 'text-rcl-gold' : ''}>Account</span><span className={step >= 2 ? 'text-rcl-gold' : ''}>Identity</span><span className={step >= 3 ? 'text-rcl-gold' : ''}>Profile</span><span>Welcome</span></div>
+          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-500"><span className={step >= 1 ? 'text-rcl-gold' : ''}>Account</span><span className={step >= 2 ? 'text-rcl-gold' : ''}>Identity</span><span className={step >= 3 ? 'text-rcl-gold' : ''}>Profile</span><span>Welcome</span></div>
           <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-gold transition-all" style={{ width: `${step * 25}%` }} /></div>
         </div>
       )}
 
       {(mode !== 'sign-up' || step === 1) && <>
         <label className="block text-sm font-semibold" htmlFor="auth-email">Email<input id="auth-email" required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} /></label>
-        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={8} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-5 text-xs text-rcl-gold">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-gray-400">Use at least 8 characters.</span>}</label>}
+        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={8} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="absolute inset-y-2 right-1 min-w-14 text-sm text-rcl-gold">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-gray-400">Use at least 8 characters.</span>}</label>}
         {mode === 'sign-up' && <label className="block text-sm font-semibold">Confirm password<input required minLength={8} type={showPassword ? 'text' : 'password'} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className={inputClass} /></label>}
       </>}
 
@@ -154,7 +154,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
           ['player','PLAYER','Build your basketball identity.'],
           ['coach','COACH','Lead, manage, scout and develop.'],
           ['fan','FAN','Follow the league, join the community and play fantasy.'],
-        ] as const).map(([value,label,copy]) => <button key={value} type="button" onClick={() => setProfileType(value)} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-gray-400">{copy}</span>{value === 'coach' && <span className="mt-1 block text-[10px] uppercase text-rcl-gold">Coach access requires league approval</span>}</button>)}
+        ] as const).map(([value,label,copy]) => <button key={value} type="button" aria-pressed={profileType === value} onClick={() => setProfileType(value)} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-gray-400">{copy}</span>{value === 'coach' && <span className="mt-1 block text-xs uppercase text-rcl-gold">Coach access requires league approval</span>}</button>)}
       </div>}
 
       {mode === 'sign-up' && step === 3 && <div className="space-y-4">
@@ -172,7 +172,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
 
       {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City League</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCL Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={signupHasSession ? "/explore" : "/auth/sign-in?next=/explore"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">Explore RCL</Link></div>}
 
-      {(error || (message && step !== 4)) && <p className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
+      {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
       {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
       {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">{mode === 'sign-in' ? <><Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link><Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}</div>}
     </form>

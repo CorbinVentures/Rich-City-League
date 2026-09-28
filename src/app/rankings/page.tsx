@@ -103,7 +103,7 @@ export default async function RankingsPage() {
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {/* OVR Rating card */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-xl">
-              <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase">OVERALL OVR</span>
+              <span className="block text-xs font-black tracking-widest text-rcl-gold uppercase">OVERALL OVR</span>
               <div className="mt-4 space-y-3">
                 {ovrLeaders.length === 0 ? (
                   <p className="text-xs text-gray-500">No stats logged yet.</p>
@@ -125,7 +125,7 @@ export default async function RankingsPage() {
 
             {/* PPG card */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-xl">
-              <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase">POINTS PER GAME</span>
+              <span className="block text-xs font-black tracking-widest text-rcl-gold uppercase">POINTS PER GAME</span>
               <div className="mt-4 space-y-3">
                 {ppgLeaders.length === 0 ? (
                   <p className="text-xs text-gray-500">No stats logged yet.</p>
@@ -147,7 +147,7 @@ export default async function RankingsPage() {
 
             {/* RPG card */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-xl">
-              <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase">REBOUNDS PER GAME</span>
+              <span className="block text-xs font-black tracking-widest text-rcl-gold uppercase">REBOUNDS PER GAME</span>
               <div className="mt-4 space-y-3">
                 {rpgLeaders.length === 0 ? (
                   <p className="text-xs text-gray-500">No stats logged yet.</p>
@@ -169,7 +169,7 @@ export default async function RankingsPage() {
 
             {/* APG card */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-xl">
-              <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase">ASSISTS PER GAME</span>
+              <span className="block text-xs font-black tracking-widest text-rcl-gold uppercase">ASSISTS PER GAME</span>
               <div className="mt-4 space-y-3">
                 {apgLeaders.length === 0 ? (
                   <p className="text-xs text-gray-500">No stats logged yet.</p>
@@ -201,7 +201,7 @@ export default async function RankingsPage() {
           <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.01] p-6 shadow-xl">
             <table className="w-full text-left text-xs min-w-[600px]">
               <thead>
-                <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                   <th className="pb-3">RANK</th>
                   <th className="pb-3">TEAM</th>
                   <th className="pb-3 text-center">GAMES PLAYED</th>
@@ -262,14 +262,14 @@ export default async function RankingsPage() {
                           {profile?.first_name} {profile?.last_name}
                         </Link>
                       </div>
-                      <span className="block text-[10px] text-gray-500 mt-1 uppercase tracking-widest">
+                      <span className="block text-xs text-gray-500 mt-1 uppercase tracking-widest">
                         {c.title || 'Head Coach'}
                       </span>
                     </div>
 
                     <div className="text-right">
                       <span className="block font-display font-black text-rcl-gold text-lg">{c.wins} WINS</span>
-                      <span className="block text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">{c.pct}% WIN RATIO</span>
+                      <span className="block text-xs text-gray-400 uppercase tracking-widest mt-0.5">{c.pct}% WIN RATIO</span>
                     </div>
                   </div>
                 );

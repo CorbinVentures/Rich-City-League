@@ -453,7 +453,7 @@ export default function AdminDashboardPage() {
         <Container maxWidth="xl">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-[10px] font-black tracking-widest text-rcl-gold uppercase flex items-center gap-1.5 w-fit">
+              <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-xs font-black tracking-widest text-rcl-gold uppercase flex items-center gap-1.5 w-fit">
                 <FaUserShield /> SYSTEM CONTROL CENTER
               </span>
               <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-white">
@@ -515,7 +515,7 @@ export default function AdminDashboardPage() {
                       { label: 'TIMELINE POSTS', value: analytics.posts },
                     ].map((stat, i) => (
                       <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-lg text-center">
-                        <span className="block text-[10px] font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
+                        <span className="block text-xs font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
                         <span className="block font-display text-3xl font-extrabold text-white mt-1">{stat.value}</span>
                       </div>
                     ))}
@@ -529,7 +529,7 @@ export default function AdminDashboardPage() {
                     <div className="mt-6 overflow-x-auto">
                       <table className="w-full text-left text-xs min-w-[500px]">
                         <thead>
-                          <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                          <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                             <th className="pb-3">ADMIN EMAIL</th>
                             <th className="pb-3">ACTION</th>
                             <th className="pb-3">DETAILS</th>
@@ -546,12 +546,12 @@ export default function AdminDashboardPage() {
                               <tr key={log.id} className="border-b border-white/5 hover:bg-white/[0.01] transition last:border-0">
                                 <td className="py-3 font-semibold text-gray-300">{log.admin?.email || 'System Admin'}</td>
                                 <td className="py-3">
-                                  <span className="rounded bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[9px] font-black text-blue-400">
+                                  <span className="rounded bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-xs font-black text-blue-400">
                                     {log.action}
                                   </span>
                                 </td>
-                                <td className="py-3 text-gray-400 font-mono text-[11px]">{log.details}</td>
-                                <td className="py-3 text-right text-gray-500 font-mono text-[10px]">
+                                <td className="py-3 text-gray-400 font-mono text-xs">{log.details}</td>
+                                <td className="py-3 text-right text-gray-500 font-mono text-xs">
                                   {new Date(log.created_at).toLocaleString()}
                                 </td>
                               </tr>
@@ -573,7 +573,7 @@ export default function AdminDashboardPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs min-w-[600px]">
                       <thead>
-                        <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                        <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                           <th className="pb-3">USER NAME</th>
                           <th className="pb-3">EMAIL</th>
                           <th className="pb-3">CURRENT ROLE</th><th className="pb-3">VIP STATUS</th>
@@ -588,12 +588,12 @@ export default function AdminDashboardPage() {
                             </td>
                             <td className="py-4 text-gray-400 font-mono">{usr.email}</td>
                             <td className="py-4">
-                              <span className="rounded bg-rcl-gold/10 border border-rcl-gold/20 px-2 py-0.5 text-[10px] font-black text-rcl-gold uppercase">
+                              <span className="rounded bg-rcl-gold/10 border border-rcl-gold/20 px-2 py-0.5 text-xs font-black text-rcl-gold uppercase">
                                 {usr.role || 'user'}
                               </span>
                             </td>
-                            <td className="py-4"><button type="button" onClick={() => void handleVipToggle(usr.id, !usr.is_vip)} className={`rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${usr.is_vip ? 'border-amber-300/40 bg-amber-400/15 text-amber-300' : 'border-white/10 text-gray-500 hover:text-white'}`}>{usr.is_vip ? '✓ VIP VERIFIED' : 'GRANT VIP'}</button></td><td className="py-4 text-right">
-                              <select
+                            <td className="py-4"><button type="button" onClick={() => void handleVipToggle(usr.id, !usr.is_vip)} className={`rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-widest ${usr.is_vip ? 'border-amber-300/40 bg-amber-400/15 text-amber-300' : 'border-white/10 text-gray-500 hover:text-white'}`}>{usr.is_vip ? '✓ VIP VERIFIED' : 'GRANT VIP'}</button></td><td className="py-4 text-right">
+                              <select aria-label="Member role"
                                 value={usr.role || 'user'}
                                 onChange={(e) => handleUpdateRole(usr.id, e.target.value)}
                                 className="rounded-lg border border-white/10 bg-black p-1.5 text-xs text-white focus:border-rcl-gold outline-none"
@@ -622,15 +622,15 @@ export default function AdminDashboardPage() {
                       CREATE NEW LEAGUE TEAM
                     </h3>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 mb-1">LEAGUE</label>
-                      <select required value={newTeamLeagueId} onChange={(e) => setNewTeamLeagueId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none">
+                      <label className="block text-xs font-black text-gray-500 mb-1">LEAGUE</label>
+                      <select aria-label="Team league" required value={newTeamLeagueId} onChange={(e) => setNewTeamLeagueId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none">
                         <option value="">-- Choose League --</option>
                         {leaguesList.map((league) => <option key={league.id} value={league.id}>{league.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 mb-1">TEAM NAME</label>
-                      <input
+                      <label className="block text-xs font-black text-gray-500 mb-1">TEAM NAME</label>
+                      <input aria-label="e.g. Richmond Generals"
                         type="text"
                         required
                         value={newTeamName}
@@ -640,8 +640,8 @@ export default function AdminDashboardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 mb-1">TEAM SLUG</label>
-                      <input
+                      <label className="block text-xs font-black text-gray-500 mb-1">TEAM SLUG</label>
+                      <input aria-label="e.g. richmond-generals"
                         type="text"
                         required
                         value={newTeamSlug}
@@ -663,12 +663,12 @@ export default function AdminDashboardPage() {
                       REGISTER PLAYER TO TEAM
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <input required value={newPlayerFirstName} onChange={(e) => setNewPlayerFirstName(e.target.value)} placeholder="First name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
-                      <input required value={newPlayerLastName} onChange={(e) => setNewPlayerLastName(e.target.value)} placeholder="Last name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
+                      <input aria-label="First name" required value={newPlayerFirstName} onChange={(e) => setNewPlayerFirstName(e.target.value)} placeholder="First name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
+                      <input aria-label="Last name" required value={newPlayerLastName} onChange={(e) => setNewPlayerLastName(e.target.value)} placeholder="Last name" className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 mb-1">SELECT USER PROFILE</label>
-                      <select
+                      <label className="block text-xs font-black text-gray-500 mb-1">SELECT USER PROFILE</label>
+                      <select aria-label="Player profile"
                         required
                         value={newPlayerProfileId}
                         onChange={(e) => setNewPlayerProfileId(e.target.value)}
@@ -683,8 +683,8 @@ export default function AdminDashboardPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-gray-500 mb-1">ASSIGN TEAM</label>
-                      <select
+                      <label className="block text-xs font-black text-gray-500 mb-1">ASSIGN TEAM</label>
+                      <select aria-label="Player team"
                         value={newPlayerTeamId}
                         onChange={(e) => setNewPlayerTeamId(e.target.value)}
                         className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none"
@@ -697,8 +697,8 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-black text-gray-500 mb-1">JERSEY #</label>
-                        <input
+                        <label className="block text-xs font-black text-gray-500 mb-1">JERSEY #</label>
+                        <input aria-label="e.g. 23"
                           type="text"
                           value={newPlayerJersey}
                           onChange={(e) => setNewPlayerJersey(e.target.value)}
@@ -707,8 +707,8 @@ export default function AdminDashboardPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black text-gray-500 mb-1">POSITION</label>
-                        <select
+                        <label className="block text-xs font-black text-gray-500 mb-1">POSITION</label>
+                        <select aria-label="Player position"
                           value={newPlayerPosition}
                           onChange={(e) => setNewPlayerPosition(e.target.value)}
                           className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-white focus:border-rcl-gold outline-none"
@@ -737,7 +737,7 @@ export default function AdminDashboardPage() {
                     <h3 className="font-display text-sm font-black tracking-widest text-rcl-gold uppercase mb-4">
                       SELECT GAME TO LOG SCORE & STATS
                     </h3>
-                    <select
+                    <select aria-label="Game"
                       value={selectedGameId}
                       onChange={(e) => handleSelectGame(e.target.value)}
                       className="w-full rounded-xl border border-white/10 bg-black p-3.5 text-sm text-white focus:border-rcl-gold outline-none"
@@ -762,7 +762,7 @@ export default function AdminDashboardPage() {
                         <div className="grid gap-6 sm:grid-cols-3 items-center">
                           <div className="text-center">
                             <span className="block text-sm font-bold text-gray-300">AWAY TEAM SCORE</span>
-                            <input
+                            <input aria-label="Away score"
                               type="number"
                               required
                               min={0}
@@ -773,8 +773,8 @@ export default function AdminDashboardPage() {
                           </div>
 
                           <div className="text-center">
-                            <span className="block text-[10px] font-black text-gray-500 uppercase">MATCHUP STATUS</span>
-                            <select
+                            <span className="block text-xs font-black text-gray-500 uppercase">MATCHUP STATUS</span>
+                            <select aria-label="Game status"
                               value={gameStatus}
                               onChange={(e) => setGameStatus(e.target.value as any)}
                               className="mt-2 w-full rounded-xl border border-white/10 bg-black p-3.5 text-xs text-white font-bold focus:border-rcl-gold outline-none"
@@ -787,7 +787,7 @@ export default function AdminDashboardPage() {
 
                           <div className="text-center">
                             <span className="block text-sm font-bold text-gray-300">HOME TEAM SCORE</span>
-                            <input
+                            <input aria-label="Home score"
                               type="number"
                               required
                               min={0}
@@ -814,7 +814,7 @@ export default function AdminDashboardPage() {
                         <div className="overflow-x-auto">
                           <table className="w-full text-left text-xs min-w-[900px]">
                             <thead>
-                              <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                              <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                                 <th className="pb-3">PLAYER</th>
                                 <th className="pb-3 text-center">MIN</th>
                                 <th className="pb-3 text-center">PTS</th>
@@ -838,49 +838,49 @@ export default function AdminDashboardPage() {
                                 <tr key={stat.player_id} className="border-b border-white/5 hover:bg-white/[0.01]">
                                   <td className="py-2 font-bold text-white">{stat.player_name}</td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.min} onChange={(e) => handleStatFieldChange(idx, 'min', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Minutes played" type="number" min={0} value={stat.min} onChange={(e) => handleStatFieldChange(idx, 'min', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.pts} onChange={(e) => handleStatFieldChange(idx, 'pts', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1 font-bold text-rcl-gold" />
+                                    <input aria-label="Points" type="number" min={0} value={stat.pts} onChange={(e) => handleStatFieldChange(idx, 'pts', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1 font-bold text-rcl-gold" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.fgm} onChange={(e) => handleStatFieldChange(idx, 'fgm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Field goals made" type="number" min={0} value={stat.fgm} onChange={(e) => handleStatFieldChange(idx, 'fgm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.fga} onChange={(e) => handleStatFieldChange(idx, 'fga', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Field goals attempted" type="number" min={0} value={stat.fga} onChange={(e) => handleStatFieldChange(idx, 'fga', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.tpm} onChange={(e) => handleStatFieldChange(idx, 'tpm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Three-pointers made" type="number" min={0} value={stat.tpm} onChange={(e) => handleStatFieldChange(idx, 'tpm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.tpa} onChange={(e) => handleStatFieldChange(idx, 'tpa', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Three-pointers attempted" type="number" min={0} value={stat.tpa} onChange={(e) => handleStatFieldChange(idx, 'tpa', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.ftm} onChange={(e) => handleStatFieldChange(idx, 'ftm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Free throws made" type="number" min={0} value={stat.ftm} onChange={(e) => handleStatFieldChange(idx, 'ftm', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.fta} onChange={(e) => handleStatFieldChange(idx, 'fta', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Free throws attempted" type="number" min={0} value={stat.fta} onChange={(e) => handleStatFieldChange(idx, 'fta', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.orb} onChange={(e) => handleStatFieldChange(idx, 'orb', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Offensive rebounds" type="number" min={0} value={stat.orb} onChange={(e) => handleStatFieldChange(idx, 'orb', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.drb} onChange={(e) => handleStatFieldChange(idx, 'drb', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Defensive rebounds" type="number" min={0} value={stat.drb} onChange={(e) => handleStatFieldChange(idx, 'drb', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.ast} onChange={(e) => handleStatFieldChange(idx, 'ast', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Assists" type="number" min={0} value={stat.ast} onChange={(e) => handleStatFieldChange(idx, 'ast', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.stl} onChange={(e) => handleStatFieldChange(idx, 'stl', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Steals" type="number" min={0} value={stat.stl} onChange={(e) => handleStatFieldChange(idx, 'stl', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.blk} onChange={(e) => handleStatFieldChange(idx, 'blk', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Blocks" type="number" min={0} value={stat.blk} onChange={(e) => handleStatFieldChange(idx, 'blk', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.tov} onChange={(e) => handleStatFieldChange(idx, 'tov', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Turnovers" type="number" min={0} value={stat.tov} onChange={(e) => handleStatFieldChange(idx, 'tov', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                   <td className="py-2 text-center">
-                                    <input type="number" min={0} value={stat.pf} onChange={(e) => handleStatFieldChange(idx, 'pf', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
+                                    <input aria-label="Personal fouls" type="number" min={0} value={stat.pf} onChange={(e) => handleStatFieldChange(idx, 'pf', parseInt(e.target.value) || 0)} className="w-12 text-center bg-black border border-white/10 rounded p-1" />
                                   </td>
                                 </tr>
                               ))}
@@ -920,13 +920,13 @@ export default function AdminDashboardPage() {
                                 <span className="text-xs font-black text-white">
                                   {author?.first_name ? `${author.first_name} ${author.last_name || ''}` : author?.display_name || 'RCL Athlete'}
                                 </span>
-                                <span className="text-[10px] text-gray-500">({new Date(post.created_at).toLocaleDateString()})</span>
+                                <span className="text-xs text-gray-500">({new Date(post.created_at).toLocaleDateString()})</span>
                               </div>
                               <p className="mt-2 text-xs text-gray-300 font-sans">{post.body}</p>
                             </div>
                             <button
                               onClick={() => handleModerateDeletePost(post.id)}
-                              className="rounded bg-rcl-red/10 border border-rcl-red/20 hover:bg-rcl-red hover:text-white px-3 py-1.5 text-[10px] font-black text-rcl-red flex items-center gap-1 uppercase tracking-widest transition"
+                              className="rounded bg-rcl-red/10 border border-rcl-red/20 hover:bg-rcl-red hover:text-white px-3 py-1.5 text-xs font-black text-rcl-red flex items-center gap-1 uppercase tracking-widest transition"
                             >
                               <FaTrash /> DELETE POST
                             </button>

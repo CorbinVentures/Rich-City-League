@@ -48,7 +48,7 @@ export function FaqExperience() {
           <FaMagnifyingGlass className="text-rcl-orange" aria-hidden="true" />
           <input id="faq-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="SEARCH FAQs..." />
           {query && <button type="button" onClick={() => setQuery('')} className="faq-clear">CLEAR</button>}
-          <span className="hidden text-[10px] font-black tracking-widest text-slate-500 sm:block">SEARCH</span>
+          <span className="hidden text-xs font-black tracking-widest text-slate-500 sm:block">SEARCH</span>
         </section>
 
         <nav aria-label="FAQ categories" className="faq-categories mt-8">
@@ -92,7 +92,7 @@ export function FaqExperience() {
 
         <section aria-labelledby="explore-heading" className="mt-20">
           <p className="rcl-kicker">GO DEEPER</p><h2 id="explore-heading" className="rcl-display mt-2 text-4xl uppercase sm:text-5xl">Explore <span className="text-rcl-orange">More</span></h2><p className="mt-3 text-sm text-slate-400">Dive deeper into everything RCL has to offer.</p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{featureCards.map((card) => <Link href={card.href} key={card.eyebrow} className="faq-feature-card"><p className="text-[10px] font-black tracking-[.18em] text-rcl-orange">{card.eyebrow}</p><h3 className="mt-5 font-display text-xl font-black uppercase leading-tight">{card.title}</h3><span className="mt-8 inline-flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-300">{card.label} <FaArrowRight /></span></Link>)}</div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{featureCards.map((card) => <Link href={card.href} key={card.eyebrow} className="faq-feature-card"><p className="text-xs font-black tracking-[.18em] text-rcl-orange">{card.eyebrow}</p><h3 className="mt-5 font-display text-xl font-black uppercase leading-tight">{card.title}</h3><span className="mt-8 inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-300">{card.label} <FaArrowRight /></span></Link>)}</div>
         </section>
 
         <section className="faq-closing mt-20"><p className="rcl-kicker">RICH CITY LEAGUE</p><h2 className="rcl-display mt-4 text-5xl uppercase sm:text-7xl">More than a league.<br /><span className="text-rcl-orange">A stronger Richmond.</span></h2><p className="mt-5 max-w-lg text-sm leading-6 text-slate-300">The city is the court. Find your place in the RCL.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/register" className="rcl-button">REGISTER NOW <FaArrowRight className="ml-2 inline" /></Link><Link href="/city" className="faq-outline-button">EXPLORE RCL</Link><Link href="/register" className="faq-outline-button">CONTACT RCL</Link></div></section>

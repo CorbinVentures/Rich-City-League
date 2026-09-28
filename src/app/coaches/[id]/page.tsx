@@ -65,7 +65,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
 
               <div>
                 <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                  <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-[10px] font-black tracking-widest text-rcl-gold uppercase flex items-center gap-1">
+                  <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-xs font-black tracking-widest text-rcl-gold uppercase flex items-center gap-1">
                     <FaCrown className="h-2.5 w-2.5" /> RCL LEAGUE LEADER
                   </span>
                   {team && (
@@ -88,7 +88,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
               <div className="text-center font-mono">
                 <span className="block text-xs font-black text-gray-400 uppercase tracking-widest">LEGACY GRADE</span>
                 <span className="block font-display text-5xl font-black text-rcl-gold mt-1">A+</span>
-                <span className="block text-[8px] font-bold text-gray-500 tracking-wider mt-1">CERTIFIED RCL SYSTEM</span>
+                <span className="block text-xs font-bold text-gray-500 tracking-wider mt-1">CERTIFIED RCL SYSTEM</span>
               </div>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {statsSummary.map((stat, i) => (
               <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">
-                <span className="block text-[10px] font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
+                <span className="block text-xs font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
                 <span className="block font-display text-3xl font-extrabold text-white mt-1">{stat.value}</span>
               </div>
             ))}
@@ -155,7 +155,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
             <div className="mt-6 overflow-x-auto">
               <table className="w-full text-left text-xs min-w-[400px]">
                 <thead>
-                  <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                  <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                     <th className="pb-3">SEASON</th>
                     <th className="pb-3">TEAM ASSIGNED</th>
                     <th className="pb-3 text-center">WINS</th>

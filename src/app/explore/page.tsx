@@ -65,7 +65,7 @@ export default function ExploreRCLPage(){
       <div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.24em] text-rcl-orange">Start here</p><h2 className="mt-2 font-display text-3xl font-black uppercase md:text-4xl">The RCL Experience</h2></div><FaBasketball className="hidden text-4xl text-rcl-gold/50 sm:block"/></div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {featured.map((item,i)=><Link key={item.title} href={item.href} className="group relative min-h-56 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[.07] to-transparent p-6 transition hover:-translate-y-1 hover:border-rcl-gold/50">
-          <span className="text-[10px] font-black tracking-[.25em] text-rcl-orange">{String(i+1).padStart(2,'0')} · {item.tag}</span>
+          <span className="text-xs font-black tracking-[.25em] text-rcl-orange">{String(i+1).padStart(2,'0')} · {item.tag}</span>
           <h3 className="mt-8 font-display text-3xl font-black uppercase">{item.title}</h3>
           <p className="mt-3 max-w-sm text-sm leading-6 text-white/55">{item.copy}</p>
           <span className="absolute bottom-6 right-6 grid h-10 w-10 place-items-center rounded-full border border-white/15 transition group-hover:border-rcl-gold group-hover:text-rcl-gold"><FaArrowRight/></span>

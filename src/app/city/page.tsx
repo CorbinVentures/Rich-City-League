@@ -55,7 +55,7 @@ export default async function CityPage() {
             {upcomingGames.length ? <div className="mt-5 grid gap-3 sm:grid-cols-3">{upcomingGames.map((game) => {
               const home = teams.find((team) => team.id === game.home_team_id)?.name ?? 'Home team';
               const away = teams.find((team) => team.id === game.away_team_id)?.name ?? 'Away team';
-              return <Link href={`/games/${game.id}`} key={game.id} className="city-event"><span className="text-[10px] font-black uppercase tracking-widest text-rcl-orange">RCL GAME</span><strong>{away} <span>vs</span> {home}</strong><small>{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)}</small><small>{game.venue_id ? 'Richmond, VA' : 'RCL Court'}</small></Link>;
+              return <Link href={`/games/${game.id}`} key={game.id} className="city-event"><span className="text-xs font-black uppercase tracking-widest text-rcl-orange">RCL GAME</span><strong>{away} <span>vs</span> {home}</strong><small>{formatDate(game.scheduled_at)} · {formatTime(game.scheduled_at)}</small><small>{game.venue_id ? 'Richmond, VA' : 'RCL Court'}</small></Link>;
             })}</div> : <div className="city-empty mt-5"><FaCalendarDays /><p>Nothing scheduled yet.</p><span>New games and community experiences will appear here.</span></div>}
           </div>
           <div className="city-section city-quote"><p className="rcl-kicker">RCL EXPERIENCES</p><p className="mt-4 font-display text-2xl font-bold uppercase leading-tight">Your next chapter starts on the court.</p><p className="mt-3 text-sm leading-6 text-slate-400">Follow the action, sharpen your game, and find your people.</p><Link href="/register" className="rcl-button mt-6 inline-flex">Join RCL <FaArrowRight /></Link></div>
