@@ -1,0 +1,95 @@
+name: One-time Lab CSS remnant cleanup
+
+on:
+  push:
+    branches:
+      - cleanup/remove-lab-css-remnants
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup/remove-lab-css-remnants
+          fetch-depth: 0
+      - name: Remove obsolete Lab CSS selectors
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          comment_with_lab = re.compile(r'/\*.*?\bLab\b.*?\*/', re.I | re.S)
+          lab_keyframes = re.compile(r'@keyframes\s+lab[-_\w]*\s*\{(?:[^{}]|\{[^{}]*\})*\}', re.I | re.S)
+          leaf_rule = re.compile(r'([^{}]+)\{([^{}]*)\}', re.S)
+          lab_selector = re.compile(r'(?i)(?:\.lab(?:[-_]|\b)|\.city-lab\b|\.rcl-splash-feature-lab\b)')
+
+          def clean_css(text: str) -> str:
+              text = comment_with_lab.sub('', text)
+              text = lab_keyframes.sub('', text)
+
+              def clean_leaf(match: re.Match) -> str:
+                  selector_text, body = match.group(1), match.group(2)
+                  # Never rewrite declaration-only or keyframe percentage blocks.
+                  stripped = selector_text.strip()
+                  if not stripped or ':' in stripped and ';' in stripped:
+                      return match.group(0)
+                  selectors = [s.strip() for s in selector_text.split(',')]
+                  kept = [s for s in selectors if s and not lab_selector.search(s)]
+                  if len(kept) == len(selectors):
+                      return match.group(0)
+                  if not kept:
+                      return ''
+                  leading = selector_text[:len(selector_text) - len(selector_text.lstrip())]
+                  return leading + ',\n'.join(kept) + ' {' + body + '}'
+
+              # Leaf rules inside @media blocks are safe to rewrite independently.
+              for _ in range(3):
+                  updated = leaf_rule.sub(clean_leaf, text)
+                  if updated == text:
+                      break
+                  text = updated
+              text = re.sub(r'@media\s*[^{}]+\{\s*\}', '', text, flags=re.S)
+              text = re.sub(r'\n{4,}', '\n\n\n', text)
+              return text
+
+          changed = []
+          for path in Path('src').rglob('*.css'):
+              original = path.read_text()
+              cleaned = clean_css(original)
+              if cleaned != original:
+                  path.write_text(cleaned)
+                  changed.append(str(path))
+
+          print('Cleaned CSS files:')
+          for path in changed:
+              print(' -', path)
+
+          leftovers = []
+          trace = re.compile(r'(?i)(?:\.lab(?:[-_]|\b)|\.city-lab\b|\.rcl-splash-feature-lab\b|\bThe Lab\b)')
+          for path in Path('src').rglob('*.css'):
+              for number, line in enumerate(path.read_text().splitlines(), 1):
+                  if trace.search(line):
+                      leftovers.append(f'{path}:{number}:{line.strip()}')
+          if leftovers:
+              print('Remaining Lab CSS traces:')
+              print('\n'.join(leftovers))
+              raise SystemExit(1)
+          PY
+      - name: Commit cleanup and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/cleanup-lab-css-remnants.yml
+          git config user.name "RCL Cleanup Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No cleanup changes required."
+            exit 0
+          fi
+          git commit -m "Remove remaining Lab CSS traces"
+          git push origin HEAD:cleanup/remove-lab-css-remnants
