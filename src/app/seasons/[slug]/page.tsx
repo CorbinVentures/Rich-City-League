@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { FaArrowRight, FaBasketball, FaCalendarDays, FaLayerGroup, FaTrophy } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
@@ -61,6 +62,6 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
   </main>;
 }
 
-function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
   return <div className="rounded-2xl border border-rcl-blue/15 bg-white/[.025] p-5"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/10 text-rcl-blue">{icon}</span><p className="mt-5 text-xs font-black uppercase tracking-[.18em] text-white/30">{label}</p><p className="mt-1 font-display text-4xl font-black">{value}</p></div>;
 }
