@@ -126,7 +126,7 @@ function RiggedMotionPlayer({title,skill,match}:{title:string;skill:string;match
       resetRef.current=()=>{action.reset().play();setFrame(0);};
       stepRef.current=()=>{if(!pausedRef.current)return;action.paused=false;mixer.update(1/selected.fps);action.paused=true;setFrame(Math.round(action.time*selected.fps));};
       seekRef.current=(nextFrame:number)=>{const t=Math.max(0,Math.min(bakedClip.duration,nextFrame/selected.fps));mixer.setTime(t);action.time=t;setFrame(Math.round(t*selected.fps));};
-      const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),contactBall=new THREE.Vector3(),ballTarget=new THREE.Vector3();
+      const leftWorld=new THREE.Vector3(),rightWorld=new THREE.Vector3(),contactBall=new THREE.Vector3(),shotAnchor=new THREE.Vector3(),ballTarget=new THREE.Vector3();
       const clock=new THREE.Clock();
       const smooth=(t:number)=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
       const bounceHeight=(phase:number)=>{const d=phase<.5?smooth(phase*2):smooth((1-phase)*2);return 1-d;};
@@ -148,8 +148,13 @@ function RiggedMotionPlayer({title,skill,match}:{title:string;skill:string;match
           showBall=phase>.06&&phase<.86;contactBall.z+=.11;contactBall.y+=.01;
           if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.74*t;ballTarget.y+=.05*t;}
         }else if(selected.id==='set-shot'){
-          showBall=phase>.08&&phase<.90;contactBall.z+=.11;contactBall.y+=.02;
-          if(phase<.62)ballTarget.copy(contactBall);else{const t=smooth((phase-.62)/.24);ballTarget.copy(rightWorld);ballTarget.z+=.11+.42*t;ballTarget.y+=.03+.58*t-.12*t*t;}
+          showBall=phase>.06&&phase<.92;
+          // The shooting hand owns the ball while the guide hand contributes only during the gather/set.
+          const guideInfluence=phase<.66?.45*(1-smooth((phase-.46)/.20)):0;
+          shotAnchor.copy(rightWorld).lerp(leftWorld,guideInfluence);
+          const setLift=smooth((phase-.28)/.38);shotAnchor.y+=.08+.03*setLift;shotAnchor.z+=.05+.025*setLift;ballTarget.copy(shotAnchor);
+          // Release starts continuously from the exact contact anchor only after the arm reaches extension.
+          if(phase>=.66){const t=smooth((phase-.66)/.22);ballTarget.z+=.46*t;ballTarget.y+=.62*t-.14*t*t;}
         }
         ball.visible=selected.ball&&showBall;if(ball.visible)ball.position.copy(ballTarget);
         camera.position.lerp(positions[viewRef.current],.09);camera.lookAt(0,1.02,0);renderer.render(scene,camera);
