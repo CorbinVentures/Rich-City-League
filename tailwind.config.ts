@@ -9,16 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'rcl-black': '#07090d',
-        'rcl-white': '#FFFFFF',
-        'rcl-gold': '#ff6b1a',
+        'rcl-black': '#03070D',
+        'rcl-white': '#F6F8FB',
+        'rcl-gold': '#FF4F16',
         'rcl-red': '#E63946',
-        'rcl-blue': '#4da3ff',
-        'rcl-navy': '#101c2d',
+        'rcl-blue': '#159FFF',
+        'rcl-navy': '#071522',
         'rcl-teal': '#06A77D',
-        'rcl-orange': '#ff6b1a',
+        'rcl-orange': '#FF4F16',
         'rcl-purple': '#7209B7',
-        'rcl-gray': '#2B2D42',
+        'rcl-gray': '#7D90A3',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
