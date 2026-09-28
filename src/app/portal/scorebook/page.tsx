@@ -32,6 +32,12 @@ const actionGroups = [
   ] },
 ] as const;
 
+const toolButtons = [
+  ['Shot chart', 'shot'],
+  ['Lineups + subs', 'lineup'],
+  ['Game IQ', 'iq'],
+] as const satisfies ReadonlyArray<readonly [string, Exclude<ToolPanel, 'none'>]>;
+
 function periodLabel(period: number, periodCount: number) {
   if (periodCount === 4) return `Q${period}`;
   return `P${period}`;
@@ -476,7 +482,7 @@ export default function ScorebookPage() {
                       const scoring = type === 'shot_made' || type === 'shot_missed' || type === 'free_throw_made' || type === 'free_throw_missed';
                       const madeAction = type === 'shot_made' || type === 'free_throw_made';
                       const missAction = type === 'shot_missed' || type === 'free_throw_missed';
-                      const tone = madeAction ? 'border-emerald-400/25 bg-emerald-400/[.07] hover:bg-emerald-400/12' : missAction ? 'border-rose-400/20 bg-rose-400/[.05] hover:bg-rose-400/10' : 'border-white/10 bg-white/[.025] hover:border-rcl-blue/40 hover:bg-rcl-blue/[.06]';
+                      const tone = madeAction ? 'border-emerald-400/25 bg-emerald-400/[.07] hover:bg-emerald-400/[.12]' : missAction ? 'border-rose-400/20 bg-rose-400/[.05] hover:bg-rose-400/10' : 'border-white/10 bg-white/[.025] hover:border-rcl-blue/40 hover:bg-rcl-blue/[.06]';
                       return <button type="button" key={label} disabled={!selectedPlayerId || busy || locked} onClick={() => void recordAction(type as GameEvent['event_type'], value, value ? value as 1 | 2 | 3 : null, made)} className={`min-h-16 rounded-2xl border px-3 py-3 text-left transition active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-25 ${tone}`}>
                         <span className="block text-sm font-black uppercase tracking-wide sm:text-base">{label}</span>
                         <span className="mt-1 block text-[9px] uppercase tracking-wider text-white/30">{locked ? 'Final' : scoring && !pendingShot && type !== 'free_throw_made' && type !== 'free_throw_missed' ? 'Location optional' : 'Record'}</span>
@@ -487,11 +493,7 @@ export default function ScorebookPage() {
               </div>
 
               <div className="mt-5 grid gap-2 border-t border-white/10 pt-4 sm:grid-cols-4">
-                {[
-                  ['Shot chart', 'shot' as ToolPanel],
-                  ['Lineups + subs', 'lineup' as ToolPanel],
-                  ['Game IQ', 'iq' as ToolPanel],
-                ].map(([label, panel]) => <button type="button" key={panel} onClick={() => setToolPanel((current) => current === panel ? 'none' : panel)} className={`rounded-xl border px-3 py-3 text-[10px] font-black uppercase tracking-widest transition ${toolPanel === panel ? 'border-rcl-blue/50 bg-rcl-blue/10 text-rcl-blue' : 'border-white/10 bg-black/20 text-white/55 hover:text-white'}`}>{label}</button>)}
+                {toolButtons.map(([label, panel]) => <button type="button" key={panel} onClick={() => setToolPanel((current) => current === panel ? 'none' : panel)} className={`rounded-xl border px-3 py-3 text-[10px] font-black uppercase tracking-widest transition ${toolPanel === panel ? 'border-rcl-blue/50 bg-rcl-blue/10 text-rcl-blue' : 'border-white/10 bg-black/20 text-white/55 hover:text-white'}`}>{label}</button>)}
                 <button type="button" disabled={!events.some((event) => !event.voided_at && event.event_type !== 'period_start') || busy || locked} onClick={() => void undoLast()} className="rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-[10px] font-black uppercase tracking-widest text-white/55 transition hover:border-rose-400/30 hover:text-rose-200 disabled:opacity-25">Undo last play</button>
               </div>
             </div>
