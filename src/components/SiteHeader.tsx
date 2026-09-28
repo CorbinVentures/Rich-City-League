@@ -5,9 +5,15 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaGear, FaBars, FaMagnifyingGlass, FaBell, FaHouse, FaUser, FaPeopleGroup, FaCalendarDays, FaBasketball } from 'react-icons/fa6';
+import { FaGear, FaBars, FaMagnifyingGlass, FaBell, FaHouse, FaUser, FaPeopleGroup, FaBasketball } from 'react-icons/fa6';
 import { NavigationDrawer } from '@/components/NavigationDrawer';
-import { isNavigationActive, RCL_ADMIN_NAV_ITEM, RCL_NAV_ITEMS } from '@/lib/rcl-navigation';
+import {
+  isPrimaryNavigationActive,
+  RCL_ADMIN_NAV_GROUP,
+  RCL_ADMIN_NAV_ITEM,
+  RCL_NAV_GROUPS,
+  RCL_PRIMARY_NAV_ITEMS,
+} from '@/lib/rcl-navigation';
 
 export function SiteHeader(){
   const pathname=usePathname();
@@ -28,12 +34,12 @@ export function SiteHeader(){
 
   if(pathname==='/'||pathname==='/social'||pathname.startsWith('/social/')||pathname==='/profile'||pathname.startsWith('/profile/'))return null;
 
-  const socialChildPaths=['/friends','/messages','/notifications','/communities','/runs','/settings'];
+  const socialChildPaths=['/friends','/messages','/notifications','/communities','/runs'];
   const isSocialChild=socialChildPaths.some(path=>pathname===path||pathname.startsWith(path+'/'));
   if(isSocialChild)return <>
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-5xl items-center gap-3 px-4">
-        <Link href="/social" aria-label="Back to Social" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-orange/30 bg-black/50 font-black text-rcl-orange">←</Link>
+        <Link href="/social" aria-label="Back to Social" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-orange/30 bg-black/50 font-black text-rcl-orange">RCL</Link>
         <Link href="/social" className="hidden text-xs font-black uppercase tracking-[.2em] text-rcl-orange sm:block">RCL Social</Link>
         <Link href="/search" className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-2xl border border-rcl-blue/40 bg-[#07111b] px-4 text-white/40"><FaMagnifyingGlass/><span className="truncate text-sm">Search members, players, teams, games…</span></Link>
         <Link href="/notifications" aria-label="Notifications" className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-white/60"><FaBell/>{unreadCount>0&&<em className="absolute right-1 top-1 rounded-full bg-rcl-orange px-1 text-xs not-italic text-black">{unreadCount>9?'9+':unreadCount}</em>}</Link>
@@ -50,8 +56,9 @@ export function SiteHeader(){
   </>;
 
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
-  const links=isAdmin?[...RCL_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_NAV_ITEMS;
-  const active=(href:string)=>isNavigationActive(pathname,href);
+  const primaryLinks=isAdmin?[...RCL_PRIMARY_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_PRIMARY_NAV_ITEMS;
+  const drawerGroups=isAdmin?[...RCL_NAV_GROUPS,RCL_ADMIN_NAV_GROUP]:RCL_NAV_GROUPS;
+  const active=(href:string)=>isPrimaryNavigationActive(pathname,href);
 
   return <>
     <aside className="rcl-universal-sidebar">
@@ -60,8 +67,9 @@ export function SiteHeader(){
         <span><b>RICH CITY <i>LEAGUE</i></b><small>804 · RVA</small></span>
       </Link>
       <nav className="rcl-universal-nav" aria-label="Primary navigation">
-        {links.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} aria-current={active(item.href)?'page':undefined} className={active(item.href)?'active':''}><Icon/><span>{item.label}</span></Link>})}
+        {primaryLinks.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} aria-current={active(item.href)?'page':undefined} className={active(item.href)?'active':''}><Icon/><span>{item.label}</span></Link>})}
       </nav>
+      <button type="button" className="rcl-universal-more" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>All RCL</span></button>
       <div className="rcl-universal-account">
         {user?<Link href="/profile" className="rcl-universal-profile"><span className="rcl-universal-avatar">{profile?.display_name?.[0]??user.email?.[0]??'P'}</span><span><b>{profile?.display_name??'RCL MEMBER'}</b><small>View Profile</small></span><strong>›</strong></Link>:<Link href="/auth/sign-in" className="rcl-universal-profile"><span className="rcl-universal-avatar">R</span><span><b>RCL MEMBER</b><small>Sign In</small></span><strong>›</strong></Link>}
         <Link href="/settings" className="rcl-universal-account-link"><FaGear/> Settings</Link>
@@ -80,10 +88,10 @@ export function SiteHeader(){
     </header>
 
     <nav className="rcl-universal-bottom" aria-label="Mobile navigation">
-      {[{label:'Home',href:'/',icon:FaHouse},{label:'Players',href:'/players',icon:FaUser},{label:'Games',href:'/games',icon:FaCalendarDays},{label:'Social',href:'/social',icon:FaPeopleGroup}].map(item=>{const Icon=item.icon;return <Link key={item.href} href={item.href} aria-current={active(item.href)?'page':undefined} className={active(item.href)?'active':''}><Icon/><span>{item.label}</span></Link>})}
+      {[{label:'Home',href:'/',icon:FaHouse},{label:'League',href:'/league',icon:FaBasketball},{label:'Players',href:'/players',icon:FaUser},{label:'Social',href:'/social',icon:FaPeopleGroup}].map(item=>{const Icon=item.icon;return <Link key={item.href} href={item.href} aria-current={active(item.href)?'page':undefined} className={active(item.href)?'active':''}><Icon/><span>{item.label}</span></Link>})}
       <button type="button" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen} className={menuOpen?'active':''}><FaBars/><span>More</span></button>
     </nav>
 
-    <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} items={links} pathname={pathname} />
+    <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} groups={drawerGroups} pathname={pathname} />
   </>;
 }
