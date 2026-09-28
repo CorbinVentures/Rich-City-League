@@ -15,6 +15,7 @@ type FriendRow = { id: string; requester_id: string; addressee_id: string; statu
 export default function FriendsPage() {
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
+  const socialDb:any = supabase;
   const [friends, setFriends] = useState<FriendRow[]>([]);
   const [search, setSearch] = useState('');
   const [people, setPeople] = useState<FriendProfile[]>([]);
@@ -24,34 +25,34 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
-    if (!supabase || !user) { setFriends([]); setSuggestions([]); return; }
+    if (!socialDb || !user) { setFriends([]); setSuggestions([]); return; }
     setLoading(true);
-    const { data } = await supabase.from('friendships').select('*, requester:profiles!requester_id(id,display_name,username,avatar_url,is_vip,vip_label,role), addressee:profiles!addressee_id(id,display_name,username,avatar_url,is_vip,vip_label,role)').or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`).order('created_at', { ascending: false });
+    const { data } = await socialDb.from('friendships').select('*, requester:profiles!requester_id(id,display_name,username,avatar_url,is_vip,vip_label,role), addressee:profiles!addressee_id(id,display_name,username,avatar_url,is_vip,vip_label,role)').or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`).order('created_at', { ascending: false });
     const rows = (data ?? []) as FriendRow[];
     setFriends(rows);
 
     const excluded = new Set<string>([user.id]);
     for (const row of rows) { excluded.add(row.requester_id); excluded.add(row.addressee_id); }
-    const { data: candidatesRaw } = await supabase.from('profiles').select('id,display_name,username,avatar_url,is_vip,vip_label,role').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account', false).order('created_at', { ascending: false }).limit(30);
+    const { data: candidatesRaw } = await socialDb.from('profiles').select('id,display_name,username,avatar_url,is_vip,vip_label,role,is_system_account').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account', false).order('created_at', { ascending: false }).limit(30);
     const candidates = ((candidatesRaw ?? []) as FriendProfile[]).filter(person => !excluded.has(person.id)).slice(0,16);
     const ids = candidates.map(person=>person.id);
-    const { data: levelsRaw } = ids.length ? await supabase.from('user_levels').select('profile_id,xp,level').in('profile_id', ids) : { data: [] as any[] };
+    const { data: levelsRaw } = ids.length ? await socialDb.from('user_levels').select('profile_id,xp,level').in('profile_id', ids) : { data: [] as any[] };
     const levels = new Map(((levelsRaw ?? []) as Array<{profile_id:string;xp:number;level:number}>).map(row=>[row.profile_id,row]));
     setSuggestions(candidates.map(person=>({...person,rep:levels.get(person.id)?.xp ?? 0,level:levels.get(person.id)?.level ?? 1})).sort((a,b)=>(b.rep??0)-(a.rep??0)).slice(0,8));
     setLoading(false);
   };
-  useEffect(() => { void load(); }, [supabase, user?.id]);
+  useEffect(() => { void load(); }, [socialDb, user?.id]);
 
   const findPeople = async () => {
-    if (!supabase) return;
+    if (!socialDb) return;
     const term = search.trim().replace(/[,%()]/g, ' ').replace(/\s+/g, ' ').slice(0, 80);
     if (term.length < 2) { setPeople([]); setMessage(term ? 'Type at least 2 characters.' : ''); return; }
     setBusy('search'); setMessage('');
     const pattern = `%${term}%`;
-    const { data, error } = await supabase.from('profiles').select('id,display_name,username,avatar_url,is_vip,vip_label,role').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account',false).or(`display_name.ilike.${pattern},username.ilike.${pattern},first_name.ilike.${pattern},last_name.ilike.${pattern}`).neq('id', user?.id ?? '').limit(20);
+    const { data, error } = await socialDb.from('profiles').select('id,display_name,username,avatar_url,is_vip,vip_label,role,is_system_account').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account',false).or(`display_name.ilike.${pattern},username.ilike.${pattern},first_name.ilike.${pattern},last_name.ilike.${pattern}`).neq('id', user?.id ?? '').limit(20);
     const raw = (data ?? []) as FriendProfile[];
     const ids = raw.map(person=>person.id);
-    const { data: levelsRaw } = ids.length ? await supabase.from('user_levels').select('profile_id,xp,level').in('profile_id',ids) : {data:[] as any[]};
+    const { data: levelsRaw } = ids.length ? await socialDb.from('user_levels').select('profile_id,xp,level').in('profile_id',ids) : {data:[] as any[]};
     const levels = new Map(((levelsRaw ?? []) as Array<{profile_id:string;xp:number;level:number}>).map(row=>[row.profile_id,row]));
     setPeople(raw.map(person=>({...person,rep:levels.get(person.id)?.xp ?? 0,level:levels.get(person.id)?.level ?? 1})));
     setMessage(error ? error.message : !raw.length ? 'No members found.' : '');
@@ -59,18 +60,18 @@ export default function FriendsPage() {
   };
 
   const request = async (id: string) => {
-    if (!supabase || !user || busy) return;
+    if (!socialDb || !user || busy) return;
     setBusy(id);
-    const { error } = await supabase.from('friendships').insert({ requester_id: user.id, addressee_id: id, status: 'pending' } as never);
+    const { error } = await socialDb.from('friendships').insert({ requester_id: user.id, addressee_id: id, status: 'pending' });
     setMessage(error ? error.message : 'Connection request sent.');
     if (!error) { setPeople(current => current.filter(person => person.id !== id)); setSuggestions(current=>current.filter(person=>person.id!==id)); await load(); }
     setBusy(null);
   };
 
   const update = async (id: string, status: 'accepted' | 'declined' | 'cancelled') => {
-    if (!supabase || !user || busy) return;
+    if (!socialDb || !user || busy) return;
     setBusy(id);
-    await supabase.from('friendships').update({ status } as never).eq('id', id);
+    await socialDb.from('friendships').update({ status }).eq('id', id);
     await load();
     setBusy(null);
   };
