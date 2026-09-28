@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
+import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
@@ -11,90 +12,44 @@ export const metadata: Metadata = { title:{absolute:'RCL Media | Richmond Basket
 export default async function MediaPage() {
   const client = getPublicClient();
   const { games, teams } = await getLeagueSnapshot();
-
-  const { data: mediaItems } = client
-    ? await client.from('media').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(60)
-    : { data: [] };
-
+  const { data: mediaItems } = client ? await client.from('media').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(60) : { data: [] };
   const items = ((mediaItems ?? []) as Media[]).map((item) => ({ id: item.id, title: item.title, description: item.description, type: item.media_type, url: item.storage_path, createdAt: item.created_at }));
   const now = Date.now();
-  const nextGame = [...games]
-    .filter((game) => !['completed', 'cancelled'].includes(game.status) && new Date(game.scheduled_at).getTime() >= now)
-    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
+  const nextGame = [...games].filter((game) => !['completed', 'cancelled'].includes(game.status) && new Date(game.scheduled_at).getTime() >= now).sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
   const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? 'RCL Team';
   const liveInputId = process.env.NEXT_PUBLIC_CLOUDFLARE_STREAM_LIVE_INPUT_ID?.trim();
   const customerCode = process.env.NEXT_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE?.trim();
-  const playerUrl = liveInputId && customerCode
-    ? `https://customer-${customerCode}.cloudflarestream.com/${liveInputId}/iframe`
-    : null;
+  const playerUrl = liveInputId && customerCode ? `https://customer-${customerCode}.cloudflarestream.com/${liveInputId}/iframe` : null;
 
-  return (
-    <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white font-display">
-      <section className="border-b border-white/10 py-16 text-center">
-        <Container maxWidth="xl">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-rcl-gold">RICH CITY MEDIA CENTER</p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-6xl text-white">
-            RCL <span className="text-rcl-gold">LIVE</span> & MEDIA
-          </h1>
-          <p className="mt-3 text-sm text-gray-400">
-            Watch Rich City League live, then catch replays, highlights, courtside action and player interviews.
-          </p>
-        </Container>
+  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <CorporatePageHero
+      eyebrow="RCL Broadcast Network"
+      title="Live + Media"
+      accent="Courtside from Richmond"
+      description="Watch official live coverage, then move into highlights, photos, interviews, and the visual archive of Rich City League basketball."
+      assetKey="media.cover"
+      meta={<div className="min-w-48 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Media library</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">items</span></p><p className="mt-2 text-xs text-rcl-orange">Live + on demand</p></div>}
+    />
+
+    <Container maxWidth="xl" className="py-10 sm:py-12">
+      <section className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 shadow-[0_24px_70px_rgba(0,0,0,.22)]">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">RCL Broadcast Network</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Live Court</h2></div>
+          <span className="rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.16em] text-rcl-orange">Live & Replay</span>
+        </div>
+        <div className="aspect-video w-full bg-black">
+          {playerUrl ? <iframe src={playerUrl} title="Rich City League Live" className="h-full w-full border-0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <div className="flex h-full flex-col items-center justify-center px-6 text-center"><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange">Broadcast setup in progress</p><h3 className="mt-3 font-display text-2xl font-black uppercase sm:text-4xl">RCL Live is coming online.</h3><p className="mt-3 max-w-xl text-sm leading-6 text-white/40">The live player will activate here as soon as the RCL Stream input is connected.</p></div>}
+        </div>
+        <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center">
+          <div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">{nextGame ? 'Next broadcast' : 'RCL Live'}</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">{nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}</h3>{nextGame && <p className="mt-1 text-sm text-white/40">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}</div>
+          <div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No external app required.</p></div>
+        </div>
       </section>
 
-      <Container maxWidth="xl" className="mt-10">
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#07101b] shadow-2xl">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">RCL BROADCAST NETWORK</p>
-              <h2 className="mt-1 text-2xl font-black uppercase">Live Court</h2>
-            </div>
-            <span className="rounded-full border border-rcl-orange/40 bg-rcl-orange/10 px-3 py-1 text-xs font-black uppercase tracking-[.2em] text-rcl-orange">
-              Live & Replay
-            </span>
-          </div>
-
-          <div className="aspect-video w-full bg-black">
-            {playerUrl ? (
-              <iframe
-                src={playerUrl}
-                title="Rich City League Live"
-                className="h-full w-full border-0"
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-                <p className="text-xs font-black uppercase tracking-[.3em] text-rcl-orange">Broadcast setup in progress</p>
-                <h3 className="mt-3 text-2xl font-black uppercase sm:text-4xl">RCL Live is coming online.</h3>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-gray-400">The live player will activate here as soon as the RCL Stream input is connected.</p>
-              </div>
-            )}
-          </div>
-
-          <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[.25em] text-gray-500">{nextGame ? 'NEXT BROADCAST' : 'RCL LIVE'}</p>
-              <h3 className="mt-2 text-lg font-black uppercase sm:text-xl">
-                {nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}
-              </h3>
-              {nextGame && <p className="mt-1 text-sm text-gray-400">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}
-            </div>
-            <div className="text-left md:text-right">
-              <p className="text-xs font-black uppercase tracking-[.2em] text-gray-500">WATCH HERE</p>
-              <p className="mt-1 text-xs text-gray-400">No external app required.</p>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-12">
-          <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">ON DEMAND</p>
-            <h2 className="mt-1 text-3xl font-black uppercase">Photos & Highlights</h2>
-          </div>
-          <MediaDirectory items={items} />
-        </div>
-      </Container>
-    </main>
-  );
+      <section className="mt-12">
+        <div className="mb-6"><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">On demand</p><h2 className="mt-1 font-display text-3xl font-black uppercase">Photos & Highlights</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">Browse published RCL media by type without leaving the platform.</p></div>
+        <MediaDirectory items={items} />
+      </section>
+    </Container>
+  </main>;
 }
