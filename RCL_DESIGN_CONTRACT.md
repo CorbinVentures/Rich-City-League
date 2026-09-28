@@ -52,7 +52,7 @@ Photography should be cinematic Richmond basketball imagery: dark environments, 
 
 ## 7. Page families
 - League: Games, Teams, Players, Standings, Stats, Rankings, Seasons.
-- Experience: Home, The Lab, Draft Night, Game IQ, Fantasy, Leaderboards.
+- Experience: Home, Draft Night, Game IQ, Fantasy, Leaderboards.
 - Community: Social, Communities, Friends, Messages, News, Media, Awards.
 - Account: Profile, Dashboard, Orders, Shop, Notifications, Auth.
 - Operations: Admin and Scorebook remain functionally specialized but inherit the same shell and tokens.

@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FaArrowRight, FaBasketball, FaCalendarDays, FaComments, FaDumbbell, FaFlask, FaGamepad, FaLocationDot, FaMedal, FaPeopleGroup, FaRankingStar, FaUser } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaCalendarDays, FaComments, FaDumbbell, FaGamepad, FaLocationDot, FaMedal, FaPeopleGroup, FaRankingStar, FaUser } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export interface SplashConfig { enabled: boolean; title: string; subtitle: string; duration: number; }
 const SPLASH_LAST_SEEN_KEY = 'rcl_splash_last_seen';
 const featureCards = [
-  { label: 'THE LAB', detail: 'TRAIN. IMPROVE. EVOLVE.', icon: FaFlask, href: '/lab', tone: 'lab' },
   { label: 'THE NEIGHBORHOOD', detail: 'COMMUNITY. EVENTS. IMPACT.', icon: FaLocationDot, href: '/city', tone: 'neighborhood' },
   { label: 'RCL FANTASY', detail: 'DRAFT. MANAGE. COMPETE.', icon: FaRankingStar, href: '/fantasy', tone: 'fantasy' },
   { label: 'MY CAREER', detail: 'STATS. MILESTONES. LEGACY.', icon: FaUser, href: '/dashboard', tone: 'career' },

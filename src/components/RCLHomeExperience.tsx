@@ -8,13 +8,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { RCL_NAV_ITEMS, RCL_ADMIN_NAV_ITEM } from '@/lib/rcl-navigation';
 import {
   FaArrowRight, FaBars, FaBell, FaCalendarDays, FaChartLine, FaComments, FaCrown,
-  FaFlask, FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar, FaPlay,
+  FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar, FaPlay,
   FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass, FaListOl, FaUserTie, FaGear
 } from 'react-icons/fa6';
 
 const nav = RCL_NAV_ITEMS;
 const quick = [
-  {title:'THE LAB',sub:'TRAIN. IMPROVE.',href:'/lab',icon:FaFlask,image:'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=700&q=82'},
+  {title:'RCL SOCIAL',sub:'CONNECT. SHARE.',href:'/social',icon:FaPeopleGroup,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
   {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
   {title:'JOIN A LEAGUE',sub:'FIND YOUR NEXT SEASON',href:'/register',icon:FaTrophy,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
 ];

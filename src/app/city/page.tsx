@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaArrowRight, FaBasketball, FaBolt, FaCalendarDays, FaChartLine, FaComments, FaCrown, FaShirt, FaTrophy } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaBolt, FaCalendarDays, FaComments, FaCrown, FaShirt, FaTrophy } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
@@ -9,7 +9,7 @@ export const revalidate = 60;
 const destinations = [
   { href: '/games', label: 'The Court', detail: 'Games & schedules', icon: FaBasketball, className: 'city-feature city-court' },
   { href: '/standings', label: 'The League', detail: 'Standings & rankings', icon: FaTrophy, className: 'city-feature city-league' },
-  { href: '/lab', label: 'The Lab', detail: 'Train smarter. Build your game.', icon: FaChartLine, className: 'city-feature city-lab' },
+  { href: '/runs', label: 'Runs', detail: 'Find Richmond basketball runs', icon: FaBolt, className: 'city-feature' },
   { href: '/communities', label: 'The Neighborhood', detail: 'Communities & conversations', icon: FaComments, className: 'city-tile' },
   { href: '/news', label: 'The Stage', detail: 'News, highlights & media', icon: FaBolt, className: 'city-tile' },
   { href: '/fantasy', label: 'RCL Fantasy', detail: 'Build your fantasy team', icon: FaTrophy, className: 'city-tile' },

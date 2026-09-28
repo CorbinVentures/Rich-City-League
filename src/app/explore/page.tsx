@@ -19,7 +19,6 @@ const featured = [
 
 const descriptions:Record<string,string>={
   Home:'Return to the RCL hub and see what is happening across the league.',
-  'The Lab':'Enter RCL’s basketball lab and explore development, analysis, and interactive basketball tools.',
   Players:'Discover player profiles, basketball identities, stats, recognition, and league history.',
   Teams:'Explore RCL teams, rosters, identities, and team information.',
   Schedule:'See when the league plays and what is coming next.',
