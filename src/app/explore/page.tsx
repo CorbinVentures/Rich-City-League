@@ -3,7 +3,7 @@ import { Container } from '@/components/Container';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 import { RCL_MEMBER_NAV_GROUPS } from '@/lib/member-navigation';
 import { getPublicClient } from '@/lib/public-data';
-import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaTrophy } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup } from 'react-icons/fa6';
 
 export const metadata = {
   title: 'Discover RCL',
@@ -71,12 +71,12 @@ export default async function ExploreRCLPage(){
         <div className="space-y-8">
           <section>
             <SectionHeading eyebrow="7-day activity" title="Rising in RCL" detail="Members creating momentum across the network." />
-            {rising.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rising.map((person,index)=><PersonCard key={person.id} person={person} index={index} mode="rising" />)}</div> : <EmptyState copy="Rising members will appear as the network gets active." />}
+            {rising.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rising.map((person,index)=><PersonCard key={person.id} person={person} index={index} />)}</div> : <EmptyState copy="Rising members will appear as the network gets active." />}
           </section>
 
           <section>
             <SectionHeading eyebrow="Reputation" title="Top REP in the city" detail="Recognition built through activity, contribution and RCL participation." actionHref="/leaderboards" actionLabel="Leaderboards" />
-            {topRep.length ? <div className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 divide-y divide-white/10">{topRep.map((person,index)=><Link key={person.id} href={`/social/profile/${person.id}`} className="flex items-center gap-3 p-4 transition hover:bg-white/[.03]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-rcl-orange/25 text-xs font-black text-rcl-orange">#{index+1}</span><SocialIdentity author={person} /><span className="ml-auto hidden text-xs font-black uppercase tracking-wider text-white/25 sm:block">{formatRep(person.rep??0)} REP</span></Link>)}</div> : <EmptyState copy="REP leaders will appear as members build activity." />}
+            {topRep.length ? <div className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 divide-y divide-white/10">{topRep.map((person,index)=><Link key={person.id} href={`/social/profile/${person.id}`} className="flex items-center gap-3 p-4 transition hover:bg-white/[.03]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-rcl-orange/25 text-xs font-black text-rcl-orange">#{index+1}</span><SocialIdentity author={person} link={false}/><span className="ml-auto hidden text-xs font-black uppercase tracking-wider text-white/25 sm:block">{formatRep(person.rep??0)} REP</span></Link>)}</div> : <EmptyState copy="REP leaders will appear as members build activity." />}
           </section>
 
           <section>
@@ -100,7 +100,7 @@ export default async function ExploreRCLPage(){
           </SideCard>
 
           <SideCard title="New to the network" icon={<FaPeopleGroup/>}>
-            <div className="space-y-2">{newcomers.map(person=><Link key={person.id} href={`/social/profile/${person.id}`} className="block rounded-xl px-2 py-2 transition hover:bg-white/[.04]"><SocialIdentity author={person} /></Link>)}</div>
+            <div className="space-y-2">{newcomers.map(person=><Link key={person.id} href={`/social/profile/${person.id}`} className="block rounded-xl px-2 py-2 transition hover:bg-white/[.04]"><SocialIdentity author={person} link={false}/></Link>)}</div>
           </SideCard>
         </aside>
       </div>
@@ -117,8 +117,8 @@ function SectionHeading({eyebrow,title,detail,actionHref,actionLabel}:{eyebrow:s
   return <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-1 font-display text-2xl font-black uppercase sm:text-3xl">{title}</h2><p className="mt-1 text-sm text-white/40">{detail}</p></div>{actionHref&&<Link href={actionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">{actionLabel}<FaArrowRight/></Link>}</div>;
 }
 
-function PersonCard({person,index,mode}:{person:DiscoverProfile;index:number;mode:'rising'}){
-  return <Link href={`/social/profile/${person.id}`} className="group rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:-translate-y-0.5 hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-3"><SocialIdentity author={person}/><span className="text-xs font-black text-rcl-orange">0{index+1}</span></div><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs font-black uppercase tracking-wider"><span className="text-white/30">{person.role || 'member'}</span><span className="text-rcl-blue">{mode==='rising'?`${person.activity} posts · `:''}{formatRep(person.rep??0)} REP</span></div></Link>;
+function PersonCard({person,index}:{person:DiscoverProfile;index:number}){
+  return <Link href={`/social/profile/${person.id}`} className="group rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:-translate-y-0.5 hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-3"><SocialIdentity author={person} link={false}/><span className="text-xs font-black text-rcl-orange">0{index+1}</span></div><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs font-black uppercase tracking-wider"><span className="text-white/30">{person.role || 'member'}</span><span className="text-rcl-blue">{person.activity} posts · {formatRep(person.rep??0)} REP</span></div></Link>;
 }
 
 function SideCard({title,icon,children}:{title:string;icon:React.ReactNode;children:React.ReactNode}){
