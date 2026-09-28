@@ -5,12 +5,18 @@ import type { Game, GameEvent, GameLineup, Player, PlayerGameStats } from '@/typ
 
 function extractResponseText(payload: any): string {
   if (typeof payload?.output_text === 'string') return payload.output_text.trim();
-  return (payload?.output ?? []).flatMap((item: any) => item?.content ?? []).map((item: any) => item?.text ?? '').filter(Boolean).join('\n').trim();
+  return (payload?.output ?? [])
+    .flatMap((item: any) => item?.content ?? [])
+    .map((item: any) => item?.text ?? '')
+    .filter(Boolean)
+    .join('\n')
+    .trim();
 }
 
 export async function POST(request: Request) {
   const supabase = await getServerSupabaseClient();
   if (!supabase) return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
 
@@ -18,6 +24,17 @@ export async function POST(request: Request) {
   const gameId = typeof body?.game_id === 'string' ? body.game_id : '';
   const question = typeof body?.question === 'string' ? body.question.trim().slice(0, 500) : '';
   if (!gameId || !question) return NextResponse.json({ error: 'game_id and question are required.' }, { status: 400 });
+
+  const [roleAccess, gameAccess] = await Promise.all([
+    supabase.rpc('has_game_iq_access' as never),
+    supabase.rpc('can_manage_game', { target_game_id: gameId } as never),
+  ]);
+  if (roleAccess.error || gameAccess.error) {
+    return NextResponse.json({ error: 'Unable to verify Game IQ access.' }, { status: 500 });
+  }
+  if (roleAccess.data !== true || gameAccess.data !== true) {
+    return NextResponse.json({ error: 'You are not authorized to analyze this game.' }, { status: 403 });
+  }
 
   const [gameResult, eventsResult, statsResult, lineupsResult, playersResult] = await Promise.all([
     supabase.from('games').select('*').eq('id', gameId).single(),
@@ -36,24 +53,54 @@ export async function POST(request: Request) {
   const lineups = (lineupsResult.data ?? []) as unknown as GameLineup[];
   const players = (playersResult.data ?? []) as unknown as Player[];
   const analytics = deriveGameAnalytics(game, events, stats, lineups);
-  const playerNames = new Map(players.map((p) => [p.id, `#${p.jersey_number ?? '--'} ${p.first_name} ${p.last_name}`]));
+  const playerNames = new Map(players.map((player) => [player.id, `#${player.jersey_number ?? '--'} ${player.first_name} ${player.last_name}`]));
 
-  const compactStats = stats.map((s) => ({
-    player: playerNames.get(s.player_id) ?? s.player_id,
-    team_id: s.team_id,
-    points: s.points, rebounds: s.rebounds, assists: s.assists, steals: s.steals, blocks: s.blocks,
-    turnovers: s.turnovers, fouls: s.fouls, minutes: s.minutes, plus_minus: s.plus_minus,
-    fgm: s.field_goals_made, fga: s.field_goals_attempted, tpm: s.three_pointers_made, tpa: s.three_pointers_attempted,
-    ftm: s.free_throws_made, fta: s.free_throws_attempted,
+  const compactStats = stats.map((stat) => ({
+    player: playerNames.get(stat.player_id) ?? stat.player_id,
+    team_id: stat.team_id,
+    points: stat.points,
+    rebounds: stat.rebounds,
+    assists: stat.assists,
+    steals: stat.steals,
+    blocks: stat.blocks,
+    turnovers: stat.turnovers,
+    fouls: stat.fouls,
+    minutes: stat.minutes,
+    plus_minus: stat.plus_minus,
+    fgm: stat.field_goals_made,
+    fga: stat.field_goals_attempted,
+    tpm: stat.three_pointers_made,
+    tpa: stat.three_pointers_attempted,
+    ftm: stat.free_throws_made,
+    fta: stat.free_throws_attempted,
   }));
 
-  const compactEvents = events.map((e) => ({
-    period: e.period_number, clock: e.clock_seconds, team_id: e.team_id, player: e.player_id ? playerNames.get(e.player_id) : null,
-    type: e.event_type, points: e.points, shot_value: e.shot_value, shot_result: e.shot_result, zone: e.shot_zone,
-    secondary_player: e.secondary_player_id ? playerNames.get(e.secondary_player_id) : null,
+  const compactEvents = events.map((event) => ({
+    period: event.period_number,
+    clock: event.clock_seconds,
+    team_id: event.team_id,
+    player: event.player_id ? playerNames.get(event.player_id) : null,
+    type: event.event_type,
+    points: event.points,
+    shot_value: event.shot_value,
+    shot_result: event.shot_result,
+    zone: event.shot_zone,
+    secondary_player: event.secondary_player_id ? playerNames.get(event.secondary_player_id) : null,
   }));
 
-  const payload = { game: { home_team_id: game.home_team_id, away_team_id: game.away_team_id, home_score: game.home_score, away_score: game.away_score, status: game.status }, question, official_stats: compactStats, play_by_play: compactEvents, basketball_intelligence: analytics };
+  const payload = {
+    game: {
+      home_team_id: game.home_team_id,
+      away_team_id: game.away_team_id,
+      home_score: game.home_score,
+      away_score: game.away_score,
+      status: game.status,
+    },
+    question,
+    official_stats: compactStats,
+    play_by_play: compactEvents,
+    basketball_intelligence: analytics,
+  };
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'AI analysis is not configured yet. Add OPENAI_API_KEY to the Vercel environment.' }, { status: 503 });
@@ -88,10 +135,16 @@ export async function POST(request: Request) {
   const answer = extractResponseText(await aiResponse.json());
   if (!answer) return NextResponse.json({ error: 'Game IQ returned no answer.' }, { status: 502 });
 
-  await supabase.from('game_ai_insights').insert({
-    game_id: gameId, insight_type: 'coach_question', title: 'Game IQ Coach Question',
-    body: answer, data: payload, confidence: 0.9, created_by: user.id,
+  const { error: insightError } = await supabase.from('game_ai_insights').insert({
+    game_id: gameId,
+    insight_type: 'coach_question',
+    title: 'Game IQ Coach Question',
+    body: answer,
+    data: payload,
+    confidence: 0.9,
+    created_by: user.id,
   } as never);
+  if (insightError) console.error('Unable to store Game IQ coach answer', insightError);
 
   return NextResponse.json({ answer });
 }
