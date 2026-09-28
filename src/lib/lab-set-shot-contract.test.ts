@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-// The Lab motion authoring library is an ESM build script, not a typed app module.
-// @ts-expect-error importing the canonical motion source is intentional for regression coverage.
 import { MOTION_SPECS } from '../../scripts/lib/basketball-motion-specs.mjs';
 
 const setShot = MOTION_SPECS['set-shot'].frame as (p: number) => {
