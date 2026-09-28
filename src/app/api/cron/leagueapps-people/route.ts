@@ -61,8 +61,6 @@ async function syncResource(db: SupabaseClient, resource: LeagueAppsResource): P
     if (resource === 'registrations-2') {
       const { error: materializeError } = await db.rpc('materialize_leagueapps_players');
       if (materializeError) throw new Error(`player reconciliation: ${materializeError.message}`);
-      const { error: rosterError } = await db.rpc('materialize_leagueapps_rosters');
-      if (rosterError) throw new Error(`roster reconciliation: ${rosterError.message}`);
     }
 
     const status: SyncResult['status'] = batches >= maxBatches ? 'partial' : 'success';
