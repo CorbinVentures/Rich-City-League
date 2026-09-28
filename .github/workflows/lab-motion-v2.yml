@@ -1,4 +1,4 @@
-name: Lab Motion V2 Validation
+name: Lab Motion V3 Validation
 
 on:
   pull_request:
@@ -26,26 +26,27 @@ jobs:
       - run: npm ci
       - name: Rebuild and validate full basketball training library
         run: npm run lab:library:verify
-      - name: Verify all canonical GLB clips use task-space training engine V2
+      - name: Verify all canonical GLB clips use ball-led task-space training engine V3
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const clips=[
-            ['RCL_Defensive_Slide_v1','public/lab3d/RCL_Defensive_Slide_v1.glb'],
-            ['RCL_Closeout_v1','public/lab3d/RCL_Closeout_v1.glb'],
-            ['RCL_Triple_Threat_Jab_v1','public/lab3d/RCL_Triple_Threat_Jab_v1.glb'],
-            ['RCL_Dribble_Stance_v1','public/lab3d/RCL_Dribble_Stance_v1.glb'],
-            ['RCL_Chest_Pass_v1','public/lab3d/RCL_Chest_Pass_v1.glb'],
-            ['RCL_Set_Shot_v1','public/lab3d/RCL_Set_Shot_v1.glb']
+            ['RCL_Defensive_Slide_v1','public/lab3d/RCL_Defensive_Slide_v1.glb',false],
+            ['RCL_Closeout_v1','public/lab3d/RCL_Closeout_v1.glb',false],
+            ['RCL_Triple_Threat_Jab_v1','public/lab3d/RCL_Triple_Threat_Jab_v1.glb',true],
+            ['RCL_Dribble_Stance_v1','public/lab3d/RCL_Dribble_Stance_v1.glb',true],
+            ['RCL_Chest_Pass_v1','public/lab3d/RCL_Chest_Pass_v1.glb',true],
+            ['RCL_Set_Shot_v1','public/lab3d/RCL_Set_Shot_v1.glb',true]
           ];
-          for(const [name,path] of clips){
+          for(const [name,path,ballLed] of clips){
             const b=fs.readFileSync(path);if(b.toString('ascii',0,4)!=='glTF')throw Error('bad GLB '+path);
             const n=b.readUInt32LE(12),g=JSON.parse(b.toString('utf8',20,20+n).trim()),a=(g.animations||[]).find(x=>x.name===name);
             if(!a)throw Error('clip missing '+name);
             if(a.channels.length<18)throw Error(name+' missing full-body task-space tracks');
-            if(a.extras?.engine!=='RCL_TASK_SPACE_IK_V2'||a.extras?.phaseModel!=='basketball-training-v3'||a.extras?.qualityGate!==true||a.extras?.stableHandWorldOrientation!==true||a.extras?.armsInFront!==true)throw Error(name+' missing V2 task-space quality contract');
+            if(a.extras?.engine!=='RCL_TASK_SPACE_IK_V3'||a.extras?.phaseModel!=='basketball-training-v4'||a.extras?.contactModel!=='ball-led-v1'||a.extras?.qualityGate!==true||a.extras?.stableContactHandFrames!==true||a.extras?.armsInFront!==true)throw Error(name+' missing V3 task-space contact contract');
+            if(ballLed&&a.extras?.ballLedContact!==true)throw Error(name+' missing ball-led contact flag');
           }
-          console.log({motions:clips.length,engine:'RCL_TASK_SPACE_IK_V2',phaseModel:'basketball-training-v3'});
+          console.log({motions:clips.length,engine:'RCL_TASK_SPACE_IK_V3',phaseModel:'basketball-training-v4',contactModel:'ball-led-v1'});
           NODE
       - name: Publish motion plans, quality reports, and rebuilt GLBs
         uses: actions/upload-artifact@v4
