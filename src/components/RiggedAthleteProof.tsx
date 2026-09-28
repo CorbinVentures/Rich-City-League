@@ -108,7 +108,7 @@ function RiggedMotionPlayer({title,skill,match}:{title:string;skill:string;match
       const model=await load('/lab3d/athlete.glb');if(disposed)return;
       const athlete=model.scene;athlete.traverse((o:any)=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
       const box=new THREE.Box3().setFromObject(athlete),size=new THREE.Vector3(),center=new THREE.Vector3();box.getSize(size);box.getCenter(center);
-      athlete.position.set(-center.x,-box.min.y,-center.z);athlete.scale.setScalar(2.15/Math.max(size.y,.001));scene.add(athlete);
+      const athleteScale=2.15/Math.max(size.y,.001);athlete.position.set(-center.x,-box.min.y,-center.z);athlete.scale.setScalar(athleteScale);scene.add(athlete);
 
       setStatus('loading-motion');
       const selected=LAB_MOTIONS.find(m=>m.id===motionId);if(!selected)throw new Error('Unknown Lab motion: '+motionId);
@@ -149,11 +149,11 @@ function RiggedMotionPlayer({title,skill,match}:{title:string;skill:string;match
           if(phase<.56)ballTarget.copy(contactBall);else{const t=smooth((phase-.56)/.28);ballTarget.copy(contactBall);ballTarget.z+=.74*t;ballTarget.y+=.05*t;}
         }else if(selected.id==='set-shot'){
           showBall=phase>.06&&phase<.92;
-          // The shooting hand owns the ball while the guide hand contributes only during the gather/set.
-          const guideInfluence=phase<.66?.45*(1-smooth((phase-.46)/.20)):0;
-          shotAnchor.copy(rightWorld).lerp(leftWorld,guideInfluence);
-          const setLift=smooth((phase-.28)/.38);shotAnchor.y+=.08+.03*setLift;shotAnchor.z+=.05+.025*setLift;ballTarget.copy(shotAnchor);
-          // Release starts continuously from the exact contact anchor only after the arm reaches extension.
+          // Set Shot V1 is explicitly right-handed: the shooting wrist owns the ball center.
+          // These offsets are the same physical relationship used by the baker (under + slightly behind),
+          // scaled with the athlete so the browser cannot pull the ball back between both wrists.
+          shotAnchor.copy(rightWorld);shotAnchor.y+=.120*athleteScale;shotAnchor.z+=.049*athleteScale;ballTarget.copy(shotAnchor);
+          // The guide hand is visual support only. Release begins after the authored extension window.
           if(phase>=.66){const t=smooth((phase-.66)/.22);ballTarget.z+=.46*t;ballTarget.y+=.62*t-.14*t*t;}
         }
         ball.visible=selected.ball&&showBall;if(ball.visible)ball.position.copy(ballTarget);
