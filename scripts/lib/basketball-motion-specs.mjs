@@ -48,10 +48,18 @@ function chestPass(p){
 }
 
 function setShot(p){
- const f=frameBase(p<.22?'dip':p<.48?'shot-pocket':p<.68?'rise-release':p<.84?'follow-through':'recover',p),active=seg(p,.02,.26)*(1-seg(p,.74,.98)),dip=pulse(p,.03,.13,.30,.44),rise=seg(p,.24,.62)*(1-seg(p,.80,1)),release=pulse(p,.50,.60,.78,.90);
+ const phase=p<.20?'dip':p<.46?'shot-pocket':p<.68?'rise-release':p<.84?'follow-through':'recover';
+ const f=frameBase(phase,p),active=seg(p,.02,.24)*(1-seg(p,.82,.98)),dip=pulse(p,.03,.13,.30,.44),rise=seg(p,.22,.62)*(1-seg(p,.82,1)),release=pulse(p,.50,.60,.80,.92);
  f.pelvis=[0,-.055*dip+.045*rise,0];f.torso.pitch=3.5*dip-1.5*rise;f.feet.l=[0,0,0];f.feet.r=[0,0,0];
- const pocketR=[.08,.46,.24],topR=[.08,.68,.30],finishR=[.08,.78,.36],pocketL=[-.025,.47,.22],topL=[-.025,.65,.27],finishL=[-.06,.63,.20],up=seg(p,.24,.62),follow=seg(p,.58,.76),interp=(a,b,t)=>a.map((v,i)=>lerp(v,b[i],t)),r=interp(interp(pocketR,topR,up),finishR,follow),l=interp(interp(pocketL,topL,up),finishL,follow);
- f.hands.r=hand('pelvis',r,active);f.hands.l=hand('pelvis',l,active);f.armPole={l:[-.30,-.14,.36],r:[.16,-.16,.42]};f.wrist.rPitch=-18*release;f.wrist.rYaw=-2*release;f.wrist.lPitch=-3*release;f.wrist.lYaw=5*release;return f;
+ const interp=(a,b,t)=>a.map((v,i)=>lerp(v,b[i],t)),pocket=seg(p,.10,.34),lift=seg(p,.30,.62),follow=seg(p,.58,.80),guidePeel=seg(p,.52,.78);
+ const pocketR=[.11,.40,.24],loadR=[.12,.50,.26],topR=[.12,.70,.31],finishR=[.12,.82,.38];
+ const pocketL=[-.07,.45,.22],loadL=[-.06,.55,.24],topL=[-.055,.69,.27],peelL=[-.13,.61,.19],finishL=[-.18,.55,.15];
+ const r=interp(interp(interp(pocketR,loadR,pocket),topR,lift),finishR,follow);
+ const supportL=interp(interp(pocketL,loadL,pocket),topL,lift),l=interp(interp(supportL,peelL,guidePeel),finishL,follow);
+ f.hands.r=hand('pelvis',r,active);f.hands.l=hand('pelvis',l,active);
+ f.armPole={l:[-.48,-.08,.34],r:[.32,-.12,.46]};
+ f.wrist.rPitch=-20*release;f.wrist.rYaw=-2*release;f.wrist.lPitch=-2*release;f.wrist.lYaw=4*(1-guidePeel);
+ return f;
 }
 
 export const MOTION_SPECS={
@@ -60,7 +68,7 @@ export const MOTION_SPECS={
  'triple-threat-jab':{clip:'RCL_Triple_Threat_Jab_v1',file:'public/lab3d/RCL_Triple_Threat_Jab_v1.glb',plan:'public/lab3d/motion/triple-threat-jab-v1-plan.json',fps:30,duration:1.3,principles:['ball-ready triple-threat pocket','left pivot stays planted','right jab attacks forward-outside','hips stay loaded','torso sells without losing balance','hands remain in a protected front pocket','jab foot retracts to base'],events:[['load',.14],['jab',.34],['sell',.58],['recover',.82],['reset',1]],validation:{startReady:true,endReady:true,pivotLocked:true,noCrossing:true,armsInFront:true},frame:jab},
  'dribble-stance':{clip:'RCL_Dribble_Stance_v1',file:'public/lab3d/RCL_Dribble_Stance_v1.glb',plan:'public/lab3d/motion/dribble-stance-v1-plan.json',fps:30,duration:1.0,principles:['feet stay planted','hips remain loaded','right hand pounds beside and in front of body','off hand protects space','torso stays controlled','one clean hand-floor-hand rhythm'],events:[['control-top',0],['pound-down',.32],['floor-contact',.5],['recover-up',.72],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,noUprightBounce:true,armsInFront:true},frame:dribble},
  'chest-pass':{clip:'RCL_Chest_Pass_v1',file:'public/lab3d/RCL_Chest_Pass_v1.glb',plan:'public/lab3d/motion/pass-v1-plan.json',fps:30,duration:1.25,principles:['ball loads at chest in front of torso','feet stay grounded','hips and torso drive target','elbows extend symmetrically','release follows extension','wrists finish through target','hands never wrap behind shoulders','recover to ready'],events:[['load',.12],['drive',.34],['release',.56],['follow-through',.72],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,symmetricRelease:true,noOverheadFlare:true,armsInFront:true},frame:chestPass},
- 'set-shot':{clip:'RCL_Set_Shot_v1',file:'public/lab3d/RCL_Set_Shot_v1.glb',plan:'public/lab3d/motion/shot-v1-plan.json',fps:30,duration:1.45,principles:['balanced two-foot base','hips and knees dip before rise','compact shot pocket in front of face','right elbow stays under ball','guide hand stays passive at side of ball','release near top of rise','wrist finishes through target','hands stay in front of head and shoulders','feet stay grounded','recover to ready'],events:[['dip',.14],['shot-pocket',.34],['rise',.50],['release',.62],['follow-through',.76],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,rightHandRelease:true,guideHandPassive:true,noElbowFlare:true,armsInFront:true,ballContactAligned:true},frame:setShot}
+ 'set-shot':{clip:'RCL_Set_Shot_v1',file:'public/lab3d/RCL_Set_Shot_v1.glb',plan:'public/lab3d/motion/shot-v1-plan.json',fps:30,duration:1.45,principles:['balanced two-foot base','hips and knees dip before rise','ball stays on the shooting-side line','right hand remains under and behind the ball through the pocket','right elbow stays under the ball without crossing the centerline','guide hand stays on the side and peels away before follow-through','release near top of rise','shooting wrist finishes through target','hands never cross or collapse together','feet stay grounded','recover to ready'],events:[['dip',.14],['shot-pocket',.34],['rise',.50],['release',.62],['follow-through',.76],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,rightHandRelease:true,guideHandPassive:true,noElbowFlare:true,armsInFront:true,ballContactAligned:true},frame:setShot}
 };
 
 export function authorMotion(id){const spec=MOTION_SPECS[id];if(!spec)throw Error('Unknown motion '+id);const frames=[],count=Math.round(spec.duration*spec.fps);for(let i=0;i<=count;i++){const time=Math.min(spec.duration,i/spec.fps),p=time/spec.duration;frames.push({frame:i,time:+time.toFixed(4),...spec.frame(p)})}return{version:3,engine:'RCL_TASK_SPACE_IK_V2',id,clip:spec.clip,fps:spec.fps,duration:spec.duration,canonicalStartEnd:'RCL_Ready_Stance_v4',principles:spec.principles,events:spec.events.map(([name,p])=>({name,time:+(p*spec.duration).toFixed(4)})),validation:spec.validation,frames}}
