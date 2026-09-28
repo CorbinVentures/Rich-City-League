@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FaArrowRight, FaMagnifyingGlass, FaPeopleGroup, FaPlus } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
-import { ContentAssetBackground } from '@/components/ContentAssetBackground';
+import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 type Community = { id: string; name: string; slug: string; description: string | null; community_type: string; privacy: string };
+
 export default function CommunitiesPage() {
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
@@ -15,11 +17,13 @@ export default function CommunitiesPage() {
   const [joined, setJoined] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const userId = user?.id;
+
   const load = useCallback(async () => {
     if (!supabase) { setLoading(false); setError('Communities are temporarily unavailable. Please try again later.'); return; }
     setLoading(true);
@@ -30,10 +34,11 @@ export default function CommunitiesPage() {
       ]);
       if (communities.error || memberships.error) throw communities.error || memberships.error;
       setItems(communities.data ?? []);
-      setJoined((memberships.data ?? []).map(item=>item.community_id));
+      setJoined((memberships.data ?? []).map(item => item.community_id));
     } catch { setError('We could not load communities. Please try again.'); }
     finally { setLoading(false); }
   }, [supabase, userId]);
+
   useEffect(() => { void load(); }, [load]);
 
   async function create(event: FormEvent) {
@@ -52,38 +57,59 @@ export default function CommunitiesPage() {
     } catch { setError('Your community was not created. Your draft is still here; please try again.'); }
     finally { setBusy(null); }
   }
+
   async function join(id: string) {
     if (!supabase || !userId || busy || joined.includes(id)) return;
     setBusy(id); setError(''); setMessage('');
     try {
       const result = await supabase.from('community_members').insert({ community_id: id, profile_id: userId });
       if (result.error && result.error.code !== '23505') throw result.error;
-      setJoined(current=>current.includes(id) ? current : [...current, id]);
+      setJoined(current => current.includes(id) ? current : [...current, id]);
       setMessage('You joined the community.');
     } catch { setError('We could not join this community. Please try again.'); }
     finally { setBusy(null); }
   }
-  return <main className="rcl-mock-page rcl-communities-page relative min-h-screen pb-24 text-white">
-    <ContentAssetBackground assetKey="communities.cover" opacity={0.14} />
-    <div className="relative z-10"><Container maxWidth="lg" className="py-12">
-      <p className="text-sm font-bold uppercase tracking-widest text-rcl-orange">RCL Community</p><h1 className="mt-3 font-display text-4xl sm:text-5xl">Find your court</h1>
-      <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">Connect with people who share your teams, interests, and love of the game.</p>
-      {error && <div role="alert" className="mt-6 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-200"><p>{error}</p><button type="button" disabled={loading || Boolean(busy)} onClick={()=>{ setError(''); void load(); }} className="mt-2 min-h-11 font-bold underline disabled:opacity-50">Refresh communities</button></div>}
-      {message && <p role="status" className="mt-6 text-sm text-emerald-300">{message}</p>}
-      <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        {authLoading ? <p role="status" className="text-sm text-slate-300">Loading your account…</p> : user ? <form onSubmit={create} className="space-y-5 rounded-2xl border border-white/10 bg-white/[.03] p-6">
-          <h2 className="text-xl font-bold">Start a community</h2>
-          <label className="block text-sm font-semibold">Community name<input required maxLength={100} value={name} onChange={event=>setName(event.target.value)} className="mt-2 w-full rounded-xl border border-white/15 p-3" /></label>
-          <label className="block text-sm font-semibold">Description<textarea maxLength={2000} rows={4} value={description} onChange={event=>setDescription(event.target.value)} placeholder="What brings people together?" className="mt-2 w-full rounded-xl border border-white/15 p-3" /></label>
-          <button type="submit" disabled={Boolean(busy) || !name.trim() || !supabase} aria-busy={busy==='create'} className="rcl-state-link rcl-state-primary w-full disabled:opacity-50">{busy==='create' ? 'Creating…' : 'Create community'}</button>
-        </form> : <div className="rounded-2xl border border-white/10 p-6"><h2 className="text-xl font-bold">Be part of the conversation</h2><p className="mt-3 text-sm leading-6 text-slate-300">Sign in to join a community or start your own.</p><Link href="/auth/sign-in?next=/communities" className="rcl-state-link rcl-state-primary mt-5">Sign in</Link></div>}
-        <section className="grid gap-4 sm:grid-cols-2" aria-label="Communities" aria-busy={loading}>
-          {loading ? <p role="status" className="col-span-full p-6 text-sm text-slate-300">Loading communities…</p> : items.length ? items.map(item=><article key={item.id} className="flex min-w-0 flex-col rounded-2xl border border-white/10 bg-white/[.03] p-5">
-            <span className="text-xs font-bold uppercase tracking-widest text-rcl-orange">{item.community_type.replace(/_/g, ' ')}</span><h2 className="mt-2 break-words text-xl font-bold">{item.name}</h2><p className="mt-3 flex-1 break-words text-sm leading-6 text-slate-300">{item.description ?? 'A new RCL basketball community.'}</p>
-            {user && <button type="button" onClick={()=>void join(item.id)} disabled={Boolean(busy) || joined.includes(item.id)} aria-busy={busy===item.id} className="rcl-state-link mt-5 disabled:opacity-60">{joined.includes(item.id) ? 'Joined' : busy===item.id ? 'Joining…' : 'Join community'}</button>}
-          </article>) : <div className="col-span-full rounded-2xl border border-dashed border-white/15 p-8"><h2 className="text-lg font-bold">Your community starts here</h2><p className="mt-2 text-sm leading-6 text-slate-300">No communities are available yet. Start one around your team or favorite part of the game.</p></div>}
+
+  const filtered = items.filter((item) => !query.trim() || `${item.name} ${item.description ?? ''} ${item.community_type}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <ClientPageHero
+      eyebrow="RCL Community"
+      title="Communities"
+      accent="Find your people"
+      description="Join spaces built around teams, basketball interests, local runs, and the conversations that keep Richmond hoops connected."
+      assetKey="communities.cover"
+      meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Community network</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">spaces</span></p><p className="mt-2 text-xs text-rcl-blue">{joined.length} joined</p></div>}
+    />
+
+    <Container maxWidth="xl" className="py-8 sm:py-12">
+      {error && <div role="alert" className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200"><div className="flex flex-wrap items-center justify-between gap-3"><p>{error}</p><button type="button" disabled={loading || Boolean(busy)} onClick={() => { setError(''); void load(); }} className="min-h-10 rounded-lg border border-red-300/20 px-3 font-black uppercase tracking-wider disabled:opacity-50">Refresh</button></div></div>}
+      {message && <p role="status" className="mb-5 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-sm text-emerald-300">{message}</p>}
+
+      <div className="grid items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <aside className="lg:sticky lg:top-24">
+          {authLoading ? <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-6 text-sm text-white/40">Loading your account…</div> : user ? <form onSubmit={create} className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 shadow-[0_18px_55px_rgba(0,0,0,.18)]">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Create a space</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Start a community</h2></div><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-orange text-black"><FaPlus/></span></div>
+            <p className="mt-3 text-sm leading-6 text-white/40">Create a public home for a team, run, basketball topic, or RCL interest.</p>
+            <label className="mt-6 block text-xs font-black uppercase tracking-wider text-white/40">Community name<input required maxLength={100} value={name} onChange={event => setName(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60" /></label>
+            <label className="mt-4 block text-xs font-black uppercase tracking-wider text-white/40">Description<textarea maxLength={2000} rows={4} value={description} onChange={event => setDescription(event.target.value)} placeholder="What brings people together?" className="mt-2 w-full resize-none rounded-xl border border-rcl-blue/15 bg-black/25 p-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60" /></label>
+            <button type="submit" disabled={Boolean(busy) || !name.trim() || !supabase} aria-busy={busy === 'create'} className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black transition hover:brightness-110 disabled:opacity-50">{busy === 'create' ? 'Creating…' : 'Create community'} <FaArrowRight/></button>
+          </form> : <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-6"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Join the conversation</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Be part of RCL</h2><p className="mt-3 text-sm leading-6 text-white/45">Sign in to join communities or start your own basketball space.</p><Link href="/auth/sign-in?next=/communities" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Sign in <FaArrowRight/></Link></div>}
+        </aside>
+
+        <section aria-label="Communities" aria-busy={loading}>
+          <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row sm:items-center">
+            <label className="relative flex-1"><span className="sr-only">Search communities</span><FaMagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-white/25"/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search communities..." className="h-12 w-full rounded-xl border border-rcl-blue/15 bg-[#050b12] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label>
+            <span className="px-2 text-xs font-black uppercase tracking-[.16em] text-white/35">{filtered.length} shown</span>
+          </div>
+
+          {loading ? <div className="grid gap-4 sm:grid-cols-2">{[1,2,3,4].map(item => <div key={item} className="h-48 animate-pulse rounded-2xl border border-rcl-blue/10 bg-white/[.025]" />)}</div> : filtered.length ? <div className="grid gap-4 sm:grid-cols-2">{filtered.map(item => <article key={item.id} className="flex min-w-0 flex-col rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 transition hover:-translate-y-1 hover:border-rcl-blue/35">
+            <div className="flex items-start justify-between gap-4"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/10 text-rcl-blue"><FaPeopleGroup/></span><span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/30">{item.privacy}</span></div>
+            <p className="mt-6 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.community_type.replace(/_/g, ' ')}</p><h2 className="mt-1 break-words font-display text-xl font-black uppercase">{item.name}</h2><p className="mt-3 flex-1 break-words text-sm leading-6 text-white/45">{item.description ?? 'A new RCL basketball community.'}</p>
+            {user ? <button type="button" onClick={() => void join(item.id)} disabled={Boolean(busy) || joined.includes(item.id)} aria-busy={busy === item.id} className={`mt-5 min-h-11 rounded-xl border px-4 text-xs font-black uppercase tracking-wider transition ${joined.includes(item.id) ? 'border-rcl-blue/20 bg-rcl-blue/10 text-rcl-blue' : 'border-rcl-orange/25 text-rcl-orange hover:bg-rcl-orange/10'} disabled:opacity-60`}>{joined.includes(item.id) ? 'Joined' : busy === item.id ? 'Joining…' : 'Join community'}</button> : null}
+          </article>)}</div> : <div className="rounded-2xl border border-dashed border-rcl-blue/25 bg-rcl-blue/[.035] p-10 text-center"><FaPeopleGroup className="mx-auto text-3xl text-rcl-blue/55"/><h2 className="mt-4 font-display text-2xl font-black uppercase">{items.length ? 'No communities found' : 'Your community starts here'}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-white/40">{items.length ? 'Try a different search.' : 'No communities are available yet. Start one around your team or favorite part of the game.'}</p></div>}
         </section>
       </div>
-    </Container></div>
+    </Container>
   </main>;
 }
