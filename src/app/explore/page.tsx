@@ -19,20 +19,21 @@ type ActivityPost = { id:string; body:string; author_id:string; created_at:strin
 
 export default async function ExploreRCLPage(){
   const client = getPublicClient();
+  const publicDb:any = client;
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7*24*60*60*1000).toISOString();
 
-  const [{data:profilesRaw},{data:communitiesRaw},{data:runsRaw},{data:recentPostsRaw},{data:officialRaw}] = client ? await Promise.all([
-    client.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key,created_at').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).order('created_at',{ascending:false}).limit(50) as any,
-    client.from('communities').select('id,name,slug,description,community_type,logo_url').eq('privacy','public').order('created_at',{ascending:false}).limit(6) as any,
-    client.from('runs').select('id,title,game_format,skill_level,court_name,location,starts_at,capacity,max_players').eq('status','open').gt('starts_at',now.toISOString()).order('starts_at',{ascending:true}).limit(6) as any,
-    client.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').gte('created_at',weekAgo).order('created_at',{ascending:false}).limit(200) as any,
-    client.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').eq('is_automated',true).order('created_at',{ascending:false}).limit(6) as any,
+  const [{data:profilesRaw},{data:communitiesRaw},{data:runsRaw},{data:recentPostsRaw},{data:officialRaw}] = publicDb ? await Promise.all([
+    publicDb.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key,created_at').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).order('created_at',{ascending:false}).limit(50),
+    publicDb.from('communities').select('id,name,slug,description,community_type,logo_url').eq('privacy','public').order('created_at',{ascending:false}).limit(6),
+    publicDb.from('runs').select('id,title,game_format,skill_level,court_name,location,starts_at,capacity,max_players').eq('status','open').gt('starts_at',now.toISOString()).order('starts_at',{ascending:true}).limit(6),
+    publicDb.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').gte('created_at',weekAgo).order('created_at',{ascending:false}).limit(200),
+    publicDb.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').eq('is_automated',true).order('created_at',{ascending:false}).limit(6),
   ]) : [{data:[]},{data:[]},{data:[]},{data:[]},{data:[]}];
 
   const profiles = (profilesRaw ?? []) as Array<Omit<DiscoverProfile,'activity'>>;
   const profileIds = profiles.map(profile=>profile.id);
-  const {data:levelsRaw} = client && profileIds.length ? await client.from('user_levels').select('profile_id,xp,level').in('profile_id',profileIds) as any : {data:[]};
+  const {data:levelsRaw} = publicDb && profileIds.length ? await publicDb.from('user_levels').select('profile_id,xp,level').in('profile_id',profileIds) : {data:[]};
   const levelMap = new Map((levelsRaw ?? []).map((row:any)=>[row.profile_id,row]));
   const recentPosts = (recentPostsRaw ?? []) as ActivityPost[];
   const activityMap = new Map<string,number>();
