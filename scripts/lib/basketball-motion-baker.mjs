@@ -47,7 +47,10 @@ export function bakeMotion(id,opts={}){
  function evaluate(){worldP.length=0;worldQ.length=0;const solve=i=>{if(worldP[i])return;const p=parent[i],t=V(localT[i]),q=localQ[i];if(p===null){worldP[i]=t;worldQ[i]=q;return}solve(p);worldQ[i]=qm(worldQ[p],q);worldP[i]=add(worldP[p],rot(worldQ[p],t))};nodes.forEach((_,i)=>solve(i))}
  evaluate();const readyWP=worldP.map(v=>({...v})),readyWQ=worldQ.map(q=>[...q]),floorY=Math.min(readyWP[by.foot_l].y,readyWP[by.foot_r].y),readyPelvis={...readyWP[by.pelvis]};
  const shoulderCenter=mul(add(readyWP[by.upperarm_l],readyWP[by.upperarm_r]),.5),armOut={l:norm(sub(readyWP[by.upperarm_l],shoulderCenter)),r:norm(sub(readyWP[by.upperarm_r],shoulderCenter))};
- const handAxes={};if(id==='set-shot')for(const side of ['l','r']){const finger=norm(V(nodes[by[`middle_01_${side}`]].translation||[0,1,0])),width=norm(sub(V(nodes[by[`index_01_${side}`]].translation||[0,0,0]),V(nodes[by[`pinky_01_${side}`]].translation||[0,0,0]))),palm=norm(cross(width,finger));handAxes[side]={finger,palm}}
+ // The Quaternius finger chains are mirrored. Using the same cross-product direction on both
+ // hands makes the left guide-hand normal point through the back of the hand, which visually
+ // turns the guide hand backwards even though the numeric palm-to-ball test appears valid.
+ const handAxes={};if(id==='set-shot')for(const side of ['l','r']){const finger=norm(V(nodes[by[`middle_01_${side}`]].translation||[0,1,0])),width=norm(sub(V(nodes[by[`index_01_${side}`]].translation||[0,0,0]),V(nodes[by[`pinky_01_${side}`]].translation||[0,0,0]))),rawPalm=norm(cross(width,finger)),palm=side==='l'?mul(rawPalm,-1):rawPalm;handAxes[side]={finger,palm}}
  const resetPose=()=>{for(let i=0;i<nodes.length;i++){localT[i]=[...readyT[i]];localQ[i]=[...readyQ[i]]}evaluate()};
  const setPelvisWorld=targetP=>{const i=by.pelvis,p=parent[i],pq=p===null?[0,0,0,1]:worldQ[p],pp=p===null?{x:0,y:0,z:0}:worldP[p];localT[i]=A(rot(qc(pq),sub(targetP,pp)));evaluate()};
  const secondaryFor=primary=>{let s=sub(rigForward,mul(primary,dot(rigForward,primary)));if(len(s)<1e-5)s=sub(lateral,mul(primary,dot(lateral,primary)));return norm(s)};
