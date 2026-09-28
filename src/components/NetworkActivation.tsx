@@ -77,7 +77,7 @@ export function NetworkActivation(){
     setDismissed(true);
   };
 
-  return <aside className="fixed bottom-[82px] right-3 z-[65] w-[min(390px,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/95 text-white shadow-[0_24px_80px_rgba(0,0,0,.48)] backdrop-blur-xl lg:bottom-5 lg:right-5" aria-label="Build your RCL Network">
+  return <aside className="fixed bottom-[82px] right-3 z-[45] w-[min(390px,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/95 text-white shadow-[0_24px_80px_rgba(0,0,0,.48)] backdrop-blur-xl lg:bottom-5 lg:right-5" aria-label="Build your RCL Network">
     <div className="border-b border-white/10 p-4">
       <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Start your RCL Network</p><h2 className="mt-1 font-display text-xl font-black uppercase">Build your basketball circle</h2></div><button type="button" onClick={dismiss} aria-label="Dismiss network starter" className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/10 text-white/35 transition hover:text-white"><FaXmark/></button></div>
       <div className="mt-4 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10"><i className="block h-full rounded-full bg-rcl-blue transition-all" style={{width:`${(done/steps.length)*100}%`}}/></div><span className="text-xs font-black text-rcl-blue">{done}/{steps.length}</span></div>
