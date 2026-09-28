@@ -34,8 +34,70 @@
   color: var(--rcl-blue, #159fff);
 }
 
+/* Replace Social's legacy bottom tabs with the same app-level member navigation. */
 .rcl-social-page .rcl-premium-bottom-nav {
-  border-color: rgba(21, 159, 255, .12);
+  display: none !important;
+}
+
+.rcl-member-social-nav {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 60;
+  display: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  background: rgba(3,7,13,.96);
+  padding-bottom: max(7px, env(safe-area-inset-bottom));
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.rcl-member-social-nav > div {
+  display: grid;
+  max-width: 620px;
+  margin: 0 auto;
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  align-items: end;
+  padding: 8px 8px 0;
+}
+
+.rcl-member-social-nav a {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 14px;
+  color: rgba(246,248,251,.44);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.rcl-member-social-nav a svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rcl-member-social-nav a.active {
+  color: #f6f8fb;
+}
+
+.rcl-member-social-nav a.active svg {
+  color: var(--rcl-blue,#159fff);
+}
+
+.rcl-member-social-nav a.create svg {
+  width: 40px;
+  height: 40px;
+  margin-top: -24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,var(--rcl-orange,#ff4f16),#ff743f);
+  padding: 11px;
+  color: #03070d;
+  box-shadow: 0 9px 26px rgba(255,79,22,.3);
 }
 
 @media (min-width: 1024px) {
@@ -89,6 +151,12 @@
 
 .rcl-member-bottom .rcl-member-create-tab span {
   margin-top: 2px;
+}
+
+@media (max-width: 1023px) {
+  .rcl-member-social-nav {
+    display: block;
+  }
 }
 
 @media (max-width: 767px) {
