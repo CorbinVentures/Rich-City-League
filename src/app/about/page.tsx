@@ -34,12 +34,12 @@ export default function AboutPage() {
   return (
     <main className="rcl-platform-page rcl-about-page min-h-screen overflow-hidden pb-24 text-white">
       <section className="rcl-cinematic-page-hero relative">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(249,115,22,.16),transparent_30%),linear-gradient(180deg,rgba(2,6,23,.05),rgba(2,6,23,.9))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(255,79,22,.16),transparent_30%),linear-gradient(180deg,rgba(2,6,23,.05),rgba(2,6,23,.9))]" />
         <Container maxWidth="xl" className="relative z-10 py-20 md:py-32">
           <p className="rcl-page-kicker">804 · RICHMOND, VIRGINIA · EST. 2011</p>
           <h1 className="max-w-5xl text-5xl font-black uppercase leading-[.9] tracking-[-.05em] md:text-8xl">
             RICHMOND BASKETBALL HAS A HISTORY.
-            <span className="mt-3 block text-orange-500">WE&apos;RE BUILDING WHAT&apos;S NEXT.</span>
+            <span className="mt-3 block text-rcl-orange">WE&apos;RE BUILDING WHAT&apos;S NEXT.</span>
           </h1>
           <p className="mt-8 max-w-3xl text-lg leading-8 text-slate-200 md:text-xl">
             Rich City League is a Richmond-born basketball organization built around competition, player development, community pride, media, technology, and the culture of the 804. What began as a summer basketball league is being rebuilt as a year-round basketball ecosystem.
@@ -60,7 +60,7 @@ export default function AboutPage() {
             ['NEXT', 'THE DIGITAL ERA'],
           ].map(([big, label]) => (
             <article className="rcl-platform-card min-h-44" key={label}>
-              <p className="text-5xl font-black tracking-[-.05em] text-orange-500">{big}</p>
+              <p className="text-5xl font-black tracking-[-.05em] text-rcl-orange">{big}</p>
               <h2 className="mt-4 text-lg font-black uppercase tracking-[.12em]">{label}</h2>
             </article>
           ))}
@@ -72,11 +72,11 @@ export default function AboutPage() {
           <p className="mt-6 max-w-4xl text-base leading-8 text-slate-300 md:text-lg">
             RCL&apos;s documented history begins in 2011 with a simple mission: bring Richmond together through competition, community pride, and basketball. The league grew into an organized environment for players from Richmond and beyond, while preserving the energy and authenticity of local basketball culture.
           </p>
-          <div className="mt-10 border-l border-orange-500/50 pl-6 md:pl-10">
+          <div className="mt-10 border-l border-rcl-orange/50 pl-6 md:pl-10">
             {timeline.map(([year, title, body]) => (
               <article key={year} className="relative border-b border-white/10 py-8 first:pt-0">
-                <span className="absolute -left-[31px] top-9 h-2.5 w-2.5 rounded-full bg-orange-500 md:-left-[45px]" />
-                <p className="text-xs font-black uppercase tracking-[.25em] text-orange-400">{year}</p>
+                <span className="absolute -left-[31px] top-9 h-2.5 w-2.5 rounded-full bg-rcl-orange md:-left-[45px]" />
+                <p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange/80">{year}</p>
                 <h3 className="mt-2 text-2xl font-black uppercase">{title}</h3>
                 <p className="mt-3 max-w-3xl leading-7 text-slate-300">{body}</p>
               </article>
@@ -87,7 +87,7 @@ export default function AboutPage() {
         <section className="grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
           <div>
             <p className="rcl-page-kicker">THE FOUNDER</p>
-            <h2 className="text-4xl font-black uppercase tracking-[-.04em] md:text-6xl">DEVaughn CORBIN.</h2>
+            <h2 className="text-4xl font-black uppercase tracking-[-.04em] md:text-6xl">DeVaughn Corbin.</h2>
           </div>
           <article className="rcl-platform-card">
             <p className="text-lg leading-8 text-slate-200">
@@ -97,7 +97,7 @@ export default function AboutPage() {
               The modern rebuild takes that original idea further. RCL is using software, statistics, automation, media, community participation, and game-day presentation to bring experiences normally associated with much larger sports organizations to local basketball.
             </p>
             <p className="mt-7 text-2xl font-black uppercase italic leading-tight">
-              THE TECHNOLOGY IS NEW.<br /><span className="text-orange-500">THE PURPOSE ISN&apos;T.</span>
+              THE TECHNOLOGY IS NEW.<br /><span className="text-rcl-orange">THE PURPOSE ISN&apos;T.</span>
             </p>
           </article>
         </section>
@@ -111,7 +111,7 @@ export default function AboutPage() {
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {ecosystem.map(([title, body], index) => (
               <article className="rcl-platform-card group min-h-64" key={title}>
-                <p className="text-xs font-black tracking-[.25em] text-orange-500">0{index + 1} / RCL SYSTEM</p>
+                <p className="text-xs font-black tracking-[.25em] text-rcl-orange">0{index + 1} / RCL SYSTEM</p>
                 <h3 className="mt-5 text-2xl font-black uppercase">{title}</h3>
                 <p className="mt-4 leading-7 text-slate-300">{body}</p>
               </article>
@@ -119,15 +119,15 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-orange-500/20 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,.15),transparent_35%),rgba(2,6,23,.72)] p-7 md:p-12">
+        <section className="rounded-[2rem] border border-rcl-orange/20 bg-[radial-gradient(circle_at_top_right,rgba(255,79,22,.15),transparent_35%),rgba(2,6,23,.72)] p-7 md:p-12">
           <p className="rcl-page-kicker">THE MISSION</p>
           <h2 className="max-w-5xl text-4xl font-black uppercase tracking-[-.04em] md:text-6xl">BUILD PLAYERS. BUILD CHARACTER. BUILD COMMUNITY.</h2>
           <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
-            Basketball is the platform, but the mission goes beyond the scoreboard. RCL is built around discipline, teamwork, leadership, confidence, accountability, respect, positive competition, and giving young men in Richmond a place to stay active, connected, and challenged.
+            Basketball is the platform, but the mission goes beyond the scoreboard. RCL is built around discipline, teamwork, leadership, confidence, accountability, respect, positive competition, and giving Richmond hoopers a place to stay active, connected, and challenged.
           </p>
           <div className="mt-10 grid gap-4 md:grid-cols-4">
             {values.map(([title, body]) => (
-              <div key={title} className="border-t-2 border-orange-500 pt-4">
+              <div key={title} className="border-t-2 border-rcl-orange pt-4">
                 <h3 className="font-black uppercase">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-400">{body}</p>
               </div>
@@ -149,11 +149,11 @@ export default function AboutPage() {
         </section>
 
         <section className="py-12 text-center md:py-20">
-          <p className="text-xs font-black uppercase tracking-[.35em] text-orange-500">2011 → TODAY → WHAT&apos;S NEXT</p>
+          <p className="text-xs font-black uppercase tracking-[.35em] text-rcl-orange">2011 → TODAY → WHAT&apos;S NEXT</p>
           <h2 className="mx-auto mt-6 max-w-5xl text-5xl font-black uppercase leading-[.9] tracking-[-.055em] md:text-8xl">BUILT IN RICHMOND.<br />REIMAGINED FOR THE NEXT GENERATION.</h2>
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-300">The city. The players. The fans. The stories. The future. This is Rich City League.</p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link href="/register" className="rounded-full bg-orange-500 px-7 py-4 text-sm font-black uppercase tracking-[.12em] text-black transition hover:bg-orange-400">Join the League</Link>
+            <Link href="/register" className="rounded-full bg-rcl-orange px-7 py-4 text-sm font-black uppercase tracking-[.12em] text-black transition hover:brightness-110">Join the League</Link>
             <Link href="/fantasy" className="rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-black uppercase tracking-[.12em] transition hover:bg-white/10">Explore RCL Fantasy</Link>
           </div>
         </section>
