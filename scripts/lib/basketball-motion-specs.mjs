@@ -57,16 +57,16 @@ function setShot(p){
  // near-midline ball path forced the right forearm to cut diagonally across the chest.
  const gatherBall=[.105,.38,.22],pocketBall=[.125,.58,.28],setBall=[.140,.93,.36],releaseBall=[.145,1.06,.43];
  const b0=interp(gatherBall,pocketBall,pocket),b1=interp(b0,setBall,lift),ball=interp(b1,releaseBall,extend);
- // Shooting wrist stays directly under/slightly behind the ball. Guide wrist sits on the lower-side
- // quadrant rather than level with the ball center, which avoids the flat vertical "high-five" pose.
- const shootingContact=add3(ball,[0,-.130,-.050]),guideContact=add3(ball,[-.145,-.055,-.005]);
- const shootingFinish=[.145,1.18,.48],guidePeelTarget=[-.215,.78,.28],guideFinish=[-.265,.64,.20];
+ // Keep the guide side lower, wider and softer than the shooting side. This avoids the
+ // rigid vertical "stop-sign" look while preserving palm-to-ball contact through the set point.
+ const shootingContact=add3(ball,[0,-.130,-.050]),guideContact=add3(ball,[-.155,-.067,-.005]);
+ const shootingFinish=[.145,1.18,.48],guidePeelTarget=[-.235,.72,.30],guideFinish=[-.285,.58,.22];
  const r0=interp(shootingContact,shootingFinish,shotFinish),r=interp(r0,add3(gatherBall,[0,-.130,-.050]),recover);
- const l0=interp(guideContact,guidePeelTarget,guidePeel),l1=interp(l0,guideFinish,shotFinish),l=interp(l1,add3(gatherBall,[-.145,-.055,-.005]),recover);
+ const l0=interp(guideContact,guidePeelTarget,guidePeel),l1=interp(l0,guideFinish,shotFinish),l=interp(l1,add3(gatherBall,[-.155,-.067,-.005]),recover);
  f.ball=ball;
  f.hands.r=hand('pelvis',r,active);f.hands.l=hand('pelvis',l,active);
- // Right pole is almost straight down the shooting line; guide elbow remains modestly wider.
- f.armPole={l:[-.40,-.12,.27],r:[.025,-.44,.18]};
+ // Keep the guide elbow modestly wider than the shooting elbow, but lower and less flared.
+ f.armPole={l:[-.36,-.20,.26],r:[.025,-.44,.18]};
  f.wrist.rPitch=0;f.wrist.rYaw=0;f.wrist.lPitch=0;f.wrist.lYaw=0;
  return f;
 }
