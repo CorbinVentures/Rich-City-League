@@ -66,49 +66,53 @@ export function BadgeUnlockCutscene() {
 
   useEffect(() => {
     let active = true;
-    if (!supabase || !user || !profile?.role) return;
+    const activeSupabase = supabase;
+    const activeUser = user;
+    const activeRole = profile?.role;
+    if (!activeSupabase || !activeUser || !activeRole) return;
+    const db = activeSupabase as any;
 
     async function bootstrap() {
       const seen = readSeen();
       let rows: AwardRow[] = [];
       let table = '';
       let filterColumn = '';
-      let filterValue = user.id;
+      let filterValue = activeUser.id;
 
-      if (profile?.role === 'player') {
-        const { data: player } = await supabase.from('players').select('id').eq('profile_id', user.id).eq('is_active', true).maybeSingle();
+      if (activeRole === 'player') {
+        const { data: player } = await activeSupabase.from('players').select('id').eq('profile_id', activeUser.id).eq('is_active', true).maybeSingle();
         if (!active || !player) return;
         playerIdRef.current = player.id;
         table = 'player_badges'; filterColumn = 'player_id'; filterValue = player.id;
-      } else if (profile?.role === 'coach') {
+      } else if (activeRole === 'coach') {
         table = 'coach_badges'; filterColumn = 'profile_id';
       } else {
         table = 'fan_badges'; filterColumn = 'profile_id';
       }
 
-      const result = await supabase.from(table as 'fan_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier)').eq(filterColumn, filterValue).order('earned_at', { ascending:false }).limit(6);
-      rows = (result.data ?? []) as unknown as AwardRow[];
+      const result = await db.from(table).select('id,badge_id,earned_at,badge:badges(name,description,icon,tier)').eq(filterColumn, filterValue).order('earned_at', { ascending:false }).limit(6);
+      rows = (result.data ?? []) as AwardRow[];
       const unseen = rows.filter(row => !seen.has(row.id)).reverse();
       unseen.forEach(row => {
         const badge = row.badge;
         pushUnlock({ awardId:row.id, badgeId:row.badge_id, name:badge?.name ?? 'RCL Badge', description:badge?.description ?? null, icon:badge?.icon ?? null, tier:badge?.tier ?? null, earnedAt:row.earned_at });
       });
 
-      const channel = supabase.channel(`rcl-badge-unlocks-${user.id}`);
-      if (profile?.role === 'player' && playerIdRef.current) {
+      const channel = activeSupabase.channel(`rcl-badge-unlocks-${activeUser.id}`);
+      if (activeRole === 'player' && playerIdRef.current) {
         channel.on('postgres_changes', { event:'INSERT', schema:'public', table:'player_badges', filter:`player_id=eq.${playerIdRef.current}` }, payload => void hydrateAward(payload.new as { id:string; badge_id:string; earned_at:string }));
-      } else if (profile?.role === 'coach') {
-        channel.on('postgres_changes', { event:'INSERT', schema:'public', table:'coach_badges', filter:`profile_id=eq.${user.id}` }, payload => void hydrateAward(payload.new as { id:string; badge_id:string; earned_at:string }));
+      } else if (activeRole === 'coach') {
+        channel.on('postgres_changes', { event:'INSERT', schema:'public', table:'coach_badges', filter:`profile_id=eq.${activeUser.id}` }, payload => void hydrateAward(payload.new as { id:string; badge_id:string; earned_at:string }));
       } else {
-        channel.on('postgres_changes', { event:'INSERT', schema:'public', table:'fan_badges', filter:`profile_id=eq.${user.id}` }, payload => void hydrateAward(payload.new as { id:string; badge_id:string; earned_at:string }));
+        channel.on('postgres_changes', { event:'INSERT', schema:'public', table:'fan_badges', filter:`profile_id=eq.${activeUser.id}` }, payload => void hydrateAward(payload.new as { id:string; badge_id:string; earned_at:string }));
       }
       channel.subscribe();
       return channel;
     }
 
-    let liveChannel: ReturnType<typeof supabase.channel> | undefined;
+    let liveChannel: ReturnType<typeof activeSupabase.channel> | undefined;
     void bootstrap().then(channel => { liveChannel = channel; });
-    return () => { active = false; if (liveChannel) void supabase.removeChannel(liveChannel); };
+    return () => { active = false; if (liveChannel) void activeSupabase.removeChannel(liveChannel); };
   }, [hydrateAward, profile?.role, pushUnlock, readSeen, supabase, user]);
 
   if (!current) return null;
