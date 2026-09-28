@@ -15,7 +15,8 @@ function previewWallActive() {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/account');
-  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/');
+  const metadataAsset = pathname === '/opengraph-image' || pathname === '/twitter-image' || pathname === '/icon' || pathname === '/apple-icon';
+  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/') || metadataAsset;
   const config = getSupabaseConfig();
 
   // The legacy beta referral token grants temporary preview access. Personal
@@ -61,6 +62,8 @@ export async function middleware(request: NextRequest) {
 
   // Through Sept. 30 the public site is a private preview. Existing signed-in
   // members bypass the wall; invited visitors use a referral link or password.
+  // Social metadata assets remain public so link previews can render without
+  // exposing any protected page content.
   const hasPreviewAccess = request.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_COOKIE_VALUE;
   if (previewWallActive() && !wallExempt && !user && !hasPreviewAccess) {
     const accessUrl = request.nextUrl.clone();
