@@ -65,16 +65,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(memberAccessUrl(request, { inactive: true }));
   }
 
-  if (pathname.startsWith('/portal/operations')) {
-    if (!profile || !['coach', 'staff', 'admin'].includes(profile.role ?? '')) {
-      return NextResponse.redirect(new URL('/league', request.url));
-    }
+  const operatorWorkspace = pathname.startsWith('/portal/operations') || pathname.startsWith('/portal/team') || pathname.startsWith('/portal/scorebook');
+  if (operatorWorkspace && (!profile || !['coach', 'staff', 'admin'].includes(profile.role ?? ''))) {
+    return NextResponse.redirect(new URL('/league', request.url));
   }
 
-  if (pathname.startsWith('/admin')) {
-    if (profile?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/league', request.url));
-    }
+  if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
+    return NextResponse.redirect(new URL('/league', request.url));
   }
 
   return response;
