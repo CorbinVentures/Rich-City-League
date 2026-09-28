@@ -18,7 +18,6 @@ const ecosystem = [
   ['BADGES + LEGACY', 'Milestones and achievements become permanent parts of the player identity. Seasons end. Accomplishments should not disappear with them.'],
   ['DRAFT NIGHT', 'Evaluations lead into a real draft experience where coaches build rosters while players and fans can follow the selections and storylines.'],
   ['RCL FANTASY', 'Fans build fantasy rosters from real RCL players. Real game statistics power scoring, rankings, matchups, standings, and season-long competition.'],
-  ['THE LAB', 'The development and basketball-intelligence side of RCL: shot data, trends, performance analysis, film-minded learning, and tools that help players understand the game.'],
   ['SOCIAL COMMUNITY', 'Player, coach, and fan identities connect through profiles, teammates, friends, stories, messaging, communities, highlights, and basketball conversation.'],
   ['LEAGUE MANAGEMENT', 'Tryouts, rosters, trades, availability, discipline, staff responsibilities, and league decisions live inside an organized operating system instead of scattered spreadsheets.'],
   ['MEDIA + STORYTELLING', 'Highlights, photography, rankings, interviews, weekly recognition, original content, and Between The Lines give Richmond basketball stories a platform.'],
