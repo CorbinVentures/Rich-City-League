@@ -6,6 +6,11 @@ import { useSearchParams } from 'next/navigation';
 import { FaArrowRight, FaBasketball, FaLock, FaShieldHalved, FaUser } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 
+function safeNext(raw:string|null) {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return '/social';
+  return raw;
+}
+
 export default function MemberAccessPage() {
   const params = useSearchParams();
   const { user, profile, loading } = useAuth();
@@ -16,7 +21,7 @@ export default function MemberAccessPage() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const next = params.get('next') || '/social';
+  const next = safeNext(params.get('next'));
   const inactive = params.get('inactive') === '1';
   const needsProfile = Boolean(user && !profile && !loading);
 
@@ -68,7 +73,7 @@ export default function MemberAccessPage() {
               <p className="mt-3 text-sm leading-6 text-white/45">The RCL platform is not publicly browsable. Sign in with your member account or create an account to begin your profile.</p>
               <Link href={`/auth/sign-in?next=${encodeURIComponent(next)}`} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Sign in <FaArrowRight/></Link>
               <Link href="/auth/sign-up" className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider">Create an account <FaArrowRight/></Link>
-              <div className="mt-5 border-t border-white/10 pt-5 text-center"><Link href="/auth/reset" className="text-xs font-bold text-white/35 hover:text-rcl-blue">Forgot your password?</Link></div>
+              <div className="mt-5 border-t border-white/10 pt-5 text-center"><Link href="/auth/forgot-password" className="text-xs font-bold text-white/35 hover:text-rcl-blue">Forgot your password?</Link></div>
             </>}
           </div>
         </section>
