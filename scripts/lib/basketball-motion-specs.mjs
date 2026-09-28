@@ -48,24 +48,25 @@ function chestPass(p){
 }
 
 function setShot(p){
- const phase=p<.18?'dip':p<.42?'shot-pocket':p<.64?'set-rise':p<.80?'release':p<.90?'follow-through':'recover';
- const f=frameBase(phase,p),active=seg(p,.02,.16)*(1-seg(p,.90,.99)),dip=pulse(p,.03,.12,.28,.42),rise=seg(p,.18,.62)*(1-seg(p,.88,1));
- f.pelvis=[0,-.050*dip+.050*rise,0];f.torso.pitch=3*dip-1.1*rise;f.feet.l=[0,0,0];f.feet.r=[0,0,0];
+ const phase=p<.20?'dip':p<.44?'shot-pocket':p<.66?'set-rise':p<.82?'release':p<.92?'follow-through':'recover';
+ const f=frameBase(phase,p),active=seg(p,.02,.16)*(1-seg(p,.92,.995)),dip=pulse(p,.03,.12,.30,.44),rise=seg(p,.20,.66)*(1-seg(p,.90,1));
+ f.pelvis=[0,-.050*dip+.046*rise,0];f.torso.pitch=3.2*dip-1.0*rise;f.feet.l=[0,0,0];f.feet.r=[0,0,0];
  const interp=(a,b,t)=>a.map((v,i)=>lerp(v,b[i],t)),add3=(a,b)=>a.map((v,i)=>v+b[i]);
- const pocket=seg(p,.08,.30),lift=seg(p,.26,.56),extend=seg(p,.50,.66),shotFinish=seg(p,.64,.80),guidePeel=seg(p,.62,.80),recover=seg(p,.88,.99);
- // Author the ball first, then place each hand by basketball role. This prevents a symmetric
- // two-hand push pose: the right wrist stays under/behind the ball and the left wrist stays on its side.
- const gatherBall=[.035,.50,.28],pocketBall=[.045,.68,.33],setBall=[.055,.89,.38],releaseBall=[.060,1.00,.45];
+ const pocket=seg(p,.08,.32),lift=seg(p,.28,.58),extend=seg(p,.52,.68),shotFinish=seg(p,.66,.84),guidePeel=seg(p,.66,.82),recover=seg(p,.90,.995);
+ // Keep the ball on the right eyebrow/shooting line from the gather forward. The previous
+ // near-midline ball path forced the right forearm to cut diagonally across the chest.
+ const gatherBall=[.105,.38,.22],pocketBall=[.125,.58,.28],setBall=[.140,.93,.36],releaseBall=[.145,1.06,.43];
  const b0=interp(gatherBall,pocketBall,pocket),b1=interp(b0,setBall,lift),ball=interp(b1,releaseBall,extend);
- const shootingContact=add3(ball,[0,-.135,-.055]),guideContact=add3(ball,[-.165,-.010,-.010]);
- const shootingFinish=[.065,1.025,.50],guidePeelTarget=[-.245,.72,.24],guideFinish=[-.285,.61,.16];
- const r0=interp(shootingContact,shootingFinish,shotFinish),r=interp(r0,add3(gatherBall,[0,-.135,-.055]),recover);
- const l0=interp(guideContact,guidePeelTarget,guidePeel),l1=interp(l0,guideFinish,shotFinish),l=interp(l1,add3(gatherBall,[-.165,-.010,-.010]),recover);
+ // Shooting wrist stays directly under/slightly behind the ball. Guide wrist sits on the lower-side
+ // quadrant rather than level with the ball center, which avoids the flat vertical "high-five" pose.
+ const shootingContact=add3(ball,[0,-.130,-.050]),guideContact=add3(ball,[-.145,-.055,-.005]);
+ const shootingFinish=[.145,1.18,.48],guidePeelTarget=[-.215,.78,.28],guideFinish=[-.265,.64,.20];
+ const r0=interp(shootingContact,shootingFinish,shotFinish),r=interp(r0,add3(gatherBall,[0,-.130,-.050]),recover);
+ const l0=interp(guideContact,guidePeelTarget,guidePeel),l1=interp(l0,guideFinish,shotFinish),l=interp(l1,add3(gatherBall,[-.145,-.055,-.005]),recover);
  f.ball=ball;
  f.hands.r=hand('pelvis',r,active);f.hands.l=hand('pelvis',l,active);
- // Guide elbow stays wider. Shooting elbow is compact/down so the forearm stacks beneath the ball.
- f.armPole={l:[-.52,-.10,.30],r:[.14,-.36,.24]};
- // Set-shot palm/wrist orientation is solved anatomically in the baker from the authored ball center.
+ // Right pole is almost straight down the shooting line; guide elbow remains modestly wider.
+ f.armPole={l:[-.40,-.12,.27],r:[.025,-.44,.18]};
  f.wrist.rPitch=0;f.wrist.rYaw=0;f.wrist.lPitch=0;f.wrist.lYaw=0;
  return f;
 }
@@ -76,7 +77,7 @@ export const MOTION_SPECS={
  'triple-threat-jab':{clip:'RCL_Triple_Threat_Jab_v1',file:'public/lab3d/RCL_Triple_Threat_Jab_v1.glb',plan:'public/lab3d/motion/triple-threat-jab-v1-plan.json',fps:30,duration:1.3,principles:['ball-ready triple-threat pocket','left pivot stays planted','right jab attacks forward-outside','hips stay loaded','torso sells without losing balance','hands remain in a protected front pocket','jab foot retracts to base'],events:[['load',.14],['jab',.34],['sell',.58],['recover',.82],['reset',1]],validation:{startReady:true,endReady:true,pivotLocked:true,noCrossing:true,armsInFront:true},frame:jab},
  'dribble-stance':{clip:'RCL_Dribble_Stance_v1',file:'public/lab3d/RCL_Dribble_Stance_v1.glb',plan:'public/lab3d/motion/dribble-stance-v1-plan.json',fps:30,duration:1.0,principles:['feet stay planted','hips remain loaded','right hand pounds beside and in front of body','off hand protects space','torso stays controlled','one clean hand-floor-hand rhythm'],events:[['control-top',0],['pound-down',.32],['floor-contact',.5],['recover-up',.72],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,noUprightBounce:true,armsInFront:true},frame:dribble},
  'chest-pass':{clip:'RCL_Chest_Pass_v1',file:'public/lab3d/RCL_Chest_Pass_v1.glb',plan:'public/lab3d/motion/pass-v1-plan.json',fps:30,duration:1.25,principles:['ball loads at chest in front of torso','feet stay grounded','hips and torso drive target','elbows extend symmetrically','release follows extension','wrists finish through target','hands never wrap behind shoulders','recover to ready'],events:[['load',.12],['drive',.34],['release',.56],['follow-through',.72],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,symmetricRelease:true,noOverheadFlare:true,armsInFront:true},frame:chestPass},
- 'set-shot':{clip:'RCL_Set_Shot_v1',file:'public/lab3d/RCL_Set_Shot_v1.glb',plan:'public/lab3d/motion/shot-v1-plan.json',fps:30,duration:1.45,principles:['balanced two-foot base','ball is authored on the right-handed shooting line before either hand is placed','right shooting wrist stays underneath and slightly behind the ball through the set point','left guide wrist stays on the side of the ball instead of underneath it','right shooting forearm stacks beneath the ball before release','right elbow stays compact under the shooting line instead of flaring across the chest','guide palm faces the basketball through the set point and peels laterally during release','shooting palm faces the basketball until release then finishes with a natural wrist snap','ball does not leave until the shooting arm reaches extension','hands never cross or exchange shooting/guide roles','feet stay grounded','recover to ready'],events:[['dip',.12],['shot-pocket',.30],['set-point',.52],['release',.66],['follow-through',.80],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,rightHandRelease:true,guideHandPassive:true,noElbowFlare:true,armsInFront:true,ballContactAligned:true,palmContactAligned:true,rightHanded:true},frame:setShot}
+ 'set-shot':{clip:'RCL_Set_Shot_v1',file:'public/lab3d/RCL_Set_Shot_v1.glb',plan:'public/lab3d/motion/shot-v1-plan.json',fps:30,duration:1.45,principles:['balanced two-foot base','ball rises on the right eyebrow/shooting line instead of the facial midline','right wrist stays directly underneath and slightly behind the ball','right elbow tracks beneath the wrist instead of flaring outside the shooting line','left guide wrist sits on the lower-side quadrant of the ball rather than above it','guide palm faces the basketball through the set point and peels laterally only after extension begins','shooting arm reaches near-full extension before the wrist snaps through target','shooting palm transitions from ball support to a relaxed downward follow-through','hands never cross, wrap behind the head, or exchange shooting/guide roles','feet stay grounded and the body rises mostly vertically','recover to ready'],events:[['dip',.12],['shot-pocket',.32],['set-point',.56],['release',.68],['follow-through',.84],['reset',1]],validation:{startReady:true,endReady:true,feetPlanted:true,rightHandRelease:true,guideHandPassive:true,noElbowFlare:true,armsInFront:true,ballContactAligned:true,palmContactAligned:true,rightHanded:true,shootingLine:true},frame:setShot}
 };
 
 export function authorMotion(id){const spec=MOTION_SPECS[id];if(!spec)throw Error('Unknown motion '+id);const frames=[],count=Math.round(spec.duration*spec.fps);for(let i=0;i<=count;i++){const time=Math.min(spec.duration,i/spec.fps),p=time/spec.duration;frames.push({frame:i,time:+time.toFixed(4),...spec.frame(p)})}return{version:3,engine:'RCL_TASK_SPACE_IK_V2',id,clip:spec.clip,fps:spec.fps,duration:spec.duration,canonicalStartEnd:'RCL_Ready_Stance_v4',principles:spec.principles,events:spec.events.map(([name,p])=>({name,time:+(p*spec.duration).toFixed(4)})),validation:spec.validation,frames}}
