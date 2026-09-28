@@ -78,7 +78,7 @@ function shuffled<T>(items: T[]) {
   return copy;
 }
 
-export function compatibleLabDrills(input: WorkoutRequest) {
+function compatibleLabDrills(input: WorkoutRequest) {
   const difficultyRank = levels.indexOf(input.level);
   return getDrillsForSkill(input.skill).filter((drill) => {
     const drillRank = levels.indexOf(drill.difficulty as WorkoutRequest['level']);
