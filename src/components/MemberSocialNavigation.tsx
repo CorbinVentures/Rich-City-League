@@ -15,7 +15,7 @@ export function MemberSocialNavigation() {
   const items = [
     { label: 'Home', href: '/social', icon: FaHouse, active: pathname === '/social' },
     { label: 'Explore', href: '/explore', icon: FaCompass, active: false },
-    { label: 'Create', href: '/social?compose=1', icon: FaPlus, active: false, create: true },
+    { label: 'Create', href: '/create', icon: FaPlus, active: false, create: true },
     { label: 'League', href: '/league', icon: FaBasketball, active: false },
     { label: 'Profile', href: profileHref, icon: FaUser, active: pathname.startsWith('/social/profile/') },
   ];
