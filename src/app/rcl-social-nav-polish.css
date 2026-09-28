@@ -1,0 +1,14 @@
+/* Keep Social focused on its four core modes. Secondary destinations remain in the global RCL drawer. */
+@media (min-width: 1024px) {
+  .rcl-social-page aside nav > a[href="/communities"],
+  .rcl-social-page aside nav > a[href="/messages"],
+  .rcl-social-page aside nav > a[href="/notifications"],
+  .rcl-social-page aside nav > a[href="/lab"],
+  .rcl-social-page aside nav > a[href="/games"] {
+    display: none !important;
+  }
+
+  .rcl-social-page aside nav > div.my-4.border-t {
+    display: none !important;
+  }
+}
