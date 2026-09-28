@@ -9,6 +9,7 @@ import './rcl-corporate-polish.css';
 import './rcl-social-nav-polish.css';
 import './rcl-scorebook-mobile.css';
 import './rcl-member-shell.css';
+import './rcl-social-activity.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
