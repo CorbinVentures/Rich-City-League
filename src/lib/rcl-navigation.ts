@@ -12,6 +12,15 @@ export function isNavigationActive(pathname: string, href: string) {
   return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
 }
 
+const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches'];
+const SOCIAL_FAMILY=['/social','/friends','/messages','/communities','/runs'];
+
+export function isPrimaryNavigationActive(pathname:string, href:string){
+  if(href==='/league') return LEAGUE_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
+  if(href==='/social') return SOCIAL_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
+  return isNavigationActive(pathname,href);
+}
+
 const HOME:RCLNavItem={label:'Home',href:'/',icon:FaHouse};
 const LEAGUE:RCLNavItem={label:'League',href:'/league',icon:FaBasketball};
 const EXPLORE:RCLNavItem={label:'Explore',href:'/explore',icon:FaCompass};
