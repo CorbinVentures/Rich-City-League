@@ -18,6 +18,7 @@ import { MessageIntent } from '@/components/MessageIntent';
 import { NetworkActivation } from '@/components/NetworkActivation';
 import { MemberSocialNavigation } from '@/components/MemberSocialNavigation';
 import { PlatformChrome } from '@/components/PlatformChrome';
+import { BadgeUnlockCutscene } from '@/components/BadgeUnlockCutscene';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityhoops.com'),
@@ -31,9 +32,9 @@ export const metadata: Metadata = {
   keywords: ['Richmond basketball league','Richmond VA basketball','RVA basketball','adult basketball Richmond VA','mens basketball league Richmond','Rich City League','RCL basketball','Richmond hoops','basketball runs Richmond VA'],
   openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City League', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community with competition, player stats, profiles, runs, fantasy, media and culture.', url: 'https://richcityhoops.com', images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Rich City League — Richmond basketball, competition and community' }] },
   twitter: { card: 'summary_large_image', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community.', images: ['/opengraph-image'] },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false, 'max-image-preview': 'none', 'max-snippet': 0, 'max-video-preview': 0 } },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
 }
