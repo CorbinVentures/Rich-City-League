@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   FaGauge,
   FaLayerGroup,
+  FaListOl,
   FaScrewdriverWrench,
   FaPlug,
   FaShirt,
@@ -15,7 +16,8 @@ import {
 const items = [
   { label: 'Admin Home', href: '/admin', icon: FaGauge, description: 'Dashboard, users, rosters, games, social and CMS' },
   { label: 'League Setup', href: '/admin/league-setup', icon: FaLayerGroup, description: 'Seasons, teams, scheduling and scorebook setup' },
-  { label: 'Operations', href: '/admin/operations', icon: FaScrewdriverWrench, description: 'Tryouts, drafts, requests, cases and league operations' },
+  { label: 'Draft Night', href: '/admin/draft', icon: FaListOl, description: 'Draft format, pick clock, rules and live-room settings' },
+  { label: 'Operations', href: '/admin/operations', icon: FaScrewdriverWrench, description: 'Tryouts, draft order, eligibility, requests and league operations' },
   { label: 'LeagueApps', href: '/admin/leagueapps', icon: FaPlug, description: 'LeagueApps connection, status and data sync' },
   { label: 'Shop', href: '/admin/shop', icon: FaShirt, description: 'Products, orders and storefront administration' },
   { label: 'Site Control', href: '/admin/control-center', icon: FaShieldHalved, description: 'Site content, platform controls and administrative tools' },
