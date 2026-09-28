@@ -52,7 +52,7 @@ export default function CommunityDetailPage(){
       if(identityIds.length){
         const [profilesResult,levelsResult]=await Promise.all([
           supabase.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label').in('id',identityIds),
-          supabase.from('user_levels').select('profile_id,xp,level').in('id',identityIds),
+          supabase.from('user_levels').select('profile_id,xp,level').in('profile_id',identityIds),
         ]);
         const levels=new Map(((levelsResult.data??[]) as Array<{profile_id:string;xp:number;level:number}>).map(row=>[row.profile_id,row]));
         const identityMap=new Map<string,SocialIdentityAuthor & {id:string}>(((profilesResult.data??[]) as Array<any>).map(profile=>{const rep=levels.get(profile.id);return [profile.id,{...profile,rep:rep?.xp??0,level:rep?.level??1}]}));
