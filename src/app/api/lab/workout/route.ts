@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getDrillsForSkill, RCL_DRILL_LIBRARY } from '@/lib/rcl-drill-library';
 
+const skills = ['Shooting', 'Ball handling', 'Finishing', 'Playmaking', 'Defense', 'Athleticism', 'Rebounding', 'Mental / IQ'] as const;
 const levels = ['Beginner', 'Intermediate', 'Advanced', 'Elite'] as const;
 const lengths = [15, 30, 45, 60, 90] as const;
 const environments = ['Indoor court', 'Outdoor court', 'Gym', 'Home / no equipment'] as const;
 const maxBodySize = 8_000;
 const providerTimeoutMs = 18_000;
 
-type WorkoutRequest = { skill: string; level: typeof levels[number]; length: typeof lengths[number]; environment: typeof environments[number]; equipment: string[]; goal: string };
+type WorkoutRequest = { skill: typeof skills[number]; level: typeof levels[number]; length: typeof lengths[number]; environment: typeof environments[number]; equipment: string[]; goal: string };
 export type WorkoutDrill = {
   id: string;
   slug: string;
@@ -37,9 +38,9 @@ function normalizeInput(input: unknown): WorkoutRequest | null {
   const equipment = Array.isArray(value.equipment) ? value.equipment.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean) : [];
   const goal = typeof value.goal === 'string' ? value.goal.trim() : '';
   const length = typeof value.length === 'number' ? value.length : Number(value.length);
-  if (!skill || skill.length > 80 || !levels.includes(level as WorkoutRequest['level']) || !lengths.includes(length as WorkoutRequest['length']) || !environments.includes(environment as WorkoutRequest['environment'])) return null;
-  if (equipment.length > 8 || equipment.some((item) => item.length > 40) || goal.length > 500) return null;
-  return { skill, level: level as WorkoutRequest['level'], length: length as WorkoutRequest['length'], environment: environment as WorkoutRequest['environment'], equipment: [...new Set(equipment)], goal };
+  if (!skills.includes(skill as WorkoutRequest['skill']) || !levels.includes(level as WorkoutRequest['level']) || !lengths.includes(length as WorkoutRequest['length']) || !environments.includes(environment as WorkoutRequest['environment'])) return null;
+  if (!equipment.length || equipment.length > 8 || equipment.some((item) => item.length > 40) || (equipment.includes('None') && equipment.length > 1) || goal.length > 500) return null;
+  return { skill: skill as WorkoutRequest['skill'], level: level as WorkoutRequest['level'], length: length as WorkoutRequest['length'], environment: environment as WorkoutRequest['environment'], equipment: [...new Set(equipment)], goal };
 }
 
 function errorResponse(message: string, status: number, code: string) {
@@ -77,30 +78,57 @@ function shuffled<T>(items: T[]) {
   return copy;
 }
 
-function compatibleDrills(input: WorkoutRequest) {
-  const allowed = getDrillsForSkill(input.skill).filter((drill) => {
-    const difficultyRank = levels.indexOf(input.level);
+export function compatibleLabDrills(input: WorkoutRequest) {
+  const difficultyRank = levels.indexOf(input.level);
+  return getDrillsForSkill(input.skill).filter((drill) => {
     const drillRank = levels.indexOf(drill.difficulty as WorkoutRequest['level']);
     const levelOk = drillRank < 0 || drillRank <= Math.min(levels.length - 1, difficultyRank + 1);
     const equipmentOk = drill.equipment.every((item) => item === 'None' || input.equipment.includes(item));
     return levelOk && equipmentOk;
   });
-  return allowed.length >= 2 ? allowed : getDrillsForSkill(input.skill);
+}
+
+function sessionTiming(length: WorkoutRequest['length']) {
+  if (length <= 15) return { warmup: 3, finisher: 2, main: 10 };
+  if (length <= 30) return { warmup: 5, finisher: 3, main: 22 };
+  if (length <= 45) return { warmup: 6, finisher: 4, main: 35 };
+  if (length <= 60) return { warmup: 8, finisher: 5, main: 47 };
+  return { warmup: 10, finisher: 7, main: 73 };
+}
+
+function fitDrillTime(drills: WorkoutDrill[], length: WorkoutRequest['length']) {
+  if (!drills.length) return drills;
+  const { main } = sessionTiming(length);
+  const base = Math.max(2, Math.floor(main / drills.length));
+  let remaining = main - base * drills.length;
+  return drills.map((drill) => {
+    const minutes = base + (remaining-- > 0 ? 1 : 0);
+    return { ...drill, duration: Math.max(120, minutes * 60) };
+  });
+}
+
+function warmupFor(length: WorkoutRequest['length']) {
+  const minutes = sessionTiming(length).warmup;
+  if (minutes <= 3) return [`Dynamic movement + ball rhythm · ${minutes} minutes`];
+  const movement = Math.max(2, Math.floor(minutes / 2));
+  return [`Dynamic movement and mobility · ${movement} minutes`, `Ball touches and low-intensity form work · ${minutes - movement} minutes`];
 }
 
 function fallbackWorkout(input: WorkoutRequest): Workout {
-  const pool = compatibleDrills(input);
+  const pool = compatibleLabDrills(input);
   const drillCount = input.length <= 15 ? 2 : input.length <= 45 ? 3 : input.length <= 60 ? 4 : 5;
-  const drills = shuffled(pool).slice(0, Math.min(drillCount, pool.length)).map(libraryDrill);
+  const selected = shuffled(pool).slice(0, Math.min(drillCount, pool.length)).map(libraryDrill);
+  const drills = fitDrillTime(selected, input.length);
+  const finisherMinutes = sessionTiming(input.length).finisher;
   return {
     title: `${input.skill} ${['development','game-speed','skill-build','performance'][Math.floor(Math.random()*4)]} session`,
     skill: input.skill,
     minutes: input.length,
     difficulty: input.level,
     goal: input.goal || `Build reliable ${input.skill.toLowerCase()} habits`,
-    warmup: ['Dynamic movement and mobility · 3 minutes', 'Ball touches and rhythm work · 2 minutes', 'Low-intensity form repetitions · 3 minutes'],
+    warmup: warmupFor(input.length),
     drills,
-    finisher: `Complete ${Math.max(5, Math.round(input.length / 3))} quality reps before you leave.`,
+    finisher: `Use the final ${finisherMinutes} minutes for quality reps of the session's main skill. Stop and reset whenever mechanics break down.`,
     coachingNotes: ['Track misses without judgment.', 'Reset your feet and breathing between reps.', `Use your ${input.environment.toLowerCase()} to rehearse game-speed intent.`],
   };
 }
@@ -112,11 +140,12 @@ function asStringArray(value: unknown) {
 function normalizeWorkout(value: unknown, input: WorkoutRequest): Workout | null {
   if (!value || typeof value !== 'object') return null;
   const candidate = value as Record<string, unknown>;
+  const pool = compatibleLabDrills(input);
+  if (!pool.length) return null;
   const drills = Array.isArray(candidate.drills) ? candidate.drills.map((item, index) => {
     if (!item || typeof item !== 'object') return null;
     const raw = item as Record<string, unknown>;
     const slug = typeof raw.videoSlug === 'string' ? raw.videoSlug : typeof raw.slug === 'string' ? raw.slug : '';
-    const pool = compatibleDrills(input);
     const libraryEntry = pool.find((drill) => drill.slug === slug) ?? pool[index % pool.length];
     if (!libraryEntry) return null;
     const base = libraryDrill(libraryEntry, index);
@@ -140,9 +169,9 @@ function normalizeWorkout(value: unknown, input: WorkoutRequest): Workout | null
     minutes: input.length,
     difficulty: typeof candidate.difficulty === 'string' ? candidate.difficulty.slice(0, 30) : input.level,
     goal: typeof candidate.goal === 'string' && candidate.goal.trim() ? candidate.goal.trim().slice(0, 500) : input.goal || `Build reliable ${input.skill.toLowerCase()} habits`,
-    warmup: asStringArray(candidate.warmup),
-    drills,
-    finisher: typeof candidate.finisher === 'string' ? candidate.finisher.trim().slice(0, 500) : 'Finish with one focused, high-quality round.',
+    warmup: warmupFor(input.length),
+    drills: fitDrillTime(drills, input.length),
+    finisher: typeof candidate.finisher === 'string' && candidate.finisher.trim() ? candidate.finisher.trim().slice(0, 500) : `Finish with ${sessionTiming(input.length).finisher} minutes of focused, high-quality work.`,
     coachingNotes: asStringArray(candidate.coachingNotes),
   };
 }
@@ -159,7 +188,7 @@ async function readProviderResponse(input: WorkoutRequest, apiKey: string) {
         temperature: 0.9,
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: 'You are an expert basketball development coach. Return JSON with title, goal, warmup string[], drills object[], finisher, and coachingNotes string[]. Every drill MUST belong to the requested skill category. Vary drill selection, order, prescriptions, warmup, finisher, title, and coaching emphasis between requests. Respect the requested level, available equipment, environment, duration, and goal. Do not substitute drills from another category. Each drill must reference one of these allowed videoSlug values and never include a URL: ' + compatibleDrills(input).map((drill) => drill.slug).join(', ') },
+          { role: 'system', content: 'You are an expert basketball development coach. Return JSON with title, goal, warmup string[], drills object[], finisher, and coachingNotes string[]. Every drill MUST belong to the requested skill category. Vary drill selection, order, prescriptions, title, finisher, and coaching emphasis between requests. Respect the requested level, available equipment, environment, duration, and goal. Do not substitute drills from another category. Each drill must reference one of these allowed videoSlug values and never include a URL: ' + compatibleLabDrills(input).map((drill) => drill.slug).join(', ') },
           { role: 'user', content: JSON.stringify(input) },
         ],
       }),
@@ -184,16 +213,18 @@ export async function POST(request: Request) {
     try { body = JSON.parse(raw); } catch { return errorResponse('Send a valid workout request.', 400, 'INVALID_JSON'); }
     const input = normalizeInput(body);
     if (!input) return errorResponse('Choose a valid skill, level, length, environment, equipment, and goal.', 400, 'INVALID_INPUT');
+    if (!compatibleLabDrills(input).length) {
+      return errorResponse(`No ${input.skill.toLowerCase()} drills match that equipment setup. Add the required equipment or choose a different focus.`, 422, 'NO_COMPATIBLE_DRILLS');
+    }
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) return NextResponse.json({ workout: fallbackWorkout(input), generatedBy: 'RCL training engine' });
     try {
       const workout = normalizeWorkout(await readProviderResponse(input, apiKey), input);
-      if (!workout) return errorResponse('The coach returned an incomplete session. Please try again.', 502, 'INVALID_PROVIDER_RESPONSE');
-      return NextResponse.json({ workout, generatedBy: 'RCL AI coach' });
+      if (workout) return NextResponse.json({ workout, generatedBy: 'RCL AI coach' });
+      return NextResponse.json({ workout: fallbackWorkout(input), generatedBy: 'RCL training engine', fallbackReason: 'AI session validation failed' });
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return errorResponse('The coach took too long to respond. Try again in a moment.', 504, 'AI_TIMEOUT');
-      if (error instanceof Error && error.message === 'RATE_LIMITED') return errorResponse('The coach is busy right now. Please try again shortly.', 429, 'AI_RATE_LIMITED');
-      return errorResponse('The coach is temporarily unavailable. Try again or use the training engine.', 502, 'AI_UNAVAILABLE');
+      const fallbackReason = error instanceof Error && error.name === 'AbortError' ? 'AI timeout' : error instanceof Error ? error.message : 'AI unavailable';
+      return NextResponse.json({ workout: fallbackWorkout(input), generatedBy: 'RCL training engine', fallbackReason });
     }
   } catch {
     return errorResponse('We could not process that workout request. Please try again.', 500, 'REQUEST_FAILED');
