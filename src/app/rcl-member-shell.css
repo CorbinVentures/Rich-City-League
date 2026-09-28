@@ -21,6 +21,23 @@
   display: none;
 }
 
+/* Social is now the member home, not a separate product tab. */
+.rcl-social-wordmark span {
+  font-size: 0 !important;
+}
+
+.rcl-social-wordmark span::after {
+  content: 'NETWORK';
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  color: var(--rcl-blue, #159fff);
+}
+
+.rcl-social-page .rcl-premium-bottom-nav {
+  border-color: rgba(21, 159, 255, .12);
+}
+
 @media (min-width: 1024px) {
   .rcl-member-topbar {
     gap: 18px;
