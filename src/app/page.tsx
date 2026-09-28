@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
+import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
 export const metadata: Metadata = { title: { absolute: 'Rich City League | Richmond VA Basketball League' }, description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
@@ -28,16 +29,19 @@ export default async function HomePage() {
   const currentStats = (statsRaw ?? []).filter((stat) => completedGameIds.has(stat.game_id));
 
   return (
-    <RCLHomeExperience
-      teams={teams}
-      games={games}
-      standings={previewStandings}
-      standingsLabel={standingsLabel}
-      players={(playersRaw ?? []) as any}
-      iq={(iqRaw ?? []) as any}
-      stats={currentStats as any}
-      news={news}
-      posts={(postsRaw ?? []) as any}
-    />
+    <>
+      <MemberHomeRedirect />
+      <RCLHomeExperience
+        teams={teams}
+        games={games}
+        standings={previewStandings}
+        standingsLabel={standingsLabel}
+        players={(playersRaw ?? []) as any}
+        iq={(iqRaw ?? []) as any}
+        stats={currentStats as any}
+        news={news}
+        posts={(postsRaw ?? []) as any}
+      />
+    </>
   );
 }

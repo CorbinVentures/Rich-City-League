@@ -1,9 +1,10 @@
-/* Keep Social focused on its four core modes. Secondary destinations remain in the global RCL drawer. */
+/* Keep the feed rail focused on social modes. The member shell owns platform-wide navigation. */
 @media (min-width: 1024px) {
   .rcl-social-page aside nav > a[href="/communities"],
   .rcl-social-page aside nav > a[href="/messages"],
   .rcl-social-page aside nav > a[href="/notifications"],
-  .rcl-social-page aside nav > a[href="/games"] {
+  .rcl-social-page aside nav > a[href="/games"],
+  .rcl-social-page aside nav > a[href="/lab"] {
     display: none !important;
   }
 

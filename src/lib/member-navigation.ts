@@ -1,5 +1,19 @@
-import { FaBasketball, FaCompass, FaComments, FaHouse, FaPeopleGroup, FaPlus, FaUser } from 'react-icons/fa6';
+import {
+  FaBasketball,
+  FaBell,
+  FaChartSimple,
+  FaCompass,
+  FaComments,
+  FaHouse,
+  FaListOl,
+  FaPeopleGroup,
+  FaPlus,
+  FaTrophy,
+  FaUser,
+  FaUsers,
+} from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
+import type { RCLNavGroup } from '@/lib/rcl-navigation';
 
 export type RCLMemberNavItem = {
   label: string;
@@ -19,12 +33,50 @@ export const RCL_MEMBER_PRIMARY_NAV: RCLMemberNavItem[] = [
 export const RCL_MEMBER_DESKTOP_NAV: RCLMemberNavItem[] = [
   { label: 'Home', href: '/social', icon: FaHouse },
   { label: 'Explore', href: '/explore', icon: FaCompass },
+  { label: 'Create', href: '/social?compose=1', icon: FaPlus, action: 'create' },
   { label: 'League', href: '/league', icon: FaBasketball },
-  { label: 'Communities', href: '/communities', icon: FaPeopleGroup },
-  { label: 'Messages', href: '/messages', icon: FaComments },
+  { label: 'Profile', href: '/profile', icon: FaUser },
 ];
 
-const SOCIAL_HOME_FAMILY = ['/social', '/friends', '/runs', '/communities', '/messages', '/notifications'];
+export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
+  {
+    label: 'Network',
+    description: 'People, conversation and basketball activity',
+    items: [
+      { label: 'Home', href: '/social', icon: FaHouse },
+      { label: 'Explore', href: '/explore', icon: FaCompass },
+      { label: 'Communities', href: '/communities', icon: FaPeopleGroup },
+      { label: 'Runs', href: '/runs', icon: FaBasketball },
+      { label: 'Messages', href: '/messages', icon: FaComments },
+      { label: 'Notifications', href: '/notifications', icon: FaBell },
+    ],
+  },
+  {
+    label: 'League',
+    description: 'Official competition powered by RCL',
+    items: [
+      { label: 'League Center', href: '/league', icon: FaBasketball },
+      { label: 'Games', href: '/games', icon: FaBasketball },
+      { label: 'Standings', href: '/standings', icon: FaListOl },
+      { label: 'Stats', href: '/stats', icon: FaChartSimple },
+      { label: 'Players', href: '/players', icon: FaUser },
+      { label: 'Teams', href: '/teams', icon: FaUsers },
+      { label: 'Rankings', href: '/rankings', icon: FaListOl },
+      { label: 'Fantasy', href: '/fantasy', icon: FaTrophy },
+    ],
+  },
+  {
+    label: 'Identity',
+    description: 'Your basketball identity and reputation',
+    items: [
+      { label: 'Profile', href: '/profile', icon: FaUser },
+      { label: 'REP + Badges', href: '/badges', icon: FaTrophy },
+      { label: 'Friends', href: '/friends', icon: FaUsers },
+    ],
+  },
+];
+
+const SOCIAL_HOME_FAMILY = ['/social', '/friends', '/runs', '/communities'];
 
 export function isMemberNavigationActive(pathname: string, href: string) {
   if (href === '/social') return SOCIAL_HOME_FAMILY.some((path) => pathname === path || pathname.startsWith(`${path}/`));
