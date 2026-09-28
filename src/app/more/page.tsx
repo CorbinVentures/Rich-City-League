@@ -23,14 +23,14 @@ export default function MorePage() {
         {tiles.map(({ href, label, sub, icon: Icon }) => <Link key={href} href={href} className="rcl-hub-tile group">
           <span className="rcl-hub-icon"><Icon /></span>
           <span className="mt-5 block font-display text-lg font-black uppercase">{label}</span>
-          <span className="mt-1 block text-[10px] uppercase tracking-wider text-white/35">{sub}</span>
+          <span className="mt-1 block text-xs uppercase tracking-wider text-white/35">{sub}</span>
           <FaArrowRight className="mt-5 text-xs text-rcl-orange opacity-60 transition group-hover:translate-x-1 group-hover:opacity-100" />
         </Link>)}
       </div>
       <section className="rcl-hub-banner mt-5">
         <p className="rcl-kicker">BASKETBALL BUILDS</p>
         <h2 className="rcl-display mt-2 text-3xl uppercase">Better players.<br/><span className="text-rcl-orange">Better people.</span></h2>
-        <Link href="/lab" className="mt-5 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white">Enter The Lab <FaArrowRight /></Link>
+        <Link href="/lab" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white">Enter The Lab <FaArrowRight /></Link>
       </section>
     </Container>
   </main>;

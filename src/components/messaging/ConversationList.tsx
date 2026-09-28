@@ -38,13 +38,13 @@ export function ConversationRow({ item }: { item: ConversationListItem }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
           <h3 className={`truncate text-sm ${item.unread ? 'font-black text-white' : 'font-bold text-gray-200'}`}>{item.title}</h3>
-          <time className={`shrink-0 text-[10px] ${item.unread ? 'font-bold text-rcl-gold' : 'text-gray-500'}`} dateTime={item.updatedAt}>
+          <time className={`shrink-0 text-xs ${item.unread ? 'font-bold text-rcl-gold' : 'text-gray-500'}`} dateTime={item.updatedAt}>
             {formatDate(item.updatedAt)}
           </time>
         </div>
         <div className="mt-1 flex items-center justify-between gap-3">
           <p className={`truncate text-xs ${item.unread ? 'font-semibold text-gray-200' : 'text-gray-500'}`}>{item.preview || 'No messages yet'}</p>
-          <span className="shrink-0 text-[9px] font-black uppercase tracking-widest text-gray-600">{item.type}</span>
+          <span className="shrink-0 text-xs font-black uppercase tracking-widest text-gray-600">{item.type}</span>
         </div>
       </div>
     </Link>

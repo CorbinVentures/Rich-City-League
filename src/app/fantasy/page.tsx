@@ -276,12 +276,12 @@ export default function FantasyPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_48%,rgba(34,133,220,.25),transparent_30rem)]" />
         <Container maxWidth="xl" className="relative py-10 sm:py-14">
           <div className="max-w-4xl">
-            <p className="flex items-center gap-2 text-[10px] font-black tracking-[.28em] text-rcl-gold"><FaBasketball /> RICH CITY LEAGUE · THE 804 DRAFT ROOM</p>
+            <p className="flex items-center gap-2 text-xs font-black tracking-[.28em] text-rcl-gold"><FaBasketball /> RICH CITY LEAGUE · THE 804 DRAFT ROOM</p>
             <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[.85] sm:text-7xl lg:text-8xl">RCL <span className="text-rcl-orange">Fantasy</span></h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/65">Real players. Real games. Real bragging rights. Build your squad, watch official RCL stats update, and compete with the basketball community.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              {!team && <Link href={user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-[10px] font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user ? 'Join League' : 'Sign in to play'}</Link>}
-              <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-[10px] font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
+              {!team && <Link href={user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user ? 'Join League' : 'Sign in to play'}</Link>}
+              <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-xs font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
             </div>
             <div className="mt-7 grid max-w-3xl grid-cols-3 gap-3">
               <Metric label="ROSTER" value={`${rosterLimit} spots`} />
@@ -304,12 +304,12 @@ export default function FantasyPage() {
               <Panel>
                 <div className="flex flex-wrap items-end justify-between gap-4">
                   <div>
-                    <p className="text-[9px] font-black tracking-[.2em] text-rcl-orange">MY FANTASY FRANCHISE</p>
+                    <p className="text-xs font-black tracking-[.2em] text-rcl-orange">MY FANTASY FRANCHISE</p>
                     <h2 className="mt-2 font-display text-3xl font-black uppercase">{team.name}</h2>
                     <p className="mt-1 text-xs text-white/35">{team.wins}-{team.losses} · Week {currentWeek}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[9px] font-black tracking-widest text-white/30">SEASON POINTS</p>
+                    <p className="text-xs font-black tracking-widest text-white/30">SEASON POINTS</p>
                     <p className="font-display text-4xl font-black text-rcl-gold">{Number(team.total_points ?? 0).toFixed(1)}</p>
                   </div>
                 </div>
@@ -319,12 +319,12 @@ export default function FantasyPage() {
                     const row = player ? roster.find(item => item.player_id === player.id) : null;
                     return (
                       <div key={position} className="min-h-32 rounded-2xl border border-white/10 bg-black/30 p-3 transition hover:border-rcl-orange/40">
-                        <p className="text-[9px] font-black tracking-wider text-white/30">{position} · STARTER</p>
+                        <p className="text-xs font-black tracking-wider text-white/30">{position} · STARTER</p>
                         {player ? (
                           <>
                             <Link href={`/players/${player.id}`} className="mt-4 block text-xs font-black hover:text-rcl-orange">{player.first_name} {player.last_name}</Link>
-                            <p className="mt-1 text-[9px] text-white/35">{Number(row?.fantasy_points ?? 0).toFixed(1)} fantasy pts</p>
-                            <button onClick={() => setRosterSlot(player.id, 'bench')} className="mt-3 text-[9px] font-black uppercase tracking-widest text-white/45 hover:text-white">Bench</button>
+                            <p className="mt-1 text-xs text-white/35">{Number(row?.fantasy_points ?? 0).toFixed(1)} fantasy pts</p>
+                            <button onClick={() => setRosterSlot(player.id, 'bench')} className="mt-3 text-xs font-black uppercase tracking-widest text-white/45 hover:text-white">Bench</button>
                           </>
                         ) : <p className="mt-5 text-xs font-black uppercase text-white/25">Open slot</p>}
                       </div>
@@ -333,19 +333,19 @@ export default function FantasyPage() {
                 </div>
                 <div className="mt-7 flex items-center justify-between">
                   <div>
-                    <p className="text-[9px] font-black tracking-[.2em] text-white/30">BENCH</p>
+                    <p className="text-xs font-black tracking-[.2em] text-white/30">BENCH</p>
                     <h3 className="mt-1 font-display text-xl font-black uppercase">Depth</h3>
                   </div>
-                  <span className="text-[9px] font-black tracking-widest text-white/30">{roster.length}/{rosterLimit}</span>
+                  <span className="text-xs font-black tracking-widest text-white/30">{roster.length}/{rosterLimit}</span>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {bench.map(item => (
                     <div key={item.player_id} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 p-3">
                       <div>
                         <Link href={`/players/${item.player_id}`} className="block text-xs font-bold hover:text-rcl-orange">{item.player ? `${item.player.first_name} ${item.player.last_name}` : 'RCL player'}</Link>
-                        <span className="text-[9px] text-white/30">{item.player?.position ?? 'RCL'} · {Number(item.fantasy_points ?? 0).toFixed(1)} pts</span>
+                        <span className="text-xs text-white/30">{item.player?.position ?? 'RCL'} · {Number(item.fantasy_points ?? 0).toFixed(1)} pts</span>
                       </div>
-                      <button onClick={() => setRosterSlot(item.player_id, 'starter')} className="rounded-lg border border-white/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider hover:border-rcl-orange/50">Start</button>
+                      <button onClick={() => setRosterSlot(item.player_id, 'starter')} className="rounded-lg border border-white/10 px-2 py-1 text-xs font-black uppercase tracking-wider hover:border-rcl-orange/50">Start</button>
                     </div>
                   ))}
                   {!bench.length && <p className="rounded-xl border border-dashed border-white/10 p-5 text-center text-xs text-white/30 sm:col-span-3">Bench is empty.</p>}
@@ -353,11 +353,11 @@ export default function FantasyPage() {
               </Panel>
             ) : (
               <Panel id="draft">
-                <p className="text-[9px] font-black tracking-[.2em] text-rcl-orange">DRAFT ROOM ENTRY</p>
+                <p className="text-xs font-black tracking-[.2em] text-rcl-orange">DRAFT ROOM ENTRY</p>
                 <h2 className="mt-2 font-display text-3xl font-black uppercase">Name your franchise</h2>
                 <p className="mt-2 max-w-2xl text-xs leading-5 text-white/40">Create your fantasy team, then add up to 8 RCL players. Starting slots are organized by position whenever official player data provides a position.</p>
                 <form onSubmit={createTeam} className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <input value={teamName} onChange={e => setTeamName(e.target.value)} minLength={2} maxLength={60} disabled={!user || profile?.role !== 'fan' || !season} placeholder="Example: 804 Ballers" className="min-h-12 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 text-sm outline-none focus:border-rcl-orange disabled:opacity-40" />
+                  <input aria-label="Example: 804 Ballers" value={teamName} onChange={e => setTeamName(e.target.value)} minLength={2} maxLength={60} disabled={!user || profile?.role !== 'fan' || !season} placeholder="Example: 804 Ballers" className="min-h-12 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 text-sm outline-none focus:border-rcl-orange disabled:opacity-40" />
                   <button disabled={saving || !user || profile?.role !== 'fan' || !season} className="rounded-xl bg-rcl-orange px-6 py-3 text-xs font-black uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:opacity-40">{saving ? 'Creating…' : 'Create team'}</button>
                 </form>
               </Panel>
@@ -368,13 +368,13 @@ export default function FantasyPage() {
                 <SectionHeader icon={<FaBolt />} title="Next Matchup" link={nextMatchup ? '#matchups' : undefined} />
                 {nextMatchup ? (
                   <div className="mt-5">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-white/30">Week {nextMatchup.week_number} · {formatDate(nextMatchup.starts_at)}</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-white/30">Week {nextMatchup.week_number} · {formatDate(nextMatchup.starts_at)}</p>
                     <div className="mt-4 flex items-center justify-between gap-3">
                       <TeamMark name={team?.name ?? getTeamName(fantasyTeams, nextMatchup.home_team_id)} />
                       <span className="font-display text-xl font-black text-white/30">VS</span>
                       <TeamMark name={nextOpponent?.name ?? getTeamName(fantasyTeams, nextMatchup.away_team_id)} />
                     </div>
-                    <p className="mt-5 rounded-xl border border-rcl-blue/15 bg-rcl-blue/5 p-3 text-[10px] leading-5 text-white/45">Scores update from official RCL game statistics automatically. No manual fantasy stat entry.</p>
+                    <p className="mt-5 rounded-xl border border-rcl-blue/15 bg-rcl-blue/5 p-3 text-xs leading-5 text-white/45">Scores update from official RCL game statistics automatically. No manual fantasy stat entry.</p>
                   </div>
                 ) : <Empty text={season ? 'Matchups will populate automatically once two or more fantasy teams join.' : 'No active fantasy season.'} />}
               </Panel>
@@ -384,7 +384,7 @@ export default function FantasyPage() {
                 <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
                   <p className="font-display text-lg font-black uppercase">Keep the trash talk in one place.</p>
                   <p className="mt-2 text-xs leading-5 text-white/40">Use RCL Social for league conversations, reactions, player debates and game-day energy.</p>
-                  <Link href="/social" className="mt-4 inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-rcl-blue">Open RCL Social <FaArrowRight /></Link>
+                  <Link href="/social" className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-blue">Open RCL Social <FaArrowRight /></Link>
                 </div>
               </Panel>
             </div>
@@ -394,14 +394,14 @@ export default function FantasyPage() {
                 <SectionHeader icon={<FaUsers />} title="Matchups" link="#rules" linkLabel="Rules" />
                 <div className="mt-4 overflow-x-auto">
                   <table className="w-full min-w-[620px] text-left">
-                    <thead><tr className="border-b border-white/10 text-[8px] font-black uppercase tracking-widest text-white/25"><th className="px-2 py-3">Week</th><th className="px-2 py-3">Matchup</th><th className="px-2 py-3">Score</th><th className="px-2 py-3">Status</th></tr></thead>
+                    <thead><tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-white/25"><th className="px-2 py-3">Week</th><th className="px-2 py-3">Matchup</th><th className="px-2 py-3">Score</th><th className="px-2 py-3">Status</th></tr></thead>
                     <tbody>
                       {matchups.slice(0, 10).map(matchup => (
                         <tr key={matchup.id} className="border-b border-white/5 last:border-0">
                           <td className="px-2 py-3 text-xs font-black text-rcl-orange">{matchup.week_number}</td>
                           <td className="px-2 py-3 text-xs font-bold">{getTeamName(fantasyTeams, matchup.home_team_id)} <span className="mx-1 text-white/20">vs</span> {getTeamName(fantasyTeams, matchup.away_team_id)}</td>
                           <td className="px-2 py-3 text-xs font-black">{Number(matchup.home_points).toFixed(1)} - {Number(matchup.away_points).toFixed(1)}</td>
-                          <td className="px-2 py-3 text-[9px] font-black uppercase tracking-widest text-white/35">{matchup.status}</td>
+                          <td className="px-2 py-3 text-xs font-black uppercase tracking-widest text-white/35">{matchup.status}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -415,11 +415,11 @@ export default function FantasyPage() {
           <aside className="space-y-5">
             <Panel>
               <SectionHeader icon={<FaMagnifyingGlass />} title="Player Pool" />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search players…" className="mt-4 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs outline-none focus:border-rcl-orange" />
+              <input aria-label="Search players…" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search players…" className="mt-4 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-xs outline-none focus:border-rcl-orange" />
               <div className="mt-3 space-y-2">
                 {available.map(player => (
                   <button type="button" key={player.id} onClick={() => addPlayer(player)} disabled={!team || roster.length >= rosterLimit} className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/20 p-3 text-left transition hover:border-rcl-orange/50 disabled:cursor-not-allowed disabled:opacity-40">
-                    <span><strong className="block text-xs">{player.first_name} {player.last_name}</strong><small className="text-[9px] text-white/30">{player.position ?? 'Position'} · {player.jersey_number ? `#${player.jersey_number}` : 'RCL'}</small></span>
+                    <span><strong className="block text-xs">{player.first_name} {player.last_name}</strong><small className="text-xs text-white/30">{player.position ?? 'Position'} · {player.jersey_number ? `#${player.jersey_number}` : 'RCL'}</small></span>
                     <span className="text-rcl-orange">+</span>
                   </button>
                 ))}
@@ -432,9 +432,9 @@ export default function FantasyPage() {
               <div id="standings" className="mt-3 space-y-1">
                 {fantasyTeams.slice(0, 8).map((item, index) => (
                   <div key={item.id} className={`grid grid-cols-[1.4rem_1fr_auto] items-center gap-2 rounded-xl px-2 py-2 ${item.id === team?.id ? 'bg-rcl-orange/10 ring-1 ring-rcl-orange/20' : 'bg-black/15'}`}>
-                    <span className="text-[9px] font-black text-rcl-orange">{index + 1}</span>
+                    <span className="text-xs font-black text-rcl-orange">{index + 1}</span>
                     <span className="truncate text-xs font-bold">{item.name}</span>
-                    <span className="text-[9px] font-black text-white/40">{item.wins}-{item.losses} · {Number(item.total_points).toFixed(1)}</span>
+                    <span className="text-xs font-black text-white/40">{item.wins}-{item.losses} · {Number(item.total_points).toFixed(1)}</span>
                   </div>
                 ))}
                 {!fantasyTeams.length && <Empty text="No fantasy teams yet." />}
@@ -446,9 +446,9 @@ export default function FantasyPage() {
               <div className="mt-3 space-y-1">
                 {playerRankings.map((item, index) => (
                   <Link key={item.player!.id} href={`/players/${item.player!.id}`} className="grid grid-cols-[1.4rem_1fr_auto] items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.04]">
-                    <span className="text-[9px] font-black text-white/25">{index + 1}</span>
+                    <span className="text-xs font-black text-white/25">{index + 1}</span>
                     <span className="truncate text-xs font-bold">{item.player!.first_name} {item.player!.last_name}</span>
-                    <span className="text-[10px] font-black text-rcl-gold">{item.points.toFixed(1)}</span>
+                    <span className="text-xs font-black text-rcl-gold">{item.points.toFixed(1)}</span>
                   </Link>
                 ))}
                 {!playerRankings.length && <Empty text="Official player statistics will populate rankings automatically." />}
@@ -470,7 +470,7 @@ export default function FantasyPage() {
           <Panel>
             <SectionHeader icon={<FaClock />} title="Recent Activity" />
             <div className="mt-4 space-y-3">
-              {teamActivity.map(item => <div key={item.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"><span className="text-xs font-bold">{item.name}</span><span className="text-[9px] text-white/30">joined {formatDate(item.created_at)}</span></div>)}
+              {teamActivity.map(item => <div key={item.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"><span className="text-xs font-bold">{item.name}</span><span className="text-xs text-white/30">joined {formatDate(item.created_at)}</span></div>)}
               {!teamActivity.length && <Empty text="No fantasy transactions or team activity yet." />}
             </div>
           </Panel>
@@ -478,12 +478,12 @@ export default function FantasyPage() {
           <Panel id="rules">
             <div className="flex items-center justify-between gap-3">
               <SectionHeader icon={<FaBolt />} title="Rules & Scoring" />
-              <button onClick={() => setRulesOpen(open => !open)} className="rounded-lg bg-rcl-orange px-3 py-2 text-[8px] font-black uppercase tracking-widest text-black">{rulesOpen ? 'Hide Rules' : 'View Rules'}</button>
+              <button onClick={() => setRulesOpen(open => !open)} className="rounded-lg bg-rcl-orange px-3 py-2 text-xs font-black uppercase tracking-widest text-black">{rulesOpen ? 'Hide Rules' : 'View Rules'}</button>
             </div>
             <div className="mt-4 space-y-2">
               {Object.entries(scoringRules).map(([key, value]) => <RuleRow key={key} label={labelRule(key)} value={value} />)}
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-[9px] font-black uppercase tracking-widest text-white/35">
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-widest text-white/35">
               <div className="rounded-xl border border-white/10 bg-black/20 p-3">8 roster spots</div>
               <div className="rounded-xl border border-white/10 bg-black/20 p-3">5 starters</div>
               <div className="rounded-xl border border-white/10 bg-black/20 p-3">Official stats</div>
@@ -507,11 +507,11 @@ export default function FantasyPage() {
         {season && <div className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-r from-[#0c1c2c] to-black p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[9px] font-black tracking-[.22em] text-rcl-gold">RCL FANTASY · AUTOMATION STATUS</p>
+              <p className="text-xs font-black tracking-[.22em] text-rcl-gold">RCL FANTASY · AUTOMATION STATUS</p>
               <h2 className="mt-2 font-display text-2xl font-black uppercase">Official stats → fantasy points → matchup standings.</h2>
               <p className="mt-2 text-xs leading-5 text-white/40">The database recalculates fantasy scoring automatically from verified RCL player-game statistics. The dashboard refreshes itself so managers do not have to enter stats manually.</p>
             </div>
-            <div className="flex shrink-0 items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/5 px-4 py-2 text-[9px] font-black uppercase tracking-widest text-rcl-blue"><span className="h-2 w-2 animate-pulse rounded-full bg-rcl-blue" /> System synced</div>
+            <div className="flex shrink-0 items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-widest text-rcl-blue"><span className="h-2 w-2 animate-pulse rounded-full bg-rcl-blue" /> System synced</div>
           </div>
         </div>}
       </Container>
@@ -524,11 +524,11 @@ function Panel({ children, id }: { children: React.ReactNode; id?: string }) {
 }
 
 function SectionHeader({ icon, title, link, linkLabel = 'See all' }: { icon: React.ReactNode; title: string; link?: string; linkLabel?: string }) {
-  return <div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 font-display text-xl font-black uppercase"><span className="text-rcl-orange">{icon}</span>{title}</h2>{link && <Link href={link} className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-rcl-blue">{linkLabel}<FaChevronRight /></Link>}</div>;
+  return <div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 font-display text-xl font-black uppercase"><span className="text-rcl-orange">{icon}</span>{title}</h2>{link && <Link href={link} className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-rcl-blue">{linkLabel}<FaChevronRight /></Link>}</div>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-white/10 bg-black/35 p-3 backdrop-blur"><p className="text-[8px] font-black tracking-widest text-white/30">{label}</p><p className="mt-1 text-xs font-bold">{value}</p></div>;
+  return <div className="rounded-2xl border border-white/10 bg-black/35 p-3 backdrop-blur"><p className="text-xs font-black tracking-widest text-white/30">{label}</p><p className="mt-1 text-xs font-bold">{value}</p></div>;
 }
 
 function Notice({ children, icon, tone }: { children: React.ReactNode; icon: React.ReactNode; tone: 'blue' | 'orange' }) {
@@ -536,7 +536,7 @@ function Notice({ children, icon, tone }: { children: React.ReactNode; icon: Rea
 }
 
 function TeamMark({ name }: { name: string }) {
-  return <div className="min-w-0 text-center"><div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-rcl-orange/20 bg-black/40 text-rcl-orange"><FaBasketball /></div><p className="mt-2 max-w-28 truncate text-[10px] font-black uppercase">{name}</p></div>;
+  return <div className="min-w-0 text-center"><div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-rcl-orange/20 bg-black/40 text-rcl-orange"><FaBasketball /></div><p className="mt-2 max-w-28 truncate text-xs font-black uppercase">{name}</p></div>;
 }
 
 function Empty({ text }: { text: string }) {
@@ -544,11 +544,11 @@ function Empty({ text }: { text: string }) {
 }
 
 function NewsRow({ title, body }: { title: string; body: string }) {
-  return <div className="rounded-2xl border border-white/10 bg-black/20 p-3"><p className="text-xs font-black">{title}</p><p className="mt-1 text-[10px] leading-5 text-white/35">{body}</p></div>;
+  return <div className="rounded-2xl border border-white/10 bg-black/20 p-3"><p className="text-xs font-black">{title}</p><p className="mt-1 text-xs leading-5 text-white/35">{body}</p></div>;
 }
 
 function RuleRow({ label, value }: { label: string; value: number }) {
-  return <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2"><span className="text-[9px] font-black uppercase tracking-widest text-white/45">{label}</span><span className={`text-xs font-black ${value < 0 ? 'text-red-300' : 'text-rcl-gold'}`}>{value > 0 ? '+' : ''}{value}</span></div>;
+  return <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2"><span className="text-xs font-black uppercase tracking-widest text-white/45">{label}</span><span className={`text-xs font-black ${value < 0 ? 'text-red-300' : 'text-rcl-gold'}`}>{value > 0 ? '+' : ''}{value}</span></div>;
 }
 
 function labelRule(key: string) {

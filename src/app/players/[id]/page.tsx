@@ -110,7 +110,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
               <div>
                 <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                  <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-[10px] font-black tracking-widest text-rcl-gold uppercase">
+                  <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-xs font-black tracking-widest text-rcl-gold uppercase">
                     RCL ATHLETE
                   </span>
                   {currentTeam && (
@@ -133,7 +133,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-rcl-gold bg-black shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                 <div className="text-center">
                   <span className="block font-display text-3xl font-black text-white">{overallRating}</span>
-                  <span className="block text-[8px] font-bold tracking-widest text-rcl-gold">RCL IQ</span>
+                  <span className="block text-xs font-bold tracking-widest text-rcl-gold">RCL IQ</span>
                 </div>
               </div>
               <div className="space-y-1 font-mono text-xs">
@@ -187,8 +187,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
                   return (
                     <div key={eb.id} className={`flex flex-col items-center justify-center rounded-xl border p-3 text-center shadow-lg transition hover:scale-105 ${tierColor}`}>
                       <span className="text-3xl mb-1">{badge.icon || '🏆'}</span>
-                      <span className="block text-[10px] font-black tracking-wider uppercase truncate max-w-full">{badge.name}</span>
-                      <span className="block text-[8px] font-bold tracking-widest text-gray-400 uppercase mt-0.5">{badge.tier}</span>
+                      <span className="block text-xs font-black tracking-wider uppercase truncate max-w-full">{badge.name}</span>
+                      <span className="block text-xs font-bold tracking-widest text-gray-400 uppercase mt-0.5">{badge.tier}</span>
                     </div>
                   );
                 })}
@@ -215,7 +215,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
                         <Link href={`/teams/${team.slug}`} className="font-bold text-white hover:text-rcl-gold">
                           {team.name}
                         </Link>
-                        <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">
+                        <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">
                           {seasonById.get(teamSeason.season_id)?.name} • {divisionById.get(teamSeason.division_id || '')?.name || 'Division 1'}
                         </p>
                       </div>
@@ -238,7 +238,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
                 <h2 className="font-display text-sm font-black tracking-widest text-rcl-gold uppercase">PLAYER DNA</h2>
                 <p className="mt-1 text-xs text-gray-400">{playerIQ.player_archetype ?? 'Not enough data'} · {playerIQ.rating_trend} trend</p>
               </div>
-              <div className="text-right"><span className="block text-[9px] uppercase tracking-widest text-gray-500">Exposure Index</span><span className="font-display text-2xl font-black text-white">{Math.round(playerIQ.exposure_index)}</span></div>
+              <div className="text-right"><span className="block text-xs uppercase tracking-widest text-gray-500">Exposure Index</span><span className="font-display text-2xl font-black text-white">{Math.round(playerIQ.exposure_index)}</span></div>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
@@ -247,27 +247,27 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
                 ['Teammate Grade', playerIQ.teammate_grade_score],
                 ['Community', playerIQ.community_popularity_score],
                 ['Growth', playerIQ.growth_consistency_score],
-              ].map(([label, value]) => <div key={label as string}><div className="flex justify-between text-[10px] uppercase tracking-wider text-gray-400"><span>{label as string}</span><b className="text-white">{Math.round(value as number)}</b></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-rcl-gold" style={{ width: `${value}%` }} /></div></div>)}
+              ].map(([label, value]) => <div key={label as string}><div className="flex justify-between text-xs uppercase tracking-wider text-gray-400"><span>{label as string}</span><b className="text-white">{Math.round(value as number)}</b></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-rcl-gold" style={{ width: `${value}%` }} /></div></div>)}
             </div>
             <p className="mt-5 text-xs leading-relaxed text-gray-400">Your RCL Rating is weighted toward court performance and skill, with teammate impact, community popularity, and sustained growth contributing separately. {playerIQ.rating_change > 0 ? `Your rating is up ${playerIQ.rating_change}.` : 'Add more completed game logs to improve rating confidence.'}</p>
-            {iqHistory.length > 1 && <p className="mt-2 text-[10px] uppercase tracking-widest text-gray-500">Rating history: {iqHistory.map((item) => Math.round(item.rcl_rating)).join(' → ')}</p>}
+            {iqHistory.length > 1 && <p className="mt-2 text-xs uppercase tracking-widest text-gray-500">Rating history: {iqHistory.map((item) => Math.round(item.rcl_rating)).join(' → ')}</p>}
           </div>
           {/* Stats Summary Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">
-              <span className="block text-[10px] font-black tracking-widest text-gray-500 uppercase">GAMES</span>
+              <span className="block text-xs font-black tracking-widest text-gray-500 uppercase">GAMES</span>
               <span className="block font-display text-3xl font-extrabold text-white mt-1">{totalGames}</span>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">
-              <span className="block text-[10px] font-black tracking-widest text-rcl-gold uppercase">PPG</span>
+              <span className="block text-xs font-black tracking-widest text-rcl-gold uppercase">PPG</span>
               <span className="block font-display text-3xl font-extrabold text-rcl-gold mt-1">{avgPoints}</span>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">
-              <span className="block text-[10px] font-black tracking-widest text-white uppercase">RPG</span>
+              <span className="block text-xs font-black tracking-widest text-white uppercase">RPG</span>
               <span className="block font-display text-3xl font-extrabold text-white mt-1">{avgRebounds}</span>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 shadow-lg text-center">
-              <span className="block text-[10px] font-black tracking-widest text-white uppercase">APG</span>
+              <span className="block text-xs font-black tracking-widest text-white uppercase">APG</span>
               <span className="block font-display text-3xl font-extrabold text-white mt-1">{avgAssists}</span>
             </div>
           </div>
@@ -280,23 +280,23 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
               {/* splits */}
               <div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">FG SPLIT</span>
+                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">FG SPLIT</span>
                 <p className="font-display text-2xl font-black text-white mt-1">{fgPct}%</p>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
                   <div className="h-full bg-rcl-gold" style={{ width: `${fgPct}%` }} />
                 </div>
               </div>
               <div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">3PT SPLIT</span>
+                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">3PT SPLIT</span>
                 <p className="font-display text-2xl font-black text-white mt-1">{threePct}%</p>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
                   <div className="h-full bg-rcl-blue" style={{ width: `${threePct}%` }} />
                 </div>
               </div>
               <div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">STOCKS/G</span>
+                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">STOCKS/G</span>
                 <p className="font-display text-2xl font-black text-white mt-1">{(avgSteals + avgBlocks).toFixed(1)}</p>
-                <p className="text-[9px] text-gray-500 mt-1 uppercase tracking-wider">{avgSteals} STL • {avgBlocks} BLK</p>
+                <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">{avgSteals} STL • {avgBlocks} BLK</p>
               </div>
             </div>
           </div>
@@ -312,7 +312,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               <div className="mt-6 overflow-x-auto">
                 <table className="w-full text-left text-xs min-w-[500px]">
                   <thead>
-                    <tr className="border-b border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-500">
+                    <tr className="border-b border-white/10 text-xs font-black uppercase tracking-widest text-gray-500">
                       <th className="pb-3">DATE / GAME</th>
                       <th className="pb-3">TEAM</th>
                       <th className="pb-3 text-center">PTS</th>
@@ -333,7 +333,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
                         <tr key={game.id} className="border-b border-white/5 hover:bg-white/[0.02] transition">
                           <td className="py-3 font-semibold">
                             <span className="block font-black">{formatDate(game.scheduled_at)}</span>
-                            <span className="block text-[9px] font-bold text-gray-500 uppercase">{game.status}</span>
+                            <span className="block text-xs font-bold text-gray-500 uppercase">{game.status}</span>
                           </td>
                           <td className="py-3">
                             <span className="font-bold text-gray-300">{team ? team.short_name || team.name : 'RCL Team'}</span>

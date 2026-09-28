@@ -46,10 +46,10 @@ export default async function MediaPage() {
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#07101b] shadow-2xl">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[.28em] text-rcl-orange">RCL BROADCAST NETWORK</p>
+              <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">RCL BROADCAST NETWORK</p>
               <h2 className="mt-1 text-2xl font-black uppercase">Live Court</h2>
             </div>
-            <span className="rounded-full border border-rcl-orange/40 bg-rcl-orange/10 px-3 py-1 text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">
+            <span className="rounded-full border border-rcl-orange/40 bg-rcl-orange/10 px-3 py-1 text-xs font-black uppercase tracking-[.2em] text-rcl-orange">
               Live & Replay
             </span>
           </div>
@@ -74,14 +74,14 @@ export default async function MediaPage() {
 
           <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[.25em] text-gray-500">{nextGame ? 'NEXT BROADCAST' : 'RCL LIVE'}</p>
+              <p className="text-xs font-black uppercase tracking-[.25em] text-gray-500">{nextGame ? 'NEXT BROADCAST' : 'RCL LIVE'}</p>
               <h3 className="mt-2 text-lg font-black uppercase sm:text-xl">
                 {nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}
               </h3>
               {nextGame && <p className="mt-1 text-sm text-gray-400">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}
             </div>
             <div className="text-left md:text-right">
-              <p className="text-[10px] font-black uppercase tracking-[.2em] text-gray-500">WATCH HERE</p>
+              <p className="text-xs font-black uppercase tracking-[.2em] text-gray-500">WATCH HERE</p>
               <p className="mt-1 text-xs text-gray-400">No external app required.</p>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default async function MediaPage() {
 
         <div className="mt-12">
           <div className="mb-6">
-            <p className="text-[10px] font-black uppercase tracking-[.28em] text-rcl-orange">ON DEMAND</p>
+            <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">ON DEMAND</p>
             <h2 className="mt-1 text-3xl font-black uppercase">Photos & Highlights</h2>
           </div>
           <MediaDirectory items={items} />

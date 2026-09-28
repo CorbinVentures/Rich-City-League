@@ -3,8 +3,13 @@ import {
   FaPlay, FaListOl, FaUserTie, FaBell, FaComments, FaPeopleGroup, FaCrown,
   FaTrophy, FaShirt, FaFlask, FaBasketball, FaGear, FaCompass
 } from 'react-icons/fa6';
+import type { IconType } from 'react-icons';
 
-export type RCLNavItem = { label:string; href:string; icon:any };
+export type RCLNavItem = { label:string; href:string; icon:IconType };
+
+export function isNavigationActive(pathname: string, href: string) {
+  return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+}
 
 export const RCL_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/',icon:FaHouse},

@@ -271,7 +271,7 @@ export default function DraftNightPage() {
             <div className="rcl-on-clock"><span>ON THE CLOCK</span><strong>{clock(seconds)}</strong><small>Pick #{draft?.current_pick ?? '—'} · Round {current?.round_number ?? '—'}</small></div>
             {selectedPlayer ? <div className="rcl-selected-player"><strong>{playerName(selectedPlayer)}</strong><span>{selectedPlayer.position ?? 'Position TBD'} · OVR {ratings.get(selectedPlayer.id) ?? '—'}</span></div> : <div className="rcl-empty-pick">Select a prospect from the board.</div>}
             <button type="button" disabled={!selectedPlayer || !isOnClock} onClick={() => void makePick()} className="rcl-draft-primary w-full disabled:cursor-not-allowed disabled:opacity-35">MAKE SELECTION <FaArrowRight /></button>
-            <p className="mt-3 text-[10px] uppercase tracking-widest text-white/30">{isOnClock ? 'Coach controls enabled' : 'Waiting for the authorized team'}</p>
+            <p className="mt-3 text-xs uppercase tracking-widest text-white/30">{isOnClock ? 'Coach controls enabled' : 'Waiting for the authorized team'}</p>
           </div>
 
           <div className="rcl-draft-module rcl-player-preview">

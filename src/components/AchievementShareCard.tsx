@@ -37,19 +37,19 @@ export function AchievementShareCard({ memberName, memberUsername, badgeName, ba
       <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full border border-rcl-orange/20 bg-rcl-orange/5" />
       <div className="relative">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[9px] font-black uppercase tracking-[.28em] text-rcl-orange">Rich City League · Achievement</span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[9px] font-black uppercase tracking-wider text-white/50">{badgeTier || 'RCL'}</span>
+          <span className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">Rich City League · Achievement</span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black uppercase tracking-wider text-white/50">{badgeTier || 'RCL'}</span>
         </div>
         <div className="mt-8 text-6xl">{badgeIcon || '🏆'}</div>
-        <p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-white/35">Badge Unlocked</p>
+        <p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-white/35">Badge Unlocked</p>
         <h3 className="mt-1 font-display text-3xl font-black uppercase leading-none text-white">{badgeName}</h3>
         {badgeDescription && <p className="mt-3 max-w-lg text-sm leading-6 text-white/55">{badgeDescription}</p>}
         <div className="mt-7 flex flex-wrap items-end justify-between gap-4 border-t border-white/10 pt-4">
-          <div><b className="block text-sm text-white">{memberName}</b><span className="text-[10px] text-white/35">{memberUsername ? '@'+memberUsername : 'RCL Member'}{earnedAt ? ' · '+new Date(earnedAt).toLocaleDateString() : ''}</span></div>
-          <span className="text-[9px] font-black uppercase tracking-[.18em] text-rcl-orange">richcityhoops.com</span>
+          <div><b className="block text-sm text-white">{memberName}</b><span className="text-xs text-white/35">{memberUsername ? '@'+memberUsername : 'RCL Member'}{earnedAt ? ' · '+new Date(earnedAt).toLocaleDateString() : ''}</span></div>
+          <span className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">richcityhoops.com</span>
         </div>
       </div>
     </div>
-    <button type="button" onClick={share} className="flex w-full items-center justify-center gap-2 border-t border-white/10 bg-white/[.04] px-5 py-4 text-[10px] font-black uppercase tracking-[.16em] text-white transition hover:bg-rcl-orange hover:text-black"><FaShareNodes />{copied ? 'Share link copied' : 'Share achievement'}</button>
+    <button type="button" onClick={share} className="flex w-full items-center justify-center gap-2 border-t border-white/10 bg-white/[.04] px-5 py-4 text-xs font-black uppercase tracking-[.16em] text-white transition hover:bg-rcl-orange hover:text-black"><FaShareNodes />{copied ? 'Share link copied' : 'Share achievement'}</button>
   </article>;
 }

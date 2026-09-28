@@ -11,7 +11,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseStyles = 'font-black uppercase tracking-[.12em] rounded-lg transition-all duration-200 flex items-center justify-center gap-2';
+const baseStyles = 'min-h-11 font-bold uppercase tracking-[.08em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
 
 const variants = {
   primary: 'bg-rcl-orange text-rcl-black hover:bg-rcl-orange/90 disabled:opacity-50',
@@ -39,9 +39,10 @@ export function Button({
     <button
       className={clsx(baseStyles, variants[variant], sizes[size], variant === 'primary' && 'shadow-[0_12px_35px_rgba(255,79,22,.18)]', className)}
       disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       {...props}
     >
-      {isLoading && <span className="animate-spin" aria-hidden="true">⏳</span>}
+      {isLoading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />}
       {children}
     </button>
   );
