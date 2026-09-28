@@ -5,14 +5,17 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { NavigationDrawer } from '@/components/NavigationDrawer';
 import { useAuth } from '@/hooks/useAuth';
-import { RCL_NAV_ITEMS, RCL_ADMIN_NAV_ITEM } from '@/lib/rcl-navigation';
 import {
-  FaArrowRight, FaBars, FaBell, FaCalendarDays, FaChartLine, FaComments, FaCrown,
-  FaFolderOpen, FaHouse, FaNewspaper, FaPeopleGroup, FaRankingStar, FaPlay,
-  FaShirt, FaTrophy, FaUser, FaUsers, FaXmark, FaBasketball, FaMagnifyingGlass, FaListOl, FaUserTie, FaGear
+  RCL_ADMIN_NAV_GROUP,
+  RCL_ADMIN_NAV_ITEM,
+  RCL_NAV_GROUPS,
+  RCL_PRIMARY_NAV_ITEMS,
+} from '@/lib/rcl-navigation';
+import {
+  FaArrowRight, FaBars, FaBell, FaCrown, FaHouse, FaPeopleGroup,
+  FaTrophy, FaUser, FaBasketball, FaMagnifyingGlass
 } from 'react-icons/fa6';
 
-const nav = RCL_NAV_ITEMS;
 const quick = [
   {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
   {title:'JOIN A LEAGUE',sub:'FIND YOUR NEXT SEASON',href:'/register',icon:FaTrophy,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
@@ -28,14 +31,15 @@ type Post = {id:string;body:string;author?:{display_name?:string|null;first_name
 type Stat={player_id:string;points:number;assists:number};
 type Props = {teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
 
-
 export function RCLHomeExperience({teams,games,standings,players,stats,news,posts,standingsLabel}:Props) {
   const [menuOpen,setMenuOpen]=useState(false);
   const {user,profile}=useAuth();
   const accountName = profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Member';
   const accountHref = user ? '/profile' : '/auth/sign-in';
   const accountInitials = user ? accountName.split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase() : 'RCL';
-  const menuLinks = profile?.role==='admin'||profile?.role==='staff' ? [...nav,RCL_ADMIN_NAV_ITEM] : nav;
+  const isAdmin=profile?.role==='admin'||profile?.role==='staff';
+  const primaryLinks=isAdmin?[...RCL_PRIMARY_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_PRIMARY_NAV_ITEMS;
+  const drawerGroups=isAdmin?[...RCL_NAV_GROUPS,RCL_ADMIN_NAV_GROUP]:RCL_NAV_GROUPS;
   const team = (id:string) => teams.find(t=>t.id===id);
   const now = Date.now();
   const next = [...games]
@@ -49,7 +53,8 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
   return <main className="rcl-mock-home">
     <aside className="rcl-home-sidebar">
       <div className="rcl-home-sidebar-brand"><div className="rcl-home-logo">RCL</div><div><b>RICH CITY</b><strong>LEAGUE</strong><small>804 · RVA</small></div></div>
-      <nav aria-label="Primary navigation">{menuLinks.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} aria-current={item.href==='/'?'page':undefined} className={item.href==='/'?'active':''}><Icon/><span>{item.label}</span></Link>})}</nav>
+      <nav aria-label="Primary navigation">{primaryLinks.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} aria-current={item.href==='/'?'page':undefined} className={item.href==='/'?'active':''}><Icon/><span>{item.label}</span></Link>})}</nav>
+      <button type="button" className="rcl-home-all-rcl" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>All RCL</span></button>
       <div className="rcl-home-sidebar-bottom">
         <Link href={accountHref} className="rcl-home-profile"><span className="rcl-avatar">{accountInitials}</span><span><b>{user ? accountName : 'RCL Member'}</b><small>{user ? 'View profile' : 'Sign in'}</small></span><FaArrowRight aria-hidden="true"/></Link>
         <Link href="/settings"><span className="rcl-settings-dot">⚙</span>Settings</Link>
@@ -70,7 +75,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
           <p className="rcl-home-kicker">⚡ 804 · RICHMOND, VIRGINIA</p>
           <h1>RICH CITY<br/><span>BUILDS<br/>DIFFERENT.</span></h1>
           <p className="rcl-home-tagline">PLAY. COMPETE. CONNECT. GROW.</p>
-          <div className="flex flex-wrap gap-3"><Link href="/city" className="rcl-home-cta">ENTER THE CITY <FaArrowRight/></Link><Link href="/richmond-basketball-league" className="rcl-home-cta">JOIN RICHMOND BASKETBALL <FaArrowRight/></Link></div>
+          <div className="flex flex-wrap gap-3"><Link href="/league" className="rcl-home-cta">ENTER THE LEAGUE <FaArrowRight/></Link><Link href="/register" className="rcl-home-cta">JOIN RCL <FaArrowRight/></Link></div>
         </div>
         <small className="rcl-home-code">RCL / 804</small>
       </section>
@@ -95,7 +100,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
 
         <section>
           <div className="rcl-home-section-head"><div><p>THE CITY</p><h2>FEATURED PLAYERS</h2></div><Link href="/players">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-player-row">{featured.map((p,i)=>{const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><>{p.photo_url ? <Image src={p.photo_url} alt={`${p.first_name} ${p.last_name}`} width={700} height={700} sizes="(max-width: 768px) 80vw, 30vw" /> : <div className="rcl-home-player-placeholder" aria-hidden="true">{p.first_name[0]}{p.last_name[0]}</div>}</><div/><small>{p.jersey_number ? `#${p.jersey_number}` : 'RCL'} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{s?.gp?ppg.toFixed(1):'—'} PPG</b><b>{s?.gp?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
+          <div className="rcl-home-player-row">{featured.map((p)=>{const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><>{p.photo_url ? <Image src={p.photo_url} alt={`${p.first_name} ${p.last_name}`} width={700} height={700} sizes="(max-width: 768px) 80vw, 30vw" /> : <div className="rcl-home-player-placeholder" aria-hidden="true">{p.first_name[0]}{p.last_name[0]}</div>}</><div/><small>{p.jersey_number ? `#${p.jersey_number}` : 'RCL'} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{s?.gp?ppg.toFixed(1):'—'} PPG</b><b>{s?.gp?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
         </section>
 
         <section className="rcl-home-news">
@@ -103,7 +108,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
           <div className="rcl-home-news-grid">{posts.length?posts.map(p=><Link href="/social" key={p.id}><span>{(p.author?.display_name||p.author?.first_name||'RCL')[0]}</span><div><b>{p.author?.display_name||[p.author?.first_name,p.author?.last_name].filter(Boolean).join(' ')||'RCL COMMUNITY'}</b><small>RCL COMMUNITY</small><p>{p.body}</p></div></Link>):<div className="rcl-home-empty">No community updates yet.</div>}</div>
         </section>
 
-        <section className="border-y border-white/10 py-10"><p className="rcl-home-kicker">RICHMOND, VIRGINIA BASKETBALL</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Looking for your next league?</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">Discover competitive Richmond basketball, official player stats, teams, rankings and the year-round RCL community.</p><div className="mt-5 flex flex-wrap gap-4 text-xs font-black uppercase tracking-wider"><Link href="/richmond-basketball-league" className="text-rcl-orange">Richmond Basketball League →</Link><Link href="/register" className="text-rcl-gold">Register →</Link><Link href="/faq">League FAQ →</Link></div></section>
+        <section className="border-y border-white/10 py-10"><p className="rcl-home-kicker">RICHMOND, VIRGINIA BASKETBALL</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Looking for your next league?</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">Discover competitive Richmond basketball, official player stats, teams, rankings and the year-round RCL community.</p><div className="mt-5 flex flex-wrap gap-4 text-xs font-black uppercase tracking-wider"><Link href="/league" className="text-rcl-orange">League Center →</Link><Link href="/register" className="text-rcl-gold">Register →</Link><Link href="/faq">League FAQ →</Link></div></section>
 
         <section className="rcl-home-latest">
           <div><p>THE STAGE</p><h2>LATEST FROM RCL</h2></div>
@@ -112,8 +117,8 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
       </div>
     </div>
 
-    <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} items={menuLinks} pathname="/" />
+    <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} groups={drawerGroups} pathname="/" />
 
-    <nav className="rcl-home-bottom" aria-label="Mobile navigation"><Link aria-current="page" className="active" href="/"><FaHouse/><span>HOME</span></Link><Link href="/players"><FaUser/><span>PLAYERS</span></Link><Link href="/games"><FaCalendarDays/><span>GAMES</span></Link><Link href="/social"><FaPeopleGroup/><span>SOCIAL</span></Link><button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>MORE</span></button></nav>
+    <nav className="rcl-home-bottom" aria-label="Mobile navigation"><Link aria-current="page" className="active" href="/"><FaHouse/><span>HOME</span></Link><Link href="/league"><FaBasketball/><span>LEAGUE</span></Link><Link href="/players"><FaUser/><span>PLAYERS</span></Link><Link href="/social"><FaPeopleGroup/><span>SOCIAL</span></Link><button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>MORE</span></button></nav>
   </main>;
 }
