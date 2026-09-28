@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchLeagueAppsBatch, type LeagueAppsResource } from '@/lib/leagueapps';
+import type { Database } from '@/types/database';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type ServiceDb = ReturnType<typeof createClient>;
+type ServiceDb = SupabaseClient<Database>;
+type LeagueAppsRecordInsert = Database['public']['Tables']['leagueapps_records']['Insert'];
+type SyncStateInsert = Database['public']['Tables']['leagueapps_sync_state']['Insert'];
 
 type SyncResult = {
   resource: LeagueAppsResource;
@@ -13,6 +16,11 @@ type SyncResult = {
   batches: number;
   status: 'success' | 'partial';
 };
+
+async function saveSyncState(db: ServiceDb, state: SyncStateInsert) {
+  const { error } = await db.from('leagueapps_sync_state').upsert(state);
+  if (error) throw new Error(`sync state: ${error.message}`);
+}
 
 async function syncResource(db: ServiceDb, resource: LeagueAppsResource): Promise<SyncResult> {
   const { data: previous, error: stateError } = await db
@@ -43,7 +51,7 @@ async function syncResource(db: ServiceDb, resource: LeagueAppsResource): Promis
           last_updated: Number(record.lastUpdated ?? 0),
           payload: record,
           synced_at: new Date().toISOString(),
-        }));
+        })) as LeagueAppsRecordInsert[];
 
       if (rows.length) {
         const { error } = await db.from('leagueapps_records').upsert(rows, { onConflict: 'resource,external_id' });
@@ -66,7 +74,7 @@ async function syncResource(db: ServiceDb, resource: LeagueAppsResource): Promis
     }
 
     const status: SyncResult['status'] = batches >= maxBatches ? 'partial' : 'success';
-    const { error: saveError } = await db.from('leagueapps_sync_state').upsert({
+    await saveSyncState(db, {
       resource,
       last_updated: cursor.lastUpdated,
       last_id: cursor.lastId,
@@ -75,12 +83,11 @@ async function syncResource(db: ServiceDb, resource: LeagueAppsResource): Promis
       status,
       last_error: null,
     });
-    if (saveError) throw new Error(`sync state: ${saveError.message}`);
 
     return { resource, recordsSynced: total, batches, status };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'LeagueApps sync failed.';
-    await db.from('leagueapps_sync_state').upsert({
+    await saveSyncState(db, {
       resource,
       last_updated: cursor.lastUpdated,
       last_id: cursor.lastId,
@@ -107,7 +114,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Server-only Supabase credentials are required.' }, { status: 503 });
   }
 
-  const db = createClient(supabaseUrl, serviceKey, {
+  const db = createClient<Database>(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
