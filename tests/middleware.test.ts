@@ -1,12 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
-let session: unknown = null;
+let sessionUser: { id:string } | null = null;
+let sessionProfile: { role:string; is_active:boolean } | null = null;
 
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
     auth: {
-      getUser: async () => ({ data: { user: session ? (session as { user: unknown }).user : null } }),
+      getUser: async () => ({ data: { user: sessionUser } }),
+    },
+    from: (table:string) => {
+      if (table !== 'profiles') throw new Error(`Unexpected table in middleware test: ${table}`);
+      return {
+        select: () => ({
+          eq: () => ({
+            maybeSingle: async () => ({ data: sessionProfile, error: null }),
+          }),
+        }),
+      };
     },
   }),
 }));
@@ -14,73 +25,145 @@ vi.mock('@supabase/ssr', () => ({
 import { middleware } from '../src/middleware';
 import { getSafeNextPath } from '../src/lib/auth-redirect';
 
-describe('protected route middleware', () => {
+describe('member platform middleware', () => {
   beforeEach(() => {
-    session = null;
+    sessionUser = null;
+    sessionProfile = null;
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
   });
 
-  it('redirects anonymous users away from dashboard and portal routes', async () => {
-    for (const pathname of ['/dashboard', '/portal/profile', '/portal/operations']) {
-      const response = await middleware(new NextRequest(`http://localhost${pathname}`, { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
-
+  it.each(['/dashboard', '/portal/profile', '/portal/operations', '/league', '/players'])(
+    'sends anonymous member route %s to the member access wall',
+    async (pathname) => {
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(307);
-      expect(response.headers.get('location')).toContain('/auth/sign-in');
-    }
+      const location = new URL(response.headers.get('location')!);
+      expect(location.pathname).toBe('/member-access');
+      expect(location.searchParams.get('next')).toBe(pathname);
+    },
+  );
+
+  it('does not allow the retired preview cookie to bypass membership', async () => {
+    const response = await middleware(new NextRequest('http://localhost/league', {
+      headers: { cookie: 'rcl_preview_access=rcl-beta-2026' },
+    }));
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get('location')!).pathname).toBe('/member-access');
   });
 
-  it('allows an authenticated session to continue to protected routes', async () => {
-    session = { user: { id: 'player-user' } };
-
+  it('allows an authenticated active member profile to continue', async () => {
+    sessionUser = { id: 'player-user' };
+    sessionProfile = { role: 'player', is_active: true };
     const response = await middleware(new NextRequest('http://localhost/dashboard'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
 
+  it('sends a signed-in account without an RCL profile to profile setup', async () => {
+    sessionUser = { id: 'new-user' };
+    sessionProfile = null;
+    const response = await middleware(new NextRequest('http://localhost/league?view=season'));
+    const location = new URL(response.headers.get('location')!);
+    expect(response.status).toBe(307);
+    expect(location.pathname).toBe('/member-access');
+    expect(location.searchParams.get('profile')).toBe('1');
+    expect(location.searchParams.get('next')).toBe('/league?view=season');
+  });
+
+  it('keeps profile setup reachable for a signed-in account without a profile', async () => {
+    sessionUser = { id: 'new-user' };
+    sessionProfile = null;
+    const response = await middleware(new NextRequest('http://localhost/profile'));
     expect(response.status).toBe(200);
   });
 
-  it('keeps sign-in reachable when the preview has no authentication configuration', async () => {
+  it('blocks an inactive member profile', async () => {
+    sessionUser = { id: 'inactive-user' };
+    sessionProfile = { role: 'fan', is_active: false };
+    const response = await middleware(new NextRequest('http://localhost/social'));
+    const location = new URL(response.headers.get('location')!);
+    expect(response.status).toBe(307);
+    expect(location.pathname).toBe('/member-access');
+    expect(location.searchParams.get('inactive')).toBe('1');
+  });
+
+  it.each(['/portal/scorebook', '/portal/team', '/portal/operations'])(
+    'keeps fan accounts out of operator workspace %s',
+    async (pathname) => {
+      sessionUser = { id: 'fan-user' };
+      sessionProfile = { role: 'fan', is_active: true };
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      expect(response.status).toBe(307);
+      expect(new URL(response.headers.get('location')!).pathname).toBe('/league');
+    },
+  );
+
+  it('allows a coach into team and scorebook workspaces', async () => {
+    sessionUser = { id: 'coach-user' };
+    sessionProfile = { role: 'coach', is_active: true };
+    for (const pathname of ['/portal/team', '/portal/scorebook']) {
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      expect(response.status).toBe(200);
+    }
+  });
+
+  it('keeps non-admin members out of admin routes', async () => {
+    sessionUser = { id: 'coach-user' };
+    sessionProfile = { role: 'coach', is_active: true };
+    const response = await middleware(new NextRequest('http://localhost/admin/operations'));
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get('location')!).pathname).toBe('/league');
+  });
+
+  it('allows an admin into admin routes', async () => {
+    sessionUser = { id: 'admin-user' };
+    sessionProfile = { role: 'admin', is_active: true };
+    const response = await middleware(new NextRequest('http://localhost/admin/operations'));
+    expect(response.status).toBe(200);
+  });
+
+  it('keeps authentication and legal pages reachable anonymously', async () => {
+    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/legal/privacy', '/member-access']) {
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('location')).toBeNull();
+    }
+  });
+
+  it('keeps social share metadata reachable anonymously', async () => {
+    const response = await middleware(new NextRequest('http://localhost/opengraph-image'));
+    expect(response.status).toBe(200);
+  });
+
+  it('keeps sign-in reachable when authentication configuration is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     const response = await middleware(new NextRequest('http://localhost/auth/sign-in'));
     expect(response.status).toBe(200);
     expect(response.headers.get('location')).toBeNull();
   });
 
-  it('still blocks protected pages when authentication configuration is missing', async () => {
+  it('returns 503 for protected pages when authentication configuration is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const response = await middleware(new NextRequest('http://localhost/dashboard', { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
+    const response = await middleware(new NextRequest('http://localhost/league'));
     expect(response.status).toBe(503);
   });
 
-  it('preserves only the internal destination in the sign-in redirect', async () => {
-    const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue', { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
+  it('preserves an internal route and query in the member access redirect', async () => {
+    const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue'));
     const location = new URL(response.headers.get('location')!);
-
-    expect(location.pathname).toBe('/auth/sign-in');
+    expect(location.pathname).toBe('/member-access');
     expect(location.searchParams.get('next')).toBe('/portal/operations?view=queue');
   });
 
-
-  it('sends anonymous public visitors to the private preview wall', async () => {
-    const response = await middleware(new NextRequest('http://localhost/players'));
-    expect(response.status).toBe(307);
-    expect(new URL(response.headers.get('location')!).pathname).toBe('/access');
-  });
-
-  it('allows a valid referral link and stores preview access', async () => {
-    const response = await middleware(new NextRequest('http://localhost/?ref=rcl-preview-804'));
-    expect(response.status).toBe(307);
-    expect(response.headers.get('set-cookie')).toContain('rcl_preview_access=');
-    expect(response.headers.get('location')).not.toContain('ref=');
-  });
-
   it.each(['https://evil-site.com', '//evil-site.com', 'javascript:alert(1)', '/\\evil-site.com'])(
-    'rejects unsafe next destination %s',
+    'legacy auth redirect helper rejects unsafe next destination %s',
     (next) => {
       expect(getSafeNextPath(next)).toBe('/dashboard');
     },
   );
 
-  it('preserves a trusted internal query string', () => {
+  it('legacy auth redirect helper preserves a trusted internal query string', () => {
     expect(getSafeNextPath('/portal/operations?view=queue')).toBe('/portal/operations?view=queue');
   });
 });

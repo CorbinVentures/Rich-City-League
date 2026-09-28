@@ -3,48 +3,30 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from './lib/supabase-config';
 
-const PREVIEW_COOKIE = 'rcl_preview_access';
-const PREVIEW_COOKIE_VALUE = 'rcl-beta-2026';
-const REFERRAL_TOKEN = 'rcl-preview-804';
-const WALL_END = Date.UTC(2026, 9, 1); // Oct 1, 2026 UTC
+type AccessProfile = { role: string | null; is_active: boolean | null };
 
-function previewWallActive() {
-  return Date.now() < WALL_END;
+function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
+  const url = request.nextUrl.clone();
+  url.pathname = '/member-access';
+  url.search = '';
+  url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  if (flags.profile) url.searchParams.set('profile', '1');
+  if (flags.inactive) url.searchParams.set('inactive', '1');
+  return url;
 }
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const protectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/account');
   const metadataAsset = pathname === '/opengraph-image' || pathname === '/twitter-image' || pathname === '/icon' || pathname === '/apple-icon';
-  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/') || metadataAsset;
+  const publicAccess = pathname === '/member-access' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/') || metadataAsset;
   const config = getSupabaseConfig();
 
-  // The legacy beta referral token grants temporary preview access. Personal
-  // growth invites use ?invite= and intentionally remain separate from this wall.
-  if (previewWallActive() && request.nextUrl.searchParams.get('ref') === REFERRAL_TOKEN) {
-    const cleanUrl = request.nextUrl.clone();
-    cleanUrl.searchParams.delete('ref');
-    const response = NextResponse.redirect(cleanUrl);
-    response.cookies.set(PREVIEW_COOKIE, PREVIEW_COOKIE_VALUE, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      expires: new Date(WALL_END),
-    });
-    return response;
-  }
-
+  // RCL is a member platform. Authentication must be available before protected
+  // basketball content can be served; there is no anonymous preview-cookie bypass.
   if (config.status !== 'configured') {
-    if (previewWallActive() && !wallExempt && request.cookies.get(PREVIEW_COOKIE)?.value !== PREVIEW_COOKIE_VALUE) {
-      const accessUrl = request.nextUrl.clone();
-      accessUrl.pathname = '/access';
-      accessUrl.search = '';
-      return NextResponse.redirect(accessUrl);
-    }
-    return protectedPath
-      ? NextResponse.json({ error: 'Authentication is temporarily unavailable.' }, { status: 503 })
-      : NextResponse.next();
+    return publicAccess
+      ? NextResponse.next()
+      : NextResponse.json({ error: 'RCL member authentication is temporarily unavailable.' }, { status: 503 });
   }
 
   let response = NextResponse.next({ request });
@@ -58,49 +40,38 @@ export async function middleware(request: NextRequest) {
       },
     },
   });
+
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Through Sept. 30 the public site is a private preview. Existing signed-in
-  // members bypass the wall; invited visitors use a referral link or password.
-  // Social metadata assets remain public so link previews can render without
-  // exposing any protected page content.
-  const hasPreviewAccess = request.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_COOKIE_VALUE;
-  if (previewWallActive() && !wallExempt && !user && !hasPreviewAccess) {
-    const accessUrl = request.nextUrl.clone();
-    accessUrl.pathname = '/access';
-    accessUrl.search = '';
-    return NextResponse.redirect(accessUrl);
+  if (!user) {
+    if (publicAccess) return response;
+    return NextResponse.redirect(memberAccessUrl(request));
   }
 
-  if (protectedPath && !user) {
-    const signInUrl = request.nextUrl.clone();
-    signInUrl.pathname = '/auth/sign-in';
-    signInUrl.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(signInUrl);
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('role,is_active')
+    .eq('id', user.id)
+    .maybeSingle();
+  const profile = profileData as AccessProfile | null;
+
+  // A signed-in auth account is not platform membership by itself. Members must
+  // have a real RCL profile; /profile remains reachable so they can create it.
+  if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
+    return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
   }
 
-  if (user && request.nextUrl.pathname.startsWith('/portal/operations')) {
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-    const profile = profileData as { role: string } | null;
-    if (!profile || !['coach', 'staff', 'admin'].includes(profile.role)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+  if (profile?.is_active === false && pathname !== '/member-access' && !pathname.startsWith('/auth/')) {
+    return NextResponse.redirect(memberAccessUrl(request, { inactive: true }));
   }
 
-  if (user && request.nextUrl.pathname.startsWith('/admin')) {
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-    const role = (profileData as { role?: string } | null)?.role;
-    if (role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+  const operatorWorkspace = pathname.startsWith('/portal/operations') || pathname.startsWith('/portal/team') || pathname.startsWith('/portal/scorebook');
+  if (operatorWorkspace && (!profile || !['coach', 'staff', 'admin'].includes(profile.role ?? ''))) {
+    return NextResponse.redirect(new URL('/league', request.url));
+  }
+
+  if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
+    return NextResponse.redirect(new URL('/league', request.url));
   }
 
   return response;
