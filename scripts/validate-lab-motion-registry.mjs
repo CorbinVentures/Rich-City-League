@@ -14,6 +14,6 @@ for(const x of entries){
  if(!a)throw Error('Exact clip missing for '+x.id);
  if(Math.abs(a.duration-x.duration)>(1/x.fps+.001))throw Error('Duration drift '+x.id+': registry '+x.duration+' GLB '+a.duration);
 }
-for(const id of ['dribble-stance','chest-pass','set-shot'])if(!entries.find(x=>x.id===id)?.ball)throw Error(id+' must be ball-enabled');
-for(const id of ['defensive-slide','closeout','triple-threat-jab'])if(entries.find(x=>x.id===id)?.ball)throw Error(id+' must be ball-free');
-console.log(JSON.stringify({motions:entries.length,unique:true,timing:true,ballRouting:true},null,2));
+for(const id of ['triple-threat-jab','dribble-stance','chest-pass','set-shot'])if(!entries.find(x=>x.id===id)?.ball)throw Error(id+' must be ball-enabled');
+for(const id of ['defensive-slide','closeout'])if(entries.find(x=>x.id===id)?.ball)throw Error(id+' must be ball-free');
+console.log(JSON.stringify({motions:entries.length,unique:true,timing:true,ballRouting:true,ballLedMotions:4},null,2));
