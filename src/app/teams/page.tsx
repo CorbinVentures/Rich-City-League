@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
+import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { TeamsDirectory } from '@/components/PublicDirectory';
 
@@ -16,5 +17,19 @@ export default async function TeamsPage() {
     const record = standings.find((standing) => standing.team_id === team.id && standing.season_id === assignment?.season_id);
     return { id: team.id, name: team.name, slug: team.slug, logo_url: team.logo_url, primary_color: team.primary_color, division: assignment ? divisionById.get(assignment.division_id ?? '') ?? null : null, season: assignment ? seasonById.get(assignment.season_id) ?? null : null, wins: record?.wins ?? null, losses: record?.losses ?? null };
   });
-  return <main className="min-h-screen bg-rcl-black pb-24"><section className="border-b border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(255,107,26,0.18),transparent_60%)] py-16"><Container maxWidth="xl"><p className="text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">League directory</p><h1 className="mt-3 font-display text-5xl font-bold sm:text-7xl">RCL <span className="text-rcl-gold">TEAMS</span></h1><p className="mt-4 max-w-xl text-gray-400">Discover the teams representing Richmond. Different hoods. One league. A stronger Richmond.</p></Container></section><Container maxWidth="xl" className="py-10"><TeamsDirectory items={items} /></Container></main>;
+  const assigned = items.filter((item) => item.division).length;
+
+  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <CorporatePageHero
+      eyebrow="RCL League Directory"
+      title="Teams"
+      accent="Richmond represented"
+      description="Explore every active RCL team, current division placement, official season record, and the identities competing across the city."
+      assetKey="teams.cover"
+      meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.2em] text-white/35">League field</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">teams</span></p><p className="mt-2 text-xs text-rcl-blue">{assigned} division assignments</p></div>}
+    />
+    <Container maxWidth="xl" className="py-10 sm:py-12">
+      <TeamsDirectory items={items} />
+    </Container>
+  </main>;
 }
