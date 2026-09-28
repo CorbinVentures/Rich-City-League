@@ -38,6 +38,19 @@ describe('protected route middleware', () => {
     expect(response.status).toBe(200);
   });
 
+  it('keeps sign-in reachable when the preview has no authentication configuration', async () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const response = await middleware(new NextRequest('http://localhost/auth/sign-in'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('still blocks protected pages when authentication configuration is missing', async () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const response = await middleware(new NextRequest('http://localhost/dashboard', { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
+    expect(response.status).toBe(503);
+  });
+
   it('preserves only the internal destination in the sign-in redirect', async () => {
     const response = await middleware(new NextRequest('http://localhost/portal/operations?view=queue', { headers: { cookie: 'rcl_preview_access=rcl-beta-2026' } }));
     const location = new URL(response.headers.get('location')!);

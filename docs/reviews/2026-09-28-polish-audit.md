@@ -22,16 +22,20 @@ Reviewed the source route inventory (91 page files), shared navigation and style
 
 Film Room link input is limited to HTTP(S). Challenge results and player assessments reject invalid numeric values. Supabase table definitions and relevant access policies were checked read-only; no database schema, production records or authentication controls were changed.
 
+Social media selection now allowlists supported MIME types and size, gives local previews only for validated base64 media, and derives upload extensions from the MIME type. Preview-wall middleware keeps `/auth/*` reachable even when preview authentication configuration is temporarily unavailable, while protected routes still return a clear 503 in that state.
+
 ## Verification
 
 - `npm run type-check`: passed.
 - `npm run lint`: passed with existing hook-dependency and raw-image warnings.
-- `npm test`: 18 test files, 45 tests passed.
+- `npm test`: 19 test files, 60 tests passed.
 - `npm run build`: passed, including the existing Lab asset generation gates.
 - `git diff --check`: passed.
 - Literal internal-link source scan: no unresolved route targets found. Dynamic destinations and signed-in navigation still need runtime review.
 
 Local checks used the available Node 24 runtime; repository CI uses its configured Node 22 runtime. Existing tests do not constitute end-to-end verification of the new UI states.
+
+The first hosted CodeQL pass reported four DOM text to HTML findings in the existing Social media-preview path after the page was touched. The preview now uses a MIME allowlist and validated base64 data URLs instead of `URL.createObjectURL`; the branch will be rechecked by CodeQL after this update.
 
 ## Remaining browser review
 

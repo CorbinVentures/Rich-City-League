@@ -15,6 +15,7 @@ function previewWallActive() {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/account');
+  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/') || pathname.startsWith('/lab3d/');
   const config = getSupabaseConfig();
 
   // The legacy beta referral token grants temporary preview access. Personal
@@ -34,7 +35,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (config.status !== 'configured') {
-    if (previewWallActive() && pathname !== '/access' && request.cookies.get(PREVIEW_COOKIE)?.value !== PREVIEW_COOKIE_VALUE) {
+    if (previewWallActive() && !wallExempt && request.cookies.get(PREVIEW_COOKIE)?.value !== PREVIEW_COOKIE_VALUE) {
       const accessUrl = request.nextUrl.clone();
       accessUrl.pathname = '/access';
       accessUrl.search = '';
@@ -60,7 +61,6 @@ export async function middleware(request: NextRequest) {
 
   // Through Sept. 30 the public site is a private preview. Existing signed-in
   // members bypass the wall; invited visitors use a referral link or password.
-  const wallExempt = pathname === '/access' || pathname.startsWith('/auth/') || pathname.startsWith('/lab3d/');
   const hasPreviewAccess = request.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_COOKIE_VALUE;
   if (previewWallActive() && !wallExempt && !user && !hasPreviewAccess) {
     const accessUrl = request.nextUrl.clone();
