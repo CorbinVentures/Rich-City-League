@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 export function SocialCreateIntent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const wantsComposer = searchParams.get('compose') === '1';
 
   useEffect(() => {
-    if (pathname !== '/social') return;
-    const wantsComposer = new URLSearchParams(window.location.search).get('compose') === '1';
-    if (!wantsComposer) return;
+    if (pathname !== '/social' || !wantsComposer) return;
 
     let cancelled = false;
     let attempt = 0;
@@ -33,7 +33,7 @@ export function SocialCreateIntent() {
       cancelled = true;
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [pathname]);
+  }, [pathname, wantsComposer]);
 
   return null;
 }
