@@ -98,7 +98,7 @@ export default function SocialCreatorPage() {
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
   const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<Array<{ name: string; type: string; url: string }>>([]);
+  const [previews, setPreviews] = useState<Array<{ type: string; url: string }>>([]);
   const [challenge, setChallenge] = useState<CreatorChallenge | null>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
@@ -110,7 +110,7 @@ export default function SocialCreatorPage() {
   }, []);
 
   useEffect(() => {
-    const next = files.map((file) => ({ name: file.name, type: file.type, url: URL.createObjectURL(file) }));
+    const next = files.map((file) => ({ type: file.type, url: URL.createObjectURL(file) }));
     setPreviews(next);
     return () => next.forEach((preview) => URL.revokeObjectURL(preview.url));
   }, [files]);
@@ -131,7 +131,10 @@ export default function SocialCreatorPage() {
 
   const chooseFiles = (list: FileList | null) => {
     if (!list?.length) return;
-    const selected = Array.from(list);
+    const incoming = Array.from(list);
+    const incomingKind = socialMediaKind(incoming[0].type);
+    const existingArePhotos = files.length > 0 && files.every((file) => socialMediaKind(file.type) === 'image');
+    const selected = existingArePhotos && incomingKind === 'image' ? [...files, ...incoming] : incoming;
     const collectionIssue = socialMediaCollectionError(selected);
     if (collectionIssue) { setError(collectionIssue); return; }
 
@@ -276,8 +279,8 @@ export default function SocialCreatorPage() {
                     </button>
                   ) : (
                     <div className={`mt-2 grid gap-2 ${previews.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
-                      {previews.map((preview, index) => <div key={`${preview.name}-${index}`} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black">{preview.type.startsWith('video/') ? <video src={preview.url} controls playsInline className="max-h-[480px] w-full object-contain" /> : <img src={preview.url} alt={`Upload preview ${index + 1}`} className="aspect-square w-full object-cover" />}<button type="button" onClick={() => removeFile(index)} aria-label={`Remove ${preview.name}`} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/75 text-white"><FaXmark /></button>{previews.length > 1 && <span className="absolute bottom-2 left-2 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black">{index + 1}/{previews.length}</span>}</div>)}
-                      {mode !== 'clip' && files.length < SOCIAL_MAX_IMAGES && <button type="button" onClick={() => fileInputRef.current?.click()} className="grid min-h-32 place-items-center rounded-2xl border border-dashed border-white/15 text-xs font-black uppercase tracking-wider text-white/35 hover:border-rcl-blue/35 hover:text-rcl-blue"><span><FaImage className="mx-auto mb-2 text-xl"/>Add photos</span></button>}
+                      {previews.map((preview, index) => <div key={index} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black">{preview.type.startsWith('video/') ? <video src={preview.url} controls playsInline className="max-h-[480px] w-full object-contain" /> : <img src={preview.url} alt={`Upload preview ${index + 1}`} className="aspect-square w-full object-cover" />}<button type="button" onClick={() => removeFile(index)} aria-label={`Remove upload ${index + 1}`} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/75 text-white"><FaXmark /></button>{previews.length > 1 && <span className="absolute bottom-2 left-2 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black">{index + 1}/{previews.length}</span>}</div>)}
+                      {mode !== 'clip' && files.length < SOCIAL_MAX_IMAGES && files.every((file) => socialMediaKind(file.type) === 'image') && <button type="button" onClick={() => fileInputRef.current?.click()} className="grid min-h-32 place-items-center rounded-2xl border border-dashed border-white/15 text-xs font-black uppercase tracking-wider text-white/35 hover:border-rcl-blue/35 hover:text-rcl-blue"><span><FaImage className="mx-auto mb-2 text-xl"/>Add photos</span></button>}
                     </div>
                   )}
                   <input ref={fileInputRef} type="file" accept={accepts} multiple={allowsMultiple} className="hidden" onChange={(event) => { chooseFiles(event.target.files); event.currentTarget.value = ''; }} />
