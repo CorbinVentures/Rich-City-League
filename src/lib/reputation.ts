@@ -1,4 +1,13 @@
 export type ReputationStatus = { key: string; label: string; minLevel: number; nextLevel: number | null };
+export type ReputationDimension = 'hooper' | 'community' | 'creator' | 'coach' | 'reliability';
+
+export const REPUTATION_DIMENSIONS: Array<{ key: ReputationDimension; label: string; description: string }> = [
+  { key: 'hooper', label: 'Hooper REP', description: 'Verified games, performance, training and basketball development.' },
+  { key: 'community', label: 'Community REP', description: 'Participation, conversation, Pick’em and positive league activity.' },
+  { key: 'creator', label: 'Creator REP', description: 'Posts, stories, media, highlights and basketball content.' },
+  { key: 'coach', label: 'Coach REP', description: 'Scouting, coaching activity and basketball leadership.' },
+  { key: 'reliability', label: 'Reliability REP', description: 'Showing up for runs, check-ins and commitments.' },
+];
 
 const STATUS_TIERS: ReputationStatus[] = [
   { key: 'rookie', label: 'Rookie', minLevel: 1, nextLevel: 3 },

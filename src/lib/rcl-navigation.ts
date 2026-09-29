@@ -1,7 +1,8 @@
 import {
   FaHouse, FaCalendarDays, FaChartSimple, FaUsers, FaUser, FaNewspaper,
   FaPlay, FaListOl, FaUserTie, FaBell, FaComments, FaPeopleGroup, FaCrown,
-  FaTrophy, FaShirt, FaBasketball, FaGear, FaCompass
+  FaTrophy, FaShirt, FaBasketball, FaGear, FaCompass, FaBolt, FaLocationDot,
+  FaMedal, FaArrowRightArrowLeft
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 
@@ -12,7 +13,7 @@ export function isNavigationActive(pathname: string, href: string) {
   return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
 }
 
-const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches'];
+const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem'];
 const SOCIAL_FAMILY=['/social','/friends','/messages','/communities','/runs'];
 
 export function isPrimaryNavigationActive(pathname:string, href:string){
@@ -22,6 +23,7 @@ export function isPrimaryNavigationActive(pathname:string, href:string){
 }
 
 const HOME:RCLNavItem={label:'Home',href:'/',icon:FaHouse};
+const TODAY:RCLNavItem={label:'Today',href:'/today',icon:FaBolt};
 const LEAGUE:RCLNavItem={label:'League',href:'/league',icon:FaBasketball};
 const EXPLORE:RCLNavItem={label:'Explore',href:'/explore',icon:FaCompass};
 const PLAYERS:RCLNavItem={label:'Players',href:'/players',icon:FaUser};
@@ -47,10 +49,12 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
       PLAYERS,
       TEAMS,
       {label:'Schedule',href:'/schedule',icon:FaCalendarDays},
-      {label:'Games',href:'/games',icon:FaBasketball},
+      {label:'Game Night',href:'/games',icon:FaBasketball},
+      {label:'Pick’em',href:'/pickem',icon:FaTrophy},
       {label:'Standings',href:'/standings',icon:FaListOl},
       {label:'Stats',href:'/stats',icon:FaChartSimple},
       {label:'Rankings',href:'/rankings',icon:FaListOl},
+      {label:'Player Compare',href:'/players/compare',icon:FaArrowRightArrowLeft},
       {label:'Coaches',href:'/coaches',icon:FaUserTie},
     ],
   },
@@ -58,6 +62,9 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     label:'Experience',
     description:'Signature RCL products and game layers',
     items:[
+      TODAY,
+      {label:'Weekly Missions',href:'/missions',icon:FaMedal},
+      {label:'Open Runs',href:'/runs',icon:FaLocationDot},
       {label:'Draft Night',href:'/draft',icon:FaCrown},
       {label:'Fantasy',href:'/fantasy',icon:FaTrophy},
       {label:'Leaderboards',href:'/leaderboards',icon:FaListOl},
@@ -71,11 +78,13 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     items:[
       SOCIAL,
       NEWS,
-      {label:'Media',href:'/media',icon:FaPlay},
+      {label:'RCL TV',href:'/media',icon:FaPlay},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
+      {label:'Basketball Connections',href:'/connections',icon:FaUsers},
       {label:'Friends',href:'/friends',icon:FaUsers},
       {label:'Messages',href:'/messages',icon:FaComments},
       {label:'Awards',href:'/badges',icon:FaTrophy},
+      {label:'Legacy',href:'/legacy',icon:FaCrown},
     ],
   },
   {
@@ -83,6 +92,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'About RCL and your account activity',
     items:[
       {label:'Notifications',href:'/notifications',icon:FaBell},
+      {label:'Alert Settings',href:'/settings/notifications',icon:FaGear},
       {label:'About RCL',href:'/about',icon:FaBasketball},
     ],
   },
@@ -90,6 +100,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
 
 export const RCL_NAV_ITEMS:RCLNavItem[]=[
   HOME,
+  TODAY,
   LEAGUE,
   EXPLORE,
   ...RCL_NAV_GROUPS.flatMap(group=>group.items),
