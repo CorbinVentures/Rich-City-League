@@ -1,10 +1,9 @@
-const CACHE_NAME = 'rcl-static-v3';
+const CACHE_NAME = 'rcl-static-v4';
 const STATIC_ASSETS = [
   '/favicon.svg',
-  '/icons/rcl-app-180.png',
+  '/icon',
+  '/apple-icon',
   '/icons/rcl-app-192.png',
-  '/icons/rcl-app-512.png',
-  '/icons/rcl-app-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -23,6 +22,61 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'RCL_BADGE_COUNT') return;
+  const count = Math.max(0, Number(event.data.count) || 0);
+  event.waitUntil(updateBadge(count));
+});
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() || {};
+  } catch {
+    payload = { body: event.data?.text() || 'New Rich City League activity.' };
+  }
+
+  const badgeCount = Math.max(0, Number(payload.badgeCount) || 1);
+  const title = payload.title || 'Rich City League';
+  const url = normalizeNotificationUrl(payload.url || '/notifications');
+
+  event.waitUntil(Promise.all([
+    updateBadge(badgeCount),
+    self.registration.showNotification(title, {
+      body: payload.body || 'New RCL activity needs your attention.',
+      icon: '/icon',
+      badge: '/favicon.svg',
+      tag: payload.tag || 'rcl-notification',
+      renotify: true,
+      data: {
+        url,
+        notificationId: payload.notificationId || null,
+        type: payload.type || 'activity',
+      },
+    }),
+  ]));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = normalizeNotificationUrl(event.notification.data?.url || '/notifications');
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      try {
+        const current = new URL(client.url);
+        if (current.origin === self.location.origin) {
+          if ('navigate' in client) await client.navigate(target);
+          if ('focus' in client) return client.focus();
+        }
+      } catch {
+        // Continue to opening a new window.
+      }
+    }
+    return self.clients.openWindow(target);
+  })());
+});
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -39,7 +93,9 @@ self.addEventListener('fetch', (event) => {
 
   const cacheableStatic = url.pathname.startsWith('/_next/static/')
     || url.pathname.startsWith('/icons/')
-    || url.pathname === '/favicon.svg';
+    || url.pathname === '/favicon.svg'
+    || url.pathname === '/icon'
+    || url.pathname === '/apple-icon';
 
   if (!cacheableStatic) return;
 
@@ -56,6 +112,25 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+function normalizeNotificationUrl(value) {
+  try {
+    const url = new URL(value, self.location.origin);
+    return url.origin === self.location.origin ? `${url.pathname}${url.search}${url.hash}` : '/notifications';
+  } catch {
+    return '/notifications';
+  }
+}
+
+async function updateBadge(count) {
+  try {
+    if (count > 0 && 'setAppBadge' in self.navigator) await self.navigator.setAppBadge(count);
+    else if (count === 0 && 'clearAppBadge' in self.navigator) await self.navigator.clearAppBadge();
+    else if (count === 0 && 'setAppBadge' in self.navigator) await self.navigator.setAppBadge(0);
+  } catch {
+    // Badging is not supported on every installed PWA platform.
+  }
+}
 
 function offlineResponse() {
   return new Response(`<!doctype html>
@@ -76,7 +151,7 @@ function offlineResponse() {
 </head>
 <body>
   <main>
-    <img src="/icons/rcl-app-192.png" alt="">
+    <img src="/icon" alt="">
     <small>RCL NETWORK</small>
     <h1>You’re offline</h1>
     <p>Live scores, messages, posts and member data need a connection. Reconnect, then try again.</p>
