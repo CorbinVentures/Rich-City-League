@@ -256,8 +256,11 @@ begin
     and bio = 'Founder of Rich City Basketball League'
     and role::text = 'admin';
 
-  if founder_count <> 1 then
-    raise exception 'Expected exactly one founder profile, found %', founder_count;
+  if founder_count = 0 then
+    raise notice 'Founder profile is not present in this environment; skipping founder data grant.';
+    return;
+  elsif founder_count > 1 then
+    raise exception 'Expected at most one founder profile, found %', founder_count;
   end if;
 
   select id into founder_id
