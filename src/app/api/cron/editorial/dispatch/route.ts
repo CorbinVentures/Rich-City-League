@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type EditorialAccount = 'rcl-business' | 'rva-hoops';
+type EditorialAccount = 'rcl-business' | 'rva-hoops' | 'rcl-community';
 
 function easternHour(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -30,6 +30,33 @@ function editorialOrigin() {
   return 'https://www.richcityhoops.com';
 }
 
+function requirementsFor(account: EditorialAccount) {
+  if (account === 'rva-hoops') {
+    return [
+      'Richmond/Central Virginia basketball first',
+      'include local high school, college, AAU, recruiting, facilities and players with a Richmond connection',
+      'current source required when reporting outside facts',
+      'no rumors as fact',
+      'avoid unnecessary minor PII',
+    ];
+  }
+  if (account === 'rcl-community') {
+    return [
+      'Richmond-area community relevance required',
+      'prioritize recreation, youth, schools, small business, events, neighborhood resources and community development',
+      'avoid generic national stories',
+      'current source required for factual news claims',
+      'concise neutral summary with source attribution',
+    ];
+  }
+  return [
+    'basketball business focus',
+    'current source required for factual news claims',
+    'original concise analysis',
+    'no copied article text',
+  ];
+}
+
 export async function GET(request: Request) {
   const bearer = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
   const secret = process.env.CRON_SECRET?.trim();
@@ -41,6 +68,8 @@ export async function GET(request: Request) {
   if (hour === 8) accounts.push('rva-hoops');
   // RCL Business publishes throughout the day so the business desk stays active.
   if (hour === 10 || hour === 12 || hour === 14 || hour === 17) accounts.push('rcl-business');
+  // RCL Community handles broader Richmond-area community coverage.
+  if (hour === 16) accounts.push('rcl-community');
 
   if (!accounts.length) {
     return NextResponse.json({ ok: true, dispatched: [], reason: 'No editorial desk scheduled for this Eastern hour.' });
@@ -67,9 +96,7 @@ export async function GET(request: Request) {
       body: JSON.stringify({
         account,
         market: 'Richmond, Virginia',
-        requirements: account === 'rva-hoops'
-          ? ['basketball only', 'current source required', 'local/high school/college/pro coverage', 'no rumors as fact', 'avoid unnecessary minor PII']
-          : ['basketball business focus', 'current source required for factual news claims', 'original concise analysis', 'no copied article text'],
+        requirements: requirementsFor(account),
       }),
       signal: AbortSignal.timeout(45_000),
     });
