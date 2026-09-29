@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from './lib/supabase-config';
 
-type AccessProfile = { role: string | null; is_active: boolean | null };
+type AccessProfile = { role: string | null; is_active: boolean | null; onboarding_complete?: boolean | null };
 
 function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
   const url = request.nextUrl.clone();
@@ -12,6 +12,14 @@ function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inact
   url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
   if (flags.profile) url.searchParams.set('profile', '1');
   if (flags.inactive) url.searchParams.set('inactive', '1');
+  return url;
+}
+
+function socialOnboardingUrl(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = '/auth/complete-profile';
+  url.search = '';
+  url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
   return url;
 }
 
@@ -54,7 +62,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('role,is_active')
+    .select('*')
     .eq('id', user.id)
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
@@ -63,6 +71,13 @@ export async function middleware(request: NextRequest) {
   // have a real RCL profile; /profile remains reachable so they can create it.
   if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
+  }
+
+  // Apple/Google can securely prove identity before RCL has collected the local
+  // 16+ age screen, role choice, username and legal acknowledgements. Keep those
+  // new social identities inside onboarding until the RCL-specific profile is done.
+  if (profile?.onboarding_complete === false && !pathname.startsWith('/auth/')) {
+    return NextResponse.redirect(socialOnboardingUrl(request));
   }
 
   if (profile?.is_active === false && pathname !== '/member-access' && !pathname.startsWith('/auth/')) {

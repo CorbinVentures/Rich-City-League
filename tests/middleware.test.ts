@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 let sessionUser: { id:string } | null = null;
-let sessionProfile: { role:string; is_active:boolean } | null = null;
+let sessionProfile: { role:string; is_active:boolean; onboarding_complete?:boolean } | null = null;
 
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
@@ -56,6 +56,24 @@ describe('member platform middleware', () => {
     sessionUser = { id: 'player-user' };
     sessionProfile = { role: 'player', is_active: true };
     const response = await middleware(new NextRequest('http://localhost/dashboard'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('sends an incomplete social identity to RCL onboarding and preserves the destination', async () => {
+    sessionUser = { id: 'oauth-user' };
+    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: false };
+    const response = await middleware(new NextRequest('http://localhost/social?tab=network'));
+    const location = new URL(response.headers.get('location')!);
+    expect(response.status).toBe(307);
+    expect(location.pathname).toBe('/auth/complete-profile');
+    expect(location.searchParams.get('next')).toBe('/social?tab=network');
+  });
+
+  it('keeps the social onboarding page reachable for an incomplete identity', async () => {
+    sessionUser = { id: 'oauth-user' };
+    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: false };
+    const response = await middleware(new NextRequest('http://localhost/auth/complete-profile'));
     expect(response.status).toBe(200);
     expect(response.headers.get('location')).toBeNull();
   });
@@ -124,7 +142,7 @@ describe('member platform middleware', () => {
   });
 
   it('keeps authentication and legal pages reachable anonymously', async () => {
-    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/legal/privacy', '/member-access']) {
+    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access']) {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(200);
       expect(response.headers.get('location')).toBeNull();
