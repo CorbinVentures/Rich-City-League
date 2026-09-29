@@ -5,8 +5,10 @@ import crypto from 'node:crypto';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+type EditorialAccount = 'rcl-business' | 'rva-hoops' | 'rcl-community';
+
 type Story = {
-  account: 'rcl-business' | 'rva-hoops';
+  account: EditorialAccount;
   title: string;
   summary: string;
   sourceName: string;
@@ -14,7 +16,13 @@ type Story = {
   publishedAt?: string;
 };
 
-const allowedAccounts = new Set(['rcl-business', 'rva-hoops']);
+const allowedAccounts = new Set<EditorialAccount>(['rcl-business', 'rva-hoops', 'rcl-community']);
+
+const automationTypes: Record<EditorialAccount, string> = {
+  'rcl-business': 'daily_business_editorial',
+  'rva-hoops': 'rva_basketball_news',
+  'rcl-community': 'richmond_community_news',
+};
 
 function normalizeUrl(value: string) {
   const url = new URL(value);
@@ -65,7 +73,7 @@ export async function POST(request: Request) {
 
   const { data: post, error: postError } = await db.from('posts').insert({
     author_id: profile.id, body, media_urls: [], status: 'published', is_automated: true,
-    automation_type: story.account === 'rcl-business' ? 'daily_business_editorial' : 'rva_basketball_news',
+    automation_type: automationTypes[story.account],
     automation_source_id: eventId,
   }).select('id').single();
   if (postError || !post) return NextResponse.json({ error: postError?.message || 'Unable to publish.' }, { status: 500 });
