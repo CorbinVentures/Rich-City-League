@@ -72,16 +72,16 @@ export type NetworkFeedItem = {
 };
 
 const reactions = [
-  { type: 'bucket', emoji: '🏀', label: 'Bucket' },
-  { type: 'heat', emoji: '🔥', label: 'Heat Check' },
-  { type: 'strong', emoji: '💪', label: 'Tough' },
-  { type: 'locked', emoji: '🔒', label: 'Locked Up' },
-  { type: 'money', emoji: '🎯', label: 'Pure' },
-  { type: 'watch', emoji: '👀', label: 'I See You' },
-  { type: 'king', emoji: '👏', label: 'Salute' },
-  { type: 'certified', emoji: '🧊', label: 'Cold Blooded' },
-  { type: 'highlight', emoji: '😂', label: "That's Crazy" },
-  { type: 'champ', emoji: '🏆', label: 'Championship' },
+  { type: 'bucket', emoji: '🏀', label: 'Bucket', shortLabel: 'Bucket' },
+  { type: 'heat', emoji: '🔥', label: 'Heat Check', shortLabel: 'Heat' },
+  { type: 'strong', emoji: '💪', label: 'Tough', shortLabel: 'Tough' },
+  { type: 'locked', emoji: '🔒', label: 'Locked Up', shortLabel: 'Lock' },
+  { type: 'money', emoji: '🎯', label: 'Pure', shortLabel: 'Pure' },
+  { type: 'watch', emoji: '👀', label: 'I See You', shortLabel: 'Watch' },
+  { type: 'king', emoji: '👏', label: 'Salute', shortLabel: 'Salute' },
+  { type: 'certified', emoji: '🧊', label: 'Cold Blooded', shortLabel: 'Cold' },
+  { type: 'highlight', emoji: '😂', label: "That's Crazy", shortLabel: 'Crazy' },
+  { type: 'champ', emoji: '🏆', label: 'Championship', shortLabel: 'Champ' },
 ];
 
 export function NetworkPostCard({
@@ -130,6 +130,15 @@ export function NetworkPostCard({
   const mediaUrls = (post.media_urls ?? []).filter(Boolean);
   const videoPost = mediaUrls.length > 0 && isVideoUrl(mediaUrls[0]);
   const mediaLabel = videoPost ? 'RCL Clip' : mediaUrls.length ? 'RCL Moment' : null;
+  const reactionCounts = (post.reactions ?? []).reduce<Record<string, number>>((counts, reaction) => {
+    counts[reaction.type] = (counts[reaction.type] ?? 0) + 1;
+    return counts;
+  }, {});
+  const topReactions = reactions
+    .map((reaction) => ({ ...reaction, count: reactionCounts[reaction.type] ?? 0 }))
+    .filter((reaction) => reaction.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
 
   return (
     <article id={`post-${post.id}`} className={`overflow-hidden rounded-2xl border bg-[#08111b]/90 shadow-[0_18px_60px_rgba(0,0,0,.22)] ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
@@ -212,27 +221,72 @@ export function NetworkPostCard({
       )}
 
       <div className="px-4 py-3 sm:px-5">
-        <div className="flex items-center justify-between gap-3 text-xs text-white/30">
-          <span>{reactionCount ? `${reactionCount} ${reactionCount === 1 ? 'reaction' : 'reactions'}` : mediaLabel ? 'Give this some RCL energy' : 'React to this'}</span>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={onToggleComments} className="hover:text-white">{commentCount} comments</button>
-            <span>{repostCount} repost{repostCount === 1 ? '' : 's'}</span>
+        <div className="rounded-2xl border border-white/[.06] bg-black/15 p-2.5">
+          <div className="mb-2 flex min-h-6 items-center justify-between gap-2 px-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-[.18em] text-white/45">RCL Reactions</span>
+              {topReactions.length > 0 && (
+                <div className="flex min-w-0 items-center gap-1 overflow-hidden">
+                  {topReactions.map((reaction) => (
+                    <span key={reaction.type} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/[.035] px-1.5 py-0.5 text-[9px] font-bold text-white/40">
+                      <span aria-hidden="true">{reaction.emoji}</span>
+                      {reaction.count}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-white/25">
+              {reactionCount} {reactionCount === 1 ? 'reaction' : 'reactions'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
+            {reactions.map((reaction) => {
+              const selected = mine?.type === reaction.type;
+              const count = reactionCounts[reaction.type] ?? 0;
+
+              return (
+                <button
+                  key={reaction.type}
+                  type="button"
+                  title={reaction.label}
+                  aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
+                  aria-pressed={selected}
+                  onClick={() => onReact(reaction.type)}
+                  className={`relative flex min-h-[58px] min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-1.5 transition duration-150 active:scale-95 ${
+                    reactionBurst === reaction.type ? 'scale-110' : ''
+                  } ${
+                    selected
+                      ? 'border-rcl-blue/55 bg-rcl-blue/10 ring-1 ring-rcl-blue/50 shadow-[0_0_18px_rgba(255,79,22,.16)]'
+                      : 'border-white/[.05] bg-white/[.018] hover:border-white/10 hover:bg-white/[.04]'
+                  }`}
+                >
+                  {count > 0 && (
+                    <span className="absolute right-1 top-1 rounded-full bg-white/[.06] px-1 text-[8px] font-black leading-4 text-white/45">
+                      {count}
+                    </span>
+                  )}
+                  <span aria-hidden="true" className="text-[24px] leading-none">{reaction.emoji}</span>
+                  <span className={`mt-1 max-w-full truncate text-[8px] font-black uppercase tracking-[.08em] ${selected ? 'text-rcl-orange' : 'text-white/35'}`}>
+                    {reaction.shortLabel}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <div className="mt-3 flex gap-1 overflow-x-auto border-t border-white/[.06] pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {reactions.map((reaction) => (
-            <button key={reaction.type} type="button" title={reaction.label} aria-label={reaction.label} onClick={() => onReact(reaction.type)} className={`group shrink-0 rounded-xl px-2.5 py-2 text-sm transition hover:bg-white/5 ${reactionBurst === reaction.type ? 'scale-110' : ''} ${mine?.type === reaction.type ? 'bg-rcl-orange/10 ring-1 ring-rcl-orange/30' : ''}`}>
-              <span aria-hidden="true">{reaction.emoji}</span><span className={`ml-1.5 text-[9px] font-black uppercase tracking-wider ${mine?.type === reaction.type ? 'text-rcl-orange' : 'text-white/0 transition group-hover:text-white/35'}`}>{reaction.label}</span>
-            </button>
-          ))}
+        <div className="mt-2 flex items-center justify-end gap-3 px-1 text-[10px] font-bold text-white/25">
+          <button type="button" onClick={onToggleComments} className="hover:text-white">{commentCount} comments</button>
+          <span>{repostCount} repost{repostCount === 1 ? '' : 's'}</span>
         </div>
 
         <div className="mt-2 grid grid-cols-4 gap-1 border-t border-white/[.06] pt-2">
-          <button type="button" onClick={onToggleComments} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaComment /><span className="hidden sm:inline">Comment</span></button>
-          <button type="button" onClick={onToggleRepost} className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-white/[.04] ${myRepost ? 'text-rcl-blue' : 'text-white/40 hover:text-white'}`}><FaRetweet /><span className="hidden sm:inline">{myRepost ? 'Reposted' : 'Repost'}</span></button>
-          <button type="button" onClick={onShare} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaShareNodes /><span className="hidden sm:inline">Share</span></button>
-          <button type="button" onClick={onSave} className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-white/[.04] ${saved ? 'text-rcl-orange' : 'text-white/40 hover:text-white'}`}><FaBookmark /><span className="hidden sm:inline">Save</span></button>
+          <button type="button" onClick={onToggleComments} className="inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaComment className="text-sm" /><span>Comment</span></button>
+          <button type="button" onClick={onToggleRepost} className={`inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white/[.04] ${myRepost ? 'text-rcl-blue' : 'text-white/40 hover:text-white'}`}><FaRetweet className="text-sm" /><span>{myRepost ? 'Reposted' : 'Repost'}</span></button>
+          <button type="button" onClick={onShare} className="inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaShareNodes className="text-sm" /><span>Share</span></button>
+          <button type="button" onClick={onSave} className={`inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white/[.04] ${saved ? 'text-rcl-orange' : 'text-white/40 hover:text-white'}`}><FaBookmark className="text-sm" /><span>Save</span></button>
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-3">
