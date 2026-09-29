@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type EditorialAccount = 'rcl-business' | 'rva-hoops';
+type EditorialAccount = 'rcl-business' | 'rva-hoops' | 'rcl-community';
 
 type FeedItem = {
   title: string;
@@ -14,16 +14,39 @@ type FeedItem = {
 
 const queries: Record<EditorialAccount, string> = {
   'rva-hoops': [
-    'basketball Richmond Virginia',
+    '"Richmond Virginia" basketball',
     '(VCU OR "University of Richmond" OR "Virginia Union") basketball',
-    'Richmond Virginia high school basketball',
+    '(Henrico OR Chesterfield OR Petersburg OR Hanover) basketball Virginia',
+    '"Central Virginia" basketball',
+    'Richmond Virginia AAU basketball',
+    'Richmond Virginia basketball recruiting commitment transfer',
+    'Richmond Virginia gym court recreation basketball',
   ].join(' OR '),
   'rcl-business': [
     '"basketball business"',
     'basketball NIL sponsorship sports marketing',
     'basketball media business',
   ].join(' OR '),
+  'rcl-community': [
+    '"Richmond Virginia" community',
+    'Richmond Virginia recreation parks youth programs',
+    '(Henrico OR Chesterfield OR Petersburg OR Hanover) community Virginia',
+    'Richmond Virginia small business community events',
+    'Richmond Virginia schools youth programs',
+    'Richmond Virginia recreation center gym court',
+  ].join(' OR '),
 };
+
+const freshnessHours: Record<EditorialAccount, number> = {
+  'rva-hoops': 72,
+  'rcl-business': 36,
+  'rcl-community': 48,
+};
+
+const localTerms = [
+  'richmond', 'rva', '804', 'henrico', 'chesterfield', 'petersburg', 'hanover',
+  'central virginia', 'vcu', 'virginia union', 'university of richmond', 'spiders',
+];
 
 function decodeXml(value: string) {
   return value
@@ -58,10 +81,48 @@ function cleanTitle(title: string) {
   return title.replace(/\s+-\s+[^-]+$/, '').trim();
 }
 
+function localRelevance(item: FeedItem) {
+  const haystack = `${item.title} ${item.sourceName}`.toLowerCase();
+  return localTerms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0);
+}
+
+function selectCandidate(account: EditorialAccount, items: FeedItem[]) {
+  const fresh = items.filter(item => ageHours(item.publishedAt) <= freshnessHours[account]);
+  const eligible = account === 'rcl-business' ? fresh : fresh.filter(item => localRelevance(item) > 0);
+  return eligible.sort((a, b) => {
+    const relevanceDifference = localRelevance(b) - localRelevance(a);
+    if (relevanceDifference !== 0) return relevanceDifference;
+    return ageHours(a.publishedAt) - ageHours(b.publishedAt);
+  })[0];
+}
+
+function easternDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date);
+  const value = (type: 'year' | 'month' | 'day') => parts.find(part => part.type === type)?.value || '';
+  return `${value('year')}-${value('month')}-${value('day')}`;
+}
+
+function rvaHoopsFallback() {
+  const date = easternDateKey();
+  return {
+    account: 'rva-hoops' as const,
+    title: 'RVA Hoops Daily: Richmond basketball watch',
+    summary: 'No strong fresh local article cleared the RVA Hoops sourcing filter today, so the desk is staying local instead of forcing a weak national story. Check the RCL Network for upcoming games, open runs, player activity and Richmond-area basketball conversation.',
+    sourceName: 'Rich City League Network',
+    sourceUrl: `https://www.richcityhoops.com/explore?desk=rva-hoops&date=${date}`,
+    publishedAt: new Date().toISOString(),
+  };
+}
+
 function buildSummary(account: EditorialAccount, item: FeedItem) {
   const headline = cleanTitle(item.title);
   if (account === 'rva-hoops') {
-    return `RVA Hoops morning desk: ${headline}. This is a sourced Richmond-area basketball update selected from current coverage. Follow the original report below for the full details; RCL is linking to the source rather than reproducing its reporting.`;
+    return `RVA Hoops desk: ${headline}. This sourced update was selected from Richmond, Central Virginia or basketball coverage with a direct local connection. Follow the original report below for the full details; RCL is linking to the source rather than reproducing its reporting.`;
+  }
+  if (account === 'rcl-community') {
+    return `RCL Community desk: ${headline}. This sourced Richmond-area update was selected because it touches community life, recreation, youth, schools, local business, events or neighborhood resources across Richmond and surrounding localities. Follow the original source below for the full report.`;
   }
   return `RCL Business watch: ${headline}. This development is worth tracking for people building around basketball because changes in sponsorship, NIL, media, marketing and league economics can shape how local basketball organizations create value. Read the original reporting below for the underlying facts and context.`;
 }
@@ -73,7 +134,7 @@ export async function POST(request: Request) {
 
   let payload: { account?: EditorialAccount };
   try { payload = await request.json(); } catch { return NextResponse.json({ error: 'Valid JSON is required.' }, { status: 400 }); }
-  if (payload.account !== 'rcl-business' && payload.account !== 'rva-hoops') {
+  if (payload.account !== 'rcl-business' && payload.account !== 'rva-hoops' && payload.account !== 'rcl-community') {
     return NextResponse.json({ error: 'Unsupported editorial account.' }, { status: 400 });
   }
 
@@ -91,14 +152,20 @@ export async function POST(request: Request) {
       cache: 'no-store',
     });
   } catch {
+    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
     return NextResponse.json({ error: 'Current-source lookup failed.' }, { status: 503 });
   }
-  if (!response.ok) return NextResponse.json({ error: 'Current-source lookup failed.' }, { status: 503 });
+  if (!response.ok) {
+    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
+    return NextResponse.json({ error: 'Current-source lookup failed.' }, { status: 503 });
+  }
 
   const xml = await response.text();
-  const fresh = parseFeed(xml).filter(item => ageHours(item.publishedAt) <= 36);
-  const item = fresh[0];
-  if (!item) return NextResponse.json({ error: 'No sufficiently fresh sourced story was found. Nothing should publish.' }, { status: 404 });
+  const item = selectCandidate(payload.account, parseFeed(xml));
+  if (!item) {
+    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
+    return NextResponse.json({ error: 'No sufficiently fresh sourced story was found. Nothing should publish.' }, { status: 404 });
+  }
 
   return NextResponse.json({
     account: payload.account,
