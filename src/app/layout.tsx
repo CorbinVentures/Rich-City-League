@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/icons/192', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/rcl-app-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: [{ url: '/icons/180', sizes: '180x180', type: 'image/png' }],
+    apple: [{ url: '/icons/rcl-app-180.png', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,

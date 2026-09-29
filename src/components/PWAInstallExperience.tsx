@@ -150,7 +150,7 @@ export function PWAInstallExperience() {
         </button>
 
         <div className="rcl-pwa-install-heading">
-          <Image src="/icons/192" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
+          <Image src="/icons/rcl-app-192.png" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
           <div>
             <span className="rcl-pwa-kicker">RCL APP</span>
             <h2>{ios ? 'Add RCL to your Home Screen' : 'Install the RCL app'}</h2>
