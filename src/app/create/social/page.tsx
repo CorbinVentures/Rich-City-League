@@ -21,6 +21,8 @@ import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import {
+  readMediaPreview,
+  safeMediaPreviewUrl,
   SOCIAL_IMAGE_ACCEPT,
   SOCIAL_MEDIA_ACCEPT,
   SOCIAL_MAX_IMAGES,
@@ -110,9 +112,11 @@ export default function SocialCreatorPage() {
   }, []);
 
   useEffect(() => {
-    const next = files.map((file) => ({ type: file.type, url: URL.createObjectURL(file) }));
-    setPreviews(next);
-    return () => next.forEach((preview) => URL.revokeObjectURL(preview.url));
+    let cancelled = false;
+    Promise.all(files.map(async (file) => ({ type: file.type, url: await readMediaPreview(file) }))).then((next) => {
+      if (!cancelled) setPreviews(next);
+    });
+    return () => { cancelled = true; };
   }, [files]);
 
   const activeMode = modes.find((entry) => entry.key === mode) ?? modes[0];
@@ -279,7 +283,7 @@ export default function SocialCreatorPage() {
                     </button>
                   ) : (
                     <div className={`mt-2 grid gap-2 ${previews.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
-                      {previews.map((preview, index) => <div key={index} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black">{preview.type.startsWith('video/') ? <video src={preview.url} controls playsInline className="max-h-[480px] w-full object-contain" /> : <img src={preview.url} alt={`Upload preview ${index + 1}`} className="aspect-square w-full object-cover" />}<button type="button" onClick={() => removeFile(index)} aria-label={`Remove upload ${index + 1}`} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/75 text-white"><FaXmark /></button>{previews.length > 1 && <span className="absolute bottom-2 left-2 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black">{index + 1}/{previews.length}</span>}</div>)}
+                      {previews.map((preview, index) => <div key={index} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black">{preview.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(preview.url)} controls playsInline className="max-h-[480px] w-full object-contain" /> : <img src={safeMediaPreviewUrl(preview.url)} alt={`Upload preview ${index + 1}`} className="aspect-square w-full object-cover" />}<button type="button" onClick={() => removeFile(index)} aria-label={`Remove upload ${index + 1}`} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/75 text-white"><FaXmark /></button>{previews.length > 1 && <span className="absolute bottom-2 left-2 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black">{index + 1}/{previews.length}</span>}</div>)}
                       {mode !== 'clip' && files.length < SOCIAL_MAX_IMAGES && files.every((file) => socialMediaKind(file.type) === 'image') && <button type="button" onClick={() => fileInputRef.current?.click()} className="grid min-h-32 place-items-center rounded-2xl border border-dashed border-white/15 text-xs font-black uppercase tracking-wider text-white/35 hover:border-rcl-blue/35 hover:text-rcl-blue"><span><FaImage className="mx-auto mb-2 text-xl"/>Add photos</span></button>}
                     </div>
                   )}
