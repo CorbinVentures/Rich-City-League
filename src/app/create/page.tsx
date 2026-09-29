@@ -4,6 +4,7 @@ import {
   FaArrowRight,
   FaBasketball,
   FaBolt,
+  FaCamera,
   FaImage,
   FaPen,
   FaPeopleGroup,
@@ -14,19 +15,39 @@ import { Container } from '@/components/Container';
 
 export const metadata: Metadata = {
   title: 'Create in RCL | Rich City League',
-  description: 'Create a post, story, basketball highlight, pickup run, or community conversation across the RCL Network.',
+  description: 'Drop clips, post basketball moments, create stories, start runs, and contribute across the RCL Network.',
 };
 
 const createOptions = [
   {
+    label: 'Drop a Clip',
+    eyebrow: 'Build The Tape',
+    description: 'Upload a basketball video directly from your phone, add context, enter a weekly challenge, and put your game in front of the network.',
+    href: '/create/social?mode=clip',
+    action: 'Drop a clip',
+    icon: FaVideo,
+    accent: 'orange',
+    note: 'Native video posts become part of your basketball identity and can collect RCL reactions, comments, saves, shares, and discovery.',
+  },
+  {
+    label: 'Post a Moment',
+    eyebrow: 'Photos from the culture',
+    description: 'Share a game, workout, team, event, community, or behind-the-scenes moment with up to 10 photos in one post.',
+    href: '/create/social?mode=moment',
+    action: 'Post a moment',
+    icon: FaCamera,
+    accent: 'blue',
+    note: 'Photo sets are native to RCL now. Give the moment context, tag it with a challenge, and let the network react.',
+  },
+  {
     label: 'Post',
     eyebrow: 'Network conversation',
-    description: 'Start a basketball conversation, share an opinion, post an update, or add photos and video to the RCL feed.',
-    href: '/social?compose=1',
+    description: 'Start a basketball conversation, share an opinion, add a link, or combine your words with native photos or video.',
+    href: '/create/social?mode=post',
     action: 'Create a post',
     icon: FaPen,
     accent: 'blue',
-    note: 'Publishes to your Network identity and can be shared, reacted to, commented on, saved, and reposted.',
+    note: 'Posts publish to your Network identity and can be shared, reacted to, commented on, saved, and reposted.',
   },
   {
     label: 'Story',
@@ -36,17 +57,7 @@ const createOptions = [
     action: 'Open stories',
     icon: FaBolt,
     accent: 'orange',
-    note: 'Use the Add Story card at the top of Network Home. Stories expire automatically after their active window.',
-  },
-  {
-    label: 'Highlight',
-    eyebrow: 'Basketball identity',
-    description: 'Put a clip or visual basketball moment in front of the network and build the media side of your RCL identity.',
-    href: '/social?compose=1',
-    action: 'Share a highlight',
-    icon: FaVideo,
-    accent: 'blue',
-    note: 'Attach a basketball clip or photo in the Network composer. Media posts become part of your Highlights and Media identity surfaces.',
+    note: 'Use the Add Story card at the top of Network Home. Stories support native photos and video and expire automatically.',
   },
   {
     label: 'Run',
@@ -56,7 +67,7 @@ const createOptions = [
     action: 'Create a run',
     icon: FaBasketball,
     accent: 'orange',
-    note: 'Open future runs also generate an official RCL Runs activity story so the network can discover them.',
+    note: 'Open future runs also generate official RCL activity so the network can discover them.',
   },
   {
     label: 'Community post',
@@ -66,7 +77,7 @@ const createOptions = [
     action: 'Choose a community',
     icon: FaPeopleGroup,
     accent: 'blue',
-    note: 'Community conversations keep their own context instead of flooding the main Network feed.',
+    note: 'Community conversations keep their own context while still feeding the culture around the league.',
   },
 ] as const;
 
@@ -81,17 +92,28 @@ export default function CreatePage() {
               <FaPlus /> Create in RCL
             </div>
             <h1 className="mt-5 font-display text-5xl font-black uppercase leading-[.9] sm:text-6xl md:text-7xl">
-              Put something<br />
-              <span className="text-rcl-blue">into the network.</span>
+              Don&apos;t just scroll.<br />
+              <span className="text-rcl-blue">Put something on the court.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/55 md:text-lg">
-              One place to start every meaningful contribution across Rich City League. Choose what you want to create; RCL sends you into the trusted flow that already owns that content.
+              RCL is built around participation. Drop the clip, post the photos, start the conversation, organize the run, and build a basketball identity people can actually discover.
             </p>
           </div>
         </Container>
       </section>
 
       <Container maxWidth="xl" className="py-8 sm:py-10">
+        <section className="mb-8 overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(135deg,rgba(255,79,22,.11),rgba(7,21,34,.8))] p-5 sm:p-7">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-rcl-orange"><FaImage /> New · RCL Creator Studio</p>
+              <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Upload native. Get seen. Build The Tape.</h2>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-white/45">YouTube links still work, but they are no longer the main way to contribute. Upload clips and photo sets directly, enter weekly basketball challenges, and let RCL reactions and discovery do the rest.</p>
+            </div>
+            <Link href="/create/social?mode=clip" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black transition hover:brightness-110">Open Creator Studio <FaArrowRight /></Link>
+          </div>
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-2">
           {createOptions.map((option, index) => {
             const Icon = option.icon;
@@ -129,8 +151,8 @@ export default function CreatePage() {
         <section className="mt-8 grid gap-4 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,#071522,#050a10)] p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7">
           <div>
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-rcl-orange"><FaImage /> RCL creator loop</p>
-            <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Create → get discovered → build your identity → bring it back to the court.</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/40">Posts and stories create conversation. Highlights build basketball identity. Runs turn online connections into games. Communities give those relationships a place to grow.</p>
+            <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Upload → recognition → REP + identity → discovery → more basketball.</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/40">The goal is not to reward spam. Strong posts earn reactions, conversation, saves, features, challenge visibility, and a permanent place in the basketball identity you build on RCL.</p>
           </div>
           <Link href="/social" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider text-rcl-blue transition hover:border-rcl-blue/60">
             Network Home <FaArrowRight />
