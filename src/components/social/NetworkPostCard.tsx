@@ -157,7 +157,10 @@ export function NetworkPostCard({
                   {official ? (
                     <span className="rounded-full border border-rcl-blue/25 bg-rcl-blue/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-rcl-blue">✓ Official</span>
                   ) : post.author?.is_vip ? (
-                    <span className="rounded-full border border-rcl-orange/25 bg-rcl-orange/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-rcl-orange">♛ {post.author.vip_label || 'VIP'}</span>
+                    <span className="rcl-vip-chip" title="RCL VIP verified member">
+                      <span aria-hidden="true">♛</span>
+                      {post.author.vip_label || 'VIP'}
+                    </span>
                   ) : null}
                   {post.author?.role && !official && <span className="text-[10px] font-black uppercase tracking-wider text-white/25">{post.author.role}</span>}
                 </div>
