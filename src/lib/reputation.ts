@@ -11,11 +11,11 @@ export const REPUTATION_DIMENSIONS: Array<{ key: ReputationDimension; label: str
 
 const STATUS_TIERS: ReputationStatus[] = [
   { key: 'rookie', label: 'Rookie', minLevel: 1, nextLevel: 3 },
-  { key: 'prospect', label: 'Prospect', minLevel: 3, nextLevel: 6 },
-  { key: 'starter', label: 'Starter', minLevel: 6, nextLevel: 10 },
-  { key: 'all-city', label: 'All-City', minLevel: 10, nextLevel: 16 },
+  { key: 'established', label: 'Established', minLevel: 3, nextLevel: 6 },
+  { key: 'recognized', label: 'Recognized', minLevel: 6, nextLevel: 10 },
+  { key: 'influential', label: 'Influential', minLevel: 10, nextLevel: 16 },
   { key: 'elite', label: 'Elite', minLevel: 16, nextLevel: 25 },
-  { key: 'legend', label: 'Legend', minLevel: 25, nextLevel: null },
+  { key: 'icon', label: 'Icon', minLevel: 25, nextLevel: null },
 ];
 
 export function xpForLevel(level: number) {
