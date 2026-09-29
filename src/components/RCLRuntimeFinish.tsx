@@ -17,6 +17,9 @@ export function RCLRuntimeFinish() {
         --rcl-court-orange: #91cef2 !important;
         --rcl-basket-orange: #91cef2 !important;
         --rcl-orange-corporate: #91cef2 !important;
+        --rcl-vip-gold: #d8b65c;
+        --rcl-vip-gold-light: #f6dda0;
+        --rcl-vip-gold-deep: #6f5314;
       }
 
       html body {
@@ -111,15 +114,83 @@ export function RCLRuntimeFinish() {
         border-color: rgba(145,206,242,.34) !important;
       }
 
-      /* Warm color remains reserved for true VIP status only. */
-      .rcl-vip-chip {
-        border-color: rgba(245,221,160,.48) !important;
-        background: linear-gradient(135deg, rgba(83,61,15,.96), rgba(176,132,37,.92) 46%, rgba(92,68,18,.96)) !important;
-        color: #fff1c4 !important;
+      /* Warm color is reserved for true VIP status only. */
+      .rcl-vip-chip,
+      .rcl-social-identity:not(.is-system) .rcl-social-identity-copy b > i,
+      [title="RCL VIP verified member"] {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: .34rem !important;
+        flex: 0 0 auto !important;
+        margin-left: .45rem !important;
+        padding: .28rem .58rem !important;
+        border: 1px solid rgba(216,182,92,.58) !important;
+        border-radius: 999px !important;
+        background:
+          linear-gradient(115deg, rgba(61,45,10,.98), rgba(134,98,20,.96) 44%, rgba(76,56,13,.98)) !important;
+        color: #f6dda0 !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,245,210,.18),
+          0 0 0 1px rgba(216,182,92,.08),
+          0 4px 16px rgba(0,0,0,.22) !important;
+        font-style: normal !important;
+        font-size: 10px !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        letter-spacing: .13em !important;
+        text-transform: uppercase !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
       }
 
-      .rcl-vip-chip :where(svg,i) {
-        color: #f5dda0 !important;
+      .rcl-social-identity:not(.is-system) .rcl-social-identity-copy b > i::before {
+        content: '◆';
+        color: #f6dda0;
+        font-size: 8px;
+        line-height: 1;
+      }
+
+      [title="RCL VIP verified member"] > span:first-child {
+        width: 1rem !important;
+        height: 1rem !important;
+        display: grid !important;
+        place-items: center !important;
+        flex: 0 0 auto !important;
+        border: 1px solid rgba(246,221,160,.55) !important;
+        border-radius: 999px !important;
+        background: linear-gradient(145deg, #f6dda0, #c89b34) !important;
+        color: #241a05 !important;
+        font-size: 9px !important;
+        font-weight: 950 !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.35) !important;
+      }
+
+      .rcl-rep-avatar.is-vip {
+        box-shadow:
+          0 0 0 1px rgba(216,182,92,.62),
+          0 0 0 4px rgba(216,182,92,.08),
+          0 10px 28px rgba(0,0,0,.24) !important;
+      }
+
+      .rcl-social-profile.is-vip .rcl-profile-rep-ring > div {
+        border-color: rgba(216,182,92,.76) !important;
+        box-shadow: 0 0 0 3px rgba(216,182,92,.10) !important;
+      }
+
+      .rcl-social-profile.is-vip .rcl-profile-rep-ring > em {
+        border-color: #05080d !important;
+        background: linear-gradient(145deg, #f6dda0, #c89b34) !important;
+        color: #241a05 !important;
+      }
+
+      @media (max-width: 640px) {
+        .rcl-social-identity:not(.is-system) .rcl-social-identity-copy b > i,
+        [title="RCL VIP verified member"] {
+          margin-left: .32rem !important;
+          padding: .24rem .48rem !important;
+          font-size: 9px !important;
+          letter-spacing: .11em !important;
+        }
       }
     `}</style>
   );
