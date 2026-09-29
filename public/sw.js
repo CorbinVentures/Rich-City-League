@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rcl-static-v2';
+const CACHE_NAME = 'rcl-static-v3';
 const STATIC_ASSETS = [
   '/favicon.svg',
   '/icons/rcl-app-180.png',
@@ -63,15 +63,15 @@ function offlineResponse() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#03070D">
+  <meta name="theme-color" content="#05090D">
   <title>RCL · Offline</title>
   <style>
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#03070d;color:#f6f8fb;font-family:Inter,system-ui,sans-serif}
-    body{min-height:100dvh;display:grid;place-items:center;padding:24px}
-    main{width:min(440px,100%);border:1px solid rgba(21,159,255,.24);border-radius:28px;background:radial-gradient(circle at 12% 0%,rgba(21,159,255,.18),transparent 35%),radial-gradient(circle at 100% 100%,rgba(255,79,22,.13),transparent 38%),#071522;padding:28px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.45)}
-    img{width:84px;height:84px;border-radius:22px;box-shadow:0 18px 44px rgba(0,0,0,.34)}
-    small{display:block;margin-top:18px;color:#ff4f16;font-weight:900;letter-spacing:.2em}h1{margin:7px 0 0;font-size:36px;line-height:.95;text-transform:uppercase}p{margin:14px auto 0;max-width:320px;color:rgba(246,248,251,.55);font-size:14px;line-height:1.6}
-    button{margin-top:22px;min-height:48px;border:0;border-radius:14px;background:#ff4f16;padding:0 22px;color:#03070d;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#05090d;color:#f4f8fb;font-family:Inter,system-ui,sans-serif}
+    body{min-height:100dvh;display:grid;place-items:center;padding:24px;background:linear-gradient(125deg,transparent 0 42%,rgba(220,235,244,.045) 42.1%,transparent 42.35%),radial-gradient(circle at 85% 0,rgba(145,206,242,.09),transparent 30rem),#05090d}
+    main{width:min(440px,100%);border:1px solid rgba(198,227,244,.18);border-radius:16px;background:linear-gradient(145deg,rgba(199,232,251,.08),rgba(7,14,20,.96));padding:28px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(22px)}
+    img{width:84px;height:84px;border-radius:18px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+    small{display:block;margin-top:18px;color:#91cef2;font-weight:700;letter-spacing:.16em}h1{margin:8px 0 0;font-size:32px;line-height:1.08;font-weight:700}p{margin:14px auto 0;max-width:320px;color:rgba(244,248,251,.58);font-size:14px;line-height:1.6}
+    button{margin-top:22px;min-height:48px;border:1px solid rgba(213,238,251,.4);border-radius:10px;background:linear-gradient(145deg,#c7e8fb,#8fcbed);padding:0 22px;color:#071018;font-weight:700;letter-spacing:.02em}
   </style>
 </head>
 <body>

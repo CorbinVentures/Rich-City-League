@@ -11,12 +11,15 @@ const config: Config = {
       colors: {
         'rcl-black': '#03070D',
         'rcl-white': '#F6F8FB',
-        'rcl-gold': '#FF4F16',
+        // Legacy accent aliases intentionally resolve to the institutional ice-blue palette.
+        // Keep these aliases because the application has many existing utility classes using them.
+        'rcl-gold': '#91CEF2',
         'rcl-red': '#E63946',
-        'rcl-blue': '#159FFF',
+        'rcl-blue': '#91CEF2',
         'rcl-navy': '#071522',
         'rcl-teal': '#06A77D',
-        'rcl-orange': '#FF4F16',
+        'rcl-orange': '#91CEF2',
+        'rcl-vip-gold': '#D8B65C',
         'rcl-purple': '#7209B7',
         'rcl-gray': '#7D90A3',
       },

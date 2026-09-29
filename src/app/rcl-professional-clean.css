@@ -1,0 +1,438 @@
+/*
+ * RCL Professional Clean v2
+ * Final authority layer: institutional ice-blue palette, restrained typography,
+ * gold VIP status, and strict mobile width containment.
+ */
+
+:root {
+  --rcl-prof-bg: #05090d;
+  --rcl-prof-surface: #09131c;
+  --rcl-prof-surface-2: #0c1822;
+  --rcl-prof-ice: #c7e8fb;
+  --rcl-prof-ice-strong: #91cef2;
+  --rcl-prof-ice-deep: #5fa9d5;
+  --rcl-prof-border: rgba(198, 227, 244, .16);
+  --rcl-prof-border-strong: rgba(198, 227, 244, .26);
+  --rcl-prof-muted: #94a6b3;
+  --rcl-prof-vip-gold: #d8b65c;
+  --rcl-prof-vip-gold-light: #f5dda0;
+
+  /* Retire the legacy orange semantic token without breaking old class names. */
+  --rcl-orange: var(--rcl-prof-ice-strong) !important;
+  --rcl-gold: var(--rcl-prof-ice-strong) !important;
+  --rcl-court-orange: var(--rcl-prof-ice-strong) !important;
+  --rcl-basket-orange: var(--rcl-prof-ice-strong) !important;
+  --rcl-orange-corporate: var(--rcl-prof-ice-strong) !important;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip !important;
+}
+
+html body {
+  background:
+    linear-gradient(121deg, transparent 0 35%, rgba(221,236,244,.035) 35.1%, transparent 35.35%),
+    linear-gradient(64deg, transparent 0 72%, rgba(135,171,192,.028) 72.1%, transparent 72.32%),
+    radial-gradient(circle at 82% -4%, rgba(145,206,242,.065), transparent 28rem),
+    linear-gradient(180deg, #070d13 0%, #05090d 54%, #04070a 100%) !important;
+}
+
+/* ---------- No-orange enforcement ---------- */
+.text-rcl-orange,
+.text-rcl-gold,
+.rcl-kicker,
+.rcl-world .rcl-kicker,
+.rcl-world .rcl-home-content .rcl-kicker {
+  color: var(--rcl-prof-ice-strong) !important;
+}
+
+.bg-rcl-orange,
+.bg-rcl-gold {
+  background: linear-gradient(145deg, #c7e8fb, #8fcbed) !important;
+  color: #071018 !important;
+}
+
+.border-rcl-orange,
+.border-rcl-gold {
+  border-color: rgba(145,206,242,.34) !important;
+}
+
+.rcl-platform-root [class*="text-orange-"],
+.rcl-platform-root [class*="text-[#ff4f16"],
+.rcl-platform-root [class*="text-[#FF4F16"],
+.rcl-platform-root [class*="text-[#ff6b1a"],
+.rcl-platform-root [class*="text-[#f97316"],
+.rcl-platform-root [class*="text-[#f5921e"] {
+  color: var(--rcl-prof-ice-strong) !important;
+}
+
+.rcl-platform-root [class*="bg-orange-"],
+.rcl-platform-root [class*="bg-[#ff4f16"],
+.rcl-platform-root [class*="bg-[#FF4F16"],
+.rcl-platform-root [class*="bg-[#ff6b1a"],
+.rcl-platform-root [class*="bg-[#f97316"],
+.rcl-platform-root [class*="bg-[#f5921e"] {
+  background: linear-gradient(145deg, #c7e8fb, #8fcbed) !important;
+  color: #071018 !important;
+}
+
+.rcl-platform-root [class*="border-orange-"],
+.rcl-platform-root [class*="border-[#ff4f16"],
+.rcl-platform-root [class*="border-[#FF4F16"],
+.rcl-platform-root [class*="border-[#ff6b1a"],
+.rcl-platform-root [class*="border-[#f97316"],
+.rcl-platform-root [class*="border-[#f5921e"] {
+  border-color: rgba(145,206,242,.34) !important;
+}
+
+/* Arbitrary Tailwind radial gradients are common on legacy heroes. Replace orange glows. */
+.rcl-platform-root [class*="bg-[radial-gradient"][class*="255,79,22"],
+.rcl-platform-root [class*="bg-[radial-gradient"][class*="255,107,26"],
+.rcl-platform-root [class*="bg-[radial-gradient"][class*="245,146,30"],
+.rcl-platform-root [class*="bg-[radial-gradient"][class*="249,115,22"] {
+  background-image:
+    radial-gradient(circle at 82% 14%, rgba(145,206,242,.075), transparent 31%),
+    radial-gradient(circle at 12% 66%, rgba(95,169,213,.05), transparent 34%),
+    linear-gradient(135deg, #09141e, #05090d 70%) !important;
+}
+
+/* Inline visual-system legacy surfaces. */
+.rcl-hero,
+.city-hero,
+.rcl-draft-hero {
+  background:
+    radial-gradient(circle at 76% 28%, rgba(145,206,242,.075), transparent 24rem),
+    linear-gradient(145deg, #0b1722 0%, #070d14 58%, #05090d 100%) !important;
+}
+
+.rcl-draft-platform {
+  background: radial-gradient(circle at 50% 0%, rgba(145,206,242,.04), transparent 34rem), #05090d !important;
+}
+
+.city-court {
+  background: linear-gradient(145deg, rgba(145,206,242,.30), rgba(24,56,76,.72)) !important;
+}
+
+.rcl-draft-live-card,
+.rcl-module-icon,
+.rcl-draft-countdown,
+.rcl-on-clock {
+  border-color: var(--rcl-prof-border) !important;
+}
+
+.rcl-module-icon,
+.rcl-draft-countdown,
+.rcl-on-clock {
+  background: rgba(145,206,242,.055) !important;
+}
+
+.rcl-draft-primary,
+.rcl-filter-row button.active {
+  background: linear-gradient(145deg, #c7e8fb, #8fcbed) !important;
+  color: #071018 !important;
+  box-shadow: none !important;
+}
+
+.rcl-draft-module:hover,
+.rcl-draft-secondary:hover {
+  border-color: var(--rcl-prof-border-strong) !important;
+}
+
+/* ---------- Mature typography ---------- */
+.rcl-platform-root :where(h1, .rcl-display) {
+  max-width: 22ch;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: clamp(2.15rem, 5vw, 3.75rem) !important;
+  font-weight: 680 !important;
+  line-height: 1.06 !important;
+  letter-spacing: -.04em !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+}
+
+.rcl-platform-root h1 :where(.text-rcl-blue, .text-rcl-orange, .text-rcl-gold),
+.rcl-platform-root .rcl-display :where(.text-rcl-blue, .text-rcl-orange, .text-rcl-gold) {
+  color: var(--rcl-prof-ice) !important;
+  font-style: normal !important;
+  transform: none !important;
+}
+
+.rcl-platform-root h2 {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: clamp(1.35rem, 3.2vw, 2.15rem) !important;
+  font-weight: 680 !important;
+  line-height: 1.14 !important;
+  letter-spacing: -.025em !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+}
+
+.rcl-platform-root h3 {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: clamp(1.05rem, 2.2vw, 1.45rem) !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.015em !important;
+  text-transform: none !important;
+}
+
+.rcl-platform-root :where(h1,h2,h3) + p {
+  color: rgba(225,235,242,.58);
+}
+
+.rcl-platform-root :where(button, a)[class*="uppercase"]:not(.rcl-vip-chip),
+.rcl-platform-root :where(button, a)[class*="tracking-widest"]:not(.rcl-vip-chip) {
+  letter-spacing: .045em !important;
+}
+
+/* Shared hero discipline, including custom Explore / Games / Runs pages. */
+.rcl-platform-root > main > section:first-child,
+.rcl-platform-root main.rcl-games-page > section:first-child {
+  min-height: 0 !important;
+}
+
+.rcl-platform-root > main > section:first-child > :where(div, .mx-auto),
+.rcl-platform-root main.rcl-games-page > section:first-child > :where(div, .mx-auto) {
+  max-width: 100%;
+}
+
+.rcl-platform-root .rcl-cinematic-page-hero h1,
+.rcl-world .rcl-hero h1.rcl-display {
+  font-size: clamp(2.4rem, 6vw, 4.2rem) !important;
+  line-height: 1.02 !important;
+  font-weight: 680 !important;
+  text-transform: none !important;
+}
+
+.rcl-platform-root .rcl-cinematic-page-hero h1 span,
+.rcl-world .rcl-hero h1.rcl-display .text-rcl-orange {
+  color: var(--rcl-prof-ice) !important;
+  font-style: normal !important;
+  transform: none !important;
+}
+
+/* ---------- Gold VIP status ---------- */
+.rcl-vip-chip {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  min-height: 24px;
+  padding: 3px 9px !important;
+  border: 1px solid rgba(245,221,160,.48) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, rgba(83,61,15,.96), rgba(176,132,37,.92) 46%, rgba(92,68,18,.96)) !important;
+  color: #fff1c4 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,248,220,.18),
+    0 0 0 1px rgba(216,182,92,.08),
+    0 5px 18px rgba(129,94,18,.16) !important;
+  font-size: 10px !important;
+  font-weight: 780 !important;
+  letter-spacing: .055em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+.rcl-vip-chip::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -60%;
+  bottom: -60%;
+  left: -55%;
+  width: 34%;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg, transparent, rgba(255,248,220,.50), transparent);
+  animation: rcl-vip-sheen 5.5s ease-in-out infinite;
+}
+
+.rcl-vip-chip :where(svg, i) {
+  color: var(--rcl-prof-vip-gold-light) !important;
+}
+
+.rcl-rep-avatar.is-vip {
+  box-shadow:
+    0 0 0 1px rgba(216,182,92,.42),
+    0 0 0 4px rgba(216,182,92,.055),
+    0 10px 28px rgba(0,0,0,.24) !important;
+}
+
+@keyframes rcl-vip-sheen {
+  0%, 72%, 100% { left: -55%; opacity: 0; }
+  78% { opacity: .85; }
+  90% { left: 135%; opacity: 0; }
+}
+
+/* ---------- Width containment / no page-level sideways scrolling ---------- */
+.rcl-platform-root,
+.rcl-platform-root > main {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip !important;
+}
+
+.rcl-platform-root :where(main, section, article, aside, form, header, footer, nav, div, ul, ol, li) {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.rcl-platform-root :where(.grid, .flex) > * {
+  min-width: 0;
+}
+
+.rcl-platform-root :where(article, section, aside, form)[class*="rounded"],
+.rcl-platform-root :where(.rcl-card, .rcl-panel, .rcl-game-card, .rcl-news-card, .rcl-admin-module) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.rcl-platform-root :where(p, h1, h2, h3, h4, a, button, span, strong, small, td, th) {
+  overflow-wrap: anywhere;
+}
+
+.rcl-platform-root :where(img, video, canvas, iframe) {
+  max-width: 100% !important;
+}
+
+.rcl-platform-root :where(input, textarea, select, button) {
+  max-width: 100%;
+}
+
+.rcl-platform-root table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed;
+}
+
+.rcl-platform-root :where(th, td) {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+/* Game Center tabs and other segmented controls wrap instead of forcing viewport overflow. */
+.rcl-games-page [class*="overflow-x-auto"] {
+  overflow-x: visible !important;
+  flex-wrap: wrap !important;
+}
+
+.rcl-games-page table[class*="min-w-"] {
+  min-width: 0 !important;
+}
+
+.rcl-filter-row {
+  overflow-x: visible !important;
+  flex-wrap: wrap !important;
+}
+
+.rcl-draft-live-card {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* ---------- Cleaner cards and controls ---------- */
+.rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-3xl"][class*="border"],
+.rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-2xl"][class*="border"] {
+  border-color: var(--rcl-prof-border) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.028) !important;
+}
+
+.rcl-platform-root :where(button,a)[class*="rounded-full"]:not(.rcl-rep-avatar) {
+  border-radius: 9px !important;
+}
+
+.rcl-platform-root :where(button,a)[class*="bg-rcl-blue"],
+.rcl-platform-root :where(button,a)[class*="bg-rcl-orange"],
+.rcl-platform-root :where(button,a)[class*="bg-rcl-gold"] {
+  border: 1px solid rgba(225,243,252,.46) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(145deg, #c7e8fb, #8fcbed) !important;
+  color: #071018 !important;
+  box-shadow: none !important;
+  font-weight: 700 !important;
+}
+
+.rcl-platform-root :where(button,a)[class*="bg-rcl-blue"]:hover,
+.rcl-platform-root :where(button,a)[class*="bg-rcl-orange"]:hover,
+.rcl-platform-root :where(button,a)[class*="bg-rcl-gold"]:hover {
+  background: linear-gradient(145deg, #d8effb, #9ed2ee) !important;
+  transform: none !important;
+}
+
+/* The floating admin control should read as utility chrome, not a highlighted CTA. */
+a[aria-label="Open administrator control center"] {
+  border-radius: 10px !important;
+  border-color: var(--rcl-prof-border) !important;
+  background: rgba(7,17,27,.90) !important;
+  color: var(--rcl-prof-ice-strong) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.24) !important;
+}
+
+@media (max-width: 767px) {
+  .rcl-platform-root :where(h1, .rcl-display) {
+    max-width: none;
+    font-size: clamp(2rem, 9vw, 2.7rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .rcl-platform-root h2 {
+    font-size: clamp(1.3rem, 6vw, 1.75rem) !important;
+  }
+
+  .rcl-platform-root h3 {
+    font-size: clamp(1.05rem, 4.6vw, 1.35rem) !important;
+  }
+
+  .rcl-platform-root [class*="min-w-["],
+  .rcl-platform-root [class*="min-w-48"],
+  .rcl-platform-root [class*="min-w-56"],
+  .rcl-platform-root [class*="min-w-64"],
+  .rcl-platform-root [class*="min-w-72"],
+  .rcl-platform-root [class*="min-w-80"] {
+    min-width: 0 !important;
+  }
+
+  .rcl-platform-root [class*="w-screen"] {
+    width: 100% !important;
+  }
+
+  .rcl-platform-root :where(nav, div)[class*="overflow-x-auto"][class*="flex"] {
+    overflow-x: visible !important;
+    flex-wrap: wrap !important;
+  }
+
+  .rcl-games-page table th:nth-child(n+6),
+  .rcl-games-page table td:nth-child(n+6) {
+    display: none;
+  }
+
+  .rcl-games-page table th,
+  .rcl-games-page table td {
+    padding-inline: .5rem !important;
+    font-size: .75rem !important;
+  }
+
+  .rcl-draft-stat-strip {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  }
+
+  .rcl-draft-workspace {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+
+  .rcl-platform-root :where(section, article, aside, form)[class*="p-12"] {
+    padding: 1.25rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcl-vip-chip::after {
+    animation: none !important;
+    display: none;
+  }
+}
