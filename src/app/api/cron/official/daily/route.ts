@@ -15,6 +15,12 @@ type OfficialAccount =
   | 'rcl-history';
 
 type Clock = { hour: number; dateKey: string; dateLabel: string; dayIndex: number };
+type GameRow = { id: string; scheduled_at: string; home_team_id: string; away_team_id: string };
+type TeamRow = { id: string; name: string };
+type LevelRow = { profile_id: string; xp: number; level: number };
+type ProfileRow = { id: string; display_name: string | null; username: string | null; is_system_account: boolean };
+type RunRow = { title: string; court_name: string | null; location: string; starts_at: string };
+type FantasyTeamRow = { name: string; wins: number; losses: number; total_points: number | string | null };
 
 const schedule: Record<number, OfficialAccount[]> = {
   9: ['rcl'],
@@ -46,7 +52,7 @@ function easternClock(date = new Date()): Clock {
     hour12: false,
     hourCycle: 'h23',
   }).formatToParts(date);
-  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value || '';
+  const value = (type: 'year' | 'month' | 'day' | 'hour') => parts.find(part => part.type === type)?.value || '';
   const year = value('year');
   const month = value('month');
   const day = value('day');
@@ -92,26 +98,30 @@ async function buildRclPost(db: SupabaseClient, clock: Clock) {
 async function buildGameDayPost(db: SupabaseClient, clock: Clock) {
   const now = new Date();
   const next24 = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-  const { data: games = [] } = await db.from('games')
+  const gamesResult = await db.from('games')
     .select('id,scheduled_at,home_team_id,away_team_id')
     .gte('scheduled_at', now.toISOString())
     .lt('scheduled_at', next24)
     .order('scheduled_at', { ascending: true })
     .limit(3);
+  const games = (gamesResult.data || []) as GameRow[];
   if (!games.length) {
     return `🏀 RCL GAMEDAY · ${clock.dateLabel.toUpperCase()}\n\nNo official RCL games are scheduled in the next 24 hours. The Game Center stays live for the next matchup, scores and official stats.\n\n/games\n\n#RCLGameDay #RichCityLeague`;
   }
   const teamIds = [...new Set(games.flatMap(game => [game.home_team_id, game.away_team_id]).filter(Boolean))];
-  const { data: teams = [] } = teamIds.length ? await db.from('teams').select('id,name').in('id', teamIds) : { data: [] as { id: string; name: string }[] };
+  const teamsResult = teamIds.length ? await db.from('teams').select('id,name').in('id', teamIds) : null;
+  const teams = (teamsResult?.data || []) as TeamRow[];
   const names = new Map(teams.map(team => [team.id, team.name]));
   const lines = games.map(game => `${names.get(game.away_team_id) || 'Away'} at ${names.get(game.home_team_id) || 'Home'} · ${timeLabel(game.scheduled_at)}`);
   return `🏀 RCL GAMEDAY · NEXT 24 HOURS\n\n${lines.join('\n')}\n\nFollow scores, stats and official results in Game Center.\n\n/games\n\n#RCLGameDay #RichCityLeague`;
 }
 
 async function buildRepPost(db: SupabaseClient, clock: Clock) {
-  const { data: levels = [] } = await db.from('user_levels').select('profile_id,xp,level').order('xp', { ascending: false }).limit(12);
+  const levelsResult = await db.from('user_levels').select('profile_id,xp,level').order('xp', { ascending: false }).limit(12);
+  const levels = (levelsResult.data || []) as LevelRow[];
   const ids = levels.map(row => row.profile_id);
-  const { data: profiles = [] } = ids.length ? await db.from('profiles').select('id,display_name,username,is_system_account').in('id', ids) : { data: [] as { id: string; display_name: string | null; username: string | null; is_system_account: boolean }[] };
+  const profilesResult = ids.length ? await db.from('profiles').select('id,display_name,username,is_system_account').in('id', ids) : null;
+  const profiles = (profilesResult?.data || []) as ProfileRow[];
   const profileMap = new Map(profiles.map(profile => [profile.id, profile]));
   const leaders = levels.filter(row => !profileMap.get(row.profile_id)?.is_system_account).slice(0, 3);
   if (!leaders.length) {
@@ -127,13 +137,14 @@ async function buildRepPost(db: SupabaseClient, clock: Clock) {
 async function buildRunsPost(db: SupabaseClient, clock: Clock) {
   const now = new Date();
   const next72 = new Date(now.getTime() + 72 * 60 * 60 * 1000).toISOString();
-  const { data: runs = [] } = await db.from('runs')
+  const runsResult = await db.from('runs')
     .select('title,court_name,location,starts_at')
     .eq('status', 'open')
     .gte('starts_at', now.toISOString())
     .lt('starts_at', next72)
     .order('starts_at', { ascending: true })
     .limit(3);
+  const runs = (runsResult.data || []) as RunRow[];
   if (!runs.length) {
     return `🏀 RCL RUNS · ${clock.dateLabel.toUpperCase()}\n\nNo open RCL Runs are currently posted for the next 72 hours. Hosts can create a run and players can watch the board for the next session.\n\n/runs\n\n#RCLRuns #RichmondBasketball`;
   }
@@ -151,11 +162,12 @@ async function buildCommunityPost(db: SupabaseClient, clock: Clock) {
 }
 
 async function buildFantasyPost(db: SupabaseClient, clock: Clock) {
-  const { data: teams = [] } = await db.from('fantasy_teams')
+  const teamsResult = await db.from('fantasy_teams')
     .select('name,wins,losses,total_points')
     .order('wins', { ascending: false })
     .order('total_points', { ascending: false })
     .limit(3);
+  const teams = (teamsResult.data || []) as FantasyTeamRow[];
   if (!teams.length) {
     return `🏆 RCL FANTASY · ${clock.dateLabel.toUpperCase()}\n\nThe Fantasy hub is ready for league competition. Real RCL player stats power fantasy scoring, matchups and standings.\n\n/fantasy\n\n#RCLFantasy #RichCityLeague`;
   }
