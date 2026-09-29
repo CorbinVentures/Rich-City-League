@@ -7,6 +7,7 @@ import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
+import { PWAAppAlertsCard } from '@/components/PWAAppAlertsCard';
 
 type Notification = { id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; actor?: SocialIdentityAuthor | null };
 
@@ -37,7 +38,14 @@ export default function NotificationsPage() {
   }, [supabase, user]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { if (!supabase || !user) return; const channel = supabase.channel('rcl-notifications-' + user.id).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'recipient_id=eq.' + user.id }, () => void load()).subscribe(); return () => { void supabase.removeChannel(channel); }; }, [load, supabase, user]);
+  useEffect(() => {
+    if (!supabase || !user) return;
+    const channel = supabase
+      .channel('rcl-notifications-' + user.id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: 'recipient_id=eq.' + user.id }, () => void load())
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [load, supabase, user]);
 
   const repTypes = new Set(['rep_level','rep_status','rep_milestone']);
   const unread = items.filter(item => !item.read_at).length;
@@ -45,8 +53,10 @@ export default function NotificationsPage() {
   const read = async (id: string) => {
     if (!supabase || !user) return;
     const now = new Date().toISOString();
-    await supabase.from('notifications').update({ read_at: now } as never).eq('id', id).eq('recipient_id', user.id);
+    const { error: readError } = await supabase.from('notifications').update({ read_at: now } as never).eq('id', id).eq('recipient_id', user.id);
+    if (readError) return;
     setItems(current => current.map(item => item.id === id ? { ...item, read_at: now } : item));
+    window.dispatchEvent(new Event('rcl:notification-state-changed'));
   };
 
   const markAllRead = async () => {
@@ -55,7 +65,10 @@ export default function NotificationsPage() {
     const now = new Date().toISOString();
     const { error: updateError } = await supabase.from('notifications').update({ read_at: now } as never).eq('recipient_id', user.id).is('read_at', null);
     if (updateError) setError('We could not mark every notification as read.');
-    else setItems(current => current.map(item => item.read_at ? item : { ...item, read_at: now }));
+    else {
+      setItems(current => current.map(item => item.read_at ? item : { ...item, read_at: now }));
+      window.dispatchEvent(new Event('rcl:notification-state-changed'));
+    }
     setBusy(false);
   };
 
@@ -71,6 +84,7 @@ export default function NotificationsPage() {
     />
 
     <Container maxWidth="lg" className="py-8 sm:py-12">
+      <PWAAppAlertsCard />
       {error && <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200"><p>{error}</p><button type="button" onClick={() => void load()} className="rounded-lg border border-red-300/20 px-3 py-2 text-xs font-black uppercase">Try again</button></div>}
 
       {!user && !authLoading ? <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-10 text-center"><FaBell className="mx-auto text-3xl text-rcl-blue"/><h2 className="mt-4 font-display text-2xl font-black uppercase">Sign in to see your alerts</h2><p className="mt-2 text-sm text-white/40">Notifications are tied to your RCL account.</p><a href="/auth/sign-in?next=/notifications" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Sign in <FaArrowRight/></a></div> : <section className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/45">

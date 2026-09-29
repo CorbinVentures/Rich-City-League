@@ -26,6 +26,7 @@ import { MemberSocialNavigation } from '@/components/MemberSocialNavigation';
 import { PlatformChrome } from '@/components/PlatformChrome';
 import { BadgeUnlockCutscene } from '@/components/BadgeUnlockCutscene';
 import { PWAInstallExperience } from '@/components/PWAInstallExperience';
+import { PWANotificationBridge } from '@/components/PWANotificationBridge';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityhoops.com'),
@@ -41,9 +42,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/icons/rcl-app-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [{ url: '/icons/rcl-app-180.png', sizes: '180x180', type: 'image/png' }],
+    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,
@@ -65,5 +66,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><PWANotificationBridge /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
 }

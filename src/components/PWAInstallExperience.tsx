@@ -150,7 +150,7 @@ export function PWAInstallExperience() {
         </button>
 
         <div className="rcl-pwa-install-heading">
-          <Image src="/icons/rcl-app-192.png" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
+          <Image src="/icon" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
           <div>
             <span className="rcl-pwa-kicker">RCL APP</span>
             <h2>{ios ? 'Add RCL to your Home Screen' : 'Install the RCL app'}</h2>
@@ -160,7 +160,7 @@ export function PWAInstallExperience() {
         {!showIOSGuide ? (
           <>
             <p className="rcl-pwa-copy">
-              Launch Rich City League full-screen with app-style navigation and faster return access—without the browser clutter.
+              Launch Rich City League full-screen with app-style navigation, faster return access, push alerts, and Home Screen notification badges.
             </p>
             <div className="rcl-pwa-actions">
               <button type="button" onClick={() => void install()} className="rcl-pwa-primary">
@@ -176,7 +176,7 @@ export function PWAInstallExperience() {
             <ol>
               <li><span>1</span><b>Tap Share</b><small>Use the square-with-arrow icon in your browser toolbar.</small></li>
               <li><span>2</span><b>Choose “Add to Home Screen”</b><small>Scroll the share sheet if the option is lower down.</small></li>
-              <li><span>3</span><b>Tap Add</b><small>RCL will launch from your Home Screen in standalone app mode.</small></li>
+              <li><span>3</span><b>Tap Add</b><small>Open RCL from the new icon, then enable alerts from Notifications to turn on push and the red unread badge.</small></li>
             </ol>
             <div className="rcl-pwa-actions">
               <button type="button" onClick={() => setShowIOSGuide(false)} className="rcl-pwa-primary">
