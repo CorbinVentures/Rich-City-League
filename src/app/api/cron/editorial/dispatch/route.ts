@@ -14,6 +14,22 @@ function easternHour(date = new Date()) {
   return Number(parts.find(part => part.type === 'hour')?.value ?? -1);
 }
 
+function editorialOrigin() {
+  const configured = process.env.EDITORIAL_SITE_ORIGIN?.trim().replace(/\/+$/, '');
+  if (configured) {
+    try {
+      const url = new URL(configured);
+      if (/^https?:$/.test(url.protocol)) return url.origin;
+    } catch {
+      // Fall through to the canonical production host.
+    }
+  }
+  // Do not derive this from request.url. Vercel Cron can execute on a protected
+  // deployment hostname, which makes same-deployment server-to-server fetches
+  // fail with Vercel Authentication before they ever reach these routes.
+  return 'https://www.richcityhoops.com';
+}
+
 export async function GET(request: Request) {
   const bearer = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
   const secret = process.env.CRON_SECRET?.trim();
@@ -23,7 +39,7 @@ export async function GET(request: Request) {
   const accounts: EditorialAccount[] = [];
   // RVA Hoops morning desk. Vercel cron runs in UTC; timezone conversion keeps DST correct.
   if (hour === 8) accounts.push('rva-hoops');
-  // RCL Business daily feature follows later in the morning.
+  // RCL Business publishes throughout the day so the business desk stays active.
   if (hour === 10 || hour === 12 || hour === 14 || hour === 17) accounts.push('rcl-business');
 
   if (!accounts.length) {
@@ -33,7 +49,7 @@ export async function GET(request: Request) {
   // Research is deliberately delegated to a configured server-side provider.
   // The provider must return sourced candidates; the publisher independently
   // requires source attribution and deduplicates before anything goes live.
-  const origin = new URL(request.url).origin;
+  const origin = editorialOrigin();
   const configuredResearchUrl = process.env.EDITORIAL_RESEARCH_ENDPOINT?.trim();
   const researchUrl = configuredResearchUrl || `${origin}/api/cron/editorial/research`;
   // The built-in research route authenticates with CRON_SECRET. Only use a
