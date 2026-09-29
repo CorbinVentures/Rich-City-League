@@ -1,6 +1,5 @@
--- Require an explicit legal-acceptance flag when completing social OAuth onboarding.
--- The first social-auth migration creates the RPC with eight arguments; replace
--- it immediately with the consent-aware signature before enabling providers.
+-- Require explicit legal acceptance when completing social OAuth onboarding and
+-- prevent clients from bypassing that flow by directly editing protected fields.
 
 drop function if exists public.complete_social_onboarding(text,text,text,text,text,date,text,text);
 
@@ -62,6 +61,10 @@ begin
     else 'player'::public.app_role
   end;
 
+  -- The trigger below allows these protected fields only when this security-
+  -- definer RPC marks the current transaction as the approved onboarding path.
+  perform set_config('rcl.social_onboarding_update', '1', true);
+
   update public.profiles
   set
     username = clean_username,
@@ -105,3 +108,30 @@ $$;
 
 revoke all on function public.complete_social_onboarding(text,text,text,text,text,date,boolean,text,text) from public, anon;
 grant execute on function public.complete_social_onboarding(text,text,text,text,text,date,boolean,text,text) to authenticated;
+
+create or replace function public.guard_social_onboarding_fields()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if auth.uid() = old.id
+    and coalesce(current_setting('rcl.social_onboarding_update', true), '') <> '1'
+    and (
+      new.date_of_birth is distinct from old.date_of_birth
+      or new.legal_terms_accepted_at is distinct from old.legal_terms_accepted_at
+      or new.privacy_policy_acknowledged_at is distinct from old.privacy_policy_acknowledged_at
+      or new.onboarding_complete is distinct from old.onboarding_complete
+    )
+  then
+    raise exception 'Protected onboarding fields must be updated through the RCL onboarding flow';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists guard_social_onboarding_fields on public.profiles;
+create trigger guard_social_onboarding_fields
+before update on public.profiles
+for each row execute function public.guard_social_onboarding_fields();
