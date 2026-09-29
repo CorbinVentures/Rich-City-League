@@ -14,6 +14,7 @@ import './rcl-pwa.css';
 import './rcl-executive-marble.css';
 import './rcl-executive-alignment.css';
 import './rcl-professional-clean.css';
+import './rcl-professional-finish.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
