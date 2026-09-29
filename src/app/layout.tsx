@@ -11,6 +11,7 @@ import './rcl-scorebook-mobile.css';
 import './rcl-member-shell.css';
 import './rcl-social-activity.css';
 import './rcl-pwa.css';
+import './rcl-executive-marble.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
@@ -55,7 +56,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#03070D',
+  themeColor: '#05090D',
   colorScheme: 'dark',
 };
 
