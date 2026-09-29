@@ -16,6 +16,7 @@ import './rcl-executive-alignment.css';
 import './rcl-professional-clean.css';
 import './rcl-professional-finish.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
+import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
 import { AuthRecoveryRedirect } from '@/components/AuthRecoveryRedirect';
 import { SocialCreateIntent } from '@/components/SocialCreateIntent';
@@ -64,5 +65,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><PWAInstallExperience /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><MemberSocialNavigation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@type':'SportsOrganization',name:'Rich City League',alternateName:'RCL',url:'https://richcityhoops.com',foundingDate:'2011',sport:'Basketball',description:'Richmond-born basketball league and year-round basketball community.',areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'} }) }} /></body></html>;
 }

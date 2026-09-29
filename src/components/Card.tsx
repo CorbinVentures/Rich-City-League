@@ -13,7 +13,7 @@ export function Card({ children, hoverable = false, className, ...props }: CardP
     <div
       className={clsx(
         'rcl-panel rounded-2xl border border-white/10 p-6 text-white',
-        hoverable && 'hover:-translate-y-1 hover:border-rcl-orange/50 hover:shadow-[0_18px_50px_rgba(255,79,22,.12)] cursor-pointer',
+        hoverable && 'cursor-pointer hover:-translate-y-1 hover:border-rcl-blue/40 hover:shadow-[0_18px_50px_rgba(145,206,242,.08)]',
         className
       )}
       {...props}
@@ -29,7 +29,7 @@ interface CardHeaderProps {
 }
 
 export function CardHeader({ children, className }: CardHeaderProps) {
-  return <div className={clsx('mb-4 pb-4 border-b border-white/10', className)}>{children}</div>;
+  return <div className={clsx('mb-4 border-b border-white/10 pb-4', className)}>{children}</div>;
 }
 
 interface CardBodyProps {
@@ -47,5 +47,5 @@ interface CardFooterProps {
 }
 
 export function CardFooter({ children, className }: CardFooterProps) {
-  return <div className={clsx('mt-4 pt-4 border-t border-white/10 flex gap-2', className)}>{children}</div>;
+  return <div className={clsx('mt-4 flex gap-2 border-t border-white/10 pt-4', className)}>{children}</div>;
 }

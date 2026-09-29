@@ -52,20 +52,19 @@ export default async function ExploreRCLPage(){
   const trends = getTrends(recentPosts.map(post=>post.body));
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <section className="relative overflow-hidden border-b border-rcl-blue/20 bg-[linear-gradient(120deg,#071522_0%,#03070d_60%,#07111b_100%)]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_15%,rgba(255,79,22,.16),transparent_30%),radial-gradient(circle_at_12%_48%,rgba(21,159,255,.16),transparent_32%)]" />
-      <Container maxWidth="xl" className="relative py-12 md:py-16">
-        <div className="max-w-4xl">
-          <p className="text-xs font-black uppercase tracking-[.3em] text-rcl-orange">RCL Network · Discover</p>
-          <h1 className="mt-4 font-display text-5xl font-black uppercase leading-[.9] sm:text-6xl md:text-7xl">Find your place<br/><span className="text-rcl-blue">in the 804.</span></h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/55 md:text-lg">People, runs, communities, league moments and reputation—one live discovery surface built around Richmond basketball.</p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/search" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-sm font-black uppercase text-black"><FaMagnifyingGlass/> Search RCL</Link>
-            <Link href="/social" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/35 bg-rcl-blue/10 px-5 text-sm font-black uppercase"><FaBolt/> Network home</Link>
-          </div>
+    <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
+      <Container maxWidth="xl" className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Network</p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Explore RCL</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">People, runs, communities, league activity and reputation across Richmond basketball.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/search" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-semibold text-[#071018]"><FaMagnifyingGlass/> Search</Link>
+          <Link href="/social" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/[.06] px-4 text-xs font-semibold text-rcl-blue"><FaBolt/> Social</Link>
         </div>
       </Container>
-    </section>
+    </header>
 
     <Container maxWidth="xl" className="py-8 md:py-10">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,.55fr)]">
@@ -77,17 +76,17 @@ export default async function ExploreRCLPage(){
 
           <section>
             <SectionHeading eyebrow="Reputation" title="Top REP in the city" detail="Recognition built through activity, contribution and RCL participation." actionHref="/leaderboards" actionLabel="Leaderboards" />
-            {topRep.length ? <div className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 divide-y divide-white/10">{topRep.map((person,index)=><Link key={person.id} href={`/social/profile/${person.id}`} className="flex items-center gap-3 p-4 transition hover:bg-white/[.03]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-rcl-orange/25 text-xs font-black text-rcl-orange">#{index+1}</span><SocialIdentity author={person} link={false}/><span className="ml-auto hidden text-xs font-black uppercase tracking-wider text-white/25 sm:block">{formatRep(person.rep??0)} REP</span></Link>)}</div> : <EmptyState copy="REP leaders will appear as members build activity." />}
+            {topRep.length ? <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/65">{topRep.map((person,index)=><Link key={person.id} href={`/social/profile/${person.id}`} className="flex items-center gap-3 p-4 transition hover:bg-white/[.03]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-rcl-blue/25 text-xs font-semibold text-rcl-blue">#{index+1}</span><SocialIdentity author={person} link={false}/><span className="ml-auto hidden text-xs font-semibold uppercase tracking-wider text-white/25 sm:block">{formatRep(person.rep??0)} REP</span></Link>)}</div> : <EmptyState copy="REP leaders will appear as members build activity." />}
           </section>
 
           <section>
             <SectionHeading eyebrow="Community" title="Find your people" detail="Join groups built around teams, runs, basketball culture and shared interests." actionHref="/communities" actionLabel="All communities" />
-            {communities.length ? <div className="grid gap-3 md:grid-cols-2">{communities.map(community=><Link key={community.id} href="/communities" className="group flex min-h-32 items-center gap-4 rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:border-rcl-blue/45"><span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-rcl-blue/10 text-xl text-rcl-blue">{community.logo_url?<img src={community.logo_url} alt="" className="h-full w-full object-cover"/>:<FaPeopleGroup/>}</span><span className="min-w-0 flex-1"><small className="text-xs font-black uppercase tracking-[.16em] text-rcl-orange">{community.community_type || 'Community'}</small><b className="mt-1 block font-display text-xl uppercase">{community.name}</b><span className="mt-1 block line-clamp-2 text-xs leading-5 text-white/40">{community.description || 'Connect with this RCL basketball community.'}</span></span><FaArrowRight className="text-white/20 transition group-hover:text-rcl-orange"/></Link>)}</div> : <EmptyState copy="Public RCL communities will appear here." />}
+            {communities.length ? <div className="grid gap-3 md:grid-cols-2">{communities.map(community=><Link key={community.id} href="/communities" className="group flex min-h-32 items-center gap-4 rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:border-rcl-blue/45"><span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-rcl-blue/10 text-xl text-rcl-blue">{community.logo_url?<img src={community.logo_url} alt="" className="h-full w-full object-cover"/>:<FaPeopleGroup/>}</span><span className="min-w-0 flex-1"><small className="text-xs font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{community.community_type || 'Community'}</small><b className="mt-1 block font-display text-xl">{community.name}</b><span className="mt-1 block line-clamp-2 text-xs leading-5 text-white/40">{community.description || 'Connect with this RCL basketball community.'}</span></span><FaArrowRight className="text-white/20 transition group-hover:text-rcl-blue"/></Link>)}</div> : <EmptyState copy="Public RCL communities will appear here." />}
           </section>
 
           <section>
             <SectionHeading eyebrow="Get on court" title="Upcoming runs" detail="Turn online connections into real basketball." actionHref="/runs" actionLabel="All runs" />
-            {runs.length ? <div className="grid gap-3 md:grid-cols-2">{runs.map(run=><Link href="/runs" key={run.id} className="rounded-2xl border border-rcl-orange/15 bg-rcl-orange/[.035] p-5 transition hover:border-rcl-orange/40"><div className="flex items-start justify-between gap-4"><div><small className="text-xs font-black uppercase tracking-[.16em] text-rcl-orange">{run.game_format || 'RCL Run'} · {run.skill_level || 'Open'}</small><h3 className="mt-2 font-display text-2xl font-black uppercase">{run.title}</h3></div><FaBasketball className="text-2xl text-rcl-orange/60"/></div><div className="mt-4 flex flex-wrap gap-3 text-xs font-bold text-white/40"><span>{formatDate(run.starts_at)}</span>{(run.court_name||run.location)&&<span className="inline-flex items-center gap-1"><FaLocationDot/>{run.court_name||run.location}</span>}<span>{run.capacity ?? 0}/{run.max_players ?? '—'} joined</span></div></Link>)}</div> : <EmptyState copy="Open pickup runs will appear here when they are scheduled." />}
+            {runs.length ? <div className="grid gap-3 md:grid-cols-2">{runs.map(run=><Link href="/runs" key={run.id} className="rounded-2xl border border-rcl-blue/15 bg-rcl-blue/[.025] p-5 transition hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-4"><div><small className="text-xs font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{run.game_format || 'RCL Run'} · {run.skill_level || 'Open'}</small><h3 className="mt-2 font-display text-2xl font-semibold">{run.title}</h3></div><FaBasketball className="text-2xl text-rcl-blue/60"/></div><div className="mt-4 flex flex-wrap gap-3 text-xs font-bold text-white/40"><span>{formatDate(run.starts_at)}</span>{(run.court_name||run.location)&&<span className="inline-flex items-center gap-1"><FaLocationDot/>{run.court_name||run.location}</span>}<span>{run.capacity ?? 0}/{run.max_players ?? '—'} joined</span></div></Link>)}</div> : <EmptyState copy="Open pickup runs will appear here when they are scheduled." />}
           </section>
         </div>
 
@@ -97,7 +96,7 @@ export default async function ExploreRCLPage(){
           </SideCard>
 
           <SideCard title="Official activity" icon={<FaBasketball/>}>
-            {official.length ? <div className="space-y-3">{official.slice(0,5).map(post=><Link key={post.id} href={`/social?post=${post.id}`} className="block rounded-xl border border-rcl-blue/10 bg-rcl-blue/[.025] p-3 transition hover:border-rcl-blue/35"><small className="font-black uppercase tracking-[.15em] text-rcl-blue">{formatAutomation(post.automation_type)}</small><p className="mt-2 line-clamp-3 text-xs leading-5 text-white/50">{cleanActivity(post.body)}</p></Link>)}</div> : <p className="text-sm leading-6 text-white/35">GameDay, REP and other official RCL moments will surface here.</p>}
+            {official.length ? <div className="space-y-3">{official.slice(0,5).map(post=><Link key={post.id} href={`/social?post=${post.id}`} className="block rounded-xl border border-rcl-blue/10 bg-rcl-blue/[.025] p-3 transition hover:border-rcl-blue/35"><small className="font-semibold uppercase tracking-[.12em] text-rcl-blue">{formatAutomation(post.automation_type)}</small><p className="mt-2 line-clamp-3 text-xs leading-5 text-white/50">{cleanActivity(post.body)}</p></Link>)}</div> : <p className="text-sm leading-6 text-white/35">GameDay, REP and other official RCL moments will surface here.</p>}
           </SideCard>
 
           <SideCard title="New to the network" icon={<FaPeopleGroup/>}>
@@ -107,23 +106,23 @@ export default async function ExploreRCLPage(){
       </div>
 
       <section className="mt-12 border-t border-white/10 pt-10">
-        <div className="mb-6"><p className="text-xs font-black uppercase tracking-[.24em] text-white/25">More RCL</p><h2 className="mt-2 font-display text-3xl font-black uppercase">The network goes deeper</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">League tools and identity features remain available without competing with discovery for the top of the experience.</p></div>
-        <div className="grid gap-4 lg:grid-cols-3">{RCL_MEMBER_NAV_GROUPS.map(group=><section key={group.label} className="rounded-2xl border border-rcl-blue/12 bg-[#071522]/45 p-5"><div className="mb-4"><h3 className="font-display text-xl font-black uppercase">{group.label}</h3><p className="mt-1 text-xs leading-5 text-white/35">{group.description}</p></div><div className="space-y-1">{group.items.slice(0,6).map(item=>{const Icon=item.icon;return <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-white/55 transition hover:bg-white/[.035] hover:text-white"><Icon className="text-rcl-blue"/><span>{item.label}</span><FaArrowRight className="ml-auto text-xs text-white/15"/></Link>})}</div></section>)}</div>
+        <div className="mb-6"><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/25">More RCL</p><h2 className="mt-2 font-display text-3xl font-semibold">The network goes deeper</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">League tools and identity features remain available without competing with discovery for the top of the experience.</p></div>
+        <div className="grid gap-4 lg:grid-cols-3">{RCL_MEMBER_NAV_GROUPS.map(group=><section key={group.label} className="rounded-2xl border border-rcl-blue/12 bg-[#071522]/45 p-5"><div className="mb-4"><h3 className="font-display text-xl font-semibold">{group.label}</h3><p className="mt-1 text-xs leading-5 text-white/35">{group.description}</p></div><div className="space-y-1">{group.items.slice(0,6).map(item=>{const Icon=item.icon;return <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-white/55 transition hover:bg-white/[.035] hover:text-white"><Icon className="text-rcl-blue"/><span>{item.label}</span><FaArrowRight className="ml-auto text-xs text-white/15"/></Link>})}</div></section>)}</div>
       </section>
     </Container>
   </main>;
 }
 
 function SectionHeading({eyebrow,title,detail,actionHref,actionLabel}:{eyebrow:string;title:string;detail:string;actionHref?:string;actionLabel?:string}){
-  return <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-orange">{eyebrow}</p><h2 className="mt-1 font-display text-2xl font-black uppercase sm:text-3xl">{title}</h2><p className="mt-1 text-sm text-white/40">{detail}</p></div>{actionHref&&<Link href={actionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">{actionLabel}<FaArrowRight/></Link>}</div>;
+  return <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">{eyebrow}</p><h2 className="mt-1 font-display text-2xl font-semibold sm:text-3xl">{title}</h2><p className="mt-1 text-sm text-white/40">{detail}</p></div>{actionHref&&<Link href={actionHref} className="inline-flex items-center gap-2 text-xs font-semibold text-rcl-blue">{actionLabel}<FaArrowRight/></Link>}</div>;
 }
 
 function PersonCard({person,index}:{person:DiscoverProfile;index:number}){
-  return <Link href={`/social/profile/${person.id}`} className="group rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:-translate-y-0.5 hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-3"><SocialIdentity author={person} link={false}/><span className="text-xs font-black text-rcl-orange">0{index+1}</span></div><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs font-black uppercase tracking-wider"><span className="text-white/30">{person.role || 'member'}</span><span className="text-rcl-blue">{person.activity} posts · {formatRep(person.rep??0)} REP</span></div></Link>;
+  return <Link href={`/social/profile/${person.id}`} className="group rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-4 transition hover:-translate-y-0.5 hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-3"><SocialIdentity author={person} link={false}/><span className="text-xs font-semibold text-rcl-blue">0{index+1}</span></div><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs font-semibold uppercase tracking-wider"><span className="text-white/30">{person.role || 'member'}</span><span className="text-rcl-blue">{person.activity} posts · {formatRep(person.rep??0)} REP</span></div></Link>;
 }
 
 function SideCard({title,icon,children}:{title:string;icon:React.ReactNode;children:React.ReactNode}){
-  return <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 p-4"><div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-display text-lg font-black uppercase">{title}</h3><span className="text-rcl-orange">{icon}</span></div>{children}</section>;
+  return <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 p-4"><div className="mb-3 flex items-center justify-between gap-3"><h3 className="font-display text-lg font-semibold">{title}</h3><span className="text-rcl-blue">{icon}</span></div>{children}</section>;
 }
 
 function EmptyState({copy}:{copy:string}){return <div className="rounded-2xl border border-dashed border-rcl-blue/15 bg-rcl-blue/[.02] p-6 text-sm text-white/35">{copy}</div>}

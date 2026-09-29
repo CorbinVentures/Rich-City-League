@@ -11,12 +11,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseStyles = 'min-h-11 font-bold uppercase tracking-[.08em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
+const baseStyles = 'min-h-11 font-semibold tracking-[.02em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
 
 const variants = {
-  primary: 'bg-rcl-orange text-rcl-black hover:bg-rcl-orange/90 disabled:opacity-50',
-  secondary: 'bg-rcl-blue text-white hover:bg-rcl-blue/90 disabled:opacity-50',
-  outline: 'border border-white/15 bg-white/[.025] text-white hover:border-rcl-orange hover:text-rcl-orange disabled:opacity-50',
+  primary: 'bg-rcl-blue text-[#071018] hover:brightness-105 disabled:opacity-50',
+  secondary: 'border border-rcl-blue/25 bg-rcl-blue/10 text-rcl-blue hover:bg-rcl-blue/15 disabled:opacity-50',
+  outline: 'border border-white/15 bg-white/[.025] text-white hover:border-rcl-blue/35 hover:text-rcl-blue disabled:opacity-50',
   ghost: 'text-rcl-muted hover:bg-white/[.04] hover:text-white disabled:opacity-50',
 };
 
@@ -37,7 +37,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={clsx(baseStyles, variants[variant], sizes[size], variant === 'primary' && 'shadow-[0_12px_35px_rgba(255,79,22,.18)]', className)}
+      className={clsx(baseStyles, variants[variant], sizes[size], variant === 'primary' && 'shadow-[0_10px_30px_rgba(145,206,242,.08)]', className)}
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
       {...props}
@@ -60,7 +60,7 @@ export function LinkButton({ href, variant = 'primary', size = 'md', children, c
   return (
     <Link
       href={href}
-      className={clsx(baseStyles, variants[variant], sizes[size], variant === 'primary' && 'shadow-[0_12px_35px_rgba(255,79,22,.18)]', className)}
+      className={clsx(baseStyles, variants[variant], sizes[size], variant === 'primary' && 'shadow-[0_10px_30px_rgba(145,206,242,.08)]', className)}
     >
       {children}
     </Link>
