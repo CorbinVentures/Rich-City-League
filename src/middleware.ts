@@ -18,7 +18,11 @@ function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inact
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const metadataAsset = pathname === '/opengraph-image' || pathname === '/twitter-image' || pathname === '/icon' || pathname === '/apple-icon';
-  const publicAccess = pathname === '/member-access' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/') || metadataAsset;
+  const pwaAsset = pathname === '/manifest.webmanifest'
+    || pathname === '/sw.js'
+    || pathname === '/favicon.svg'
+    || pathname.startsWith('/icons/');
+  const publicAccess = pathname === '/member-access' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/') || metadataAsset || pwaAsset;
   const config = getSupabaseConfig();
 
   // RCL is a member platform. Authentication must be available before protected

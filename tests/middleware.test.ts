@@ -136,9 +136,25 @@ describe('member platform middleware', () => {
     expect(response.status).toBe(200);
   });
 
+  it.each(['/manifest.webmanifest', '/sw.js', '/favicon.svg', '/icons/180', '/icons/192', '/icons/512', '/icons/512-maskable'])(
+    'keeps PWA asset %s reachable anonymously',
+    async (pathname) => {
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('location')).toBeNull();
+    },
+  );
+
   it('keeps sign-in reachable when authentication configuration is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     const response = await middleware(new NextRequest('http://localhost/auth/sign-in'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('keeps PWA assets reachable when authentication configuration is missing', async () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const response = await middleware(new NextRequest('http://localhost/manifest.webmanifest'));
     expect(response.status).toBe(200);
     expect(response.headers.get('location')).toBeNull();
   });

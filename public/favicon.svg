@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="15" fill="#03070D"/>
+  <rect x="2" y="2" width="60" height="60" rx="13" fill="none" stroke="#159FFF" stroke-width="4"/>
+  <circle cx="32" cy="32" r="20" fill="#FF4F16"/>
+  <path d="M12 32h40M32 12v40M17 20c9 5 13 13 13 24M47 20c-9 5-13 13-13 24" fill="none" stroke="#03070D" stroke-width="3.5" stroke-linecap="round"/>
+  <rect x="13" y="25" width="38" height="14" rx="5" fill="#071522"/>
+  <text x="32" y="35.3" text-anchor="middle" fill="#F6F8FB" font-size="12" font-weight="900" font-family="Arial,Helvetica,sans-serif">RCL</text>
+</svg>
