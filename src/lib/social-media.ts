@@ -49,8 +49,8 @@ export function socialMediaCollectionError(files: ArrayLike<{ type: string; size
   }
 
   const kinds = new Set(items.map((file) => socialMediaKind(file.type)));
-  if (kinds.has('video') && items.length > 1) return 'Upload one video clip at a time. You can add a caption and link with it.';
   if (kinds.size > 1) return 'Choose either one video clip or a set of photos for each post.';
+  if (kinds.has('video') && items.length > 1) return 'Upload one video clip at a time. You can add a caption and link with it.';
   if (kinds.has('image') && items.length > SOCIAL_MAX_IMAGES) return `Choose up to ${SOCIAL_MAX_IMAGES} photos per post.`;
   return null;
 }
