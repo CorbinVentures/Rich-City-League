@@ -8,6 +8,7 @@ import {
   FaRetweet,
   FaShareNodes,
   FaTrash,
+  FaVideo,
 } from 'react-icons/fa6';
 import { RichPostBody } from '@/components/SocialRichContent';
 import { SocialIdentity } from '@/components/SocialIdentity';
@@ -72,12 +73,15 @@ export type NetworkFeedItem = {
 
 const reactions = [
   { type: 'bucket', emoji: '🏀', label: 'Bucket' },
-  { type: 'heat', emoji: '🔥', label: 'Heat' },
+  { type: 'heat', emoji: '🔥', label: 'Heat Check' },
   { type: 'strong', emoji: '💪', label: 'Tough' },
-  { type: 'locked', emoji: '🔒', label: 'Locked' },
+  { type: 'locked', emoji: '🔒', label: 'Locked Up' },
   { type: 'money', emoji: '🎯', label: 'Pure' },
-  { type: 'watch', emoji: '👀', label: 'Seen' },
-  { type: 'champ', emoji: '🏆', label: 'Champ' },
+  { type: 'watch', emoji: '👀', label: 'I See You' },
+  { type: 'king', emoji: '👏', label: 'Salute' },
+  { type: 'certified', emoji: '🧊', label: 'Cold Blooded' },
+  { type: 'highlight', emoji: '😂', label: "That's Crazy" },
+  { type: 'champ', emoji: '🏆', label: 'Championship' },
 ];
 
 export function NetworkPostCard({
@@ -123,6 +127,9 @@ export function NetworkPostCard({
   const repostCount = post.reposts?.length ?? 0;
   const profileHref = `/social/profile/${post.author_id}`;
   const official = Boolean(post.author?.is_system_account);
+  const mediaUrls = (post.media_urls ?? []).filter(Boolean);
+  const videoPost = mediaUrls.length > 0 && isVideoUrl(mediaUrls[0]);
+  const mediaLabel = videoPost ? 'RCL Clip' : mediaUrls.length ? 'RCL Moment' : null;
 
   return (
     <article id={`post-${post.id}`} className={`overflow-hidden rounded-2xl border bg-[#08111b]/90 shadow-[0_18px_60px_rgba(0,0,0,.22)] ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
@@ -139,6 +146,13 @@ export function NetworkPostCard({
       {official && (
         <div className="flex items-center gap-2 border-b border-rcl-blue/15 bg-rcl-blue/[.055] px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue sm:px-5">
           <span className="h-1.5 w-1.5 rounded-full bg-rcl-orange" /> RCL Network · Official Activity
+        </div>
+      )}
+
+      {mediaLabel && !official && (
+        <div className="flex items-center justify-between gap-3 border-b border-white/[.06] bg-[linear-gradient(90deg,rgba(255,79,22,.055),rgba(21,159,255,.035))] px-4 py-2 sm:px-5">
+          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">{videoPost ? <FaVideo /> : <span aria-hidden="true">📸</span>} {mediaLabel}</span>
+          <Link href={`${profileHref}?tab=highlights`} className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue hover:text-white">The Tape →</Link>
         </div>
       )}
 
@@ -180,15 +194,26 @@ export function NetworkPostCard({
         </div>
       </div>
 
-      {post.media_urls?.[0] && (
+      {mediaUrls.length > 0 && (
         <div className="border-y border-white/[.07] bg-black">
-          {isVideoUrl(post.media_urls[0]) ? <video src={post.media_urls[0]} controls playsInline className="max-h-[620px] w-full object-contain" /> : <img src={post.media_urls[0]} alt="Post media" className="max-h-[620px] w-full object-cover" />}
+          {videoPost ? (
+            <video src={mediaUrls[0]} controls playsInline preload="metadata" className="max-h-[680px] w-full object-contain" />
+          ) : (
+            <div className={`grid gap-0.5 ${mediaUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {mediaUrls.slice(0, 10).map((url, index) => (
+                <div key={`${url}-${index}`} className={`relative overflow-hidden bg-[#05080d] ${mediaUrls.length === 3 && index === 0 ? 'col-span-2' : ''}`}>
+                  <img src={url} alt={`Post media ${index + 1}`} className={`${mediaUrls.length === 1 ? 'max-h-[680px] w-full object-contain' : 'aspect-square h-full w-full object-cover'}`} />
+                  {index === 9 && mediaUrls.length > 10 && <div className="absolute inset-0 grid place-items-center bg-black/65 text-3xl font-black">+{mediaUrls.length - 10}</div>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       <div className="px-4 py-3 sm:px-5">
         <div className="flex items-center justify-between gap-3 text-xs text-white/30">
-          <span>{reactionCount ? `${reactionCount} ${reactionCount === 1 ? 'reaction' : 'reactions'}` : 'React to this'}</span>
+          <span>{reactionCount ? `${reactionCount} ${reactionCount === 1 ? 'reaction' : 'reactions'}` : mediaLabel ? 'Give this some RCL energy' : 'React to this'}</span>
           <div className="flex items-center gap-3">
             <button type="button" onClick={onToggleComments} className="hover:text-white">{commentCount} comments</button>
             <span>{repostCount} repost{repostCount === 1 ? '' : 's'}</span>
@@ -197,8 +222,8 @@ export function NetworkPostCard({
 
         <div className="mt-3 flex gap-1 overflow-x-auto border-t border-white/[.06] pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {reactions.map((reaction) => (
-            <button key={reaction.type} type="button" title={reaction.label} onClick={() => onReact(reaction.type)} className={`shrink-0 rounded-xl px-2.5 py-2 text-sm transition hover:bg-white/5 ${reactionBurst === reaction.type ? 'scale-110' : ''} ${mine?.type === reaction.type ? 'bg-rcl-orange/10 ring-1 ring-rcl-orange/30' : ''}`}>
-              <span aria-hidden="true">{reaction.emoji}</span>
+            <button key={reaction.type} type="button" title={reaction.label} aria-label={reaction.label} onClick={() => onReact(reaction.type)} className={`group shrink-0 rounded-xl px-2.5 py-2 text-sm transition hover:bg-white/5 ${reactionBurst === reaction.type ? 'scale-110' : ''} ${mine?.type === reaction.type ? 'bg-rcl-orange/10 ring-1 ring-rcl-orange/30' : ''}`}>
+              <span aria-hidden="true">{reaction.emoji}</span><span className={`ml-1.5 text-[9px] font-black uppercase tracking-wider ${mine?.type === reaction.type ? 'text-rcl-orange' : 'text-white/0 transition group-hover:text-white/35'}`}>{reaction.label}</span>
             </button>
           ))}
         </div>
@@ -210,7 +235,8 @@ export function NetworkPostCard({
           <button type="button" onClick={onSave} className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-white/[.04] ${saved ? 'text-rcl-orange' : 'text-white/40 hover:text-white'}`}><FaBookmark /><span className="hidden sm:inline">Save</span></button>
         </div>
 
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex items-center justify-between gap-3">
+          {mediaLabel ? <Link href="/create/social?mode=clip" className="text-[10px] font-black uppercase tracking-wider text-rcl-orange/65 hover:text-rcl-orange">Drop yours</Link> : <span />}
           <Link href={`/social/post/${post.id}`} className="text-[10px] font-black uppercase tracking-wider text-white/20 hover:text-rcl-blue">Open post</Link>
         </div>
       </div>
