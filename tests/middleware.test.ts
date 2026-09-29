@@ -136,7 +136,7 @@ describe('member platform middleware', () => {
     expect(response.status).toBe(200);
   });
 
-  it.each(['/manifest.webmanifest', '/sw.js', '/favicon.svg', '/icons/180', '/icons/192', '/icons/512', '/icons/512-maskable'])(
+  it.each(['/manifest.webmanifest', '/sw.js', '/favicon.svg', '/icons/rcl-app-180.png', '/icons/rcl-app-192.png', '/icons/rcl-app-512.png', '/icons/rcl-app-maskable-512.png'])(
     'keeps PWA asset %s reachable anonymously',
     async (pathname) => {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));

@@ -1,10 +1,10 @@
-const CACHE_NAME = 'rcl-static-v1';
+const CACHE_NAME = 'rcl-static-v2';
 const STATIC_ASSETS = [
   '/favicon.svg',
-  '/icons/180',
-  '/icons/192',
-  '/icons/512',
-  '/icons/512-maskable',
+  '/icons/rcl-app-180.png',
+  '/icons/rcl-app-192.png',
+  '/icons/rcl-app-512.png',
+  '/icons/rcl-app-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -76,7 +76,7 @@ function offlineResponse() {
 </head>
 <body>
   <main>
-    <img src="/icons/192" alt="">
+    <img src="/icons/rcl-app-192.png" alt="">
     <small>RCL NETWORK</small>
     <h1>You’re offline</h1>
     <p>Live scores, messages, posts and member data need a connection. Reconnect, then try again.</p>
