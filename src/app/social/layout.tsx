@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SocialMediaShortcutBridge } from '@/components/social/SocialMediaShortcutBridge';
 
 export const metadata: Metadata = {
   title: "RCL Social",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SectionLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <><SocialMediaShortcutBridge />{children}</>;
 }
