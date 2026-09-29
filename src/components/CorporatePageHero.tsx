@@ -14,21 +14,20 @@ type CorporatePageHeroProps = {
 
 export function CorporatePageHero({ eyebrow, title, accent, description, actions, meta, assetKey }: CorporatePageHeroProps) {
   return (
-    <section className="relative overflow-hidden border-b border-rcl-blue/20 bg-[linear-gradient(115deg,#071522_0%,#03070d_62%,#07111b_100%)] text-white">
-      {assetKey ? <ContentAssetBackground assetKey={assetKey} opacity={0.12} /> : null}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(3,7,13,.96),rgba(3,7,13,.80)_48%,rgba(3,7,13,.52)),radial-gradient(circle_at_82%_12%,rgba(255,79,22,.15),transparent_28%),radial-gradient(circle_at_12%_60%,rgba(21,159,255,.12),transparent_30%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(21,159,255,.16)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,255,.16)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_90%)]" />
-      <Container maxWidth="xl" className="relative py-14 sm:py-16 lg:py-20">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-4xl">
-            <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">{eyebrow}</p>
-            <h1 className="mt-4 text-balance font-display text-5xl font-black uppercase leading-[.88] tracking-[-.025em] sm:text-6xl lg:text-7xl">
-              {title}{accent ? <><br /><span className="text-rcl-blue">{accent}</span></> : null}
+    <section className="relative overflow-hidden border-b border-rcl-blue/15 bg-[linear-gradient(115deg,#09131d_0%,#05090d_62%,#07111b_100%)] text-white">
+      {assetKey ? <ContentAssetBackground assetKey={assetKey} opacity={0.08} /> : null}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(145,206,242,.09),transparent_30%),radial-gradient(circle_at_12%_60%,rgba(95,169,213,.07),transparent_34%)]" />
+      <Container maxWidth="xl" className="relative py-11 sm:py-13 lg:py-16">
+        <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[.18em] text-rcl-blue/80">{eyebrow}</p>
+            <h1 className="mt-3 text-balance font-display text-4xl font-semibold leading-[1.02] tracking-[-.04em] sm:text-5xl lg:text-6xl">
+              {title}{accent ? <><br /><span className="text-[#c7e8fb]">{accent}</span></> : null}
             </h1>
-            {description ? <p className="mt-5 max-w-2xl text-sm leading-6 text-white/55 sm:text-base sm:leading-7">{description}</p> : null}
-            {actions ? <div className="mt-7 flex flex-wrap gap-3">{actions}</div> : null}
+            {description ? <p className="mt-4 max-w-2xl text-sm leading-6 text-white/55 sm:text-base sm:leading-7">{description}</p> : null}
+            {actions ? <div className="mt-6 flex flex-wrap gap-3">{actions}</div> : null}
           </div>
-          {meta ? <div className="shrink-0">{meta}</div> : null}
+          {meta ? <div className="min-w-0 shrink-0">{meta}</div> : null}
         </div>
       </Container>
     </section>
