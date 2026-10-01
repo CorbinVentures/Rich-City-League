@@ -1,0 +1,3 @@
+create index if not exists network_org_subscriptions_plan_idx on public.network_organization_subscriptions(plan_code);
+create index if not exists network_partner_credit_plan_idx on public.network_partner_credit_ledger(plan_code) where plan_code is not null;
+create index if not exists network_partner_credit_created_by_idx on public.network_partner_credit_ledger(created_by) where created_by is not null;
