@@ -25,6 +25,6 @@ export default async function OrganizationClaimPage({ params }:{ params: Promise
         <p className="mt-4 max-w-2xl text-sm leading-6 text-white/50">Verify that you represent this organization. Approved operators can submit public events, request exposure campaigns, and see measurable Network results.</p>
       </Container>
     </section>
-    <Container maxWidth="md" className="py-8"><OrganizationClaimForm organizationId={organization.id} organizationName={organization.name}/></Container>
+    <Container maxWidth="md" className="py-8"><OrganizationClaimForm organizationId={organization.id} organizationSlug={organization.slug} organizationName={organization.name}/></Container>
   </main>;
 }
