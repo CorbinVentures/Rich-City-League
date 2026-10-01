@@ -18,6 +18,7 @@ const core = [
   ['/organizations/region/shenandoah',.75,'daily'],
   ['/organizations/region/southwest-virginia',.75,'daily'],
   ['/organizations/region/statewide',.75,'daily'],
+  ['/membership',.9,'weekly'],
   ['/news',.9,'daily'],
   ['/players',.9,'daily'],
   ['/teams',.9,'daily'],
