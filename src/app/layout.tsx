@@ -15,6 +15,7 @@ import './rcl-executive-marble.css';
 import './rcl-executive-alignment.css';
 import './rcl-professional-clean.css';
 import './rcl-professional-finish.css';
+import './rcl-behavioral-design.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
@@ -61,7 +62,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#05090D',
+  themeColor: '#090D12',
   colorScheme: 'dark',
 };
 
