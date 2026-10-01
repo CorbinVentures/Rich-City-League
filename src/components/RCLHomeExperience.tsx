@@ -12,13 +12,13 @@ import {
   RCL_PRIMARY_NAV_ITEMS,
 } from '@/lib/rcl-navigation';
 import {
-  FaArrowRight, FaBars, FaBell, FaCrown, FaHouse, FaPeopleGroup,
-  FaTrophy, FaUser, FaBasketball, FaMagnifyingGlass
+  FaArrowRight, FaBars, FaBell, FaHouse, FaPeopleGroup,
+  FaTrophy, FaUser, FaBasketball, FaMagnifyingGlass, FaLocationDot, FaGlobe
 } from 'react-icons/fa6';
 
 const quick = [
-  {title:'DRAFT NIGHT',sub:'NEXT CHAPTER.',href:'/draft',icon:FaCrown,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
-  {title:'JOIN A LEAGUE',sub:'FIND YOUR NEXT SEASON',href:'/register',icon:FaTrophy,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
+  {title:'OPEN RUNS',sub:'FIND YOUR NEXT RUN',href:'/runs',icon:FaLocationDot,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
+  {title:'VIRGINIA NETWORK',sub:'LEAGUES · EVENTS · ORGANIZATIONS',href:'/network',icon:FaGlobe,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
 ];
 
 type Team = {id:string;name:string;logo_url?:string|null};
@@ -72,17 +72,17 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
         <div className="rcl-home-hero-image"/>
         <div className="rcl-home-grid"/>
         <div className="rcl-home-hero-copy">
-          <p className="rcl-home-kicker">⚡ 804 · RICHMOND, VIRGINIA</p>
+          <p className="rcl-home-kicker">804 · RICHMOND, VIRGINIA</p>
           <h1>RICH CITY<br/><span>BUILDS<br/>DIFFERENT.</span></h1>
           <p className="rcl-home-tagline">PLAY. COMPETE. CONNECT. GROW.</p>
-          <div className="flex flex-wrap gap-3"><Link href="/league" className="rcl-home-cta">ENTER THE LEAGUE <FaArrowRight/></Link><Link href="/register" className="rcl-home-cta">JOIN RCL <FaArrowRight/></Link></div>
+          <div className="rcl-home-hero-actions"><Link href="/register" className="rcl-home-cta rcl-home-cta-primary">JOIN RCL <FaArrowRight/></Link><Link href="/explore" className="rcl-home-cta rcl-home-cta-secondary">EXPLORE BASKETBALL <FaArrowRight/></Link></div>
         </div>
         <small className="rcl-home-code">RCL / 804</small>
       </section>
 
       <div className="rcl-home-content">
         <section className="rcl-home-quick">
-          <div className="rcl-home-section-head"><div><p>STEP INTO THE WORLD</p><h2>FIND YOUR COURT</h2></div><b>01</b></div>
+          <div className="rcl-home-section-head"><div><p>START HERE</p><h2>FIND YOUR BASKETBALL</h2></div><b>01</b></div>
           <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card" style={{backgroundImage:'linear-gradient(90deg,rgba(3,8,13,.96),rgba(3,8,13,.48)),url('+q.image+')'}}><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
         </section>
 
