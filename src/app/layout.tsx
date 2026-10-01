@@ -16,6 +16,7 @@ import './rcl-executive-alignment.css';
 import './rcl-professional-clean.css';
 import './rcl-professional-finish.css';
 import './rcl-behavioral-design.css';
+import './rcl-behavioral-home.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
