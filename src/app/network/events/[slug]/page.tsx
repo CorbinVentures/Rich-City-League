@@ -2,21 +2,25 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { NetworkExposureTracker, TrackedNetworkLink } from '@/components/network/NetworkExposure';
-import { getPublicClient } from '@/lib/supabase/server';
+import { getPublicClient } from '@/lib/public-data';
 import { FaArrowLeft, FaArrowRight, FaCalendarDays, FaLocationDot } from 'react-icons/fa6';
 
 export const revalidate = 60;
 
 export async function generateMetadata({ params }:{ params:Promise<{slug:string}> }) {
   const { slug } = await params;
-  const supabase = getPublicClient();
+  const client = getPublicClient();
+  const supabase:any = client;
+  if (!supabase) return { title:'RCL Network Event' };
   const { data } = await supabase.from('network_events').select('title,description').eq('slug',slug).eq('status','published').maybeSingle();
   return data ? { title:`${data.title} | RCL Network`, description:data.description || 'Virginia basketball event on RCL Network.' } : { title:'RCL Network Event' };
 }
 
 export default async function NetworkEventPage({ params }:{ params:Promise<{slug:string}> }) {
   const { slug } = await params;
-  const supabase = getPublicClient();
+  const client = getPublicClient();
+  const supabase:any = client;
+  if (!supabase) notFound();
   const { data:eventData } = await supabase.from('network_events').select('id,organization_id,slug,title,description,event_type,venue_name,city,state,starts_at,ends_at,external_url,image_url,is_featured').eq('slug',slug).eq('status','published').maybeSingle();
   if (!eventData) notFound();
   const event = eventData as any;
