@@ -48,6 +48,7 @@ export const RCL_NAV_ITEMS:RCLNavItem[]=[HOME,TODAY,LEAGUE,NETWORK,EXPLORE,...RC
 
 export const RCL_ADMIN_NAV_ITEM:RCLNavItem={label:'Admin',href:'/admin',icon:FaGear};
 export const RCL_NETWORK_ADMIN_ITEM:RCLNavItem={label:'Network Operations',href:'/admin/network',icon:FaBullhorn};
+export const RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM:RCLNavItem={label:'Campaign Control',href:'/admin/network/campaigns',icon:FaChartSimple};
 export const RCL_NETWORK_ACQUISITION_ADMIN_ITEM:RCLNavItem={label:'Network Acquisition',href:'/admin/network/acquisition',icon:FaPeopleGroup};
 export const RCL_REVENUE_ADMIN_ITEM:RCLNavItem={label:'Revenue Center',href:'/admin/revenue',icon:FaChartSimple};
-export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={label:'Operations',description:'Staff, league, revenue and Network administration',items:[RCL_ADMIN_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM]};
+export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={label:'Operations',description:'Staff, league, revenue and Network administration',items:[RCL_ADMIN_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM]};
