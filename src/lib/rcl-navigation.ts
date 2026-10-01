@@ -122,8 +122,9 @@ export const RCL_NAV_ITEMS:RCLNavItem[]=[
 ].filter((item,index,items)=>items.findIndex(candidate=>candidate.href===item.href)===index);
 
 export const RCL_ADMIN_NAV_ITEM:RCLNavItem={label:'Admin',href:'/admin',icon:FaGear};
+export const RCL_NETWORK_ADMIN_ITEM:RCLNavItem={label:'Network Operations',href:'/admin/network',icon:FaBullhorn};
 export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={
   label:'Operations',
-  description:'Staff and league administration',
-  items:[RCL_ADMIN_NAV_ITEM],
+  description:'Staff, league and Network administration',
+  items:[RCL_ADMIN_NAV_ITEM,RCL_NETWORK_ADMIN_ITEM],
 };
