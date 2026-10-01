@@ -7,6 +7,7 @@ type AccessProfile = { role: string | null; is_active: boolean | null; onboardin
 
 const MEMBER_ROUTE_PREFIXES = [
   '/dashboard',
+  '/my-hoops',
   '/portal',
   '/admin',
   '/account',
