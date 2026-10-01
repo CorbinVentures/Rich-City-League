@@ -2,7 +2,7 @@ import {
   FaHouse, FaCalendarDays, FaChartSimple, FaUsers, FaUser, FaNewspaper,
   FaPlay, FaListOl, FaUserTie, FaBell, FaComments, FaPeopleGroup, FaCrown,
   FaTrophy, FaShirt, FaBasketball, FaGear, FaCompass, FaBolt, FaLocationDot,
-  FaMedal, FaArrowRightArrowLeft
+  FaMedal, FaArrowRightArrowLeft, FaGlobe, FaBullhorn
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 
@@ -15,16 +15,19 @@ export function isNavigationActive(pathname: string, href: string) {
 
 const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem'];
 const SOCIAL_FAMILY=['/social','/friends','/messages','/communities','/runs'];
+const NETWORK_FAMILY=['/network','/organizations'];
 
 export function isPrimaryNavigationActive(pathname:string, href:string){
   if(href==='/league') return LEAGUE_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   if(href==='/social') return SOCIAL_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
+  if(href==='/network') return NETWORK_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   return isNavigationActive(pathname,href);
 }
 
 const HOME:RCLNavItem={label:'Home',href:'/',icon:FaHouse};
 const TODAY:RCLNavItem={label:'Today',href:'/today',icon:FaBolt};
 const LEAGUE:RCLNavItem={label:'League',href:'/league',icon:FaBasketball};
+const NETWORK:RCLNavItem={label:'Virginia Network',href:'/network',icon:FaGlobe};
 const EXPLORE:RCLNavItem={label:'Explore',href:'/explore',icon:FaCompass};
 const PLAYERS:RCLNavItem={label:'Players',href:'/players',icon:FaUser};
 const TEAMS:RCLNavItem={label:'Teams',href:'/teams',icon:FaUsers};
@@ -34,6 +37,7 @@ const NEWS:RCLNavItem={label:'News',href:'/news',icon:FaNewspaper};
 export const RCL_PRIMARY_NAV_ITEMS:RCLNavItem[]=[
   HOME,
   LEAGUE,
+  NETWORK,
   PLAYERS,
   TEAMS,
   SOCIAL,
@@ -44,7 +48,7 @@ export const RCL_PRIMARY_NAV_ITEMS:RCLNavItem[]=[
 export const RCL_NAV_GROUPS:RCLNavGroup[]=[
   {
     label:'League',
-    description:'Competition, teams and performance',
+    description:'Rich City League flagship competition and performance',
     items:[
       PLAYERS,
       TEAMS,
@@ -56,6 +60,16 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Rankings',href:'/rankings',icon:FaListOl},
       {label:'Player Compare',href:'/players/compare',icon:FaArrowRightArrowLeft},
       {label:'Coaches',href:'/coaches',icon:FaUserTie},
+    ],
+  },
+  {
+    label:'Virginia Network',
+    description:'Discover and amplify basketball across Virginia',
+    items:[
+      NETWORK,
+      {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
+      {label:'For Organizations',href:'/network/partners',icon:FaBullhorn},
+      {label:'Join the Network',href:'/network/partners/apply',icon:FaGlobe},
     ],
   },
   {
@@ -88,7 +102,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     ],
   },
   {
-    label:'Organization',
+    label:'RCL',
     description:'About RCL and your account activity',
     items:[
       {label:'Notifications',href:'/notifications',icon:FaBell},
@@ -102,13 +116,15 @@ export const RCL_NAV_ITEMS:RCLNavItem[]=[
   HOME,
   TODAY,
   LEAGUE,
+  NETWORK,
   EXPLORE,
   ...RCL_NAV_GROUPS.flatMap(group=>group.items),
 ].filter((item,index,items)=>items.findIndex(candidate=>candidate.href===item.href)===index);
 
 export const RCL_ADMIN_NAV_ITEM:RCLNavItem={label:'Admin',href:'/admin',icon:FaGear};
+export const RCL_NETWORK_ADMIN_ITEM:RCLNavItem={label:'Network Operations',href:'/admin/network',icon:FaBullhorn};
 export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={
   label:'Operations',
-  description:'Staff and league administration',
-  items:[RCL_ADMIN_NAV_ITEM],
+  description:'Staff, league and Network administration',
+  items:[RCL_ADMIN_NAV_ITEM,RCL_NETWORK_ADMIN_ITEM],
 };

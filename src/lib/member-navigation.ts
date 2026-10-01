@@ -1,9 +1,11 @@
 import {
   FaBasketball,
   FaBell,
+  FaBullhorn,
   FaChartSimple,
   FaCompass,
   FaComments,
+  FaGlobe,
   FaHouse,
   FaListOl,
   FaPeopleGroup,
@@ -41,20 +43,23 @@ export const RCL_MEMBER_DESKTOP_NAV: RCLMemberNavItem[] = [
 export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
   {
     label: 'Network',
-    description: 'People, conversation and basketball activity',
+    description: 'People, conversation and basketball activity across Virginia',
     items: [
       { label: 'Home', href: '/social', icon: FaHouse },
       { label: 'Explore', href: '/explore', icon: FaCompass },
+      { label: 'Virginia Network', href: '/network', icon: FaGlobe },
+      { label: 'Organizations', href: '/organizations', icon: FaPeopleGroup },
       { label: 'Create', href: '/create', icon: FaPlus },
       { label: 'Communities', href: '/communities', icon: FaPeopleGroup },
       { label: 'Runs', href: '/runs', icon: FaBasketball },
       { label: 'Messages', href: '/messages', icon: FaComments },
       { label: 'Notifications', href: '/notifications', icon: FaBell },
+      { label: 'For Organizations', href: '/network/partners', icon: FaBullhorn },
     ],
   },
   {
     label: 'League',
-    description: 'Official competition powered by RCL',
+    description: 'Rich City League flagship competition powered by RCL',
     items: [
       { label: 'League Center', href: '/league', icon: FaBasketball },
       { label: 'Games', href: '/games', icon: FaBasketball },
