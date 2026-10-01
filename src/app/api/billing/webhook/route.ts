@@ -47,6 +47,16 @@ async function syncSubscription(db: any, subscription: Awaited<ReturnType<typeof
   return { synced: true };
 }
 
+function invoiceSubscriptionId(invoice: any) {
+  const value = invoice?.subscription;
+  if (typeof value === 'string') return value;
+  if (value?.id) return value.id as string;
+  const parentSubscription = invoice?.parent?.subscription_details?.subscription;
+  if (typeof parentSubscription === 'string') return parentSubscription;
+  if (parentSubscription?.id) return parentSubscription.id as string;
+  return null;
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   if (!verifyStripeWebhook(body, request.headers.get('stripe-signature'))) {
@@ -79,6 +89,8 @@ export async function POST(request: Request) {
     } else if (event.type.startsWith('customer.subscription.')) {
       subscriptionObject = event.data?.object;
       subscriptionId = subscriptionObject?.id || null;
+    } else if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+      subscriptionId = invoiceSubscriptionId(event.data?.object);
     } else {
       await db.from('membership_webhook_events').update({ processing_status: 'ignored', error_message: null, processed_at: new Date().toISOString() }).eq('provider_event_id', event.id);
       return NextResponse.json({ received: true, ignored: true });
