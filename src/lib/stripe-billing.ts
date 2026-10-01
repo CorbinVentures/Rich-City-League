@@ -31,6 +31,12 @@ type StripeSubscription = {
 };
 
 const STRIPE_API = 'https://api.stripe.com/v1';
+const PAID_PLAN_INTERVALS: Array<[PaidPlanCode, MembershipBillingInterval]> = [
+  ['rcl_plus', 'monthly'],
+  ['rcl_plus', 'annual'],
+  ['all_access', 'monthly'],
+  ['all_access', 'annual'],
+];
 
 function stripeSecret() {
   return process.env.STRIPE_SECRET_KEY?.trim() || null;
@@ -49,13 +55,7 @@ export function getStripePriceId(plan: PaidPlanCode, interval: MembershipBilling
 
 export function planForStripePrice(priceId: string | null | undefined): { planCode: PaidPlanCode; interval: MembershipBillingInterval } | null {
   if (!priceId) return null;
-  const pairs: Array<[PaidPlanCode, MembershipBillingInterval]> = [
-    ['rcl_plus', 'monthly'],
-    ['rcl_plus', 'annual'],
-    ['all_access', 'monthly'],
-    ['all_access', 'annual'],
-  ];
-  for (const [planCode, interval] of pairs) {
+  for (const [planCode, interval] of PAID_PLAN_INTERVALS) {
     if (envPrice(planCode, interval) === priceId) return { planCode, interval };
   }
   return null;
@@ -64,7 +64,7 @@ export function planForStripePrice(priceId: string | null | undefined): { planCo
 export function stripeBillingConfigured(plan?: PaidPlanCode, interval?: MembershipBillingInterval) {
   if (!stripeSecret()) return false;
   if (plan && interval) return Boolean(envPrice(plan, interval));
-  return true;
+  return PAID_PLAN_INTERVALS.every(([planCode, billingInterval]) => Boolean(envPrice(planCode, billingInterval)));
 }
 
 async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'; body?: URLSearchParams } = {}): Promise<T> {
@@ -99,6 +99,8 @@ export async function createStripeCheckoutSession(input: {
   const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://richcityhoops.com').replace(/\/$/, '');
   const body = new URLSearchParams();
   body.set('mode', 'subscription');
+  body.set('origin_context', 'web');
+  body.set('submit_type', 'subscribe');
   body.set('success_url', `${site}/account/membership?checkout=success`);
   body.set('cancel_url', `${site}/account/membership?checkout=cancelled`);
   body.set('client_reference_id', input.userId);
@@ -111,6 +113,8 @@ export async function createStripeCheckoutSession(input: {
   body.set('subscription_data[metadata][user_id]', input.userId);
   body.set('subscription_data[metadata][plan_code]', input.planCode);
   body.set('subscription_data[metadata][billing_interval]', input.interval);
+  // Stripe's current Checkout API defaults new subscriptions to flexible billing mode.
+  // Do not force a billing mode unless RCL has a specific compatibility reason to override it.
   if (input.customerId) body.set('customer', input.customerId);
   else if (input.email) body.set('customer_email', input.email);
   return stripeRequest<{ id: string; url: string | null }>('/checkout/sessions', { method: 'POST', body });
@@ -122,6 +126,8 @@ export async function createStripePortalSession(customerId: string) {
   const body = new URLSearchParams();
   body.set('customer', customerId);
   body.set('return_url', `${site}/account/membership`);
+  const configuration = process.env.STRIPE_PORTAL_CONFIGURATION_ID?.trim();
+  if (configuration) body.set('configuration', configuration);
   return stripeRequest<{ id: string; url: string }>('/billing_portal/sessions', { method: 'POST', body });
 }
 
