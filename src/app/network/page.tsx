@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
+import { NetworkExposureTracker, TrackedNetworkLink } from '@/components/network/NetworkExposure';
 import { getPublicClient } from '@/lib/public-data';
-import { FaArrowRight, FaBasketball, FaBullhorn, FaChartLine, FaCircleCheck, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6';
+import { FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6';
 
 export const metadata = {
   title: 'RCL Network | Virginia Basketball',
@@ -21,16 +22,24 @@ type NetworkEvent = {
   venue_name:string|null; starts_at:string; external_url:string|null; is_featured:boolean;
 };
 
+type Promotion = {
+  id:string; organization_id:string; event_id:string|null; campaign_id:string|null; placement:string;
+  headline:string|null; disclosure_label:string; destination_url:string|null; starts_at:string; ends_at:string;
+  organization:{id:string;slug:string;name:string;short_name:string|null}|null;
+};
+
 export default async function NetworkPage() {
   const client = getPublicClient();
   const db:any = client;
   const now = new Date().toISOString();
-  const [{data:organizationsRaw},{data:eventsRaw}] = db ? await Promise.all([
+  const [{data:organizationsRaw},{data:eventsRaw},{data:promotionsRaw}] = db ? await Promise.all([
     db.from('network_organizations').select('id,slug,name,short_name,description,organization_type,region,city,state,website_url,is_verified,verification_label,network_tier,is_featured,featured_rank').eq('status','active').order('featured_rank',{ascending:true,nullsFirst:false}).order('name').limit(12),
     db.from('network_events').select('id,organization_id,slug,title,event_type,city,state,venue_name,starts_at,external_url,is_featured').eq('status','published').gte('starts_at',now).order('is_featured',{ascending:false}).order('starts_at',{ascending:true}).limit(8),
-  ]) : [{data:[]},{data:[]}];
+    db.from('network_promotions').select('id,organization_id,event_id,campaign_id,placement,headline,disclosure_label,destination_url,starts_at,ends_at,organization:network_organizations!organization_id(id,slug,name,short_name)').eq('status','active').eq('placement','network-home').lte('starts_at',now).gte('ends_at',now).order('sort_weight',{ascending:false}).limit(2),
+  ]) : [{data:[]},{data:[]},{data:[]}];
   const organizations=(organizationsRaw??[]) as Organization[];
   const events=(eventsRaw??[]) as NetworkEvent[];
+  const promotions=(promotionsRaw??[]).map((row:any)=>({...row,organization:Array.isArray(row.organization)?row.organization[0]:row.organization})) as Promotion[];
   const orgMap=new Map(organizations.map((org)=>[org.id,org]));
   const flagship=organizations.find((org)=>org.network_tier==='flagship');
 
@@ -44,6 +53,7 @@ export default async function NetworkPage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/organizations" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-blue px-5 text-xs font-black uppercase tracking-wide text-[#03101a]">Explore organizations <FaArrowRight/></Link>
             <Link href="/network/partners" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-orange/35 bg-rcl-orange/[.06] px-5 text-xs font-black uppercase tracking-wide text-rcl-orange">Grow your exposure <FaBullhorn/></Link>
+            <Link href="/network/dashboard" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/10 px-5 text-xs font-black uppercase tracking-wide text-white/55">Partner dashboard <FaChartLine/></Link>
           </div>
         </div>
         <div className="mt-12 grid gap-3 sm:grid-cols-3">
@@ -55,6 +65,8 @@ export default async function NetworkPage() {
     </section>
 
     <Container maxWidth="xl" className="py-10 sm:py-14">
+      {promotions.length>0 && <section className="mb-14"><SectionHeading eyebrow="Sponsored across RCL Network" title="Featured partner exposure" detail="Paid placement is always disclosed. Sponsorship changes distribution, never competitive rankings, REP, awards, or basketball results."/><div className="grid gap-4 md:grid-cols-2">{promotions.map(p=><SponsoredCard key={p.id} promotion={p}/>)}</div></section>}
+
       <section className="grid gap-6 lg:grid-cols-[1.4fr_.6fr]">
         <div>
           <SectionHeading eyebrow="Virginia Network" title="Basketball lives beyond one league" detail="RCL Network is built to expose the entire ecosystem without taking over how other organizations operate." actionHref="/organizations" actionLabel="See directory"/>
@@ -92,12 +104,15 @@ export default async function NetworkPage() {
   </main>;
 }
 
+function SponsoredCard({promotion}:{promotion:Promotion}) {
+  const org=promotion.organization;
+  if(!org) return null;
+  const content=<><div className="flex items-center justify-between gap-3"><span className="rounded-full border border-rcl-orange/35 bg-rcl-orange/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[.15em] text-rcl-orange">{promotion.disclosure_label}</span><span className="text-[9px] font-black uppercase tracking-[.15em] text-white/25">Network Home</span></div><h3 className="mt-4 font-display text-3xl font-black uppercase">{promotion.headline||org.name}</h3><p className="mt-2 text-xs font-black uppercase tracking-wide text-rcl-blue">{org.name}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">Learn more <FaArrowRight/></span></>;
+  return <article className="rounded-2xl border border-rcl-orange/25 bg-[linear-gradient(145deg,rgba(255,79,22,.075),rgba(7,21,34,.7))] p-5"><NetworkExposureTracker organizationId={promotion.organization_id} eventId={promotion.event_id} promotionId={promotion.id} campaignId={promotion.campaign_id} eventType="impression" surface="network-home-sponsored"/>{promotion.destination_url?<TrackedNetworkLink href={promotion.destination_url} organizationId={promotion.organization_id} eventId={promotion.event_id} promotionId={promotion.id} campaignId={promotion.campaign_id} surface="network-home-sponsored-cta" className="block">{content}</TrackedNetworkLink>:<Link href={`/organizations/${org.slug}`} className="block">{content}</Link>}</article>;
+}
 function ValueStat({icon,label,detail}:{icon:React.ReactNode;label:string;detail:string}) { return <div className="rounded-2xl border border-rcl-blue/15 bg-black/20 p-4"><span className="text-xl text-rcl-blue">{icon}</span><b className="mt-3 block font-display text-xl uppercase">{label}</b><p className="mt-1 text-xs leading-5 text-white/40">{detail}</p></div>; }
-
 function OrganizationCard({org}:{org:Organization}) { return <Link href={`/organizations/${org.slug}`} className="group rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 p-5 transition hover:-translate-y-0.5 hover:border-rcl-blue/45"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-rcl-blue/20 bg-rcl-blue/10 font-display text-lg font-black text-rcl-blue">{(org.short_name||org.name).slice(0,3).toUpperCase()}</span><div className="flex flex-wrap justify-end gap-1.5">{org.network_tier==='flagship'&&<Badge copy="RCL Flagship" accent="orange"/>}{org.is_verified&&<Badge copy="Verified"/>}</div></div><h3 className="mt-4 font-display text-2xl font-black uppercase">{org.name}</h3><p className="mt-1 text-xs font-bold uppercase tracking-wide text-rcl-blue/60">{prettyType(org.organization_type)} · {prettyRegion(org.region)}</p><p className="mt-3 line-clamp-2 text-sm leading-6 text-white/40">{org.description||'Official organization in the RCL Virginia basketball network.'}</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-blue">View organization <FaArrowRight className="transition group-hover:translate-x-1"/></span></Link>; }
-
-function EventCard({event,organization}:{event:NetworkEvent;organization?:Organization}) { return <article className="rounded-2xl border border-white/10 bg-[#071522]/55 p-5"><div className="flex items-center justify-between gap-3"><Badge copy={prettyType(event.event_type)}/>{event.is_featured&&<Badge copy="Featured" accent="orange"/>}</div><h3 className="mt-4 font-display text-2xl font-black uppercase leading-6">{event.title}</h3><p className="mt-2 text-xs font-bold text-rcl-blue">{organization?.name ?? 'RCL Network Organization'}</p><div className="mt-4 space-y-2 text-xs text-white/40"><p>{formatDate(event.starts_at)}</p>{(event.venue_name||event.city)&&<p className="flex items-center gap-2"><FaLocationDot/>{[event.venue_name,event.city,event.state].filter(Boolean).join(' · ')}</p>}</div>{organization&&<Link href={`/organizations/${organization.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-white/65">Details <FaArrowRight/></Link>}</article>; }
-
+function EventCard({event,organization}:{event:NetworkEvent;organization?:Organization}) { return <article className="rounded-2xl border border-white/10 bg-[#071522]/55 p-5"><div className="flex items-center justify-between gap-3"><Badge copy={prettyType(event.event_type)}/>{event.is_featured&&<Badge copy="Featured" accent="orange"/>}</div><h3 className="mt-4 font-display text-2xl font-black uppercase leading-6">{event.title}</h3><p className="mt-2 text-xs font-bold text-rcl-blue">{organization?.name ?? 'RCL Network Organization'}</p><div className="mt-4 space-y-2 text-xs text-white/40"><p>{formatDate(event.starts_at)}</p>{(event.venue_name||event.city)&&<p className="flex items-center gap-2"><FaLocationDot/>{[event.venue_name,event.city,event.state].filter(Boolean).join(' · ')}</p>}</div><Link href={`/network/events/${event.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-white/65">Event details <FaArrowRight/></Link></article>; }
 function SectionHeading({eyebrow,title,detail,actionHref,actionLabel}:{eyebrow:string;title:string;detail:string;actionHref?:string;actionLabel?:string}) { return <div className="mb-5 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">{eyebrow}</p><h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">{title}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">{detail}</p></div>{actionHref&&<Link href={actionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-blue">{actionLabel}<FaArrowRight/></Link>}</div>; }
 function Badge({copy,accent='blue'}:{copy:string;accent?:'blue'|'orange'}) { return <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[.12em] ${accent==='orange'?'border-rcl-orange/30 bg-rcl-orange/10 text-rcl-orange':'border-rcl-blue/30 bg-rcl-blue/10 text-rcl-blue'}`}>{copy}</span>; }
 function EmptyState({copy}:{copy:string}) { return <div className="rounded-2xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-7 text-sm text-white/40">{copy}</div>; }
