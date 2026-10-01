@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { NetworkImpression } from '@/components/network/NetworkExposure';
 import { FaArrowRight, FaBasketball, FaCircleCheck, FaLocationDot, FaMagnifyingGlass } from 'react-icons/fa6';
 
 export type DirectoryOrganization = {
@@ -42,6 +43,8 @@ export function OrganizationDirectory({organizations,initialRegion='all',showReg
     });
   },[organizations,query,region,type,ownership]);
 
+  const surface=initialRegion==='all'?'organization-directory-card':`organization-region-${initialRegion}-card`;
+
   return <section>
     <div className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/55 p-4 sm:p-5">
       <div className="grid gap-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
@@ -64,7 +67,7 @@ export function OrganizationDirectory({organizations,initialRegion='all',showReg
       return <Link key={value} href={`/organizations/region/${value}`} className="shrink-0 rounded-full border border-white/10 bg-white/[.025] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-white/45 transition hover:border-rcl-blue/35 hover:text-rcl-blue">{label} <span className="ml-1 text-white/25">{count}</span></Link>;
     })}</div>}
 
-    {filtered.length?<div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map(org=><OrganizationCard key={org.id} org={org}/>)}</div>:<div className="mt-6 rounded-3xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-7 sm:p-9"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Nothing matched yet</p><h3 className="mt-2 font-display text-3xl font-black uppercase">Know an organization that belongs here?</h3><p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Add it to RCL Network for free. RCL reviews the submission, creates the listing, and the organization can claim it to manage its presence and publish events.</p><Link href="/network/partners/apply" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase text-black">Add an organization <FaArrowRight/></Link></div>}
+    {filtered.length?<div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map(org=><NetworkImpression key={org.id} organizationId={org.id} surface={surface}><OrganizationCard org={org}/></NetworkImpression>)}</div>:<div className="mt-6 rounded-3xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-7 sm:p-9"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Nothing matched yet</p><h3 className="mt-2 font-display text-3xl font-black uppercase">Know an organization that belongs here?</h3><p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Add it to RCL Network for free. RCL reviews the submission, creates the listing, and the organization can claim it to manage its presence and publish events.</p><Link href="/network/partners/apply" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase text-black">Add an organization <FaArrowRight/></Link></div>}
   </section>;
 }
 
@@ -74,7 +77,7 @@ function Filter({value,onChange,label,children}:{value:string;onChange:(value:st
 
 function OrganizationCard({org}:{org:DirectoryOrganization}) {
   const flagship=org.network_tier==='flagship';
-  return <article className={`rounded-2xl border p-5 ${flagship?'border-rcl-orange/30 bg-rcl-orange/[.045]':'border-rcl-blue/15 bg-[#071522]/60'}`}>
+  return <article className={`h-full rounded-2xl border p-5 ${flagship?'border-rcl-orange/30 bg-rcl-orange/[.045]':'border-rcl-blue/15 bg-[#071522]/60'}`}>
     <div className="flex items-start justify-between gap-4"><span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl border font-display text-lg font-black ${flagship?'border-rcl-orange/25 bg-rcl-orange/10 text-rcl-orange':'border-rcl-blue/20 bg-rcl-blue/10 text-rcl-blue'}`}>{(org.short_name||org.name).slice(0,3).toUpperCase()}</span><div className="flex flex-wrap justify-end gap-1.5">{flagship&&<Badge copy="RCL Flagship" orange/>}{org.network_tier==='premier'&&<Badge copy="Premier" orange/>}{org.is_verified&&<Badge copy="Verified"/>}{!org.is_claimed&&!flagship&&<Badge copy="Claimable"/>}</div></div>
     <h3 className="mt-4 font-display text-2xl font-black uppercase">{org.name}</h3>
     <div className="mt-2 flex flex-wrap gap-3 text-[10px] font-black uppercase tracking-wide text-white/35"><span className="flex items-center gap-1.5"><FaBasketball/>{pretty(org.organization_type)}</span><span className="flex items-center gap-1.5"><FaLocationDot/>{org.city?`${org.city}, ${org.state}`:pretty(org.region)}</span></div>

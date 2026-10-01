@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { NetworkExposureTracker, TrackedNetworkLink } from '@/components/network/NetworkExposure';
+import { OrganizationFollowButton } from '@/components/network/OrganizationFollowButton';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowLeft, FaArrowRight, FaBasketball, FaCircleCheck, FaGlobe, FaLocationDot, FaShieldHalved } from 'react-icons/fa6';
 
@@ -12,7 +13,7 @@ type Organization = {
   organization_type:string; region:string; city:string|null; state:string; website_url:string|null;
   instagram_url:string|null; facebook_url:string|null; x_url:string|null; youtube_url:string|null;
   logo_url:string|null; cover_url:string|null; is_verified:boolean; verification_label:string|null;
-  network_tier:string; is_featured:boolean; is_claimed:boolean;
+  network_tier:string; is_featured:boolean; is_claimed:boolean; follower_count:number;
 };
 
 type NetworkEvent = {
@@ -31,7 +32,7 @@ export default async function OrganizationPage({params}:{params:Promise<{slug:st
   const {slug}=await params;
   const client=getPublicClient(); const db:any=client;
   if(!db) notFound();
-  const {data:organizationRaw}=await db.from('network_organizations').select('id,slug,name,short_name,description,organization_type,region,city,state,website_url,instagram_url,facebook_url,x_url,youtube_url,logo_url,cover_url,is_verified,verification_label,network_tier,is_featured,is_claimed').eq('slug',slug).eq('status','active').maybeSingle();
+  const {data:organizationRaw}=await db.from('network_organizations').select('id,slug,name,short_name,description,organization_type,region,city,state,website_url,instagram_url,facebook_url,x_url,youtube_url,logo_url,cover_url,is_verified,verification_label,network_tier,is_featured,is_claimed,follower_count').eq('slug',slug).eq('status','active').maybeSingle();
   if(!organizationRaw) notFound();
   const organization=organizationRaw as Organization;
   const {data:eventsRaw}=await db.from('network_events').select('id,slug,title,description,event_type,venue_name,city,state,starts_at,ends_at,external_url,is_featured').eq('organization_id',organization.id).eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(12);
@@ -51,7 +52,11 @@ export default async function OrganizationPage({params}:{params:Promise<{slug:st
             <div className="mt-4 flex flex-wrap gap-4 text-xs font-black uppercase tracking-wide text-white/40"><span className="flex items-center gap-2"><FaBasketball/>{pretty(organization.organization_type)}</span><span className="flex items-center gap-2"><FaLocationDot/>{organization.city ? `${organization.city}, ${organization.state}` : pretty(organization.region)}</span></div>
             <p className="mt-5 max-w-3xl text-sm leading-7 text-white/55 sm:text-base">{organization.description||'Official Virginia basketball organization represented in the RCL Network.'}</p>
           </div>
-          <div className="flex flex-wrap gap-2">{organization.website_url&&<TrackedNetworkLink href={organization.website_url} organizationId={organization.id} surface="organization-website" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-black uppercase text-[#03101a]"><FaGlobe/> Official website</TrackedNetworkLink>}{socialLinks.map(([label,url])=><TrackedNetworkLink key={label} href={url} organizationId={organization.id} surface={`organization-social-${label.toLowerCase()}`} className="inline-flex min-h-11 items-center rounded-xl border border-white/10 px-4 text-xs font-black uppercase text-white/55">{label}</TrackedNetworkLink>)}</div>
+          <div className="flex flex-wrap gap-2">
+            <OrganizationFollowButton organizationId={organization.id} organizationSlug={organization.slug} initialFollowerCount={organization.follower_count}/>
+            {organization.website_url&&<TrackedNetworkLink href={organization.website_url} organizationId={organization.id} surface="organization-website" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-black uppercase text-[#03101a]"><FaGlobe/> Official website</TrackedNetworkLink>}
+            {socialLinks.map(([label,url])=><TrackedNetworkLink key={label} href={url} organizationId={organization.id} surface={`organization-social-${label.toLowerCase()}`} className="inline-flex min-h-11 items-center rounded-xl border border-white/10 px-4 text-xs font-black uppercase text-white/55">{label}</TrackedNetworkLink>)}
+          </div>
         </div>
       </Container>
     </section>
@@ -69,7 +74,7 @@ export default async function OrganizationPage({params}:{params:Promise<{slug:st
             <h2 className="mt-2 font-display text-2xl font-black uppercase">Exposure, not control.</h2>
             <p className="mt-3 text-sm leading-6 text-white/45">RCL Network helps people discover this organization and its public basketball activity. Registration, payments, schedules, rosters, and program operations stay with the organization.</p>
           </section>
-          {flagship ? <section className="rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-5"><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">Why this page goes deeper</p><h3 className="mt-2 font-display text-2xl font-black uppercase">RCL-owned flagship.</h3><p className="mt-3 text-sm leading-6 text-white/45">Rich City League can carry official stats, standings, game data, fantasy, rankings, and native media because RCL owns and operates the competition.</p><Link href="/league" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">League Center <FaArrowRight/></Link></section> : <section className="rounded-2xl border border-white/10 bg-white/[.02] p-5"><p className="text-[10px] font-black uppercase tracking-[.16em] text-white/35">Organization operators</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{organization.is_claimed?'Need manager access?':'Claim this page.'}</h3><p className="mt-3 text-sm leading-6 text-white/45">Verified operators can submit events, request campaign inventory, and see the exposure RCL generates.</p><div className="mt-5 flex flex-col gap-2"><Link href={`/organizations/${organization.slug}/claim`} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-black uppercase text-[#03101a]"><FaShieldHalved/> {organization.is_claimed?'Request access':'Claim organization'}</Link><Link href="/network/dashboard" className="inline-flex items-center gap-2 px-1 text-xs font-black uppercase text-rcl-orange">Partner dashboard <FaArrowRight/></Link><Link href="/network/partners" className="inline-flex items-center gap-2 px-1 text-xs font-black uppercase text-white/45">Exposure options <FaArrowRight/></Link></div></section>}
+          {flagship ? <section className="rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-5"><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">Why this page goes deeper</p><h3 className="mt-2 font-display text-2xl font-black uppercase">RCL-owned flagship.</h3><p className="mt-3 text-sm leading-6 text-white/45">Rich City League can carry official stats, standings, game data, fantasy, rankings, and native media because RCL owns and operates the competition.</p><Link href="/league" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">League Center <FaArrowRight/></Link></section> : <section className="rounded-2xl border border-white/10 bg-white/[.02] p-5"><p className="text-[10px] font-black uppercase tracking-[.16em] text-white/35">Organization operators</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{organization.is_claimed?'Need manager access?':'Claim this page.'}</h3><p className="mt-3 text-sm leading-6 text-white/45">Verified operators can publish through review, request Boost inventory, and see RCL Reach—impressions, views, clicks, saves, follows, and campaign performance.</p><div className="mt-5 flex flex-col gap-2"><Link href={`/organizations/${organization.slug}/claim`} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-black uppercase text-[#03101a]"><FaShieldHalved/> {organization.is_claimed?'Request access':'Claim organization'}</Link><Link href="/network/dashboard/reach" className="inline-flex items-center gap-2 px-1 text-xs font-black uppercase text-rcl-orange">RCL Reach dashboard <FaArrowRight/></Link><Link href="/network/partners" className="inline-flex items-center gap-2 px-1 text-xs font-black uppercase text-white/45">Exposure options <FaArrowRight/></Link></div></section>}
         </aside>
       </div>
     </Container>
