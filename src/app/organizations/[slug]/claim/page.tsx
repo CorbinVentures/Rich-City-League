@@ -2,14 +2,16 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { OrganizationClaimForm } from '@/components/network/OrganizationClaimForm';
-import { getPublicClient } from '@/lib/supabase/server';
+import { getPublicClient } from '@/lib/public-data';
 import { FaArrowLeft, FaShieldHalved } from 'react-icons/fa6';
 
 export const revalidate = 60;
 
 export default async function OrganizationClaimPage({ params }:{ params: Promise<{slug:string}> }) {
   const { slug } = await params;
-  const supabase = getPublicClient();
+  const client = getPublicClient();
+  const supabase:any = client;
+  if (!supabase) notFound();
   const { data } = await supabase.from('network_organizations').select('id,slug,name,network_tier,is_claimed,status').eq('slug', slug).eq('status','active').maybeSingle();
   const organization = data as {id:string;slug:string;name:string;network_tier:string;is_claimed:boolean}|null;
   if (!organization) notFound();
