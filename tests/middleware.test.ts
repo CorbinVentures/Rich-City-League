@@ -25,7 +25,7 @@ vi.mock('@supabase/ssr', () => ({
 import { middleware } from '../src/middleware';
 import { getSafeNextPath } from '../src/lib/auth-redirect';
 
-describe('member platform middleware', () => {
+describe('public launch middleware', () => {
   beforeEach(() => {
     sessionUser = null;
     sessionProfile = null;
@@ -33,34 +33,47 @@ describe('member platform middleware', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
   });
 
-  it.each(['/dashboard', '/portal/profile', '/portal/operations', '/league', '/players'])(
-    'sends anonymous member route %s to the member access wall',
-    async (pathname) => {
-      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
-      expect(response.status).toBe(307);
-      const location = new URL(response.headers.get('location')!);
-      expect(location.pathname).toBe('/member-access');
-      expect(location.searchParams.get('next')).toBe(pathname);
-    },
-  );
-
-  it('does not allow the retired preview cookie to bypass membership', async () => {
-    const response = await middleware(new NextRequest('http://localhost/league', {
-      headers: { cookie: 'rcl_preview_access=rcl-beta-2026' },
-    }));
-    expect(response.status).toBe(307);
-    expect(new URL(response.headers.get('location')!).pathname).toBe('/member-access');
+  it.each([
+    '/', '/league', '/players', '/teams', '/schedule', '/games', '/standings', '/stats', '/rankings',
+    '/news', '/media', '/about', '/network', '/organizations', '/organizations/region/central-virginia',
+    '/organizations/rich-city-league', '/organizations/example/claim', '/network/partners', '/network/partners/apply',
+    '/network/events/example-event', '/runs', '/shop',
+  ])('keeps public launch route %s reachable anonymously', async (pathname) => {
+    const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
   });
 
-  it('allows an authenticated active member profile to continue', async () => {
+  it.each([
+    '/dashboard', '/portal/profile', '/portal/operations', '/portal/team', '/portal/scorebook', '/admin',
+    '/account', '/profile', '/messages', '/notifications', '/settings/notifications', '/orders',
+    '/network/dashboard', '/network/dashboard/profile', '/friends', '/connections', '/social', '/communities',
+    '/missions', '/fantasy', '/pickem',
+  ])('sends anonymous private route %s to member access', async (pathname) => {
+    const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+    expect(response.status).toBe(307);
+    const location = new URL(response.headers.get('location')!);
+    expect(location.pathname).toBe('/member-access');
+    expect(location.searchParams.get('next')).toBe(pathname);
+  });
+
+  it('allows a signed-in active member into private member routes', async () => {
     sessionUser = { id: 'player-user' };
-    sessionProfile = { role: 'player', is_active: true };
+    sessionProfile = { role: 'player', is_active: true, onboarding_complete: true };
     const response = await middleware(new NextRequest('http://localhost/dashboard'));
     expect(response.status).toBe(200);
     expect(response.headers.get('location')).toBeNull();
   });
 
-  it('sends an incomplete social identity to RCL onboarding and preserves the destination', async () => {
+  it('does not force incomplete identities through onboarding while browsing public pages', async () => {
+    sessionUser = { id: 'oauth-user' };
+    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: false };
+    const response = await middleware(new NextRequest('http://localhost/organizations'));
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+  });
+
+  it('sends an incomplete social identity to onboarding when entering a member workspace', async () => {
     sessionUser = { id: 'oauth-user' };
     sessionProfile = { role: 'fan', is_active: true, onboarding_complete: false };
     const response = await middleware(new NextRequest('http://localhost/social?tab=network'));
@@ -70,23 +83,27 @@ describe('member platform middleware', () => {
     expect(location.searchParams.get('next')).toBe('/social?tab=network');
   });
 
-  it('keeps the social onboarding page reachable for an incomplete identity', async () => {
-    sessionUser = { id: 'oauth-user' };
-    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: false };
-    const response = await middleware(new NextRequest('http://localhost/auth/complete-profile'));
-    expect(response.status).toBe(200);
-    expect(response.headers.get('location')).toBeNull();
+  it('keeps authentication and onboarding pages public', async () => {
+    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access']) {
+      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('location')).toBeNull();
+    }
   });
 
-  it('sends a signed-in account without an RCL profile to profile setup', async () => {
+  it('sends a signed-in account without an RCL profile to profile setup only for private routes', async () => {
     sessionUser = { id: 'new-user' };
     sessionProfile = null;
-    const response = await middleware(new NextRequest('http://localhost/league?view=season'));
-    const location = new URL(response.headers.get('location')!);
-    expect(response.status).toBe(307);
+
+    const publicResponse = await middleware(new NextRequest('http://localhost/league?view=season'));
+    expect(publicResponse.status).toBe(200);
+
+    const privateResponse = await middleware(new NextRequest('http://localhost/dashboard?view=season'));
+    const location = new URL(privateResponse.headers.get('location')!);
+    expect(privateResponse.status).toBe(307);
     expect(location.pathname).toBe('/member-access');
     expect(location.searchParams.get('profile')).toBe('1');
-    expect(location.searchParams.get('next')).toBe('/league?view=season');
+    expect(location.searchParams.get('next')).toBe('/dashboard?view=season');
   });
 
   it('keeps profile setup reachable for a signed-in account without a profile', async () => {
@@ -96,12 +113,16 @@ describe('member platform middleware', () => {
     expect(response.status).toBe(200);
   });
 
-  it('blocks an inactive member profile', async () => {
+  it('blocks inactive accounts from private workspaces but not public discovery', async () => {
     sessionUser = { id: 'inactive-user' };
-    sessionProfile = { role: 'fan', is_active: false };
-    const response = await middleware(new NextRequest('http://localhost/social'));
-    const location = new URL(response.headers.get('location')!);
-    expect(response.status).toBe(307);
+    sessionProfile = { role: 'fan', is_active: false, onboarding_complete: true };
+
+    const publicResponse = await middleware(new NextRequest('http://localhost/network'));
+    expect(publicResponse.status).toBe(200);
+
+    const privateResponse = await middleware(new NextRequest('http://localhost/social'));
+    const location = new URL(privateResponse.headers.get('location')!);
+    expect(privateResponse.status).toBe(307);
     expect(location.pathname).toBe('/member-access');
     expect(location.searchParams.get('inactive')).toBe('1');
   });
@@ -110,7 +131,7 @@ describe('member platform middleware', () => {
     'keeps fan accounts out of operator workspace %s',
     async (pathname) => {
       sessionUser = { id: 'fan-user' };
-      sessionProfile = { role: 'fan', is_active: true };
+      sessionProfile = { role: 'fan', is_active: true, onboarding_complete: true };
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe('/league');
@@ -119,7 +140,7 @@ describe('member platform middleware', () => {
 
   it('allows a coach into team and scorebook workspaces', async () => {
     sessionUser = { id: 'coach-user' };
-    sessionProfile = { role: 'coach', is_active: true };
+    sessionProfile = { role: 'coach', is_active: true, onboarding_complete: true };
     for (const pathname of ['/portal/team', '/portal/scorebook']) {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(200);
@@ -128,34 +149,21 @@ describe('member platform middleware', () => {
 
   it('keeps non-admin members out of admin routes', async () => {
     sessionUser = { id: 'coach-user' };
-    sessionProfile = { role: 'coach', is_active: true };
-    const response = await middleware(new NextRequest('http://localhost/admin/operations'));
+    sessionProfile = { role: 'coach', is_active: true, onboarding_complete: true };
+    const response = await middleware(new NextRequest('http://localhost/admin/network/acquisition'));
     expect(response.status).toBe(307);
     expect(new URL(response.headers.get('location')!).pathname).toBe('/league');
   });
 
   it('allows an admin into admin routes', async () => {
     sessionUser = { id: 'admin-user' };
-    sessionProfile = { role: 'admin', is_active: true };
-    const response = await middleware(new NextRequest('http://localhost/admin/operations'));
+    sessionProfile = { role: 'admin', is_active: true, onboarding_complete: true };
+    const response = await middleware(new NextRequest('http://localhost/admin/network/acquisition'));
     expect(response.status).toBe(200);
   });
 
-  it('keeps authentication and legal pages reachable anonymously', async () => {
-    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access']) {
-      const response = await middleware(new NextRequest(`http://localhost${pathname}`));
-      expect(response.status).toBe(200);
-      expect(response.headers.get('location')).toBeNull();
-    }
-  });
-
-  it('keeps social share metadata reachable anonymously', async () => {
-    const response = await middleware(new NextRequest('http://localhost/opengraph-image'));
-    expect(response.status).toBe(200);
-  });
-
-  it.each(['/manifest.webmanifest', '/sw.js', '/favicon.svg', '/icons/rcl-app-180.png', '/icons/rcl-app-192.png', '/icons/rcl-app-512.png', '/icons/rcl-app-maskable-512.png'])(
-    'keeps PWA asset %s reachable anonymously',
+  it.each(['/manifest.webmanifest', '/sw.js', '/favicon.svg', '/icons/rcl-app-180.png', '/opengraph-image'])(
+    'keeps public asset %s reachable anonymously',
     async (pathname) => {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(200);
@@ -163,23 +171,16 @@ describe('member platform middleware', () => {
     },
   );
 
-  it('keeps sign-in reachable when authentication configuration is missing', async () => {
+  it('keeps public pages reachable when authentication configuration is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const response = await middleware(new NextRequest('http://localhost/auth/sign-in'));
+    const response = await middleware(new NextRequest('http://localhost/organizations'));
     expect(response.status).toBe(200);
     expect(response.headers.get('location')).toBeNull();
   });
 
-  it('keeps PWA assets reachable when authentication configuration is missing', async () => {
+  it('returns 503 for private pages when authentication configuration is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const response = await middleware(new NextRequest('http://localhost/manifest.webmanifest'));
-    expect(response.status).toBe(200);
-    expect(response.headers.get('location')).toBeNull();
-  });
-
-  it('returns 503 for protected pages when authentication configuration is missing', async () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const response = await middleware(new NextRequest('http://localhost/league'));
+    const response = await middleware(new NextRequest('http://localhost/network/dashboard'));
     expect(response.status).toBe(503);
   });
 
@@ -191,13 +192,13 @@ describe('member platform middleware', () => {
   });
 
   it.each(['https://evil-site.com', '//evil-site.com', 'javascript:alert(1)', '/\\evil-site.com'])(
-    'legacy auth redirect helper rejects unsafe next destination %s',
+    'auth redirect helper rejects unsafe next destination %s',
     (next) => {
       expect(getSafeNextPath(next)).toBe('/dashboard');
     },
   );
 
-  it('legacy auth redirect helper preserves a trusted internal query string', () => {
+  it('auth redirect helper preserves a trusted internal query string', () => {
     expect(getSafeNextPath('/portal/operations?view=queue')).toBe('/portal/operations?view=queue');
   });
 });

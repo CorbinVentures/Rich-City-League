@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City League', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community with competition, player stats, profiles, runs, fantasy, media and culture.', url: 'https://richcityhoops.com', images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Rich City League — Richmond basketball, competition and community' }] },
   twitter: { card: 'summary_large_image', title: 'Rich City League | Richmond VA Basketball League', description: 'Richmond-born basketball league and year-round hoops community.', images: ['/opengraph-image'] },
-  robots: { index: false, follow: false, googleBot: { index: false, follow: false, 'max-image-preview': 'none', 'max-snippet': 0, 'max-video-preview': 0 } },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
 export const viewport: Viewport = {

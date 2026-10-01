@@ -5,6 +5,34 @@ import { getSupabaseConfig } from './lib/supabase-config';
 
 type AccessProfile = { role: string | null; is_active: boolean | null; onboarding_complete?: boolean | null };
 
+const MEMBER_ROUTE_PREFIXES = [
+  '/dashboard',
+  '/portal',
+  '/admin',
+  '/account',
+  '/profile',
+  '/messages',
+  '/notifications',
+  '/settings',
+  '/orders',
+  '/network/dashboard',
+  '/friends',
+  '/connections',
+  '/social',
+  '/communities',
+  '/missions',
+  '/fantasy',
+  '/pickem',
+] as const;
+
+function matchesRoute(pathname: string, prefix: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function requiresMemberAccess(pathname: string) {
+  return MEMBER_ROUTE_PREFIXES.some((prefix) => matchesRoute(pathname, prefix));
+}
+
 function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
   const url = request.nextUrl.clone();
   url.pathname = '/member-access';
@@ -25,20 +53,17 @@ function socialOnboardingUrl(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const metadataAsset = pathname === '/opengraph-image' || pathname === '/twitter-image' || pathname === '/icon' || pathname === '/apple-icon';
-  const pwaAsset = pathname === '/manifest.webmanifest'
-    || pathname === '/sw.js'
-    || pathname === '/favicon.svg'
-    || pathname.startsWith('/icons/');
-  const publicAccess = pathname === '/member-access' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/') || metadataAsset || pwaAsset;
-  const config = getSupabaseConfig();
+  const protectedPath = requiresMemberAccess(pathname);
 
-  // RCL is a member platform. Authentication must be available before protected
-  // basketball content can be served; there is no anonymous preview-cookie bypass.
+  // RCL's public launch is public by default. League discovery, player/team data,
+  // news, Network pages, organization listings, partner acquisition, event pages,
+  // media, registration and other public surfaces must remain crawlable and usable
+  // without an account. Authentication is required only for member workspaces.
+  if (!protectedPath) return NextResponse.next();
+
+  const config = getSupabaseConfig();
   if (config.status !== 'configured') {
-    return publicAccess
-      ? NextResponse.next()
-      : NextResponse.json({ error: 'RCL member authentication is temporarily unavailable.' }, { status: 503 });
+    return NextResponse.json({ error: 'RCL member authentication is temporarily unavailable.' }, { status: 503 });
   }
 
   let response = NextResponse.next({ request });
@@ -54,11 +79,7 @@ export async function middleware(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    if (publicAccess) return response;
-    return NextResponse.redirect(memberAccessUrl(request));
-  }
+  if (!user) return NextResponse.redirect(memberAccessUrl(request));
 
   const { data: profileData } = await supabase
     .from('profiles')
@@ -67,16 +88,13 @@ export async function middleware(request: NextRequest) {
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
 
-  // A signed-in auth account is not platform membership by itself. Members must
-  // have a real RCL profile; /profile remains reachable so they can create it.
+  // A signed-in auth identity still needs an RCL profile before member-only tools
+  // are available. /profile itself remains reachable so that profile can be built.
   if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
   }
 
-  // Apple/Google can securely prove identity before RCL has collected the local
-  // 16+ age screen, role choice, username and legal acknowledgements. Keep those
-  // new social identities inside onboarding until the RCL-specific profile is done.
-  if (profile?.onboarding_complete === false && !pathname.startsWith('/auth/')) {
+  if (profile?.onboarding_complete === false && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(socialOnboardingUrl(request));
   }
 
