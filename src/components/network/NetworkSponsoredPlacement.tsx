@@ -63,7 +63,8 @@ export function NetworkSponsoredPlacement({
       if(!active||error)return;
       const eligible=(data??[]).map((row:any)=>({...row,organization:Array.isArray(row.organization)?row.organization[0]:row.organization})).filter((row:any)=>{
         const targets=Array.isArray(row.target_regions)?row.target_regions:[];
-        return targets.length===0||targets.includes('statewide')||!region||targets.includes(region);
+        if(targets.length===0||targets.includes('statewide'))return true;
+        return Boolean(region&&targets.includes(region));
       }) as Promotion[];
       setPromotion(eligible[0]??null);
     };
