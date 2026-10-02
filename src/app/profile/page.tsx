@@ -93,7 +93,7 @@ export default function ProfilePage() {
 
   const statusMessage = error || (saved ? isPrivileged ? 'Profile saved. Your league authorization is unchanged.' : role === 'fan' ? 'Profile saved. Your fan identity is active.' : 'Profile saved. Your role request is pending league verification.' : '');
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
       eyebrow="RCL Identity"
       title="Your profile"
