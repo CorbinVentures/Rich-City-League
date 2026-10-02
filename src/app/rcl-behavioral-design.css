@@ -131,11 +131,11 @@ select {
 
 /* Legacy utility color rescue: orange once again means intentional attention. */
 .rcl-platform-root [class*="text-orange-"],
-.rcl-platform-root [class*="text-[#ff4f16"],
-.rcl-platform-root [class*="text-[#FF4F16"],
-.rcl-platform-root [class*="text-[#ff6b1a"],
-.rcl-platform-root [class*="text-[#f97316"],
-.rcl-platform-root [class*="text-[#f5921e"] {
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"] {
   color: var(--rcl-psych-orange) !important;
 }
 
