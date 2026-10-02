@@ -579,6 +579,45 @@ a[aria-label="Open administrator control center"] {
   box-shadow:var(--rcl-v3-shadow)!important;
 }
 
+
+/*
+ * Final light-surface specificity guard.
+ * Legacy executive CSS uses a high-specificity selector on rounded bordered
+ * section/article/div cards and applies a dark translucent background with
+ * !important. That selector was still winning over the rebrand card rules in
+ * the installed PWA, producing navy text on gray cards. These selectors match
+ * the canonical social/product surfaces with greater specificity and explicitly
+ * clear the legacy background image/glass treatment.
+ */
+.rcl-platform-root .rcl-feed-post[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-story-rail[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-feed-composer[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-feed-mode-tabs[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-platform-panel[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-card[class*="rounded"][class*="border"],
+.rcl-platform-root .rcl-panel[class*="rounded"][class*="border"] {
+  border-color:var(--rcl-v3-border)!important;
+  background-color:var(--rcl-v3-surface)!important;
+  background-image:none!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Keep the feed's internal utility panels light and high-contrast as well. */
+.rcl-platform-root .rcl-feed-post [class*="bg-black/"],
+.rcl-platform-root .rcl-feed-post [class*="bg-white/["]:not(.rcl-dark-media) {
+  background-color:var(--rcl-v3-canvas)!important;
+  background-image:none!important;
+}
+.rcl-platform-root .rcl-feed-post [class*="text-white/"] {
+  color:var(--rcl-v3-copy)!important;
+}
+.rcl-platform-root .rcl-feed-post [class~="text-white"] {
+  color:var(--rcl-v3-ink)!important;
+}
+
 @media (max-width:959px) {
   .rcl-universal-topbar {
     height:64px!important;
