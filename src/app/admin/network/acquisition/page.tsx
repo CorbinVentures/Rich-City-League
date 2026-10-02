@@ -19,7 +19,7 @@ import {
 } from 'react-icons/fa6';
 
 type Inquiry={id:string;organization_name:string;organization_type:string;city:string|null;region:string;contact_name:string;contact_email:string;website_url:string|null;instagram_url:string|null;plan_interest:string;goals:string|null;status:string;source:string;converted_organization_id:string|null;created_at:string};
-type Prospect={id:string;organization_name:string;organization_type:string;city:string|null;region:string;description:string|null;website_url:string|null;instagram_url:string|null;source_url:string;source_label:string|null;source_checked_at:string;contact_name:string|null;contact_email:string|null;contact_instagram_url:string|null;notes:string|null;status:string;outreach_status:string;last_contacted_at:string|null;follow_up_at:string|null;published_organization_id:string|null;created_at:string};
+type Prospect={id:string;organization_name:string;organization_type:string;city:string|null;region:string;description:string|null;website_url:string|null;instagram_url:string|null;source_url:string;source_label:string|null;source_checked_at:string;contact_name:string|null;contact_role:string|null;contact_email:string|null;contact_phone:string|null;contact_instagram_url:string|null;contact_source_url:string|null;contact_checked_at:string|null;notes:string|null;status:string;outreach_status:string;last_contacted_at:string|null;follow_up_at:string|null;published_organization_id:string|null;created_at:string};
 type Created={id:string;slug:string};
 type ImportRow=Record<string,string>;
 
@@ -27,7 +27,7 @@ const TYPES=['league','tournament','program','club','team','media','creator','fa
 const REGIONS=['central-virginia','hampton-roads','northern-virginia','shenandoah','southwest-virginia','statewide','other'];
 const PROSPECT_STATUSES=['staged','ready','published','duplicate','archived'];
 const OUTREACH=['not-contacted','queued','contacted','replied','interested','claim-sent','claimed','verified','paid-prospect','not-interested'];
-const CSV_HEADERS=['organization_name','organization_type','region','city','website_url','instagram_url','facebook_url','x_url','youtube_url','source_url','source_label','description','contact_name','contact_email','contact_instagram_url','notes','status','outreach_status'];
+const CSV_HEADERS=['organization_name','organization_type','region','city','website_url','instagram_url','facebook_url','x_url','youtube_url','source_url','source_label','description','contact_name','contact_role','contact_email','contact_phone','contact_instagram_url','contact_source_url','contact_checked_at','notes','status','outreach_status'];
 
 export default function NetworkAcquisitionPage(){
   const {user,profile,loading:authLoading}=useAuth();
@@ -48,7 +48,7 @@ export default function NetworkAcquisitionPage(){
     if(!authorized||!db)return;
     setLoading(true); setError('');
     const [prospectResult,inquiryResult]=await Promise.all([
-      db.from('network_acquisition_prospects').select('id,organization_name,organization_type,city,region,description,website_url,instagram_url,source_url,source_label,source_checked_at,contact_name,contact_email,contact_instagram_url,notes,status,outreach_status,last_contacted_at,follow_up_at,published_organization_id,created_at').order('created_at',{ascending:false}),
+      db.from('network_acquisition_prospects').select('id,organization_name,organization_type,city,region,description,website_url,instagram_url,source_url,source_label,source_checked_at,contact_name,contact_role,contact_email,contact_phone,contact_instagram_url,contact_source_url,contact_checked_at,notes,status,outreach_status,last_contacted_at,follow_up_at,published_organization_id,created_at').order('created_at',{ascending:false}),
       db.from('network_partner_inquiries').select('id,organization_name,organization_type,city,region,contact_name,contact_email,website_url,instagram_url,plan_interest,goals,status,source,converted_organization_id,created_at').order('created_at',{ascending:false}),
     ]);
     if(prospectResult.error)setError(prospectResult.error.message); else setProspects(prospectResult.data??[]);
@@ -61,12 +61,13 @@ export default function NetworkAcquisitionPage(){
   const visibleProspects=useMemo(()=>{
     const q=query.trim().toLowerCase();
     if(!q)return prospects;
-    return prospects.filter(item=>[item.organization_name,item.city,item.region,item.organization_type,item.outreach_status,item.contact_name,item.contact_email].some(value=>value?.toLowerCase().includes(q)));
+    return prospects.filter(item=>[item.organization_name,item.city,item.region,item.organization_type,item.outreach_status,item.contact_name,item.contact_role,item.contact_email,item.contact_phone].some(value=>value?.toLowerCase().includes(q)));
   },[prospects,query]);
 
   const dueFollowUps=prospects.filter(item=>item.follow_up_at&&new Date(item.follow_up_at)<=new Date()&&!['claimed','verified','paid-prospect','not-interested'].includes(item.outreach_status)).length;
   const notContacted=prospects.filter(item=>item.outreach_status==='not-contacted'||item.outreach_status==='queued').length;
   const publishedCount=prospects.filter(item=>item.published_organization_id).length;
+  const contactReady=prospects.filter(item=>item.contact_email||item.contact_phone||item.contact_instagram_url).length;
   const claimPipeline=prospects.filter(item=>['contacted','replied','interested','claim-sent'].includes(item.outreach_status)).length;
 
   async function updateProspect(id:string,patch:Record<string,unknown>){
@@ -75,6 +76,24 @@ export default function NetworkAcquisitionPage(){
     setBusy(null);
     if(updateError)return setError(updateError.message);
     setProspects(current=>current.map(item=>item.id===id?{...item,...patch} as Prospect:item));
+  }
+
+  async function saveContact(id:string,event:React.FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    const form=new FormData(event.currentTarget);
+    const clean=(key:string)=>{const value=String(form.get(key)??'').trim();return value||null};
+    const contactSource=clean('contact_source_url');
+    if(contactSource&&!/^https?:\/\//i.test(contactSource)){setError('Contact source must use http or https.');return}
+    await updateProspect(id,{
+      contact_name:clean('contact_name'),
+      contact_role:clean('contact_role'),
+      contact_email:clean('contact_email'),
+      contact_phone:clean('contact_phone'),
+      contact_instagram_url:clean('contact_instagram_url'),
+      contact_source_url:contactSource,
+      contact_checked_at:new Date().toISOString(),
+    });
+    setMessage('Contact research saved.');
   }
 
   async function publishProspect(id:string){
@@ -138,8 +157,9 @@ export default function NetworkAcquisitionPage(){
     {error&&<p className="mt-6 rounded-xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
     {message&&<p className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">{message}</p>}
 
-    <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
       <Stat value={prospects.length} label="Research prospects"/>
+      <Stat value={contactReady} label="Contact-ready" accent="green"/>
       <Stat value={notContacted} label="Need first contact"/>
       <Stat value={claimPipeline} label="Active outreach"/>
       <Stat value={publishedCount} label="Prospects published" accent="green"/>
@@ -171,9 +191,12 @@ export default function NetworkAcquisitionPage(){
               {item.website_url&&<a href={item.website_url} target="_blank" rel="noreferrer" className="block font-bold text-white/60 hover:text-white">Official website</a>}
             </div>
             <div className="space-y-2 text-xs text-white/40">
-              <p className="font-bold text-white/65">{item.contact_name||'Contact not researched yet'}</p>
+              <p className="font-bold text-white/65">{item.contact_name||'Contact not researched yet'}{item.contact_role?<span className="font-normal text-white/35"> · {item.contact_role}</span>:null}</p>
               {item.contact_email&&<a href={`mailto:${item.contact_email}`} className="block hover:text-white">{item.contact_email}</a>}
+              {item.contact_phone&&<a href={`tel:${item.contact_phone}`} className="block hover:text-white">{item.contact_phone}</a>}
               {item.contact_instagram_url&&<a href={item.contact_instagram_url} target="_blank" rel="noreferrer" className="block hover:text-white">Contact Instagram</a>}
+              {item.contact_source_url&&<a href={item.contact_source_url} target="_blank" rel="noreferrer" className="block text-[10px] font-black uppercase text-white/50 hover:text-white">Contact source <FaArrowUpRightFromSquare className="ml-1 inline text-[9px]"/></a>}
+              {item.contact_checked_at&&<p className="text-[10px] text-white/25">Checked {new Date(item.contact_checked_at).toLocaleDateString()}</p>}
               {item.follow_up_at&&<p className={new Date(item.follow_up_at)<=new Date()?'text-amber-200':'text-white/35'}>Follow up {new Date(item.follow_up_at).toLocaleDateString()}</p>}
             </div>
             <div className="grid gap-2">
@@ -186,6 +209,18 @@ export default function NetworkAcquisitionPage(){
               {slug&&<Link href={`/organizations/${slug}`} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-[10px] font-black uppercase text-white/65">Open listing <FaArrowRight/></Link>}
             </div>
           </div>
+          <details className="mt-4 border-t border-white/8 pt-4">
+            <summary className="cursor-pointer text-[10px] font-black uppercase tracking-wider text-white/45 hover:text-white">Edit outreach contact</summary>
+            <form onSubmit={e=>void saveContact(item.id,e)} className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <input name="contact_name" defaultValue={item.contact_name??''} placeholder="Contact name" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none"/>
+              <input name="contact_role" defaultValue={item.contact_role??''} placeholder="Role / title" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none"/>
+              <input name="contact_email" type="email" defaultValue={item.contact_email??''} placeholder="Email" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none"/>
+              <input name="contact_phone" type="tel" defaultValue={item.contact_phone??''} placeholder="Phone" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none"/>
+              <input name="contact_instagram_url" type="url" defaultValue={item.contact_instagram_url??''} placeholder="Instagram URL" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none md:col-span-1"/>
+              <input name="contact_source_url" type="url" defaultValue={item.contact_source_url??''} placeholder="Contact source URL" className="min-h-10 rounded-xl border border-white/10 bg-[#090D12] px-3 text-xs text-white outline-none md:col-span-1 xl:col-span-2"/>
+              <button disabled={busy===item.id} className="min-h-10 rounded-xl border border-rcl-orange/35 px-4 text-[10px] font-black uppercase text-rcl-orange disabled:opacity-50">Save contact research</button>
+            </form>
+          </details>
         </article>})}
         {!visibleProspects.length&&<Empty>{prospects.length?'No prospects match that search.':'No researched prospects yet. Use Import / stage to build the first cohort.'}</Empty>}
       </div>
@@ -225,7 +260,7 @@ function parseCsv(input:string):{rows:ImportRow[];error:string}{
   return {rows,error:''};
 }
 function parseCsvLine(line:string){const out:string[]=[];let current='';let quoted=false;for(let i=0;i<line.length;i++){const char=line[i];if(char==='"'){if(quoted&&line[i+1]==='"'){current+='"';i++;}else quoted=!quoted;}else if(char===','&&!quoted){out.push(current);current='';}else current+=char;}out.push(current);return out;}
-function validateImportRow(row:ImportRow){const issues:string[]=[];const name=row.organization_name||row.name;if(!name||name.trim().length<2)issues.push('organization_name is required');if(!row.source_url||!/^https?:\/\//i.test(row.source_url))issues.push('source_url must be an http(s) URL');if(row.website_url&&!/^https?:\/\//i.test(row.website_url))issues.push('website_url must be an http(s) URL');if(row.organization_type&&!TYPES.includes(row.organization_type))issues.push(`organization_type must be one of ${TYPES.join(', ')}`);if(row.region&&!REGIONS.includes(row.region))issues.push(`region must be one of ${REGIONS.join(', ')}`);if(row.status&&!PROSPECT_STATUSES.includes(row.status))issues.push('invalid status');if(row.outreach_status&&!OUTREACH.includes(row.outreach_status))issues.push('invalid outreach_status');return issues;}
+function validateImportRow(row:ImportRow){const issues:string[]=[];const name=row.organization_name||row.name;if(!name||name.trim().length<2)issues.push('organization_name is required');if(!row.source_url||!/^https?:\/\//i.test(row.source_url))issues.push('source_url must be an http(s) URL');if(row.website_url&&!/^https?:\/\//i.test(row.website_url))issues.push('website_url must be an http(s) URL');if(row.contact_source_url&&!/^https?:\/\//i.test(row.contact_source_url))issues.push('contact_source_url must be an http(s) URL');if(row.organization_type&&!TYPES.includes(row.organization_type))issues.push(`organization_type must be one of ${TYPES.join(', ')}`);if(row.region&&!REGIONS.includes(row.region))issues.push(`region must be one of ${REGIONS.join(', ')}`);if(row.status&&!PROSPECT_STATUSES.includes(row.status))issues.push('invalid status');if(row.outreach_status&&!OUTREACH.includes(row.outreach_status))issues.push('invalid outreach_status');return issues;}
 function toDateInput(value:string|null){if(!value)return '';const date=new Date(value);if(Number.isNaN(date.getTime()))return '';return date.toISOString().slice(0,10)}
 function Stat({value,label,accent}:{value:number;label:string;accent?:'green'}){return <div className="rounded-2xl border border-white/8 bg-[#111820]/75 p-5"><strong className={`font-display text-4xl font-black ${accent==='green'?'text-emerald-300':'text-white'}`}>{value}</strong><span className="mt-1 block text-[10px] font-black uppercase tracking-[.14em] text-white/35">{label}</span></div>}
 function Pill({children,tone}:{children:React.ReactNode;tone?:'green'}){return <span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${tone==='green'?'border-emerald-400/20 text-emerald-300':'border-white/10 text-white/45'}`}>{children}</span>}
