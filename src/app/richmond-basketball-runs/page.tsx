@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: { absolute: 'Basketball Runs Richmond VA | RCL Open Runs' },
   description: 'Find basketball runs in Richmond, Virginia through Rich City League. Discover the RCL Runs community, then sign in to host or join local basketball activity.',
   alternates: { canonical: '/richmond-basketball-runs' },
-  openGraph: { images: [{ url: 'https://richcityhoops.com/opengraph-image?v=20261002-2', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }], url: '/richmond-basketball-runs', title: 'Basketball Runs Richmond VA | RCL', description: 'A Richmond basketball home for finding, hosting and joining runs through the RCL community.' },
+  openGraph: { images: [{ url: 'https://richcityhoops.com/rcl-share-20261002.png', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }], url: '/richmond-basketball-runs', title: 'Basketball Runs Richmond VA | RCL', description: 'A Richmond basketball home for finding, hosting and joining runs through the RCL community.' },
 };
 
 export default function RichmondBasketballRunsPage() {
