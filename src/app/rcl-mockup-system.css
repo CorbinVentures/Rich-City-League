@@ -101,8 +101,8 @@ select {
   color:var(--rcl-v3-ink)!important;
 }
 
-.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#0"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
-.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#1"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#0"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module):not(.rcl-modal-scrim),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#1"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module):not(.rcl-modal-scrim),
 .rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-white/["]:not(.rcl-dark-media),
 .rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-black/"]:not(.rcl-dark-media),
 .rcl-platform-root :where(section,article,aside,form,div,header)[class~="bg-rcl-black"]:not(.rcl-dark-media) {
@@ -135,6 +135,9 @@ select {
   color:var(--rcl-v3-ink)!important;
   box-shadow:var(--rcl-v3-shadow)!important;
 }
+
+/* Modal scrims stay translucent navy while modal surfaces remain light. */
+.rcl-modal-scrim { background:rgba(15,37,71,.35)!important; }
 
 /* Inputs from the mockup: white, bordered, navy text. */
 .rcl-platform-root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
