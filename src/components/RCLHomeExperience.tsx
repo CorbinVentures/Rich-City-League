@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import {
   FaArrowRight, FaBasketball, FaComments, FaCompass, FaLocationDot,
-  FaPeopleGroup, FaPlay, FaShirt, FaCrown, FaTrophy, FaUserGroup
+  FaPlay, FaShirt, FaCrown, FaTrophy, FaUserGroup
 } from 'react-icons/fa6';
 
 type Team={id:string;name:string;logo_url?:string|null};
