@@ -71,11 +71,9 @@ type FeedMode = 'for-you' | 'following' | 'trending';
 
 const leftNav = [
   { href: '/social', label: 'Home', icon: FaHouse },
-  { href: '/explore', label: 'Explore', icon: FaCompass },
-  { href: '/friends', label: 'People', icon: FaUserGroup },
-  { href: '/communities', label: 'Communities', icon: FaPeopleGroup },
+  { href: '/explore', label: 'Discover', icon: FaCompass },
+  { href: '/create', label: 'Create', icon: FaPlus },
   { href: '/runs', label: 'Runs', icon: FaBasketball },
-  { href: '/messages', label: 'Messages', icon: FaComments },
   { href: '/league', label: 'League', icon: FaBasketball },
 ];
 
@@ -476,29 +474,21 @@ export default function NetworkHome() {
   const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
 
   return (
-    <main className="min-h-screen bg-[#03070d] pb-24 text-white lg:pb-0">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#03070d]/95 backdrop-blur-xl">
-        <Container maxWidth="xl" className="flex h-16 items-center gap-3 px-3 sm:h-20 sm:px-4">
-          <Link href="/social" className="flex shrink-0 items-center gap-2" aria-label="RCL Network home">
-            <span className="grid h-10 w-10 place-items-center rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 font-black text-rcl-blue">RCL</span>
-            <span className="hidden sm:block"><b className="block text-xs font-black uppercase tracking-[.18em]">RCL Network</b><small className="text-[10px] font-bold uppercase tracking-[.14em] text-white/25">Richmond basketball</small></span>
-          </Link>
-          <label className="relative mx-auto min-w-0 max-w-xl flex-1"><span className="sr-only">Search RCL Network</span><FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-white/25"/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search people and posts" className="h-11 w-full rounded-2xl border border-white/10 bg-[#07111b] pl-10 pr-4 text-sm outline-none placeholder:text-white/25 focus:border-rcl-blue/45"/></label>
-          {user ? <>
-            <Link href="/messages" aria-label="Messages" className="hidden h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/55 hover:text-white sm:grid"><FaComments/></Link>
-            <Link href="/notifications" aria-label="Notifications" className="hidden h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/55 hover:text-white sm:grid"><FaBell/></Link>
-            <button type="button" onClick={openComposer} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rcl-orange px-3 text-xs font-black uppercase tracking-wider text-black sm:px-4"><FaPlus/><span className="hidden sm:inline">Create</span></button>
-          </> : <Link href="/auth/sign-in?redirect=/social" className="rounded-xl bg-rcl-orange px-4 py-2.5 text-xs font-black uppercase text-black">Sign in</Link>}
-        </Container>
-      </header>
-
+    <main className="rcl-social-world min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
-      <Container maxWidth="xl" className="py-4 sm:py-5">
-        <div className="grid gap-5 lg:grid-cols-[210px_minmax(0,680px)_minmax(260px,1fr)] xl:grid-cols-[220px_minmax(0,720px)_310px]">
+      <Container maxWidth="xl" className="py-5 sm:py-7">
+        <section className="rcl-feed-intro">
+          <div><p>Home</p><h1>Your basketball world</h1><span>People, runs, highlights and competition around you.</span></div>
+          <div className="rcl-feed-intro-actions">
+            <label><span className="sr-only">Search this feed</span><FaMagnifyingGlass/><input value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search this feed"/></label>
+            {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
+          </div>
+        </section>
+        <div className="grid gap-5 lg:grid-cols-[190px_minmax(0,680px)_minmax(250px,1fr)] xl:grid-cols-[190px_minmax(0,720px)_300px]">
           <aside className="hidden lg:block">
             <div className="sticky top-24 space-y-1">
-              {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold transition ${href === '/social' ? 'bg-rcl-blue/10 text-rcl-blue' : 'text-white/50 hover:bg-white/[.04] hover:text-white'}`}><Icon/><span>{label}</span></Link>)}
+              {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
               <div className="my-3 border-t border-white/10"/>
               {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCL Network</Link>}
               <p className="px-3 pt-4 text-[10px] font-black uppercase leading-5 tracking-[.18em] text-white/20">Your city · Your court · Your rep</p>
