@@ -16,6 +16,7 @@ import './rcl-professional-finish.css';
 import './rcl-behavioral-design.css';
 import './rcl-behavioral-home.css';
 import './rcl-social-world.css';
+import './rcl-site-uniform.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'RCL',
-    statusBarStyle: 'black',
+    statusBarStyle: 'default',
   },
   formatDetection: { telephone: false },
   openGraph: { type: 'website', locale: 'en_US', siteName: 'RCL', title: 'RCL | Richmond Basketball Social', description: 'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.', url: 'https://richcityhoops.com', images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }] },
