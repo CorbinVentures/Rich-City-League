@@ -84,7 +84,7 @@ export default function FriendsPage() {
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
-      eyebrow="RCL Network"
+      eyebrow="Discover"
       title="People"
       accent="Build your basketball circle"
       description="Discover players, coaches, teammates and basketball people across Rich City League—then turn those connections into conversations, communities and runs."
