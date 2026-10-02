@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Learn everything about the Rich City League — registration, basketball tryouts, player evaluations, the RCL draft, teams, coaches, schedules, rules, fantasy basketball, social features, news, media, and the league's Richmond history since 2011.",
   alternates: { canonical: '/faq' },
   openGraph: {
-    images: [{ url: 'https://richcityhoops.com/opengraph-image?v=20261002-2', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }],
+    images: [{ url: 'https://richcityhoops.com/rcl-share-20261002.png', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }],
     title: 'Rich City League FAQ | Richmond Basketball League | RCL',
     description: 'The official RCL information hub for Richmond basketball players, coaches, fans, and community members.',
     url: '/faq',
