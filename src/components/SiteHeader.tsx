@@ -56,7 +56,7 @@ export function SiteHeader(){
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
       <Link href={memberMode?'/social':'/'} className="rcl-universal-brand" aria-label="RCL home">
-        <span className="rcl-universal-mark">RCL</span>
+        <span className="rcl-universal-mark">R</span>
         <span><b>RCL</b><small>Basketball Social</small></span>
       </Link>
 
