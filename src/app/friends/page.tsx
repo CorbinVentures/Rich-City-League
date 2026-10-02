@@ -82,7 +82,7 @@ export default function FriendsPage() {
   const outbound = friends.filter(row => row.status === 'pending' && row.requester_id === user?.id);
   const displayedPeople = search.trim().length >= 2 ? people : suggestions;
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-world min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
       eyebrow="Discover"
       title="People"
