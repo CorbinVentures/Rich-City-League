@@ -178,8 +178,8 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   return <main className={'rcl-social-profile min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4">
-        <Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70 transition hover:border-rcl-blue/30 hover:text-white" aria-label="Back to RCL Network"><FaArrowLeft /></Link>
-        <div className="min-w-0"><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-blue">RCL Network · Identity</p><p className="truncate text-sm font-black">{name}</p></div>
+        <Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70 transition hover:border-rcl-blue/30 hover:text-white" aria-label="Back to RCL Home"><FaArrowLeft /></Link>
+        <div className="min-w-0"><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-blue">RCL Social · Identity</p><p className="truncate text-sm font-black">{name}</p></div>
       </div>
     </header>
 
@@ -191,7 +191,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
             <div className="rcl-profile-rep-ring" style={{'--profile-progress':progress+'%'} as React.CSSProperties}>
               <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-rcl-orange text-4xl font-black text-black">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0,1).toUpperCase()}</div><em>{socialLevel}</em>
             </div>
-            <Link href="/social" className="mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Network Home</Link>
+            <Link href="/social" className="mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Home</Link>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -278,7 +278,7 @@ function StatsTab({player,basketball,profileLocation}:{player:PlayerRow|null;bas
 
 function CareerTab({basketball,rows,authorMap}:{basketball:any;rows:ProfilePost[];authorMap:Map<any,any>}){
   return <div className="space-y-5">
-    <div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Current chapter</p><h2 className="mt-2 font-display text-2xl font-black uppercase">{basketball?.team?.name || 'RCL Network Member'}</h2><p className="mt-2 text-sm text-white/40">{basketball?.seasonName || 'Official team and season history will appear as this identity participates in RCL.'}</p>{basketball?.joinedAt&&<p className="mt-4 text-xs font-black uppercase tracking-wider text-white/25">Joined {new Date(basketball.joinedAt).toLocaleDateString()}</p>}</div><div className="rounded-2xl border border-rcl-orange/15 bg-rcl-orange/[.035] p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Verified moments</p><strong className="mt-2 block font-display text-4xl font-black">{rows.length}</strong><p className="mt-2 text-sm text-white/40">Official game, draft, badge, REP and league moments attached to this identity.</p></div></div>
+    <div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Current chapter</p><h2 className="mt-2 font-display text-2xl font-black uppercase">{basketball?.team?.name || 'RCL Member'}</h2><p className="mt-2 text-sm text-white/40">{basketball?.seasonName || 'Official team and season history will appear as this identity participates in RCL.'}</p>{basketball?.joinedAt&&<p className="mt-4 text-xs font-black uppercase tracking-wider text-white/25">Joined {new Date(basketball.joinedAt).toLocaleDateString()}</p>}</div><div className="rounded-2xl border border-rcl-orange/15 bg-rcl-orange/[.035] p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Verified moments</p><strong className="mt-2 block font-display text-4xl font-black">{rows.length}</strong><p className="mt-2 text-sm text-white/40">Official game, draft, badge, REP and league moments attached to this identity.</p></div></div>
     <ProfilePostList rows={rows} authorMap={authorMap} emptyTitle="Career timeline is just getting started" emptyCopy="Verified league moments will collect here as this member plays, earns and participates."/>
   </div>;
 }
