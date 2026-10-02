@@ -43,7 +43,7 @@ export function RCLVisualSystem(){
     body :where(.text-rcl-gold) { color:var(--rcl-gold)!important; }
     body :where(.text-rcl-blue) { color:var(--rcl-blue)!important; }
     body :where(.bg-rcl-orange) { background:var(--rcl-orange)!important; color:#fff!important; box-shadow:none!important; }
-    body :where(.bg-rcl-gold) { background:var(--rcl-gold)!important; color:#221A0D!important; box-shadow:none!important; }
+    body :where(.bg-rcl-gold) { background:var(--rcl-gold)!important; color:#fff!important; box-shadow:none!important; }
 
       /* Cinematic Draft Platform */
       .rcl-draft-platform { background: radial-gradient(circle at 50% 0%, rgba(47,111,175,.055), transparent 34rem), #05070b; }
