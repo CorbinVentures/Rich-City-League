@@ -158,7 +158,7 @@ async function buildCommunityPost(db: SupabaseClient, clock: Clock) {
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_system_account', false),
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_system_account', false).gte('created_at', since),
   ]);
-  return `🤝 RCL COMMUNITY · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active member profiles are part of the Network${newMembers.count ? `, including ${newMembers.count} added in the last 24 hours` : ''}.\n\nFind players, coaches and fans. Join communities. Build real basketball connections.\n\n/explore · /communities\n\n#RCLCommunity #RichCityLeague`;
+  return `🤝 RCL COMMUNITY · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active member profiles are part of RCL${newMembers.count ? `, including ${newMembers.count} added in the last 24 hours` : ''}.\n\nFind players, coaches and fans. Join communities. Build real basketball connections.\n\n/discover · /communities\n\n#RCLCommunity #RichCityLeague`;
 }
 
 async function buildFantasyPost(db: SupabaseClient, clock: Clock) {
