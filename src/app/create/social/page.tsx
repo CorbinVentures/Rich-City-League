@@ -317,7 +317,7 @@ export default function SocialCreatorPage() {
                 <Benefit icon={<FaRankingStar />} title="Earn recognition" copy="Strong engagement feeds discovery and REP activity without rewarding empty spam." />
                 <Benefit icon={<FaTrophy />} title="Get featured" copy="Challenges create an easy path for RCL to spotlight the best community clips and moments." />
               </div>
-              <Link href="/explore" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">See what is moving <FaArrowRight /></Link>
+              <Link href="/discover" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">See what is moving <FaArrowRight /></Link>
             </div>
 
             <div className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/70 p-5">

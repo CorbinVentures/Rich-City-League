@@ -154,7 +154,7 @@ export default function AboutPage() {
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-300">The city. The players. The fans. The stories. The future. This is Rich City League.</p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link href="/register" className="rounded-full bg-orange-500 px-7 py-4 text-sm font-black uppercase tracking-[.12em] text-black transition hover:bg-orange-400">Join the League</Link>
-            <Link href="/fantasy" className="rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-black uppercase tracking-[.12em] transition hover:bg-white/10">Explore RCL Fantasy</Link>
+            <Link href="/fantasy" className="rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-black uppercase tracking-[.12em] transition hover:bg-white/10">Discover RCL Fantasy</Link>
           </div>
         </section>
       </Container>

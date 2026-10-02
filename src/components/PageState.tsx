@@ -15,7 +15,7 @@ export function PageState({ eyebrow, title, children, action }: {
       <div className="mt-8 flex flex-wrap gap-3">
         {action}
         <Link className="rcl-state-link" href="/">Back to home</Link>
-        <Link className="rcl-state-link" href="/explore">Explore RCL</Link>
+        <Link className="rcl-state-link" href="/discover">Discover RCL</Link>
       </div>
     </section>
   </main>;

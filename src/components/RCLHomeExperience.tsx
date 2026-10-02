@@ -20,7 +20,7 @@ type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:I
 
 const worldCards=[
   {title:'Social',copy:'Highlights, conversations, stories and the people shaping basketball around you.',href:'/social',icon:FaComments},
-  {title:'Discover',copy:'Find players, teams, organizations, events and basketball opportunities without digging through ten different apps.',href:'/explore',icon:FaCompass},
+  {title:'Discover',copy:'Find players, teams, organizations, events and basketball opportunities without digging through ten different apps.',href:'/discover',icon:FaCompass},
   {title:'Runs',copy:'See where people are hooping, join the run and keep the night alive through Run Tape.',href:'/runs',icon:FaLocationDot},
 ];
 
@@ -64,7 +64,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
     </section>
 
     <section className="rcl-landing-section">
-      <div className="rcl-landing-section-head"><div><p>Start here</p><h2>A social world built for basketball.</h2></div><Link href="/explore">Discover basketball <FaArrowRight/></Link></div>
+      <div className="rcl-landing-section-head"><div><p>Start here</p><h2>A social world built for basketball.</h2></div><Link href="/discover">Discover basketball <FaArrowRight/></Link></div>
       <div className="rcl-world-card-grid">{worldCards.map(({title,copy,href,icon:Icon})=><Link href={href} key={title} className="rcl-world-card"><span><Icon/></span><h3>{title}</h3><p>{copy}</p><b>Open <FaArrowRight/></b></Link>)}</div>
     </section>
 

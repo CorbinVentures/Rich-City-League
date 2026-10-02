@@ -68,7 +68,7 @@ type FeedMode = 'for-you' | 'following' | 'trending';
 
 const leftNav = [
   { href: '/social', label: 'Home', icon: FaHouse },
-  { href: '/explore', label: 'Discover', icon: FaCompass },
+  { href: '/discover', label: 'Discover', icon: FaCompass },
   { href: '/create', label: 'Create', icon: FaPlus },
   { href: '/runs', label: 'Runs', icon: FaBasketball },
   { href: '/league', label: 'League', icon: FaBasketball },
@@ -562,7 +562,7 @@ function LoadingFeed() {
 }
 
 function FeedEmpty({ user, followingMode, onCreate }: { user: boolean; followingMode: boolean; onCreate: () => void }) {
-  return <div className="rounded-2xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-10 text-center"><FaBasketball className="mx-auto text-4xl text-rcl-blue/45"/><h2 className="mt-4 font-display text-2xl font-black uppercase">{followingMode ? 'Build your network' : 'The conversation starts here'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/35">{followingMode ? 'Follow people from Explore or People and their posts and reposts will collect here.' : 'Posts, official game moments, communities and basketball activity will appear here.'}</p>{user && <button onClick={onCreate} className="mt-5 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">Create a post</button>}</div>;
+  return <div className="rounded-2xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-10 text-center"><FaBasketball className="mx-auto text-4xl text-rcl-blue/45"/><h2 className="mt-4 font-display text-2xl font-black uppercase">{followingMode ? 'Build your network' : 'The conversation starts here'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/35">{followingMode ? 'Follow people from Discover or People and their posts and reposts will collect here.' : 'Posts, official game moments, communities and basketball activity will appear here.'}</p>{user && <button onClick={onCreate} className="mt-5 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">Create a post</button>}</div>;
 }
 
 function SideCard({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {

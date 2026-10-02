@@ -111,7 +111,7 @@ function rvaHoopsFallback() {
     title: 'RVA Hoops Daily: Richmond basketball watch',
     summary: 'No strong fresh local article cleared the RVA Hoops sourcing filter today, so the desk is staying local instead of forcing a weak national story. Check the RCL Network for upcoming games, open runs, player activity and Richmond-area basketball conversation.',
     sourceName: 'Rich City League Network',
-    sourceUrl: `https://www.richcityhoops.com/explore?desk=rva-hoops&date=${date}`,
+    sourceUrl: `https://www.richcityhoops.com/discover?desk=rva-hoops&date=${date}`,
     publishedAt: new Date().toISOString(),
   };
 }
