@@ -32,12 +32,12 @@ import { PWANotificationBridge } from '@/components/PWANotificationBridge';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityhoops.com'),
-  title: { default: 'Rich City League | Richmond VA Basketball League', template: '%s | Rich City League' },
+  title: { default: 'RCL | Richmond Basketball Social', template: '%s | RCL' },
   description: 'RCL is Richmond basketball connected: a social world for players, runs, highlights, organizations and community, with Rich City League as the flagship competition.',
   applicationName: 'RCL',
-  authors: [{ name: 'Rich City League', url: 'https://richcityhoops.com' }],
-  creator: 'Rich City League',
-  publisher: 'Rich City League',
+  authors: [{ name: 'RCL', url: 'https://richcityhoops.com' }],
+  creator: 'RCL',
+  publisher: 'RCL',
   category: 'sports',
   keywords: ['Richmond basketball league','Richmond VA basketball','RVA basketball','adult basketball Richmond VA','mens basketball league Richmond','Rich City League','RCL basketball','Richmond hoops','basketball runs Richmond VA'],
   manifest: '/manifest.webmanifest',
