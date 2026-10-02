@@ -12,7 +12,7 @@ export const revalidate = 0;
 export default async function NewsPage() {
   const { news } = await getLeagueSnapshot();
   const items = news.map((item) => ({ id: item.id, slug: item.slug, title: item.title, excerpt: item.excerpt, category: 'League News', publishedAt: item.published_at, coverImageUrl: item.cover_image_url }));
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-world min-h-screen bg-rcl-black pb-24 text-white">
     <CorporatePageHero
       eyebrow="Official RCL Newsroom"
       title="RCL News"
