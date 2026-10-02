@@ -9,7 +9,7 @@ export function RCLRuntimeFinish(){
     :root {
       --rcl-orange:#3B82F6!important;
       --rcl-gold:#3B82F6!important;
-      --rcl-blue:#64748B!important;
+      --rcl-blue:#3B82F6!important;
       --rcl-court-orange:#3B82F6!important;
       --rcl-basket-orange:#3B82F6!important;
       --rcl-orange-corporate:#3B82F6!important;
@@ -45,7 +45,7 @@ export function RCLRuntimeFinish(){
     .rcl-vip-chip,
     .rcl-social-identity:not(.is-system) .rcl-social-identity-copy b > i,
     [title="RCL VIP verified member"] {
-      border-color:rgba(201,164,92,.48)!important;
+      border-color:rgba(212,175,55,.48)!important;
       background:#FBF6E9!important;
       color:#7A5C20!important;
       box-shadow:none!important;
@@ -58,7 +58,7 @@ export function RCLRuntimeFinish(){
     }
 
     .rcl-rep-avatar.is-vip {
-      box-shadow:0 0 0 2px rgba(201,164,92,.28)!important;
+      box-shadow:0 0 0 2px rgba(212,175,55,.28)!important;
     }
   `}</style>;
 }
