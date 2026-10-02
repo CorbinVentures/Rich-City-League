@@ -3,7 +3,6 @@ import { Suspense } from 'react';
 import './globals.css';
 import './rcl-future.css';
 import './rcl-basketball-branding.css';
-import '@/components/RclSplashMockup.css';
 import './rcl-accessibility.css';
 import './rcl-corporate-polish.css';
 import './rcl-social-nav-polish.css';
