@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function ClientPageHero({ eyebrow, title, accent, description, assetKey, meta, actions }: Props) {
-  return <header className="relative overflow-hidden border-b border-rcl-blue/12 bg-[#071018]/88 text-white">
+  return <header className="rcl-client-page-hero relative overflow-hidden border-b border-rcl-blue/12 bg-[#071018]/88 text-white">
     {assetKey ? <ContentAssetBackground assetKey={assetKey} opacity={0.035} /> : null}
     <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,9,13,.98),rgba(5,9,13,.92)_55%,rgba(7,16,24,.76)),radial-gradient(circle_at_88%_0%,rgba(145,206,242,.08),transparent_34%)]" />
     <Container maxWidth="xl" className="relative py-6 sm:py-8">
