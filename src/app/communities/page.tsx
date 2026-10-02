@@ -74,7 +74,7 @@ export default function CommunitiesPage() {
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
-      eyebrow="RCL Network"
+      eyebrow="Community"
       title="Communities"
       accent="Find your people"
       description="Join living basketball spaces built around teams, local runs, shared interests and the conversations that move Richmond hoops."
