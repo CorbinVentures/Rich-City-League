@@ -17,7 +17,7 @@ export function RCLVisualSystem(){
       --rcl-muted:#8190A1;
       --rcl-orange:#3B82F6;
       --rcl-gold:#3B82F6;
-      --rcl-blue:#64748B;
+      --rcl-blue:#3B82F6;
       --rcl-success:#2E8B70;
       --rcl-danger:#C65361;
       --rcl-charcoal:#0F2547;
