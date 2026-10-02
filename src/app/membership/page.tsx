@@ -22,7 +22,7 @@ const valuePillars = [
 export default function MembershipPage() {
   const billingReady = stripeBillingConfigured();
   return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-24 text-white">
-    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_75%_15%,rgba(249,115,22,.18),transparent_32%),radial-gradient(circle_at_20%_20%,rgba(21,159,255,.13),transparent_30%),#050a10] py-16 sm:py-24">
+    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_75%_15%,rgba(59,130,246,.18),transparent_32%),radial-gradient(circle_at_20%_20%,rgba(21,159,255,.13),transparent_30%),#050a10] py-16 sm:py-24">
       <Container maxWidth="xl">
         <div className="max-w-4xl">
           <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">RCL Membership</p>
