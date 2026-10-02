@@ -7,7 +7,7 @@ import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifying
 
 export const metadata = {
   title: 'Discover RCL',
-  description: 'Discover people, communities, runs, trends and basketball activity across the RCL Network.',
+  description: 'Discover people, communities, runs, trends and basketball activity across RCL.',
 };
 
 export const revalidate = 30;
@@ -55,7 +55,7 @@ export default async function ExploreRCLPage(){
     <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
       <Container maxWidth="xl" className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Network</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">Discover</p>
           <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Explore RCL</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">People, runs, communities, league activity and reputation across Richmond basketball.</p>
         </div>
@@ -106,7 +106,7 @@ export default async function ExploreRCLPage(){
       </div>
 
       <section className="mt-12 border-t border-white/10 pt-10">
-        <div className="mb-6"><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/25">More RCL</p><h2 className="mt-2 font-display text-3xl font-semibold">The network goes deeper</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">League tools and identity features remain available without competing with discovery for the top of the experience.</p></div>
+        <div className="mb-6"><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/25">More RCL</p><h2 className="mt-2 font-display text-3xl font-semibold">There’s more to RCL</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">League tools and identity features remain available without competing with discovery for the top of the experience.</p></div>
         <div className="grid gap-4 lg:grid-cols-3">{RCL_MEMBER_NAV_GROUPS.map(group=><section key={group.label} className="rounded-2xl border border-rcl-blue/12 bg-[#071522]/45 p-5"><div className="mb-4"><h3 className="font-display text-xl font-semibold">{group.label}</h3><p className="mt-1 text-xs leading-5 text-white/35">{group.description}</p></div><div className="space-y-1">{group.items.slice(0,6).map(item=>{const Icon=item.icon;return <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-white/55 transition hover:bg-white/[.035] hover:text-white"><Icon className="text-rcl-blue"/><span>{item.label}</span><FaArrowRight className="ml-auto text-xs text-white/15"/></Link>})}</div></section>)}</div>
       </section>
     </Container>

@@ -67,7 +67,7 @@ const modes: Array<{
     key: 'post',
     label: 'Start a Post',
     kicker: 'Talk Richmond basketball',
-    description: 'Post an update, opinion, link, photo set, or video to the RCL Network.',
+    description: 'Post an update, opinion, link, photo set, or video to the RCL Home feed.',
     icon: FaBasketball,
   },
 ];
@@ -177,7 +177,7 @@ export default function SocialCreatorPage() {
       window.location.href = `/auth/sign-in?redirect=${encodeURIComponent(`/create/social?mode=${mode}`)}`;
       return;
     }
-    if (!db) { setError('RCL Network services are not available right now.'); return; }
+    if (!db) { setError('RCL social services are not available right now.'); return; }
     if (!body.trim() && !link.trim() && !files.length) { setError('Add a clip, photo, link, or caption before posting.'); return; }
 
     const collectionIssue = socialMediaCollectionError(files);
@@ -190,7 +190,7 @@ export default function SocialCreatorPage() {
         mediaUrls.push(await uploadFile(files[index], index));
       }
 
-      setProgress('Publishing to RCL Network…');
+      setProgress('Publishing to RCL…');
       const identityTag = mode === 'clip' ? '#RCLClip' : mode === 'moment' ? '#RCLMoment' : '';
       const tags = [challenge?.tag, identityTag].filter(Boolean) as string[];
       const uniqueTags = tags.filter((tag) => !body.toLowerCase().includes(tag.toLowerCase()));
@@ -237,7 +237,7 @@ export default function SocialCreatorPage() {
             <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL Creator Studio</p>
             <h1 className="truncate font-display text-xl font-black uppercase sm:text-2xl">Make the network move.</h1>
           </div>
-          <Link href="/social" className="hidden rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-rcl-blue sm:inline-flex">Network Home</Link>
+          <Link href="/social" className="hidden rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-rcl-blue sm:inline-flex">Home</Link>
         </Container>
       </header>
 

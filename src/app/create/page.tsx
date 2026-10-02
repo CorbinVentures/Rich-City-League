@@ -15,7 +15,7 @@ import { Container } from '@/components/Container';
 
 export const metadata: Metadata = {
   title: 'Create in RCL | Rich City League',
-  description: 'Drop clips, post basketball moments, create stories, start runs, and contribute across the RCL Network.',
+  description: 'Drop clips, post basketball moments, create stories, start runs, and contribute across RCL.',
 };
 
 const createOptions = [
@@ -57,7 +57,7 @@ const createOptions = [
     action: 'Open stories',
     icon: FaBolt,
     accent: 'orange',
-    note: 'Use the Add Story card at the top of Network Home. Stories support native photos and video and expire automatically.',
+    note: 'Use the Add Story card at the top of Home. Stories support native photos and video and expire automatically.',
   },
   {
     label: 'Run',
@@ -155,7 +155,7 @@ export default function CreatePage() {
             <p className="mt-3 max-w-3xl text-sm leading-6 text-white/40">The goal is not to reward spam. Strong posts earn reactions, conversation, saves, features, challenge visibility, and a permanent place in the basketball identity you build on RCL.</p>
           </div>
           <Link href="/social" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider text-rcl-blue transition hover:border-rcl-blue/60">
-            Network Home <FaArrowRight />
+            Home <FaArrowRight />
           </Link>
         </section>
       </Container>

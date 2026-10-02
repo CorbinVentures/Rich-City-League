@@ -252,7 +252,7 @@ export default function NetworkHome() {
       setSuggestedProfiles(suggestionRows.map((profile) => authorMap.get(profile.id as string) ?? profile).filter((profile) => profile.id !== user?.id).slice(0, 6));
     } catch (loadError) {
       console.error('Unable to load RCL Social', loadError);
-      setError(loadError instanceof Error ? loadError.message : 'We could not load RCL Network right now.');
+      setError(loadError instanceof Error ? loadError.message : 'We could not load your RCL Home feed right now.');
       setPosts([]);
       setReposts([]);
     } finally {
