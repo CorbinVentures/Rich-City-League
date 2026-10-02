@@ -786,6 +786,7 @@ body { color:var(--rcl-social-text)!important; }
 .rcl-social-secondary [class*="bg-[#07111b"],
 .rcl-social-secondary [class*="bg-[#071522"],
 .rcl-social-secondary [class*="bg-[#08111b"],
+.rcl-social-secondary [class*="bg-[#08131e"],
 .rcl-social-secondary [class*="bg-[#08111a"],
 .rcl-social-secondary [class*="bg-[#09111a"],
 .rcl-social-secondary [class*="bg-[#09121b"],
@@ -815,6 +816,10 @@ body { color:var(--rcl-social-text)!important; }
   border-color:var(--rcl-social-border)!important;
 }
 .rcl-social-secondary [class*="shadow-"] { box-shadow:0 12px 32px rgba(56,45,34,.06)!important; }
+.rcl-social-secondary .animate-pulse {
+  background:#ECE7DF!important;
+  border-color:#DDD6CC!important;
+}
 .rcl-social-secondary input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
 .rcl-social-secondary textarea,
 .rcl-social-secondary select {
