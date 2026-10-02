@@ -73,13 +73,13 @@ export function RCLVisualSystem(){
       .rcl-draft-countdown b { font-family:Impact,sans-serif; font-size:1.8rem; }
       .rcl-draft-countdown small { color:#68788a; font-size: .75rem; letter-spacing:.12em; }
       .rcl-draft-primary,.rcl-draft-secondary { display:flex; min-height:2.7rem; align-items:center; justify-content:center; gap:.45rem; border-radius:.65rem; padding:.7rem .8rem; font-size: .75rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
-      .rcl-draft-primary { background:var(--rcl-orange); color:#080a0e; box-shadow:0 10px 30px rgba(47,111,175,.18); }
+      .rcl-draft-primary { background:var(--rcl-orange); color:#fff; box-shadow:0 10px 30px rgba(47,111,175,.18); }
       .rcl-draft-secondary { margin-top:.5rem; border:1px solid rgba(255,255,255,.14); color:#b8c3cf; background:rgba(255,255,255,.025); }
       .rcl-draft-secondary:hover { border-color:rgba(47,111,175,.4); color:white; }
       .rcl-draft-board input { width:100%; margin-bottom:.55rem; padding:.65rem .75rem; color:white; outline:none; font-size: .75rem; }
       .rcl-filter-row { display:flex; gap:.3rem; overflow-x:auto; padding-bottom:.45rem; }
       .rcl-filter-row button { border-radius:999px; background:rgba(255,255,255,.055); padding:.35rem .55rem; color:#718094; font-size: .75rem; font-weight:900; }
-      .rcl-filter-row button.active { background:var(--rcl-orange); color:#080a0e; }
+      .rcl-filter-row button.active { background:var(--rcl-orange); color:#fff; }
       .rcl-prospect-list { max-height:20rem; overflow:auto; }
       .rcl-prospect-list > button { display:grid; width:100%; grid-template-columns:1.8rem 2rem 1fr auto; align-items:center; gap:.5rem; border-bottom:1px solid rgba(255,255,255,.045); padding:.55rem .35rem; text-align:left; color:white; }
       .rcl-prospect-list > button:hover,.rcl-prospect-list > button.selected { background:rgba(47,111,175,.08); }
