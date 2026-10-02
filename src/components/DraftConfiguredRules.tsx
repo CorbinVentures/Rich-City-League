@@ -41,7 +41,7 @@ export function DraftConfiguredRules() {
 
   return <section id="official-draft-rules" className="border-t border-white/10 bg-[#03070d] pb-24 pt-10 text-white">
     <Container maxWidth="xl">
-      <div className="rounded-3xl border border-rcl-orange/20 bg-[radial-gradient(circle_at_90%_5%,rgba(255,79,22,.13),transparent_28%),#071522] p-6 sm:p-8">
+      <div className="rounded-3xl border border-rcl-orange/20 bg-[radial-gradient(circle_at_90%_5%,rgba(59,130,246,.13),transparent_28%),#071522] p-6 sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div><p className="text-xs font-black uppercase tracking-[.24em] text-rcl-orange">Official Draft Night rules</p><h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">{draft.name}</h2><p className="mt-2 text-xs font-black uppercase tracking-wider text-white/28">{draft.status} · League-controlled configuration</p></div>
           <div className="grid grid-cols-3 gap-2 sm:min-w-[430px]"><Metric icon={<FaListOl/>} label="Rounds" value={String(draft.rounds)}/><Metric icon={<FaClock/>} label="Pick clock" value={`${draft.clock_duration_seconds}s`}/><Metric icon={<FaUsers/>} label="Roster max" value={String(draft.roster_limit)}/></div>
