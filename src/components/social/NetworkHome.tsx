@@ -5,15 +5,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FaArrowLeft,
   FaBasketball,
-  FaBell,
-  FaComments,
   FaCompass,
   FaHouse,
   FaImage,
   FaMagnifyingGlass,
   FaPeopleGroup,
   FaPlus,
-  FaUserGroup,
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
@@ -71,11 +68,9 @@ type FeedMode = 'for-you' | 'following' | 'trending';
 
 const leftNav = [
   { href: '/social', label: 'Home', icon: FaHouse },
-  { href: '/explore', label: 'Explore', icon: FaCompass },
-  { href: '/friends', label: 'People', icon: FaUserGroup },
-  { href: '/communities', label: 'Communities', icon: FaPeopleGroup },
+  { href: '/explore', label: 'Discover', icon: FaCompass },
+  { href: '/create', label: 'Create', icon: FaPlus },
   { href: '/runs', label: 'Runs', icon: FaBasketball },
-  { href: '/messages', label: 'Messages', icon: FaComments },
   { href: '/league', label: 'League', icon: FaBasketball },
 ];
 
@@ -169,7 +164,7 @@ export default function NetworkHome() {
   };
 
   const load = async () => {
-    if (!db) { setLoading(false); setError('RCL Network services are not configured.'); return; }
+    if (!db) { setLoading(false); setError('RCL social services are not configured.'); return; }
     setLoading(true);
     setError('');
     try {
@@ -256,7 +251,7 @@ export default function NetworkHome() {
       setCurrentProfile(user ? authorMap.get(user.id) ?? ((currentProfileResult.data ?? null) as NetworkAuthor | null) : null);
       setSuggestedProfiles(suggestionRows.map((profile) => authorMap.get(profile.id as string) ?? profile).filter((profile) => profile.id !== user?.id).slice(0, 6));
     } catch (loadError) {
-      console.error('Unable to load RCL Network', loadError);
+      console.error('Unable to load RCL Social', loadError);
       setError(loadError instanceof Error ? loadError.message : 'We could not load RCL Network right now.');
       setPosts([]);
       setReposts([]);
@@ -405,7 +400,7 @@ export default function NetworkHome() {
   const sharePost = async (post: NetworkPost) => {
     const url = `${window.location.origin}/social/post/${post.id}`;
     try {
-      if (navigator.share) await navigator.share({ title: 'RCL Network', text: post.body.slice(0, 140), url });
+      if (navigator.share) await navigator.share({ title: 'RCL', text: post.body.slice(0, 140), url });
       else { await navigator.clipboard.writeText(url); setError('Post link copied.'); window.setTimeout(() => setError(''), 1800); }
       void trackActivity('share', 'post', post.id);
     } catch { /* user cancelled */ }
@@ -476,31 +471,23 @@ export default function NetworkHome() {
   const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
 
   return (
-    <main className="min-h-screen bg-[#03070d] pb-24 text-white lg:pb-0">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#03070d]/95 backdrop-blur-xl">
-        <Container maxWidth="xl" className="flex h-16 items-center gap-3 px-3 sm:h-20 sm:px-4">
-          <Link href="/social" className="flex shrink-0 items-center gap-2" aria-label="RCL Network home">
-            <span className="grid h-10 w-10 place-items-center rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 font-black text-rcl-blue">RCL</span>
-            <span className="hidden sm:block"><b className="block text-xs font-black uppercase tracking-[.18em]">RCL Network</b><small className="text-[10px] font-bold uppercase tracking-[.14em] text-white/25">Richmond basketball</small></span>
-          </Link>
-          <label className="relative mx-auto min-w-0 max-w-xl flex-1"><span className="sr-only">Search RCL Network</span><FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-white/25"/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search people and posts" className="h-11 w-full rounded-2xl border border-white/10 bg-[#07111b] pl-10 pr-4 text-sm outline-none placeholder:text-white/25 focus:border-rcl-blue/45"/></label>
-          {user ? <>
-            <Link href="/messages" aria-label="Messages" className="hidden h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/55 hover:text-white sm:grid"><FaComments/></Link>
-            <Link href="/notifications" aria-label="Notifications" className="hidden h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/55 hover:text-white sm:grid"><FaBell/></Link>
-            <button type="button" onClick={openComposer} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rcl-orange px-3 text-xs font-black uppercase tracking-wider text-black sm:px-4"><FaPlus/><span className="hidden sm:inline">Create</span></button>
-          </> : <Link href="/auth/sign-in?redirect=/social" className="rounded-xl bg-rcl-orange px-4 py-2.5 text-xs font-black uppercase text-black">Sign in</Link>}
-        </Container>
-      </header>
-
+    <main className="rcl-social-world min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
-      <Container maxWidth="xl" className="py-4 sm:py-5">
-        <div className="grid gap-5 lg:grid-cols-[210px_minmax(0,680px)_minmax(260px,1fr)] xl:grid-cols-[220px_minmax(0,720px)_310px]">
+      <Container maxWidth="xl" className="py-5 sm:py-7">
+        <section className="rcl-feed-intro">
+          <div><p>Home</p><h1>Your basketball world</h1><span>People, runs, highlights and competition around you.</span></div>
+          <div className="rcl-feed-intro-actions">
+            <label><span className="sr-only">Search this feed</span><FaMagnifyingGlass/><input value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search this feed"/></label>
+            {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
+          </div>
+        </section>
+        <div className="grid gap-5 lg:grid-cols-[190px_minmax(0,680px)_minmax(250px,1fr)] xl:grid-cols-[190px_minmax(0,720px)_300px]">
           <aside className="hidden lg:block">
             <div className="sticky top-24 space-y-1">
-              {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold transition ${href === '/social' ? 'bg-rcl-blue/10 text-rcl-blue' : 'text-white/50 hover:bg-white/[.04] hover:text-white'}`}><Icon/><span>{label}</span></Link>)}
+              {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
               <div className="my-3 border-t border-white/10"/>
-              {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCL Network</Link>}
+              {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCL</Link>}
               <p className="px-3 pt-4 text-[10px] font-black uppercase leading-5 tracking-[.18em] text-white/20">Your city · Your court · Your rep</p>
             </div>
           </aside>
@@ -553,7 +540,7 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
 
 function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
   const chooseFile = (file: File | null) => { if (!file) return; const issue = socialMediaError(file); if (!issue) setMediaFile(file); };
-  return <div className="fixed inset-0 z-[90] grid place-items-end bg-black/75 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-white/10 bg-[#09131e] p-5 shadow-2xl sm:max-w-xl sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Create</p><h2 className="font-display text-2xl font-black uppercase">Post to RCL Network</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/50"><FaXmark/></button></div><div className="mt-5 flex gap-3"><SocialIdentity author={currentProfile} compact/><textarea autoFocus value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={5} placeholder="What is happening in Richmond basketball?" className="min-h-32 flex-1 resize-none bg-transparent text-base leading-7 outline-none placeholder:text-white/25"/></div>{mediaPreview && <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black">{mediaFile?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(mediaPreview)} controls className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Preview" className="max-h-72 w-full object-contain"/>}<button type="button" onClick={() => setMediaFile(null)} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70"><FaXmark/></button></div>}<SocialLinkField value={linkInput} onChange={setLinkInput}/><div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4"><div><button type="button" onClick={() => mediaInputRef.current?.click()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black uppercase tracking-wider text-white/50"><FaImage/> Photo / video</button><input ref={mediaInputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/></div><button disabled={publishing || (!body.trim() && !mediaFile && !linkInput.trim())} className="min-h-11 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-35">{publishing ? 'Posting…' : 'Post'}</button></div></form></div>;
+  return <div className="fixed inset-0 z-[90] grid place-items-end bg-black/75 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-white/10 bg-[#09131e] p-5 shadow-2xl sm:max-w-xl sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Create</p><h2 className="font-display text-2xl font-black uppercase">Post to RCL</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/50"><FaXmark/></button></div><div className="mt-5 flex gap-3"><SocialIdentity author={currentProfile} compact/><textarea autoFocus value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={5} placeholder="What is happening in Richmond basketball?" className="min-h-32 flex-1 resize-none bg-transparent text-base leading-7 outline-none placeholder:text-white/25"/></div>{mediaPreview && <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black">{mediaFile?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(mediaPreview)} controls className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Preview" className="max-h-72 w-full object-contain"/>}<button type="button" onClick={() => setMediaFile(null)} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70"><FaXmark/></button></div>}<SocialLinkField value={linkInput} onChange={setLinkInput}/><div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4"><div><button type="button" onClick={() => mediaInputRef.current?.click()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black uppercase tracking-wider text-white/50"><FaImage/> Photo / video</button><input ref={mediaInputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/></div><button disabled={publishing || (!body.trim() && !mediaFile && !linkInput.trim())} className="min-h-11 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-35">{publishing ? 'Posting…' : 'Post'}</button></div></form></div>;
 }
 
 function StoryComposer({ currentProfile, body, setBody, file, preview, setFile, inputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; file: File | null; preview: string; setFile: (file: File | null) => void; inputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
@@ -563,7 +550,7 @@ function StoryComposer({ currentProfile, body, setBody, file, preview, setFile, 
 
 function StoryViewer({ stories, index, onClose, onIndex }: { stories: Story[]; index: number; onClose: () => void; onIndex: (index: number) => void }) {
   const story = stories[index];
-  return <div className="fixed inset-0 z-[100] grid place-items-center bg-black/95 p-3"><div className="relative flex h-[min(760px,92vh)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#09131e]"><div className="absolute left-3 right-3 top-3 z-10 flex gap-1">{stories.map((_, itemIndex) => <span key={itemIndex} className={`h-1 flex-1 rounded-full ${itemIndex === index ? 'bg-white' : itemIndex < index ? 'bg-rcl-orange' : 'bg-white/15'}`}/>)}</div><button type="button" onClick={onClose} className="absolute right-3 top-7 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55"><FaXmark/></button><div className="flex flex-1 items-center justify-center p-6 pt-14">{story.media_url ? <div className="w-full">{isVideoUrl(story.media_url) ? <video src={story.media_url} controls autoPlay playsInline className="max-h-[62vh] w-full rounded-2xl object-contain"/> : <img src={story.media_url} alt="Story" className="max-h-[62vh] w-full rounded-2xl object-contain"/>}{story.body && <p className="mt-4 text-center text-base font-bold leading-6">{story.body}</p>}</div> : <div className="text-center"><SocialIdentity author={story.author}/><p className="mt-5 text-xl font-bold leading-8">{story.body}</p></div>}</div><button aria-label="Previous story" disabled={index === 0} onClick={() => onIndex(index - 1)} className="absolute left-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><button aria-label="Next story" disabled={index === stories.length - 1} onClick={() => onIndex(index + 1)} className="absolute right-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><div className="border-t border-white/10 p-3 text-center text-[10px] font-black uppercase tracking-wider text-white/25">{index + 1} / {stories.length}</div></div></div>;
+  return <div className="rcl-dark-media fixed inset-0 z-[100] grid place-items-center bg-black/95 p-3"><div className="relative flex h-[min(760px,92vh)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#09131e]"><div className="absolute left-3 right-3 top-3 z-10 flex gap-1">{stories.map((_, itemIndex) => <span key={itemIndex} className={`h-1 flex-1 rounded-full ${itemIndex === index ? 'bg-white' : itemIndex < index ? 'bg-rcl-orange' : 'bg-white/15'}`}/>)}</div><button type="button" onClick={onClose} className="absolute right-3 top-7 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55"><FaXmark/></button><div className="flex flex-1 items-center justify-center p-6 pt-14">{story.media_url ? <div className="w-full">{isVideoUrl(story.media_url) ? <video src={story.media_url} controls autoPlay playsInline className="max-h-[62vh] w-full rounded-2xl object-contain"/> : <img src={story.media_url} alt="Story" className="max-h-[62vh] w-full rounded-2xl object-contain"/>}{story.body && <p className="mt-4 text-center text-base font-bold leading-6">{story.body}</p>}</div> : <div className="text-center"><SocialIdentity author={story.author}/><p className="mt-5 text-xl font-bold leading-8">{story.body}</p></div>}</div><button aria-label="Previous story" disabled={index === 0} onClick={() => onIndex(index - 1)} className="absolute left-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><button aria-label="Next story" disabled={index === stories.length - 1} onClick={() => onIndex(index + 1)} className="absolute right-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><div className="border-t border-white/10 p-3 text-center text-[10px] font-black uppercase tracking-wider text-white/25">{index + 1} / {stories.length}</div></div></div>;
 }
 
 function FeedModeButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {

@@ -2,123 +2,115 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
-import { NavigationDrawer } from '@/components/NavigationDrawer';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  RCL_ADMIN_NAV_GROUP,
-  RCL_ADMIN_NAV_ITEM,
-  RCL_NAV_GROUPS,
-  RCL_PRIMARY_NAV_ITEMS,
-} from '@/lib/rcl-navigation';
-import {
-  FaArrowRight, FaBars, FaBell, FaHouse, FaPeopleGroup,
-  FaTrophy, FaUser, FaBasketball, FaMagnifyingGlass, FaLocationDot, FaGlobe
+  FaArrowRight, FaBasketball, FaComments, FaCompass, FaLocationDot,
+  FaPlay, FaShirt, FaCrown, FaTrophy, FaUserGroup
 } from 'react-icons/fa6';
 
-const quick = [
-  {title:'OPEN RUNS',sub:'FIND YOUR NEXT RUN',href:'/runs',icon:FaLocationDot,image:'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=700&q=82'},
-  {title:'VIRGINIA NETWORK',sub:'LEAGUES · EVENTS · ORGANIZATIONS',href:'/network',icon:FaGlobe,image:'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=700&q=82'},
+type Team={id:string;name:string;logo_url?:string|null};
+type Game={id:string;home_team_id:string;away_team_id:string;scheduled_at:string;venue_id?:string|null;status:string;home_score:number;away_score:number};
+type Standing={id:string;team_id:string;wins:number;losses:number;rank?:number|null};
+type Player={id:string;first_name:string;last_name:string;photo_url?:string|null;position?:string|null;jersey_number?:string|null};
+type IQ={player_id:string;rcl_rating:number;court_performance_score:number;exposure_index:number;player_archetype?:string|null};
+type News={id:string;slug:string;title:string;published_at?:string|null};
+type Post={id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
+type Stat={player_id:string;points:number;assists:number};
+type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
+
+const worldCards=[
+  {title:'Social',copy:'Highlights, conversations, stories and the people shaping basketball around you.',href:'/social',icon:FaComments},
+  {title:'Discover',copy:'Find players, teams, organizations, events and basketball opportunities without digging through ten different apps.',href:'/explore',icon:FaCompass},
+  {title:'Runs',copy:'See where people are hooping, join the run and keep the night alive through Run Tape.',href:'/runs',icon:FaLocationDot},
 ];
 
-type Team = {id:string;name:string;logo_url?:string|null};
-type Game = {id:string;home_team_id:string;away_team_id:string;scheduled_at:string;venue_id?:string|null;status:string;home_score:number;away_score:number};
-type Standing = {id:string;team_id:string;wins:number;losses:number;rank?:number|null};
-type Player = {id:string;first_name:string;last_name:string;photo_url?:string|null;position?:string|null;jersey_number?:string|null};
-type IQ = {player_id:string;rcl_rating:number;court_performance_score:number;exposure_index:number;player_archetype?:string|null};
-type News = {id:string;slug:string;title:string;published_at?:string|null};
-type Post = {id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
-type Stat={player_id:string;points:number;assists:number};
-type Props = {teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
+export function RCLHomeExperience({teams,games,standings,players,stats,news,posts,standingsLabel}:Props){
+  const {user}=useAuth();
+  const team=(id:string)=>teams.find(item=>item.id===id);
+  const now=Date.now();
+  const next=[...games].filter(game=>!['completed','cancelled'].includes(game.status)&&new Date(game.scheduled_at).getTime()>=now)
+    .sort((a,b)=>new Date(a.scheduled_at).getTime()-new Date(b.scheduled_at).getTime()).slice(0,2);
+  const topStandings=[...standings].sort((a,b)=>(a.rank??99)-(b.rank??99)).slice(0,4);
+  const featured=players.slice(0,4);
+  const statMap=new Map<string,{gp:number;points:number;assists:number}>();
+  for(const row of stats){
+    const current=statMap.get(row.player_id)??{gp:0,points:0,assists:0};
+    current.gp+=1;current.points+=Number(row.points)||0;current.assists+=Number(row.assists)||0;statMap.set(row.player_id,current);
+  }
 
-export function RCLHomeExperience({teams,games,standings,players,stats,news,posts,standingsLabel}:Props) {
-  const [menuOpen,setMenuOpen]=useState(false);
-  const {user,profile}=useAuth();
-  const accountName = profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'RCL Member';
-  const accountHref = user ? '/profile' : '/auth/sign-in';
-  const accountInitials = user ? accountName.split(/\s+/).slice(0,2).map(part=>part[0]).join('').toUpperCase() : 'RCL';
-  const isAdmin=profile?.role==='admin'||profile?.role==='staff';
-  const primaryLinks=isAdmin?[...RCL_PRIMARY_NAV_ITEMS,RCL_ADMIN_NAV_ITEM]:RCL_PRIMARY_NAV_ITEMS;
-  const drawerGroups=isAdmin?[...RCL_NAV_GROUPS,RCL_ADMIN_NAV_GROUP]:RCL_NAV_GROUPS;
-  const team = (id:string) => teams.find(t=>t.id===id);
-  const now = Date.now();
-  const next = [...games]
-    .filter(g => !['completed', 'cancelled'].includes(g.status) && new Date(g.scheduled_at).getTime() >= now)
-    .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
-    .slice(0, 3);
-  const featured = players.slice(0,3);
-  const statMap = new Map<string,{gp:number;points:number;assists:number}>();
-  for(const s of stats){const cur=statMap.get(s.player_id)??{gp:0,points:0,assists:0};cur.gp+=1;cur.points+=Number(s.points)||0;cur.assists+=Number(s.assists)||0;statMap.set(s.player_id,cur);}
-  const topStandings = [...standings].sort((a,b)=>(a.rank??99)-(b.rank??99)).slice(0,4);
-  return <main className="rcl-mock-home">
-    <aside className="rcl-home-sidebar">
-      <div className="rcl-home-sidebar-brand"><div className="rcl-home-logo">RCL</div><div><b>RICH CITY</b><strong>LEAGUE</strong><small>804 · RVA</small></div></div>
-      <nav aria-label="Primary navigation">{primaryLinks.map(item=>{const Icon=item.icon;return <Link key={item.href+item.label} href={item.href} aria-current={item.href==='/'?'page':undefined} className={item.href==='/'?'active':''}><Icon/><span>{item.label}</span></Link>})}</nav>
-      <button type="button" className="rcl-home-all-rcl" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>All RCL</span></button>
-      <div className="rcl-home-sidebar-bottom">
-        <Link href={accountHref} className="rcl-home-profile"><span className="rcl-avatar">{accountInitials}</span><span><b>{user ? accountName : 'RCL Member'}</b><small>{user ? 'View profile' : 'Sign in'}</small></span><FaArrowRight aria-hidden="true"/></Link>
-        <Link href="/settings"><span className="rcl-settings-dot">⚙</span>Settings</Link>
-      </div>
-      <div className="rcl-sidebar-motto"><b>PLAY.</b><span>COMPETE.</span><b>CONNECT.</b><span>GROW.</span><small>RICHMOND<br/>VIRGINIA</small></div>
-    </aside>
-
-    <div className="rcl-home-main">
-      <header className="rcl-home-topbar">
-        <Link href="/" className="rcl-home-wordmark"><span>R</span><b>RICH CITY <i>LEAGUE</i></b></Link>
-        <div className="rcl-home-tools"><Link href="/search" aria-label="Search"><FaMagnifyingGlass/></Link><Link href="/notifications" aria-label="Notifications"><FaBell/></Link><button onClick={()=>setMenuOpen(true)} aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button></div>
-      </header>
-
-      <section className="rcl-home-hero">
-        <div className="rcl-home-hero-image"/>
-        <div className="rcl-home-grid"/>
-        <div className="rcl-home-hero-copy">
-          <p className="rcl-home-kicker">804 · RICHMOND, VIRGINIA</p>
-          <h1>RICH CITY<br/><span>BUILDS<br/>DIFFERENT.</span></h1>
-          <p className="rcl-home-tagline">PLAY. COMPETE. CONNECT. GROW.</p>
-          <div className="rcl-home-hero-actions"><Link href="/register" className="rcl-home-cta rcl-home-cta-primary">JOIN RCL <FaArrowRight/></Link><Link href="/explore" className="rcl-home-cta rcl-home-cta-secondary">EXPLORE BASKETBALL <FaArrowRight/></Link></div>
+  return <main className="rcl-social-landing">
+    <section className="rcl-social-landing-hero">
+      <div className="rcl-landing-copy">
+        <p className="rcl-landing-kicker">RCL · Richmond basketball social</p>
+        <h1>Your basketball world.<br/><span>All in one place.</span></h1>
+        <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
+        <div className="rcl-landing-actions">
+          <Link href={user?'/social':'/register'} className="rcl-landing-primary">{user?'Open your feed':'Join free'} <FaArrowRight/></Link>
+          <Link href="/social" className="rcl-landing-secondary"><FaPlay/> See what&apos;s happening</Link>
         </div>
-        <small className="rcl-home-code">RCL / 804</small>
-      </section>
-
-      <div className="rcl-home-content">
-        <section className="rcl-home-quick">
-          <div className="rcl-home-section-head"><div><p>START HERE</p><h2>FIND YOUR BASKETBALL</h2></div><b>01</b></div>
-          <div className="rcl-home-quick-grid">{quick.map(q=>{const Icon=q.icon;return <Link href={q.href} key={q.title} className="rcl-home-quick-card" style={{backgroundImage:'linear-gradient(90deg,rgba(3,8,13,.96),rgba(3,8,13,.48)),url('+q.image+')'}}><span><Icon/></span><div><b>{q.title}</b><small>{q.sub}</small></div><FaArrowRight/></Link>})}</div>
-        </section>
-
-        <section>
-          <div className="rcl-home-section-head"><div><p>THE COURT</p><h2>NEXT GAME</h2></div><Link href="/games">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-game-card">
-            {next.length ? <div className="rcl-home-game-grid">{next.map(g=><Link href={'/games/'+g.id} key={g.id}><small>{new Date(g.scheduled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/New_York'})} · {new Date(g.scheduled_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})}</small><div><b>{team(g.away_team_id)?.name??'AWAY'}</b><strong>VS</strong><b>{team(g.home_team_id)?.name??'HOME'}</b></div><span>RICHMOND, VIRGINIA</span></Link>)}</div> : <div className="rcl-home-empty">No upcoming games have been announced. Check the game center for updates.</div>}
-          </div>
-        </section>
-
-        <section>
-          <div className="rcl-home-section-head"><div><p>{standingsLabel || 'THE LEAGUE'}</p><h2>STANDINGS</h2></div><Link href="/standings">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-standings"><div className="rcl-standing-head"><span>#</span><span>TEAM</span><span>W</span><span>L</span><span>PCT</span><span>GB</span></div>{topStandings.map((s,i)=><Link href="/standings" key={s.id}><b>{i+1}</b><span>{team(s.team_id)?.name??'RCL Team'}</span><strong>{s.wins}</strong><strong>{s.losses}</strong><strong>{(s.wins+s.losses)?(s.wins/(s.wins+s.losses)).toFixed(3).replace('0.','.'):'—'}</strong><small>{i && topStandings[0] ? ((topStandings[0].wins-s.wins+s.losses-topStandings[0].losses)/2).toFixed(1) : '—'}</small></Link>)}{!topStandings.length&&<div className="rcl-home-empty">Standings appear after games are logged.</div>}</div>
-        </section>
-
-        <section>
-          <div className="rcl-home-section-head"><div><p>THE CITY</p><h2>FEATURED PLAYERS</h2></div><Link href="/players">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-player-row">{featured.map((p)=>{const s=statMap.get(p.id); const ppg=s&&s.gp?s.points/s.gp:0; const apg=s&&s.gp?s.assists/s.gp:0;return <Link href={'/players/'+p.id} key={p.id} className="rcl-home-player-card"><>{p.photo_url ? <Image src={p.photo_url} alt={`${p.first_name} ${p.last_name}`} width={700} height={700} sizes="(max-width: 768px) 80vw, 30vw" /> : <div className="rcl-home-player-placeholder" aria-hidden="true">{p.first_name[0]}{p.last_name[0]}</div>}</><div/><small>{p.jersey_number ? `#${p.jersey_number}` : 'RCL'} · {p.position??'PLAYER'}</small><h3>{p.first_name}<br/>{p.last_name}</h3><span><b>{s?.gp?ppg.toFixed(1):'—'} PPG</b><b>{s?.gp?apg.toFixed(1):'—'} APG</b></span></Link>})}{!featured.length&&<div className="rcl-home-empty">Featured players will appear here.</div>}</div>
-        </section>
-
-        <section className="rcl-home-news">
-          <div className="rcl-home-section-head"><div><p>804 NOW</p><h2>WHAT&apos;S HAPPENING</h2></div><Link href="/social">VIEW ALL <FaArrowRight/></Link></div>
-          <div className="rcl-home-news-grid">{posts.length?posts.map(p=><Link href="/social" key={p.id}><span>{(p.author?.display_name||p.author?.first_name||'RCL')[0]}</span><div><b>{p.author?.display_name||[p.author?.first_name,p.author?.last_name].filter(Boolean).join(' ')||'RCL COMMUNITY'}</b><small>RCL COMMUNITY</small><p>{p.body}</p></div></Link>):<div className="rcl-home-empty">No community updates yet.</div>}</div>
-        </section>
-
-        <section className="border-y border-white/10 py-10"><p className="rcl-home-kicker">RICHMOND, VIRGINIA BASKETBALL</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Looking for your next league?</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">Discover competitive Richmond basketball, official player stats, teams, rankings and the year-round RCL community.</p><div className="mt-5 flex flex-wrap gap-4 text-xs font-black uppercase tracking-wider"><Link href="/league" className="text-rcl-orange">League Center →</Link><Link href="/register" className="text-rcl-gold">Register →</Link><Link href="/faq">League FAQ →</Link></div></section>
-
-        <section className="rcl-home-latest">
-          <div><p>THE STAGE</p><h2>LATEST FROM RCL</h2></div>
-          <div>{news.length === 0 && <p className="rcl-home-empty">League news and announcements will appear here.</p>}{news.slice(0,3).map(n=><Link href={'/news/'+n.slug} key={n.id}><small>RCL NEWS</small><b>{n.title}</b></Link>)}</div>
-        </section>
+        <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>
       </div>
-    </div>
 
-    <NavigationDrawer open={menuOpen} onClose={()=>setMenuOpen(false)} groups={drawerGroups} pathname="/" />
+      <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
+        <div className="rcl-landing-phone-top"><b>RCL</b><span>For You</span><i>•••</i></div>
+        <div className="rcl-landing-story-row">{featured.slice(0,4).map(player=><span key={player.id}>{player.photo_url?<Image src={player.photo_url} alt="" width={64} height={64}/>:<b>{player.first_name[0]}{player.last_name[0]}</b>}</span>)}</div>
+        <div className="rcl-landing-preview-post">
+          <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>
+          <strong>Basketball here is bigger than a schedule.</strong>
+          <p>Follow the people, runs, stories and competition that make the city move.</p>
+          <div className="rcl-preview-actions"><span>🏀 React</span><span>💬 Comment</span><span>↗ Share</span></div>
+        </div>
+      </div>
+    </section>
 
-    <nav className="rcl-home-bottom" aria-label="Mobile navigation"><Link aria-current="page" className="active" href="/"><FaHouse/><span>HOME</span></Link><Link href="/league"><FaBasketball/><span>LEAGUE</span></Link><Link href="/players"><FaUser/><span>PLAYERS</span></Link><Link href="/social"><FaPeopleGroup/><span>SOCIAL</span></Link><button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/><span>MORE</span></button></nav>
+    <section className="rcl-landing-section">
+      <div className="rcl-landing-section-head"><div><p>Start here</p><h2>A social world built for basketball.</h2></div><Link href="/explore">Discover basketball <FaArrowRight/></Link></div>
+      <div className="rcl-world-card-grid">{worldCards.map(({title,copy,href,icon:Icon})=><Link href={href} key={title} className="rcl-world-card"><span><Icon/></span><h3>{title}</h3><p>{copy}</p><b>Open <FaArrowRight/></b></Link>)}</div>
+    </section>
+
+    <section className="rcl-landing-section rcl-league-feature">
+      <div className="rcl-league-copy">
+        <p className="rcl-landing-kicker">Premier competition</p>
+        <h2>Rich City League</h2>
+        <p>The flagship league of the RCL platform. Games, stats, rankings, stories and league history get a premium stage without making the entire platform feel like a league-management website.</p>
+        <div className="rcl-landing-actions"><Link href="/league" className="rcl-landing-primary">Enter League Center <FaArrowRight/></Link><Link href="/standings" className="rcl-landing-secondary"><FaTrophy/> Standings</Link></div>
+      </div>
+      <div className="rcl-league-scoreboard">
+        <p>{standingsLabel||'Rich City League'}</p>
+        {next.length?next.map(game=><Link href={'/games/'+game.id} key={game.id}><small>{new Date(game.scheduled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/New_York'})}</small><div><b>{team(game.away_team_id)?.name??'Away'}</b><span>vs</span><b>{team(game.home_team_id)?.name??'Home'}</b></div></Link>):<div className="rcl-calm-empty">Upcoming league games will appear here.</div>}
+        {topStandings.length>0&&<div className="rcl-mini-standings">{topStandings.map((row,index)=><span key={row.id}><i>{index+1}</i><b>{team(row.team_id)?.name??'RCL Team'}</b><small>{row.wins}-{row.losses}</small></span>)}</div>}
+      </div>
+    </section>
+
+    <section className="rcl-landing-section">
+      <div className="rcl-landing-section-head"><div><p>People first</p><h2>Faces make the network feel alive.</h2></div><Link href="/players">See players <FaArrowRight/></Link></div>
+      <div className="rcl-people-row">{featured.map(player=>{
+        const s=statMap.get(player.id);
+        const ppg=s&&s.gp?s.points/s.gp:0;
+        return <Link href={'/players/'+player.id} key={player.id} className="rcl-person-card">
+          <div>{player.photo_url?<Image src={player.photo_url} alt={`${player.first_name} ${player.last_name}`} width={540} height={540}/>:<span>{player.first_name[0]}{player.last_name[0]}</span>}</div>
+          <p><small>{player.position??'Player'}{player.jersey_number?` · #${player.jersey_number}`:''}</small><b>{player.first_name} {player.last_name}</b><em>{s?.gp?`${ppg.toFixed(1)} PPG`:'RCL Profile'}</em></p>
+        </Link>;
+      })}{!featured.length&&<div className="rcl-calm-empty">Player profiles will appear here as the community grows.</div>}</div>
+    </section>
+
+    <section className="rcl-landing-section rcl-community-pulse">
+      <div className="rcl-landing-section-head"><div><p>Community pulse</p><h2>What basketball is talking about.</h2></div><Link href="/social">Open feed <FaArrowRight/></Link></div>
+      <div className="rcl-pulse-grid">{posts.slice(0,4).map(post=><Link href="/social" key={post.id}><span><FaUserGroup/></span><div><b>{post.author?.display_name||post.author?.first_name||'RCL Community'}</b><p>{post.body}</p></div></Link>)}{!posts.length&&<div className="rcl-calm-empty">Community posts will appear here.</div>}</div>
+    </section>
+
+    <section className="rcl-landing-section rcl-revenue-lifestyle">
+      <div className="rcl-landing-section-head"><div><p>More from RCL</p><h2>Membership and merch without interrupting the game.</h2></div></div>
+      <div className="rcl-lifestyle-grid">
+        <Link href="/membership" className="rcl-lifestyle-card"><span><FaCrown/></span><div><small>RCL+</small><h3>Your basketball life, organized.</h3><p>My Hoops, Passport tools, analytics, saves and premium basketball utility.</p><b>Explore membership <FaArrowRight/></b></div></Link>
+        <Link href="/shop" className="rcl-lifestyle-card"><span><FaShirt/></span><div><small>RCL Drops</small><h3>Wear the culture.</h3><p>Limited league and community releases presented like drops, not banner ads.</p><b>Shop RCL <FaArrowRight/></b></div></Link>
+        <Link href="/runs" className="rcl-lifestyle-card"><span><FaBasketball/></span><div><small>On court</small><h3>Find your next run.</h3><p>Basketball activity gives the social world a real-life heartbeat.</p><b>See runs <FaArrowRight/></b></div></Link>
+      </div>
+    </section>
+
+    {news.length>0&&<section className="rcl-landing-section">
+      <div className="rcl-landing-section-head"><div><p>From RCL</p><h2>Stories worth knowing.</h2></div><Link href="/news">All news <FaArrowRight/></Link></div>
+      <div className="rcl-editorial-row">{news.slice(0,3).map(item=><Link href={'/news/'+item.slug} key={item.id}><small>RCL</small><b>{item.title}</b><FaArrowRight/></Link>)}</div>
+    </section>}
   </main>;
 }

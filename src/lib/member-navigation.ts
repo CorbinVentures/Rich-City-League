@@ -1,91 +1,89 @@
 import {
-  FaBasketball,
-  FaBell,
-  FaBullhorn,
-  FaChartSimple,
-  FaCompass,
-  FaComments,
-  FaGlobe,
-  FaHouse,
-  FaListOl,
-  FaPeopleGroup,
-  FaPlus,
-  FaTrophy,
-  FaUser,
-  FaUsers,
+  FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple, FaComments,
+  FaCompass, FaCrown, FaGlobe, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
+  FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUsers
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 import type { RCLNavGroup } from '@/lib/rcl-navigation';
 
-export type RCLMemberNavItem = {
-  label: string;
-  href: string;
-  icon: IconType;
-  action?: 'create';
-};
+export type RCLMemberNavItem={label:string;href:string;icon:IconType;action?:'create'};
 
-export const RCL_MEMBER_PRIMARY_NAV: RCLMemberNavItem[] = [
-  { label: 'Home', href: '/social', icon: FaHouse },
-  { label: 'Explore', href: '/explore', icon: FaCompass },
-  { label: 'Create', href: '/create', icon: FaPlus, action: 'create' },
-  { label: 'League', href: '/league', icon: FaBasketball },
-  { label: 'Profile', href: '/social/profile/me', icon: FaUser },
+export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
+  {label:'Home',href:'/social',icon:FaHouse},
+  {label:'Discover',href:'/explore',icon:FaCompass},
+  {label:'Create',href:'/create',icon:FaPlus,action:'create'},
+  {label:'Runs',href:'/runs',icon:FaLocationDot},
+  {label:'League',href:'/league',icon:FaBasketball},
 ];
 
-export const RCL_MEMBER_DESKTOP_NAV: RCLMemberNavItem[] = [
-  { label: 'Home', href: '/social', icon: FaHouse },
-  { label: 'Explore', href: '/explore', icon: FaCompass },
-  { label: 'Create', href: '/create', icon: FaPlus, action: 'create' },
-  { label: 'League', href: '/league', icon: FaBasketball },
-  { label: 'Profile', href: '/social/profile/me', icon: FaUser },
-];
+export const RCL_MEMBER_DESKTOP_NAV=RCL_MEMBER_PRIMARY_NAV;
 
-export const RCL_MEMBER_NAV_GROUPS: RCLNavGroup[] = [
+export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
   {
-    label: 'Network',
-    description: 'People, conversation and basketball activity across Virginia',
-    items: [
-      { label: 'Home', href: '/social', icon: FaHouse },
-      { label: 'Explore', href: '/explore', icon: FaCompass },
-      { label: 'Virginia Network', href: '/network', icon: FaGlobe },
-      { label: 'Organizations', href: '/organizations', icon: FaPeopleGroup },
-      { label: 'Create', href: '/create', icon: FaPlus },
-      { label: 'Communities', href: '/communities', icon: FaPeopleGroup },
-      { label: 'Runs', href: '/runs', icon: FaBasketball },
-      { label: 'Messages', href: '/messages', icon: FaComments },
-      { label: 'Notifications', href: '/notifications', icon: FaBell },
-      { label: 'For Organizations', href: '/network/partners', icon: FaBullhorn },
+    label:'Your basketball',
+    description:'Your identity, people, conversations and personalized basketball world',
+    items:[
+      {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'My Profile',href:'/social/profile/me',icon:FaUser},
+      {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
+      {label:'Messages',href:'/messages',icon:FaComments},
+      {label:'Notifications',href:'/notifications',icon:FaBell},
+      {label:'Communities',href:'/communities',icon:FaPeopleGroup},
+      {label:'REP + Badges',href:'/badges',icon:FaMedal},
     ],
   },
   {
-    label: 'League',
-    description: 'Rich City League flagship competition powered by RCL',
-    items: [
-      { label: 'League Center', href: '/league', icon: FaBasketball },
-      { label: 'Games', href: '/games', icon: FaBasketball },
-      { label: 'Standings', href: '/standings', icon: FaListOl },
-      { label: 'Stats', href: '/stats', icon: FaChartSimple },
-      { label: 'Players', href: '/players', icon: FaUser },
-      { label: 'Teams', href: '/teams', icon: FaUsers },
-      { label: 'Rankings', href: '/rankings', icon: FaListOl },
-      { label: 'Fantasy', href: '/fantasy', icon: FaTrophy },
+    label:'Discover',
+    description:'Find people, teams, organizations, media and opportunities around you',
+    items:[
+      {label:'Discover Basketball',href:'/explore',icon:FaCompass},
+      {label:'Players',href:'/players',icon:FaUser},
+      {label:'Teams',href:'/teams',icon:FaUsers},
+      {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
+      {label:'Virginia Network',href:'/network',icon:FaGlobe},
+      {label:'News',href:'/news',icon:FaNewspaper},
+      {label:'RCL TV',href:'/media',icon:FaPlay},
     ],
   },
   {
-    label: 'Identity',
-    description: 'Your basketball identity and reputation',
-    items: [
-      { label: 'Edit Profile', href: '/profile', icon: FaUser },
-      { label: 'REP + Badges', href: '/badges', icon: FaTrophy },
-      { label: 'People', href: '/friends', icon: FaUsers },
+    label:'Rich City League',
+    description:'The premier league and flagship competition property on RCL',
+    items:[
+      {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Games',href:'/games',icon:FaBasketball},
+      {label:'Standings',href:'/standings',icon:FaChartSimple},
+      {label:'Stats',href:'/stats',icon:FaChartSimple},
+      {label:'Rankings',href:'/rankings',icon:FaTrophy},
+      {label:'Fantasy',href:'/fantasy',icon:FaTrophy},
+    ],
+  },
+  {
+    label:'Membership + shop',
+    description:'Premium tools, member benefits and limited RCL drops',
+    items:[
+      {label:'Membership',href:'/membership',icon:FaCrown},
+      {label:'Shop RCL',href:'/shop',icon:FaShirt},
+    ],
+  },
+  {
+    label:'Organization tools',
+    description:'Manage and grow an organization without turning RCL into league-management software',
+    items:[
+      {label:'For Organizations',href:'/network/partners',icon:FaBullhorn},
+      {label:'Partner Dashboard',href:'/network/dashboard',icon:FaChartSimple},
+      {label:'RCL Reach',href:'/network/dashboard/reach',icon:FaChartSimple},
     ],
   },
 ];
 
-const SOCIAL_HOME_FAMILY = ['/social', '/friends', '/runs', '/communities'];
+const SOCIAL=['/social'];
+const DISCOVER=['/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
+const RUNS=['/runs','/richmond-basketball-runs'];
+const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
-export function isMemberNavigationActive(pathname: string, href: string) {
-  if (href === '/social') return SOCIAL_HOME_FAMILY.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-  const cleanHref = href.split('?')[0];
-  return pathname === cleanHref || (cleanHref !== '/' && pathname.startsWith(`${cleanHref}/`));
+export function isMemberNavigationActive(pathname:string,href:string){
+  const family=href==='/social'?SOCIAL:href==='/explore'?DISCOVER:href==='/runs'?RUNS:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
+  const clean=href.split('?')[0];
+  return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));
 }

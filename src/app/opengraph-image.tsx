@@ -1,55 +1,41 @@
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
-export const alt = 'RCL Network — Richmond basketball lives here';
-export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
+export const runtime='edge';
+export const alt='RCL — Richmond basketball social';
+export const size={width:1200,height:630};
+export const contentType='image/png';
 
-export default function Image() {
+export default function Image(){
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          position: 'relative',
-          overflow: 'hidden',
-          background: '#03070D',
-          color: '#F6F8FB',
-          fontFamily: 'Arial, sans-serif',
-        }}
-      >
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', background: 'radial-gradient(circle at 82% 20%, rgba(21,159,255,.24), transparent 31%), radial-gradient(circle at 16% 86%, rgba(255,79,22,.18), transparent 34%), linear-gradient(135deg,#03070D 0%,#071522 58%,#03070D 100%)' }} />
-        <div style={{ position: 'absolute', right: -90, top: -120, width: 620, height: 620, border: '22px solid rgba(21,159,255,.12)', borderRadius: 620, display: 'flex' }} />
-        <div style={{ position: 'absolute', right: 78, top: 74, width: 320, height: 320, border: '8px solid rgba(246,248,251,.08)', borderRadius: 320, display: 'flex' }} />
-        <div style={{ position: 'absolute', right: 212, top: 74, width: 8, height: 325, background: 'rgba(246,248,251,.08)', display: 'flex' }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, width: 16, height: '100%', background: '#FF4F16', display: 'flex' }} />
+    <div style={{width:'100%',height:'100%',display:'flex',position:'relative',overflow:'hidden',background:'#F7F5F1',color:'#1B1C1E',fontFamily:'Arial, sans-serif'}}>
+      <div style={{position:'absolute',inset:0,display:'flex',background:'radial-gradient(circle at 84% 22%, rgba(184,92,56,.12), transparent 30%), radial-gradient(circle at 18% 90%, rgba(201,164,92,.10), transparent 32%)'}}/>
+      <div style={{position:'absolute',right:-70,top:-85,width:500,height:500,border:'22px solid rgba(184,92,56,.08)',borderRadius:500,display:'flex'}}/>
+      <div style={{position:'absolute',right:90,top:90,width:270,height:270,border:'2px solid rgba(27,28,30,.08)',borderRadius:270,display:'flex'}}/>
+      <div style={{position:'absolute',left:0,top:0,width:12,height:'100%',background:'#B85C38',display:'flex'}}/>
 
-        <div style={{ padding: '66px 72px 58px 82px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', zIndex: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <div style={{ width: 70, height: 70, borderRadius: 70, border: '5px solid #FF4F16', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 25, fontWeight: 900 }}>RCL</div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 5, color: '#FF4F16' }}>RCL NETWORK · EST. 2011</div>
-              <div style={{ marginTop: 7, fontSize: 18, color: '#7D90A3', letterSpacing: 2 }}>RICHMOND, VIRGINIA · 804</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 850 }}>
-            <div style={{ fontSize: 76, lineHeight: .96, fontWeight: 900, letterSpacing: -4, display: 'flex', flexDirection: 'column' }}>
-              <span>RICHMOND BASKETBALL.</span>
-              <span style={{ color: '#159FFF' }}>ONE NETWORK.</span>
-            </div>
-            <div style={{ marginTop: 26, fontSize: 27, color: '#D9E0E7', lineHeight: 1.3 }}>Feed · Profiles · REP · Runs · League · Community</div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: 2 }}>RICHCITYHOOPS.COM</div>
-            <div style={{ padding: '13px 22px', borderRadius: 999, background: '#FF4F16', color: '#03070D', fontSize: 19, fontWeight: 900, letterSpacing: 1, display: 'flex' }}>BUILD YOUR IDENTITY</div>
+      <div style={{padding:'64px 72px 56px 82px',display:'flex',flexDirection:'column',justifyContent:'space-between',width:'100%',zIndex:2}}>
+        <div style={{display:'flex',alignItems:'center',gap:18}}>
+          <div style={{width:64,height:64,borderRadius:18,border:'2px solid #D9D2C9',background:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:25,fontWeight:900,color:'#B85C38'}}>R</div>
+          <div style={{display:'flex',flexDirection:'column'}}>
+            <div style={{fontSize:22,fontWeight:900,letterSpacing:4,color:'#1B1C1E'}}>RCL · BASKETBALL SOCIAL</div>
+            <div style={{marginTop:7,fontSize:17,color:'#7C7F84',letterSpacing:2}}>RICHMOND, VIRGINIA · 804</div>
           </div>
         </div>
+
+        <div style={{display:'flex',flexDirection:'column',maxWidth:900}}>
+          <div style={{fontSize:78,lineHeight:.96,fontWeight:900,letterSpacing:-4,display:'flex',flexDirection:'column'}}>
+            <span>YOUR BASKETBALL WORLD.</span>
+            <span style={{color:'#B85C38'}}>ALL IN ONE PLACE.</span>
+          </div>
+          <div style={{marginTop:24,fontSize:25,color:'#5F6368',lineHeight:1.35}}>People · Runs · Highlights · Discovery · Rich City League</div>
+        </div>
+
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{fontSize:21,fontWeight:850,letterSpacing:2}}>RICHCITYHOOPS.COM</div>
+          <div style={{padding:'13px 22px',borderRadius:999,background:'#1B1C1E',color:'#FFFFFF',fontSize:18,fontWeight:900,display:'flex'}}>JOIN THE WORLD</div>
+        </div>
       </div>
-    ),
+    </div>,
     size,
   );
 }

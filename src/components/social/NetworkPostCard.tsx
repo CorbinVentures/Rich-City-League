@@ -141,7 +141,7 @@ export function NetworkPostCard({
     .slice(0, 3);
 
   return (
-    <article id={`post-${post.id}`} className={`overflow-hidden rounded-2xl border bg-[#08111b]/90 shadow-[0_18px_60px_rgba(0,0,0,.22)] ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
+    <article id={`post-${post.id}`} className={`rcl-feed-post overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
       {repost && (
         <div className="flex items-center gap-2 border-b border-white/[.06] bg-white/[.018] px-4 py-2.5 text-xs font-bold text-white/35 sm:px-5">
           <FaRetweet className="text-rcl-blue" />
@@ -154,7 +154,7 @@ export function NetworkPostCard({
 
       {official && (
         <div className="flex items-center gap-2 border-b border-rcl-blue/15 bg-rcl-blue/[.055] px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue sm:px-5">
-          <span className="h-1.5 w-1.5 rounded-full bg-rcl-orange" /> RCL Network · Official Activity
+          <span className="h-1.5 w-1.5 rounded-full bg-rcl-orange" /> RCL · Official Activity
         </div>
       )}
 
@@ -204,7 +204,7 @@ export function NetworkPostCard({
       </div>
 
       {mediaUrls.length > 0 && (
-        <div className="border-y border-white/[.07] bg-black">
+        <div className="rcl-dark-media border-y border-white/[.07] bg-black">
           {videoPost ? (
             <video src={mediaUrls[0]} controls playsInline preload="metadata" className="max-h-[680px] w-full object-contain" />
           ) : (
