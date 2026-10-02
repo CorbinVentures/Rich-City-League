@@ -1,0 +1,460 @@
+/*
+ * RCL Rebrand Concept — enforced sitewide.
+ * Source of truth: Cool · Trustworthy · Basketball Social.
+ * This file loads last and is intentionally opinionated.
+ */
+
+:root {
+  --rcl-v3-canvas:#F6F9FC;
+  --rcl-v3-surface:#FFFFFF;
+  --rcl-v3-soft:#EDF4FA;
+  --rcl-v3-border:#D9E4EF;
+  --rcl-v3-border-strong:#C7D6E5;
+  --rcl-v3-ink:#0F2547;
+  --rcl-v3-copy:#64748B;
+  --rcl-v3-muted:#8190A1;
+  --rcl-v3-primary:#3B82F6;
+  --rcl-v3-primary-deep:#2563EB;
+  --rcl-v3-primary-soft:#E8F1FF;
+  --rcl-v3-slate:#64748B;
+  --rcl-v3-gold:#D4AF37;
+  --rcl-v3-success:#2E8B70;
+  --rcl-v3-danger:#C65361;
+  --rcl-v3-shadow:0 8px 28px rgba(15,37,71,.07);
+  --rcl-v3-shadow-raised:0 16px 44px rgba(15,37,71,.10);
+
+  --rcl-bg:var(--rcl-v3-canvas)!important;
+  --rcl-canvas:var(--rcl-v3-canvas)!important;
+  --rcl-surface:var(--rcl-v3-surface)!important;
+  --rcl-surface-2:var(--rcl-v3-soft)!important;
+  --rcl-line:var(--rcl-v3-border)!important;
+  --rcl-text:var(--rcl-v3-ink)!important;
+  --rcl-text-2:var(--rcl-v3-copy)!important;
+  --rcl-muted:var(--rcl-v3-muted)!important;
+  --rcl-charcoal:var(--rcl-v3-ink)!important;
+  --rcl-cream:var(--rcl-v3-canvas)!important;
+
+  /* Legacy aliases remain for compatibility but resolve to the mockup system. */
+  --rcl-orange:var(--rcl-v3-primary)!important;
+  --rcl-blue:var(--rcl-v3-primary)!important;
+  --rcl-gold:var(--rcl-v3-primary)!important;
+  --rcl-navy:var(--rcl-v3-ink)!important;
+  --rcl-success:var(--rcl-v3-success)!important;
+  --rcl-danger:var(--rcl-v3-danger)!important;
+
+  --rcl-social-canvas:var(--rcl-v3-canvas)!important;
+  --rcl-social-surface:var(--rcl-v3-surface)!important;
+  --rcl-social-soft:var(--rcl-v3-soft)!important;
+  --rcl-social-border:var(--rcl-v3-border)!important;
+  --rcl-social-text:var(--rcl-v3-ink)!important;
+  --rcl-social-text-2:var(--rcl-v3-copy)!important;
+  --rcl-social-muted:var(--rcl-v3-muted)!important;
+  --rcl-social-primary:var(--rcl-v3-primary)!important;
+  --rcl-social-clay:var(--rcl-v3-primary)!important;
+  --rcl-social-primary-deep:var(--rcl-v3-primary-deep)!important;
+  --rcl-social-clay-deep:var(--rcl-v3-primary-deep)!important;
+  --rcl-social-slate:var(--rcl-v3-slate)!important;
+  --rcl-social-gold:var(--rcl-v3-gold)!important;
+  --rcl-social-success:var(--rcl-v3-success)!important;
+}
+
+html,
+html body,
+.rcl-platform-root,
+.rcl-platform-root > main {
+  background:var(--rcl-v3-canvas)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+
+html body,
+button,
+input,
+textarea,
+select {
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+}
+
+/* Readability is non-negotiable. */
+.rcl-platform-root :where(h1,h2,h3,h4,h5,h6,.font-display,.rcl-display) {
+  color:var(--rcl-v3-ink)!important;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-weight:800;
+  text-shadow:none!important;
+}
+.rcl-platform-root :where(p,li,dd,dt) {
+  color:inherit;
+}
+.rcl-platform-root [class~="text-white"] { color:var(--rcl-v3-ink)!important; }
+.rcl-platform-root [class*="text-white/"],
+.rcl-platform-root :where(.text-gray-300,.text-gray-400,.text-gray-500,.text-slate-300,.text-slate-400,.text-slate-500) {
+  color:var(--rcl-v3-copy)!important;
+}
+.rcl-platform-root :where(.text-gray-600,.text-slate-600) { color:var(--rcl-v3-muted)!important; }
+.rcl-platform-root :where(.text-rcl-orange,.text-rcl-blue,.text-rcl-gold) { color:var(--rcl-v3-primary)!important; }
+
+/* Canvas and cards — no slate-on-slate panels. */
+.rcl-platform-root > main[class*="bg-"],
+.rcl-platform-root main.rcl-social-world,
+.rcl-platform-root main.rcl-social-secondary,
+.rcl-platform-root main.rcl-mock-page {
+  background:var(--rcl-v3-canvas)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#0"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-[#1"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-white/["]:not(.rcl-dark-media),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class*="bg-black/"]:not(.rcl-dark-media),
+.rcl-platform-root :where(section,article,aside,form,div,header)[class~="bg-rcl-black"]:not(.rcl-dark-media) {
+  background:var(--rcl-v3-surface)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+
+.rcl-platform-root :where(section,article,aside,form,div)[class*="rounded"][class*="border"]:not(.rcl-dark-media) {
+  border-color:var(--rcl-v3-border)!important;
+}
+
+.rcl-platform-root [class*="border-white/"],
+.rcl-platform-root [class*="border-rcl-blue/"] {
+  border-color:var(--rcl-v3-border)!important;
+}
+.rcl-platform-root [class*="divide-white/"] > :not([hidden]) ~ :not([hidden]) {
+  border-color:var(--rcl-v3-border)!important;
+}
+
+/* Canonical product cards. */
+.rcl-feed-post,
+.rcl-story-rail,
+.rcl-feed-composer,
+.rcl-feed-mode-tabs,
+.rcl-platform-panel,
+.rcl-panel,
+.rcl-card {
+  background:var(--rcl-v3-surface)!important;
+  border-color:var(--rcl-v3-border)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+
+/* Inputs from the mockup: white, bordered, navy text. */
+.rcl-platform-root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.rcl-platform-root textarea,
+.rcl-platform-root select {
+  background:#fff!important;
+  border-color:var(--rcl-v3-border)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:none!important;
+}
+.rcl-platform-root input::placeholder,
+.rcl-platform-root textarea::placeholder {
+  color:#8A99AA!important;
+  opacity:1!important;
+}
+.rcl-platform-root input:focus,
+.rcl-platform-root textarea:focus,
+.rcl-platform-root select:focus {
+  border-color:rgba(59,130,246,.58)!important;
+  outline:none!important;
+  box-shadow:0 0 0 3px rgba(59,130,246,.10)!important;
+}
+
+/* Actions and states. */
+.rcl-platform-root :where(a,button)[class*="bg-rcl-orange"],
+.rcl-platform-root :where(a,button)[class*="bg-rcl-blue"],
+.rcl-platform-root :where(a,button)[class*="bg-rcl-gold"] {
+  background:var(--rcl-v3-primary)!important;
+  border-color:transparent!important;
+  color:#fff!important;
+}
+.rcl-platform-root :where(a,button)[class*="bg-rcl-orange"]:hover,
+.rcl-platform-root :where(a,button)[class*="bg-rcl-blue"]:hover,
+.rcl-platform-root :where(a,button)[class*="bg-rcl-gold"]:hover {
+  background:var(--rcl-v3-primary-deep)!important;
+  color:#fff!important;
+}
+.rcl-platform-root [class*="hover:bg-white/"]:hover,
+.rcl-platform-root [class*="hover:bg-rcl-blue/"]:hover {
+  background:var(--rcl-v3-primary-soft)!important;
+}
+.rcl-platform-root [class*="hover:text-white"]:hover {
+  color:var(--rcl-v3-ink)!important;
+}
+
+/* Catch old orange/legacy arbitrary utilities without rewriting every historic page. */
+body [class*="text-orange-"],
+body [class*="text-[#ff4f16"],
+body [class*="text-[#FF4F16"],
+body [class*="text-[#ff6b1a"],
+body [class*="text-[#f97316"],
+body [class*="text-[#f5921e"] {
+  color:var(--rcl-v3-primary)!important;
+}
+body [class*="bg-orange-"],
+body [class*="bg-[#ff4f16"],
+body [class*="bg-[#FF4F16"],
+body [class*="bg-[#ff6b1a"],
+body [class*="bg-[#f97316"],
+body [class*="bg-[#f5921e"] {
+  background:var(--rcl-v3-primary)!important;
+  color:#fff!important;
+}
+body [class*="border-orange-"],
+body [class*="border-[#ff4f16"],
+body [class*="border-[#FF4F16"],
+body [class*="border-[#ff6b1a"],
+body [class*="border-[#f97316"],
+body [class*="border-[#f5921e"] {
+  border-color:rgba(59,130,246,.42)!important;
+}
+
+/* Header and navigation: crisp white chrome, blue active states. */
+.rcl-universal-sidebar,
+.rcl-universal-topbar,
+.rcl-universal-bottom {
+  background:rgba(255,255,255,.97)!important;
+  border-color:var(--rcl-v3-border)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:0 1px 0 rgba(15,37,71,.03)!important;
+}
+.rcl-universal-mark,
+.rcl-universal-wordmark>span {
+  border:0!important;
+  background:transparent!important;
+  color:var(--rcl-v3-ink)!important;
+  font-style:italic!important;
+  font-weight:950!important;
+  letter-spacing:-.08em!important;
+}
+.rcl-universal-nav a,
+.rcl-universal-bottom a,
+.rcl-universal-more,
+.rcl-universal-account-link {
+  color:var(--rcl-v3-slate)!important;
+}
+.rcl-universal-nav a:hover,
+.rcl-universal-more:hover {
+  background:var(--rcl-v3-soft)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+.rcl-universal-nav a.active {
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-primary)!important;
+}
+.rcl-universal-nav a.active svg,
+.rcl-universal-bottom a.active,
+.rcl-universal-bottom a.active svg {
+  color:var(--rcl-v3-primary)!important;
+}
+.rcl-universal-nav a.rcl-primary-create {
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-primary)!important;
+}
+.rcl-universal-bottom a.rcl-mobile-create {
+  background:var(--rcl-v3-primary)!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(59,130,246,.28)!important;
+}
+.rcl-universal-tools>a:not(.rcl-topbar-signin),
+.rcl-universal-tools>button {
+  border-color:transparent!important;
+  background:transparent!important;
+  color:var(--rcl-v3-ink)!important;
+}
+.rcl-universal-tools>a:hover,
+.rcl-universal-tools>button:hover {
+  background:var(--rcl-v3-soft)!important;
+  color:var(--rcl-v3-primary)!important;
+}
+.rcl-global-search {
+  border-color:var(--rcl-v3-border)!important;
+  background:#fff!important;
+  color:var(--rcl-v3-slate)!important;
+}
+
+/* Shared page heroes: editorial white/blue instead of old dark blocks. */
+.rcl-corporate-page-hero,
+.rcl-client-page-hero,
+.rcl-social-secondary > section:first-child {
+  border-color:var(--rcl-v3-border)!important;
+  background:
+    radial-gradient(circle at 90% 0%,rgba(59,130,246,.10),transparent 34%),
+    linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:none!important;
+}
+
+/* Feed — match the approved mockup. */
+.rcl-feed-intro>div:first-child p { color:var(--rcl-v3-primary)!important; }
+.rcl-feed-intro h1 { color:var(--rcl-v3-ink)!important; }
+.rcl-feed-intro>div:first-child span { color:var(--rcl-v3-copy)!important; }
+.rcl-feed-intro-actions label {
+  border-color:var(--rcl-v3-border)!important;
+  background:#fff!important;
+  color:var(--rcl-v3-slate)!important;
+}
+.rcl-feed-intro-actions button,
+.rcl-feed-intro-actions>a {
+  background:var(--rcl-v3-primary)!important;
+  color:#fff!important;
+}
+
+.rcl-story-rail,
+.rcl-feed-composer {
+  border:1px solid var(--rcl-v3-border)!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+.rcl-story-rail [class*="border-rcl-orange"] { border-color:var(--rcl-v3-primary)!important; }
+.rcl-story-rail [class*="border-[#08111b]"] { border-color:#fff!important; }
+.rcl-story-rail [class*="bg-rcl-orange"] { background:var(--rcl-v3-primary)!important; color:#fff!important; }
+.rcl-story-rail [class*="text-white/"] { color:var(--rcl-v3-copy)!important; }
+
+.rcl-feed-composer .rcl-composer-prompt {
+  border-color:var(--rcl-v3-border)!important;
+  background:var(--rcl-v3-canvas)!important;
+  color:var(--rcl-v3-copy)!important;
+}
+.rcl-feed-composer .rcl-composer-action {
+  color:var(--rcl-v3-slate)!important;
+}
+.rcl-feed-composer .rcl-composer-action:hover,
+.rcl-feed-composer .rcl-composer-action.primary {
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+
+.rcl-feed-mode-tabs {
+  padding:4px!important;
+  border:1px solid var(--rcl-v3-border)!important;
+  border-radius:14px!important;
+  background:#fff!important;
+}
+.rcl-feed-mode-tabs button {
+  color:var(--rcl-v3-ink)!important;
+  border-radius:10px!important;
+}
+.rcl-feed-mode-tabs button[aria-pressed="true"],
+.rcl-feed-mode-tabs button.active {
+  background:var(--rcl-v3-primary)!important;
+  color:#fff!important;
+}
+
+/* Post cards and reactions. */
+.rcl-feed-post {
+  border:1px solid var(--rcl-v3-border)!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+.rcl-feed-post [class*="text-white/"] { color:var(--rcl-v3-copy)!important; }
+.rcl-feed-post [class~="text-white"] { color:var(--rcl-v3-ink)!important; }
+.rcl-feed-post [class*="bg-black/"],
+.rcl-feed-post [class*="bg-white/["]:not(.rcl-dark-media) {
+  background:var(--rcl-v3-canvas)!important;
+}
+.rcl-feed-post [class*="border-white/"] {
+  border-color:var(--rcl-v3-border)!important;
+}
+.rcl-feed-post [class*="bg-rcl-blue"] {
+  background:var(--rcl-v3-primary-soft)!important;
+}
+.rcl-feed-post [class*="text-rcl-blue"],
+.rcl-feed-post [class*="text-rcl-orange"] {
+  color:var(--rcl-v3-primary)!important;
+}
+
+/* VIP remains the only gold UI treatment. */
+.rcl-vip-chip,
+[title="RCL VIP verified member"] {
+  border-color:rgba(212,175,55,.42)!important;
+  background:#FFF9E8!important;
+  color:#775E0B!important;
+}
+
+/* Deliberate dark storytelling/media zones from the mockup. */
+.rcl-dark-media,
+.rcl-dark-media *,
+.rcl-league-feature,
+.rcl-league-feature *,
+.rcl-league-scoreboard,
+.rcl-league-scoreboard *,
+.rcl-scorebook-immersive,
+.rcl-scorebook-immersive *,
+.rcl-draft-platform,
+.rcl-draft-platform * {
+  color:#fff;
+}
+.rcl-dark-media,
+.rcl-league-feature,
+.rcl-league-scoreboard,
+.rcl-scorebook-immersive,
+.rcl-draft-platform {
+  --rcl-text:#fff!important;
+  --rcl-text-2:#CBD5E1!important;
+}
+.rcl-dark-media [class*="text-white/"],
+.rcl-league-feature [class*="text-white/"],
+.rcl-league-scoreboard [class*="text-white/"],
+.rcl-draft-platform [class*="text-white/"] {
+  color:#CBD5E1!important;
+}
+.rcl-dark-media [class*="border-white/"],
+.rcl-league-feature [class*="border-white/"],
+.rcl-league-scoreboard [class*="border-white/"],
+.rcl-draft-platform [class*="border-white/"] {
+  border-color:rgba(255,255,255,.16)!important;
+}
+
+/* Tables remain readable and horizontally scroll instead of crushing names. */
+.rcl-platform-root table { table-layout:auto!important; }
+.rcl-platform-root table[class*="min-w-"] { min-width:40rem!important; }
+.rcl-platform-root :where(th,td) {
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  hyphens:none!important;
+}
+.rcl-platform-root :where(th,td):nth-child(2) { min-width:8rem; }
+
+/* Admin shortcut belongs to the same chrome. */
+a[aria-label="Open administrator control center"] {
+  border-color:var(--rcl-v3-border)!important;
+  background:#fff!important;
+  color:var(--rcl-v3-primary)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+
+@media (max-width:959px) {
+  .rcl-universal-topbar {
+    height:64px!important;
+    padding:0 16px!important;
+    background:rgba(255,255,255,.98)!important;
+  }
+  .rcl-universal-wordmark>span {
+    width:auto!important;
+    min-width:56px!important;
+    font-size:21px!important;
+  }
+  .rcl-universal-bottom {
+    min-height:72px!important;
+    padding:5px 10px max(7px,env(safe-area-inset-bottom))!important;
+  }
+  .rcl-universal-bottom a { min-height:56px!important; }
+  .rcl-universal-bottom a svg { width:19px!important; height:19px!important; }
+  .rcl-universal-bottom a span { font-size:10px!important; }
+  .rcl-universal-bottom a.rcl-mobile-create {
+    width:52px!important;
+    min-width:52px!important;
+    height:52px!important;
+    min-height:52px!important;
+  }
+}
+
+@media (max-width:639px) {
+  .rcl-feed-intro { margin-bottom:14px!important; }
+  .rcl-feed-intro h1 { font-size:28px!important; }
+  .rcl-story-rail,
+  .rcl-feed-composer,
+  .rcl-feed-post { border-radius:18px!important; }
+}
