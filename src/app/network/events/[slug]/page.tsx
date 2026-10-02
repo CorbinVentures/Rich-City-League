@@ -31,7 +31,7 @@ export default async function NetworkEventPage({ params }:{ params:Promise<{slug
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <NetworkExposureTracker organizationId={org.id} eventId={event.id} eventType="event_view" surface="network-event-page"/>
-    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_78%_10%,rgba(255,79,22,.10),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
+    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_78%_10%,rgba(59,130,246,.10),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="lg" className="py-12 sm:py-16">
         <Link href="/network" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-white/40"><FaArrowLeft/> Virginia Network</Link>
         <div className="mt-8 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[.14em]"><span className="rounded-full border border-rcl-orange/25 bg-rcl-orange/[.06] px-3 py-1.5 text-rcl-orange">{event.event_type}</span>{event.is_featured&&<span className="rounded-full border border-rcl-blue/25 px-3 py-1.5 text-rcl-blue">Featured</span>}</div>
