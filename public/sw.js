@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rcl-static-v8';
-const SW_VERSION = 'v8';
+const CACHE_NAME = 'rcl-static-v9';
+const SW_VERSION = 'v9';
 const STATIC_ASSETS = [
   '/favicon.svg',
   '/icon',
@@ -116,8 +116,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  const cacheableStatic = url.pathname.startsWith('/_next/static/')
-    || url.pathname.startsWith('/icons/')
+  // Next.js build assets are content-addressed and should be handled by the
+  // browser/Vercel cache. Cache-first service-worker handling here can strand an
+  // installed iOS PWA on an old CSS/JS bundle even after a new document loads.
+  if (url.pathname.startsWith('/_next/static/')) return;
+
+  const cacheableStatic = url.pathname.startsWith('/icons/')
     || url.pathname === '/favicon.svg'
     || url.pathname === '/icon'
     || url.pathname === '/apple-icon';
