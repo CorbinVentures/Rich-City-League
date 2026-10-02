@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: { absolute: `${item.title} | RCL News` },
     description,
     alternates: { canonical: `/news/${item.slug}` },
-    openGraph: { type:'article', url:`/news/${item.slug}`, title:item.title, description, publishedTime:item.published_at || undefined, images:item.cover_image_url?[{url:item.cover_image_url,alt:item.title}]:[{url:'https://richcityhoops.com/opengraph-image?v=20261002-2',width:1200,height:630,alt:'RCL — Richmond basketball social'}] },
-    twitter: { card:'summary_large_image', title:item.title, description, images:item.cover_image_url?[item.cover_image_url]:['https://richcityhoops.com/opengraph-image?v=20261002-2'] },
+    openGraph: { type:'article', url:`/news/${item.slug}`, title:item.title, description, publishedTime:item.published_at || undefined, images:item.cover_image_url?[{url:item.cover_image_url,alt:item.title}]:[{url:'https://richcityhoops.com/rcl-share-20261002.png',width:1200,height:630,alt:'RCL — Richmond basketball social'}] },
+    twitter: { card:'summary_large_image', title:item.title, description, images:item.cover_image_url?[item.cover_image_url]:['https://richcityhoops.com/rcl-share-20261002.png'] },
   };
 }
 
