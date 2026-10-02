@@ -6,15 +6,17 @@ export const metadata: Metadata = {
   description: 'Rich City League Draft Night — Richmond basketball, real players, real opportunity.',
   alternates: { canonical: '/draft' },
   openGraph: {
+    images: [{ url: 'https://richcityhoops.com/opengraph-image?v=20261002-2', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }],
     title: 'RCL Draft Night | Rich City League',
     description: 'Follow the official Rich City League draft board, prospects, order, and live selections.',
     url: '/draft',
     type: 'website',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'RCL Draft Night | Rich City League',
     description: 'Richmond basketball. Real players. Real opportunity.',
+    images: ['https://richcityhoops.com/opengraph-image?v=20261002-2'],
   },
 };
 
