@@ -16,8 +16,89 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = 'rcl:pwa-install-dismissed-until';
+const VERSION_KEY = 'rcl:pwa-deployment-version';
+const REFRESH_GUARD_KEY = 'rcl:pwa-refreshing-version';
+const REFRESH_QUERY_KEY = '__rclv';
 const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+async function readDeploymentVersion() {
+  try {
+    const response = await fetch('/api/pwa-version', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (!response.ok) return null;
+    const payload = await response.json() as { version?: string };
+    return payload.version?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+async function clearRCLWorkerCaches() {
+  if (!('caches' in window)) return;
+  try {
+    const keys = await window.caches.keys();
+    await Promise.all(keys.filter((key) => key.startsWith('rcl-static-')).map((key) => window.caches.delete(key)));
+  } catch {
+    // A cache cleanup failure should never block the app from opening.
+  }
+}
+
+function cleanRefreshQuery() {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(REFRESH_QUERY_KEY)) return;
+    url.searchParams.delete(REFRESH_QUERY_KEY);
+    window.history.replaceState(window.history.state, '', url.toString());
+  } catch {
+    // Cosmetic URL cleanup only.
+  }
+}
+
+async function syncPWADeployment(registration: ServiceWorkerRegistration) {
+  try {
+    await registration.update();
+    registration.waiting?.postMessage({ type: 'RCL_SKIP_WAITING' });
+  } catch {
+    // Version checking below can still refresh the document.
+  }
+
+  const version = await readDeploymentVersion();
+  if (!version || version === 'development') return;
+
+  let knownVersion = '';
+  let refreshGuard = '';
+  try {
+    knownVersion = window.localStorage.getItem(VERSION_KEY) ?? '';
+    refreshGuard = window.sessionStorage.getItem(REFRESH_GUARD_KEY) ?? '';
+  } catch {
+    return;
+  }
+
+  if (!knownVersion) {
+    window.localStorage.setItem(VERSION_KEY, version);
+    return;
+  }
+
+  if (knownVersion === version) {
+    if (refreshGuard === version) window.sessionStorage.removeItem(REFRESH_GUARD_KEY);
+    return;
+  }
+
+  // Persist before navigation so a successful refresh cannot loop.
+  window.localStorage.setItem(VERSION_KEY, version);
+  if (refreshGuard === version) return;
+  window.sessionStorage.setItem(REFRESH_GUARD_KEY, version);
+
+  await clearRCLWorkerCaches();
+  registration.waiting?.postMessage({ type: 'RCL_SKIP_WAITING' });
+
+  const url = new URL(window.location.href);
+  url.searchParams.set(REFRESH_QUERY_KEY, version.slice(0, 12));
+  window.location.replace(url.toString());
+}
 
 function isStandaloneMode() {
   if (typeof window === 'undefined') return false;
@@ -91,19 +172,47 @@ export function PWAInstallExperience() {
 
     if (iosDevice && !standalone) setEligible(true);
 
-    if ('serviceWorker' in navigator && window.isSecureContext) {
-      const register = () => {
-        void navigator.serviceWorker.register('/sw.js', { scope: '/' })
-          .then((registration) => registration.update())
-          .catch(() => undefined);
-      };
-      if (document.readyState === 'complete') register();
-      else window.addEventListener('load', register, { once: true });
-    }
+    cleanRefreshQuery();
+
+    let disposed = false;
+    let registration: ServiceWorkerRegistration | null = null;
+
+    const syncWorker = async () => {
+      if (!('serviceWorker' in navigator) || !window.isSecureContext || disposed) return;
+      try {
+        registration = registration ?? await navigator.serviceWorker.register('/sw.js', {
+          scope: '/',
+          updateViaCache: 'none',
+        });
+        if (!disposed) await syncPWADeployment(registration);
+      } catch {
+        // The website remains fully usable if service workers are unavailable.
+      }
+    };
+
+    const visibleHandler = () => {
+      if (document.visibilityState === 'visible') void syncWorker();
+    };
+
+    const controllerHandler = () => {
+      // A newly activated worker should control the next document immediately.
+      // The worker itself also navigates controlled clients for iOS reliability.
+      cleanRefreshQuery();
+    };
+
+    document.addEventListener('visibilitychange', visibleHandler);
+    navigator.serviceWorker?.addEventListener('controllerchange', controllerHandler);
+
+    if (document.readyState === 'complete') void syncWorker();
+    else window.addEventListener('load', syncWorker, { once: true });
 
     return () => {
+      disposed = true;
       window.removeEventListener('beforeinstallprompt', beforeInstall);
       window.removeEventListener('appinstalled', installedHandler);
+      window.removeEventListener('load', syncWorker);
+      document.removeEventListener('visibilitychange', visibleHandler);
+      navigator.serviceWorker?.removeEventListener('controllerchange', controllerHandler);
     };
   }, []);
 
