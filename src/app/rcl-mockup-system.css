@@ -410,6 +410,124 @@ body [class*="border-[#f5921e"] {
   border-color:rgba(255,255,255,.16)!important;
 }
 
+
+/* ---------- Legacy semantic surfaces migrated into the approved system ---------- */
+.rcl-world {
+  background:var(--rcl-v3-canvas)!important;
+  color:var(--rcl-v3-ink)!important;
+}
+.rcl-world .rcl-home-content,
+.rcl-world .rcl-home-content h2,
+.rcl-world .rcl-home-content h3,
+.rcl-world .rcl-home-content strong,
+.rcl-world .rcl-home-content b {
+  color:var(--rcl-v3-ink)!important;
+}
+.rcl-world .rcl-destination,
+.rcl-world .rcl-panel,
+.rcl-world .rcl-game-card,
+.rcl-world .rcl-news-card,
+.city-dashboard,
+.city-section,
+.city-feature,
+.city-tile,
+.city-event,
+.lab-panel,
+.lab-workout,
+.rcl-hub-tile,
+.rcl-hub-banner,
+.rcl-admin-source-card,
+.rcl-admin-panel,
+.rcl-admin-module,
+.faq-story-panel,
+.faq-numbers,
+.faq-feature-card,
+.faq-closing {
+  border-color:var(--rcl-v3-border)!important;
+  background:#fff!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+.rcl-world .rcl-destination:hover,
+.rcl-world .rcl-game-card:hover,
+.rcl-world .rcl-news-card:hover,
+.city-feature:hover,
+.city-tile:hover,
+.city-event:hover,
+.rcl-admin-module:hover,
+.rcl-hub-tile:hover {
+  border-color:rgba(59,130,246,.42)!important;
+  background:#fff!important;
+  box-shadow:var(--rcl-v3-shadow-raised)!important;
+}
+.rcl-world .rcl-destination-icon,
+.city-icon,
+.rcl-hub-icon,
+.rcl-admin-icon {
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-primary)!important;
+}
+.rcl-world .rcl-destination small,
+.city-feature small,
+.city-tile small,
+.city-event small,
+.lab-panel p,
+.lab-workout p,
+.rcl-admin-source-card small,
+.rcl-admin-module small,
+.rcl-hub-tile small,
+.faq-answer {
+  color:var(--rcl-v3-copy)!important;
+}
+
+/* City can keep a photographic/editorial hero, but only in the approved navy/blue language. */
+.city-hero {
+  background:
+    radial-gradient(circle at 78% 20%,rgba(59,130,246,.22),transparent 25rem),
+    linear-gradient(130deg,#0F2547,#122F54 58%,#0B1C36)!important;
+  border-bottom:1px solid rgba(59,130,246,.22)!important;
+  color:#fff!important;
+}
+.city-hero h1,
+.city-hero h2,
+.city-hero p,
+.city-hero .rcl-kicker {
+  color:#fff!important;
+}
+.city-hero .text-rcl-orange,
+.city-hero .rcl-kicker svg {
+  color:#7CB2FF!important;
+}
+.city-hero::after {
+  background:repeating-linear-gradient(115deg,transparent 0 5rem,rgba(124,178,255,.16) 5.1rem 5.2rem,transparent 5.3rem 9rem)!important;
+}
+
+/* FAQ and admin utility controls inherit the same high-contrast behavior. */
+.faq-categories button,
+.rcl-admin-chip,
+.rcl-admin-badge {
+  border-color:var(--rcl-v3-border)!important;
+  background:var(--rcl-v3-soft)!important;
+  color:var(--rcl-v3-copy)!important;
+}
+.faq-categories button:hover,
+.faq-categories button.active {
+  border-color:rgba(59,130,246,.40)!important;
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-primary)!important;
+}
+.faq-item,
+.faq-list {
+  border-color:var(--rcl-v3-border)!important;
+}
+.faq-item button {
+  color:var(--rcl-v3-ink)!important;
+}
+.faq-item.open button,
+.faq-item button svg {
+  color:var(--rcl-v3-primary)!important;
+}
+
 /* Tables remain readable and horizontally scroll instead of crushing names. */
 .rcl-platform-root table { table-layout:auto!important; }
 .rcl-platform-root table[class*="min-w-"] { min-width:40rem!important; }
