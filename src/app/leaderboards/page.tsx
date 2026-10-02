@@ -88,7 +88,7 @@ export default async function LeaderboardsPage() {
 
 function LeaderboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <main className="rcl-social-world min-h-screen bg-rcl-black pb-24 text-white">
       <section className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_80%_10%,rgba(255,107,26,0.2),transparent_35%),linear-gradient(135deg,#07111f,#05070b_65%)]">
         <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.04)_1px,transparent_1px)] [background-size:42px_42px]" />
         <Container maxWidth="xl" className="relative py-16 sm:py-20">
