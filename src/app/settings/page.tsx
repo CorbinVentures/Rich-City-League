@@ -13,7 +13,7 @@ const items = [
 ];
 
 export default function SettingsPage(){
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-world min-h-screen bg-rcl-black pb-24 text-white">
     <CorporatePageHero eyebrow="RCL Control" title="Settings" accent="Your account, your rules" description="Manage your identity, security, notifications, privacy, and account tools from one clear control center." />
     <Container maxWidth="xl" className="py-8 sm:py-12">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{items.map(({title,body,href,icon:Icon}) => <Link href={href} className="group relative overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 transition hover:-translate-y-1 hover:border-rcl-blue/45" key={title}>
