@@ -5,15 +5,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FaArrowLeft,
   FaBasketball,
-  FaBell,
-  FaComments,
   FaCompass,
   FaHouse,
   FaImage,
   FaMagnifyingGlass,
   FaPeopleGroup,
   FaPlus,
-  FaUserGroup,
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
