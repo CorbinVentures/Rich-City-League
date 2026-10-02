@@ -67,7 +67,7 @@ export default function GlobalSearchPage() {
   const total=members.length+players.length+teams.length+games.length+news.length+posts.length;
   const active=query.trim().length>=2;
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <section className="border-b border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,.35),transparent_70%)] py-10"><Container maxWidth="xl"><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">RCL SEARCH</p><h1 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Find the <span className="text-rcl-gold">whole league.</span></h1><p className="mt-3 max-w-2xl text-sm text-white/45">Members, players, teams, games, venues, news and Social posts from one search.</p></Container></section>
     <Container maxWidth="lg" className="py-7">
       <label className="relative block"><span className="sr-only">Search Rich City League</span><FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35"/><input autoFocus type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search a name, @username, team, venue, article or keyword…" className="w-full rounded-2xl border border-white/10 bg-[#07111b] py-4 pl-12 pr-4 text-base outline-none focus:border-rcl-orange/60"/></label>
