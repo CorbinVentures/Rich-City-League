@@ -26,7 +26,7 @@ Global navigation answers “Where am I going?”
 Page navigation answers “What can I do here?”
 
 ## 3. Brand character
-The product should feel calm, premium, human and social.
+The product should feel cool, trustworthy, premium, human and social.
 
 Avoid:
 - dark esports/gaming treatment as the default
@@ -46,22 +46,23 @@ Prefer:
 - one obvious primary action
 
 ## 4. Color tokens
-- Canvas: #F7F5F1
+- Canvas: #F3F6F9
 - Surface: #FFFFFF
-- Soft surface: #F1EEE8
-- Border: #E3DDD3
-- Primary text: #1B1C1E
-- Secondary text: #5F6368
-- Muted text: #8A8F96
-- Basketball clay/action: #B85C38
-- Deep clay: #8E4429
+- Soft surface: #E9EFF5
+- Border: #D3DDE7
+- Primary text / navy ink: #162331
+- Secondary text: #526273
+- Muted text: #657688
+- Trust blue / primary action: #2F6FAF
+- Deep trust blue: #245781
+- Steel blue / secondary accent: #53789A
 - Prestige gold: #C9A45C
-- Info slate: #64748B
-- Success: #4D8B67
-- Danger: #B54B55
+- Success: #3D7E6D
+- Danger: #B65362
 
-Clay means action and basketball energy.
-Gold means earned/premium status.
+Trust blue means action, navigation focus and platform confidence.
+Steel blue supports secondary information without competing with the primary action.
+Gold is reserved for earned/premium status.
 Green means successful completion.
 Red is reserved for true warnings/destructive actions.
 

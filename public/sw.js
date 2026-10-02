@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rcl-static-v5';
+const CACHE_NAME = 'rcl-static-v6';
 const STATIC_ASSETS = [
   '/favicon.svg',
   '/icon',
@@ -138,15 +138,15 @@ function offlineResponse() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#F7F5F1">
+  <meta name="theme-color" content="#F3F6F9">
   <title>RCL · Offline</title>
   <style>
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#F7F5F1;color:#1B1C1E;font-family:Arial,Helvetica,system-ui,sans-serif}
-    body{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 85% 0,rgba(184,92,56,.08),transparent 30rem),radial-gradient(circle at 0 100%,rgba(100,116,139,.06),transparent 28rem),#F7F5F1}
-    main{width:min(440px,100%);border:1px solid #E3DDD3;border-radius:18px;background:#fff;padding:28px;text-align:center;box-shadow:0 20px 55px rgba(71,56,42,.10)}
-    img{width:84px;height:84px;border-radius:18px;box-shadow:0 12px 28px rgba(71,56,42,.12)}
-    small{display:block;margin-top:18px;color:#B85C38;font-weight:800;letter-spacing:.12em}h1{margin:8px 0 0;font-size:32px;line-height:1.08;font-weight:800}p{margin:14px auto 0;max-width:320px;color:#5F6368;font-size:14px;line-height:1.6}
-    button{margin-top:22px;min-height:48px;border:0;border-radius:12px;background:#B85C38;padding:0 22px;color:#fff;font-weight:800;letter-spacing:.02em}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#F3F6F9;color:#162331;font-family:Arial,Helvetica,system-ui,sans-serif}
+    body{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 85% 0,rgba(47,111,175,.10),transparent 30rem),radial-gradient(circle at 0 100%,rgba(83,120,154,.08),transparent 28rem),#F3F6F9}
+    main{width:min(440px,100%);border:1px solid #D3DDE7;border-radius:18px;background:#fff;padding:28px;text-align:center;box-shadow:0 20px 55px rgba(35,55,72,.10)}
+    img{width:84px;height:84px;border-radius:18px;box-shadow:0 12px 28px rgba(35,55,72,.12)}
+    small{display:block;margin-top:18px;color:#2F6FAF;font-weight:800;letter-spacing:.12em}h1{margin:8px 0 0;font-size:32px;line-height:1.08;font-weight:800}p{margin:14px auto 0;max-width:320px;color:#526273;font-size:14px;line-height:1.6}
+    button{margin-top:22px;min-height:48px;border:0;border-radius:12px;background:#2F6FAF;padding:0 22px;color:#fff;font-weight:800;letter-spacing:.02em}
   </style>
 </head>
 <body>

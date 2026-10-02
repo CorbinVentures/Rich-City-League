@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait-primary',
-    background_color: '#F7F5F1',
-    theme_color: '#F7F5F1',
+    background_color: '#F3F6F9',
+    theme_color: '#F3F6F9',
     categories: ['sports','social','entertainment'],
     shortcuts: [
       { name:'RCL Home', short_name:'Home', description:'Open your basketball social feed.', url:'/social?source=pwa-shortcut', icons:[{src:'/icon',sizes:'512x512',type:'image/png'}] },
