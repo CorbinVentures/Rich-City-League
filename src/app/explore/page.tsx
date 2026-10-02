@@ -51,7 +51,7 @@ export default async function ExploreRCLPage(){
   const official = (officialRaw ?? []) as ActivityPost[];
   const trends = getTrends(recentPosts.map(post=>post.body));
 
-  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-24 text-white">
     <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
       <Container maxWidth="xl" className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8">
         <div>

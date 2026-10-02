@@ -175,7 +175,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     media:mediaRows.length,
   };
 
-  return <main className={'rcl-social-profile min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
+  return <main className={'rcl-social-secondary rcl-social-profile min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4">
         <Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70 transition hover:border-rcl-blue/30 hover:text-white" aria-label="Back to RCL Home"><FaArrowLeft /></Link>

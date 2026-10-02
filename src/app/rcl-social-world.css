@@ -762,3 +762,151 @@ body { color:var(--rcl-social-text)!important; }
   .rcl-feed-intro-actions>a,.rcl-feed-intro-actions button { flex:0 0 auto; }
   .rcl-legal-footer-inner { align-items:flex-start; flex-direction:column; }
 }
+
+
+/* ---------- Secondary consumer surfaces: one social-world visual language ---------- */
+.rcl-social-secondary {
+  min-height:100vh!important;
+  background:var(--rcl-social-canvas)!important;
+  color:var(--rcl-social-text)!important;
+}
+.rcl-social-secondary :is(h1,h2,h3,h4,.font-display) {
+  color:var(--rcl-social-text)!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+  letter-spacing:-.025em!important;
+  text-shadow:none!important;
+  text-transform:none!important;
+}
+.rcl-social-secondary [class~="bg-rcl-black"],
+.rcl-social-secondary [class*="bg-[#03070d"],
+.rcl-social-secondary [class*="bg-[#05080d"],
+.rcl-social-secondary [class*="bg-[#050a10"],
+.rcl-social-secondary [class*="bg-[#071018"],
+.rcl-social-secondary [class*="bg-[#07111a"],
+.rcl-social-secondary [class*="bg-[#07111b"],
+.rcl-social-secondary [class*="bg-[#071522"],
+.rcl-social-secondary [class*="bg-[#08111b"],
+.rcl-social-secondary [class*="bg-[#09111a"],
+.rcl-social-secondary [class*="bg-black/"],
+.rcl-social-secondary [class*="bg-white/["],
+.rcl-social-secondary [class*="bg-[linear-gradient"],
+.rcl-social-secondary [class*="bg-[radial-gradient"] {
+  background:var(--rcl-social-surface)!important;
+}
+.rcl-social-secondary [class*="text-white/"],
+.rcl-social-secondary [class~="text-gray-300"],
+.rcl-social-secondary [class~="text-gray-400"],
+.rcl-social-secondary [class~="text-gray-500"],
+.rcl-social-secondary [class~="text-slate-300"],
+.rcl-social-secondary [class~="text-slate-400"],
+.rcl-social-secondary [class~="text-slate-500"] {
+  color:var(--rcl-social-text-2)!important;
+}
+.rcl-social-secondary [class~="text-white"] { color:var(--rcl-social-text)!important; }
+.rcl-social-secondary [class*="border-white/"],
+.rcl-social-secondary [class*="border-rcl-blue/"] {
+  border-color:var(--rcl-social-border)!important;
+}
+.rcl-social-secondary [class*="divide-white/"] > :not([hidden]) ~ :not([hidden]) {
+  border-color:var(--rcl-social-border)!important;
+}
+.rcl-social-secondary [class*="shadow-"] { box-shadow:0 12px 32px rgba(56,45,34,.06)!important; }
+.rcl-social-secondary input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.rcl-social-secondary textarea,
+.rcl-social-secondary select {
+  background:#fff!important;
+  border-color:var(--rcl-social-border)!important;
+  color:var(--rcl-social-text)!important;
+  box-shadow:none!important;
+}
+.rcl-social-secondary input::placeholder,
+.rcl-social-secondary textarea::placeholder { color:#9A9DA2!important; }
+.rcl-social-secondary > header,
+.rcl-social-secondary > section:first-child,
+.rcl-social-secondary .rcl-client-page-hero {
+  border-color:var(--rcl-social-border)!important;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F7F5F1 100%)!important;
+  color:var(--rcl-social-text)!important;
+}
+.rcl-social-secondary .rcl-client-page-hero > div.pointer-events-none.absolute.inset-0,
+.rcl-social-secondary > section:first-child > div.pointer-events-none.absolute.inset-0 {
+  opacity:1!important;
+  background:
+    radial-gradient(circle at 86% 10%,rgba(184,92,56,.09),transparent 30%),
+    radial-gradient(circle at 8% 82%,rgba(100,116,139,.07),transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.18),rgba(247,245,241,.34))!important;
+}
+.rcl-social-secondary :is(a,button)[class*="bg-rcl-orange"],
+.rcl-social-secondary [class*="bg-rcl-orange"] {
+  background:var(--rcl-social-clay)!important;
+  color:#fff!important;
+}
+.rcl-social-secondary :is(a,button)[class*="bg-rcl-blue"],
+.rcl-social-secondary [class*="bg-rcl-blue"] {
+  background:#EEF0F2!important;
+  color:#45515F!important;
+}
+.rcl-social-secondary :is(a,button)[class*="bg-rcl-blue"]:hover { background:#E5E8EB!important; }
+.rcl-social-secondary [class*="hover:bg-white/"]:hover { background:#F3F0EB!important; }
+.rcl-social-secondary [class*="hover:text-white"]:hover { color:var(--rcl-social-text)!important; }
+
+/* Preserve dark framing only where the content itself is media. */
+.rcl-social-secondary [class~="bg-black"]:has(video),
+.rcl-social-secondary [class~="bg-black"]:has(img) {
+  background:#111!important;
+}
+.rcl-social-secondary [class~="bg-black"]:has(video) *,
+.rcl-social-secondary [class~="bg-black"]:has(img) * { color:#fff; }
+
+/* Social profile legacy components now inherit the light identity system. */
+.rcl-social-secondary.rcl-social-profile { background:var(--rcl-social-canvas)!important; }
+.rcl-social-secondary .rcl-profile-rep-ring {
+  background:conic-gradient(var(--rcl-social-clay) var(--profile-progress),var(--rcl-social-slate) var(--profile-progress),#E2DDD5 0)!important;
+  box-shadow:none!important;
+}
+.rcl-social-secondary .rcl-profile-rep-ring em {
+  border-color:#fff!important;
+  background:var(--rcl-social-slate)!important;
+}
+.rcl-social-secondary .rcl-profile-status-banner,
+.rcl-social-secondary .rcl-profile-rep-ledger,
+.rcl-social-secondary .rcl-profile-rep-badges {
+  border-color:var(--rcl-social-border)!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.rcl-social-secondary .rcl-profile-metrics {
+  border-color:var(--rcl-social-border)!important;
+}
+.rcl-social-secondary .rcl-profile-metrics span+span { border-color:var(--rcl-social-border)!important; }
+.rcl-social-secondary .rcl-profile-metrics b { color:var(--rcl-social-text)!important; }
+.rcl-social-secondary .rcl-profile-metrics span:first-child b { color:var(--rcl-social-clay)!important; }
+.rcl-social-secondary .rcl-profile-rep-progress { background:#DDD7CE!important; }
+.rcl-social-secondary .rcl-profile-rep-progress i { background:linear-gradient(90deg,var(--rcl-social-slate),var(--rcl-social-clay))!important; }
+.rcl-social-secondary .rcl-profile-rep-ledger article,
+.rcl-social-secondary .rcl-rep-badge-grid article { border-color:var(--rcl-social-border)!important; }
+.rcl-social-secondary .rcl-rep-badge-grid article { background:#F8F6F2!important; }
+
+/* Dormant legacy social nav stays visually compatible if it renders. */
+.rcl-member-social-nav {
+  border-top-color:var(--rcl-social-border)!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 -8px 24px rgba(56,45,34,.06)!important;
+}
+.rcl-member-social-nav a {
+  color:var(--rcl-social-muted)!important;
+  text-transform:none!important;
+}
+.rcl-member-social-nav a.active { color:var(--rcl-social-text)!important; }
+.rcl-member-social-nav a.active svg { color:var(--rcl-social-clay)!important; }
+.rcl-member-social-nav a.create svg {
+  background:var(--rcl-social-clay)!important;
+  color:#fff!important;
+  box-shadow:0 7px 20px rgba(142,68,41,.18)!important;
+}
+
+@media (max-width:639px) {
+  .rcl-social-secondary :is(h1,.font-display.text-4xl,.font-display.text-5xl,.font-display.text-6xl) {
+    line-height:1.02!important;
+  }
+}

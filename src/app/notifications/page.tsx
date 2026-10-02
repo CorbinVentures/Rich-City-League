@@ -72,7 +72,7 @@ export default function NotificationsPage() {
     setBusy(false);
   };
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
       eyebrow="RCL Alerts"
       title="Notifications"
