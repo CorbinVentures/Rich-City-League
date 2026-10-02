@@ -8,21 +8,21 @@
  */
 
 :root {
-  --rcl-uniform-canvas:#F3F6F9;
+  --rcl-uniform-canvas:#F6F9FC;
   --rcl-uniform-surface:#FFFFFF;
-  --rcl-uniform-soft:#E9EFF5;
-  --rcl-uniform-border:#D3DDE7;
-  --rcl-uniform-text:#162331;
-  --rcl-uniform-text-2:#526273;
-  --rcl-uniform-muted:#657688;
-  --rcl-uniform-primary:#2F6FAF;
-  --rcl-uniform-primary-deep:#245781;
+  --rcl-uniform-soft:#EDF4FA;
+  --rcl-uniform-border:#D9E4EF;
+  --rcl-uniform-text:#0F2547;
+  --rcl-uniform-text-2:#64748B;
+  --rcl-uniform-muted:#8190A1;
+  --rcl-uniform-primary:#3B82F6;
+  --rcl-uniform-primary-deep:#2563EB;
   --rcl-uniform-clay:var(--rcl-uniform-primary);
   --rcl-uniform-clay-deep:var(--rcl-uniform-primary-deep);
-  --rcl-uniform-slate:#53789A;
-  --rcl-uniform-gold:#C9A45C;
-  --rcl-uniform-success:#3D7E6D;
-  --rcl-uniform-danger:#B65362;
+  --rcl-uniform-slate:#64748B;
+  --rcl-uniform-gold:#D4AF37;
+  --rcl-uniform-success:#2E8B70;
+  --rcl-uniform-danger:#C65361;
 
   /* Keep legacy token names pointed at the current system. */
   --rcl-bg:var(--rcl-uniform-canvas)!important;
@@ -50,7 +50,7 @@ html body,
 /* ---------- Typography ---------- */
 .rcl-platform-root :where(h1,h2,h3,h4,h5,h6,.font-display,.rcl-display) {
   color:var(--rcl-uniform-text)!important;
-  font-family:Arial,Helvetica,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
   text-shadow:none!important;
 }
 
@@ -119,7 +119,7 @@ html body,
 
 .rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-2xl"][class*="border"],
 .rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-3xl"][class*="border"] {
-  box-shadow:0 10px 28px rgba(35,55,72,.07)!important;
+  box-shadow:0 10px 28px rgba(15,37,71,.07)!important;
 }
 
 .rcl-platform-root [class*="hover:bg-white/"]:hover,
@@ -181,9 +181,9 @@ html body,
 .rcl-social-secondary > section:first-child {
   border-color:var(--rcl-uniform-border)!important;
   background:
-    radial-gradient(circle at 88% 0%,rgba(47,111,175,.10),transparent 30%),
+    radial-gradient(circle at 88% 0%,rgba(59,130,246,.10),transparent 30%),
     radial-gradient(circle at 8% 100%,rgba(83,120,154,.08),transparent 34%),
-    linear-gradient(180deg,#FFFFFF 0%,#F3F6F9 100%)!important;
+    linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important;
   color:var(--rcl-uniform-text)!important;
 }
 .rcl-corporate-page-hero [class*="text-white/"],
@@ -246,7 +246,7 @@ a[aria-label="Open administrator control center"] {
   border-color:var(--rcl-uniform-border)!important;
   background:rgba(255,255,255,.96)!important;
   color:var(--rcl-uniform-slate)!important;
-  box-shadow:0 8px 24px rgba(35,55,72,.10)!important;
+  box-shadow:0 8px 24px rgba(15,37,71,.10)!important;
 }
 
 /* ---------- Small-screen legibility ---------- */
