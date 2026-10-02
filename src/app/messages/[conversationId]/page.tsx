@@ -109,7 +109,7 @@ export default function ConversationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
       <Container maxWidth="xl" className="py-5 sm:py-8">
         <Link href="/messages" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-rcl-gold"><FiArrowLeft /> Back to RCL Direct</Link>
         {loading ? <div className="mt-5 h-[70vh] animate-pulse rounded-2xl border border-white/10 bg-white/[.03]" /> : error && !conversation ? <div className="mt-8 rounded-2xl border border-white/10 p-12 text-center"><p className="font-display text-xl font-bold uppercase">Conversation unavailable</p><p className="mt-2 text-sm text-gray-500">This conversation is unavailable or you don&apos;t have access.</p><Link href="/messages" className="mt-5 inline-block text-xs font-black uppercase tracking-widest text-rcl-gold">Return to inbox</Link></div> : conversation && <div className="mt-5 grid min-h-[calc(100vh-12rem)] overflow-hidden rounded-2xl border border-white/10 bg-white/[.025] lg:grid-cols-[minmax(0,1fr)_260px]">
