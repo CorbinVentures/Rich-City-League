@@ -75,7 +75,7 @@ export default function AccountMembershipPage() {
   const paid = planCode !== 'free' && subscription && ['active','trialing'].includes(subscription.status);
   const periodLabel = subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
 
-  return <main className="min-h-screen bg-[#03070d] pb-28 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
     <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_5%,rgba(249,115,22,.16),transparent_30%),#050a10] py-12">
       <Container maxWidth="lg"><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange">Account · Membership</p><h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">Your RCL membership</h1><p className="mt-4 max-w-2xl text-sm leading-6 text-white/50">Choose the tools that make RCL more useful to you. Your REP, ratings, rankings and competitive achievements are never for sale.</p></Container>
     </section>
