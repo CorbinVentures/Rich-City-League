@@ -368,6 +368,39 @@ body [class*="border-[#f5921e"] {
   color:var(--rcl-v3-primary)!important;
 }
 
+
+/*
+ * Legacy interactive cards used <a> / Next Link roots, so the original
+ * block-surface migration did not touch them. On the installed PWA those
+ * translucent navy cards composited over the new light canvas as flat gray,
+ * while their text had already been remapped to navy. Normalize those card
+ * anchors into the approved light system as well.
+ */
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-[#0"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-[#1"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-[linear-gradient"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-[radial-gradient"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-gradient-to-"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-white/"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module),
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-black/"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-draft-platform):not(.rcl-draft-module) {
+  border-color:var(--rcl-v3-border)!important;
+  background:var(--rcl-v3-surface)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+.rcl-platform-root a[class*="rounded"][class*="border"][class*="bg-rcl-blue/"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard) {
+  border-color:rgba(59,130,246,.26)!important;
+  background:var(--rcl-v3-primary-soft)!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+}
+.rcl-platform-root a[class*="rounded"][class*="border"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard) [class*="text-white/"] {
+  color:var(--rcl-v3-copy)!important;
+}
+.rcl-platform-root a[class*="rounded"][class*="border"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard) [class~="text-white"] {
+  color:var(--rcl-v3-ink)!important;
+}
+
 /* VIP remains the only gold UI treatment. */
 .rcl-vip-chip,
 [title="RCL VIP verified member"] {
