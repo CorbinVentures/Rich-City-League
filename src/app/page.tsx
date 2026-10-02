@@ -3,7 +3,7 @@ import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
-export const metadata: Metadata = { title: { absolute: 'Rich City League | Richmond VA Basketball League' }, description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://richcityhoops.com/opengraph-image?v=20261002-2',width:1200,height:630,alt:'RCL — Richmond basketball social'}],url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
+export const metadata: Metadata = { title: { absolute: 'Rich City League | Richmond VA Basketball League' }, description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://richcityhoops.com/rcl-share-20261002.png',width:1200,height:630,alt:'RCL — Richmond basketball social'}],url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
 
 export const revalidate = 60;
 
