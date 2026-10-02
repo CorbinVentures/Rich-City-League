@@ -15,14 +15,14 @@ export function isNavigationActive(pathname:string,href:string){
 }
 
 const SOCIAL_FAMILY=['/social'];
-const DISCOVER_FAMILY=['/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
+const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
 const CREATE_FAMILY=['/create'];
 const RUNS_FAMILY=['/runs','/richmond-basketball-runs'];
 const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isPrimaryNavigationActive(pathname:string,href:string){
   if(href==='/social') return SOCIAL_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
-  if(href==='/explore') return DISCOVER_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
+  if(href==='/discover') return DISCOVER_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   if(href==='/create') return CREATE_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   if(href==='/runs') return RUNS_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   if(href==='/league') return LEAGUE_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
@@ -31,7 +31,7 @@ export function isPrimaryNavigationActive(pathname:string,href:string){
 
 export const RCL_PRIMARY_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
-  {label:'Discover',href:'/explore',icon:FaCompass},
+  {label:'Discover',href:'/discover',icon:FaCompass},
   {label:'Create',href:'/create',icon:FaPlus},
   {label:'Runs',href:'/runs',icon:FaLocationDot},
   {label:'League',href:'/league',icon:FaBasketball},
@@ -54,7 +54,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     label:'Discover',
     description:'Find the people, teams, stories and organizations shaping Virginia basketball',
     items:[
-      {label:'Discover Basketball',href:'/explore',icon:FaCompass},
+      {label:'Discover Basketball',href:'/discover',icon:FaCompass},
       {label:'Players',href:'/players',icon:FaUser},
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
