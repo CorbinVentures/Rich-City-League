@@ -55,7 +55,7 @@ const plans = [
 
 export default function NetworkPartnersPage() {
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_78%_15%,rgba(255,79,22,.11),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
+    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_78%_15%,rgba(59,130,246,.11),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="xl" className="py-14 sm:py-20">
         <p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-orange">RCL Network · For Organizations</p>
         <h1 className="mt-4 max-w-5xl font-display text-5xl font-black uppercase leading-[.94] tracking-[-.045em] sm:text-7xl">We don&apos;t run your organization.<br/><span className="text-rcl-blue">We help Virginia see it.</span></h1>
@@ -94,7 +94,7 @@ export default function NetworkPartnersPage() {
         <div className="rounded-2xl border border-rcl-blue/20 bg-rcl-blue/[.04] p-6"><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">Operational independence</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Your program stays yours.</h2><p className="mt-3 text-sm leading-6 text-white/45">RCL Network does not require organizations to transfer registration, payments, scheduling, rosters, standings, or team administration. Public exposure can link directly back to the destination the organization already controls.</p></div>
       </section>
 
-      <section className="mt-14 rounded-3xl border border-rcl-orange/25 bg-[linear-gradient(120deg,rgba(255,79,22,.08),#071522)] p-7 text-center sm:p-10">
+      <section className="mt-14 rounded-3xl border border-rcl-orange/25 bg-[linear-gradient(120deg,rgba(59,130,246,.08),#071522)] p-7 text-center sm:p-10">
         <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Built for Virginia basketball</p>
         <h2 className="mt-3 font-display text-4xl font-black uppercase sm:text-5xl">Put your organization on the Network.</h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/50">Start with a free presence or tell RCL what kind of audience growth you need. The first goal is simple: make it easier for the right basketball people to find you.</p>
