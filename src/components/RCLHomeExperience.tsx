@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import {
   FaArrowRight, FaBasketball, FaComments, FaCompass, FaLocationDot,
-  FaPeopleGroup, FaPlay, FaShirt, FaSparkles, FaTrophy, FaUserGroup
+  FaPeopleGroup, FaPlay, FaShirt, FaCrown, FaTrophy, FaUserGroup
 } from 'react-icons/fa6';
 
 type Team={id:string;name:string;logo_url?:string|null};
@@ -102,7 +102,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
     <section className="rcl-landing-section rcl-revenue-lifestyle">
       <div className="rcl-landing-section-head"><div><p>More from RCL</p><h2>Membership and merch without interrupting the game.</h2></div></div>
       <div className="rcl-lifestyle-grid">
-        <Link href="/membership" className="rcl-lifestyle-card"><span><FaSparkles/></span><div><small>RCL+</small><h3>Your basketball life, organized.</h3><p>My Hoops, Passport tools, analytics, saves and premium basketball utility.</p><b>Explore membership <FaArrowRight/></b></div></Link>
+        <Link href="/membership" className="rcl-lifestyle-card"><span><FaCrown/></span><div><small>RCL+</small><h3>Your basketball life, organized.</h3><p>My Hoops, Passport tools, analytics, saves and premium basketball utility.</p><b>Explore membership <FaArrowRight/></b></div></Link>
         <Link href="/shop" className="rcl-lifestyle-card"><span><FaShirt/></span><div><small>RCL Drops</small><h3>Wear the culture.</h3><p>Limited league and community releases presented like drops, not banner ads.</p><b>Shop RCL <FaArrowRight/></b></div></Link>
         <Link href="/runs" className="rcl-lifestyle-card"><span><FaBasketball/></span><div><small>On court</small><h3>Find your next run.</h3><p>Basketball activity gives the social world a real-life heartbeat.</p><b>See runs <FaArrowRight/></b></div></Link>
       </div>
