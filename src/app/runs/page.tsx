@@ -337,12 +337,12 @@ export default function RunsPage() {
   const directionsHref = (court: Court) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${court.name}, ${court.address}, ${court.locality}, VA`)}`;
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#05080d] pb-28 text-white">
+    <main className="rcl-social-secondary min-h-screen overflow-x-hidden bg-[#05080d] pb-28 text-white">
       <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
         <Container maxWidth="xl" className="py-6 sm:py-7">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Court Network</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Runs</p>
               <h1 className="mt-1 text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Open Runs</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Competitive runs, pickup basketball and social meetups across Richmond, Henrico and Chesterfield.</p>
             </div>
