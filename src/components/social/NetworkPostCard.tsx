@@ -154,7 +154,7 @@ export function NetworkPostCard({
 
       {official && (
         <div className="flex items-center gap-2 border-b border-rcl-blue/15 bg-rcl-blue/[.055] px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue sm:px-5">
-          <span className="h-1.5 w-1.5 rounded-full bg-rcl-orange" /> RCL Network · Official Activity
+          <span className="h-1.5 w-1.5 rounded-full bg-rcl-orange" /> RCL · Official Activity
         </div>
       )}
 
