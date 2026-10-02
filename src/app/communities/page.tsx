@@ -72,7 +72,7 @@ export default function CommunitiesPage() {
 
   const filtered = items.filter((item) => !query.trim() || `${item.name} ${item.description ?? ''} ${item.community_type}`.toLowerCase().includes(query.trim().toLowerCase()));
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
       eyebrow="Community"
       title="Communities"
