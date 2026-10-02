@@ -1,4 +1,5 @@
-const CACHE_NAME = 'rcl-static-v7';
+const CACHE_NAME = 'rcl-static-v8';
+const SW_VERSION = 'v8';
 const STATIC_ASSETS = [
   '/favicon.svg',
   '/icon',
@@ -15,14 +16,38 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+    await self.clients.claim();
+
+    // iOS installed PWAs can keep the previous document alive after a worker update.
+    // Force controlled windows through a real navigation once the new worker owns them.
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    await Promise.all(windows.map(async (client) => {
+      try {
+        const url = new URL(client.url);
+        if (url.origin === self.location.origin && 'navigate' in client) {
+          await client.navigate(client.url);
+        }
+      } catch {
+        // A client can disappear while the worker is activating.
+      }
+    }));
+  })());
 });
 
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'RCL_SKIP_WAITING') {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
+  if (event.data?.type === 'RCL_GET_VERSION') {
+    event.source?.postMessage?.({ type: 'RCL_SW_VERSION', version: SW_VERSION });
+    return;
+  }
+
   if (event.data?.type !== 'RCL_BADGE_COUNT') return;
   const count = Math.max(0, Number(event.data.count) || 0);
   event.waitUntil(updateBadge(count));
@@ -86,7 +111,7 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => offlineResponse())
+      fetch(request, { cache: 'no-store' }).catch(() => offlineResponse())
     );
     return;
   }
