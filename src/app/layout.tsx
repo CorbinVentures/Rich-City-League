@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
   },
   formatDetection: { telephone: false },
-  openGraph: { type: 'website', locale: 'en_US', siteName: 'RCL', title: 'RCL | Richmond Basketball Social', description: 'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.', url: 'https://richcityhoops.com', images: [{ url: 'https://richcityhoops.com/opengraph-image?v=20261002-2', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }] },
-  twitter: { card: 'summary_large_image', title: 'RCL | Richmond Basketball Social', description: 'People, runs, highlights and Rich City League competition in one basketball social world.', images: ['https://richcityhoops.com/opengraph-image?v=20261002-2'] },
+  openGraph: { type: 'website', locale: 'en_US', siteName: 'RCL', title: 'RCL | Richmond Basketball Social', description: 'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.', url: 'https://richcityhoops.com', images: [{ url: 'https://richcityhoops.com/rcl-share-20261002.png', width: 1200, height: 630, alt: 'RCL — Richmond basketball social' }] },
+  twitter: { card: 'summary_large_image', title: 'RCL | Richmond Basketball Social', description: 'People, runs, highlights and Rich City League competition in one basketball social world.', images: ['https://richcityhoops.com/rcl-share-20261002.png'] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
