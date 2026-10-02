@@ -276,6 +276,10 @@ body { color:var(--rcl-social-text)!important; }
   padding-top:64px!important;
   background:var(--rcl-social-canvas)!important;
 }
+.rcl-platform-root > main {
+  margin-left:0!important;
+  min-height:0;
+}
 .rcl-legal-footer { margin-left:var(--rcl-shell-width)!important; }
 
 /* ---------- Drawer: secondary, not a second product ---------- */
