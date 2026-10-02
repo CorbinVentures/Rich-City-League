@@ -125,7 +125,7 @@ export default function MessagesPage() {
 
   return (
     <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
-      <section className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(255,107,26,.18),transparent_40%),linear-gradient(115deg,#07090d,#101c2d)]">
+      <section className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(59,130,246,.18),transparent_40%),linear-gradient(115deg,#07090d,#101c2d)]">
         <Container maxWidth="xl" className="relative py-14 sm:py-20">
           <div className="max-w-3xl">
             <p className="text-xs font-black uppercase tracking-[0.35em] text-rcl-gold">RCL DIRECT</p>
