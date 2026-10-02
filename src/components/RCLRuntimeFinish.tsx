@@ -2,7 +2,7 @@
 
 /**
  * Final semantic brand layer. Renders after RCLVisualSystem so legacy accent
- * utilities resolve to the new calm basketball palette.
+ * utilities resolve to the cool, trustworthy basketball palette.
  */
 export function RCLRuntimeFinish(){
   return <style jsx global>{`
@@ -22,25 +22,25 @@ export function RCLRuntimeFinish(){
     body main::before,body main::after { display:none!important; }
 
     body [class*="text-orange-"],
-    body [class*="text-[#2F6FAF"],
-    body [class*="text-[#2F6FAF"],
-    body [class*="text-[#2F6FAF"],
-    body [class*="text-[#2F6FAF"],
-    body [class*="text-[#2F6FAF"] { color:#2F6FAF!important; }
+    body [class*="text-[#ff4f16"],
+    body [class*="text-[#FF4F16"],
+    body [class*="text-[#ff6b1a"],
+    body [class*="text-[#f97316"],
+    body [class*="text-[#f5921e"] { color:#2F6FAF!important; }
 
     body [class*="bg-orange-"],
-    body [class*="bg-[#2F6FAF"],
-    body [class*="bg-[#2F6FAF"],
-    body [class*="bg-[#2F6FAF"],
-    body [class*="bg-[#2F6FAF"],
-    body [class*="bg-[#2F6FAF"] { background:#2F6FAF!important; color:#fff!important; }
+    body [class*="bg-[#ff4f16"],
+    body [class*="bg-[#FF4F16"],
+    body [class*="bg-[#ff6b1a"],
+    body [class*="bg-[#f97316"],
+    body [class*="bg-[#f5921e"] { background:#2F6FAF!important; color:#fff!important; }
 
     body [class*="border-orange-"],
-    body [class*="border-[#2F6FAF"],
-    body [class*="border-[#2F6FAF"],
-    body [class*="border-[#2F6FAF"],
-    body [class*="border-[#2F6FAF"],
-    body [class*="border-[#2F6FAF"] { border-color:rgba(47,111,175,.40)!important; }
+    body [class*="border-[#ff4f16"],
+    body [class*="border-[#FF4F16"],
+    body [class*="border-[#ff6b1a"],
+    body [class*="border-[#f97316"],
+    body [class*="border-[#f5921e"] { border-color:rgba(47,111,175,.40)!important; }
 
     .rcl-vip-chip,
     .rcl-social-identity:not(.is-system) .rcl-social-identity-copy b > i,
