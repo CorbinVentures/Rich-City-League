@@ -56,7 +56,7 @@ export function SiteHeader(){
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
       <Link href={memberMode?'/social':'/'} className="rcl-universal-brand" aria-label="RCL home">
-        <span className="rcl-universal-mark">R</span>
+        <span className="rcl-universal-mark">RCL</span>
         <span><b>RCL</b><small>Basketball Social</small></span>
       </Link>
 
@@ -96,7 +96,7 @@ export function SiteHeader(){
 
     <header className="rcl-universal-topbar rcl-social-world-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCL social home">
-        <span>R</span><b>RCL <i>Social</i></b>
+        <span>RCL</span><b>RCL <i>Social</i></b>
       </Link>
 
       <Link href="/search" className="rcl-global-search" aria-label="Search RCL">
