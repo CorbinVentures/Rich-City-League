@@ -32,7 +32,7 @@ export default function SecurityPage() {
   const meetsLength = password.length >= 8;
   const matches = Boolean(password) && password === confirmation;
 
-  return <main className="min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero eyebrow="Account Security" title="Security" accent="Protect your RCL identity" description="Update your password from an authenticated session without changing your profile, role, or league history." meta={<span className="grid h-14 w-14 place-items-center rounded-2xl border border-rcl-blue/20 bg-rcl-blue/10 text-2xl text-rcl-blue"><FaShieldHalved/></span>} />
     <Container maxWidth="lg" className="py-8 sm:py-12">
       <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link>
