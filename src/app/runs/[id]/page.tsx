@@ -257,16 +257,16 @@ export default function RunRoomPage() {
   };
 
   if (!run) {
-    return <main className="min-h-screen bg-[#03070d] p-8 text-white"><Container maxWidth="lg"><p className="rounded-3xl border border-white/10 p-10 text-center text-white/40">{error || 'Loading run…'}</p></Container></main>;
+    return <main className="rcl-social-secondary min-h-screen bg-[#03070d] p-8 text-white"><Container maxWidth="lg"><p className="rounded-3xl border border-white/10 p-10 text-center text-white/40">{error || 'Loading run…'}</p></Container></main>;
   }
 
   return (
-    <main className="min-h-screen bg-[#03070d] pb-28 text-white">
+    <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
       <ClientPageHero
         eyebrow="RCL Runs"
         title={run.title}
         accent={run.status === 'cancelled' ? 'Cancelled' : 'Run Room'}
-        description={run.description ?? 'Pickup basketball organized through the RCL court network.'}
+        description={run.description ?? 'Pickup basketball organized through RCL Runs.'}
         assetKey="runs.cover"
         actions={<div className="flex flex-wrap gap-2"><Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
         meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5"><p className="text-[10px] font-black uppercase tracking-wider text-rcl-blue"><FaLocationDot className="mr-1 inline" />{run.court_name || run.location}</p><p className="mt-2 text-sm font-black">{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p><p className="mt-2 text-xs text-white/35">{run.skill_level} · {run.game_format ?? 'Pickup'} · {profiles.length}/{run.max_players}</p></div>}
@@ -321,7 +321,7 @@ export default function RunRoomPage() {
           {runPosts.length ? <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{runPosts.map((post) => {
             const first = post.media_urls[0];
             return <article key={post.id} className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">{first ? (isVideoUrl(first) ? <video src={first} controls playsInline preload="metadata" className="aspect-video w-full bg-black object-contain" /> : <img src={first} alt="Run highlight" className="aspect-video w-full object-cover" />) : null}<div className="p-4"><div className="flex items-center justify-between gap-3"><p className="truncate text-xs font-black">{post.author?.display_name || post.author?.username || 'RCL member'}</p><span className="text-[10px] text-white/25">{new Date(post.created_at).toLocaleDateString()}</span></div><p className="mt-2 line-clamp-3 text-sm leading-6 text-white/48">{post.body}</p><Link href={`/social?post=${post.id}`} className="mt-3 inline-flex text-[10px] font-black uppercase tracking-wider text-rcl-blue">Open in RCL Social →</Link></div></article>;
-          })}</div> : <div className="mt-6 rounded-2xl border border-dashed border-white/10 p-8 text-center"><FaVideo className="mx-auto text-2xl text-rcl-orange" /><p className="mt-3 text-sm font-black">No Run Tape yet.</p><p className="mt-1 text-xs text-white/35">Be the first to show the network what happened at this Run.</p></div>}
+          })}</div> : <div className="mt-6 rounded-2xl border border-dashed border-white/10 p-8 text-center"><FaVideo className="mx-auto text-2xl text-rcl-orange" /><p className="mt-3 text-sm font-black">No Run Tape yet.</p><p className="mt-1 text-xs text-white/35">Be the first to show RCL what happened at this Run.</p></div>}
         </section>
       </Container>
       <style jsx>{`.field{height:2.75rem;width:100%;border-radius:.75rem;border:1px solid rgba(255,255,255,.1);background:#071018;padding:0 .75rem;color:white;outline:none}`}</style>
