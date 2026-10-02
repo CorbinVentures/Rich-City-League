@@ -71,7 +71,11 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     items:[
       {label:'For Organizations',href:'/network/partners',icon:FaBullhorn},
       {label:'Partner Dashboard',href:'/network/dashboard',icon:FaChartSimple},
+      {label:'Organization Profile',href:'/network/dashboard/profile',icon:FaUser},
+      {label:'Editorial Studio',href:'/network/dashboard/editorial',icon:FaNewspaper},
+      {label:'Boost',href:'/network/dashboard/boost',icon:FaBolt},
       {label:'RCL Reach',href:'/network/dashboard/reach',icon:FaChartSimple},
+      {label:'Billing',href:'/network/dashboard/billing',icon:FaCrown},
     ],
   },
 ];
