@@ -29,7 +29,7 @@ export default async function OrganizationsPage() {
   const verified=organizations.filter(org=>org.is_verified).length;
   const claimable=organizations.filter(org=>!org.is_claimed&&org.network_tier!=='flagship').length;
 
-  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
+  return <main className="rcl-social-world min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_8%,rgba(44,166,255,.12),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="xl" className="py-12 sm:py-16">
         <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL Network Directory</p>
