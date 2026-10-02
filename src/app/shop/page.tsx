@@ -80,7 +80,7 @@ export default function ShopPage() {
   const subtotal = cart.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
 
   return (
-    <main className="min-h-screen bg-rcl-black pb-24 text-white">
+    <main className="rcl-social-world min-h-screen bg-rcl-black pb-24 text-white">
       <section className="rcl-texture relative overflow-hidden border-b border-white/10 bg-[radial-gradient(ellipse_at_80%_10%,rgba(77,163,255,.22),transparent_35%),linear-gradient(125deg,#101c2d,#07090d)] py-20">
         <Container maxWidth="xl"><p className="rcl-kicker">RCL SHOP · RICHMOND, VA</p><h1 className="rcl-display mt-4 max-w-3xl text-6xl uppercase leading-[.9] sm:text-8xl">Gear the <span className="text-rcl-orange">culture.</span></h1><p className="mt-6 max-w-lg text-lg text-gray-400">Premium pieces for the people, players, and places that make 804 basketball.</p><button type="button" onClick={() => document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })} className="rcl-button mt-8 inline-flex items-center gap-3">Shop the collection <FaArrowRight /></button></Container>
       </section>
