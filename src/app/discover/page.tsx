@@ -8,6 +8,7 @@ import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifying
 export const metadata = {
   title: 'Discover RCL',
   description: 'Discover people, communities, runs, trends and basketball activity across RCL.',
+  alternates: { canonical: '/discover' },
 };
 
 export const revalidate = 30;
