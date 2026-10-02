@@ -8,7 +8,7 @@ export function RCLRuntimeFinish(){
   return <style jsx global>{`
     :root {
       --rcl-orange:#B85C38!important;
-      --rcl-gold:#C9A45C!important;
+      --rcl-gold:#B85C38!important;
       --rcl-blue:#64748B!important;
       --rcl-court-orange:#B85C38!important;
       --rcl-basket-orange:#B85C38!important;
