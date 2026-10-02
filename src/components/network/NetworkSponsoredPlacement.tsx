@@ -116,8 +116,8 @@ export function NetworkSponsoredPlacement({
 }
 
 function variantClass(variant:Variant){
-  if(variant==='feed')return 'rounded-2xl border border-rcl-orange/25 bg-[linear-gradient(145deg,rgba(255,79,22,.07),rgba(7,17,27,.96))] p-5 shadow-[0_18px_60px_rgba(0,0,0,.18)]';
-  if(variant==='banner')return 'rounded-2xl border border-rcl-orange/20 bg-[linear-gradient(120deg,rgba(255,79,22,.07),rgba(7,21,34,.78))] p-4 sm:p-5';
+  if(variant==='feed')return 'rounded-2xl border border-rcl-orange/25 bg-[linear-gradient(145deg,rgba(59,130,246,.07),rgba(7,17,27,.96))] p-5 shadow-[0_18px_60px_rgba(0,0,0,.18)]';
+  if(variant==='banner')return 'rounded-2xl border border-rcl-orange/20 bg-[linear-gradient(120deg,rgba(59,130,246,.07),rgba(7,21,34,.78))] p-4 sm:p-5';
   return 'rounded-2xl border border-rcl-orange/20 bg-[#071522]/70 p-5';
 }
 function pretty(value:string){return value.replaceAll('-',' ').replace(/\b\w/g,(letter)=>letter.toUpperCase());}
