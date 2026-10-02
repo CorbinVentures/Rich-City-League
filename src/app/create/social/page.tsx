@@ -229,7 +229,7 @@ export default function SocialCreatorPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#03070d] pb-28 text-white">
+    <main className="rcl-social-world min-h-screen bg-[#03070d] pb-28 text-white">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#03070d]/95 backdrop-blur-xl">
         <Container maxWidth="xl" className="flex h-16 items-center gap-3 px-3 sm:h-20 sm:px-4">
           <Link href="/create" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-white/60 transition hover:border-rcl-blue/30 hover:text-white" aria-label="Back to Create"><FaArrowLeft /></Link>
