@@ -204,7 +204,7 @@ export function NetworkPostCard({
       </div>
 
       {mediaUrls.length > 0 && (
-        <div className="border-y border-white/[.07] bg-black">
+        <div className="rcl-dark-media border-y border-white/[.07] bg-black">
           {videoPost ? (
             <video src={mediaUrls[0]} controls playsInline preload="metadata" className="max-h-[680px] w-full object-contain" />
           ) : (
