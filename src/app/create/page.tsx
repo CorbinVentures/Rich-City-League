@@ -83,7 +83,7 @@ const createOptions = [
 
 export default function CreatePage() {
   return (
-    <main className="min-h-screen bg-[#03070d] pb-28 text-white">
+    <main className="rcl-social-world min-h-screen bg-[#03070d] pb-28 text-white">
       <section className="relative overflow-hidden border-b border-rcl-blue/15 bg-[linear-gradient(135deg,#071522_0%,#03070d_62%,#07111b_100%)]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(255,79,22,.18),transparent_30%),radial-gradient(circle_at_8%_72%,rgba(21,159,255,.16),transparent_34%)]" />
         <Container maxWidth="xl" className="relative py-12 sm:py-16">
