@@ -85,7 +85,7 @@ export default function CreatePage() {
   return (
     <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
       <section className="relative overflow-hidden border-b border-rcl-blue/15 bg-[linear-gradient(135deg,#071522_0%,#03070d_62%,#07111b_100%)]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(255,79,22,.18),transparent_30%),radial-gradient(circle_at_8%_72%,rgba(21,159,255,.16),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(59,130,246,.18),transparent_30%),radial-gradient(circle_at_8%_72%,rgba(21,159,255,.16),transparent_34%)]" />
         <Container maxWidth="xl" className="relative py-12 sm:py-16">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-rcl-orange/20 bg-rcl-orange/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">
@@ -103,7 +103,7 @@ export default function CreatePage() {
       </section>
 
       <Container maxWidth="xl" className="py-8 sm:py-10">
-        <section className="mb-8 overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(135deg,rgba(255,79,22,.11),rgba(7,21,34,.8))] p-5 sm:p-7">
+        <section className="mb-8 overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(135deg,rgba(59,130,246,.11),rgba(7,21,34,.8))] p-5 sm:p-7">
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-rcl-orange"><FaImage /> New · RCL Creator Studio</p>

@@ -9,7 +9,7 @@ export function TeamStandingShareCard({rank,teamName,wins,losses,ties=0,pointsFo
  const url=typeof window!=='undefined'?(teamUrl?new URL(teamUrl,window.location.origin).toString():window.location.href):'https://richcityhoops.com/leaderboards';
  const record=ties?`${wins}-${losses}-${ties}`:`${wins}-${losses}`; const text=`#${rank} ${teamName} — ${record} (${pct}%) in the official Rich City League standings.`;
  async function share(){try{if(navigator.share){await navigator.share({title:`${teamName} | RCL Standings`,text,url});return;}await navigator.clipboard.writeText(`${text} ${url}`);setCopied(true);window.setTimeout(()=>setCopied(false),1800);}catch{}}
- return <article className="overflow-hidden rounded-3xl border border-rcl-gold/25 bg-[radial-gradient(circle_at_85%_10%,rgba(255,107,26,.2),transparent_32%),linear-gradient(135deg,#101820,#05080d)]"><div className="p-6">
+ return <article className="overflow-hidden rounded-3xl border border-rcl-gold/25 bg-[radial-gradient(circle_at_85%_10%,rgba(59,130,246,.2),transparent_32%),linear-gradient(135deg,#101820,#05080d)]"><div className="p-6">
   <div className="flex items-center justify-between"><span className="text-xs font-black uppercase tracking-[.24em] text-rcl-gold">Official RCL Standings</span><b className="font-display text-4xl font-black text-rcl-gold">#{rank}</b></div>
   <p className="mt-6 text-xs font-black uppercase tracking-[.18em] text-white/35">{rank===1?'Top of the standings':'Season standings'}</p><h3 className="mt-1 font-display text-3xl font-black uppercase">{teamName}</h3>
   <div className="mt-6 grid grid-cols-3 gap-3"><Stat label="Record" value={record}/><Stat label="Win %" value={`${pct}%`}/><Stat label="Streak" value={streak??'—'}/></div>

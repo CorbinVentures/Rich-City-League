@@ -110,7 +110,7 @@ export function ShotMap({ events, pendingShot, onLocationSelect }: ShotMapProps)
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-rcl-orange shadow-[0_0_10px_rgba(255,107,26,.8)]" />
+              <span className="h-2 w-2 rounded-full bg-rcl-orange shadow-[0_0_10px_rgba(59,130,246,.8)]" />
               <p className="text-[9px] font-black uppercase tracking-[.2em] text-rcl-orange">Game IQ · Shot chart</p>
             </div>
             <h3 className="mt-1 text-lg font-black uppercase tracking-tight text-white">Shot map</h3>

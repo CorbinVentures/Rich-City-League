@@ -96,7 +96,7 @@ export function SiteHeader(){
 
     <header className="rcl-universal-topbar rcl-social-world-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCL social home">
-        <span>R</span><b>RCL <i>Social</i></b>
+        <span>RCL</span><b>RCL <i>Social</i></b>
       </Link>
 
       <Link href="/search" className="rcl-global-search" aria-label="Search RCL">

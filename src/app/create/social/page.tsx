@@ -253,7 +253,7 @@ export default function SocialCreatorPage() {
             </div>
 
             <form onSubmit={publish} className="overflow-hidden rounded-3xl border border-white/10 bg-[#08131e] shadow-[0_24px_90px_rgba(0,0,0,.28)]">
-              <div className="border-b border-white/[.07] bg-[radial-gradient(circle_at_90%_10%,rgba(255,79,22,.13),transparent_34%),linear-gradient(135deg,#0a1723,#07111b)] p-5 sm:p-6">
+              <div className="border-b border-white/[.07] bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.13),transparent_34%),linear-gradient(135deg,#0a1723,#07111b)] p-5 sm:p-6">
                 <div className="flex items-start gap-4">
                   <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-rcl-orange/25 bg-rcl-orange/10 text-lg text-rcl-orange"><ActiveIcon /></span>
                   <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">{activeMode.kicker}</p><h2 className="mt-1 font-display text-3xl font-black uppercase">{activeMode.label}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">{activeMode.description}</p></div>
@@ -308,7 +308,7 @@ export default function SocialCreatorPage() {
           </div>
 
           <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-            <div className="overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(145deg,rgba(255,79,22,.11),rgba(7,17,27,.95)_48%)] p-5 sm:p-6">
+            <div className="overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(145deg,rgba(59,130,246,.11),rgba(7,17,27,.95)_48%)] p-5 sm:p-6">
               <div className="flex items-center gap-2 text-rcl-orange"><FaFire /><span className="text-[10px] font-black uppercase tracking-[.2em]">Why post here?</span></div>
               <h2 className="mt-3 font-display text-3xl font-black uppercase leading-none">Your game should build your name.</h2>
               <p className="mt-3 text-sm leading-6 text-white/45">RCL media is connected to basketball identity—not just a random feed. Give people a reason to know your game, your team, your work, and your community.</p>

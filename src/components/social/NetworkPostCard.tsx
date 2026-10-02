@@ -159,7 +159,7 @@ export function NetworkPostCard({
       )}
 
       {mediaLabel && !official && (
-        <div className="flex items-center justify-between gap-3 border-b border-white/[.06] bg-[linear-gradient(90deg,rgba(255,79,22,.055),rgba(21,159,255,.035))] px-4 py-2 sm:px-5">
+        <div className="flex items-center justify-between gap-3 border-b border-white/[.06] bg-[linear-gradient(90deg,rgba(59,130,246,.055),rgba(21,159,255,.035))] px-4 py-2 sm:px-5">
           <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">{videoPost ? <FaVideo /> : <span aria-hidden="true">📸</span>} {mediaLabel}</span>
           <Link href={`${profileHref}?tab=highlights`} className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue hover:text-white">The Tape →</Link>
         </div>
@@ -258,7 +258,7 @@ export function NetworkPostCard({
                     reactionBurst === reaction.type ? 'scale-110' : ''
                   } ${
                     selected
-                      ? 'border-rcl-blue/55 bg-rcl-blue/10 ring-1 ring-rcl-blue/50 shadow-[0_0_18px_rgba(255,79,22,.16)]'
+                      ? 'border-rcl-blue/55 bg-rcl-blue/10 ring-1 ring-rcl-blue/50 shadow-[0_0_18px_rgba(59,130,246,.16)]'
                       : 'border-white/[.05] bg-white/[.018] hover:border-white/10 hover:bg-white/[.04]'
                   }`}
                 >

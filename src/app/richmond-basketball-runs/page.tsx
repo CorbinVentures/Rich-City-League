@@ -16,7 +16,7 @@ export default function RichmondBasketballRunsPage() {
   ]};
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumb)}}/>
-    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_10%,rgba(249,115,22,.18),transparent_35%),linear-gradient(180deg,#07111d,#02060b)]">
+    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_10%,rgba(59,130,246,.18),transparent_35%),linear-gradient(180deg,#07111d,#02060b)]">
       <Container maxWidth="xl" className="py-20 md:py-28">
         <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">804 · Richmond, Virginia</p>
         <h1 className="mt-5 max-w-5xl font-display text-5xl font-black uppercase leading-[.92] md:text-8xl">Find your next<br/><span className="text-rcl-orange">Richmond run.</span></h1>

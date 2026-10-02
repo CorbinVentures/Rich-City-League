@@ -147,7 +147,7 @@ export default function DraftSettingsPage() {
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <AdminWorkspace />
-    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_82%_20%,rgba(255,79,22,.16),transparent_28%),radial-gradient(circle_at_18%_70%,rgba(21,159,255,.14),transparent_32%),#071522]">
+    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_82%_20%,rgba(59,130,246,.16),transparent_28%),radial-gradient(circle_at_18%_70%,rgba(21,159,255,.14),transparent_32%),#071522]">
       <Container maxWidth="xl" className="py-10 sm:py-14">
         <p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange">League administration · Draft Night</p>
         <div className="mt-3 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -190,7 +190,7 @@ export default function DraftSettingsPage() {
         </form>
       </div>}
     </Container>
-    <style jsx>{`.control{min-height:3rem;width:100%;border-radius:.75rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.25);padding:0 .9rem;color:white;outline:none}.control:focus{border-color:rgba(255,79,22,.55)}.control:disabled{opacity:.6}`}</style>
+    <style jsx>{`.control{min-height:3rem;width:100%;border-radius:.75rem;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.25);padding:0 .9rem;color:white;outline:none}.control:focus{border-color:rgba(59,130,246,.55)}.control:disabled{opacity:.6}`}</style>
   </main>;
 }
 

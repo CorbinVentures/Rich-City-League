@@ -9,7 +9,7 @@ export const metadata = {
 export default async function AccessPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return <main className="relative grid min-h-svh place-items-center overflow-hidden bg-[#03070d] px-5 py-12 text-white">
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_4%,rgba(255,79,22,.16),transparent_32%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.14),transparent_34%)]" />
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_4%,rgba(59,130,246,.16),transparent_32%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.14),transparent_34%)]" />
     <div className="pointer-events-none absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(21,159,255,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,255,.18)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
     <section className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/90 p-6 shadow-[0_28px_90px_rgba(0,0,0,.48)] backdrop-blur-xl sm:p-9">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rcl-orange to-transparent" />

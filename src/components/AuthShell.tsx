@@ -13,7 +13,7 @@ export function AuthShell({ children, mode }: { children: ReactNode; mode: 'sign
         : { kicker:'Member access', title:'Welcome back.', body:'One account connects your RCL profile, league tools, social activity, fantasy experience, and community.' };
 
   return <main className="relative min-h-svh overflow-hidden bg-rcl-black text-white">
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_8%,rgba(255,79,22,.13),transparent_30%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.13),transparent_32%)]" />
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_8%,rgba(59,130,246,.13),transparent_30%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.13),transparent_32%)]" />
     <div className="pointer-events-none absolute inset-0 opacity-[.1] [background-image:linear-gradient(rgba(21,159,255,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,255,.18)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_90%)]" />
     <Container maxWidth="xl" className="relative py-8 sm:py-12 lg:py-16">
       <Link href="/" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/40 transition hover:text-white"><FaArrowLeft /> Back to RCL</Link>

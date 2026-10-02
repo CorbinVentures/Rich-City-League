@@ -224,7 +224,7 @@ export default function RunHighlightPublisher() {
       </header>
 
       <Container maxWidth="lg" className="py-6 sm:py-9">
-        <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgba(255,79,22,.12),transparent_36%),#07111b] p-5 sm:p-7">
+        <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.12),transparent_36%),#07111b] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaBasketball className="mr-1 inline" />{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Show what happened.</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Joined players and the host can earn one verified +35 REP highlight reward during the Run highlight window.</p>

@@ -21,7 +21,7 @@ export function PerformanceShareCard({ playerName,teamName,opponentName,points,r
   const line=`${points} PTS · ${rebounds} REB · ${assists} AST${steals? ` · ${steals} STL`:''}${blocks? ` · ${blocks} BLK`:''}`;
   const text=`${playerName} — ${line} on Rich City League.`;
   async function share(){try{if(navigator.share){await navigator.share({title:`${playerName} | RCL Game Performance`,text,url});return;}await navigator.clipboard.writeText(`${text} ${url}`);setCopied(true);window.setTimeout(()=>setCopied(false),1800);}catch{}}
-  return <article className="overflow-hidden rounded-3xl border border-rcl-gold/25 bg-[radial-gradient(circle_at_90%_10%,rgba(255,107,26,.18),transparent_35%),linear-gradient(135deg,#101820,#05080d)]">
+  return <article className="overflow-hidden rounded-3xl border border-rcl-gold/25 bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.18),transparent_35%),linear-gradient(135deg,#101820,#05080d)]">
     <div className="p-6 sm:p-7"><div className="flex items-center justify-between gap-4"><span className="text-xs font-black uppercase tracking-[.26em] text-rcl-gold">Official RCL Game Stats</span><span className="text-3xl">🏀</span></div>
     <p className="mt-7 text-xs font-black uppercase tracking-[.18em] text-white/35">Game Performance</p><h3 className="mt-1 font-display text-3xl font-black uppercase">{playerName}</h3>
     {(teamName||opponentName)&&<p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/40">{teamName||'RCL'}{opponentName?` vs ${opponentName}`:''}</p>}

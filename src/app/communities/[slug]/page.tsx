@@ -105,7 +105,7 @@ export default function CommunityDetailPage(){
 
   return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
     <section className="relative overflow-hidden border-b border-white/10 bg-[#071522]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_15%,rgba(21,159,255,.2),transparent_32%),radial-gradient(circle_at_15%_65%,rgba(255,79,22,.14),transparent_35%)]"/>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_15%,rgba(21,159,255,.2),transparent_32%),radial-gradient(circle_at_15%_65%,rgba(59,130,246,.14),transparent_35%)]"/>
       {community.cover_url&&<img src={community.cover_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30"/>}
       <Container maxWidth="lg" className="relative py-8 sm:py-12">
         <Link href="/communities" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/45 hover:text-white"><FaArrowLeft/> Communities</Link>

@@ -9,23 +9,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'rcl-black': '#03070D',
-        'rcl-white': '#F6F8FB',
-        // Legacy accent aliases intentionally resolve to the institutional ice-blue palette.
-        // Keep these aliases because the application has many existing utility classes using them.
-        'rcl-gold': '#91CEF2',
+        'rcl-black': '#0F2547',
+        'rcl-white': '#F6F9FC',
+        // Legacy aliases resolve to the approved RCL mockup palette.
+        // Keep these names because the application has many existing utility classes using them.
+        'rcl-gold': '#3B82F6',
         'rcl-red': '#E63946',
-        'rcl-blue': '#91CEF2',
-        'rcl-navy': '#071522',
-        'rcl-teal': '#06A77D',
-        'rcl-orange': '#91CEF2',
-        'rcl-vip-gold': '#D8B65C',
+        'rcl-blue': '#3B82F6',
+        'rcl-navy': '#0F2547',
+        'rcl-teal': '#2E8B70',
+        'rcl-orange': '#3B82F6',
+        'rcl-vip-gold': '#D4AF37',
         'rcl-purple': '#7209B7',
-        'rcl-gray': '#7D90A3',
+        'rcl-gray': '#64748B',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1rem' }],

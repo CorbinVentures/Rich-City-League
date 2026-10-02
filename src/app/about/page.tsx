@@ -34,7 +34,7 @@ export default function AboutPage() {
   return (
     <main className="rcl-platform-page rcl-about-page min-h-screen overflow-hidden pb-24 text-white">
       <section className="rcl-cinematic-page-hero relative">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(249,115,22,.16),transparent_30%),linear-gradient(180deg,rgba(2,6,23,.05),rgba(2,6,23,.9))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(59,130,246,.16),transparent_30%),linear-gradient(180deg,rgba(2,6,23,.05),rgba(2,6,23,.9))]" />
         <Container maxWidth="xl" className="relative z-10 py-20 md:py-32">
           <p className="rcl-page-kicker">804 · RICHMOND, VIRGINIA · EST. 2011</p>
           <h1 className="max-w-5xl text-5xl font-black uppercase leading-[.9] tracking-[-.05em] md:text-8xl">
@@ -119,7 +119,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-orange-500/20 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,.15),transparent_35%),rgba(2,6,23,.72)] p-7 md:p-12">
+        <section className="rounded-[2rem] border border-orange-500/20 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,.15),transparent_35%),rgba(2,6,23,.72)] p-7 md:p-12">
           <p className="rcl-page-kicker">THE MISSION</p>
           <h2 className="max-w-5xl text-4xl font-black uppercase tracking-[-.04em] md:text-6xl">BUILD PLAYERS. BUILD CHARACTER. BUILD COMMUNITY.</h2>
           <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
