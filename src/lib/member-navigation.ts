@@ -10,7 +10,7 @@ export type RCLMemberNavItem={label:string;href:string;icon:IconType;action?:'cr
 
 export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
-  {label:'Discover',href:'/explore',icon:FaCompass},
+  {label:'Discover',href:'/discover',icon:FaCompass},
   {label:'Create',href:'/create',icon:FaPlus,action:'create'},
   {label:'Runs',href:'/runs',icon:FaLocationDot},
   {label:'League',href:'/league',icon:FaBasketball},
@@ -36,7 +36,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     label:'Discover',
     description:'Find people, teams, organizations, media and opportunities around you',
     items:[
-      {label:'Discover Basketball',href:'/explore',icon:FaCompass},
+      {label:'Discover Basketball',href:'/discover',icon:FaCompass},
       {label:'Players',href:'/players',icon:FaUser},
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
@@ -81,12 +81,12 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
 ];
 
 const SOCIAL=['/social'];
-const DISCOVER=['/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
+const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isMemberNavigationActive(pathname:string,href:string){
-  const family=href==='/social'?SOCIAL:href==='/explore'?DISCOVER:href==='/runs'?RUNS:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  const family=href==='/social'?SOCIAL:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
   if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   const clean=href.split('?')[0];
   return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));
