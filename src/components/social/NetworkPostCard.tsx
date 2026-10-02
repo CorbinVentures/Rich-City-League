@@ -141,7 +141,7 @@ export function NetworkPostCard({
     .slice(0, 3);
 
   return (
-    <article id={`post-${post.id}`} className={`overflow-hidden rounded-2xl border bg-[#08111b]/90 shadow-[0_18px_60px_rgba(0,0,0,.22)] ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
+    <article id={`post-${post.id}`} className={`rcl-feed-post overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
       {repost && (
         <div className="flex items-center gap-2 border-b border-white/[.06] bg-white/[.018] px-4 py-2.5 text-xs font-bold text-white/35 sm:px-5">
           <FaRetweet className="text-rcl-blue" />
