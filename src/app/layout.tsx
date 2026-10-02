@@ -8,7 +8,6 @@ import './rcl-accessibility.css';
 import './rcl-corporate-polish.css';
 import './rcl-social-nav-polish.css';
 import './rcl-scorebook-mobile.css';
-import './rcl-member-shell.css';
 import './rcl-social-activity.css';
 import './rcl-pwa.css';
 import './rcl-executive-marble.css';
