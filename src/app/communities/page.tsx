@@ -14,6 +14,7 @@ type CourtLocation = { slug:string; name:string; address:string; locality:string
 export default function CommunitiesPage() {
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
+  const db = supabase as any;
   const [items, setItems] = useState<Community[]>([]);
   const [joined, setJoined] = useState<string[]>([]);
   const [locations, setLocations] = useState<Map<string,CourtLocation>>(new Map());
@@ -34,7 +35,7 @@ export default function CommunitiesPage() {
       const [communities, memberships, courtLocations] = await Promise.all([
         supabase.from('communities').select('*').order('created_at', { ascending: false }),
         userId ? supabase.from('community_members').select('community_id').eq('profile_id', userId) : Promise.resolve({ data: [], error: null }),
-        supabase.from('basketball_locations').select('slug,name,address,locality,area').eq('is_active',true).eq('venue_type','outdoor').eq('access_type','public').order('name'),
+        db.from('basketball_locations').select('slug,name,address,locality,area').eq('is_active',true).eq('venue_type','outdoor').eq('access_type','public').order('name'),
       ]);
       if (communities.error || memberships.error || courtLocations.error) throw communities.error || memberships.error || courtLocations.error;
       setItems((communities.data ?? []) as Community[]);
