@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { FaArrowRight, FaLock, FaShieldHalved } from 'react-icons/fa6';
 
 export const metadata = {
-  title: 'Private Preview',
-  description: 'Rich City League private preview access.',
+  title: 'RCL Access',
+  description: 'Rich City League invite and member access.',
 };
 
 export default async function AccessPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -34,7 +34,7 @@ export default async function AccessPage({ searchParams }: { searchParams: Promi
 
       <div className="my-6 flex items-center gap-3 text-xs font-black uppercase tracking-[.16em] text-white/30"><span className="h-px flex-1 bg-white/10"/><span>Current member?</span><span className="h-px flex-1 bg-white/10"/></div>
       <Link href="/auth/sign-in" className="flex min-h-14 items-center justify-center gap-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-4 text-sm font-black uppercase transition hover:border-rcl-blue/60 hover:bg-rcl-blue/10"><FaShieldHalved className="text-rcl-blue" /> Sign in to your account</Link>
-      <p className="mt-7 text-center text-xs leading-5 text-white/35">Private preview access is temporary. Public access is planned after September 30.</p>
+      <p className="mt-7 text-center text-xs leading-5 text-white/35">Public areas of RCL are open. This page remains available for invited testing and controlled-access sessions.</p>
     </section>
   </main>;
 }
