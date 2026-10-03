@@ -58,6 +58,19 @@ export type PlayerDetailData = {
   iqHistory: Database['public']['Tables']['player_iq_history']['Row'][];
 };
 
+export type PublicNews = Database['public']['Tables']['news']['Row'] & {
+  category?: 'league-news' | 'rich-city-league' | 'richmond-basketball' | 'richmond-culture' | null;
+  is_automated?: boolean | null;
+  automation_type?: string | null;
+  source_urls?: unknown;
+  source_names?: unknown;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  seo_keywords?: string[] | null;
+  generated_by_model?: string | null;
+  editorial_confidence?: number | string | null;
+};
+
 export function getPublicClient(): PublicClient | null {
   const config = getSupabaseConfig();
   if (config.status !== 'configured') return null;
@@ -67,6 +80,36 @@ export function getPublicClient(): PublicClient | null {
     console.error('Unable to initialize the public Supabase client', error);
     return null;
   }
+}
+
+export async function getPublishedNews(limit = 100): Promise<PublicNews[]> {
+  const client = getPublicClient() as any;
+  if (!client) return [];
+  const { data, error } = await client.from('news')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(Math.max(1, Math.min(500, limit)));
+  if (error) {
+    console.error('Published news query failed', error);
+    return [];
+  }
+  return (data ?? []) as PublicNews[];
+}
+
+export async function getNewsBySlug(slug: string): Promise<PublicNews | null> {
+  const client = getPublicClient() as any;
+  if (!client || !slug) return null;
+  const { data, error } = await client.from('news')
+    .select('*')
+    .eq('status', 'published')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) {
+    console.error('News detail query failed', error);
+    return null;
+  }
+  return (data ?? null) as PublicNews | null;
 }
 
 export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
