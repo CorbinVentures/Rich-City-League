@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/official/daily",
       "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/newsroom/daily",
+      "schedule": "20 * * * *"
     }
   ]
 }

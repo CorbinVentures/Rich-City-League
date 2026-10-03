@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
+import { getLeagueSnapshot, getPublicClient, getPublishedNews } from '@/lib/public-data';
 
 const SITE = 'https://richcityhoops.com';
 const core = [
@@ -50,8 +50,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const [{ teams, news }, publicClient] = await Promise.all([
+    const [{ teams }, news, publicClient] = await Promise.all([
       getLeagueSnapshot(),
+      getPublishedNews(500),
       Promise.resolve(getPublicClient()),
     ]);
 
