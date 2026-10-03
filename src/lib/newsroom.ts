@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type NewsBeat = 'rich-city-league' | 'richmond-basketball' | 'richmond-culture';
+export type NewsBeat = 'rich-city-league' | 'richmond-basketball' | 'richmond-culture' | 'rcl-insider';
 
 export type NewsSource = {
   name: string;
@@ -50,6 +50,13 @@ const beatConfig: Record<NewsBeat, {
     account: 'rcl-community',
     automationType: 'daily_news_richmond_culture',
     web: true,
+    minSources: 1,
+  },
+  'rcl-insider': {
+    label: 'RCL Insider',
+    account: 'rcl-business',
+    automationType: 'daily_news_rcl_insider',
+    web: false,
     minSources: 1,
   },
 };
@@ -104,6 +111,7 @@ export function newsroomHour(date = new Date()) {
 export function scheduledBeat(hour: number): NewsBeat | null {
   if (hour === 7) return 'rich-city-league';
   if (hour === 11) return 'richmond-basketball';
+  if (hour === 13) return 'rcl-insider';
   if (hour === 16) return 'richmond-culture';
   return null;
 }
@@ -152,8 +160,11 @@ function cleanArticle(raw: any, beat: NewsBeat): GeneratedNewsArticle {
     reason: typeof raw?.reason === 'string' ? raw.reason.trim().slice(0, 500) : undefined,
   };
 
-  if (beat === 'rich-city-league' && !article.sources.length) {
-    article.sources = [{ name: 'Rich City League official data', url: `${SITE}/league` }];
+  if ((beat === 'rich-city-league' || beat === 'rcl-insider') && !article.sources.length) {
+    article.sources = [{
+      name: beat === 'rcl-insider' ? 'RCL official product information' : 'Rich City League official data',
+      url: beat === 'rcl-insider' ? SITE : `${SITE}/league`,
+    }];
   }
   return article;
 }
@@ -238,6 +249,63 @@ async function richCityLeagueContext(db: SupabaseClient) {
   };
 }
 
+async function rclBusinessContext(db: SupabaseClient) {
+  const now = new Date().toISOString();
+  const [
+    topicResult,
+    memberResult,
+    organizationResult,
+    eventResult,
+    newsResult,
+    mediaResult,
+    gameResult,
+  ] = await Promise.all([
+    (db as any).from('newsroom_product_topics')
+      .select('id,slug,title,summary,status,public_url,seo_terms,priority,last_featured_at')
+      .eq('approved_for_public', true)
+      .order('last_featured_at', { ascending: true, nullsFirst: true })
+      .order('priority', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    db.from('profiles').select('id', { count:'exact', head:true }).eq('is_active', true).eq('is_system_account', false),
+    (db as any).from('network_organizations').select('id', { count:'exact', head:true }).eq('status','active'),
+    (db as any).from('network_events').select('id', { count:'exact', head:true }).eq('status','published').gte('starts_at', now),
+    db.from('news').select('id', { count:'exact', head:true }).eq('status','published'),
+    db.from('media').select('id', { count:'exact', head:true }).eq('status','published'),
+    db.from('games').select('id', { count:'exact', head:true }).gte('scheduled_at', now),
+  ]);
+
+  const topic = topicResult.data as null | {
+    id:string;
+    slug:string;
+    title:string;
+    summary:string;
+    status:'live'|'preview'|'roadmap';
+    public_url:string;
+    seo_terms:string[];
+    priority:number;
+    last_featured_at:string|null;
+  };
+
+  return {
+    topic,
+    liveSignals: {
+      activeMemberProfiles: memberResult.count ?? 0,
+      activeNetworkOrganizations: organizationResult.count ?? 0,
+      upcomingNetworkEvents: eventResult.count ?? 0,
+      publishedNewsStories: newsResult.count ?? 0,
+      publishedMediaItems: mediaResult.count ?? 0,
+      upcomingOfficialGames: gameResult.count ?? 0,
+    },
+    sourceHints: topic
+      ? [
+          { name:'RCL official product information', url: topic.public_url },
+          { name:'Rich City League', url:SITE },
+        ]
+      : [{ name:'Rich City League', url:SITE }],
+  };
+}
+
 function editorialInstructions(beat: NewsBeat) {
   const shared = [
     'You are the RCL Newsroom: a disciplined local reporter, editor, PR strategist and search editor for Rich City League in Richmond, Virginia.',
@@ -264,6 +332,20 @@ function editorialInstructions(beat: NewsBeat) {
       'Choose the strongest timely RCL angle: completed games, upcoming games, standings movement, registration status, open runs, or a useful league explainer supported by the supplied data.',
       'If there is no dramatic news, write a useful verified preview or state-of-the-league piece rather than manufacturing a development.',
       'Source URLs should point to relevant richcityhoops.com pages such as /league, /games, /standings, /runs or /register.',
+    ].join('\n');
+  }
+
+  if (beat === 'rcl-insider') {
+    return [
+      ...shared,
+      'BEAT: RCL Insider — product, business and platform growth.',
+      'Use ONLY the approved official RCL business context included in the prompt. Do not browse or add outside business claims.',
+      'The selected product topic is the primary angle. Explain what it does, who it helps, why it matters to Richmond/Virginia basketball, and how it connects to the broader RCL business.',
+      'If topic.status is live, describe it as available now. If status is preview, describe it as being introduced or expanded, not as universally available. If status is roadmap, use careful language such as planned, on the roadmap, or being developed. Never announce a launch date, price, partnership, sponsor, revenue figure or guarantee unless the supplied context explicitly contains it.',
+      'Use liveSignals only as current platform context. Do not exaggerate them or turn small counts into hype.',
+      'Make the story traffic-oriented without becoming an ad: answer a real search intent, explain a useful feature or business direction, and include one natural next step using the supplied public URL.',
+      'Do not repeat the same product angle if recent newsroom titles already covered it.',
+      'Sources must point only to official richcityhoops.com pages supplied in the business context.',
     ].join('\n');
   }
 
@@ -296,7 +378,12 @@ export async function generateNewsArticle(db: SupabaseClient, beat: NewsBeat) {
 
   const model = process.env.OPENAI_NEWSROOM_MODEL?.trim() || 'gpt-6-sol';
   const recent = await recentNewsContext(db);
-  const context = beat === 'rich-city-league' ? await richCityLeagueContext(db) : null;
+  const leagueContext = beat === 'rich-city-league' ? await richCityLeagueContext(db) : null;
+  const businessContext = beat === 'rcl-insider' ? await rclBusinessContext(db) : null;
+
+  if (beat === 'rcl-insider' && !businessContext?.topic) {
+    throw new Error('No approved RCL Insider product topic is available.');
+  }
 
   const prompt = [
     editorialInstructions(beat),
@@ -304,8 +391,10 @@ export async function generateNewsArticle(db: SupabaseClient, beat: NewsBeat) {
     'Avoid duplicating these recent RCL Newsroom titles or substantially repeating the same angle:',
     JSON.stringify(recent),
     beat === 'rich-city-league'
-      ? `OFFICIAL RCL DATA:\n${JSON.stringify(context)}`
-      : 'Research the current web now, then choose one strong local story with enough evidence to publish.',
+      ? `OFFICIAL RCL DATA:\n${JSON.stringify(leagueContext)}`
+      : beat === 'rcl-insider'
+        ? `APPROVED RCL BUSINESS CONTEXT:\n${JSON.stringify(businessContext)}`
+        : 'Research the current web now, then choose one strong local story with enough evidence to publish.',
   ].join('\n\n');
 
   const requestBody: any = {
@@ -332,5 +421,9 @@ export async function generateNewsArticle(db: SupabaseClient, beat: NewsBeat) {
   }
 
   const raw = parseJsonObject(extractResponseText(await response.json()));
-  return { article: validateArticle(cleanArticle(raw, beat), beat), model };
+  return {
+    article: validateArticle(cleanArticle(raw, beat), beat),
+    model,
+    topicId: businessContext?.topic?.id ?? null,
+  };
 }
