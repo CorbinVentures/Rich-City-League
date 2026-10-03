@@ -2,22 +2,25 @@
 
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaArrowRight, FaMagnifyingGlass, FaPeopleGroup, FaPlus } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaPlus } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-type Community = { id: string; name: string; slug: string; description: string | null; community_type: string; privacy: string; logo_url?:string|null; cover_url?:string|null };
+type Community = { id: string; name: string; slug: string; description: string | null; community_type: string; privacy: string; logo_url?:string|null; cover_url?:string|null; location_slug?:string|null; is_system_community?:boolean };
+type CourtLocation = { slug:string; name:string; address:string; locality:string; area:string };
 
 export default function CommunitiesPage() {
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const [items, setItems] = useState<Community[]>([]);
   const [joined, setJoined] = useState<string[]>([]);
+  const [locations, setLocations] = useState<Map<string,CourtLocation>>(new Map());
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [query, setQuery] = useState('');
+  const [kind, setKind] = useState<'all'|'court'|'member'>('all');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -28,13 +31,15 @@ export default function CommunitiesPage() {
     if (!supabase) { setLoading(false); setError('Communities are temporarily unavailable. Please try again later.'); return; }
     setLoading(true);
     try {
-      const [communities, memberships] = await Promise.all([
+      const [communities, memberships, courtLocations] = await Promise.all([
         supabase.from('communities').select('*').order('created_at', { ascending: false }),
         userId ? supabase.from('community_members').select('community_id').eq('profile_id', userId) : Promise.resolve({ data: [], error: null }),
+        supabase.from('basketball_locations').select('slug,name,address,locality,area').eq('is_active',true).eq('venue_type','outdoor').eq('access_type','public').order('name'),
       ]);
-      if (communities.error || memberships.error) throw communities.error || memberships.error;
+      if (communities.error || memberships.error || courtLocations.error) throw communities.error || memberships.error || courtLocations.error;
       setItems((communities.data ?? []) as Community[]);
       setJoined((memberships.data ?? []).map(item => item.community_id));
+      setLocations(new Map(((courtLocations.data ?? []) as CourtLocation[]).map(location=>[location.slug,location])));
     } catch { setError('We could not load communities. Please try again.'); }
     finally { setLoading(false); }
   }, [supabase, userId]);
@@ -70,14 +75,28 @@ export default function CommunitiesPage() {
     finally { setBusy(null); }
   }
 
-  const filtered = items.filter((item) => !query.trim() || `${item.name} ${item.description ?? ''} ${item.community_type}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const courtCount=items.filter(item=>item.community_type==='court').length;
+  const memberCount=items.length-courtCount;
+  const filtered = items
+    .filter(item=>kind==='all'||(kind==='court'?item.community_type==='court':item.community_type!=='court'))
+    .filter((item) => {
+      const location=item.location_slug?locations.get(item.location_slug):null;
+      const haystack=`${item.name} ${item.description ?? ''} ${item.community_type} ${location?.address??''} ${location?.locality??''} ${location?.area??''}`.toLowerCase();
+      return !query.trim()||haystack.includes(query.trim().toLowerCase());
+    })
+    .sort((a,b)=>{
+      if(a.community_type==='court'&&b.community_type==='court') return a.name.localeCompare(b.name);
+      if(a.community_type==='court') return -1;
+      if(b.community_type==='court') return 1;
+      return a.name.localeCompare(b.name);
+    });
 
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
       eyebrow="Community"
       title="Communities"
       accent="Find your people"
-      description="Join living basketball spaces built around teams, local runs, shared interests and the conversations that move Richmond hoops."
+      description="Join basketball spaces built around local courts, teams, runs, shared interests and the conversations that move Richmond hoops."
       assetKey="communities.cover"
       meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Community network</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">spaces</span></p><p className="mt-2 text-xs text-rcl-blue">{joined.length} joined</p></div>}
     />
@@ -98,13 +117,22 @@ export default function CommunitiesPage() {
         </aside>
 
         <section aria-label="Communities" aria-busy={loading}>
-          <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row sm:items-center">
-            <label className="relative flex-1"><span className="sr-only">Search communities</span><FaMagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-white/25"/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search communities..." className="h-12 w-full rounded-xl border border-rcl-blue/15 bg-[#050b12] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label>
-            <span className="px-2 text-xs font-black uppercase tracking-[.16em] text-white/35">{filtered.length} shown</span>
+          <div className="mb-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label className="relative flex-1"><span className="sr-only">Search communities</span><FaMagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs text-white/25"/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search parks, neighborhoods or communities..." className="h-12 w-full rounded-xl border border-rcl-blue/15 bg-[#050b12] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label>
+              <span className="px-2 text-xs font-black uppercase tracking-[.16em] text-white/35">{filtered.length} shown</span>
+            </div>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              {([
+                ['all',`All · ${items.length}`,FaPeopleGroup],
+                ['court',`Court communities · ${courtCount}`,FaBasketball],
+                ['member',`Member-created · ${memberCount}`,FaPeopleGroup],
+              ] as const).map(([value,label,Icon])=><button type="button" key={value} onClick={()=>setKind(value)} className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-black uppercase tracking-wider transition ${kind===value?'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue':'border-white/10 text-white/40 hover:text-white'}`}><Icon/>{label}</button>)}
+            </div>
           </div>
 
           {loading ? <div className="grid gap-4 sm:grid-cols-2">{[1,2,3,4].map(item => <div key={item} className="h-52 animate-pulse rounded-2xl border border-rcl-blue/10 bg-white/[.025]" />)}</div> : filtered.length ? <div className="grid gap-4 sm:grid-cols-2">{filtered.map(item => <article key={item.id} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 transition hover:-translate-y-1 hover:border-rcl-blue/35">
-            <Link href={`/communities/${item.slug}`} className="group block flex-1 p-5"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-rcl-blue/10 text-rcl-blue">{item.logo_url?<img src={item.logo_url} alt="" className="h-full w-full object-cover"/>:<FaPeopleGroup/>}</span><span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/30">{item.privacy}</span></div><p className="mt-6 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.community_type.replace(/_/g, ' ')}</p><h2 className="mt-1 break-words font-display text-xl font-black uppercase group-hover:text-rcl-blue">{item.name}</h2><p className="mt-3 break-words text-sm leading-6 text-white/45">{item.description ?? 'A new RCL basketball community.'}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Open community <FaArrowRight/></span></Link>
+            <Link href={`/communities/${item.slug}`} className="group block flex-1 p-5"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-rcl-blue/10 text-rcl-blue">{item.logo_url?<img src={item.logo_url} alt="" className="h-full w-full object-cover"/>:item.community_type==='court'?<FaLocationDot/>:<FaPeopleGroup/>}</span><span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/30">{item.privacy}</span></div><p className="mt-6 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.community_type==='court'?'Court community':item.community_type.replace(/_/g, ' ')}</p><h2 className="mt-1 break-words font-display text-xl font-black uppercase group-hover:text-rcl-blue">{item.name}</h2>{item.location_slug&&locations.get(item.location_slug)?<p className="mt-2 inline-flex items-start gap-2 text-xs leading-5 text-rcl-blue/70"><FaLocationDot className="mt-1 shrink-0"/><span>{locations.get(item.location_slug)?.address} · {locations.get(item.location_slug)?.locality}</span></p>:null}<p className="mt-3 break-words text-sm leading-6 text-white/45">{item.description ?? 'A new RCL basketball community.'}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Open community <FaArrowRight/></span></Link>
             <div className="border-t border-white/10 p-3">{user ? joined.includes(item.id) ? <Link href={`/communities/${item.slug}`} className="flex min-h-11 items-center justify-center rounded-xl border border-rcl-blue/20 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider text-rcl-blue">Joined · Enter</Link> : <button type="button" onClick={() => void join(item.id)} disabled={Boolean(busy)} aria-busy={busy === item.id} className="min-h-11 w-full rounded-xl border border-rcl-orange/25 px-4 text-xs font-black uppercase tracking-wider text-rcl-orange transition hover:bg-rcl-orange/10 disabled:opacity-60">{busy === item.id ? 'Joining…' : 'Join community'}</button> : <Link href={`/communities/${item.slug}`} className="flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-4 text-xs font-black uppercase tracking-wider text-white/45">View conversation</Link>}</div>
           </article>)}</div> : <div className="rounded-2xl border border-dashed border-rcl-blue/25 bg-rcl-blue/[.035] p-10 text-center"><FaPeopleGroup className="mx-auto text-3xl text-rcl-blue/55"/><h2 className="mt-4 font-display text-2xl font-black uppercase">{items.length ? 'No communities found' : 'Your community starts here'}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-white/40">{items.length ? 'Try a different search.' : 'No communities are available yet. Start one around your team or favorite part of the game.'}</p></div>}
         </section>
