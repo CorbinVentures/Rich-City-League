@@ -9,7 +9,7 @@ export default function SignInPage() {
     <AuthShell mode="sign-in">
       <div className="space-y-4">
         <SocialAuthOptions mode="sign-in" />
-        <AuthForm mode="sign-in" />
+        <AuthForm mode="sign-in" allowSignUp={false} />
       </div>
     </AuthShell>
   );
