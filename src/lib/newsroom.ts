@@ -144,7 +144,7 @@ function cleanArticle(raw: any, beat: NewsBeat): GeneratedNewsArticle {
     seoTitle: String(raw?.seoTitle || raw?.title || '').trim().replace(/\s+/g, ' ').slice(0, 75),
     seoDescription: String(raw?.seoDescription || raw?.excerpt || '').trim().replace(/\s+/g, ' ').slice(0, 180),
     keywords: Array.isArray(raw?.keywords)
-      ? [...new Set(raw.keywords.map((item: any) => String(item).trim()).filter(Boolean))].slice(0, 10)
+      ? [...new Set<string>(raw.keywords.map((item: any) => String(item).trim()).filter(Boolean))].slice(0, 10)
       : [],
     sources,
     confidence: Math.max(0, Math.min(1, Number(raw?.confidence) || 0)),
