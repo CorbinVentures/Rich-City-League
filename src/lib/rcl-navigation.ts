@@ -60,7 +60,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
       {label:'Virginia Network',href:'/network',icon:FaGlobe},
       {label:'News',href:'/news',icon:FaNewspaper},
-      {label:'RCL TV',href:'/media',icon:FaPlay},
+      {label:'RCH TV',href:'/media',icon:FaPlay},
     ],
   },
   {
