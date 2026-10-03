@@ -72,16 +72,16 @@ export type NetworkFeedItem = {
 };
 
 const reactions = [
-  { type: 'bucket', emoji: '🏀', label: 'Bucket', shortLabel: 'Bucket' },
-  { type: 'heat', emoji: '🔥', label: 'Heat Check', shortLabel: 'Heat' },
-  { type: 'strong', emoji: '💪', label: 'Tough', shortLabel: 'Tough' },
-  { type: 'locked', emoji: '🔒', label: 'Locked Up', shortLabel: 'Lock' },
-  { type: 'money', emoji: '🎯', label: 'Pure', shortLabel: 'Pure' },
-  { type: 'watch', emoji: '👀', label: 'I See You', shortLabel: 'Watch' },
-  { type: 'king', emoji: '👏', label: 'Salute', shortLabel: 'Salute' },
-  { type: 'certified', emoji: '🧊', label: 'Cold Blooded', shortLabel: 'Cold' },
-  { type: 'highlight', emoji: '😂', label: "That's Crazy", shortLabel: 'Crazy' },
-  { type: 'champ', emoji: '🏆', label: 'Championship', shortLabel: 'Champ' },
+  { type: 'bucket', emoji: '🏀', label: 'Bucket' },
+  { type: 'heat', emoji: '🔥', label: 'Heat Check' },
+  { type: 'strong', emoji: '💪', label: 'Tough' },
+  { type: 'locked', emoji: '🔒', label: 'Locked Up' },
+  { type: 'money', emoji: '🎯', label: 'Pure' },
+  { type: 'watch', emoji: '👀', label: 'I See You' },
+  { type: 'king', emoji: '👏', label: 'Salute' },
+  { type: 'certified', emoji: '🧊', label: 'Cold Blooded' },
+  { type: 'highlight', emoji: '😂', label: "That's Crazy" },
+  { type: 'champ', emoji: '🏆', label: 'Championship' },
 ];
 
 export function NetworkPostCard({
@@ -221,8 +221,8 @@ export function NetworkPostCard({
       )}
 
       <div className="px-4 py-3 sm:px-5">
-        <div className="rounded-2xl border border-white/[.06] bg-black/15 p-2.5">
-          <div className="mb-2 flex min-h-6 items-center justify-between gap-2 px-1">
+        <div className="rounded-2xl border border-white/[.06] bg-black/15 px-2.5 py-2">
+          <div className="flex items-center justify-between gap-3 px-1">
             <div className="flex min-w-0 items-center gap-2">
               <span className="shrink-0 text-[10px] font-black uppercase tracking-[.18em] text-white/45">RCL Reactions</span>
               {topReactions.length > 0 && (
@@ -237,11 +237,11 @@ export function NetworkPostCard({
               )}
             </div>
             <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-white/25">
-              {reactionCount} {reactionCount === 1 ? 'reaction' : 'reactions'}
+              {reactionCount}
             </span>
           </div>
 
-          <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
+          <div className="mt-1.5 flex gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {reactions.map((reaction) => {
               const selected = mine?.type === reaction.type;
               const count = reactionCounts[reaction.type] ?? 0;
@@ -254,7 +254,7 @@ export function NetworkPostCard({
                   aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
                   aria-pressed={selected}
                   onClick={() => onReact(reaction.type)}
-                  className={`relative flex min-h-[58px] min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-1.5 transition duration-150 active:scale-95 ${
+                  className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition duration-150 active:scale-95 ${
                     reactionBurst === reaction.type ? 'scale-110' : ''
                   } ${
                     selected
@@ -263,14 +263,11 @@ export function NetworkPostCard({
                   }`}
                 >
                   {count > 0 && (
-                    <span className="absolute right-1 top-1 rounded-full bg-white/[.06] px-1 text-[8px] font-black leading-4 text-white/45">
+                    <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-[#071522] px-1 text-center text-[8px] font-black leading-4 text-white/55 ring-1 ring-white/10">
                       {count}
                     </span>
                   )}
-                  <span aria-hidden="true" className="text-[24px] leading-none">{reaction.emoji}</span>
-                  <span className={`mt-1 max-w-full truncate text-[8px] font-black uppercase tracking-[.08em] ${selected ? 'text-rcl-orange' : 'text-white/35'}`}>
-                    {reaction.shortLabel}
-                  </span>
+                  <span aria-hidden="true" className="text-[21px] leading-none">{reaction.emoji}</span>
                 </button>
               );
             })}
