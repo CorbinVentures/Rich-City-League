@@ -16,18 +16,20 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
 
 function validBeat(value: string | null): value is NewsBeat {
-  return value === 'rich-city-league' || value === 'richmond-basketball' || value === 'richmond-culture';
+  return value === 'rich-city-league' || value === 'richmond-basketball' || value === 'richmond-culture' || value === 'rcl-insider';
 }
 
 function categoryLabel(beat: NewsBeat) {
   if (beat === 'rich-city-league') return 'Rich City League';
   if (beat === 'richmond-basketball') return 'Richmond Basketball';
+  if (beat === 'rcl-insider') return 'RCL Insider';
   return 'Richmond Culture';
 }
 
 function socialHashtags(beat: NewsBeat) {
   if (beat === 'rich-city-league') return '#RichCityLeague #RCL';
   if (beat === 'richmond-basketball') return '#RichmondBasketball #RVAHoops';
+  if (beat === 'rcl-insider') return '#RichCityLeague #RCLNetwork';
   return '#RichmondVA #RVACulture';
 }
 
@@ -98,7 +100,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, published: false, beat, error: message }, { status: 422 });
   }
 
-  const { article, model } = generated;
+  const { article, model, topicId } = generated;
   const slug = slugifyNews(article.title, dateKey);
   const now = new Date().toISOString();
   const sourceUrls = article.sources.map(source => source.url);
@@ -132,6 +134,13 @@ export async function GET(request: Request) {
     }
     console.error('[rcl-newsroom] insert failed', insertError);
     return NextResponse.json({ error: insertError?.message || 'Unable to publish newsroom article.' }, { status: 500 });
+  }
+
+  if (topicId) {
+    const { error: topicUpdateError } = await db.from('newsroom_product_topics')
+      .update({ last_featured_at: now, updated_at: now })
+      .eq('id', topicId);
+    if (topicUpdateError) console.error('[rcl-newsroom] topic rotation update failed', topicUpdateError);
   }
 
   const articleUrl = `/news/${news.slug}`;
