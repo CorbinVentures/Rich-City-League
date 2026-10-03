@@ -40,10 +40,6 @@ body {
   max-width: 100% !important;
 }
 
-.rcl-platform-root :where(img,video) {
-  height: auto;
-}
-
 .rcl-platform-root :where(pre,code) {
   max-width: 100%;
 }
@@ -59,7 +55,7 @@ body {
   text-wrap: balance;
   overflow-wrap: break-word;
   word-break: normal;
-  hyphens: auto;
+  hyphens: none;
 }
 
 .rcl-platform-root :where(p,li,dd,dt,figcaption) {
@@ -356,15 +352,6 @@ body {
 @media (max-width: 479px) {
   .rcl-platform-root [class*="tracking-["] {
     letter-spacing: .05em !important;
-  }
-
-  .rcl-platform-root :where(
-    [class*="grid-cols-3"],
-    [class*="grid-cols-4"],
-    [class*="grid-cols-5"],
-    [class*="grid-cols-6"]
-  ):not(.rcl-universal-bottom):not(.rcl-draft-stat-strip) {
-    grid-template-columns: minmax(0,1fr) !important;
   }
 
   .rcl-platform-root :where(.flex)[class*="justify-between"] {
