@@ -404,6 +404,8 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          is_system_community: boolean
+          location_slug: string | null
           logo_url: string | null
           name: string
           privacy: string
@@ -417,6 +419,8 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          is_system_community?: boolean
+          location_slug?: string | null
           logo_url?: string | null
           name: string
           privacy?: string
@@ -430,6 +434,8 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          is_system_community?: boolean
+          location_slug?: string | null
           logo_url?: string | null
           name?: string
           privacy?: string
@@ -443,6 +449,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communities_location_slug_fkey"
+            columns: ["location_slug"]
+            isOneToOne: false
+            referencedRelation: "basketball_locations"
+            referencedColumns: ["slug"]
           },
         ]
       }
