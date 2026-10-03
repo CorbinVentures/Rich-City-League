@@ -390,3 +390,120 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ---------- Mobile browser homepage repair ----------
+ * These selectors intentionally load after legacy executive/mobile rules.
+ * The regular Safari/Chrome website was inheriting old dark-shell button colors
+ * on the white header and a generic min-width reset was collapsing the player rail.
+ */
+.rcl-topbar-signin {
+  display:inline-flex!important;
+  width:auto!important;
+  min-width:72px!important;
+  height:40px!important;
+  min-height:40px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 14px!important;
+  border:1px solid var(--rcl-v3-ink)!important;
+  border-radius:999px!important;
+  background:var(--rcl-v3-ink)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+.rcl-social-landing .rcl-landing-lede {
+  color:var(--rcl-v3-copy)!important;
+  opacity:1!important;
+}
+
+@media (max-width: 639px) {
+  .rcl-social-landing-hero {
+    gap:30px!important;
+  }
+
+  .rcl-social-landing .rcl-landing-lede {
+    margin-top:20px!important;
+    max-width:34rem!important;
+    color:#566B83!important;
+    font-size:1rem!important;
+    line-height:1.65!important;
+  }
+
+  .rcl-social-landing .rcl-landing-actions {
+    gap:10px!important;
+    margin-top:24px!important;
+  }
+
+  .rcl-social-landing .rcl-landing-primary,
+  .rcl-social-landing .rcl-landing-secondary {
+    min-height:48px!important;
+    width:auto!important;
+    max-width:100%!important;
+    padding-inline:18px!important;
+    white-space:nowrap!important;
+  }
+
+  .rcl-social-landing .rcl-people-row {
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 2px 10px!important;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .rcl-social-landing .rcl-people-row::-webkit-scrollbar {
+    display:none;
+  }
+
+  .rcl-social-landing .rcl-person-card {
+    flex:0 0 min(78vw,300px)!important;
+    width:min(78vw,300px)!important;
+    min-width:min(78vw,300px)!important;
+    max-width:300px!important;
+    scroll-snap-align:start;
+  }
+
+  .rcl-social-landing .rcl-person-card p {
+    padding:16px!important;
+  }
+
+  .rcl-social-landing .rcl-person-card b {
+    margin-top:5px!important;
+    font-size:1rem!important;
+    line-height:1.25!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    hyphens:none!important;
+  }
+
+  .rcl-social-landing .rcl-person-card small,
+  .rcl-social-landing .rcl-person-card em {
+    font-size:.7rem!important;
+    line-height:1.35!important;
+  }
+}
+
+@media (max-width: 420px) {
+  .rcl-universal-topbar {
+    padding-inline:12px!important;
+  }
+
+  .rcl-universal-tools {
+    gap:6px!important;
+  }
+
+  .rcl-topbar-signin {
+    min-width:68px!important;
+    padding-inline:12px!important;
+    font-size:11px!important;
+  }
+}
