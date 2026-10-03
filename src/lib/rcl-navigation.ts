@@ -1,6 +1,6 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaCalendarDays, FaChartSimple,
-  FaComments, FaCompass, FaCrown, FaGear, FaGlobe, FaHouse, FaListOl,
+  FaComments, FaCompass, FaCrown, FaFilm, FaGear, FaGlobe, FaHouse, FaListOl,
   FaLocationDot, FaMedal, FaNewspaper, FaPeopleGroup, FaPlay, FaPlus,
   FaShirt, FaTrophy, FaUser, FaUsers
 } from 'react-icons/fa6';
@@ -109,8 +109,9 @@ export const RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM:RCLNavItem={label:'Campaign Contro
 export const RCL_NETWORK_ACQUISITION_ADMIN_ITEM:RCLNavItem={label:'Network Acquisition',href:'/admin/network/acquisition',icon:FaPeopleGroup};
 export const RCL_NETWORK_EDITORIAL_ADMIN_ITEM:RCLNavItem={label:'Editorial Queue',href:'/admin/network/editorial',icon:FaNewspaper};
 export const RCL_REVENUE_ADMIN_ITEM:RCLNavItem={label:'Revenue Center',href:'/admin/revenue',icon:FaChartSimple};
+export const RCH_TV_ACQUISITION_ADMIN_ITEM:RCLNavItem={label:'RCH TV Acquisition',href:'/admin/rch-tv/acquisition',icon:FaFilm};
 export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={
   label:'Operations',
   description:'Staff, league, revenue and Network administration',
-  items:[RCL_ADMIN_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM,RCL_NETWORK_EDITORIAL_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM],
+  items:[RCL_ADMIN_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCH_TV_ACQUISITION_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM,RCL_NETWORK_EDITORIAL_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM],
 };
