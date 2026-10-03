@@ -59,7 +59,7 @@ export type PlayerDetailData = {
 };
 
 export type PublicNews = Database['public']['Tables']['news']['Row'] & {
-  category?: 'league-news' | 'rich-city-league' | 'richmond-basketball' | 'richmond-culture' | null;
+  category?: 'league-news' | 'rich-city-league' | 'richmond-basketball' | 'richmond-culture' | 'rcl-insider' | null;
   is_automated?: boolean | null;
   automation_type?: string | null;
   source_urls?: unknown;
