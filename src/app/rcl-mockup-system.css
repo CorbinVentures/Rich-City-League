@@ -605,6 +605,25 @@ a[aria-label="Open administrator control center"] {
   -webkit-backdrop-filter:none!important;
 }
 
+/*
+ * Structural light-surface guard.
+ * rcl-executive-marble.css still applies a dark glass treatment with !important
+ * to generic rounded + bordered section/article/aside/form/div cards. Those
+ * selectors were winning on mobile/PWA pages whose copy had already migrated
+ * to navy, producing navy-on-gray low-contrast cards. This later rule mirrors
+ * that legacy specificity and makes the light product system authoritative.
+ */
+.rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-3xl"][class*="border"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-scorebook-immersive):not(.rcl-draft-platform):not(.rcl-draft-module):not(.rcl-modal-scrim):not(.city-hero),
+.rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-2xl"][class*="border"]:not(.rcl-dark-media):not(.rcl-league-feature):not(.rcl-league-scoreboard):not(.rcl-scorebook-immersive):not(.rcl-draft-platform):not(.rcl-draft-module):not(.rcl-modal-scrim):not(.city-hero) {
+  border-color:var(--rcl-v3-border)!important;
+  background-color:var(--rcl-v3-surface)!important;
+  background-image:none!important;
+  color:var(--rcl-v3-ink)!important;
+  box-shadow:var(--rcl-v3-shadow)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
 /* Keep the feed's internal utility panels light and high-contrast as well. */
 .rcl-platform-root .rcl-feed-post [class*="bg-black/"],
 .rcl-platform-root .rcl-feed-post [class*="bg-white/["]:not(.rcl-dark-media) {
