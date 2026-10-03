@@ -1,40 +1,65 @@
 import Link from 'next/link';
-import { FaArrowRight, FaLock, FaShieldHalved } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaLock, FaShieldHalved } from 'react-icons/fa6';
 
 export const metadata = {
-  title: 'RCL Access',
-  description: 'Rich City League invite and member access.',
+  title: 'Coming Soon | Rich City Hoops',
+  description: 'Rich City Hoops is temporarily in a member-only preview while the next release is being built.',
+  robots: { index: false, follow: false },
 };
 
-export default async function AccessPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
-  return <main className="relative grid min-h-svh place-items-center overflow-hidden bg-[#03070d] px-5 py-12 text-white">
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_4%,rgba(59,130,246,.16),transparent_32%),radial-gradient(circle_at_12%_82%,rgba(21,159,255,.14),transparent_34%)]" />
-    <div className="pointer-events-none absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(21,159,255,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(21,159,255,.18)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
-    <section className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/90 p-6 shadow-[0_28px_90px_rgba(0,0,0,.48)] backdrop-blur-xl sm:p-9">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rcl-orange to-transparent" />
-      <div className="mb-9 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
+function safeNextPath(value?: string) {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/dashboard';
+  return value;
+}
+
+export default async function AccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; profile?: string; inactive?: string }>;
+}) {
+  const { next, profile, inactive } = await searchParams;
+  const destination = safeNextPath(next);
+  const signInHref = `/auth/sign-in?next=${encodeURIComponent(destination)}`;
+
+  return <main className="relative grid min-h-svh place-items-center overflow-hidden bg-[#F6F9FC] px-5 py-12 text-[#0F2547]">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_5%,rgba(59,130,246,.13),transparent_30%),radial-gradient(circle_at_8%_88%,rgba(15,37,71,.08),transparent_34%)]" />
+    <div className="pointer-events-none absolute inset-0 opacity-[.22] [background-image:linear-gradient(rgba(59,130,246,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,.12)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+
+    <section className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#D9E4EF] bg-white/95 p-6 shadow-[0_28px_90px_rgba(15,37,71,.14)] backdrop-blur-xl sm:p-10">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent" />
+
+      <div className="mb-9 flex items-center justify-between gap-4 border-b border-[#E7EEF5] pb-6">
         <div>
-          <div className="text-lg font-black uppercase tracking-[.12em]">Rich City <span className="text-rcl-blue">League</span></div>
-          <div className="mt-1 text-xs font-black uppercase tracking-[.24em] text-white/40">Richmond, Virginia · 804</div>
+          <div className="text-lg font-black uppercase tracking-[.12em]">Rich City <span className="text-[#3B82F6]">League</span></div>
+          <div className="mt-1 text-xs font-black uppercase tracking-[.22em] text-[#64748B]">Richmond basketball · 804</div>
         </div>
-        <div className="grid h-12 w-12 place-items-center rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 text-sm font-black text-rcl-blue">RCL</div>
+        <div className="grid h-12 w-16 place-items-center rounded-xl border border-[#D9E4EF] bg-[#EDF4FA] text-lg font-black italic text-[#0F2547]">RCH</div>
       </div>
 
-      <div className="inline-flex items-center gap-2 rounded-full border border-rcl-orange/20 bg-rcl-orange/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.18em] text-rcl-orange"><FaLock /> Private preview</div>
-      <h1 className="mt-4 text-balance font-display text-4xl font-black uppercase leading-[.92] sm:text-5xl">The next era of<br/><span className="text-rcl-blue">Richmond basketball.</span></h1>
-      <p className="mt-5 text-sm leading-6 text-white/60">RCL is currently open to current members and invited guests while the platform is in private preview. Use your access password, referral link, or existing RCL account.</p>
+      <div className="inline-flex items-center gap-2 rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-3 py-1.5 text-xs font-black uppercase tracking-[.18em] text-[#2563EB]"><FaLock /> Member-only preview</div>
 
-      <form action="/api/preview-access" method="post" className="mt-8 space-y-3">
-        <label htmlFor="password" className="block text-xs font-black uppercase tracking-[.18em] text-white/55">Preview password</label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" placeholder="Enter access password" className="h-14 w-full rounded-xl border border-rcl-blue/20 bg-black/25 px-4 text-base outline-none transition placeholder:text-white/30 focus:border-rcl-blue/60 focus:ring-2 focus:ring-rcl-blue/10" />
-        {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm font-bold text-red-300">That password isn&apos;t valid. Try again.</p>}
-        <button type="submit" className="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-rcl-orange text-sm font-black uppercase tracking-[.08em] text-black transition hover:-translate-y-0.5 hover:brightness-110">Enter Rich City League <FaArrowRight /></button>
-      </form>
+      <h1 className="mt-5 text-balance font-display text-4xl font-black uppercase leading-[.92] sm:text-6xl">Coming soon.<br/><span className="text-[#3B82F6]">We&apos;re still building.</span></h1>
+      <p className="mt-5 text-sm leading-7 text-[#64748B] sm:text-base">Public access is temporarily closed while we keep polishing the next version of the platform. Existing Rich City League members can still sign in and use the site while development continues.</p>
 
-      <div className="my-6 flex items-center gap-3 text-xs font-black uppercase tracking-[.16em] text-white/30"><span className="h-px flex-1 bg-white/10"/><span>Current member?</span><span className="h-px flex-1 bg-white/10"/></div>
-      <Link href="/auth/sign-in" className="flex min-h-14 items-center justify-center gap-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-4 text-sm font-black uppercase transition hover:border-rcl-blue/60 hover:bg-rcl-blue/10"><FaShieldHalved className="text-rcl-blue" /> Sign in to your account</Link>
-      <p className="mt-7 text-center text-xs leading-5 text-white/35">Public areas of RCL are open. This page remains available for invited testing and controlled-access sessions.</p>
+      {(profile || inactive) && <div className="mt-6 rounded-2xl border border-[#FDE68A] bg-[#FFFBEB] px-4 py-3 text-sm leading-6 text-[#92400E]">
+        {inactive
+          ? 'This account is not currently active for the member preview.'
+          : 'This preview is limited to member accounts that were already active before the temporary wall went up.'}
+      </div>}
+
+      <Link href={signInHref} className="mt-8 flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#3B82F6] px-5 py-4 text-sm font-black uppercase tracking-[.08em] text-white shadow-[0_14px_35px_rgba(59,130,246,.24)] transition hover:-translate-y-0.5 hover:bg-[#2563EB]">
+        <FaShieldHalved /> Member sign in <FaArrowRight />
+      </Link>
+
+      <div className="mt-7 grid grid-cols-[auto_1fr] gap-3 rounded-2xl border border-[#D9E4EF] bg-[#F8FBFE] p-4">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#EDF4FA] text-[#3B82F6]"><FaBasketball /></div>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[.14em] text-[#0F2547]">New accounts are paused</p>
+          <p className="mt-1 text-xs leading-5 text-[#64748B]">When the public launch reopens, new players, coaches and fans will be able to join again.</p>
+        </div>
+      </div>
+
+      <p className="mt-7 text-center text-xs leading-5 text-[#94A3B8]">Already a member? Your existing login is all you need.</p>
     </section>
   </main>;
 }
