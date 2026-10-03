@@ -28,7 +28,7 @@ export const NETWORK_CREDIT_LABELS: Record<NetworkCreditType, string> = {
   'regional-feature': 'Regional Feature',
   'statewide-feature': 'Statewide Feature',
   'social-feed': 'Social Feed',
-  'media-feature': 'RCL TV / Media Feature',
+  'media-feature': 'RCH TV / Media Feature',
 };
 
 export function isPaidNetworkPartnerPlanCode(value: unknown): value is PaidNetworkPartnerPlanCode {
