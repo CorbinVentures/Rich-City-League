@@ -11,7 +11,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseStyles = 'min-h-11 font-semibold tracking-[.02em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
+const baseStyles = 'min-h-11 min-w-0 max-w-full whitespace-normal text-center leading-snug font-semibold tracking-[.02em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
 
 const variants = {
   primary: 'bg-rcl-blue text-[#071018] hover:brightness-105 disabled:opacity-50',

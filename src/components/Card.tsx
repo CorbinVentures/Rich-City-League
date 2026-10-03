@@ -47,5 +47,5 @@ interface CardFooterProps {
 }
 
 export function CardFooter({ children, className }: CardFooterProps) {
-  return <div className={clsx('mt-4 flex gap-2 border-t border-white/10 pt-4', className)}>{children}</div>;
+  return <div className={clsx('mt-4 flex min-w-0 flex-wrap gap-2 border-t border-white/10 pt-4 [&>*]:min-w-0 [&>*]:max-w-full', className)}>{children}</div>;
 }

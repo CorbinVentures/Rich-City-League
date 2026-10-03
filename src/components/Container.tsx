@@ -19,7 +19,7 @@ export function Container({ children, maxWidth = 'lg', className, ...props }: Co
   };
 
   return (
-    <div className={clsx('mx-auto px-4 w-full', maxWidthMap[maxWidth], className)} {...props}>
+    <div className={clsx('mx-auto w-full min-w-0 px-4 sm:px-5 lg:px-6', maxWidthMap[maxWidth], className)} {...props}>
       {children}
     </div>
   );

@@ -27,9 +27,9 @@ export function ClientPageHero({ eyebrow, title, accent, description, assetKey, 
             {accent ? <span className="text-sm font-medium text-[#64748B] sm:text-base">{accent}</span> : null}
           </div>
           {description ? <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748B]">{description}</p> : null}
-          {actions ? <div className="mt-4 flex flex-wrap gap-2">{actions}</div> : null}
+          {actions ? <div className="mt-4 flex min-w-0 flex-wrap gap-2 [&>*]:min-w-0 [&>*]:max-w-full">{actions}</div> : null}
         </div>
-        {meta ? <div className="min-w-0 shrink-0">{meta}</div> : null}
+        {meta ? <div className="w-full min-w-0 lg:w-auto lg:max-w-[42%] lg:shrink-0">{meta}</div> : null}
       </div>
     </Container>
   </header>;

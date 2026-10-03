@@ -22,7 +22,7 @@ type FormState={placement:string;startsAt:string;endsAt:string;region:string;hea
 
 const placements=[
   ['network-home','Network Home'],['regional-feature','Regional Feature'],['event-spotlight','Event Spotlight'],['social-feed','Social Feed'],
-  ['search-feature','Search'],['news-feature','News'],['community-feature','Communities'],['media-feature','RCL TV'],['digest','RCL Digest'],
+  ['search-feature','Search'],['news-feature','News'],['community-feature','Communities'],['media-feature','RCH TV'],['digest','RCL Digest'],
 ] as const;
 const regions=[
   ['statewide','Statewide Virginia'],['central-virginia','Central Virginia'],['tri-cities','Tri-Cities'],['hampton-roads','Hampton Roads'],
