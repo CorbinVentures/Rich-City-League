@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   FaBookmark,
   FaCheck,
@@ -120,6 +121,7 @@ export function NetworkPostCard({
   onDelete?: () => void;
 }) {
   const { post, repost } = item;
+  const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   const mine = post.reactions?.find((reaction) => reaction.user_id === userId);
   const myRepost = post.reposts?.some((entry) => entry.profile_id === userId) ?? false;
   const reactionCount = post.reactions?.length ?? 0;
@@ -139,6 +141,12 @@ export function NetworkPostCard({
     .filter((reaction) => reaction.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
+  const selectedReaction = reactions.find((reaction) => reaction.type === mine?.type);
+
+  const react = (type: string) => {
+    onReact(type);
+    setReactionPickerOpen(false);
+  };
 
   return (
     <article id={`post-${post.id}`} className={`rcl-feed-post overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
@@ -220,66 +228,75 @@ export function NetworkPostCard({
         </div>
       )}
 
-      <div className="px-4 py-3 sm:px-5">
-        <div className="rounded-2xl border border-white/[.06] bg-black/15 px-2.5 py-2">
-          <div className="flex items-center justify-between gap-3 px-1">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="shrink-0 text-[10px] font-black uppercase tracking-[.18em] text-white/45">RCL Reactions</span>
+      <div className="px-4 py-2.5 sm:px-5">
+        {(reactionCount > 0 || commentCount > 0 || repostCount > 0) && (
+          <div className="flex min-h-7 items-center justify-between gap-3 px-1 text-[10px] font-bold text-white/25">
+            <div className="flex min-w-0 items-center gap-1.5">
               {topReactions.length > 0 && (
-                <div className="flex min-w-0 items-center gap-1 overflow-hidden">
+                <div className="flex items-center -space-x-1">
                   {topReactions.map((reaction) => (
-                    <span key={reaction.type} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/[.035] px-1.5 py-0.5 text-[9px] font-bold text-white/40">
-                      <span aria-hidden="true">{reaction.emoji}</span>
-                      {reaction.count}
+                    <span key={reaction.type} aria-hidden="true" className="grid h-6 w-6 place-items-center rounded-full border border-white/10 bg-white text-[14px] shadow-sm">
+                      {reaction.emoji}
                     </span>
                   ))}
                 </div>
               )}
+              {reactionCount > 0 && <span>{reactionCount}</span>}
             </div>
-            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-white/25">
-              {reactionCount}
-            </span>
+            <div className="flex shrink-0 items-center gap-3">
+              {commentCount > 0 && <button type="button" onClick={onToggleComments} className="hover:text-white">{commentCount} comment{commentCount === 1 ? '' : 's'}</button>}
+              {repostCount > 0 && <span>{repostCount} repost{repostCount === 1 ? '' : 's'}</span>}
+            </div>
           </div>
+        )}
 
-          <div className="mt-1.5 flex gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {reactions.map((reaction) => {
-              const selected = mine?.type === reaction.type;
-              const count = reactionCounts[reaction.type] ?? 0;
-
-              return (
-                <button
-                  key={reaction.type}
-                  type="button"
-                  title={reaction.label}
-                  aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
-                  aria-pressed={selected}
-                  onClick={() => onReact(reaction.type)}
-                  className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition duration-150 active:scale-95 ${
-                    reactionBurst === reaction.type ? 'scale-110' : ''
-                  } ${
-                    selected
-                      ? 'border-rcl-blue/55 bg-rcl-blue/10 ring-1 ring-rcl-blue/50 shadow-[0_0_18px_rgba(59,130,246,.16)]'
-                      : 'border-white/[.05] bg-white/[.018] hover:border-white/10 hover:bg-white/[.04]'
-                  }`}
-                >
-                  {count > 0 && (
-                    <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-[#071522] px-1 text-center text-[8px] font-black leading-4 text-white/55 ring-1 ring-white/10">
-                      {count}
-                    </span>
-                  )}
-                  <span aria-hidden="true" className="text-[21px] leading-none">{reaction.emoji}</span>
-                </button>
-              );
-            })}
+        <div className="relative mt-1 grid grid-cols-5 gap-1 border-t border-white/[.06] pt-1.5">
+          <div className="relative min-w-0">
+            {reactionPickerOpen && (
+              <div className="rcl-reaction-popover absolute bottom-[calc(100%+8px)] left-0 z-30 grid w-[min(320px,calc(100vw-48px))] grid-cols-5 gap-1.5 rounded-2xl border border-white/10 bg-white p-2 shadow-[0_14px_36px_rgba(15,37,71,.18)]">
+                {reactions.map((reaction) => {
+                  const selected = mine?.type === reaction.type;
+                  const count = reactionCounts[reaction.type] ?? 0;
+                  return (
+                    <button
+                      key={reaction.type}
+                      type="button"
+                      title={reaction.label}
+                      aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
+                      aria-pressed={selected}
+                      onClick={() => react(reaction.type)}
+                      className={`relative grid min-h-10 place-items-center rounded-xl transition duration-150 active:scale-95 ${
+                        reactionBurst === reaction.type ? 'scale-110' : ''
+                      } ${
+                        selected
+                          ? 'bg-rcl-blue/10 ring-1 ring-rcl-blue/35'
+                          : 'hover:bg-rcl-blue/[.06]'
+                      }`}
+                    >
+                      {count > 0 && (
+                        <span className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-rcl-blue/10 px-1 text-center text-[8px] font-black leading-4 text-rcl-blue">
+                          {count}
+                        </span>
+                      )}
+                      <span aria-hidden="true" className="text-[21px] leading-none">{reaction.emoji}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setReactionPickerOpen((open) => !open)}
+              aria-expanded={reactionPickerOpen}
+              aria-label={selectedReaction ? `Change reaction: ${selectedReaction.label}` : 'React to post'}
+              className={`inline-flex min-h-11 w-full flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white/[.04] ${
+                mine ? 'text-rcl-blue' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              <span aria-hidden="true" className="text-[17px] leading-none">{selectedReaction?.emoji ?? '🏀'}</span>
+              <span>{mine ? 'Reacted' : 'React'}</span>
+            </button>
           </div>
-        </div>
-
-        <div className="mt-2 flex items-center justify-end gap-3 px-1 text-[10px] font-bold text-white/25">
-          <button type="button" onClick={onToggleComments} className="hover:text-white">{commentCount} comments</button>
-          <span>{repostCount} repost{repostCount === 1 ? '' : 's'}</span>
-        </div>
-
-        <div className="mt-2 grid grid-cols-4 gap-1 border-t border-white/[.06] pt-2">
           <button type="button" onClick={onToggleComments} className="inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaComment className="text-sm" /><span>Comment</span></button>
           <button type="button" onClick={onToggleRepost} className={`inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white/[.04] ${myRepost ? 'text-rcl-blue' : 'text-white/40 hover:text-white'}`}><FaRetweet className="text-sm" /><span>{myRepost ? 'Reposted' : 'Repost'}</span></button>
           <button type="button" onClick={onShare} className="inline-flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/40 hover:bg-white/[.04] hover:text-white"><FaShareNodes className="text-sm" /><span>Share</span></button>
