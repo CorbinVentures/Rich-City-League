@@ -251,39 +251,39 @@ export function NetworkPostCard({
         )}
 
         <div className="relative mt-1 grid grid-cols-5 gap-1 border-t border-white/[.06] pt-1.5">
-          <div className="relative min-w-0">
-            {reactionPickerOpen && (
-              <div className="rcl-reaction-popover absolute bottom-[calc(100%+8px)] left-0 z-30 grid w-[min(320px,calc(100vw-48px))] grid-cols-5 gap-1.5 rounded-2xl border border-white/10 bg-white p-2 shadow-[0_14px_36px_rgba(15,37,71,.18)]">
-                {reactions.map((reaction) => {
-                  const selected = mine?.type === reaction.type;
-                  const count = reactionCounts[reaction.type] ?? 0;
-                  return (
-                    <button
-                      key={reaction.type}
-                      type="button"
-                      title={reaction.label}
-                      aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
-                      aria-pressed={selected}
-                      onClick={() => react(reaction.type)}
-                      className={`relative grid min-h-10 place-items-center rounded-xl transition duration-150 active:scale-95 ${
-                        reactionBurst === reaction.type ? 'scale-110' : ''
-                      } ${
-                        selected
-                          ? 'bg-rcl-blue/10 ring-1 ring-rcl-blue/35'
-                          : 'hover:bg-rcl-blue/[.06]'
-                      }`}
-                    >
-                      {count > 0 && (
-                        <span className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-rcl-blue/10 px-1 text-center text-[8px] font-black leading-4 text-rcl-blue">
-                          {count}
-                        </span>
-                      )}
-                      <span aria-hidden="true" className="text-[21px] leading-none">{reaction.emoji}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+          {reactionPickerOpen && (
+            <div className="rcl-reaction-popover absolute inset-x-0 bottom-[calc(100%+8px)] z-30 flex items-center gap-1 overflow-x-auto rounded-2xl border border-rcl-blue/15 bg-white px-2 py-1.5 shadow-[0_14px_36px_rgba(15,37,71,.18)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {reactions.map((reaction) => {
+                const selected = mine?.type === reaction.type;
+                const count = reactionCounts[reaction.type] ?? 0;
+                return (
+                  <button
+                    key={reaction.type}
+                    type="button"
+                    title={reaction.label}
+                    aria-label={`${reaction.label}${count ? `, ${count}` : ''}`}
+                    aria-pressed={selected}
+                    onClick={() => react(reaction.type)}
+                    className={`relative grid h-9 w-9 shrink-0 place-items-center rounded-full transition duration-150 active:scale-95 ${
+                      reactionBurst === reaction.type ? 'scale-110' : ''
+                    } ${
+                      selected
+                        ? 'bg-rcl-blue/10 ring-1 ring-rcl-blue/35'
+                        : 'hover:bg-rcl-blue/[.06]'
+                    }`}
+                  >
+                    {count > 0 && (
+                      <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-rcl-blue/10 px-1 text-center text-[8px] font-black leading-4 text-rcl-blue">
+                        {count}
+                      </span>
+                    )}
+                    <span aria-hidden="true" className="text-[19px] leading-none">{reaction.emoji}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <div className="min-w-0">
             <button
               type="button"
               onClick={() => setReactionPickerOpen((open) => !open)}
