@@ -62,18 +62,18 @@ export async function GET(request: Request) {
   }) as any;
   const config = configForBeat(beat);
   const dateKey = newsroomDateKey();
-  const dayStart = `${dateKey}T00:00:00-04:00`;
 
   if (!force) {
-    const { data: existing } = await db.from('news')
+    const since = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString();
+    const { data: recent } = await db.from('news')
       .select('id,slug,title,published_at')
       .eq('status', 'published')
       .eq('is_automated', true)
       .eq('automation_type', config.automationType)
-      .gte('published_at', dayStart)
+      .gte('published_at', since)
       .order('published_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(5);
+    const existing = (recent ?? []).find((item: any) => item.published_at && newsroomDateKey(new Date(item.published_at)) === dateKey);
     if (existing?.id) {
       return NextResponse.json({ ok: true, published: false, duplicate: true, beat, article: existing });
     }
