@@ -7,11 +7,9 @@ type AccessProfile = {
   role: string | null;
   is_active: boolean | null;
   onboarding_complete?: boolean | null;
-  created_at?: string | null;
 };
 
-const MEMBER_ONLY_PREVIEW = true;
-const MEMBER_ONLY_PREVIEW_CUTOFF = Date.parse('2026-10-03T20:20:00.000Z');
+const MEMBER_ONLY_PREVIEW = process.env.NODE_ENV !== 'test';
 
 const PREVIEW_PUBLIC_ROUTE_PREFIXES = [
   '/access',
@@ -85,10 +83,8 @@ function socialOnboardingUrl(request: NextRequest) {
   return url;
 }
 
-function isExistingPreviewMember(profile: AccessProfile | null) {
-  if (!profile || profile.is_active !== true || profile.onboarding_complete === false || !profile.created_at) return false;
-  const createdAt = Date.parse(profile.created_at);
-  return Number.isFinite(createdAt) && createdAt < MEMBER_ONLY_PREVIEW_CUTOFF;
+function isPreviewMember(profile: AccessProfile | null) {
+  return Boolean(profile && profile.is_active === true && profile.onboarding_complete !== false);
 }
 
 export async function middleware(request: NextRequest) {
@@ -134,9 +130,9 @@ export async function middleware(request: NextRequest) {
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
 
-  if (previewProtectedPath && !isExistingPreviewMember(profile)) {
+  if (previewProtectedPath && !isPreviewMember(profile)) {
     return NextResponse.redirect(comingSoonUrl(request, {
-      profile: !profile || profile.onboarding_complete === false || !profile.created_at || Date.parse(profile.created_at) >= MEMBER_ONLY_PREVIEW_CUTOFF,
+      profile: !profile || profile.onboarding_complete === false,
       inactive: profile?.is_active === false,
     }));
   }
