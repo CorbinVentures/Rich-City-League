@@ -8,7 +8,7 @@ import { getSafeNextPath } from '@/lib/auth-redirect';
 
 type ProfileType = 'player' | 'coach' | 'fan';
 
-export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
+export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign-up' | 'reset'; allowSignUp?: boolean }) {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -66,10 +66,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
             if (claimed) window.localStorage.removeItem('rcl_pending_referral');
           }
         }
-        // The temporary preview wall uses its own site-access cookie in addition to
-        // Supabase auth. Grant that cookie after a successful member sign-in so
-        // subsequent route requests do not bounce authenticated users back to /access.
-        document.cookie = `rcl_preview_access=rcl-beta-2026; Path=/; SameSite=Lax; Expires=${new Date(Date.UTC(2026, 9, 1)).toUTCString()}${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         if (!hasExplicitNext) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
@@ -174,7 +170,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' | 'reset' }) {
 
       {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
       {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
-      {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">{mode === 'sign-in' ? <><Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link><Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}</div>}
+      {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}</div>}
     </form>
   );
 }

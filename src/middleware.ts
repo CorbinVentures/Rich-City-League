@@ -3,7 +3,24 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from './lib/supabase-config';
 
-type AccessProfile = { role: string | null; is_active: boolean | null; onboarding_complete?: boolean | null };
+type AccessProfile = {
+  role: string | null;
+  is_active: boolean | null;
+  onboarding_complete?: boolean | null;
+};
+
+const MEMBER_ONLY_PREVIEW = process.env.NODE_ENV !== 'test';
+
+const PREVIEW_PUBLIC_ROUTE_PREFIXES = [
+  '/access',
+  '/auth/sign-in',
+  '/auth/forgot-password',
+  '/auth/update-password',
+  '/auth/callback',
+  '/auth/confirm',
+  '/auth/verify-email',
+  '/legal',
+] as const;
 
 const MEMBER_ROUTE_PREFIXES = [
   '/dashboard',
@@ -34,6 +51,20 @@ function requiresMemberAccess(pathname: string) {
   return MEMBER_ROUTE_PREFIXES.some((prefix) => matchesRoute(pathname, prefix));
 }
 
+function isPreviewPublicPath(pathname: string) {
+  return PREVIEW_PUBLIC_ROUTE_PREFIXES.some((prefix) => matchesRoute(pathname, prefix));
+}
+
+function comingSoonUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
+  const url = request.nextUrl.clone();
+  url.pathname = '/access';
+  url.search = '';
+  url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  if (flags.profile) url.searchParams.set('profile', '1');
+  if (flags.inactive) url.searchParams.set('inactive', '1');
+  return url;
+}
+
 function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
   const url = request.nextUrl.clone();
   url.pathname = '/member-access';
@@ -52,14 +83,22 @@ function socialOnboardingUrl(request: NextRequest) {
   return url;
 }
 
+function isPreviewMember(profile: AccessProfile | null) {
+  return Boolean(profile && profile.is_active === true && profile.onboarding_complete !== false);
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const protectedPath = requiresMemberAccess(pathname);
 
-  // RCL's public launch is public by default. League discovery, player/team data,
-  // news, Network pages, organization listings, partner acquisition, event pages,
-  // media, registration and other public surfaces must remain crawlable and usable
-  // without an account. Authentication is required only for member workspaces.
+  // During the temporary edit window, new account creation is closed. Existing
+  // members can still use normal sign-in, recovery and verification routes.
+  if (MEMBER_ONLY_PREVIEW && matchesRoute(pathname, '/auth/sign-up')) {
+    return NextResponse.redirect(comingSoonUrl(request));
+  }
+
+  const previewProtectedPath = MEMBER_ONLY_PREVIEW && !isPreviewPublicPath(pathname);
+  const protectedPath = previewProtectedPath || requiresMemberAccess(pathname);
+
   if (!protectedPath) return NextResponse.next();
 
   const config = getSupabaseConfig();
@@ -80,7 +119,9 @@ export async function middleware(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(memberAccessUrl(request));
+  if (!user) {
+    return NextResponse.redirect(previewProtectedPath ? comingSoonUrl(request) : memberAccessUrl(request));
+  }
 
   const { data: profileData } = await supabase
     .from('profiles')
@@ -89,8 +130,15 @@ export async function middleware(request: NextRequest) {
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
 
-  // A signed-in auth identity still needs an RCL profile before member-only tools
-  // are available. /profile itself remains reachable so that profile can be built.
+  if (previewProtectedPath && !isPreviewMember(profile)) {
+    return NextResponse.redirect(comingSoonUrl(request, {
+      profile: !profile || profile.onboarding_complete === false,
+      inactive: profile?.is_active === false,
+    }));
+  }
+
+  // Standard member-workspace authorization remains in place underneath the
+  // temporary site wall so roles and operational permissions do not change.
   if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
   }
