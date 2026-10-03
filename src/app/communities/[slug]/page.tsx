@@ -19,6 +19,7 @@ export default function CommunityDetailPage(){
   const slug = params?.slug;
   const { user, loading:authLoading } = useAuth();
   const supabase = useMemo(()=>getSupabaseClient(),[]);
+  const db=supabase as any;
   const [community,setCommunity] = useState<Community|null>(null);
   const [court,setCourt] = useState<CourtLocation|null>(null);
   const [posts,setPosts] = useState<CommunityPost[]>([]);
@@ -44,7 +45,7 @@ export default function CommunityDetailPage(){
         supabase.from('community_posts').select('id,community_id,author_id,body,created_at,updated_at').eq('community_id',nextCommunity.id).order('created_at',{ascending:false}).limit(100),
         user ? supabase.from('community_members').select('community_id').eq('community_id',nextCommunity.id).eq('profile_id',user.id).maybeSingle() : Promise.resolve({data:null,error:null}),
         user ? supabase.from('community_members').select('profile_id,role,joined_at').eq('community_id',nextCommunity.id).order('joined_at',{ascending:true}).limit(50) : Promise.resolve({data:[],error:null}),
-        nextCommunity.location_slug ? supabase.from('basketball_locations').select('slug,name,address,locality,postal_code,area,court_count,lights,hours_text,source_label,source_url').eq('slug',nextCommunity.location_slug).maybeSingle() : Promise.resolve({data:null,error:null}),
+        nextCommunity.location_slug ? db.from('basketball_locations').select('slug,name,address,locality,postal_code,area,court_count,lights,hours_text,source_label,source_url').eq('slug',nextCommunity.location_slug).maybeSingle() : Promise.resolve({data:null,error:null}),
       ]);
       if(postResult.error || courtResult.error) throw postResult.error || courtResult.error;
       setCourt((courtResult.data ?? null) as CourtLocation|null);
