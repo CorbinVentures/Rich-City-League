@@ -14,6 +14,7 @@ function categoryLabel(value?: string | null) {
   if (value === 'rich-city-league') return 'Rich City League';
   if (value === 'richmond-basketball') return 'Richmond Basketball';
   if (value === 'richmond-culture') return 'Richmond Culture';
+  if (value === 'rcl-insider') return 'RCL Insider';
   return 'League News';
 }
 
@@ -99,9 +100,11 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   const related = item.category === 'richmond-culture'
     ? [['/discover','Discover RCL'],['/communities','Communities'],['/network','Virginia basketball network']]
-    : item.category === 'rich-city-league'
-      ? [['/league','League home'],['/games','Game Center'],['/standings','Standings'],['/runs','RCL Runs']]
-      : [['/richmond-basketball-league','Richmond basketball'],['/players','Players'],['/runs','Find runs'],['/media','RCH TV']];
+    : item.category === 'rcl-insider'
+      ? [['/about','About RCL'],['/membership','Membership'],['/network','RCL Network'],['/media','RCH TV']]
+      : item.category === 'rich-city-league'
+        ? [['/league','League home'],['/games','Game Center'],['/standings','Standings'],['/runs','RCL Runs']]
+        : [['/richmond-basketball-league','Richmond basketball'],['/players','Players'],['/runs','Find runs'],['/media','RCH TV']];
 
   return <main className="min-h-screen bg-rcl-black text-white">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify([articleSchema,breadcrumbSchema])}} />
