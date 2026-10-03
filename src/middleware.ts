@@ -53,15 +53,6 @@ function socialOnboardingUrl(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host')?.split(':')[0]?.toLowerCase();
-  if (hostname === 'www.richcityhoops.com') {
-    const canonicalUrl = request.nextUrl.clone();
-    canonicalUrl.protocol = 'https:';
-    canonicalUrl.hostname = 'richcityhoops.com';
-    canonicalUrl.port = '';
-    return NextResponse.redirect(canonicalUrl, 308);
-  }
-
   const pathname = request.nextUrl.pathname;
   const protectedPath = requiresMemberAccess(pathname);
 
