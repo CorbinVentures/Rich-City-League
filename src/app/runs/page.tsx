@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
@@ -117,6 +118,8 @@ const emptyForm = {
 };
 
 export default function RunsPage() {
+  const searchParams = useSearchParams();
+  const courtParam = searchParams.get('court')?.trim() || '';
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -203,6 +206,15 @@ export default function RunsPage() {
   };
 
   useEffect(() => { void load(); }, [supabase, user?.id]);
+
+  useEffect(() => {
+    if (!courtParam || !courts.length) return;
+    const match=courts.find(court=>court.slug===courtParam);
+    if (!match) return;
+    setSelectedCourt(match);
+    setCourtSearch(match.name);
+    if (match.area==='Richmond'||match.area==='Henrico'||match.area==='Chesterfield') setAreaFilter(match.area);
+  }, [courtParam,courts]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -318,7 +330,8 @@ export default function RunsPage() {
   const visibleRuns = runs.filter((run) => {
     const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
     const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
-    return skillMatch && typeMatch;
+    const courtMatch = !courtParam || run.location_slug === courtParam;
+    return skillMatch && typeMatch && courtMatch;
   });
 
   const visibleCourts = courts.filter((court) => {
@@ -345,6 +358,7 @@ export default function RunsPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Runs</p>
               <h1 className="mt-1 text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Open Runs</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Competitive runs, pickup basketball and social meetups across Richmond, Henrico and Chesterfield.</p>
+              {courtParam&&selectedCourt&&<div className="mt-3 inline-flex items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-1.5 text-xs font-semibold text-rcl-blue"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-1 text-white/40 hover:text-white">Clear</Link></div>}
             </div>
             <button onClick={() => openCreateForCourt()} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Create run / meetup</button>
           </div>
