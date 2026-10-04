@@ -26,6 +26,8 @@ import {
   readMediaPreview,
   safeMediaPreviewUrl,
   SOCIAL_MEDIA_ACCEPT,
+  SOCIAL_IMAGE_ACCEPT,
+  SOCIAL_VIDEO_ACCEPT,
   socialMediaError,
   socialMediaExtension,
 } from '@/lib/social-media';
@@ -600,6 +602,8 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
 }
 
 function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
   const chooseFile = (file: File | null) => {
     if (!file) return;
     const issue = socialMediaError(file);
@@ -646,38 +650,60 @@ function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput,
           className="rcl-composer-textarea"
         />
 
-        {mediaPreview ? <div className="rcl-composer-preview">
-          {mediaFile?.type.startsWith('video/')
-            ? <video src={safeMediaPreviewUrl(mediaPreview)} controls playsInline />
-            : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Selected upload preview" />}
-          <div className="rcl-composer-preview-meta">
-            <span><FaImage/> {mediaFile?.type.startsWith('video/') ? 'Video selected' : 'Photo selected'}</span>
-            <button type="button" onClick={() => setMediaFile(null)} aria-label="Remove selected media"><FaXmark/> Remove</button>
+        <section className="rcl-composer-type-section" aria-label="Choose post attachment type">
+          <p>Add to your post</p>
+          <div className="rcl-composer-type-row">
+            <button type="button" onClick={() => mediaInputRef.current?.click()} className="rcl-composer-type-option">
+              <span><FaImage/></span>
+              <strong>Photo</strong>
+              <small>Images only</small>
+            </button>
+            <button type="button" onClick={() => videoInputRef.current?.click()} className="rcl-composer-type-option">
+              <span><FaVideo/></span>
+              <strong>Video</strong>
+              <small>Video only</small>
+            </button>
+            <div className="rcl-composer-link-option">
+              <SocialLinkField value={linkInput} onChange={setLinkInput}/>
+            </div>
           </div>
-        </div> : <button type="button" onClick={() => mediaInputRef.current?.click()} className="rcl-composer-media-drop">
-          <span><FaImage/></span>
-          <strong>Add a photo or video</strong>
-          <small>Choose media from your device</small>
-        </button>}
-
-        <div className="rcl-composer-link">
-          <SocialLinkField value={linkInput} onChange={setLinkInput}/>
-        </div>
-      </div>
-
-      <footer className="rcl-composer-footer">
-        <div>
-          <button type="button" onClick={() => mediaInputRef.current?.click()}><FaImage/><span>{mediaFile ? 'Change media' : 'Photo / video'}</span></button>
           <input
             ref={mediaInputRef}
             type="file"
-            accept={SOCIAL_MEDIA_ACCEPT}
+            accept={SOCIAL_IMAGE_ACCEPT}
             className="hidden"
             onChange={(event) => {
               chooseFile(event.target.files?.[0] ?? null);
               event.currentTarget.value = '';
             }}
           />
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept={SOCIAL_VIDEO_ACCEPT}
+            className="hidden"
+            onChange={(event) => {
+              chooseFile(event.target.files?.[0] ?? null);
+              event.currentTarget.value = '';
+            }}
+          />
+        </section>
+
+        {mediaPreview && <div className="rcl-composer-preview">
+          {mediaFile?.type.startsWith('video/')
+            ? <video src={safeMediaPreviewUrl(mediaPreview)} controls playsInline />
+            : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Selected upload preview" />}
+          <div className="rcl-composer-preview-meta">
+            <span>{mediaFile?.type.startsWith('video/') ? <FaVideo/> : <FaImage/>} {mediaFile?.type.startsWith('video/') ? 'Video selected' : 'Photo selected'}</span>
+            <button type="button" onClick={() => setMediaFile(null)} aria-label="Remove selected media"><FaXmark/> Remove</button>
+          </div>
+        </div>}
+      </div>
+
+      <footer className="rcl-composer-footer">
+        <div className="rcl-composer-footer-types">
+          <button type="button" onClick={() => mediaInputRef.current?.click()} aria-label="Upload a photo"><FaImage/><span>Photo</span></button>
+          <button type="button" onClick={() => videoInputRef.current?.click()} aria-label="Upload a video"><FaVideo/><span>Video</span></button>
         </div>
         <button
           type="submit"
