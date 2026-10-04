@@ -4,6 +4,7 @@ import { getPublicClient } from '@/lib/public-data';
 import { FaArrowLeft, FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
 import { SocialIdentity } from '@/components/SocialIdentity';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { AchievementShareCard } from '@/components/AchievementShareCard';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
