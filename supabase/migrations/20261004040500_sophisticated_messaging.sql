@@ -116,6 +116,7 @@ create trigger conversation_preferences_updated_at
   for each row execute procedure public.touch_conversation_preference_updated_at();
 
 alter publication supabase_realtime add table public.message_reactions;
+alter publication supabase_realtime add table public.conversation_preferences;
 
 
 create or replace function public.get_message_inbox()
@@ -219,10 +220,10 @@ declare
 begin
   if me is null then raise exception 'Authentication required'; end if;
 
-  select array_agg(distinct id)
+  select array_agg(distinct target.id)
   into clean_ids
-  from unnest(coalesce(target_profile_ids, array[]::uuid[])) id
-  where id is not null and id <> me;
+  from unnest(coalesce(target_profile_ids, array[]::uuid[])) as target(id)
+  where target.id is not null and target.id <> me;
 
   if clean_ids is null or cardinality(clean_ids) < 2 then
     raise exception 'Choose at least two other members for a group';
@@ -230,8 +231,8 @@ begin
 
   if exists (
     select 1
-    from unnest(clean_ids) id
-    left join public.profiles p on p.id = id and p.is_active = true
+    from unnest(clean_ids) as target(id)
+    left join public.profiles p on p.id = target.id and p.is_active = true
     where p.id is null
   ) then
     raise exception 'One or more selected members are unavailable';
@@ -249,8 +250,8 @@ begin
   values (new_id, me, 'admin');
 
   insert into public.conversation_members(conversation_id, profile_id, role)
-  select new_id, id, 'member'
-  from unnest(clean_ids) id;
+  select new_id, target.id, 'member'
+  from unnest(clean_ids) as target(id);
 
   return new_id;
 end;
