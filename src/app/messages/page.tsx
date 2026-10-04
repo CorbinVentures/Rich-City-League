@@ -75,6 +75,11 @@ export default function MessagesPage() {
   const [groupTitle, setGroupTitle] = useState('');
   const [starting, setStarting] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (new URLSearchParams(window.location.search).get('compose') === '1') setComposeOpen(true);
+  }, []);
+
   const loadConversations = useCallback(async () => {
     if (!db || !user) {
       setLoading(false);
