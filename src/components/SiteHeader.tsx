@@ -26,17 +26,28 @@ export function SiteHeader(){
   const {user,profile,signOut}=useAuth();
   const supabase=useMemo(()=>getSupabaseClient(),[]);
   const [unreadCount,setUnreadCount]=useState(0);
+  const [messageUnread,setMessageUnread]=useState(0);
   const [menuOpen,setMenuOpen]=useState(false);
 
   useEffect(()=>{
-    if(!user||!supabase){setUnreadCount(0);return;}
-    const load=async()=>{
+    if(!user||!supabase){setUnreadCount(0);setMessageUnread(0);return;}
+    const db=supabase as any;
+    const loadNotifications=async()=>{
       const {count}=await supabase.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',user.id).is('read_at',null);
       if(count!==null)setUnreadCount(count);
     };
-    void load();
-    const channel=supabase.channel('rcl_header_notifications')
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`recipient_id=eq.${user.id}`},()=>setUnreadCount(value=>value+1))
+    const loadMessages=async()=>{
+      const result=await db.rpc('get_message_inbox');
+      if(!result.error){
+        const rows=(result.data??[]) as Array<{unread_count:number|string|null;archived_at:string|null}>;
+        setMessageUnread(rows.filter(row=>!row.archived_at).reduce((sum,row)=>sum+Number(row.unread_count??0),0));
+      }
+    };
+    void Promise.all([loadNotifications(),loadMessages()]);
+    const channel=supabase.channel('rcl_header_activity')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`recipient_id=eq.${user.id}`},()=>void loadNotifications())
+      .on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>void loadMessages())
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversation_members',filter:`profile_id=eq.${user.id}`},()=>void loadMessages())
       .subscribe();
     return()=>{void supabase.removeChannel(channel);};
   },[user,supabase]);
@@ -118,7 +129,7 @@ export function SiteHeader(){
       </Link>
 
       <div className="rcl-universal-tools">
-        {user&&<Link href="/messages" aria-label="Messages"><FaComments/></Link>}
+        {user&&<Link href="/messages" aria-label={messageUnread>0?`Messages, ${messageUnread} unread`:'Messages'} className="rcl-message-header-button"><FaComments/>{messageUnread>0&&<em>{messageUnread>9?'9+':messageUnread}</em>}</Link>}
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
         <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open RCL navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
