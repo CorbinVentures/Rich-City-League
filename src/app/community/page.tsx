@@ -81,7 +81,7 @@ export default async function CommunityPage(){
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">For advertisers</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase">Reach Richmond culture through RCH.</h2>
           <p className="mt-3 text-sm leading-6 text-white/45">Promote a business, event, launch, or offer through sponsored feed placements, featured events, community inventory, email, RCH TV, and recurring category sponsorships.</p>
-          <Link href="/network/partners#advertising" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-rcl-orange">See advertising options <FaArrowRight/></Link>
+          <Link href="/sponsors" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-rcl-orange">Open Sponsor Center <FaArrowRight/></Link>
         </div>
       </section>
 
