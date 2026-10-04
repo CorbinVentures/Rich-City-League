@@ -1,0 +1,459 @@
+/*
+ * RCH Social composer — viewport-safe mobile upload experience.
+ * Keeps media controls and publish actions above fixed site navigation.
+ */
+
+.rcl-composer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15,37,71,.34);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.rcl-composer-sheet {
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  width: min(620px,100%);
+  max-height: min(760px,calc(100dvh - 36px));
+  overflow: hidden;
+  border: 1px solid var(--rcl-v3-border);
+  border-radius: 24px;
+  background: #fff;
+  color: var(--rcl-v3-ink);
+  box-shadow: 0 24px 80px rgba(15,37,71,.2);
+}
+
+.rcl-composer-header {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--rcl-v3-border);
+  background: rgba(255,255,255,.98);
+}
+
+.rcl-composer-header p {
+  margin: 0;
+  color: var(--rcl-v3-primary);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.rcl-composer-header h2 {
+  margin: 3px 0 0;
+  color: var(--rcl-v3-ink);
+  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1;
+}
+
+.rcl-composer-header > button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  place-items: center;
+  flex: 0 0 42px;
+  border: 1px solid var(--rcl-v3-border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--rcl-v3-slate);
+  box-shadow: none;
+}
+
+.rcl-composer-header > button:hover {
+  background: var(--rcl-v3-soft);
+  color: var(--rcl-v3-ink);
+}
+
+.rcl-composer-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rcl-composer-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rcl-composer-author > span {
+  min-width: 0;
+}
+
+.rcl-composer-author strong,
+.rcl-composer-author small {
+  display: block;
+}
+
+.rcl-composer-author strong {
+  overflow: hidden;
+  color: var(--rcl-v3-ink);
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rcl-composer-author small {
+  margin-top: 2px;
+  color: var(--rcl-v3-muted);
+  font-size: 10px;
+}
+
+.rcl-platform-root .rcl-composer-textarea,
+.rcl-composer-textarea {
+  width: 100%;
+  min-height: 136px;
+  margin-top: 14px;
+  resize: none;
+  border: 1px solid var(--rcl-v3-border) !important;
+  border-radius: 18px;
+  background: #fff !important;
+  padding: 15px 16px !important;
+  color: var(--rcl-v3-ink) !important;
+  font-size: 16px !important;
+  line-height: 1.55;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.rcl-composer-textarea::placeholder {
+  color: #8A99AA !important;
+  opacity: 1;
+}
+
+.rcl-composer-textarea:focus {
+  border-color: rgba(59,130,246,.58) !important;
+  box-shadow: 0 0 0 4px rgba(59,130,246,.1) !important;
+}
+
+.rcl-composer-media-drop {
+  display: grid;
+  width: 100%;
+  min-height: 150px;
+  margin-top: 14px;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  border: 1px dashed #B8CBE0;
+  border-radius: 18px;
+  background: #F7FAFD;
+  padding: 18px;
+  color: var(--rcl-v3-slate);
+  text-align: center;
+  box-shadow: none;
+}
+
+.rcl-composer-media-drop:hover {
+  border-color: #9BBDE8;
+  background: #F1F6FD;
+}
+
+.rcl-composer-media-drop > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--rcl-v3-primary-soft);
+  color: var(--rcl-v3-primary);
+  font-size: 18px;
+}
+
+.rcl-composer-media-drop strong {
+  margin-top: 2px;
+  color: var(--rcl-v3-ink);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.rcl-composer-media-drop small {
+  color: var(--rcl-v3-muted);
+  font-size: 10px;
+}
+
+.rcl-composer-preview {
+  overflow: hidden;
+  margin-top: 14px;
+  border: 1px solid var(--rcl-v3-border);
+  border-radius: 18px;
+  background: #F4F7FA;
+}
+
+.rcl-composer-preview > img,
+.rcl-composer-preview > video {
+  display: block;
+  width: 100%;
+  max-height: min(48dvh,440px);
+  object-fit: contain;
+  background: #EEF3F7;
+}
+
+.rcl-composer-preview-meta {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border-top: 1px solid var(--rcl-v3-border);
+  background: #fff;
+}
+
+.rcl-composer-preview-meta > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  color: var(--rcl-v3-slate);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.rcl-composer-preview-meta > span svg {
+  color: var(--rcl-v3-primary);
+}
+
+.rcl-composer-preview-meta > button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 9px;
+  background: #F6F8FA;
+  padding: 0 10px;
+  color: var(--rcl-v3-slate);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.rcl-composer-link {
+  margin-top: 14px;
+}
+
+.rcl-composer-footer {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px calc(11px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rcl-v3-border);
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 -10px 28px rgba(15,37,71,.045);
+}
+
+.rcl-composer-footer > div > button,
+.rcl-composer-footer > button:not(.rcl-composer-submit) {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--rcl-v3-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0 13px;
+  color: var(--rcl-v3-slate);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.rcl-composer-footer > div > button svg,
+.rcl-composer-footer > button:not(.rcl-composer-submit) svg {
+  color: var(--rcl-v3-primary);
+}
+
+.rcl-composer-submit {
+  min-width: 100px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--rcl-v3-primary);
+  padding: 0 18px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 20px rgba(59,130,246,.22);
+}
+
+.rcl-composer-submit:disabled {
+  background: #E5EAF0;
+  color: #94A3B8;
+  box-shadow: none;
+}
+
+.rcl-story-caption {
+  min-height: 96px;
+}
+
+.rcl-story-media-picker {
+  display: grid;
+  width: 100%;
+  min-height: 240px;
+  margin-top: 14px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px dashed #B8CBE0;
+  border-radius: 18px;
+  background: #F7FAFD;
+  padding: 0;
+  color: var(--rcl-v3-slate);
+  box-shadow: none;
+}
+
+.rcl-story-media-picker > img,
+.rcl-story-media-picker > video {
+  width: 100%;
+  max-height: 52dvh;
+  object-fit: contain;
+  background: #EEF3F7;
+}
+
+.rcl-story-media-picker > span {
+  display: grid;
+  place-items: center;
+  gap: 7px;
+  padding: 20px;
+}
+
+.rcl-story-media-picker > span > svg {
+  color: var(--rcl-v3-primary);
+  font-size: 24px;
+}
+
+.rcl-story-media-picker strong {
+  color: var(--rcl-v3-ink);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.rcl-story-media-picker small {
+  color: var(--rcl-v3-muted);
+  font-size: 10px;
+}
+
+@media (max-width: 639px) {
+  .rcl-composer-overlay {
+    place-items: stretch;
+    padding: 0;
+    background: #fff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .rcl-composer-sheet {
+    width: 100%;
+    max-height: none;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .rcl-composer-header {
+    min-height: calc(66px + env(safe-area-inset-top));
+    padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  }
+
+  .rcl-composer-header h2 {
+    font-size: 24px;
+  }
+
+  .rcl-composer-scroll {
+    padding: 14px 16px 20px;
+  }
+
+  .rcl-composer-textarea {
+    min-height: 122px;
+    margin-top: 12px;
+    border-radius: 16px;
+  }
+
+  .rcl-composer-media-drop {
+    min-height: 132px;
+    margin-top: 12px;
+    border-radius: 16px;
+  }
+
+  .rcl-composer-preview {
+    margin-top: 12px;
+    border-radius: 16px;
+  }
+
+  .rcl-composer-preview > img,
+  .rcl-composer-preview > video {
+    max-height: 42dvh;
+  }
+
+  .rcl-composer-footer {
+    min-height: calc(66px + env(safe-area-inset-bottom));
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .rcl-composer-footer > div > button,
+  .rcl-composer-footer > button:not(.rcl-composer-submit) {
+    min-height: 44px;
+  }
+
+  .rcl-composer-submit {
+    min-height: 46px;
+  }
+
+  .rcl-story-media-picker {
+    min-height: 210px;
+  }
+
+  .rcl-story-media-picker > img,
+  .rcl-story-media-picker > video {
+    max-height: 42dvh;
+  }
+
+  /* Composer owns the viewport; site chrome should never sit above it. */
+  body:has(.rcl-composer-overlay) .rcl-universal-topbar,
+  body:has(.rcl-composer-overlay) .rcl-universal-bottom {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .rcl-composer-footer {
+    gap: 8px;
+  }
+
+  .rcl-composer-footer > div > button span {
+    display: none;
+  }
+
+  .rcl-composer-footer > div > button {
+    width: 46px;
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcl-composer-overlay,
+  .rcl-composer-sheet {
+    scroll-behavior: auto;
+  }
+}
