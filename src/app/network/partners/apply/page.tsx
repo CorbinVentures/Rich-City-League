@@ -8,7 +8,8 @@ export const metadata = {
   description: 'Join the RCH Community Network for free, promote an event, advertise a business, or discuss a major Rich City Hoops sponsorship.',
 };
 
-export default function PartnerApplyPage() {
+export default async function PartnerApplyPage({searchParams}:{searchParams:Promise<{plan?:string}>}) {
+  const {plan}=await searchParams;
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_12%,rgba(21,159,255,.12),transparent_30%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="lg" className="py-12 sm:py-16">
@@ -25,7 +26,7 @@ export default function PartnerApplyPage() {
         <Benefit copy="Your organization stays independent"/>
         <Benefit copy="Paid exposure is clearly disclosed"/>
       </div>
-      <PartnerInterestForm/>
+      <PartnerInterestForm initialPlan={plan}/>
     </Container>
   </main>;
 }
