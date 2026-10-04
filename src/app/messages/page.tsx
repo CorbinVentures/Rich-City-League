@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fi';
 import { Container } from '@/components/Container';
 import { ConversationList, type ConversationListItem } from '@/components/messaging/ConversationList';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -324,7 +325,7 @@ export default function MessagesPage() {
 
             {selectedPeople.length > 0 && (
               <div className="rcl-selected-people">
-                {selectedPeople.map((person) => <button type="button" key={person.id} onClick={() => togglePerson(person)}><span>{person.avatar_url ? <img src={person.avatar_url} alt="" /> : personName(person).slice(0, 1).toUpperCase()}</span>{personName(person)}<FiX /></button>)}
+                {selectedPeople.map((person) => <button type="button" key={person.id} onClick={() => togglePerson(person)}><span><ProfileAvatarMedia src={person.avatar_url} alt={personName(person)} className="h-full w-full object-cover" /></span>{personName(person)}<FiX /></button>)}
               </div>
             )}
 
@@ -344,7 +345,7 @@ export default function MessagesPage() {
               {peopleLoading ? <p>Finding people…</p> : people.map((person) => {
                 const selected = selectedPeople.some((item) => item.id === person.id);
                 return <button type="button" key={person.id} onClick={() => togglePerson(person)} className={selected ? 'selected' : ''}>
-                  <span className="rcl-person-result-avatar">{person.avatar_url ? <img src={person.avatar_url} alt="" /> : personName(person).slice(0, 2).toUpperCase()}</span>
+                  <span className="rcl-person-result-avatar"><ProfileAvatarMedia src={person.avatar_url} alt={personName(person)} className="h-full w-full object-cover" /></span>
                   <span><strong>{personName(person)}</strong><small>{person.username ? `@${person.username} · ` : ''}{person.role}</small></span>
                   <i>{selected ? '✓' : '+'}</i>
                 </button>;
