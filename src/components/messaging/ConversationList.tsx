@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FiMessageCircle } from 'react-icons/fi';
+import { FiArchive, FiBellOff, FiMessageCircle, FiStar, FiUsers } from 'react-icons/fi';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 
 export type ConversationListItem = {
@@ -13,6 +13,11 @@ export type ConversationListItem = {
   unread: number;
   avatarUrl: string | null;
   identity?: SocialIdentityAuthor | null;
+  isPinned?: boolean;
+  isMuted?: boolean;
+  isArchived?: boolean;
+  memberCount?: number;
+  lastSenderIsMe?: boolean;
 };
 
 function formatDate(value: string) {
@@ -21,46 +26,102 @@ function formatDate(value: string) {
   if (date.toDateString() === today.toDateString()) {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   }
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-export function ConversationRow({ item }: { item: ConversationListItem }) {
+function typeLabel(type: string, memberCount?: number) {
+  if (type === 'DIRECT') return 'Direct';
+  if (type === 'GROUP') return memberCount ? \`\${memberCount} members\` : 'Group';
+  return type.charAt(0) + type.slice(1).toLowerCase();
+}
+
+export function ConversationRow({
+  item,
+  onPin,
+  onMute,
+  onArchive,
+}: {
+  item: ConversationListItem;
+  onPin?: (item: ConversationListItem) => void;
+  onMute?: (item: ConversationListItem) => void;
+  onArchive?: (item: ConversationListItem) => void;
+}) {
   return (
-    <Link
-      href={`/messages/${item.id}`}
-      className="group flex min-h-[84px] items-center gap-3 border-b border-white/[0.07] px-4 py-4 transition hover:bg-white/[0.05] focus-visible:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rcl-gold"
-      aria-label={`Open conversation with ${item.title}${item.unread ? `, ${item.unread} unread` : ''}`}
-    >
-      <div className="relative shrink-0">
-        {item.identity ? <SocialIdentity author={item.identity} compact link={false} /> : <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-white/10 bg-rcl-navy text-sm font-black text-rcl-gold">{item.avatarUrl ? <img src={item.avatarUrl} alt="" className="h-full w-full object-cover" /> : item.title.slice(0, 2).toUpperCase()}</div>}
-        {item.unread > 0 && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-rcl-black bg-rcl-gold" />}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className={`truncate text-sm ${item.unread ? 'font-black text-white' : 'font-bold text-gray-200'}`}>{item.title}</h3>
-          <time className={`shrink-0 text-xs ${item.unread ? 'font-bold text-rcl-gold' : 'text-gray-500'}`} dateTime={item.updatedAt}>
-            {formatDate(item.updatedAt)}
-          </time>
+    <article className={\`rcl-message-row \${item.unread ? 'is-unread' : ''} \${item.isPinned ? 'is-pinned' : ''}\`}>
+      <Link
+        href={\`/messages/\${item.id}\`}
+        className="rcl-message-row-main"
+        aria-label={\`Open conversation with \${item.title}\${item.unread ? \`, \${item.unread} unread\` : ''}\`}
+      >
+        <div className="rcl-message-avatar-wrap">
+          {item.identity ? (
+            <SocialIdentity author={item.identity} compact link={false} />
+          ) : (
+            <div className="rcl-message-avatar">
+              {item.avatarUrl ? <img src={item.avatarUrl} alt="" /> : item.type === 'GROUP' ? <FiUsers /> : item.title.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+          {item.unread > 0 && <span className="rcl-message-unread-dot" />}
         </div>
-        <div className="mt-1 flex items-center justify-between gap-3">
-          <p className={`truncate text-xs ${item.unread ? 'font-semibold text-gray-200' : 'text-gray-500'}`}>{item.preview || 'No messages yet'}</p>
-          <span className="shrink-0 text-xs font-black uppercase tracking-widest text-gray-600">{item.type}</span>
+
+        <div className="rcl-message-copy">
+          <div className="rcl-message-row-top">
+            <div className="rcl-message-title-line">
+              <h3>{item.title}</h3>
+              {item.isPinned && <FiStar aria-label="Pinned" />}
+              {item.isMuted && <FiBellOff aria-label="Muted" />}
+            </div>
+            <time dateTime={item.updatedAt}>{formatDate(item.updatedAt)}</time>
+          </div>
+
+          <div className="rcl-message-row-bottom">
+            <p>{item.lastSenderIsMe && item.preview ? <span>You: </span> : null}{item.preview || 'Start the conversation'}</p>
+            <div className="rcl-message-row-meta">
+              <span>{typeLabel(item.type, item.memberCount)}</span>
+              {item.unread > 0 && <b>{item.unread > 99 ? '99+' : item.unread}</b>}
+            </div>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {(onPin || onMute || onArchive) && (
+        <div className="rcl-message-row-actions" aria-label={\`Conversation actions for \${item.title}\`}>
+          {onPin && <button type="button" onClick={() => onPin(item)} aria-label={item.isPinned ? 'Unpin conversation' : 'Pin conversation'} title={item.isPinned ? 'Unpin' : 'Pin'}><FiStar /></button>}
+          {onMute && <button type="button" onClick={() => onMute(item)} aria-label={item.isMuted ? 'Unmute conversation' : 'Mute conversation'} title={item.isMuted ? 'Unmute' : 'Mute'}><FiBellOff /></button>}
+          {onArchive && <button type="button" onClick={() => onArchive(item)} aria-label={item.isArchived ? 'Restore conversation' : 'Archive conversation'} title={item.isArchived ? 'Restore' : 'Archive'}><FiArchive /></button>}
+        </div>
+      )}
+    </article>
   );
 }
 
-export function ConversationList({ items, emptyMessage = 'No conversations match this view.' }: { items: ConversationListItem[]; emptyMessage?: string }) {
+export function ConversationList({
+  items,
+  emptyMessage = 'No conversations match this view.',
+  onPin,
+  onMute,
+  onArchive,
+}: {
+  items: ConversationListItem[];
+  emptyMessage?: string;
+  onPin?: (item: ConversationListItem) => void;
+  onMute?: (item: ConversationListItem) => void;
+  onArchive?: (item: ConversationListItem) => void;
+}) {
   if (!items.length) {
     return (
-      <div className="grid min-h-[220px] place-items-center p-8 text-center">
+      <div className="rcl-message-empty">
         <div>
-          <FiMessageCircle className="mx-auto h-8 w-8 text-rcl-gold/50" aria-hidden="true" />
-          <p className="mt-3 text-sm text-gray-500">{emptyMessage}</p>
+          <span><FiMessageCircle aria-hidden="true" /></span>
+          <h3>No conversations here</h3>
+          <p>{emptyMessage}</p>
         </div>
       </div>
     );
   }
-  return <div>{items.map((item) => <ConversationRow key={item.id} item={item} />)}</div>;
+
+  return <div className="rcl-message-list">{items.map((item) => <ConversationRow key={item.id} item={item} onPin={onPin} onMute={onMute} onArchive={onArchive} />)}</div>;
 }
