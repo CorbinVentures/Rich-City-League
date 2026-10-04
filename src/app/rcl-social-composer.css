@@ -351,7 +351,165 @@
   font-size: 10px;
 }
 
+
+.rcl-composer-type-section {
+  margin-top: 14px;
+}
+
+.rcl-composer-type-section > p {
+  margin: 0 0 8px;
+  color: var(--rcl-v3-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.rcl-composer-type-row {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+}
+
+.rcl-composer-type-option,
+.rcl-composer-link-option > button {
+  display: grid !important;
+  min-width: 0;
+  min-height: 88px !important;
+  place-items: center;
+  align-content: center;
+  gap: 4px !important;
+  border: 1px solid var(--rcl-v3-border) !important;
+  border-radius: 14px !important;
+  background: #F8FAFC !important;
+  padding: 10px 8px !important;
+  color: var(--rcl-v3-slate) !important;
+  text-align: center;
+  box-shadow: none !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.rcl-composer-type-option:hover,
+.rcl-composer-link-option > button:hover {
+  border-color: #BFD4F3 !important;
+  background: var(--rcl-v3-primary-soft) !important;
+  color: var(--rcl-v3-primary) !important;
+}
+
+.rcl-composer-type-option > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--rcl-v3-primary-soft);
+  color: var(--rcl-v3-primary);
+  font-size: 15px;
+}
+
+.rcl-composer-link-option > button > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--rcl-v3-primary);
+}
+
+.rcl-composer-type-option strong {
+  color: var(--rcl-v3-ink);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.rcl-composer-type-option small {
+  color: var(--rcl-v3-muted);
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.rcl-composer-link-option > button {
+  width: 100%;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+}
+
+.rcl-composer-link-option:has(input) {
+  grid-column: 1 / -1;
+}
+
+.rcl-composer-link-option:has(input) > div {
+  width: 100%;
+  margin: 0 !important;
+  border: 1px solid rgba(59,130,246,.28) !important;
+  border-radius: 14px !important;
+  background: #F5F9FF !important;
+  color: var(--rcl-v3-slate) !important;
+}
+
+.rcl-composer-link-option:has(input) input {
+  min-height: 40px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--rcl-v3-ink) !important;
+  box-shadow: none !important;
+}
+
+.rcl-composer-link-option:has(input) button {
+  color: var(--rcl-v3-slate) !important;
+}
+
+.rcl-composer-footer-types {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rcl-composer-footer-types > button {
+  display: inline-flex !important;
+  min-height: 42px !important;
+  align-items: center !important;
+  gap: 7px !important;
+  border: 1px solid var(--rcl-v3-border) !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  padding: 0 12px !important;
+  color: var(--rcl-v3-slate) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  box-shadow: none !important;
+}
+
+.rcl-composer-footer-types > button svg {
+  color: var(--rcl-v3-primary);
+}
+
 @media (max-width: 639px) {
+
+  .rcl-composer-type-row {
+    gap: 7px;
+  }
+
+  .rcl-composer-type-option,
+  .rcl-composer-link-option > button {
+    min-height: 76px !important;
+    border-radius: 13px !important;
+    padding: 8px 5px !important;
+  }
+
+  .rcl-composer-type-option > span,
+  .rcl-composer-link-option > button > svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rcl-composer-footer-types {
+    gap: 6px;
+  }
+
+  .rcl-composer-footer-types > button {
+    min-height: 44px !important;
+    padding: 0 11px !important;
+  }
+
   .rcl-composer-overlay {
     place-items: stretch;
     padding: 0;
@@ -440,14 +598,14 @@
     gap: 8px;
   }
 
-  .rcl-composer-footer > div > button span {
+  .rcl-composer-footer-types > button span {
     display: none;
   }
 
-  .rcl-composer-footer > div > button {
-    width: 46px;
-    justify-content: center;
-    padding: 0;
+  .rcl-composer-footer-types > button {
+    width: 44px !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
 }
 
