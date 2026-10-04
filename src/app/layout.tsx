@@ -19,6 +19,7 @@ import './rcl-social-world.css';
 import './rcl-site-uniform.css';
 import './rcl-mockup-system.css';
 import './rcl-presentation-polish.css';
+import './rcl-seasonal-themes.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
@@ -30,6 +31,7 @@ import { PlatformChrome } from '@/components/PlatformChrome';
 import { BadgeUnlockCutscene } from '@/components/BadgeUnlockCutscene';
 import { PWAInstallExperience } from '@/components/PWAInstallExperience';
 import { PWANotificationBridge } from '@/components/PWANotificationBridge';
+import { SeasonalTheme } from '@/components/SeasonalTheme';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richcityhoops.com'),
@@ -69,5 +71,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><PWANotificationBridge /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@graph':[{ '@type':'WebSite','@id':'https://richcityhoops.com/#website',url:'https://richcityhoops.com',name:'RCL',alternateName:'RCL Basketball Social',description:'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.',publisher:{'@id':'https://richcityhoops.com/#platform'}},{ '@type':'Organization','@id':'https://richcityhoops.com/#platform',name:'RCL',alternateName:'RCL Basketball Social',url:'https://richcityhoops.com',description:'A basketball social platform connecting players, runs, highlights, organizations and community across Virginia.',areaServed:{'@type':'State',name:'Virginia'}},{ '@type':'SportsOrganization','@id':'https://richcityhoops.com/#rich-city-league',name:'Rich City League',alternateName:'RCL League',url:'https://richcityhoops.com/league',foundingDate:'2011',sport:'Basketball',description:'The flagship basketball competition property inside the RCL platform.',parentOrganization:{'@id':'https://richcityhoops.com/#platform'},areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'}}] }) }} /></body></html>;
+  return <html lang="en"><body><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><PWANotificationBridge /><SeasonalTheme /><DraftChime /><AuthRecoveryRedirect /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@graph':[{ '@type':'WebSite','@id':'https://richcityhoops.com/#website',url:'https://richcityhoops.com',name:'RCL',alternateName:'RCL Basketball Social',description:'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.',publisher:{'@id':'https://richcityhoops.com/#platform'}},{ '@type':'Organization','@id':'https://richcityhoops.com/#platform',name:'RCL',alternateName:'RCL Basketball Social',url:'https://richcityhoops.com',description:'A basketball social platform connecting players, runs, highlights, organizations and community across Virginia.',areaServed:{'@type':'State',name:'Virginia'}},{ '@type':'SportsOrganization','@id':'https://richcityhoops.com/#rich-city-league',name:'Rich City League',alternateName:'RCL League',url:'https://richcityhoops.com/league',foundingDate:'2011',sport:'Basketball',description:'The flagship basketball competition property inside the RCL platform.',parentOrganization:{'@id':'https://richcityhoops.com/#platform'},areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'}}] }) }} /></body></html>;
 }
