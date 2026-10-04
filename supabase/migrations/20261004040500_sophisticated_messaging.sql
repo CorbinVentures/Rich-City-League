@@ -146,7 +146,7 @@ language sql
 stable
 security definer
 set search_path = public
-as $
+as $$
   select
     c.id as conversation_id,
     c.title,
@@ -202,7 +202,7 @@ as $
   left join public.user_levels peer_level on peer_level.profile_id = peer.profile_id
   where mine.profile_id = auth.uid()
   order by coalesce(pref.is_pinned, false) desc, coalesce(latest.created_at, c.updated_at) desc;
-$;
+$$;
 
 revoke all on function public.get_message_inbox() from public;
 grant execute on function public.get_message_inbox() to authenticated;
@@ -212,7 +212,7 @@ returns uuid
 language plpgsql
 security definer
 set search_path = public, pg_catalog
-as $
+as $$
 declare
   me uuid := auth.uid();
   clean_ids uuid[];
@@ -255,7 +255,7 @@ begin
 
   return new_id;
 end;
-$;
+$$;
 
 revoke all on function public.start_group_conversation(uuid[], text) from public;
 grant execute on function public.start_group_conversation(uuid[], text) to authenticated;
