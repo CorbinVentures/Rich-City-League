@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FaArrowLeft,
   FaBasketball,
@@ -599,15 +600,173 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
 }
 
 function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
-  const chooseFile = (file: File | null) => { if (!file) return; const issue = socialMediaError(file); if (!issue) setMediaFile(file); };
-  return <div className="rcl-modal-scrim fixed inset-0 z-[90] grid place-items-end bg-[#0F2547]/35 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-[#D9E4EF] bg-white p-5 shadow-2xl sm:max-w-xl sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Create</p><h2 className="font-display text-2xl font-black uppercase">Post to RCL</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/50"><FaXmark/></button></div><div className="mt-5 flex gap-3"><SocialIdentity author={currentProfile} compact/><textarea autoFocus value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={5} placeholder="What is happening in Richmond basketball?" className="min-h-32 flex-1 resize-none bg-transparent text-base leading-7 outline-none placeholder:text-white/25"/></div>{mediaPreview && <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black">{mediaFile?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(mediaPreview)} controls className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Preview" className="max-h-72 w-full object-contain"/>}<button type="button" onClick={() => setMediaFile(null)} className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70"><FaXmark/></button></div>}<SocialLinkField value={linkInput} onChange={setLinkInput}/><div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4"><div><button type="button" onClick={() => mediaInputRef.current?.click()} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs font-black uppercase tracking-wider text-white/50"><FaImage/> Photo / video</button><input ref={mediaInputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/></div><button disabled={publishing || (!body.trim() && !mediaFile && !linkInput.trim())} className="min-h-11 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-white disabled:opacity-35">{publishing ? 'Posting…' : 'Post'}</button></div></form></div>;
-}
+  const chooseFile = (file: File | null) => {
+    if (!file) return;
+    const issue = socialMediaError(file);
+    if (!issue) setMediaFile(file);
+  };
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, []);
+
+  if (typeof document === 'undefined') return null;
+
+  const modal = <div
+    className="rcl-composer-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="rcl-composer-title"
+    onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+  >
+    <form onSubmit={onSubmit} className="rcl-composer-sheet">
+      <header className="rcl-composer-header">
+        <div>
+          <p>Create</p>
+          <h2 id="rcl-composer-title">Post to RCH</h2>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Close composer"><FaXmark/></button>
+      </header>
+
+      <div className="rcl-composer-scroll">
+        <div className="rcl-composer-author">
+          <SocialIdentity author={currentProfile} compact/>
+          <span><strong>{currentProfile?.display_name || currentProfile?.username || 'RCH Member'}</strong><small>Share with the RCH community</small></span>
+        </div>
+
+        <textarea
+          autoFocus
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          maxLength={2000}
+          rows={5}
+          placeholder="What is happening in Richmond basketball?"
+          className="rcl-composer-textarea"
+        />
+
+        {mediaPreview ? <div className="rcl-composer-preview">
+          {mediaFile?.type.startsWith('video/')
+            ? <video src={safeMediaPreviewUrl(mediaPreview)} controls playsInline />
+            : <img src={safeMediaPreviewUrl(mediaPreview)} alt="Selected upload preview" />}
+          <div className="rcl-composer-preview-meta">
+            <span><FaImage/> {mediaFile?.type.startsWith('video/') ? 'Video selected' : 'Photo selected'}</span>
+            <button type="button" onClick={() => setMediaFile(null)} aria-label="Remove selected media"><FaXmark/> Remove</button>
+          </div>
+        </div> : <button type="button" onClick={() => mediaInputRef.current?.click()} className="rcl-composer-media-drop">
+          <span><FaImage/></span>
+          <strong>Add a photo or video</strong>
+          <small>Choose media from your device</small>
+        </button>}
+
+        <div className="rcl-composer-link">
+          <SocialLinkField value={linkInput} onChange={setLinkInput}/>
+        </div>
+      </div>
+
+      <footer className="rcl-composer-footer">
+        <div>
+          <button type="button" onClick={() => mediaInputRef.current?.click()}><FaImage/><span>{mediaFile ? 'Change media' : 'Photo / video'}</span></button>
+          <input
+            ref={mediaInputRef}
+            type="file"
+            accept={SOCIAL_MEDIA_ACCEPT}
+            className="hidden"
+            onChange={(event) => {
+              chooseFile(event.target.files?.[0] ?? null);
+              event.currentTarget.value = '';
+            }}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={publishing || (!body.trim() && !mediaFile && !linkInput.trim())}
+          className="rcl-composer-submit"
+        >
+          {publishing ? 'Posting…' : 'Post'}
+        </button>
+      </footer>
+    </form>
+  </div>;
+
+  return createPortal(modal, document.body);
+}
 function StoryComposer({ currentProfile, body, setBody, file, preview, setFile, inputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; file: File | null; preview: string; setFile: (file: File | null) => void; inputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
-  const chooseFile = (next: File | null) => { if (!next) return; const issue = socialMediaError(next); if (!issue) setFile(next); };
-  return <div className="fixed inset-0 z-[90] grid place-items-end bg-[#0F2547]/35 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"><form onSubmit={onSubmit} className="w-full rounded-t-3xl border border-[#D9E4EF] bg-white p-5 sm:max-w-md sm:rounded-3xl"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">24 hours</p><h2 className="font-display text-2xl font-black uppercase">Add story</h2></div><button type="button" onClick={onClose} className="grid h-10 w-10 place-items-center rounded-xl border border-white/10"><FaXmark/></button></div><div className="mt-5 flex items-center gap-3"><SocialIdentity author={currentProfile} compact/><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={240} rows={3} placeholder="Add a caption…" className="flex-1 resize-none rounded-xl border border-white/10 bg-black/15 p-3 text-sm outline-none"/></div><button type="button" onClick={() => inputRef.current?.click()} className="mt-4 grid min-h-52 w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-rcl-blue/25 bg-rcl-blue/[.025]">{preview ? file?.type.startsWith('video/') ? <video src={safeMediaPreviewUrl(preview)} muted className="max-h-72 w-full object-contain"/> : <img src={safeMediaPreviewUrl(preview)} alt="Story preview" className="max-h-72 w-full object-contain"/> : <span className="text-center"><FaImage className="mx-auto text-3xl text-rcl-blue"/><b className="mt-3 block text-xs font-black uppercase">Choose photo or video</b></span>}</button><input ref={inputRef} type="file" accept={SOCIAL_MEDIA_ACCEPT} className="hidden" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}/><button disabled={publishing || (!body.trim() && !file)} className="mt-4 min-h-12 w-full rounded-xl bg-rcl-orange text-xs font-black uppercase tracking-wider text-white disabled:opacity-35">{publishing ? 'Sharing…' : 'Share story'}</button></form></div>;
-}
+  const chooseFile = (next: File | null) => {
+    if (!next) return;
+    const issue = socialMediaError(next);
+    if (!issue) setFile(next);
+  };
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, []);
+
+  if (typeof document === 'undefined') return null;
+
+  const modal = <div
+    className="rcl-composer-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="rcl-story-composer-title"
+    onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+  >
+    <form onSubmit={onSubmit} className="rcl-composer-sheet rcl-story-composer-sheet">
+      <header className="rcl-composer-header">
+        <div>
+          <p>24 hours</p>
+          <h2 id="rcl-story-composer-title">Add story</h2>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Close story composer"><FaXmark/></button>
+      </header>
+
+      <div className="rcl-composer-scroll">
+        <div className="rcl-composer-author">
+          <SocialIdentity author={currentProfile} compact/>
+          <span><strong>{currentProfile?.display_name || currentProfile?.username || 'RCH Member'}</strong><small>Story disappears after 24 hours</small></span>
+        </div>
+
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          maxLength={240}
+          rows={3}
+          placeholder="Add a caption…"
+          className="rcl-composer-textarea rcl-story-caption"
+        />
+
+        <button type="button" onClick={() => inputRef.current?.click()} className="rcl-story-media-picker">
+          {preview ? file?.type.startsWith('video/')
+            ? <video src={safeMediaPreviewUrl(preview)} muted playsInline />
+            : <img src={safeMediaPreviewUrl(preview)} alt="Story preview" />
+            : <span><FaImage/><strong>Choose photo or video</strong><small>Tap to select media from your device</small></span>}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={SOCIAL_MEDIA_ACCEPT}
+          className="hidden"
+          onChange={(event) => {
+            chooseFile(event.target.files?.[0] ?? null);
+            event.currentTarget.value = '';
+          }}
+        />
+      </div>
+
+      <footer className="rcl-composer-footer">
+        <button type="button" onClick={() => inputRef.current?.click()}><FaImage/><span>{file ? 'Change media' : 'Photo / video'}</span></button>
+        <button type="submit" disabled={publishing || (!body.trim() && !file)} className="rcl-composer-submit">
+          {publishing ? 'Sharing…' : 'Share story'}
+        </button>
+      </footer>
+    </form>
+  </div>;
+
+  return createPortal(modal, document.body);
+}
 function StoryViewer({ stories, index, onClose, onIndex }: { stories: Story[]; index: number; onClose: () => void; onIndex: (index: number) => void }) {
   const story = stories[index];
   return <div className="rcl-dark-media fixed inset-0 z-[100] grid place-items-center bg-black/95 p-3"><div className="relative flex h-[min(760px,92vh)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#09131e]"><div className="absolute left-3 right-3 top-3 z-10 flex gap-1">{stories.map((_, itemIndex) => <span key={itemIndex} className={`h-1 flex-1 rounded-full ${itemIndex === index ? 'bg-white' : itemIndex < index ? 'bg-rcl-orange' : 'bg-white/15'}`}/>)}</div><button type="button" onClick={onClose} className="absolute right-3 top-7 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55"><FaXmark/></button><div className="flex flex-1 items-center justify-center p-6 pt-14">{story.media_url ? <div className="w-full">{isVideoUrl(story.media_url) ? <video src={story.media_url} controls autoPlay playsInline className="max-h-[62vh] w-full rounded-2xl object-contain"/> : <img src={story.media_url} alt="Story" className="max-h-[62vh] w-full rounded-2xl object-contain"/>}{story.body && <p className="mt-4 text-center text-base font-bold leading-6">{story.body}</p>}</div> : <div className="text-center"><SocialIdentity author={story.author}/><p className="mt-5 text-xl font-bold leading-8">{story.body}</p></div>}</div><button aria-label="Previous story" disabled={index === 0} onClick={() => onIndex(index - 1)} className="absolute left-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><button aria-label="Next story" disabled={index === stories.length - 1} onClick={() => onIndex(index + 1)} className="absolute right-0 top-1/2 h-1/2 w-1/3 -translate-y-1/2 disabled:pointer-events-none"/><div className="border-t border-white/10 p-3 text-center text-[10px] font-black uppercase tracking-wider text-white/25">{index + 1} / {stories.length}</div></div></div>;
