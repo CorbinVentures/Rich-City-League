@@ -15,7 +15,7 @@ type ExistingOrganization={slug:string;name:string;is_claimed:boolean;network_ti
 const PLAN_OPTIONS=[
   ['community','Community Partner — Free'],
   ['boost','Promotion Boost — from $49'],
-  ['partner-pro','Partner Pro — $199/mo'],
+  ['partner-pro','Partner Pro — from $149/mo'],
   ['business-advertising','Business Advertising — from $250/mo'],
   ['major-sponsor','Major Sponsor — Custom'],
   ['unsure','Not sure yet'],
