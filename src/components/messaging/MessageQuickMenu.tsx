@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaArrowRight, FaComments, FaMagnifyingGlass, FaPenToSquare, FaUsers, FaXmark } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 
 type QuickInboxRow = {
   conversation_id: string;
@@ -200,7 +201,7 @@ export function MessageQuickMenu({
             {!loading && !loadError && visible.map((item) => (
               <Link key={item.id} href={`/messages/${item.id}`} onClick={() => setOpen(false)} className={`rcl-message-quick-item ${item.unread ? 'unread' : ''}`}>
                 <span className="rcl-message-quick-avatar">
-                  {item.avatarUrl ? <img src={item.avatarUrl} alt="" /> : item.isGroup ? <FaUsers /> : item.title.slice(0, 2).toUpperCase()}
+                  {item.isGroup ? <FaUsers /> : <ProfileAvatarMedia src={item.avatarUrl} alt={item.title} className="h-full w-full rounded-full object-cover" />}
                   {item.unread > 0 && <i />}
                 </span>
                 <span className="rcl-message-quick-copy">
