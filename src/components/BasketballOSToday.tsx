@@ -10,7 +10,6 @@ import {
   FaCircleCheck,
   FaCrown,
   FaFire,
-  FaFlask,
   FaLocationDot,
   FaMedal,
   FaPeopleGroup,
@@ -95,7 +94,6 @@ const dimensionMeta: Array<{ key: RepDimension; label: string; blurb: string }> 
 const quickLinks = [
   { href: '/games', label: 'Game Night', detail: 'Scores, live action and box scores', icon: FaBasketball },
   { href: '/runs', label: 'Find a Run', detail: 'Richmond court network', icon: FaLocationDot },
-  { href: '/lab', label: 'The Lab', detail: 'Train and build your player profile', icon: FaFlask },
   { href: '/pickem', label: 'Pick’em', detail: 'Call upcoming RCL games', icon: FaTrophy },
   { href: '/players/compare', label: 'Compare', detail: 'Put player profiles side-by-side', icon: FaChartLine },
   { href: '/legacy', label: 'Legacy', detail: 'History, seasons and Hall of Fame', icon: FaCrown },
