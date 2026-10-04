@@ -15,6 +15,7 @@ import {
 import { Container } from '@/components/Container';
 import { ConversationList, type ConversationListItem } from '@/components/messaging/ConversationList';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
