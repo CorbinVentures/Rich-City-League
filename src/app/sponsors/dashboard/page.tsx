@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaClock,
-  FaGlobe, FaMousePointer, FaRectangleAd,
+  FaGlobe, FaRectangleAd,
 } from 'react-icons/fa6';
 
 type Organization={id:string;name:string;slug:string;organization_type:string;network_tier:string};
