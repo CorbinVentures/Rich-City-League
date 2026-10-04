@@ -189,7 +189,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         <div className="px-5 pb-6">
           <div className="-mt-14 flex items-end justify-between gap-4">
             <div className="rcl-profile-rep-ring" style={{'--profile-progress':progress+'%'} as React.CSSProperties}>
-              <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-rcl-orange text-4xl font-black text-black">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : name.slice(0,1).toUpperCase()}</div><em>{socialLevel}</em>
+              <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-white"><ProfileAvatarMedia src={profile.avatar_url} alt={name} className="h-full w-full object-cover" /></div><em>{socialLevel}</em>
             </div>
             <Link href="/social" className="mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Home</Link>
           </div>
