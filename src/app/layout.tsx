@@ -20,6 +20,7 @@ import './rcl-site-uniform.css';
 import './rcl-mockup-system.css';
 import './rcl-presentation-polish.css';
 import './rcl-seasonal-themes.css';
+import './rcl-draft-uniform.css';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
 import { RCLRuntimeFinish } from '@/components/RCLRuntimeFinish';
 import { DraftChime } from '@/components/DraftChime';
