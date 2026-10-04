@@ -11,9 +11,9 @@ export async function generateMetadata({ params }:{ params:Promise<{slug:string}
   const { slug } = await params;
   const client = getPublicClient();
   const supabase:any = client;
-  if (!supabase) return { title:'RCL Network Event' };
+  if (!supabase) return { title:'RCH Network Event' };
   const { data } = await supabase.from('network_events').select('title,description').eq('slug',slug).eq('status','published').maybeSingle();
-  return data ? { title:`${data.title} | RCL Network`, description:data.description || 'Virginia basketball event on RCL Network.' } : { title:'RCL Network Event' };
+  return data ? { title:`${data.title} | RCH Network`, description:data.description || 'Virginia event discovered through the RCH Network.' } : { title:'RCH Network Event' };
 }
 
 export default async function NetworkEventPage({ params }:{ params:Promise<{slug:string}> }) {
@@ -33,7 +33,7 @@ export default async function NetworkEventPage({ params }:{ params:Promise<{slug
     <NetworkExposureTracker organizationId={org.id} eventId={event.id} eventType="event_view" surface="network-event-page"/>
     <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_78%_10%,rgba(59,130,246,.10),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="lg" className="py-12 sm:py-16">
-        <Link href="/network" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-white/40"><FaArrowLeft/> Virginia Network</Link>
+        <Link href="/network" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-white/40"><FaArrowLeft/> RCH Network</Link>
         <div className="mt-8 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[.14em]"><span className="rounded-full border border-rcl-orange/25 bg-rcl-orange/[.06] px-3 py-1.5 text-rcl-orange">{event.event_type}</span>{event.is_featured&&<span className="rounded-full border border-rcl-blue/25 px-3 py-1.5 text-rcl-blue">Featured</span>}</div>
         <h1 className="mt-4 max-w-5xl font-display text-5xl font-black uppercase leading-[.95] tracking-[-.04em] sm:text-7xl">{event.title}</h1>
         <Link href={`/organizations/${org.slug}`} className="mt-4 inline-flex items-center gap-2 text-sm font-black text-rcl-blue">{org.name}{org.is_verified&&<span aria-label="Verified">✓</span>} <FaArrowRight className="text-xs"/></Link>
@@ -52,7 +52,7 @@ export default async function NetworkEventPage({ params }:{ params:Promise<{slug
         <aside className="rounded-3xl border border-rcl-blue/20 bg-[#071522]/70 p-6">
           <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">Official destination</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase">Continue with {org.short_name||org.name}</h2>
-          <p className="mt-3 text-xs leading-5 text-white/40">RCL provides discovery and exposure. Registration, tickets, payments, eligibility, schedules, and event operations remain with the organization running this event.</p>
+          <p className="mt-3 text-xs leading-5 text-white/40">RCH provides discovery and exposure. Registration, tickets, payments, eligibility, schedules, and event operations remain with the organization running this event.</p>
           {event.external_url ? <TrackedNetworkLink href={event.external_url} organizationId={org.id} eventId={event.id} surface="network-event-primary-cta" className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wide text-black">Visit official event page <FaArrowRight/></TrackedNetworkLink> : <p className="mt-6 rounded-xl border border-dashed border-white/10 p-4 text-xs text-white/35">No external event link has been published yet.</p>}
         </aside>
       </section>
