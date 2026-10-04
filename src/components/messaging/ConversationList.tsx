@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FiArchive, FiBellOff, FiMessageCircle, FiStar, FiUsers } from 'react-icons/fi';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 
 export type ConversationListItem = {
   id: string;
@@ -61,7 +62,7 @@ export function ConversationRow({
             <SocialIdentity author={item.identity} compact link={false} />
           ) : (
             <div className="rcl-message-avatar">
-              {item.avatarUrl ? <img src={item.avatarUrl} alt="" /> : item.type === 'GROUP' ? <FiUsers /> : item.title.slice(0, 2).toUpperCase()}
+              {item.type === 'GROUP' ? <FiUsers /> : <ProfileAvatarMedia src={item.avatarUrl} alt={item.title} className="h-full w-full object-cover" />}
             </div>
           )}
           {item.unread > 0 && <span className="rcl-message-unread-dot" />}
