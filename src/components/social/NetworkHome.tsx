@@ -479,12 +479,11 @@ export default function NetworkHome() {
         <section className="rcl-feed-intro">
           <div><p>Home</p><h1>Your basketball world</h1><span>People, runs, highlights and competition around you.</span></div>
           <div className="rcl-feed-intro-actions">
-            <label className="rcl-feed-search">
-              <span className="sr-only">Search this feed</span>
+            <div className="rcl-feed-search" role="search">
               <FaMagnifyingGlass className="rcl-feed-search-icon"/>
-              <input type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search posts, people and topics"/>
+              <input aria-label="Search this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search posts, people and topics"/>
               {search && <button type="button" onClick={()=>setSearch('')} className="rcl-feed-search-clear" aria-label="Clear feed search"><FaXmark/></button>}
-            </label>
+            </div>
             {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
           </div>
         </section>
