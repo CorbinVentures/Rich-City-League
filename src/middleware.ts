@@ -21,6 +21,8 @@ const MEMBER_ROUTE_PREFIXES = [
   '/settings',
   '/orders',
   '/network/dashboard',
+  '/sponsors/dashboard',
+  '/sponsors/campaigns',
   '/friends',
   '/connections',
   '/social',
