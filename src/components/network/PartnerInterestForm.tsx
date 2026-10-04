@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { FormEvent, useMemo, useState } from 'react';
 import { FaArrowRight, FaCircleCheck, FaMagnifyingGlass } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { NETWORK_ORGANIZATION_TYPES, NETWORK_REGIONS } from '@/lib/network-taxonomy';
@@ -28,19 +27,13 @@ const initialState:FormState={
   region:'central-virginia',planInterest:'community',goals:'',
 };
 
-export function PartnerInterestForm() {
-  const params=useSearchParams();
+export function PartnerInterestForm({initialPlan='community'}:{initialPlan?:string}) {
+  const selectedPlan=PLAN_VALUES.has(initialPlan as (typeof PLAN_OPTIONS)[number][0])?initialPlan:'community';
   const supabase=useMemo(()=>getSupabaseClient(),[]); const db=supabase as any;
-  const [form,setForm]=useState<FormState>(initialState); const [busy,setBusy]=useState(false); const [error,setError]=useState('');
+  const [form,setForm]=useState<FormState>({...initialState,planInterest:selectedPlan}); const [busy,setBusy]=useState(false); const [error,setError]=useState('');
   const [sent,setSent]=useState(false); const [existing,setExisting]=useState<ExistingOrganization|null>(null);
   const update=(key:keyof FormState,value:string)=>{setExisting(null);setForm(current=>({...current,[key]:value}));};
 
-  useEffect(()=>{
-    const requested=params.get('plan');
-    if(requested&&PLAN_VALUES.has(requested as (typeof PLAN_OPTIONS)[number][0])){
-      setForm(current=>({...current,planInterest:requested}));
-    }
-  },[params]);
 
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault(); if(!db)return setError('RCH Community Network is temporarily unavailable. Please try again shortly.');
