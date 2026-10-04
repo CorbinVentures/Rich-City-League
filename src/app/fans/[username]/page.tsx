@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
-import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getPublicClient } from '@/lib/public-data';
 import { FaBasketball, FaMedal } from 'react-icons/fa6';
 
