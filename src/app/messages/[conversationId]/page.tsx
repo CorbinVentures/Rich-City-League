@@ -15,7 +15,7 @@ import {
   FiInfo,
   FiMessageCircle,
   FiMoreHorizontal,
-  FiReply,
+  FiCornerUpLeft,
   FiSend,
   FiSmile,
   FiStar,
@@ -521,7 +521,7 @@ export default function ConversationPage() {
                           <div className="rcl-message-deleted">Message removed</div>
                         ) : (
                           <>
-                            {reply && <button type="button" className="rcl-reply-quote"><FiReply /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
+                            {reply && <button type="button" className="rcl-reply-quote"><FiCornerUpLeft /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
 
                             <div className="rcl-message-bubble">
                               {message.attachment_url && (
@@ -535,7 +535,7 @@ export default function ConversationPage() {
                             </div>
 
                             <div className="rcl-message-actions">
-                              <button type="button" onClick={() => setReplyTo(message)} aria-label="Reply"><FiReply /></button>
+                              <button type="button" onClick={() => setReplyTo(message)} aria-label="Reply"><FiCornerUpLeft /></button>
                               <button type="button" onClick={() => setReactionOpen(reactionOpen === message.id ? null : message.id)} aria-label="React"><FiSmile /></button>
                               {mine && <button type="button" onClick={() => setMessageMenu(messageMenu === message.id ? null : message.id)} aria-label="More message actions"><FiMoreHorizontal /></button>}
                             </div>
@@ -580,7 +580,7 @@ export default function ConversationPage() {
               <form onSubmit={send} className="rcl-message-composer">
                 {(replyTo || editing) && (
                   <div className="rcl-composer-context">
-                    <span>{editing ? <FiEdit2 /> : <FiReply />}</span>
+                    <span>{editing ? <FiEdit2 /> : <FiCornerUpLeft />}</span>
                     <div><strong>{editing ? 'Editing message' : `Replying to ${replyTo?.sender_id === user?.id ? 'yourself' : displayName(memberMap.get(replyTo?.sender_id ?? ''))}`}</strong><p>{editing?.body ?? replyTo?.body}</p></div>
                     <button type="button" onClick={() => { setReplyTo(null); if (editing) { setEditing(null); setBody(''); } }} aria-label="Cancel"><FiX /></button>
                   </div>
