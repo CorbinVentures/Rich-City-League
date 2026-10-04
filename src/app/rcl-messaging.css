@@ -2714,3 +2714,132 @@
     padding-inline: 6px;
   }
 }
+
+
+/* ---------- Inbox sharpening pass ----------
+ * Final authority for the compact iPhone/PWA presentation.
+ */
+.rcl-message-overview > div {
+  border-color: #D5E0EB;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(15,37,71,.035);
+}
+
+.rcl-inbox-workspace {
+  border-color: #D5E0EB;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(15,37,71,.04);
+}
+
+.rcl-inbox-sidebar nav button {
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.rcl-message-search {
+  overflow: hidden;
+  border-color: #D5E0EB;
+  border-radius: 13px;
+  background: #F8FAFC;
+  box-shadow: none;
+}
+
+.rcl-message-search > input,
+.rcl-message-search > input[type="search"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-style: none !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.rcl-message-search > input:focus,
+.rcl-message-search > input[type="search"]:focus {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.rcl-message-search > input[type="search"]::-webkit-search-decoration,
+.rcl-message-search > input[type="search"]::-webkit-search-cancel-button,
+.rcl-message-search > input[type="search"]::-webkit-search-results-button,
+.rcl-message-search > input[type="search"]::-webkit-search-results-decoration {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+.rcl-message-row {
+  border-bottom-color: #DDE7F0;
+}
+
+@media (max-width: 639px) {
+  .rcl-message-overview {
+    gap: 8px;
+  }
+
+  .rcl-message-overview > div {
+    min-height: 76px;
+    border-radius: 11px;
+    padding: 11px 12px;
+    box-shadow: none;
+  }
+
+  .rcl-inbox-workspace {
+    border-radius: 13px;
+    box-shadow: none;
+  }
+
+  .rcl-inbox-sidebar {
+    padding: 8px;
+  }
+
+  .rcl-inbox-sidebar nav {
+    gap: 6px;
+  }
+
+  .rcl-inbox-sidebar nav button {
+    min-height: 38px;
+    flex: 0 0 auto;
+    border-radius: 9px;
+    padding: 0 12px;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .rcl-inbox-sidebar nav button span {
+    white-space: nowrap;
+  }
+
+  .rcl-inbox-toolbar {
+    gap: 10px;
+    padding: 13px 12px;
+  }
+
+  .rcl-message-search {
+    min-height: 44px;
+    border-radius: 12px;
+    padding-left: 40px;
+    padding-right: 38px;
+  }
+
+  .rcl-message-search > input,
+  .rcl-message-search > input[type="search"] {
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 16px !important;
+  }
+
+  .rcl-message-row-main {
+    min-height: 78px;
+  }
+}

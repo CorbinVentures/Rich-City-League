@@ -23,7 +23,7 @@ export function SocialIdentity({ author, compact = false, link = true }: { autho
   const name = author?.display_name || author?.username || 'RCL Member';
   const identity = <span className={`rcl-social-identity ${compact ? 'is-compact' : ''} ${author?.is_system_account ? 'is-system' : ''}`}>
     <span className={`rcl-rep-avatar status-${status.key} ${author?.is_vip ? 'is-vip' : ''}`} style={{'--rep-progress': progress.percent + '%'} as React.CSSProperties}>
-      <span><ProfileAvatarMedia src={author?.avatar_url} alt={name} className="h-full w-full object-cover" /></span>
+      <span className="rcl-rep-avatar-core"><ProfileAvatarMedia src={author?.avatar_url} alt={name} className="h-full w-full object-cover" /></span>
       {!compact && <em>{level}</em>}
     </span>
     {!compact && <span className="rcl-social-identity-copy"><b>{name}{author?.is_system_account && <i>RCL OFFICIAL</i>}{!author?.is_system_account && author?.is_vip && <i>{author.vip_label || 'VIP'}</i>}</b><small>{author?.is_system_account ? 'Official RCL Automated Account' : `${formatReputation(rep)} REP · ${status.label} · LVL ${level}`}</small></span>}
