@@ -99,8 +99,10 @@ export function SiteHeader(){
         <span>RCH</span><b>RCH <i>Social</i></b>
       </Link>
 
-      <Link href="/search" className="rcl-global-search" aria-label="Search RCL">
-        <FaMagnifyingGlass/><span>Search basketball</span>
+      <Link href="/search" className="rcl-global-search" aria-label="Search RCH">
+        <FaMagnifyingGlass/>
+        <span>Search players, teams, runs…</span>
+        <kbd>⌘K</kbd>
       </Link>
 
       <div className="rcl-universal-tools">
