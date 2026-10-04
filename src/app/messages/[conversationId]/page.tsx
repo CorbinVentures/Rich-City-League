@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
   FiArchive,
+  FiArrowLeft,
   FiBellOff,
   FiCheck,
   FiCheckCircle,
@@ -12,6 +13,7 @@ import {
   FiEdit2,
   FiImage,
   FiInfo,
+  FiMessageCircle,
   FiMoreHorizontal,
   FiReply,
   FiSend,
@@ -447,7 +449,7 @@ export default function ConversationPage() {
     return (
       <main className="rcl-messages-shell">
         <Container maxWidth="lg" className="py-16 text-center">
-          <span className="rcl-messages-lock"><FiMessageCircleFallback /></span>
+          <span className="rcl-messages-lock"><FiMessageCircle /></span>
           <h1>Conversation unavailable</h1>
           <p>{error}</p>
           <Link href="/messages" className="rcl-message-primary-button">Back to messages</Link>
@@ -667,10 +669,3 @@ export default function ConversationPage() {
   );
 }
 
-function FiArrowLeft() {
-  return <span aria-hidden="true">←</span>;
-}
-
-function FiMessageCircleFallback() {
-  return <FiSend />;
-}
