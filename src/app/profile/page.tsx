@@ -6,6 +6,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { FaArrowLeft, FaBasketball, FaBullhorn, FaCamera, FaShieldHalved, FaUserGroup } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -116,7 +117,7 @@ export default function ProfilePage() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#071522] via-transparent to-black/20"/>
             <button type="button" onClick={() => coverInputRef.current?.click()} className="absolute right-4 top-4 inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/70 px-3 text-xs font-black uppercase tracking-wider text-white"><FaCamera/>{uploading === 'cover' ? 'Uploading…' : 'Change cover'}</button>
             <input aria-label="Upload cover photo" ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={e => void uploadProfileImage('cover', e.target.files?.[0])}/>
-            <div className="absolute -bottom-12 left-5 sm:left-7"><button type="button" onClick={() => avatarInputRef.current?.click()} className="relative block h-24 w-24 overflow-hidden rounded-2xl border-4 border-[#071522] bg-rcl-orange shadow-xl sm:h-28 sm:w-28">{avatarUrl ? <img src={avatarUrl} alt="Profile preview" className="h-full w-full object-cover"/> : <span className="grid h-full w-full place-items-center text-3xl font-black text-black">{displayName?.[0] ?? 'R'}</span>}<span className="absolute bottom-1 right-1 grid h-8 w-8 place-items-center rounded-lg bg-white text-black"><FaCamera/></span></button><input aria-label="Upload profile photo" ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={e => void uploadProfileImage('avatar', e.target.files?.[0])}/></div>
+            <div className="absolute -bottom-12 left-5 sm:left-7"><button type="button" onClick={() => avatarInputRef.current?.click()} className="relative block h-24 w-24 overflow-hidden rounded-2xl border-4 border-[#071522] bg-rcl-orange shadow-xl sm:h-28 sm:w-28"><ProfileAvatarMedia src={avatarUrl} alt="Profile preview" className="h-full w-full object-cover" /><span className="absolute bottom-1 right-1 grid h-8 w-8 place-items-center rounded-lg bg-white text-black"><FaCamera/></span></button><input aria-label="Upload profile photo" ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={e => void uploadProfileImage('avatar', e.target.files?.[0])}/></div>
           </div>
           <div className="px-5 pb-6 pt-16 sm:px-7"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile media</p><p className="mt-2 text-sm text-white/40">Use clear, recognizable images. Uploads must be images 5 MB or smaller.</p></div>
         </section>
