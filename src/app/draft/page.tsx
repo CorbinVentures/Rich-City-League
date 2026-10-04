@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
-import { ContentAssetBackground } from '@/components/ContentAssetBackground';
 import { DraftNightIntro } from '@/components/DraftNightIntro';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -216,15 +215,15 @@ export default function DraftNightPage() {
   if (loading) return <main className="min-h-screen"><Container maxWidth="xl" className="py-20"><div className="h-96 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
 
   return (
-    <main className="rcl-draft-platform relative min-h-screen overflow-hidden pb-24"><DraftNightIntro /><ContentAssetBackground assetKey="draft.cover" opacity={0.12} /><div className="relative z-10">
+    <main className="rcl-draft-platform relative min-h-screen overflow-hidden pb-24"><DraftNightIntro /><div className="relative z-10">
       <section className="rcl-draft-hero relative overflow-hidden">
         <div className="rcl-draft-hero-grid" aria-hidden="true" />
         <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16 lg:py-20">
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div>
-              <p className="rcl-kicker"><FaBolt /> RCL DRAFT PLATFORM</p>
-              <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.86] sm:text-7xl lg:text-8xl">Draft<br /><span className="text-rcl-orange">Night.</span></h1>
-              <p className="mt-5 max-w-xl text-sm leading-6 text-white/55 sm:text-base">Real players. Real teams. Real opportunity. The official Richmond basketball draft board, built for the entire RCL community.</p>
+              <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
+              <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Follow the official Rich City League draft in real time—prospects, team turns, selections, scouting details and draft history in one place.</p>
             </div>
             <div className="rcl-draft-live-card">
               <span className="rcl-live">LIVE DRAFT BOARD</span>
