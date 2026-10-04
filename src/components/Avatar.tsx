@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Profile } from '@/types';
-import { getInitials } from '@/utils/helpers';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 
 interface AvatarProps {
   profile: Profile | null;
@@ -18,18 +18,9 @@ export function Avatar({ profile, size = 'md', href }: AvatarProps) {
     lg: 'w-16 h-16 text-lg',
   };
 
-  const initials = getInitials(profile?.first_name || '', profile?.last_name || '');
-
   const content = (
-    <div
-      className={`${sizeMap[size]} rounded-full bg-rcl-red text-white flex items-center justify-center font-bold`}
-      style={{
-        backgroundImage: profile?.avatar_url ? `url(${profile.avatar_url})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      {!profile?.avatar_url && initials}
+    <div className={`${sizeMap[size]} overflow-hidden rounded-full bg-white`}>
+      <ProfileAvatarMedia src={profile?.avatar_url} alt={profile?.display_name || 'Profile'} className="h-full w-full object-cover" />
     </div>
   );
 

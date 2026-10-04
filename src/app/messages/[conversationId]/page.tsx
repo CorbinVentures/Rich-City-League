@@ -25,6 +25,7 @@ import {
   FiX,
 } from 'react-icons/fi';
 import { Container } from '@/components/Container';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -66,10 +67,6 @@ const reactionOptions = [
 
 function displayName(profile?: Profile | null) {
   return profile?.display_name ?? profile?.username ?? 'RCH member';
-}
-
-function initials(profile?: Profile | null) {
-  return displayName(profile).split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'R';
 }
 
 function isVideoAttachment(url: string | null) {
@@ -477,7 +474,7 @@ export default function ConversationPage() {
             <section className="rcl-thread-main">
               <header className="rcl-thread-header">
                 <div className="rcl-thread-avatar">
-                  {peer?.avatar_url ? <img src={peer.avatar_url} alt="" /> : conversation.conversation_type === 'direct' ? initials(peer) : <FiUsers />}
+                  {conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}
                   {peer && onlineIds.includes(peer.id) && <i />}
                 </div>
                 <div>
@@ -511,7 +508,7 @@ export default function ConversationPage() {
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
                     <article className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
-                      {!mine && !grouped && <div className="rcl-chat-avatar">{sender?.avatar_url ? <img src={sender.avatar_url} alt="" /> : initials(sender)}</div>}
+                      {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
                       <div className="rcl-chat-message-content">
@@ -631,7 +628,7 @@ export default function ConversationPage() {
             <aside className="rcl-thread-info">
               <header>
                 <button type="button" onClick={() => setShowInfo(false)} aria-label="Close details"><FiX /></button>
-                <div className="rcl-thread-info-avatar">{peer?.avatar_url ? <img src={peer.avatar_url} alt="" /> : conversation.conversation_type === 'direct' ? initials(peer) : <FiUsers />}</div>
+                <div className="rcl-thread-info-avatar">{conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}</div>
                 <h2>{conversationTitle}</h2>
                 <p>{presenceText}</p>
               </header>
@@ -645,7 +642,7 @@ export default function ConversationPage() {
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
                 {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/profile' : `/social/profile/${member.profile_id}`}>
-                  <span>{member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" /> : initials(member.profile)}</span>
+                  <span><ProfileAvatarMedia src={member.profile?.avatar_url} alt={displayName(member.profile)} className="h-full w-full object-cover" /></span>
                   <div><strong>{member.profile_id === user?.id ? 'You' : displayName(member.profile)}</strong><small>{member.role === 'admin' ? 'Conversation admin' : member.profile?.role ?? 'Member'}</small></div>
                   {onlineIds.includes(member.profile_id) && <i />}
                 </Link>)}
