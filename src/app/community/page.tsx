@@ -5,7 +5,7 @@ import { getPublicClient } from '@/lib/public-data';
 import { COMMUNITY_ORGANIZATION_TYPES } from '@/lib/network-taxonomy';
 import {
   FaArrowRight, FaBullhorn, FaCalendarDays, FaCar, FaHeart, FaLocationDot,
-  FaPeopleGroup, FaPersonRunning, FaStore,
+  FaPersonRunning, FaStore,
 } from 'react-icons/fa6';
 
 export const metadata = {
