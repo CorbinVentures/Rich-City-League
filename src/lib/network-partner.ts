@@ -5,21 +5,21 @@ export type NetworkCreditType = 'event-spotlight' | 'regional-feature' | 'statew
 export const NETWORK_PARTNER_PLANS = {
   network: {
     code: 'network' as const,
-    name: 'Network',
+    name: 'Community Partner',
     monthlyPriceCents: 0,
-    description: 'Free organization presence and organic discovery across RCL Network.',
+    description: 'Free organization presence and organic discovery across the RCH Network.',
   },
   amplify: {
     code: 'amplify' as const,
     name: 'Amplify',
     monthlyPriceCents: 4900,
-    description: 'Enhanced discovery, recurring promotion credits and full RCL Reach reporting.',
+    description: 'Enhanced discovery, recurring promotion credits and full RCH Reach reporting.',
   },
   premier: {
     code: 'premier' as const,
-    name: 'Premier Partner',
+    name: 'Partner Pro',
     monthlyPriceCents: 14900,
-    description: 'Statewide inventory, deeper reporting, cross-channel distribution and priority media consideration.',
+    description: 'Recurring priority inventory, deeper reporting, cross-channel distribution and priority media consideration.',
   },
 } satisfies Record<NetworkPartnerPlanCode, { code: NetworkPartnerPlanCode; name: string; monthlyPriceCents: number; description: string }>;
 
