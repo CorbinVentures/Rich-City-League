@@ -16,6 +16,8 @@ type SponsoredOrganization = {
   region:string;
   is_verified:boolean;
   network_tier:string;
+  logo_url:string|null;
+  cover_url:string|null;
 };
 type Promotion = {
   id:string;
@@ -52,7 +54,7 @@ export function NetworkSponsoredPlacement({
     const load=async()=>{
       const now=new Date().toISOString();
       const {data,error}=await db.from('network_promotions')
-        .select('id,organization_id,event_id,campaign_id,placement,headline,disclosure_label,destination_url,target_regions,organization:network_organizations!organization_id(id,slug,name,short_name,city,region,is_verified,network_tier)')
+        .select('id,organization_id,event_id,campaign_id,placement,headline,disclosure_label,destination_url,target_regions,organization:network_organizations!organization_id(id,slug,name,short_name,city,region,is_verified,network_tier,logo_url,cover_url)')
         .eq('placement',placement)
         .eq('status','active')
         .lte('starts_at',now)
@@ -87,13 +89,15 @@ export function NetworkSponsoredPlacement({
     className={className}
   >
     <article className={variantClass(variant)}>
+      {org.cover_url&&<div aria-hidden="true" className="absolute inset-0 bg-cover bg-center opacity-[.08]" style={{backgroundImage:'url("'+org.cover_url.replaceAll('"','')+'")'}}/>}
+      <div className="relative z-[1]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2 rounded-full border border-rcl-orange/30 bg-rcl-orange/[.08] px-2.5 py-1 text-[9px] font-black uppercase tracking-[.16em] text-rcl-orange"><FaBullhorn/>{promotion.disclosure_label||'Sponsored'}</span>
-        <span className="text-[9px] font-black uppercase tracking-[.15em] text-white/25">RCL Network</span>
+        <span className="text-[9px] font-black uppercase tracking-[.15em] text-white/25">RCH Sponsor</span>
       </div>
       <div className={`${variant==='banner'?'mt-3 sm:flex sm:items-end sm:justify-between sm:gap-6':'mt-4'}`}>
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wide text-rcl-blue"><span>{org.name}</span>{org.is_verified&&<FaCircleCheck/>}</div>
+          <div className="flex items-center gap-3"><span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-rcl-blue/20 bg-rcl-blue/10 bg-cover bg-center font-display text-[10px] font-black text-rcl-blue" style={org.logo_url?{backgroundImage:'url("'+org.logo_url.replaceAll('"','')+'")'}:undefined}>{org.logo_url?'':(org.short_name||org.name).slice(0,3).toUpperCase()}</span><div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wide text-rcl-blue"><span>{org.name}</span>{org.is_verified&&<FaCircleCheck/>}</div></div>
           <h3 className={`${variant==='feed'?'text-2xl':'text-xl sm:text-2xl'} mt-1 font-display font-black uppercase leading-tight text-white`}>{promotion.headline||`Discover ${org.name}`}</h3>
           <p className="mt-2 text-xs text-white/35">{location} · Paid distribution affects visibility only.</p>
         </div>
@@ -111,13 +115,14 @@ export function NetworkSponsoredPlacement({
           Learn more <FaArrowRight/>
         </TrackedNetworkLink>
       </div>
+      </div>
     </article>
   </NetworkImpression>;
 }
 
 function variantClass(variant:Variant){
-  if(variant==='feed')return 'rounded-2xl border border-rcl-orange/25 bg-[linear-gradient(145deg,rgba(59,130,246,.07),rgba(7,17,27,.96))] p-5 shadow-[0_18px_60px_rgba(0,0,0,.18)]';
-  if(variant==='banner')return 'rounded-2xl border border-rcl-orange/20 bg-[linear-gradient(120deg,rgba(59,130,246,.07),rgba(7,21,34,.78))] p-4 sm:p-5';
-  return 'rounded-2xl border border-rcl-orange/20 bg-[#071522]/70 p-5';
+  if(variant==='feed')return 'relative overflow-hidden rounded-2xl border border-rcl-orange/25 bg-[linear-gradient(145deg,rgba(59,130,246,.07),rgba(7,17,27,.96))] p-5 shadow-[0_18px_60px_rgba(0,0,0,.18)]';
+  if(variant==='banner')return 'relative overflow-hidden rounded-2xl border border-rcl-orange/20 bg-[linear-gradient(120deg,rgba(59,130,246,.07),rgba(7,21,34,.78))] p-4 sm:p-5';
+  return 'relative overflow-hidden rounded-2xl border border-rcl-orange/20 bg-[#071522]/70 p-5';
 }
 function pretty(value:string){return value.replaceAll('-',' ').replace(/\b\w/g,(letter)=>letter.toUpperCase());}
