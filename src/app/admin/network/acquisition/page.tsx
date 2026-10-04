@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { NETWORK_ORGANIZATION_TYPE_VALUES, NETWORK_REGION_VALUES } from '@/lib/network-taxonomy';
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -23,8 +24,8 @@ type Prospect={id:string;organization_name:string;organization_type:string;city:
 type Created={id:string;slug:string};
 type ImportRow=Record<string,string>;
 
-const TYPES=['league','tournament','program','club','team','media','creator','facility','training','other'];
-const REGIONS=['central-virginia','hampton-roads','northern-virginia','shenandoah','southwest-virginia','statewide','other'];
+const TYPES=[...NETWORK_ORGANIZATION_TYPE_VALUES];
+const REGIONS=[...NETWORK_REGION_VALUES];
 const PROSPECT_STATUSES=['staged','ready','published','duplicate','archived'];
 const OUTREACH=['not-contacted','queued','contacted','replied','interested','claim-sent','claimed','verified','paid-prospect','not-interested'];
 const CSV_HEADERS=['organization_name','organization_type','region','city','website_url','instagram_url','facebook_url','x_url','youtube_url','source_url','source_label','description','contact_name','contact_role','contact_email','contact_phone','contact_instagram_url','contact_source_url','contact_checked_at','notes','status','outreach_status'];

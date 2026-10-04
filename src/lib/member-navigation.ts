@@ -41,6 +41,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
       {label:'Virginia Network',href:'/network',icon:FaGlobe},
+      {label:'Community Network',href:'/community',icon:FaPeopleGroup},
       {label:'News',href:'/news',icon:FaNewspaper},
       {label:'RCH TV',href:'/media',icon:FaPlay},
     ],
@@ -82,7 +83,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
 ];
 
 const SOCIAL=['/social'];
-const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
+const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 

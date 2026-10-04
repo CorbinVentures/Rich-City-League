@@ -35,7 +35,7 @@ describe('public launch middleware', () => {
 
   it.each([
     '/', '/league', '/players', '/teams', '/schedule', '/games', '/standings', '/stats', '/rankings',
-    '/news', '/media', '/about', '/network', '/organizations', '/organizations/region/central-virginia',
+    '/news', '/media', '/about', '/network', '/community', '/organizations', '/organizations/region/central-virginia', '/organizations/region/tri-cities',
     '/organizations/rich-city-league', '/organizations/example/claim', '/network/partners', '/network/partners/apply',
     '/network/events/example-event', '/runs', '/shop',
   ])('keeps public launch route %s reachable anonymously', async (pathname) => {

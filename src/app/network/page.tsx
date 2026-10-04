@@ -52,6 +52,7 @@ export default async function NetworkPage() {
           <p className="mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg">Discover leagues, tournaments, programs, events, creators, and basketball culture across Virginia—while Rich City League remains RCL&apos;s flagship competitive property.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/organizations" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-blue px-5 text-xs font-black uppercase tracking-wide text-[#03101a]">Explore organizations <FaArrowRight/></Link>
+            <Link href="/community" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/25 px-5 text-xs font-black uppercase tracking-wide text-rcl-blue">RCH Community <FaPeopleGroup/></Link>
             <Link href="/network/partners" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-orange/35 bg-rcl-orange/[.06] px-5 text-xs font-black uppercase tracking-wide text-rcl-orange">Grow your exposure <FaBullhorn/></Link>
             <Link href="/network/dashboard" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/10 px-5 text-xs font-black uppercase tracking-wide text-white/55">Partner dashboard <FaChartLine/></Link>
           </div>
