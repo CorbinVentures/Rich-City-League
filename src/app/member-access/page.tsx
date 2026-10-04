@@ -5,25 +5,56 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FaArrowRight, FaBasketball, FaCompass, FaLock, FaShieldHalved, FaUser } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
-
-function safeNext(raw:string|null) {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return '/social';
-  return raw;
-}
+import { getSafePostAuthPath } from '@/lib/auth-redirect';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export default function MemberAccessPage() {
   const params = useSearchParams();
   const { user, profile, loading } = useAuth();
   const [intro, setIntro] = useState(true);
+  const [continuing, setContinuing] = useState(false);
+  const [continueError, setContinueError] = useState('');
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIntro(false), 1100);
     return () => window.clearTimeout(timer);
   }, []);
 
-  const next = safeNext(params.get('next'));
+  const next = getSafePostAuthPath(params.get('next'), '/today');
   const inactive = params.get('inactive') === '1';
   const needsProfile = Boolean(user && !profile && !loading);
+
+  async function continueToMemberWorkspace() {
+    if (continuing) return;
+    setContinuing(true);
+    setContinueError('');
+
+    const client = getSupabaseClient();
+    if (!client) {
+      window.location.replace(`/auth/sign-in?next=${encodeURIComponent(next)}`);
+      return;
+    }
+
+    try {
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        window.location.replace(`/auth/sign-in?next=${encodeURIComponent(next)}`);
+        return;
+      }
+
+      // Safari can retain a usable browser session while the middleware cookie
+      // is stale. Refreshing once rewrites the SSR cookies before a full
+      // document navigation, preventing the member-access bounce loop.
+      const { error: refreshError } = await client.auth.refreshSession();
+      if (refreshError) throw refreshError;
+
+      window.location.assign(next);
+    } catch (error) {
+      console.error('Unable to refresh member access session', error);
+      setContinueError('Your browser session needs to be refreshed. Please sign in again.');
+      setContinuing(false);
+    }
+  }
 
   return <main className="fixed inset-0 z-[9999] overflow-y-auto bg-[#090D12] text-white">
     <div className={`pointer-events-none fixed inset-0 z-20 grid place-items-center bg-[#090D12] transition-all duration-500 ${intro ? 'opacity-100' : 'scale-[1.02] opacity-0'}`} aria-hidden={!intro}>
@@ -66,7 +97,8 @@ export default function MemberAccessPage() {
               <p className="text-xs font-black uppercase tracking-[.2em] text-emerald-300">Access verified</p>
               <h3 className="mt-3 font-display text-3xl font-black uppercase">Welcome back.</h3>
               <p className="mt-3 text-sm leading-6 text-white/45">Your RCL member workspace is ready.</p>
-              <Link href={next} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Continue <FaArrowRight/></Link>
+              <button type="button" disabled={continuing} onClick={() => void continueToMemberWorkspace()} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-60">{continuing ? 'Refreshing access…' : <>Continue <FaArrowRight/></>}</button>
+              {continueError && <p role="alert" className="mt-3 text-sm text-red-300">{continueError}</p>}
             </> : <>
               <p className="text-xs font-black uppercase tracking-[.2em] text-white/45">Member sign in</p>
               <h3 className="mt-3 font-display text-3xl font-black uppercase">Sign in to continue.</h3>
