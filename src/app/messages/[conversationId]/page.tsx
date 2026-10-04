@@ -26,7 +26,6 @@ import {
 } from 'react-icons/fi';
 import { Container } from '@/components/Container';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
-import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import {
