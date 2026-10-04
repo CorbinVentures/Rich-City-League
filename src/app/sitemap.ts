@@ -10,6 +10,8 @@ const core = [
   ['/richmond-basketball-runs',.9,'daily'],
   ['/network',.95,'daily'],
   ['/community',.9,'daily'],
+  ['/sponsors',.9,'weekly'],
+  ['/sponsors/start',.8,'weekly'],
   ['/organizations',.95,'daily'],
   ['/network/partners',.85,'weekly'],
   ['/network/partners/apply',.8,'weekly'],

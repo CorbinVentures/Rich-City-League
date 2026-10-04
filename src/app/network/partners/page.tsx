@@ -185,7 +185,8 @@ function ProductCard({name,price,code,tagline,features,accent}:{name:string;pric
 }
 
 function AdvertiserCard({name,price,code,copy}:{name:string;price:string;code:string;copy:string}){
-  return <Link href={`/network/partners/apply?plan=${code}`} className="group block rounded-2xl border border-white/10 bg-white/[.025] p-5 transition hover:border-rcl-orange/30">
+  const href=code==='major-sponsor'?'/sponsors/start?product=category-exclusive':'/sponsors';
+  return <Link href={href} className="group block rounded-2xl border border-white/10 bg-white/[.025] p-5 transition hover:border-rcl-orange/30">
     <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">{name}</p><strong className="mt-1 block font-display text-3xl font-black uppercase">{price}</strong></div><FaArrowRight className="mt-2 text-rcl-orange transition group-hover:translate-x-1"/></div>
     <p className="mt-3 text-xs leading-5 text-white/40">{copy}</p>
   </Link>;

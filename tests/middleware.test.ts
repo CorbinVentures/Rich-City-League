@@ -37,7 +37,7 @@ describe('public launch middleware', () => {
     '/', '/league', '/players', '/teams', '/schedule', '/games', '/standings', '/stats', '/rankings',
     '/news', '/media', '/about', '/network', '/community', '/organizations', '/organizations/region/central-virginia', '/organizations/region/tri-cities',
     '/organizations/rich-city-league', '/organizations/example/claim', '/network/partners', '/network/partners/apply',
-    '/network/events/example-event', '/runs', '/shop',
+    '/network/events/example-event', '/sponsors', '/sponsors/start', '/runs', '/shop',
   ])('keeps public launch route %s reachable anonymously', async (pathname) => {
     const response = await middleware(new NextRequest(`http://localhost${pathname}`));
     expect(response.status).toBe(200);
