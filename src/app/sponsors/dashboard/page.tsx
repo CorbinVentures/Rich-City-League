@@ -77,7 +77,7 @@ export default function SponsorDashboardPage(){
 
       <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Metric icon={<FaGlobe/>} label="Delivered reach" value={metrics.reach} detail="RCH campaign delivery"/>
-        <Metric icon={<FaMousePointer/>} label="Outbound clicks" value={metrics.clicks} detail="Tracked destination clicks"/>
+        <Metric icon={<FaArrowRight/>} label="Outbound clicks" value={metrics.clicks} detail="Tracked destination clicks"/>
         <Metric icon={<FaChartLine/>} label="CTR" value={ctr.toFixed(1)+'%'} detail="Clicks ÷ delivered reach"/>
         <Metric icon={<FaCircleCheck/>} label="Live campaigns" value={live} detail="Currently delivering"/>
         <Metric icon={<FaClock/>} label="In review / ready" value={awaiting} detail="Pending or approved"/>
