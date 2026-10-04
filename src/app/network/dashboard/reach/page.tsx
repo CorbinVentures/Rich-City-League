@@ -124,7 +124,7 @@ export default function ReachDashboardPage() {
   });
 
   if(authLoading||(!memberships.length&&loading))return <main className="min-h-screen bg-[#03070d] py-16 text-white"><Container maxWidth="xl"><p className="text-sm text-white/45">Loading RCL Reach…</p></Container></main>;
-  if(!user)return <main className="min-h-screen bg-[#03070d] py-16 text-white"><Container maxWidth="md"><h1 className="font-display text-4xl font-black uppercase">Sign in to RCL Reach</h1><Link href="/login?next=/network/dashboard/reach" className="mt-5 inline-flex rounded-xl bg-rcl-blue px-5 py-3 text-xs font-black uppercase text-black">Sign in</Link></Container></main>;
+  if(!user)return <main className="min-h-screen bg-[#03070d] py-16 text-white"><Container maxWidth="md"><h1 className="font-display text-4xl font-black uppercase">Sign in to RCL Reach</h1><Link href="/auth/sign-in?next=/network/dashboard/reach" className="mt-5 inline-flex rounded-xl bg-rcl-blue px-5 py-3 text-xs font-black uppercase text-black">Sign in</Link></Container></main>;
   if(!memberships.length)return <main className="min-h-screen bg-[#03070d] py-16 text-white"><Container maxWidth="lg"><h1 className="font-display text-5xl font-black uppercase">Claim an organization first.</h1><p className="mt-4 max-w-2xl text-sm text-white/45">RCL Reach is available to verified organization operators.</p><Link href="/organizations" className="mt-6 inline-flex rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">Find your organization</Link></Container></main>;
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
