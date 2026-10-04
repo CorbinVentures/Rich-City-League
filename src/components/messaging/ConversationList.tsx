@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { FiArchive, FiBellOff, FiMessageCircle, FiStar, FiUsers } from 'react-icons/fi';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
-import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 
 export type ConversationListItem = {
   id: string;
