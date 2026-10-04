@@ -44,6 +44,7 @@ type Story = {
   body: string | null;
   media_url: string | null;
   expires_at: string;
+  created_at?: string;
   author?: NetworkAuthor;
 };
 
@@ -171,7 +172,7 @@ export default function NetworkHome() {
       const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult, suggestedResult, communitiesResult, runsResult] = await Promise.all([
         db.from('posts').select('id,author_id,body,media_urls,created_at,is_automated,automation_type').eq('status', 'published').order('created_at', { ascending: false }).limit(100),
         db.from('post_reposts').select('id,post_id,profile_id,created_at').order('created_at', { ascending: false }).limit(120),
-        db.from('stories').select('id,author_id,body,media_url,expires_at').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(30),
+        db.from('stories').select('id,author_id,body,media_url,expires_at,created_at').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(30),
         user ? db.from('follows').select('following_id').eq('follower_id', user.id) : Promise.resolve({ data: [], error: null }),
         user ? db.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),
         user ? db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
@@ -314,7 +315,7 @@ export default function NetworkHome() {
     try {
       const mediaUrl = storyFile ? await uploadMedia(storyFile, 'stories') : null;
       const storyType = mediaUrl ? (storyFile?.type.startsWith('video/') ? 'video' : 'photo') : 'text';
-      const { data, error: storyError } = await db.from('stories').insert({ author_id: user.id, story_type: storyType, body: storyBody.trim() || null, media_url: mediaUrl, audience: 'public' }).select('id,author_id,body,media_url,expires_at').single();
+      const { data, error: storyError } = await db.from('stories').insert({ author_id: user.id, story_type: storyType, body: storyBody.trim() || null, media_url: mediaUrl, audience: 'public' }).select('id,author_id,body,media_url,expires_at,created_at').single();
       if (storyError) throw storyError;
       if (data) setStories((current) => [{ ...data, author: currentProfile ?? { id: user.id, display_name: 'RCL Member', username: null } }, ...current]);
       setStoryBody(''); setStoryFile(null); setStoryPreview(''); setStoryComposerOpen(false);
@@ -478,7 +479,11 @@ export default function NetworkHome() {
         <section className="rcl-feed-intro">
           <div><p>Home</p><h1>Your basketball world</h1><span>People, runs, highlights and competition around you.</span></div>
           <div className="rcl-feed-intro-actions">
-            <label><span className="sr-only">Search this feed</span><FaMagnifyingGlass/><input value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search this feed"/></label>
+            <div className="rcl-feed-search" role="search">
+              <FaMagnifyingGlass className="rcl-feed-search-icon"/>
+              <input aria-label="Search this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search posts, people and topics"/>
+              {search && <button type="button" onClick={()=>setSearch('')} className="rcl-feed-search-clear" aria-label="Clear feed search"><FaXmark/></button>}
+            </div>
             {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
           </div>
         </section>
@@ -534,8 +539,63 @@ export default function NetworkHome() {
   );
 }
 
+function storyTimeRemaining(expiresAt: string) {
+  const ms = Math.max(0, new Date(expiresAt).getTime() - Date.now());
+  const hours = Math.max(1, Math.ceil(ms / 3_600_000));
+  return hours >= 24 ? '24h' : `${hours}h`;
+}
+
 function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { stories: Story[]; user: { id: string } | null; currentProfile: NetworkAuthor | null; onCreate: () => void; onOpen: (index: number) => void }) {
-  return <section className="rcl-story-rail overflow-hidden rounded-2xl border p-3"><div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"><button onClick={onCreate} className="w-[70px] shrink-0 text-center"><span className="relative mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-rcl-orange/60 bg-white/[.03]"><SocialIdentity author={currentProfile ?? { display_name: user ? 'You' : 'Guest', username: null }} compact/><span className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-white bg-rcl-orange text-xs text-white"><FaPlus/></span></span><span className="mt-2 block truncate text-[10px] font-black uppercase tracking-wider text-white/45">Your story</span></button>{stories.map((story, index) => <button key={story.id} onClick={() => onOpen(index)} className="w-[70px] shrink-0 text-center"><span className="mx-auto block h-16 w-16 rounded-full bg-gradient-to-br from-rcl-orange to-rcl-blue p-[2px]"><span className="grid h-full w-full place-items-center overflow-hidden rounded-full border-2 border-white bg-[#EDF4FA]">{story.media_url ? isVideoUrl(story.media_url) ? <video src={story.media_url} muted playsInline className="h-full w-full object-cover"/> : <img src={story.media_url} alt="" className="h-full w-full object-cover"/> : <SocialIdentity author={story.author} compact/>}</span></span><span className="mt-2 block truncate text-[10px] font-bold text-white/45">{story.author?.display_name || story.author?.username || 'RCL'}</span></button>)}</div></section>;
+  const grouped = new Map<string, { story: Story; index: number; count: number }>();
+  stories.forEach((story, index) => {
+    const existing = grouped.get(story.author_id);
+    if (existing) existing.count += 1;
+    else grouped.set(story.author_id, { story, index, count: 1 });
+  });
+  const timeline = [...grouped.values()];
+  const yourName = currentProfile?.display_name || currentProfile?.username || (user ? 'You' : 'Guest');
+  const yourInitial = yourName.trim().slice(0, 1).toUpperCase() || 'R';
+
+  return <section className="rcl-story-rail">
+    <div className="rcl-story-rail-head">
+      <div>
+        <p>Stories</p>
+        <span>24-hour updates from the RCH community</span>
+      </div>
+      <small>{timeline.length ? `${timeline.length} active` : 'Start the timeline'}</small>
+    </div>
+    <div className="rcl-story-track">
+      <button type="button" onClick={onCreate} className="rcl-story-card rcl-story-create">
+        <span className="rcl-story-media">
+          {currentProfile?.avatar_url ? <img src={currentProfile.avatar_url} alt="" /> : <b>{yourInitial}</b>}
+          <i><FaPlus/></i>
+        </span>
+        <span className="rcl-story-label"><strong>Your story</strong><small>Add an update</small></span>
+      </button>
+
+      {timeline.map(({ story, index, count }) => {
+        const name = story.author?.display_name || story.author?.username || 'RCL Member';
+        const initial = name.trim().slice(0, 1).toUpperCase() || 'R';
+        return <button type="button" key={story.author_id} onClick={() => onOpen(index)} className="rcl-story-card">
+          <span className="rcl-story-media rcl-story-media-active">
+            {story.media_url ? isVideoUrl(story.media_url)
+              ? <video src={story.media_url} muted playsInline preload="metadata" />
+              : <img src={story.media_url} alt="" />
+              : story.author?.avatar_url ? <img src={story.author.avatar_url} alt="" /> : <b>{initial}</b>}
+            {story.media_url && isVideoUrl(story.media_url) && <i className="rcl-story-video"><FaVideo/></i>}
+            {count > 1 && <em>{count}</em>}
+          </span>
+          <span className="rcl-story-label"><strong>{name}</strong><small>{storyTimeRemaining(story.expires_at)} left</small></span>
+        </button>;
+      })}
+
+      {!timeline.length && <button type="button" onClick={onCreate} className="rcl-story-empty-card">
+        <span><FaPlus/></span>
+        <strong>Start today&apos;s story</strong>
+        <small>Share a quick photo, clip or basketball update.</small>
+      </button>}
+    </div>
+  </section>;
 }
 
 function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
