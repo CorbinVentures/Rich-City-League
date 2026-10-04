@@ -39,7 +39,7 @@ export function OrganizationFollowButton({
 
   const toggle = async () => {
     if (!user) {
-      router.push(`/login?next=${encodeURIComponent(`/organizations/${organizationSlug}`)}`);
+      router.push(`/auth/sign-in?next=${encodeURIComponent(`/organizations/${organizationSlug}`)}`);
       return;
     }
     if (busy) return;
