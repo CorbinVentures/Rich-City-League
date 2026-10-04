@@ -15,7 +15,7 @@ export function isNavigationActive(pathname:string,href:string){
 }
 
 const SOCIAL_FAMILY=['/social'];
-const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/news','/media','/communities','/friends'];
+const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
 const CREATE_FAMILY=['/create'];
 const RUNS_FAMILY=['/runs','/richmond-basketball-runs'];
 const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
@@ -59,6 +59,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
       {label:'Virginia Network',href:'/network',icon:FaGlobe},
+      {label:'Community Network',href:'/community',icon:FaPeopleGroup},
       {label:'News',href:'/news',icon:FaNewspaper},
       {label:'RCH TV',href:'/media',icon:FaPlay},
     ],
