@@ -599,3 +599,40 @@
     transition: none !important;
   }
 }
+
+
+/* ---------- Mobile search field hardening ----------
+ * Keep the feed search as one clean control. iOS/PWA form styling must not
+ * render a second rounded rectangle inside the search shell.
+ */
+.rcl-platform-root .rcl-feed-search > input[type="search"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-style: none !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.rcl-platform-root .rcl-feed-search > input[type="search"]:focus {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-decoration,
+.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-cancel-button,
+.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-results-button,
+.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-results-decoration {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
