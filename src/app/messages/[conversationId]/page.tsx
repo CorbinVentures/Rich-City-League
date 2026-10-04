@@ -70,10 +70,6 @@ function displayName(profile?: Profile | null) {
   return profile?.display_name ?? profile?.username ?? 'RCH member';
 }
 
-function initials(profile?: Profile | null) {
-  return displayName(profile).split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'R';
-}
-
 function isVideoAttachment(url: string | null) {
   return Boolean(url && /\.(mp4|webm|mov|ogv)(?:$|\?)/i.test(url));
 }
