@@ -85,7 +85,7 @@ type Highlight = {
 };
 
 const dimensionMeta: Array<{ key: RepDimension; label: string; blurb: string }> = [
-  { key: 'hooper', label: 'Hooper', blurb: 'Games, stats and Lab work' },
+  { key: 'hooper', label: 'Hooper', blurb: 'Games, stats and player development' },
   { key: 'community', label: 'Community', blurb: 'Participation and conversation' },
   { key: 'creator', label: 'Creator', blurb: 'Posts, media and highlights' },
   { key: 'coach', label: 'Coach', blurb: 'Scouting and basketball leadership' },
@@ -192,7 +192,7 @@ export function BasketballOSToday() {
       eyebrow="RCL Basketball OS"
       title="Today in RCL"
       accent={rep ? `${rep.status_label} · Level ${rep.level}` : 'Your basketball world'}
-      description="One personalized command center for tonight’s games, your REP, weekly missions, runs, training, highlights and everything moving across Rich City League."
+      description="One personalized command center for tonight’s games, your REP, weekly missions, runs, highlights and everything moving across Rich City League."
       assetKey="social.cover"
       actions={<div className="flex flex-wrap gap-2"><Link href="/social" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black">Open social <FaArrowRight /></Link><Link href="/dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider">My career</Link></div>}
       meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5 shadow-xl backdrop-blur"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Your REP</p><p className="mt-1 font-display text-4xl font-black">{rep?.total_xp ?? 0}</p><p className="mt-2 text-xs text-white/40">{user ? `${completed}/${missions.length || 6} weekly missions complete` : 'Sign in to activate your REP board'}</p></div>}
