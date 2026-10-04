@@ -54,6 +54,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Standings',href:'/standings',icon:FaChartSimple},
       {label:'Stats',href:'/stats',icon:FaChartSimple},
       {label:'Rankings',href:'/rankings',icon:FaTrophy},
+      {label:'Draft Night',href:'/draft',icon:FaCrown},
       {label:'Fantasy',href:'/fantasy',icon:FaTrophy},
     ],
   },
