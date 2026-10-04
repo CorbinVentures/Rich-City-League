@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaMagnifyingGlass, FaBasketball, FaRegComment, FaCalendarDays, FaNewspaper } from 'react-icons/fa6';
+import { FaMagnifyingGlass, FaBasketball, FaRegComment, FaCalendarDays, FaNewspaper, FaXmark } from 'react-icons/fa6';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
 
 type Member = SocialIdentityAuthor & { id:string; first_name:string|null; last_name:string|null; role:string|null };
@@ -70,8 +70,13 @@ export default function GlobalSearchPage() {
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <section className="border-b border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,.35),transparent_70%)] py-10"><Container maxWidth="xl"><p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">RCL SEARCH</p><h1 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Find the <span className="text-rcl-gold">whole league.</span></h1><p className="mt-3 max-w-2xl text-sm text-white/45">Members, players, teams, games, venues, news and Social posts from one search.</p></Container></section>
     <Container maxWidth="lg" className="py-7">
-      <label className="relative block"><span className="sr-only">Search Rich City League</span><FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35"/><input autoFocus type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search a name, @username, team, venue, article or keyword…" className="w-full rounded-2xl border border-white/10 bg-[#07111b] py-4 pl-12 pr-4 text-base outline-none focus:border-rcl-orange/60"/></label>
-      {!query.trim()&&<div className="mt-8 rounded-3xl border border-white/10 bg-white/[.025] p-8"><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-orange">SEARCH EVERYTHING</p><p className="mt-3 text-sm text-white/45">Try a player name, username, team, Richmond venue, “final”, a news topic, or words from a Social post.</p></div>}
+      <label className="rcl-search-page-bar">
+        <span className="sr-only">Search Rich City League</span>
+        <FaMagnifyingGlass/>
+        <input autoFocus type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search people, players, teams, games, news and posts"/>
+        {query && <button type="button" onClick={()=>setQuery('')} aria-label="Clear search"><FaXmark/></button>}
+      </label>
+      {!query.trim()&&<div className="rcl-search-starter mt-6"><p>Popular searches</p><div><button type="button" onClick={()=>setQuery('Richmond')}>Richmond</button><button type="button" onClick={()=>setQuery('RCL')}>RCL</button><button type="button" onClick={()=>setQuery('final')}>Final scores</button><button type="button" onClick={()=>setQuery('coach')}>Coaches</button></div><span>Search members, players, teams, venues, news and Social posts from one place.</span></div>}
       {query.trim().length===1&&<p className="mt-6 text-sm text-white/40">Type at least 2 characters to search.</p>}
       {loading&&<div className="py-14 text-center text-xs font-black uppercase tracking-widest text-white/40">Searching RCL…</div>}
       {error&&<p className="mt-6 rounded-xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-300">{error}</p>}
