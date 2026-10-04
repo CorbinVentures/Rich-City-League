@@ -67,6 +67,7 @@ describe('site route integrity', () => {
       /new URL\(\s*["'`]([^"'`]+)["'`]/g,
       /\.pathname\s*=\s*["'`]([^"'`]+)["'`]/g,
       /action\s*=\s*["'`]([^"'`]+)["'`]/g,
+      /["'`](\/[a-zA-Z0-9_./-]+)\?[^"'`]*\$\{encodeURIComponent\(\s*["'`]/g,
     ];
 
     for (const file of sourceFiles) {
