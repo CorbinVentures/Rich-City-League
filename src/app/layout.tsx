@@ -47,10 +47,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/icon', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.svg?v=black-r-1', type: 'image/svg+xml' },
+      { url: '/icon?v=black-r-1', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
+    apple: [{ url: '/apple-icon?v=black-r-1', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,
