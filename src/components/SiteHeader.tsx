@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { FaBars, FaBell, FaGear, FaMagnifyingGlass, FaUser } from 'react-icons/fa6';
 import { NavigationDrawer } from '@/components/NavigationDrawer';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { MessageQuickMenu } from '@/components/messaging/MessageQuickMenu';
 import {
   isPrimaryNavigationActive,
@@ -75,7 +76,6 @@ export function SiteHeader(){
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
   const profileHref=user?'/social/profile/me':'/auth/sign-in?redirect=/social';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
-  const initial=(displayName||user?.email||'R').trim().slice(0,1).toUpperCase();
 
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
@@ -101,7 +101,7 @@ export function SiteHeader(){
 
       <div className="rcl-universal-account">
         <Link href={profileHref} className="rcl-universal-profile">
-          <span className="rcl-universal-avatar">{user?initial:'R'}</span>
+          <span className="rcl-universal-avatar">{user?<ProfileAvatarMedia src={profile?.avatar_url} alt={displayName} className="h-full w-full object-cover" />:'R'}</span>
           <span><b>{user?displayName:'Join RCL'}</b><small>{user?'View basketball identity':'Create a free profile'}</small></span>
           <strong>›</strong>
         </Link>
