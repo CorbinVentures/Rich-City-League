@@ -43,7 +43,7 @@ const partnerProducts = [
   },
   {
     name:'Partner Pro',
-    price:'$199/mo',
+    price:'From $149/mo',
     code:'partner-pro',
     accent:'blue' as const,
     tagline:'Built for organizations that have something happening every month.',
