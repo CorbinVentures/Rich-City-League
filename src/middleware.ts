@@ -9,19 +9,6 @@ type AccessProfile = {
   onboarding_complete?: boolean | null;
 };
 
-const MEMBER_ONLY_PREVIEW = process.env.NODE_ENV !== 'test';
-
-const PREVIEW_PUBLIC_ROUTE_PREFIXES = [
-  '/access',
-  '/auth/sign-in',
-  '/auth/forgot-password',
-  '/auth/update-password',
-  '/auth/callback',
-  '/auth/confirm',
-  '/auth/verify-email',
-  '/legal',
-] as const;
-
 const MEMBER_ROUTE_PREFIXES = [
   '/dashboard',
   '/my-hoops',
@@ -51,20 +38,6 @@ function requiresMemberAccess(pathname: string) {
   return MEMBER_ROUTE_PREFIXES.some((prefix) => matchesRoute(pathname, prefix));
 }
 
-function isPreviewPublicPath(pathname: string) {
-  return PREVIEW_PUBLIC_ROUTE_PREFIXES.some((prefix) => matchesRoute(pathname, prefix));
-}
-
-function comingSoonUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
-  const url = request.nextUrl.clone();
-  url.pathname = '/access';
-  url.search = '';
-  url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-  if (flags.profile) url.searchParams.set('profile', '1');
-  if (flags.inactive) url.searchParams.set('inactive', '1');
-  return url;
-}
-
 function memberAccessUrl(request: NextRequest, flags: { profile?: boolean; inactive?: boolean } = {}) {
   const url = request.nextUrl.clone();
   url.pathname = '/member-access';
@@ -83,21 +56,9 @@ function socialOnboardingUrl(request: NextRequest) {
   return url;
 }
 
-function isPreviewMember(profile: AccessProfile | null) {
-  return Boolean(profile && profile.is_active === true && profile.onboarding_complete !== false);
-}
-
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
-  // During the temporary edit window, new account creation is closed. Existing
-  // members can still use normal sign-in, recovery and verification routes.
-  if (MEMBER_ONLY_PREVIEW && matchesRoute(pathname, '/auth/sign-up')) {
-    return NextResponse.redirect(comingSoonUrl(request));
-  }
-
-  const previewProtectedPath = MEMBER_ONLY_PREVIEW && !isPreviewPublicPath(pathname);
-  const protectedPath = previewProtectedPath || requiresMemberAccess(pathname);
+  const protectedPath = requiresMemberAccess(pathname);
 
   if (!protectedPath) return NextResponse.next();
 
@@ -120,7 +81,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.redirect(previewProtectedPath ? comingSoonUrl(request) : memberAccessUrl(request));
+    return NextResponse.redirect(memberAccessUrl(request));
   }
 
   const { data: profileData } = await supabase
@@ -130,15 +91,6 @@ export async function middleware(request: NextRequest) {
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
 
-  if (previewProtectedPath && !isPreviewMember(profile)) {
-    return NextResponse.redirect(comingSoonUrl(request, {
-      profile: !profile || profile.onboarding_complete === false,
-      inactive: profile?.is_active === false,
-    }));
-  }
-
-  // Standard member-workspace authorization remains in place underneath the
-  // temporary site wall so roles and operational permissions do not change.
   if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
   }

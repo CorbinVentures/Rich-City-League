@@ -84,7 +84,7 @@ describe('public launch middleware', () => {
   });
 
   it('keeps authentication and onboarding pages public', async () => {
-    for (const pathname of ['/auth/sign-in', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access']) {
+    for (const pathname of ['/auth/sign-in', '/auth/sign-up', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access', '/access']) {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(200);
       expect(response.headers.get('location')).toBeNull();
