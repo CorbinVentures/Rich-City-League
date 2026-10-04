@@ -23,7 +23,7 @@ vi.mock('@supabase/ssr', () => ({
 }));
 
 import { middleware } from '../src/middleware';
-import { getSafeNextPath } from '../src/lib/auth-redirect';
+import { getSafeNextPath, getSafePostAuthPath } from '../src/lib/auth-redirect';
 
 describe('public launch middleware', () => {
   beforeEach(() => {
@@ -200,5 +200,16 @@ describe('public launch middleware', () => {
 
   it('auth redirect helper preserves a trusted internal query string', () => {
     expect(getSafeNextPath('/portal/operations?view=queue')).toBe('/portal/operations?view=queue');
+  });
+
+  it.each(['/member-access', '/member-access?next=/social', '/access', '/auth/sign-in', '/auth/complete-profile?next=/social'])(
+    'post-auth redirect helper rejects loop destination %s',
+    (next) => {
+      expect(getSafePostAuthPath(next, '/today')).toBe('/today');
+    },
+  );
+
+  it('post-auth redirect helper preserves a trusted member path', () => {
+    expect(getSafePostAuthPath('/messages?thread=123', '/today')).toBe('/messages?thread=123');
   });
 });

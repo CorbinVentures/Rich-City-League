@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaArrowRight, FaBasketball, FaBullhorn, FaUserGroup } from 'react-icons/fa6';
-import { getSafeNextPath } from '@/lib/auth-redirect';
+import { getSafePostAuthPath } from '@/lib/auth-redirect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type ProfileType = 'player' | 'coach' | 'fan';
@@ -52,7 +52,7 @@ export default function SocialOnboardingForm() {
   const [bio, setBio] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
 
-  const next = getSafeNextPath(params.get('next') ?? '/social');
+  const next = getSafePostAuthPath(params.get('next') ?? '/social', '/today');
 
   useEffect(() => {
     let cancelled = false;
@@ -75,7 +75,7 @@ export default function SocialOnboardingForm() {
       const { data: rawProfile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
       const profile = rawProfile as unknown as OnboardingProfile | null;
       if (profile?.onboarding_complete !== false) {
-        router.replace(next);
+        window.location.replace(next);
         return;
       }
 
@@ -152,8 +152,7 @@ export default function SocialOnboardingForm() {
         }
       }
 
-      router.replace(next);
-      router.refresh();
+      window.location.replace(next);
     } catch (saveError) {
       const code = typeof saveError === 'object' && saveError !== null && 'code' in saveError ? String((saveError as { code?: string }).code ?? '') : '';
       const message = saveError instanceof Error ? saveError.message : typeof saveError === 'object' && saveError !== null && 'message' in saveError ? String((saveError as { message?: string }).message ?? '') : '';

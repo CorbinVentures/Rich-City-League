@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { FaCircleCheck, FaTriangleExclamation } from 'react-icons/fa6';
-import { getSafeNextPath } from '@/lib/auth-redirect';
+import { getSafePostAuthPath } from '@/lib/auth-redirect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type CallbackProfile = {
@@ -26,7 +26,6 @@ async function claimPendingReferral() {
 }
 
 export default function OAuthCallbackClient() {
-  const router = useRouter();
   const params = useSearchParams();
   const [error, setError] = useState('');
 
@@ -68,12 +67,12 @@ export default function OAuthCallbackClient() {
 
         const { data: rawProfile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
         const profile = rawProfile as unknown as CallbackProfile | null;
-        const next = getSafeNextPath(params.get('next') ?? '/social');
+        const next = getSafePostAuthPath(params.get('next') ?? '/social', '/today');
 
         if (profile?.onboarding_complete === false) {
           const destination = new URL('/auth/complete-profile', window.location.origin);
           destination.searchParams.set('next', next);
-          if (!cancelled) router.replace(`${destination.pathname}${destination.search}`);
+          if (!cancelled) window.location.replace(`${destination.pathname}${destination.search}`);
           return;
         }
 
@@ -81,9 +80,9 @@ export default function OAuthCallbackClient() {
 
         if (!cancelled) {
           if (!params.get('next') && profile?.is_active === true && (profile.role === 'admin' || profile.role === 'coach')) {
-            router.replace('/portal/scorebook');
+            window.location.replace('/portal/scorebook');
           } else {
-            router.replace(next);
+            window.location.replace(next);
           }
         }
       } catch (callbackError) {
@@ -94,7 +93,7 @@ export default function OAuthCallbackClient() {
 
     void finishSignIn();
     return () => { cancelled = true; };
-  }, [params, router]);
+  }, [params]);
 
   if (error) {
     return (
