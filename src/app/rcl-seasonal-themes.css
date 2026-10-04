@@ -3,29 +3,6 @@ html[data-season-theme] {
   --rcl-blue: var(--season-accent);
 }
 
-html[data-season-theme] .text-rcl-orange,
-html[data-season-theme] .text-rcl-blue,
-html[data-season-theme] .text-rcl-gold {
-  color: var(--season-accent) !important;
-}
-
-html[data-season-theme] .bg-rcl-orange,
-html[data-season-theme] .bg-rcl-blue,
-html[data-season-theme] .bg-rcl-gold {
-  background-color: var(--season-accent) !important;
-}
-
-html[data-season-theme] .border-rcl-orange,
-html[data-season-theme] .border-rcl-blue,
-html[data-season-theme] .border-rcl-gold {
-  border-color: var(--season-accent) !important;
-}
-
-html[data-season-theme] .ring-rcl-orange,
-html[data-season-theme] .ring-rcl-blue,
-html[data-season-theme] .ring-rcl-gold {
-  --tw-ring-color: var(--season-accent) !important;
-}
 
 html[data-season-theme] .rcl-platform-root {
   position: relative;
