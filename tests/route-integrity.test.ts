@@ -64,6 +64,9 @@ describe('site route integrity', () => {
       /(?:router\.(?:push|replace|prefetch)|redirect|permanentRedirect)\(\s*["'`]([^"'`]+)["'`]/g,
       /(?:window\.)?location\.href\s*=\s*["'`]([^"'`]+)["'`]/g,
       /location\.(?:assign|replace)\(\s*["'`]([^"'`]+)["'`]/g,
+      /new URL\(\s*["'`]([^"'`]+)["'`]/g,
+      /\.pathname\s*=\s*["'`]([^"'`]+)["'`]/g,
+      /action\s*=\s*["'`]([^"'`]+)["'`]/g,
     ];
 
     for (const file of sourceFiles) {
