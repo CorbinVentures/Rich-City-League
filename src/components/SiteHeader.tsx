@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -22,6 +22,7 @@ import {
 
 export function SiteHeader(){
   const pathname=usePathname();
+  const router=useRouter();
   const {user,profile,signOut}=useAuth();
   const supabase=useMemo(()=>getSupabaseClient(),[]);
   const [unreadCount,setUnreadCount]=useState(0);
@@ -41,6 +42,17 @@ export function SiteHeader(){
   },[user,supabase]);
 
   useEffect(()=>setMenuOpen(false),[pathname]);
+
+  useEffect(()=>{
+    const openSearch=(event:KeyboardEvent)=>{
+      if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){
+        event.preventDefault();
+        router.push('/search');
+      }
+    };
+    window.addEventListener('keydown',openSearch);
+    return()=>window.removeEventListener('keydown',openSearch);
+  },[router]);
 
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
   const memberMode=Boolean(user);
