@@ -1,16 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { getSafeNextPath } from '@/lib/auth-redirect';
+import { getSafePostAuthPath } from '@/lib/auth-redirect';
 
 type ProfileType = 'player' | 'coach' | 'fan';
 
 export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign-up' | 'reset'; allowSignUp?: boolean }) {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,7 +54,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       if (mode === 'sign-in') {
         const requestedNext = new URLSearchParams(window.location.search).get('next');
         const hasExplicitNext = Boolean(requestedNext);
-        let destination = getSafeNextPath(requestedNext);
+        let destination = getSafePostAuthPath(requestedNext, '/dashboard');
         await signIn(email, password);
         const pendingReferral = window.localStorage.getItem('rcl_pending_referral');
         if (pendingReferral) {
@@ -75,7 +73,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             if (accessProfile?.is_active === true && (accessProfile.role === 'admin' || accessProfile.role === 'coach')) destination = '/portal/scorebook';
           }
         }
-        router.replace(destination);
+        window.location.assign(destination);
       } else if (mode === 'sign-up') {
         if (step < 3) { setStep((current) => current + 1); return; }
         if (password !== confirmation) { setStep(1); setMessage('Passwords do not match.'); return; }
