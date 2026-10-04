@@ -134,8 +134,8 @@ export default function MessagesPage() {
     const channel = supabase
       .channel('rch-messaging-inbox')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => void loadConversations())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_members', filter: \`profile_id=eq.\${user.id}\` }, () => void loadConversations())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_preferences', filter: \`profile_id=eq.\${user.id}\` }, () => void loadConversations())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_members', filter: `profile_id=eq.${user.id}` }, () => void loadConversations())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_preferences', filter: `profile_id=eq.${user.id}` }, () => void loadConversations())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [loadConversations, supabase, user]);
@@ -146,7 +146,7 @@ export default function MessagesPage() {
       setPeopleLoading(true);
       const query = peopleSearch.trim();
       let request = db.from('profiles').select('id,display_name,username,avatar_url,role').eq('is_active', true).neq('id', user.id).limit(20);
-      if (query) request = request.or(\`display_name.ilike.%\${query}%,username.ilike.%\${query}%\`);
+      if (query) request = request.or(`display_name.ilike.%${query}%,username.ilike.%${query}%`);
       const result = await request;
       setPeople((result.data ?? []) as ProfileResult[]);
       setPeopleLoading(false);
@@ -156,7 +156,7 @@ export default function MessagesPage() {
 
   const visible = items.filter((item) => {
     const term = search.trim().toLowerCase();
-    const matchesSearch = !term || \`\${item.title} \${item.preview} \${item.type}\`.toLowerCase().includes(term);
+    const matchesSearch = !term || `${item.title} ${item.preview} ${item.type}`.toLowerCase().includes(term);
     if (!matchesSearch) return false;
     if (view === 'ARCHIVED') return item.isArchived;
     if (item.isArchived) return false;
@@ -225,7 +225,7 @@ export default function MessagesPage() {
       return;
     }
 
-    window.location.href = \`/messages/\${result.data}\`;
+    window.location.href = `/messages/${result.data}`;
   };
 
   if (!authLoading && !user) {
@@ -340,14 +340,14 @@ export default function MessagesPage() {
                 const selected = selectedPeople.some((item) => item.id === person.id);
                 return <button type="button" key={person.id} onClick={() => togglePerson(person)} className={selected ? 'selected' : ''}>
                   <span className="rcl-person-result-avatar">{person.avatar_url ? <img src={person.avatar_url} alt="" /> : personName(person).slice(0, 2).toUpperCase()}</span>
-                  <span><strong>{personName(person)}</strong><small>{person.username ? \`@\${person.username} · \` : ''}{person.role}</small></span>
+                  <span><strong>{personName(person)}</strong><small>{person.username ? `@${person.username} · ` : ''}{person.role}</small></span>
                   <i>{selected ? '✓' : '+'}</i>
                 </button>;
               })}
             </div>
 
             <footer>
-              <p>{selectedPeople.length === 0 ? 'Choose one person for a direct message or several for a group.' : selectedPeople.length === 1 ? 'Direct message' : \`Group with \${selectedPeople.length + 1} members\`}</p>
+              <p>{selectedPeople.length === 0 ? 'Choose one person for a direct message or several for a group.' : selectedPeople.length === 1 ? 'Direct message' : `Group with ${selectedPeople.length + 1} members`}</p>
               <button type="button" disabled={!selectedPeople.length || starting} onClick={() => void startConversation()} className="rcl-message-primary-button">{starting ? 'Opening…' : selectedPeople.length > 1 ? 'Create group' : 'Open conversation'}</button>
             </footer>
           </section>
