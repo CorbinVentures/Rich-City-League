@@ -205,26 +205,26 @@ export default function ConversationPage() {
   useEffect(() => {
     if (!supabase || !user || !conversation) return;
 
-    const channel = supabase.channel(\`rch-conversation-\${conversationId}\`, {
+    const channel = supabase.channel(`rch-conversation-${conversationId}`, {
       config: { presence: { key: user.id } },
     }) as any;
     channelRef.current = channel;
 
     channel
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: \`conversation_id=eq.\${conversationId}\` }, (payload: { new: Message }) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload: { new: Message }) => {
         const next = payload.new;
         setMessages((current) => current.some((message) => message.id === next.id) ? current : [...current, next]);
         void markRead();
         window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: \`conversation_id=eq.\${conversationId}\` }, (payload: { new: Message }) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload: { new: Message }) => {
         const next = payload.new;
         setMessages((current) => current.map((message) => message.id === next.id ? next : message));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
         void loadReactions(messages.map((message) => message.id));
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_members', filter: \`conversation_id=eq.\${conversationId}\` }, () => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_members', filter: `conversation_id=eq.${conversationId}` }, () => {
         void loadMembers();
       })
       .on('broadcast', { event: 'typing' }, ({ payload }: { payload: { profile_id?: string; name?: string } }) => {
@@ -294,7 +294,7 @@ export default function ConversationPage() {
     if (!supabase || !user || !attachmentFile) return null;
     const extension = socialMediaExtension(attachmentFile.type);
     if (!extension) throw new Error('That attachment type is not supported.');
-    const path = \`\${user.id}/messages/\${conversationId}/\${Date.now()}-\${crypto.randomUUID()}.\${extension}\`;
+    const path = `${user.id}/messages/${conversationId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const uploaded = await supabase.storage.from('media').upload(path, attachmentFile, {
       upsert: false,
       contentType: attachmentFile.type,
@@ -418,7 +418,7 @@ export default function ConversationPage() {
       return peer && onlineIds.includes(peer.id) ? 'Active here now' : 'Direct message';
     }
     const onlineOthers = others.filter((member) => onlineIds.includes(member.profile_id)).length;
-    return \`\${members.length} members\${onlineOthers ? \` · \${onlineOthers} active\` : ''}\`;
+    return `${members.length} members${onlineOthers ? ` · ${onlineOthers} active` : ''}`;
   })();
 
   const reactionsFor = (messageId: string) => {
@@ -438,7 +438,7 @@ export default function ConversationPage() {
     const seen = others.filter((member) => member.last_read_at && new Date(member.last_read_at).getTime() >= new Date(message.created_at).getTime()).length;
     if (!others.length) return 'Sent';
     if (conversation?.conversation_type === 'direct') return seen ? 'Seen' : 'Delivered';
-    return seen ? \`Seen by \${seen}\` : 'Sent';
+    return seen ? `Seen by ${seen}` : 'Sent';
   };
 
   if (loading) {
@@ -473,7 +473,7 @@ export default function ConversationPage() {
         {error && <div className="rcl-message-error">{error}<button type="button" onClick={() => setError('')}>Dismiss</button></div>}
 
         {conversation && (
-          <div className={\`rcl-thread-workspace \${showInfo ? 'show-info' : ''}\`}>
+          <div className={`rcl-thread-workspace ${showInfo ? 'show-info' : ''}`}>
             <section className="rcl-thread-main">
               <header className="rcl-thread-header">
                 <div className="rcl-thread-avatar">
@@ -482,7 +482,7 @@ export default function ConversationPage() {
                 </div>
                 <div>
                   <h1>{conversationTitle}</h1>
-                  <p>{typingNames.length ? \`\${typingNames.join(', ')} \${typingNames.length === 1 ? 'is' : 'are'} typing…\` : presenceText}</p>
+                  <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
@@ -510,7 +510,7 @@ export default function ConversationPage() {
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article className={\`rcl-chat-message \${mine ? 'mine' : 'theirs'} \${grouped ? 'grouped' : ''}\`}>
+                    <article className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
                       {!mine && !grouped && <div className="rcl-chat-avatar">{sender?.avatar_url ? <img src={sender.avatar_url} alt="" /> : initials(sender)}</div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -581,7 +581,7 @@ export default function ConversationPage() {
                 {(replyTo || editing) && (
                   <div className="rcl-composer-context">
                     <span>{editing ? <FiEdit2 /> : <FiReply />}</span>
-                    <div><strong>{editing ? 'Editing message' : \`Replying to \${replyTo?.sender_id === user?.id ? 'yourself' : displayName(memberMap.get(replyTo?.sender_id ?? ''))}\`}</strong><p>{editing?.body ?? replyTo?.body}</p></div>
+                    <div><strong>{editing ? 'Editing message' : `Replying to ${replyTo?.sender_id === user?.id ? 'yourself' : displayName(memberMap.get(replyTo?.sender_id ?? ''))}`}</strong><p>{editing?.body ?? replyTo?.body}</p></div>
                     <button type="button" onClick={() => { setReplyTo(null); if (editing) { setEditing(null); setBody(''); } }} aria-label="Cancel"><FiX /></button>
                   </div>
                 )}
@@ -644,7 +644,7 @@ export default function ConversationPage() {
 
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
-                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/profile' : \`/social/profile/\${member.profile_id}\`}>
+                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/profile' : `/social/profile/${member.profile_id}`}>
                   <span>{member.profile?.avatar_url ? <img src={member.profile.avatar_url} alt="" /> : initials(member.profile)}</span>
                   <div><strong>{member.profile_id === user?.id ? 'You' : displayName(member.profile)}</strong><small>{member.role === 'admin' ? 'Conversation admin' : member.profile?.role ?? 'Member'}</small></div>
                   {onlineIds.includes(member.profile_id) && <i />}
