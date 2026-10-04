@@ -34,7 +34,7 @@ function formatDate(value: string) {
 
 function typeLabel(type: string, memberCount?: number) {
   if (type === 'DIRECT') return 'Direct';
-  if (type === 'GROUP') return memberCount ? \`\${memberCount} members\` : 'Group';
+  if (type === 'GROUP') return memberCount ? `${memberCount} members` : 'Group';
   return type.charAt(0) + type.slice(1).toLowerCase();
 }
 
@@ -50,11 +50,11 @@ export function ConversationRow({
   onArchive?: (item: ConversationListItem) => void;
 }) {
   return (
-    <article className={\`rcl-message-row \${item.unread ? 'is-unread' : ''} \${item.isPinned ? 'is-pinned' : ''}\`}>
+    <article className={`rcl-message-row ${item.unread ? 'is-unread' : ''} ${item.isPinned ? 'is-pinned' : ''}`}>
       <Link
-        href={\`/messages/\${item.id}\`}
+        href={`/messages/${item.id}`}
         className="rcl-message-row-main"
-        aria-label={\`Open conversation with \${item.title}\${item.unread ? \`, \${item.unread} unread\` : ''}\`}
+        aria-label={`Open conversation with ${item.title}${item.unread ? `, ${item.unread} unread` : ''}`}
       >
         <div className="rcl-message-avatar-wrap">
           {item.identity ? (
@@ -88,7 +88,7 @@ export function ConversationRow({
       </Link>
 
       {(onPin || onMute || onArchive) && (
-        <div className="rcl-message-row-actions" aria-label={\`Conversation actions for \${item.title}\`}>
+        <div className="rcl-message-row-actions" aria-label={`Conversation actions for ${item.title}`}>
           {onPin && <button type="button" onClick={() => onPin(item)} aria-label={item.isPinned ? 'Unpin conversation' : 'Pin conversation'} title={item.isPinned ? 'Unpin' : 'Pin'}><FiStar /></button>}
           {onMute && <button type="button" onClick={() => onMute(item)} aria-label={item.isMuted ? 'Unmute conversation' : 'Mute conversation'} title={item.isMuted ? 'Unmute' : 'Mute'}><FiBellOff /></button>}
           {onArchive && <button type="button" onClick={() => onArchive(item)} aria-label={item.isArchived ? 'Restore conversation' : 'Archive conversation'} title={item.isArchived ? 'Restore' : 'Archive'}><FiArchive /></button>}
