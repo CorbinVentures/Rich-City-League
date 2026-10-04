@@ -59,8 +59,9 @@ describe('site route integrity', () => {
 
     const patterns = [
       /href\s*=\s*["'`]([^"'`]+)["'`]/g,
+      /href\s*=\s*\{\s*["'`]([^"'`]+)["'`]\s*\}/g,
       /href\s*:\s*["'`]([^"'`]+)["'`]/g,
-      /(?:router\.(?:push|replace)|redirect|permanentRedirect)\(\s*["'`]([^"'`]+)["'`]/g,
+      /(?:router\.(?:push|replace|prefetch)|redirect|permanentRedirect)\(\s*["'`]([^"'`]+)["'`]/g,
       /(?:window\.)?location\.href\s*=\s*["'`]([^"'`]+)["'`]/g,
       /location\.(?:assign|replace)\(\s*["'`]([^"'`]+)["'`]/g,
     ];
