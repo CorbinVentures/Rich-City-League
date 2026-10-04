@@ -557,7 +557,6 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
   });
   const timeline = [...grouped.values()];
   const yourName = currentProfile?.display_name || currentProfile?.username || (user ? 'You' : 'Guest');
-  const yourInitial = yourName.trim().slice(0, 1).toUpperCase() || 'R';
 
   return <section className="rcl-story-rail">
     <div className="rcl-story-rail-head">
@@ -570,7 +569,7 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
     <div className="rcl-story-track">
       <button type="button" onClick={onCreate} className="rcl-story-card rcl-story-create">
         <span className="rcl-story-media">
-          {currentProfile?.avatar_url ? <img src={currentProfile.avatar_url} alt="" /> : <b>{yourInitial}</b>}
+          <ProfileAvatarMedia src={currentProfile?.avatar_url} alt={yourName} className="h-full w-full object-cover" />
           <i><FaPlus/></i>
         </span>
         <span className="rcl-story-label"><strong>Your story</strong><small>Add an update</small></span>
@@ -578,13 +577,12 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
 
       {timeline.map(({ story, index, count }) => {
         const name = story.author?.display_name || story.author?.username || 'RCL Member';
-        const initial = name.trim().slice(0, 1).toUpperCase() || 'R';
         return <button type="button" key={story.author_id} onClick={() => onOpen(index)} className="rcl-story-card">
           <span className="rcl-story-media rcl-story-media-active">
             {story.media_url ? isVideoUrl(story.media_url)
               ? <video src={story.media_url} muted playsInline preload="metadata" />
               : <img src={story.media_url} alt="" />
-              : story.author?.avatar_url ? <img src={story.author.avatar_url} alt="" /> : <b>{initial}</b>}
+              : <ProfileAvatarMedia src={story.author?.avatar_url} alt={name} className="h-full w-full object-cover" />}
             {story.media_url && isVideoUrl(story.media_url) && <i className="rcl-story-video"><FaVideo/></i>}
             {count > 1 && <em>{count}</em>}
           </span>
