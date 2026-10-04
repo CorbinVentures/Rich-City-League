@@ -18,6 +18,7 @@ import {
 import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
+import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
