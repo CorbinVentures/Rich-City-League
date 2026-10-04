@@ -5,8 +5,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaBars, FaBell, FaComments, FaGear, FaMagnifyingGlass, FaUser } from 'react-icons/fa6';
+import { FaBars, FaBell, FaGear, FaMagnifyingGlass, FaUser } from 'react-icons/fa6';
 import { NavigationDrawer } from '@/components/NavigationDrawer';
+import { MessageQuickMenu } from '@/components/messaging/MessageQuickMenu';
 import {
   isPrimaryNavigationActive,
   RCL_ADMIN_NAV_GROUP,
@@ -129,7 +130,7 @@ export function SiteHeader(){
       </Link>
 
       <div className="rcl-universal-tools">
-        {user&&<Link href="/messages" aria-label={messageUnread>0?`Messages, ${messageUnread} unread`:'Messages'} className="rcl-message-header-button"><FaComments/>{messageUnread>0&&<em>{messageUnread>9?'9+':messageUnread}</em>}</Link>}
+        {user&&<MessageQuickMenu userId={user.id} unreadCount={messageUnread}/>} 
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
         <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open RCL navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
