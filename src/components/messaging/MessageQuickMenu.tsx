@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaArrowRight, FaComments, FaMagnifyingGlass, FaPenToSquare, FaUsers, FaXmark } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
-import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 
 type QuickInboxRow = {
   conversation_id: string;
