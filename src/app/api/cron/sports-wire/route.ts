@@ -105,6 +105,28 @@ function cleanItem(raw: any): WireItem {
   };
 }
 
+function containsBettingAdvice(item: WireItem) {
+  const text = [item.title, item.summary, ...(item.stats ?? [])].join(' ').toLowerCase();
+  const banned = [
+    'best bet',
+    'our pick',
+    'my pick',
+    'lock of the',
+    'is a lock',
+    'sure thing',
+    'guaranteed winner',
+    'guaranteed outcome',
+    'bet this',
+    'wager on',
+    'stake ',
+    'units on',
+    'unit play',
+    'parlay',
+    'chase losses',
+  ];
+  return banned.some(phrase => text.includes(phrase));
+}
+
 function promptFor(desk: Desk, recent: string[]) {
   const shared = [
     'You are the RCH Sports Wire, a fast but disciplined sports editor.',
@@ -184,6 +206,7 @@ async function generateWireItem(db: SupabaseClient, desk: Desk) {
   if (item.title.length < 12 || item.summary.length < 80) throw new Error('Sports wire item is too thin.');
   if (!item.sources.length) throw new Error('Sports wire item has no verifiable sources.');
   if (desk === 'nfl-betting-stats' && (item.stats?.length ?? 0) < 2) throw new Error('NFL stats item does not contain enough verified data points.');
+  if (desk === 'nfl-betting-stats' && containsBettingAdvice(item)) throw new Error('NFL stats item contains betting-advice language and will not publish.');
   return item;
 }
 
