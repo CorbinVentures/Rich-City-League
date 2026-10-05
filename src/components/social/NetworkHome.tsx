@@ -942,7 +942,7 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
     <div className="rcl-story-track">
       <button type="button" onClick={onCreate} className="rcl-story-card rcl-story-create">
         <span className="rcl-story-media">
-          <ProfileAvatarMedia src={currentProfile?.avatar_url} alt={yourName} className="h-full w-full object-cover" />
+          <ProfileAvatarMedia src={currentProfile?.avatar_url} alt={yourName} className="h-full w-full object-cover" priority />
           <i><FaPlus/></i>
         </span>
         <span className="rcl-story-label"><strong>Your story</strong><small>Add an update</small></span>
