@@ -20,6 +20,10 @@
     {
       "path": "/api/cron/newsroom/daily",
       "schedule": "20 * * * *"
+    },
+    {
+      "path": "/api/cron/sports-wire",
+      "schedule": "40 * * * *"
     }
   ]
 }
