@@ -104,18 +104,6 @@ function easternDateKey(date = new Date()) {
   return `${value('year')}-${value('month')}-${value('day')}`;
 }
 
-function rvaHoopsFallback() {
-  const date = easternDateKey();
-  return {
-    account: 'rva-hoops' as const,
-    title: 'RVA Hoops Daily: Richmond basketball watch',
-    summary: 'No strong fresh local article cleared the RVA Hoops sourcing filter today, so the desk is staying local instead of forcing a weak national story. Check the RCL Network for upcoming games, open runs, player activity and Richmond-area basketball conversation.',
-    sourceName: 'Rich City League Network',
-    sourceUrl: `https://www.richcityhoops.com/discover?desk=rva-hoops&date=${date}`,
-    publishedAt: new Date().toISOString(),
-  };
-}
-
 function buildSummary(account: EditorialAccount, item: FeedItem) {
   const headline = cleanTitle(item.title);
   if (account === 'rva-hoops') {
@@ -152,18 +140,15 @@ export async function POST(request: Request) {
       cache: 'no-store',
     });
   } catch {
-    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
     return NextResponse.json({ error: 'Current-source lookup failed.' }, { status: 503 });
   }
   if (!response.ok) {
-    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
     return NextResponse.json({ error: 'Current-source lookup failed.' }, { status: 503 });
   }
 
   const xml = await response.text();
   const item = selectCandidate(payload.account, parseFeed(xml));
   if (!item) {
-    if (payload.account === 'rva-hoops') return NextResponse.json(rvaHoopsFallback());
     return NextResponse.json({ error: 'No sufficiently fresh sourced story was found. Nothing should publish.' }, { status: 404 });
   }
 
