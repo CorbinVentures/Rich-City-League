@@ -21,8 +21,15 @@ type Breakdown={campaign_id:string|null;impressions:number;organization_views:nu
 type FormState={placement:string;startsAt:string;endsAt:string;region:string;headline:string;destinationUrl:string;disclosure:string};
 
 const placements=[
-  ['network-home','Network Home'],['regional-feature','Regional Feature'],['event-spotlight','Event Spotlight'],['social-feed','Social Feed'],
-  ['search-feature','Search'],['news-feature','News'],['community-feature','Communities'],['media-feature','RCH TV'],['digest','RCL Digest'],
+  ['network-home','Today in RCH / Network Home'],
+  ['regional-feature','RCH Runs Presenting'],
+  ['event-spotlight','Featured Event'],
+  ['social-feed','Sponsored Social Feed'],
+  ['search-feature','Search + Discover'],
+  ['news-feature','News'],
+  ['community-feature','Community Feature'],
+  ['media-feature','RCH TV'],
+  ['digest','Weekend Guide / Digest'],
 ] as const;
 const regions=[
   ['statewide','Statewide Virginia'],['central-virginia','Central Virginia'],['tri-cities','Tri-Cities'],['hampton-roads','Hampton Roads'],

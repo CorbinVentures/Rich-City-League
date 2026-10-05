@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import {
@@ -376,6 +377,19 @@ export default function RunsPage() {
             <button key={key} onClick={() => setView(key)} className={`flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition sm:text-sm ${view === key ? 'bg-rcl-blue text-[#071018]' : 'text-white/45 hover:bg-white/[.04] hover:text-white'}`}><Icon className="shrink-0" /><span className="truncate">{label}</span></button>
           ))}
         </nav>
+
+        <NetworkSponsoredPlacement
+          placement="regional-feature"
+          surface="rch-runs-presenting"
+          region="central-virginia"
+          variant="strip"
+          slotKey="runs-presenting"
+          dailyCap={12}
+          sessionCap={8}
+          brandLabel="RCH Runs partner"
+          ctaLabel="Visit partner"
+          className="mb-5"
+        />
 
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}

@@ -72,6 +72,7 @@ export function NetworkImpression({
   eventId,
   promotionId,
   campaignId,
+  onImpression,
 }: {
   children: ReactNode;
   className?: string;
@@ -80,6 +81,7 @@ export function NetworkImpression({
   eventId?: string | null;
   promotionId?: string | null;
   campaignId?: string | null;
+  onImpression?: () => void;
 }) {
   const supabase = useMemo(() => getSupabaseClient(), []);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -104,12 +106,13 @@ export function NetworkImpression({
       sent.current = true;
       observer.disconnect();
       if (!claimSessionEvent(context)) return;
+      onImpression?.();
       void (supabase as any).rpc('record_network_exposure_event', payload(context));
     }, { threshold: [0.5] });
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [campaignId, eventId, organizationId, promotionId, surface, supabase]);
+  }, [campaignId, eventId, onImpression, organizationId, promotionId, surface, supabase]);
 
   return <div ref={rootRef} className={className}>{children}</div>;
 }

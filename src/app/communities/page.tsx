@@ -5,6 +5,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaPlus } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -131,6 +132,19 @@ export default function CommunitiesPage() {
               ] as const).map(([value,label,Icon])=><button type="button" key={value} onClick={()=>setKind(value)} className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-black uppercase tracking-wider transition ${kind===value?'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue':'border-white/10 text-white/40 hover:text-white'}`}><Icon/>{label}</button>)}
             </div>
           </div>
+
+          <NetworkSponsoredPlacement
+            placement="community-feature"
+            surface="communities-discovery-sponsored"
+            region="central-virginia"
+            variant="inline"
+            slotKey="community-primary"
+            dailyCap={3}
+            sessionCap={2}
+            brandLabel="Community partner"
+            ctaLabel="Explore partner"
+            className="mb-5"
+          />
 
           {loading ? <div className="grid gap-4 sm:grid-cols-2">{[1,2,3,4].map(item => <div key={item} className="h-52 animate-pulse rounded-2xl border border-rcl-blue/10 bg-white/[.025]" />)}</div> : filtered.length ? <div className="grid gap-4 sm:grid-cols-2">{filtered.map(item => <article key={item.id} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 transition hover:-translate-y-1 hover:border-rcl-blue/35">
             <Link href={`/communities/${item.slug}`} className="group block flex-1 p-5"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-rcl-blue/10 text-rcl-blue">{item.logo_url?<img src={item.logo_url} alt="" className="h-full w-full object-cover"/>:item.community_type==='court'?<FaLocationDot/>:<FaPeopleGroup/>}</span><span className="rounded-full border border-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white/30">{item.privacy}</span></div><p className="mt-6 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.community_type==='court'?'Court community':item.community_type.replace(/_/g, ' ')}</p><h2 className="mt-1 break-words font-display text-xl font-black uppercase group-hover:text-rcl-blue">{item.name}</h2>{item.location_slug&&locations.get(item.location_slug)?<p className="mt-2 inline-flex items-start gap-2 text-xs leading-5 text-rcl-blue/70"><FaLocationDot className="mt-1 shrink-0"/><span>{locations.get(item.location_slug)?.address} · {locations.get(item.location_slug)?.locality}</span></p>:null}<p className="mt-3 break-words text-sm leading-6 text-white/45">{item.description ?? 'A new RCL basketball community.'}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Open community <FaArrowRight/></span></Link>

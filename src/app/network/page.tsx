@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { NetworkImpression, TrackedNetworkLink } from '@/components/network/NetworkExposure';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6';
 
@@ -88,6 +89,17 @@ export default async function NetworkPage() {
 
       <section className="mt-14">
         <SectionHeading eyebrow="What&apos;s happening" title="Upcoming across the network" detail="Events remain owned and operated by the organizations behind them. RCL helps people find them." />
+        <NetworkSponsoredPlacement
+          placement="event-spotlight"
+          surface="network-event-spotlight"
+          variant="banner"
+          slotKey="featured-event"
+          dailyCap={3}
+          sessionCap={2}
+          brandLabel="Featured event partner"
+          ctaLabel="View event"
+          className="mb-5"
+        />
         {events.length ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{events.map((event)=><EventCard key={event.id} event={event} organization={orgMap.get(event.organization_id)}/>)}</div> : <EmptyState copy="Upcoming partner events will appear here as organizations join the Network."/>}
       </section>
 
