@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { RCL_MEMBER_NAV_GROUPS } from '@/lib/member-navigation';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup } from 'react-icons/fa6';
@@ -74,6 +75,18 @@ export default async function DiscoverRCLPage(){
             <SectionHeading eyebrow="7-day activity" title="Rising in RCL" detail="Members creating momentum across RCL." />
             {rising.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rising.map((person,index)=><PersonCard key={person.id} person={person} index={index} />)}</div> : <EmptyState copy="Rising members will appear as RCL gets active." />}
           </section>
+
+          <NetworkSponsoredPlacement
+            placement="search-feature"
+            surface="discover-sponsored"
+            region="central-virginia"
+            variant="inline"
+            slotKey="discover-primary"
+            dailyCap={3}
+            sessionCap={2}
+            brandLabel="Sponsored discovery"
+            ctaLabel="Explore"
+          />
 
           <section>
             <SectionHeading eyebrow="Reputation" title="Top REP in the city" detail="Recognition built through activity, contribution and RCL participation." actionHref="/leaderboards" actionLabel="Leaderboards" />
