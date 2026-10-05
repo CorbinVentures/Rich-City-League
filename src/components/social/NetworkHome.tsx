@@ -67,6 +67,8 @@ type Run = {
   court_name: string | null;
   location: string | null;
   game_format: string | null;
+  max_players: number;
+  players?: string[];
 };
 
 type FeedMode = 'for-you' | 'following' | 'trending';
@@ -95,6 +97,8 @@ export default function NetworkHome() {
   const [saved, setSaved] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [runBusy, setRunBusy] = useState<string | null>(null);
 
   const [mode, setMode] = useState<FeedMode>('for-you');
   const [search, setSearch] = useState('');
@@ -119,6 +123,7 @@ export default function NetworkHome() {
 
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const storyInputRef = useRef<HTMLInputElement>(null);
+  const socialSessionTrackedRef = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -126,6 +131,18 @@ export default function NetworkHome() {
     setFocusPostId(post);
     if (params.get('compose') === '1' && user) setComposerOpen(true);
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!db || !user || socialSessionTrackedRef.current) return;
+    socialSessionTrackedRef.current = true;
+    void db.from('user_activity').insert({
+      profile_id: user.id,
+      activity_type: 'social_home_session',
+      entity_type: 'surface',
+      entity_id: null,
+      metadata: { surface: 'social_home' },
+    });
+  }, [db, user?.id]);
 
   useEffect(() => {
     let active = true;
@@ -182,7 +199,7 @@ export default function NetworkHome() {
         user ? db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
         db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account', false).order('created_at', { ascending: false }).limit(12),
         db.from('communities').select('id,name,slug,description,community_type').eq('privacy', 'public').order('created_at', { ascending: false }).limit(5),
-        db.from('runs').select('id,title,starts_at,court_name,location,game_format').eq('status', 'open').gt('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(4),
+        db.from('runs').select('id,title,starts_at,court_name,location,game_format,max_players').eq('status', 'open').gt('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(4),
       ]);
 
       if (basePostsResult.error) throw basePostsResult.error;
@@ -245,6 +262,15 @@ export default function NetworkHome() {
       }));
       const enrichedReposts = repostRows.map((entry) => ({ ...entry, profile: authorMap.get(entry.profile_id) }));
       const enrichedStories = storyRows.map((entry) => ({ ...entry, author: authorMap.get(entry.author_id) }));
+      const runRows = (runsResult.data ?? []) as Run[];
+      const runIds = runRows.map((run) => run.id);
+      const runPlayersResult = runIds.length
+        ? await db.from('run_players').select('run_id,profile_id').in('run_id', runIds)
+        : { data: [], error: null };
+      const runPlayerMap = new Map<string, string[]>();
+      for (const entry of (runPlayersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
+        runPlayerMap.set(entry.run_id, [...(runPlayerMap.get(entry.run_id) ?? []), entry.profile_id]);
+      }
 
       setPosts(enrichedPosts);
       setReposts(enrichedReposts);
@@ -252,7 +278,7 @@ export default function NetworkHome() {
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((entry) => entry.following_id));
       setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((entry) => entry.post_id));
       setCommunities((communitiesResult.data ?? []) as Community[]);
-      setRuns((runsResult.data ?? []) as Run[]);
+      setRuns(runRows.map((run) => ({ ...run, players: runPlayerMap.get(run.id) ?? [] })));
       setCurrentProfile(user ? authorMap.get(user.id) ?? ((currentProfileResult.data ?? null) as NetworkAuthor | null) : null);
       setSuggestedProfiles(suggestionRows.map((profile) => authorMap.get(profile.id as string) ?? profile).filter((profile) => profile.id !== user?.id).slice(0, 6));
     } catch (loadError) {
@@ -427,6 +453,41 @@ export default function NetworkHome() {
     }
   };
 
+  const toggleRunParticipation = async (run: Run) => {
+    if (!db || !user) { signInForNetwork(); return; }
+    const joined = run.players?.includes(user.id) ?? false;
+    const playerCount = run.players?.length ?? 0;
+    if (!joined && playerCount >= run.max_players) {
+      setError('This run is full.');
+      return;
+    }
+
+    setRunBusy(run.id);
+    setError('');
+    const optimisticPlayers = joined
+      ? (run.players ?? []).filter((id) => id !== user.id)
+      : [...(run.players ?? []), user.id];
+    setRuns((current) => current.map((item) => item.id === run.id ? { ...item, players: optimisticPlayers } : item));
+
+    const result = joined
+      ? await db.from('run_players').delete().eq('run_id', run.id).eq('profile_id', user.id)
+      : await db.from('run_players').insert({ run_id: run.id, profile_id: user.id });
+
+    if (result.error) {
+      setError(result.error.message);
+      void load();
+    } else {
+      setNotice(joined ? `You left ${run.title}.` : `You’re in for ${run.title}.`);
+      window.setTimeout(() => setNotice(''), 2600);
+      void trackActivity(joined ? 'run_left' : 'run_joined', 'run', run.id, {
+        source: 'social_home',
+        starts_at: run.starts_at,
+      });
+      if (!joined) void refreshRep();
+    }
+    setRunBusy(null);
+  };
+
   const feedItems = useMemo(() => {
     const repostsByPost = new Map<string, NetworkRepost[]>();
     reposts.forEach((repost) => repostsByPost.set(repost.post_id, [...(repostsByPost.get(repost.post_id) ?? []), repost]));
@@ -475,9 +536,32 @@ export default function NetworkHome() {
 
   const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
 
+  const todaySnapshot = useMemo(() => {
+    const now = new Date();
+    const sameLocalDay = (value: string) => {
+      const date = new Date(value);
+      return date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && date.getDate() === now.getDate();
+    };
+    const postsToday = posts.filter((post) => sameLocalDay(post.created_at)).length;
+    const trendingPost = posts
+      .map((post) => ({ key: `today:${post.id}`, post, feed_at: post.created_at } as NetworkFeedItem))
+      .sort((a, b) => trendScore(b) - trendScore(a))[0]?.post ?? null;
+    return {
+      postsToday,
+      activeStories: stories.length,
+      nextRun: runs[0] ?? null,
+      trendingPost,
+      rep: currentProfile?.rep ?? 0,
+      level: currentProfile?.level ?? 1,
+    };
+  }, [posts, stories, runs, currentProfile?.rep, currentProfile?.level]);
+
   return (
     <main className="rcl-social-world min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
+      {notice && <div className="fixed left-1/2 top-20 z-[79] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-blue/25 bg-[#071522] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
       <Container maxWidth="xl" className="py-5 sm:py-7">
         <section className="rcl-feed-intro">
@@ -506,6 +590,18 @@ export default function NetworkHome() {
 
             {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
 
+            {!focusPostId && <TodayPanel
+              postsToday={todaySnapshot.postsToday}
+              activeStories={todaySnapshot.activeStories}
+              rep={todaySnapshot.rep}
+              level={todaySnapshot.level}
+              nextRun={todaySnapshot.nextRun}
+              trendingPost={todaySnapshot.trendingPost}
+              userId={user?.id}
+              busyRunId={runBusy}
+              onRunToggle={(run) => void toggleRunParticipation(run)}
+            />}
+
             {!focusPostId && (
               <section className="rcl-feed-composer rounded-2xl border p-4">
                 <div className="flex gap-3"><button onClick={openComposer} aria-label="Create post"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCL Member' : 'Guest', username: null }} compact/></button><button onClick={openComposer} className="rcl-composer-prompt min-h-12 flex-1 rounded-2xl border px-4 text-left text-sm">Share something with Richmond basketball…</button></div>
@@ -513,7 +609,7 @@ export default function NetworkHome() {
               </section>
             )}
 
-            {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-3"><FeedModeButton active={mode === 'for-you'} onClick={() => setMode('for-you')}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => setMode('following')}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => setMode('trending')}>Trending</FeedModeButton></div>}
+            {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-3"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton></div>}
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item) => <NetworkPostCard key={item.key} item={item} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
           </div>
@@ -524,7 +620,12 @@ export default function NetworkHome() {
                 <div className="space-y-2">{suggestedProfiles.slice(0, 4).map((profile) => <div key={profile.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.03]"><SocialIdentity author={profile} compact/><Link href={`/social/profile/${profile.id}`} className="min-w-0 flex-1"><b className="block truncate text-xs">{profile.display_name || profile.username || 'RCL Member'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">{formatRep(profile.rep ?? 0)} REP</small></Link>{profile.id && profile.id !== user?.id && <button onClick={() => void toggleFollow(profile.id!)} className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${following.includes(profile.id) ? 'text-rcl-blue' : 'border border-white/10 text-white/45'}`}>{following.includes(profile.id) ? 'Following' : 'Follow'}</button>}</div>)}</div>
               </SideCard>
 
-              {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0, 3).map((run) => <Link key={run.id} href="/runs" className="block rounded-xl border border-white/[.06] p-3 hover:border-rcl-orange/25"><b className="block text-xs">{run.title}</b><small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-rcl-orange">{formatRunTime(run.starts_at)} · {run.court_name || run.location || 'RCL court'}</small></Link>)}</div></SideCard>}
+              {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0, 3).map((run) => {
+                const joined = Boolean(user?.id && run.players?.includes(user.id));
+                const count = run.players?.length ?? 0;
+                const full = count >= run.max_players;
+                return <div key={run.id} className="rounded-xl border border-white/[.06] p-3 hover:border-rcl-orange/25"><Link href={`/runs/${run.id}`} className="block"><b className="block text-xs">{run.title}</b><small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-rcl-orange">{formatRunTime(run.starts_at)} · {run.court_name || run.location || 'RCL court'}</small><small className="mt-1 block text-[10px] font-bold text-white/35">{count}/{run.max_players} joined · {Math.max(0, run.max_players - count)} spots left</small></Link><button type="button" disabled={runBusy === run.id || (!joined && full)} onClick={() => void toggleRunParticipation(run)} className="mt-2 w-full rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-2 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue disabled:opacity-40">{runBusy === run.id ? 'Updating…' : joined ? '✓ You’re in · Leave' : full ? 'Run full' : 'Join run'}</button></div>;
+              })}</div></SideCard>}
 
               {communities.length > 0 && <SideCard title="Communities" href="/communities"><div className="space-y-1">{communities.slice(0, 3).map((community) => <Link key={community.id} href={`/communities/${community.slug}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[.03]"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rcl-blue/10 text-rcl-blue"><FaPeopleGroup/></span><span className="min-w-0"><b className="block truncate text-xs">{community.name}</b><small className="text-[10px] uppercase tracking-wider text-white/25">{community.community_type?.replace(/_/g, ' ') || 'Community'}</small></span></Link>)}</div></SideCard>}
 
@@ -541,6 +642,84 @@ export default function NetworkHome() {
       {storyIndex !== null && stories[storyIndex] && <StoryViewer stories={stories} index={storyIndex} onClose={() => setStoryIndex(null)} onIndex={setStoryIndex} />}
     </main>
   );
+}
+
+
+function TodayPanel({
+  postsToday,
+  activeStories,
+  rep,
+  level,
+  nextRun,
+  trendingPost,
+  userId,
+  busyRunId,
+  onRunToggle,
+}: {
+  postsToday: number;
+  activeStories: number;
+  rep: number;
+  level: number;
+  nextRun: Run | null;
+  trendingPost: NetworkPost | null;
+  userId?: string;
+  busyRunId: string | null;
+  onRunToggle: (run: Run) => void;
+}) {
+  const playerCount = nextRun?.players?.length ?? 0;
+  const joined = Boolean(nextRun && userId && nextRun.players?.includes(userId));
+  const full = Boolean(nextRun && playerCount >= nextRun.max_players);
+  const spotsLeft = nextRun ? Math.max(0, nextRun.max_players - playerCount) : 0;
+
+  return <section className="overflow-hidden rounded-2xl border border-[#D9E4EF] bg-white shadow-[0_8px_28px_rgba(15,37,71,.07)]">
+    <div className="flex items-start justify-between gap-4 border-b border-[#E7EEF6] px-4 py-4 sm:px-5">
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">Today in RCH</p>
+        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">Richmond basketball, right now.</h2>
+        <p className="mt-1 text-xs leading-5 text-[#60738D]">Fresh activity, your next court and the conversation moving around you.</p>
+      </div>
+      <Link href="/discover" className="shrink-0 rounded-lg border border-[#D9E4EF] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore</Link>
+    </div>
+
+    <div className="grid grid-cols-3 border-b border-[#E7EEF6]">
+      <div className="px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{postsToday}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Posts today</span></div>
+      <div className="border-x border-[#E7EEF6] px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{activeStories}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Live stories</span></div>
+      <Link href="/social/profile/me" className="px-3 py-3 text-center transition hover:bg-[#F7FAFD]"><strong className="block text-lg font-black text-[#0F2547]">{formatRep(rep)}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">REP · LVL {level}</span></Link>
+    </div>
+
+    <div className="grid gap-0 md:grid-cols-[1.15fr_.85fr]">
+      <div className="border-b border-[#E7EEF6] p-4 sm:p-5 md:border-b-0 md:border-r">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">🏀 Next run</p>
+          <Link href="/runs" className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">All runs</Link>
+        </div>
+        {nextRun ? <>
+          <Link href={`/runs/${nextRun.id}`} className="mt-3 block">
+            <h3 className="text-base font-black text-[#0F2547]">{nextRun.title}</h3>
+            <p className="mt-1 text-xs font-semibold text-[#60738D]">{formatRunTime(nextRun.starts_at)} · {nextRun.court_name || nextRun.location || 'RCH court'}</p>
+            <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#71839A]">{playerCount}/{nextRun.max_players} joined · {spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'} left</p>
+          </Link>
+          <button
+            type="button"
+            disabled={busyRunId === nextRun.id || (!joined && full)}
+            onClick={() => onRunToggle(nextRun)}
+            className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-rcl-blue px-4 text-xs font-black text-[#071018] disabled:opacity-45"
+          >
+            {busyRunId === nextRun.id ? 'Updating…' : joined ? '✓ You’re in · Leave run' : full ? 'Run full' : 'Join from Home'}
+          </button>
+        </> : <div className="mt-3 rounded-xl border border-dashed border-[#D9E4EF] bg-[#F7FAFD] p-4"><p className="text-sm font-bold text-[#0F2547]">No open run is scheduled yet.</p><Link href="/runs" className="mt-2 inline-block text-xs font-black text-rcl-blue">Find or create the next run →</Link></div>}
+      </div>
+
+      <div className="p-4 sm:p-5">
+        <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">🔥 Moving now</p>
+        {trendingPost ? <Link href={`/social/post/${trendingPost.id}`} className="mt-3 block rounded-xl border border-[#E7EEF6] bg-[#F7FAFD] p-3 transition hover:border-rcl-blue/30">
+          <strong className="block text-xs text-[#0F2547]">{trendingPost.author?.display_name || trendingPost.author?.username || 'RCH Member'}</strong>
+          <p className="mt-1 line-clamp-3 text-xs leading-5 text-[#60738D]">{trendingPost.body || 'Basketball activity is moving on RCH.'}</p>
+          <span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-rcl-blue">{trendingPost.reactions?.length ?? 0} reactions · {trendingPost.comments?.length ?? 0} comments</span>
+        </Link> : <div className="mt-3 rounded-xl border border-dashed border-[#D9E4EF] bg-[#F7FAFD] p-4 text-xs leading-5 text-[#60738D]">Fresh posts will surface here as the community gets active.</div>}
+      </div>
+    </div>
+  </section>;
 }
 
 function storyTimeRemaining(expiresAt: string) {
