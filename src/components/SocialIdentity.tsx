@@ -26,7 +26,7 @@ export function SocialIdentity({ author, compact = false, link = true }: { autho
       <span className="rcl-rep-avatar-core"><ProfileAvatarMedia src={author?.avatar_url} alt={name} className="h-full w-full object-cover" /></span>
       {!compact && <em>{level}</em>}
     </span>
-    {!compact && <span className="rcl-social-identity-copy"><b>{name}{author?.is_system_account && <i>RCL OFFICIAL</i>}{!author?.is_system_account && author?.is_vip && <i>{author.vip_label || 'VIP'}</i>}</b><small>{author?.is_system_account ? 'Official RCL Automated Account' : `${formatReputation(rep)} REP · ${status.label} · LVL ${level}`}</small></span>}
+    {!compact && <span className="rcl-social-identity-copy"><b>{name}{author?.is_system_account && <i>RCH PAGE</i>}{!author?.is_system_account && author?.is_vip && <i>{author.vip_label || 'VIP'}</i>}</b><small>{author?.is_system_account ? 'Official RCH Page' : `${formatReputation(rep)} REP · ${status.label} · LVL ${level}`}</small></span>}
   </span>;
   return link && author?.id ? <Link href={`/social/profile/${author.id}`} className="rcl-social-identity-link">{identity}</Link> : identity;
 }

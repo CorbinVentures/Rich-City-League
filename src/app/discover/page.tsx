@@ -18,6 +18,7 @@ type DiscoverProfile = SocialIdentityAuthor & { id:string; role?:string|null; cr
 type Community = { id:string; name:string; slug:string; description:string|null; community_type:string|null; logo_url:string|null };
 type Run = { id:string; title:string; game_format:string|null; skill_level:string|null; court_name:string|null; location:string|null; starts_at:string; capacity:number|null; max_players:number|null };
 type ActivityPost = { id:string; body:string; author_id:string; created_at:string; is_automated:boolean; automation_type:string|null };
+type RchPage = SocialIdentityAuthor & { id:string; system_account_key?:string|null };
 
 export default async function DiscoverRCLPage(){
   const client = getPublicClient();
@@ -25,13 +26,14 @@ export default async function DiscoverRCLPage(){
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7*24*60*60*1000).toISOString();
 
-  const [{data:profilesRaw},{data:communitiesRaw},{data:runsRaw},{data:recentPostsRaw},{data:officialRaw}] = publicDb ? await Promise.all([
+  const [{data:profilesRaw},{data:communitiesRaw},{data:runsRaw},{data:recentPostsRaw},{data:officialRaw},{data:pagesRaw}] = publicDb ? await Promise.all([
     publicDb.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key,created_at').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).order('created_at',{ascending:false}).limit(50),
     publicDb.from('communities').select('id,name,slug,description,community_type,logo_url').eq('privacy','public').order('created_at',{ascending:false}).limit(6),
     publicDb.from('runs').select('id,title,game_format,skill_level,court_name,location,starts_at,capacity,max_players').eq('status','open').gt('starts_at',now.toISOString()).order('starts_at',{ascending:true}).limit(6),
     publicDb.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').gte('created_at',weekAgo).order('created_at',{ascending:false}).limit(200),
     publicDb.from('posts').select('id,body,author_id,created_at,is_automated,automation_type').eq('status','published').eq('is_automated',true).order('created_at',{ascending:false}).limit(6),
-  ]) : [{data:[]},{data:[]},{data:[]},{data:[]},{data:[]}];
+    publicDb.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',true).order('display_name',{ascending:true}).limit(20),
+  ]) : [{data:[]},{data:[]},{data:[]},{data:[]},{data:[]},{data:[]}];
 
   const profiles = (profilesRaw ?? []) as Array<Omit<DiscoverProfile,'activity'>>;
   const profileIds = profiles.map(profile=>profile.id);
@@ -51,6 +53,12 @@ export default async function DiscoverRCLPage(){
   const communities = (communitiesRaw ?? []) as Community[];
   const runs = (runsRaw ?? []) as Run[];
   const official = (officialRaw ?? []) as ActivityPost[];
+  const pagePriority = ['nba-news','nfl-betting-stats','rva-hoops','rcl-runs','rcl-gameday','rcl-community','rcl-history','rcl-business','rcl-rep','rcl-fantasy','rcl'];
+  const pages = ((pagesRaw ?? []) as RchPage[]).sort((a,b)=>{
+    const ai=pagePriority.indexOf(a.system_account_key ?? '');
+    const bi=pagePriority.indexOf(b.system_account_key ?? '');
+    return (ai<0?999:ai)-(bi<0?999:bi);
+  });
   const trends = getTrends(recentPosts.map(post=>post.body));
 
   return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-24 text-white">
@@ -105,6 +113,10 @@ export default async function DiscoverRCLPage(){
         </div>
 
         <aside className="space-y-5">
+          <SideCard title="RCH Pages" icon={<FaBasketball/>}>
+            {pages.length ? <div className="space-y-1">{pages.slice(0,8).map(page=><Link key={page.id} href={`/social/profile/${page.id}`} className="flex items-center justify-between gap-3 rounded-xl px-2 py-2 transition hover:bg-white/[.04]"><SocialIdentity author={page} link={false}/><span className="shrink-0 text-[10px] font-semibold uppercase tracking-[.1em] text-rcl-blue/65">Page</span></Link>)}</div> : <p className="text-sm leading-6 text-white/35">Official RCH pages will appear here.</p>}
+          </SideCard>
+
           <SideCard title="Trending in the 804" icon={<FaFire/>}>
             {trends.length ? <div className="space-y-1">{trends.map((trend,index)=><Link key={trend.tag} href="/social" className="flex items-center justify-between rounded-xl px-3 py-2.5 transition hover:bg-white/[.04]"><span><small className="mr-2 text-white/20">0{index+1}</small><b className="text-sm">#{trend.tag}</b></span><span className="text-xs text-white/25">{trend.count} posts</span></Link>)}</div> : <p className="text-sm leading-6 text-white/35">Hashtags will surface here as the city starts talking.</p>}
           </SideCard>
