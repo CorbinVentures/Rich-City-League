@@ -1,5 +1,7 @@
 export type SponsorInventoryCode =
   | 'social-feed'
+  | 'today-in-rch'
+  | 'search-discovery'
   | 'featured-event'
   | 'community-feature'
   | 'rch-tv-feature'
@@ -40,6 +42,37 @@ export const SPONSOR_INVENTORY:SponsorInventoryItem[]=[
     description:'Native, clearly disclosed distribution inside eligible RCH social surfaces.',
     deliverables:['Sponsored feed placement','Clickable call to action','Regional targeting','RCH Reach reporting'],
     idealFor:'Local businesses, launches, offers and event promotion',
+  },
+  {
+    code:'today-in-rch',
+    name:'Today in RCH Partner',
+    eyebrow:'Premium daily visibility',
+    kind:'featured-partner',
+    placement:'network-home',
+    package:'amplify',
+    objective:'awareness',
+    durationDays:30,
+    startingPriceCents:25000,
+    priceLabel:'From $250 / month',
+    description:'A subtle presented-by placement inside the daily RCH activity snapshot members see near the top of Social Home.',
+    deliverables:['Today in RCH sponsor strip','Daily native brand association','Clickable partner CTA','RCH Reach reporting'],
+    idealFor:'Banks, telecom, automotive, healthcare, restaurants and high-frequency local brands',
+    featured:true,
+  },
+  {
+    code:'search-discovery',
+    name:'Search + Discover Feature',
+    eyebrow:'Discovery placement',
+    kind:'campaign',
+    placement:'search-feature',
+    package:'amplify',
+    objective:'website-traffic',
+    durationDays:14,
+    startingPriceCents:9900,
+    priceLabel:'From $99',
+    description:'Appear as a clearly sponsored discovery card after members begin browsing people, players and basketball results.',
+    deliverables:['Search / Discover placement','Clickable CTA','Frequency-capped delivery','RCH Reach reporting'],
+    idealFor:'Trainers, schools, events, local services and businesses seeking high-intent discovery',
   },
   {
     code:'featured-event',
