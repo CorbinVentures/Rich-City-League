@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getNewsBySlug } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
 import Image from 'next/image';
@@ -130,6 +131,18 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
       <article className="mt-10 max-w-3xl space-y-6 text-[17px] leading-8 text-white/72">
         {paragraphs.map((paragraph,index)=><p key={index}>{paragraph}</p>)}
       </article>
+
+      <NetworkSponsoredPlacement
+        placement="news-feature"
+        surface="news-article-inline"
+        variant="inline"
+        slotKey="news-article"
+        dailyCap={2}
+        sessionCap={1}
+        brandLabel="News partner"
+        ctaLabel="Visit sponsor"
+        className="mt-10 max-w-3xl"
+      />
 
       {sources.length > 0 && <section className="mt-12 max-w-3xl rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
         <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Reporting sources</p>
