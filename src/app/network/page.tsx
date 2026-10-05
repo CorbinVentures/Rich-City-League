@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { NetworkImpression, TrackedNetworkLink } from '@/components/network/NetworkExposure';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6';
 
@@ -85,6 +86,18 @@ export default async function NetworkPage() {
           <Link href="/league" className="mt-7 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-rcl-orange">Enter Rich City League <FaArrowRight/></Link>
         </aside>
       </section>
+
+      <NetworkSponsoredPlacement
+        placement="event-spotlight"
+        surface="network-event-spotlight"
+        variant="banner"
+        slotKey="featured-event"
+        dailyCap={3}
+        sessionCap={2}
+        brandLabel="Featured event partner"
+        ctaLabel="View event"
+        className="mt-14"
+      />
 
       <section className="mt-14">
         <SectionHeading eyebrow="What&apos;s happening" title="Upcoming across the network" detail="Events remain owned and operated by the organizations behind them. RCL helps people find them." />
