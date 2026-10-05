@@ -15,7 +15,7 @@ export type SponsorInventoryItem = {
   name:string;
   eyebrow:string;
   kind:'campaign'|'featured-partner'|'presenting'|'exclusive';
-  placement:'social-feed'|'event-spotlight'|'community-feature'|'media-feature'|'digest'|'regional-feature'|'network-home';
+  placement:'social-feed'|'event-spotlight'|'community-feature'|'media-feature'|'digest'|'regional-feature'|'network-home'|'search-feature'|'news-feature';
   package:'boost'|'amplify'|'premier'|'custom';
   objective:'awareness'|'event-traffic'|'website-traffic'|'media-views'|'audience-growth';
   durationDays:number|null;
