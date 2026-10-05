@@ -24,7 +24,7 @@ begin
     from public.profiles p
     where p.id = p_profile
       and p.is_active = true
-      and p.profile_visibility <> 'private'
+      and coalesce(p.profile_visibility, 'public') <> 'private'
   ) then
     return;
   end if;
