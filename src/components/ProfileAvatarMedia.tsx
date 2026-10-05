@@ -9,10 +9,12 @@ export function ProfileAvatarMedia({
   src,
   alt = '',
   className = '',
+  priority = false,
 }: {
   src?: string | null;
   alt?: string;
   className?: string;
+  priority?: boolean;
 }) {
   const normalizedSrc = useMemo(() => src?.trim() ?? '', [src]);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
@@ -38,8 +40,8 @@ export function ProfileAvatarMedia({
       sizes="96px"
       quality={72}
       className={className}
-      loading="eager"
-      fetchPriority="high"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={priority ? 'high' : 'auto'}
       style={fallbackBackground}
       onError={() => {
         if (normalizedSrc && resolved !== DEFAULT_PROFILE_AVATAR) setFailedSrc(normalizedSrc);

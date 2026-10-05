@@ -125,6 +125,9 @@ export default function NetworkHome() {
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const storyInputRef = useRef<HTMLInputElement>(null);
   const socialSessionTrackedRef = useRef(false);
+  const feedHydratedRef = useRef(false);
+  const loadRequestRef = useRef(0);
+  const liveRefreshTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -187,23 +190,57 @@ export default function NetworkHome() {
   };
 
   const load = async () => {
-    if (!db) { setLoading(false); setError('RCL social services are not configured.'); return; }
-    setLoading(true);
+    if (!db) {
+      setLoading(false);
+      setError('RCL social services are not configured.');
+      return;
+    }
+
+    const requestId = ++loadRequestRef.current;
+    const firstHydration = !feedHydratedRef.current;
+    if (firstHydration) setLoading(true);
     setError('');
+
     try {
-      const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult, suggestedResult, communitiesResult, runsResult] = await Promise.all([
-        db.from('posts').select('id,author_id,body,media_urls,created_at,is_automated,automation_type').eq('status', 'published').order('created_at', { ascending: false }).limit(100),
-        db.from('post_reposts').select('id,post_id,profile_id,created_at').order('created_at', { ascending: false }).limit(120),
-        db.from('stories').select('id,author_id,body,media_url,expires_at,created_at').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(30),
-        user ? db.from('follows').select('following_id').eq('follower_id', user.id) : Promise.resolve({ data: [], error: null }),
-        user ? db.from('saved_posts').select('post_id').eq('profile_id', user.id) : Promise.resolve({ data: [], error: null }),
-        user ? db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('id', user.id).maybeSingle() : Promise.resolve({ data: null, error: null }),
-        db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').eq('is_active', true).eq('profile_visibility', 'public').eq('is_system_account', false).order('created_at', { ascending: false }).limit(12),
-        db.from('communities').select('id,name,slug,description,community_type').eq('privacy', 'public').order('created_at', { ascending: false }).limit(5),
-        db.from('runs').select('id,title,starts_at,court_name,location,game_format,max_players').eq('status', 'open').gt('starts_at', new Date().toISOString()).order('starts_at', { ascending: true }).limit(4),
+      const nowIso = new Date().toISOString();
+      const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult, runsResult] = await Promise.all([
+        db.from('posts')
+          .select('id,author_id,body,media_urls,created_at,is_automated,automation_type')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(36),
+        db.from('post_reposts')
+          .select('id,post_id,profile_id,created_at')
+          .order('created_at', { ascending: false })
+          .limit(30),
+        db.from('stories')
+          .select('id,author_id,body,media_url,expires_at,created_at')
+          .gt('expires_at', nowIso)
+          .order('created_at', { ascending: false })
+          .limit(18),
+        user
+          ? db.from('follows').select('following_id').eq('follower_id', user.id).limit(500)
+          : Promise.resolve({ data: [], error: null }),
+        user
+          ? db.from('saved_posts').select('post_id').eq('profile_id', user.id).limit(500)
+          : Promise.resolve({ data: [], error: null }),
+        user
+          ? db.from('profiles')
+              .select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key')
+              .eq('id', user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+        db.from('runs')
+          .select('id,title,starts_at,court_name,location,game_format,max_players')
+          .eq('status', 'open')
+          .gt('starts_at', nowIso)
+          .order('starts_at', { ascending: true })
+          .limit(4),
       ]);
 
+      if (requestId !== loadRequestRef.current) return;
       if (basePostsResult.error) throw basePostsResult.error;
+
       const visibleReposts = repostResult.error ? [] : (repostResult.data ?? []);
       const basePosts = (basePostsResult.data ?? []) as NetworkPost[];
       const basePostIds = new Set(basePosts.map((post) => post.id));
@@ -214,98 +251,228 @@ export default function NetworkHome() {
 
       let extraPosts: NetworkPost[] = [];
       if (neededPostIds.length) {
-        const extraResult = await db.from('posts').select('id,author_id,body,media_urls,created_at,is_automated,automation_type').eq('status', 'published').in('id', neededPostIds);
+        const extraResult = await db.from('posts')
+          .select('id,author_id,body,media_urls,created_at,is_automated,automation_type')
+          .eq('status', 'published')
+          .in('id', neededPostIds);
         if (!extraResult.error) extraPosts = (extraResult.data ?? []) as NetworkPost[];
       }
+
+      if (requestId !== loadRequestRef.current) return;
 
       const postMap = new Map<string, NetworkPost>();
       [...basePosts, ...extraPosts].forEach((post) => postMap.set(post.id, post));
       const allPosts = [...postMap.values()];
       const postIds = allPosts.map((post) => post.id);
-
-      const [commentsResult, reactionsResult] = await Promise.all([
-        postIds.length ? db.from('comments').select('id,post_id,author_id,body,created_at').in('post_id', postIds).order('created_at', { ascending: true }) : Promise.resolve({ data: [], error: null }),
-        postIds.length ? db.from('reactions').select('post_id,user_id,type').in('post_id', postIds) : Promise.resolve({ data: [], error: null }),
-      ]);
-
-      const comments = (commentsResult.data ?? []) as NetworkComment[];
-      const reactions = (reactionsResult.data ?? []) as NetworkReaction[];
       const storyRows = (storiesResult.data ?? []) as Story[];
-      const suggestionRows = (suggestedResult.data ?? []) as Array<NetworkAuthor & { id: string }>;
       const repostRows = visibleReposts as NetworkRepost[];
+
       const identityIds = [...new Set([
         ...allPosts.map((post) => post.author_id),
-        ...comments.map((entry) => entry.author_id),
         ...storyRows.map((entry) => entry.author_id),
         ...repostRows.map((entry) => entry.profile_id),
-        ...suggestionRows.map((entry) => entry.id as string),
         ...(user ? [user.id] : []),
       ])];
 
-      const [profilesResult, levelsResult] = identityIds.length ? await Promise.all([
-        db.from('profiles').select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key').in('id', identityIds),
-        db.from('user_levels').select('profile_id,xp,level').in('profile_id', identityIds),
-      ]) : [{ data: [] }, { data: [] }];
+      const [profilesResult, levelsResult] = identityIds.length
+        ? await Promise.all([
+            db.from('profiles')
+              .select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key')
+              .in('id', identityIds),
+            db.from('user_levels').select('profile_id,xp,level').in('profile_id', identityIds),
+          ])
+        : [{ data: [] }, { data: [] }];
 
-      const levelMap = new Map(((levelsResult.data ?? []) as Array<{ profile_id: string; xp: number; level: number }>).map((row) => [row.profile_id, row]));
-      const authorMap = new Map<string, NetworkAuthor>(((profilesResult.data ?? []) as Array<NetworkAuthor & { id: string }>).map((profile) => [profile.id, {
-        ...profile,
-        rep: levelMap.get(profile.id)?.xp ?? 0,
-        level: levelMap.get(profile.id)?.level ?? 1,
-      }]));
+      if (requestId !== loadRequestRef.current) return;
 
-      const enrichedPosts = allPosts.map((post) => ({
+      const levelMap = new Map(
+        ((levelsResult.data ?? []) as Array<{ profile_id: string; xp: number; level: number }>)
+          .map((row) => [row.profile_id, row]),
+      );
+      const authorMap = new Map<string, NetworkAuthor>(
+        ((profilesResult.data ?? []) as Array<NetworkAuthor & { id: string }>).map((profile) => [
+          profile.id,
+          {
+            ...profile,
+            rep: levelMap.get(profile.id)?.xp ?? 0,
+            level: levelMap.get(profile.id)?.level ?? 1,
+          },
+        ]),
+      );
+
+      const corePosts = allPosts.map((post) => ({
         ...post,
         media_urls: Array.isArray(post.media_urls) ? post.media_urls : [],
         author: authorMap.get(post.author_id),
-        comments: comments.filter((entry) => entry.post_id === post.id).map((entry) => ({ ...entry, author: authorMap.get(entry.author_id) })),
-        reactions: reactions.filter((entry) => entry.post_id === post.id),
+        comments: [],
+        reactions: [],
       }));
-      const enrichedReposts = repostRows.map((entry) => ({ ...entry, profile: authorMap.get(entry.profile_id) }));
-      const enrichedStories = storyRows.map((entry) => ({ ...entry, author: authorMap.get(entry.author_id) }));
+      const coreReposts = repostRows.map((entry) => ({ ...entry, profile: authorMap.get(entry.profile_id) }));
+      const coreStories = storyRows.map((entry) => ({ ...entry, author: authorMap.get(entry.author_id) }));
       const runRows = (runsResult.data ?? []) as Run[];
-      const runIds = runRows.map((run) => run.id);
-      const runPlayersResult = runIds.length
-        ? await db.from('run_players').select('run_id,profile_id').in('run_id', runIds)
-        : { data: [], error: null };
-      const runPlayerMap = new Map<string, string[]>();
-      for (const entry of (runPlayersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
-        runPlayerMap.set(entry.run_id, [...(runPlayerMap.get(entry.run_id) ?? []), entry.profile_id]);
-      }
 
-      setPosts(enrichedPosts);
-      setReposts(enrichedReposts);
-      setStories(enrichedStories);
+      // First paint: feed, identity, stories and the next run become usable here.
+      // Engagement and sidebar discovery hydrate below without blocking the UI.
+      setPosts(corePosts);
+      setReposts(coreReposts);
+      setStories(coreStories);
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((entry) => entry.following_id));
       setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((entry) => entry.post_id));
-      setCommunities((communitiesResult.data ?? []) as Community[]);
-      setRuns(runRows.map((run) => ({ ...run, players: runPlayerMap.get(run.id) ?? [] })));
-      setCurrentProfile(user ? authorMap.get(user.id) ?? ((currentProfileResult.data ?? null) as NetworkAuthor | null) : null);
-      setSuggestedProfiles(suggestionRows.map((profile) => authorMap.get(profile.id as string) ?? profile).filter((profile) => profile.id !== user?.id).slice(0, 6));
-    } catch (loadError) {
-      console.error('Unable to load RCL Social', loadError);
-      setError(loadError instanceof Error ? loadError.message : 'We could not load your RCL Home feed right now.');
-      setPosts([]);
-      setReposts([]);
-    } finally {
+      setRuns(runRows.map((run) => ({ ...run, players: [] })));
+      setCurrentProfile(
+        user
+          ? authorMap.get(user.id) ?? ((currentProfileResult.data ?? null) as NetworkAuthor | null)
+          : null,
+      );
+      feedHydratedRef.current = true;
       setLoading(false);
+
+      void (async () => {
+        try {
+          const [commentsResult, reactionsResult, suggestedResult, communitiesResult, runPlayersResult] = await Promise.all([
+            postIds.length
+              ? db.from('comments')
+                  .select('id,post_id,author_id,body,created_at')
+                  .in('post_id', postIds)
+                  .order('created_at', { ascending: false })
+                  .limit(180)
+              : Promise.resolve({ data: [], error: null }),
+            postIds.length
+              ? db.from('reactions')
+                  .select('post_id,user_id,type')
+                  .in('post_id', postIds)
+                  .limit(400)
+              : Promise.resolve({ data: [], error: null }),
+            db.from('profiles')
+              .select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key')
+              .eq('is_active', true)
+              .eq('profile_visibility', 'public')
+              .eq('is_system_account', false)
+              .order('created_at', { ascending: false })
+              .limit(8),
+            db.from('communities')
+              .select('id,name,slug,description,community_type')
+              .eq('privacy', 'public')
+              .order('created_at', { ascending: false })
+              .limit(4),
+            runRows.length
+              ? db.from('run_players').select('run_id,profile_id').in('run_id', runRows.map((run) => run.id))
+              : Promise.resolve({ data: [], error: null }),
+          ]);
+
+          if (requestId !== loadRequestRef.current) return;
+
+          const comments = ((commentsResult.data ?? []) as NetworkComment[])
+            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          const reactions = (reactionsResult.data ?? []) as NetworkReaction[];
+          const suggestionRows = (suggestedResult.data ?? []) as Array<NetworkAuthor & { id: string }>;
+          const secondaryIdentityIds = [...new Set([
+            ...comments.map((entry) => entry.author_id),
+            ...suggestionRows.map((entry) => entry.id),
+          ])];
+
+          const [secondaryProfilesResult, secondaryLevelsResult] = secondaryIdentityIds.length
+            ? await Promise.all([
+                db.from('profiles')
+                  .select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key')
+                  .in('id', secondaryIdentityIds),
+                db.from('user_levels').select('profile_id,xp,level').in('profile_id', secondaryIdentityIds),
+              ])
+            : [{ data: [] }, { data: [] }];
+
+          if (requestId !== loadRequestRef.current) return;
+
+          const secondaryLevelMap = new Map(
+            ((secondaryLevelsResult.data ?? []) as Array<{ profile_id: string; xp: number; level: number }>)
+              .map((row) => [row.profile_id, row]),
+          );
+          const secondaryAuthorMap = new Map(authorMap);
+          for (const profile of (secondaryProfilesResult.data ?? []) as Array<NetworkAuthor & { id: string }>) {
+            secondaryAuthorMap.set(profile.id, {
+              ...profile,
+              rep: secondaryLevelMap.get(profile.id)?.xp ?? authorMap.get(profile.id)?.rep ?? 0,
+              level: secondaryLevelMap.get(profile.id)?.level ?? authorMap.get(profile.id)?.level ?? 1,
+            });
+          }
+
+          const commentsByPost = new Map<string, NetworkComment[]>();
+          for (const entry of comments) {
+            commentsByPost.set(entry.post_id, [
+              ...(commentsByPost.get(entry.post_id) ?? []),
+              { ...entry, author: secondaryAuthorMap.get(entry.author_id) },
+            ]);
+          }
+          const reactionsByPost = new Map<string, NetworkReaction[]>();
+          for (const entry of reactions) {
+            reactionsByPost.set(entry.post_id, [
+              ...(reactionsByPost.get(entry.post_id) ?? []),
+              entry,
+            ]);
+          }
+
+          setPosts((current) => current.map((post) => ({
+            ...post,
+            comments: commentsByPost.get(post.id) ?? post.comments ?? [],
+            reactions: reactionsByPost.get(post.id) ?? post.reactions ?? [],
+          })));
+
+          setSuggestedProfiles(
+            suggestionRows
+              .map((profile) => secondaryAuthorMap.get(profile.id) ?? profile)
+              .filter((profile) => profile.id !== user?.id)
+              .slice(0, 6),
+          );
+          setCommunities((communitiesResult.data ?? []) as Community[]);
+
+          const runPlayerMap = new Map<string, string[]>();
+          for (const entry of (runPlayersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
+            runPlayerMap.set(entry.run_id, [...(runPlayerMap.get(entry.run_id) ?? []), entry.profile_id]);
+          }
+          setRuns(runRows.map((run) => ({ ...run, players: runPlayerMap.get(run.id) ?? [] })));
+        } catch (secondaryError) {
+          console.warn('RCH Social background hydration skipped', secondaryError);
+        }
+      })();
+    } catch (loadError) {
+      if (requestId !== loadRequestRef.current) return;
+      console.error('Unable to load RCH Social', loadError);
+      if (!feedHydratedRef.current) {
+        setError(loadError instanceof Error ? loadError.message : 'We could not load your RCH Home feed right now.');
+        setPosts([]);
+        setReposts([]);
+        setLoading(false);
+      }
     }
   };
-
   useEffect(() => { void load(); }, [supabase, user?.id, focusPostId]);
 
   useEffect(() => {
     if (!supabase) return;
-    const channel = supabase.channel('rcl-network-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reposts' }, () => void load())
-      .subscribe();
-    return () => { void supabase.removeChannel(channel); };
-  }, [supabase, user?.id, focusPostId]);
 
+    const scheduleRefresh = () => {
+      if (liveRefreshTimerRef.current) window.clearTimeout(liveRefreshTimerRef.current);
+      liveRefreshTimerRef.current = window.setTimeout(() => {
+        liveRefreshTimerRef.current = null;
+        void load();
+      }, 900);
+    };
+
+    const channel = supabase.channel('rcl-network-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reactions' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reposts' }, scheduleRefresh)
+      .subscribe();
+
+    return () => {
+      if (liveRefreshTimerRef.current) {
+        window.clearTimeout(liveRefreshTimerRef.current);
+        liveRefreshTimerRef.current = null;
+      }
+      void supabase.removeChannel(channel);
+    };
+  }, [supabase, user?.id, focusPostId]);
   const uploadMedia = async (file: File, folder: 'posts' | 'stories') => {
     if (!supabase || !user) throw new Error('Please sign in to upload media.');
     const issue = socialMediaError(file);
@@ -532,7 +699,7 @@ export default function NetworkHome() {
       if (seen.has(item.post.id)) return false;
       seen.add(item.post.id);
       return true;
-    }).slice(0, 100);
+    }).slice(0, 40);
   }, [posts, reposts, mode, search, focusPostId, user?.id, following]);
 
   const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
@@ -775,7 +942,7 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
     <div className="rcl-story-track">
       <button type="button" onClick={onCreate} className="rcl-story-card rcl-story-create">
         <span className="rcl-story-media">
-          <ProfileAvatarMedia src={currentProfile?.avatar_url} alt={yourName} className="h-full w-full object-cover" />
+          <ProfileAvatarMedia src={currentProfile?.avatar_url} alt={yourName} className="h-full w-full object-cover" priority />
           <i><FaPlus/></i>
         </span>
         <span className="rcl-story-label"><strong>Your story</strong><small>Add an update</small></span>
