@@ -19,6 +19,7 @@ import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -611,7 +612,20 @@ export default function NetworkHome() {
 
             {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-3"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton></div>}
 
-            {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item) => <NetworkPostCard key={item.key} item={item} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
+            {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
+              <NetworkPostCard item={item} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
+              {!focusPostId && (index === 4 || (index > 4 && (index - 4) % 14 === 0)) && <NetworkSponsoredPlacement
+                placement="social-feed"
+                surface={`social-feed-inline-${index}`}
+                region="central-virginia"
+                variant="feed"
+                slotKey={`social-feed-${index}`}
+                dailyCap={3}
+                sessionCap={2}
+                brandLabel="Sponsored in RCH"
+                ctaLabel="View partner"
+              />}
+            </div>) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
           </div>
 
           <aside className="hidden xl:block">
@@ -719,6 +733,18 @@ function TodayPanel({
         </Link> : <div className="mt-3 rounded-xl border border-dashed border-[#D9E4EF] bg-[#F7FAFD] p-4 text-xs leading-5 text-[#60738D]">Fresh posts will surface here as the community gets active.</div>}
       </div>
     </div>
+    <NetworkSponsoredPlacement
+      placement="network-home"
+      surface="today-in-rch-presenting"
+      region="central-virginia"
+      variant="strip"
+      theme="light"
+      slotKey="today-in-rch"
+      dailyCap={4}
+      sessionCap={2}
+      brandLabel="Today in RCH partner"
+      ctaLabel="Visit sponsor"
+    />
   </section>;
 }
 
