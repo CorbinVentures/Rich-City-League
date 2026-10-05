@@ -14,6 +14,9 @@ type OfficialAccount =
   | 'rcl-fantasy'
   | 'rcl-history';
 
+type PulseAccount = 'rva-hoops' | 'rcl-community' | 'rcl-runs' | 'rcl-history' | 'rcl-business';
+type SystemAccount = OfficialAccount | PulseAccount;
+
 type Clock = { hour: number; dateKey: string; dateLabel: string; dayIndex: number };
 type GameRow = { id: string; scheduled_at: string; home_team_id: string; away_team_id: string };
 type TeamRow = { id: string; name: string };
@@ -22,7 +25,7 @@ type ProfileRow = { id: string; display_name: string | null; username: string | 
 type RunRow = { title: string; court_name: string | null; location: string; starts_at: string };
 type FantasyTeamRow = { name: string; wins: number; losses: number; total_points: number | string | null };
 
-const schedule: Record<number, OfficialAccount[]> = {
+const officialSchedule: Record<number, OfficialAccount[]> = {
   9: ['rcl'],
   11: ['rcl-gameday'],
   13: ['rcl-rep'],
@@ -30,6 +33,52 @@ const schedule: Record<number, OfficialAccount[]> = {
   16: ['rcl-community'],
   18: ['rcl-fantasy'],
   19: ['rcl-history'],
+};
+
+// Conversational house-account posts keep the social feed moving between official
+// updates. These identities are already marked as system accounts and every post
+// remains tagged as automated so they cannot farm REP.
+const pulseSchedule: Record<number, PulseAccount[]> = {
+  8: ['rva-hoops'],
+  12: ['rcl-community'],
+  17: ['rcl-business'],
+  20: ['rva-hoops'],
+};
+
+const pulsePrompts: Record<PulseAccount, string[]> = {
+  'rva-hoops': [
+    '🏀 RVA HOOPS CHECK-IN\n\nWho is the toughest bucket getter you have watched around Richmond/Central Virginia lately? Drop a name + where you saw them hoop. Keep it basketball — no hating. 👀\n\n#RVAHoops #RichmondBasketball',
+    '👀 PUT US ON\n\nWhat Richmond-area player, coach, team, trainer or creator should more people be paying attention to right now? Tell us why.\n\n#RVAHoops #804Basketball',
+    '🔥 HOOPS DEBATE\n\nYou need one stop to win the game. Are you taking your best on-ball defender, rim protector or rebounder? Make the case.\n\n#RVAHoops',
+    '📍 COURT CHECK\n\nWhat gym or outdoor court has the best REAL pickup runs around Richmond? Drop the spot, best day and usual time.\n\n#RVAHoops #RichmondBasketball',
+    '🎥 CLIP CALL\n\nPlayers and creators: drop your best recent basketball clip on RCH today. Highlights, workouts, game film, mic’d-up runs — show the city what you have.\n\n#RVAHoops',
+    '🏀 804 QUESTION OF THE DAY\n\nWhat matters more in a pickup run: shot making, defense, passing or rebounding? Pick one and defend it.\n\n#RVAHoops #804Basketball',
+  ],
+  'rcl-community': [
+    '804 ROLL CALL 👇\n\nPlayer? Coach? Trainer? Photographer? Videographer? Hoops parent? Fan? Tell Richmond what you do + what side of the area you are from. Find somebody here you should connect with.\n\n#RCLCommunity',
+    '🤝 COMMUNITY CONNECT\n\nDrop one thing you are looking for right now: a team, players, a trainer, a photographer, a gym, a run, content help or basketball connections. Somebody here may have the answer.\n\n#RCLCommunity',
+    '📣 SHOUT SOMEBODY OUT\n\nWho is doing positive work for basketball in Richmond that deserves more attention? Coach, organizer, trainer, creator, parent, ref — give them their flowers.\n\n#RCLCommunity #RichmondBasketball',
+    '🎥 CREATOR ROLL CALL\n\nRichmond photographers, videographers, podcasters and hoop content creators — drop your page and the kind of basketball content you make.\n\n#RCLCommunity #RVAHoops',
+    '🏀 NEW HERE?\n\nIntroduce yourself in one line: name, basketball role + what you want to get out of the RCH Network.\n\n#RCLCommunity',
+  ],
+  'rcl-runs': [
+    '📍 WHERE ARE THE RUNS?\n\nDrop the gym or court + the usual time. Indoor, outdoor, organized, pickup — if people can actually get games there, put us on.\n\n#RCLRuns #RVAHoops',
+    '🏀 NEED PLAYERS?\n\nIf you are trying to get a run together today, post the location, time, format and how many you need. Make the comments useful.\n\n#RCLRuns',
+    '👟 PICKUP ETIQUETTE\n\nWhat is one unwritten rule every pickup player should know before stepping on the court?\n\n#RCLRuns #RichmondBasketball',
+    '🔥 BEST RUN IN THE CITY?\n\nWhich Richmond-area run consistently has the best competition? Name the spot + day.\n\n#RCLRuns',
+  ],
+  'rcl-history': [
+    '📚 RICHMOND HOOPS THROWBACK\n\nName ONE player, team, coach, league or legendary run from Richmond basketball that younger hoopers should know about. Bonus if you have a photo or story.\n\n#RCLHistory',
+    '🕰️ OLD SCHOOL CHECK-IN\n\nWhat is your first real Richmond basketball memory? A gym, tournament, summer league, school rivalry, player or game — take us back.\n\n#RCLHistory',
+    '🏀 CITY ARCHIVE QUESTION\n\nIf we built a Richmond basketball Hall of Fame wall on RCH, who absolutely has to be included?\n\n#RCLHistory #RichmondBasketball',
+    '📸 THROWBACK CALL\n\nGot old Richmond hoops photos, flyers, jerseys, team pictures or clips? Post them. We want the RCH timeline to preserve the culture, not just today’s games.\n\n#RCLHistory',
+  ],
+  'rcl-business': [
+    '🎥 RVA BASKETBALL CREATORS + BUSINESSES\n\nPhotographers, videographers, trainers, designers, barbers, apparel brands and event organizers — drop what you do. We want basketball people to find the people who make the culture move.\n\n#RCLBusiness #RVAHoops',
+    '💼 BASKETBALL BUSINESS ROLL CALL\n\nIf your business serves players, teams, parents or basketball events in Virginia, introduce it below. What do you offer and where are you based?\n\n#RCLBusiness',
+    '🤝 COLLAB CHECK\n\nCreators, trainers, teams and local brands: what kind of collaboration are you looking for right now? Content, sponsorship, events, uniforms, training, media — put it on the board.\n\n#RCLBusiness',
+    '📣 LOCAL BRAND SPOTLIGHT\n\nWhat Richmond-area business or basketball brand should we know about? Tag them or drop the name + what they do.\n\n#RCLBusiness #RichmondVA',
+  ],
 };
 
 const historyFacts = [
@@ -84,6 +133,12 @@ function timeLabel(value: string) {
   }).format(new Date(value));
 }
 
+function buildPulsePost(account: PulseAccount, clock: Clock) {
+  const prompts = pulsePrompts[account];
+  const salt = account.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) + clock.hour;
+  return prompts[((clock.dayIndex + salt) % prompts.length + prompts.length) % prompts.length];
+}
+
 async function buildRclPost(db: SupabaseClient, clock: Clock) {
   const now = new Date();
   const week = new Date(now.getTime() + 7 * 86_400_000).toISOString();
@@ -92,7 +147,7 @@ async function buildRclPost(db: SupabaseClient, clock: Clock) {
     db.from('games').select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lt('scheduled_at', week),
     db.from('runs').select('id', { count: 'exact', head: true }).eq('status', 'open').gte('starts_at', now.toISOString()),
   ]);
-  return `🏀 TODAY IN RCL · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active members · ${games.count || 0} official games in the next 7 days · ${runs.count || 0} open runs on the board.\n\nExplore the Network, check the league schedule and keep building your basketball identity.\n\n/social · /schedule · /runs\n\n#RichCityLeague #RCLNetwork`;
+  return `🏀 TODAY ON RCH · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active members · ${games.count || 0} official RCL games in the next 7 days · ${runs.count || 0} open runs on the board.\n\nWhat are YOU doing in basketball today — playing, coaching, training, creating or looking for a run? Drop it on the feed.\n\n/social · /schedule · /runs\n\n#RichCityHoops #RCLNetwork`;
 }
 
 async function buildGameDayPost(db: SupabaseClient, clock: Clock) {
@@ -106,7 +161,7 @@ async function buildGameDayPost(db: SupabaseClient, clock: Clock) {
     .limit(3);
   const games = (gamesResult.data || []) as GameRow[];
   if (!games.length) {
-    return `🏀 RCL GAMEDAY · ${clock.dateLabel.toUpperCase()}\n\nNo official RCL games are scheduled in the next 24 hours. The Game Center stays live for the next matchup, scores and official stats.\n\n/games\n\n#RCLGameDay #RichCityLeague`;
+    return `🏀 RCL GAMEDAY · ${clock.dateLabel.toUpperCase()}\n\nNo official RCL games are scheduled in the next 24 hours — so open floor: what local matchup would you actually pay to watch right now? Teams, schools, players or a dream 1-on-1. 👀\n\n/games\n\n#RCLGameDay #RichmondBasketball`;
   }
   const teamIds = [...new Set(games.flatMap(game => [game.home_team_id, game.away_team_id]).filter(Boolean))];
   const teamsResult = teamIds.length ? await db.from('teams').select('id,name').in('id', teamIds) : null;
@@ -146,7 +201,7 @@ async function buildRunsPost(db: SupabaseClient, clock: Clock) {
     .limit(3);
   const runs = (runsResult.data || []) as RunRow[];
   if (!runs.length) {
-    return `🏀 RCL RUNS · ${clock.dateLabel.toUpperCase()}\n\nNo open RCL Runs are currently posted for the next 72 hours. Hosts can create a run and players can watch the board for the next session.\n\n/runs\n\n#RCLRuns #RichmondBasketball`;
+    return `🏀 RCL RUNS · ${clock.dateLabel.toUpperCase()}\n\nNothing is posted on the Runs board for the next 72 hours. If you know where people are hooping, put us on: court/gym + day + time. If you are organizing one, post it so players can find you.\n\n/runs\n\n#RCLRuns #RichmondBasketball`;
   }
   const lines = runs.map(run => `${run.title} · ${run.court_name || run.location} · ${timeLabel(run.starts_at)}`);
   return `🏀 OPEN RUN BOARD · ${clock.dateLabel.toUpperCase()}\n\n${lines.join('\n')}\n\nClaim a spot from the Runs hub.\n\n/runs\n\n#RCLRuns #RichmondBasketball`;
@@ -158,7 +213,7 @@ async function buildCommunityPost(db: SupabaseClient, clock: Clock) {
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_system_account', false),
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_system_account', false).gte('created_at', since),
   ]);
-  return `🤝 RCL COMMUNITY · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active member profiles are part of RCL${newMembers.count ? `, including ${newMembers.count} added in the last 24 hours` : ''}.\n\nFind players, coaches and fans. Join communities. Build real basketball connections.\n\n/discover · /communities\n\n#RCLCommunity #RichCityLeague`;
+  return `🤝 RCL COMMUNITY · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active member profiles are on the network${newMembers.count ? `, including ${newMembers.count} added in the last 24 hours` : ''}.\n\nRoll call: player, coach, trainer, creator, organizer or fan — what part of the Richmond area are you representing? Find somebody in the comments you should know.\n\n/discover · /communities\n\n#RCLCommunity #RichCityHoops`;
 }
 
 async function buildFantasyPost(db: SupabaseClient, clock: Clock) {
@@ -169,7 +224,7 @@ async function buildFantasyPost(db: SupabaseClient, clock: Clock) {
     .limit(3);
   const teams = (teamsResult.data || []) as FantasyTeamRow[];
   if (!teams.length) {
-    return `🏆 RCL FANTASY · ${clock.dateLabel.toUpperCase()}\n\nThe Fantasy hub is ready for league competition. Real RCL player stats power fantasy scoring, matchups and standings.\n\n/fantasy\n\n#RCLFantasy #RichCityLeague`;
+    return `🏆 RCL FANTASY · ${clock.dateLabel.toUpperCase()}\n\nFantasy teams are not active yet, so here is the debate: build a 5-man lineup by ROLE — point guard, scorer, wing defender, big and sixth man. What type of player are you choosing first?\n\n/fantasy\n\n#RCLFantasy #RVAHoops`;
   }
   const lines = teams.map((team, index) => `${index + 1}. ${team.name} · ${team.wins}-${team.losses} · ${Number(team.total_points || 0).toFixed(1)} PTS`);
   return `🏆 RCL FANTASY BOARD · ${clock.dateLabel.toUpperCase()}\n\n${lines.join('\n')}\n\nCheck your roster, matchup and standings in the Fantasy hub.\n\n/fantasy\n\n#RCLFantasy #RichCityLeague`;
@@ -190,7 +245,7 @@ async function buildBody(db: SupabaseClient, account: OfficialAccount, clock: Cl
   return buildHistoryPost(clock);
 }
 
-async function publishDaily(db: SupabaseClient, account: OfficialAccount, body: string, dateKey: string) {
+async function publishDaily(db: SupabaseClient, account: SystemAccount, body: string, dateKey: string, slot = 'official') {
   const { data: profile, error: profileError } = await db.from('profiles')
     .select('id')
     .eq('system_account_key', account)
@@ -199,8 +254,10 @@ async function publishDaily(db: SupabaseClient, account: OfficialAccount, body: 
     .maybeSingle();
   if (profileError || !profile?.id) return { account, ok: false, error: 'Official system account is unavailable.' };
 
-  const automationType = `daily_${account.replace(/-/g, '_')}`;
-  const sourceId = sourceUuid(`${account}|${dateKey}`);
+  const automationType = slot === 'official'
+    ? `daily_${account.replace(/-/g, '_')}`
+    : `community_pulse_${account.replace(/-/g, '_')}_${slot}`;
+  const sourceId = sourceUuid(`${account}|${dateKey}|${slot}`);
   const { data: existing } = await db.from('posts').select('id')
     .eq('automation_type', automationType)
     .eq('automation_source_id', sourceId)
@@ -230,21 +287,40 @@ export async function GET(request: Request) {
   if (!supabaseUrl || !serviceKey) return NextResponse.json({ error: 'Server database credentials are not configured.' }, { status: 503 });
 
   const clock = easternClock();
-  const accounts = schedule[clock.hour] || [];
-  if (!accounts.length) return NextResponse.json({ ok: true, dispatched: [], reason: 'No official account scheduled for this Eastern hour.' });
+  const officialAccounts = officialSchedule[clock.hour] || [];
+  const pulseAccounts = pulseSchedule[clock.hour] || [];
+  if (!officialAccounts.length && !pulseAccounts.length) {
+    return NextResponse.json({ ok: true, dispatched: [], reason: 'No official or community-pulse account scheduled for this Eastern hour.' });
+  }
 
   const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const results = [];
-  for (const account of accounts) {
+
+  for (const account of officialAccounts) {
     try {
       const body = await buildBody(db, account, clock);
-      const result = await publishDaily(db, account, body, clock.dateKey);
+      const result = await publishDaily(db, account, body, clock.dateKey, 'official');
       if (result.ok) console.info('[official-daily] published', result);
       else console.error('[official-daily] failed', result);
       results.push(result);
     } catch (error) {
       const failure = { account, ok: false, error: error instanceof Error ? error.message : 'Unknown daily post error.' };
       console.error('[official-daily] failed', failure);
+      results.push(failure);
+    }
+  }
+
+  for (const account of pulseAccounts) {
+    try {
+      const slot = `pulse_${clock.hour}`;
+      const body = buildPulsePost(account, clock);
+      const result = await publishDaily(db, account, body, clock.dateKey, slot);
+      if (result.ok) console.info('[official-daily] community pulse published', result);
+      else console.error('[official-daily] community pulse failed', result);
+      results.push(result);
+    } catch (error) {
+      const failure = { account, ok: false, error: error instanceof Error ? error.message : 'Unknown community-pulse post error.' };
+      console.error('[official-daily] community pulse failed', failure);
       results.push(failure);
     }
   }
