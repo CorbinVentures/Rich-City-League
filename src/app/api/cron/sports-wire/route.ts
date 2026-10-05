@@ -250,8 +250,9 @@ export async function GET(request: Request) {
 
   const hour = easternHour();
   const url = new URL(request.url);
-  const forcedDesk = url.searchParams.get('desk');
-  const desks = (forcedDesk === 'nba-news' || forcedDesk === 'nfl-betting-stats')
+  const requestedDesk = url.searchParams.get('desk');
+  const forcedDesk: Desk | null = requestedDesk === 'nba-news' || requestedDesk === 'nfl-betting-stats' ? requestedDesk : null;
+  const desks: Desk[] = forcedDesk
     ? [forcedDesk]
     : (Object.keys(deskConfig) as Desk[]).filter(desk => deskConfig[desk].hours.includes(hour));
 
