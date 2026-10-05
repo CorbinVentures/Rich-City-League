@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaArrowRight, FaCrown, FaFilm, FaGlobe, FaPlay, FaPlus, FaUsers } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
+import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
@@ -56,6 +57,18 @@ export default async function MediaPage() {
         <div className="aspect-video w-full bg-black">{playerUrl ? <iframe src={playerUrl} title="RCH TV Live" className="h-full w-full border-0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <div className="flex h-full flex-col items-center justify-center px-6 text-center"><FaPlay className="text-3xl text-rcl-blue"/><p className="mt-4 text-xs font-black uppercase tracking-[.25em] text-rcl-orange">Broadcast setup in progress</p><h3 className="mt-3 font-display text-2xl font-black uppercase sm:text-4xl">RCH TV Live is coming online.</h3><p className="mt-3 max-w-xl text-sm leading-6 text-white/40">When the live input is connected, official RCL games stream here free.</p></div>}</div>
         <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">{nextGame ? 'Next free broadcast' : 'RCH TV Live'}</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">{nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}</h3>{nextGame && <p className="mt-1 text-sm text-white/40">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}</div><div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No subscription required for games.</p></div></div>
       </section>
+
+      <NetworkSponsoredPlacement
+        placement="media-feature"
+        surface="rch-tv-presenting"
+        variant="strip"
+        slotKey="rch-tv-primary"
+        dailyCap={6}
+        sessionCap={3}
+        brandLabel="RCH TV partner"
+        ctaLabel="Visit partner"
+        className="mt-8"
+      />
 
       <section className="mt-10 rounded-3xl border border-rcl-orange/20 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,.14),transparent_34%),#071018] p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-5"><div className="max-w-3xl"><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange"><FaCrown className="mr-2 inline"/>RCH Originals</p><h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">A premium library worth opening.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">The plan is not to flood RCH TV with filler. Originals should earn their place: strong Richmond basketball stories, personalities and access that members cannot get from a box score.</p></div><Link href="/membership" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 text-xs font-black uppercase tracking-wider text-rcl-orange">Membership <FaArrowRight/></Link></div>
