@@ -7,6 +7,7 @@ import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { AchievementShareCard } from '@/components/AchievementShareCard';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
+import { ProfileViewInsights } from '@/components/ProfileViewInsights';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
 
 export const revalidate = 30;
@@ -204,6 +205,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
+          {!profile.is_system_account && <ProfileViewInsights profileId={profile.id} />}
 
           <div className={`rcl-profile-status-banner status-${repStatus.key}`}><small>REPUTATION STATUS</small><strong>{repStatus.label}</strong><span>Level {socialLevel} · {repProgress.remaining} REP to Level {socialLevel+1}</span></div>
           <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>REP</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span></div>
