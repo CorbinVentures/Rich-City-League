@@ -45,9 +45,6 @@ export default async function NewsPage() {
       meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Published</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">stories</span></p><p className="mt-2 text-xs text-rcl-blue">{automatedCount ? 'Daily newsroom active' : 'Official RCL coverage'}</p></div>}
     />
     <Container maxWidth="xl" className="py-10 sm:py-12">
-      <div className="mb-6 rounded-2xl border border-rcl-blue/15 bg-rcl-blue/[.045] p-5 text-sm leading-6 text-white/50">
-        <b className="text-white">How the RCL Newsroom works:</b> League stories use official platform data. RCL Insider rotates through approved live, preview and roadmap topics without inventing launch promises. Richmond basketball and culture stories use current public sources and must clear sourcing, duplication and confidence checks before publication. AI-assisted stories are labeled on the article page and link back to their reporting sources.
-      </div>
       <NewsDirectory items={items} />
     </Container>
   </main>;
