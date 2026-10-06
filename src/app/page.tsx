@@ -42,7 +42,10 @@ export default async function HomePage() {
         .limit(6)
     : { data: [] };
 
-  const playerIds = (playersRaw ?? []).slice(0, 4).map(player=>player.id);
+  const playerIds = (playersRaw ?? [])
+    .slice(0, 4)
+    .map(player=>player.id)
+    .filter((id): id is string => Boolean(id));
   const [{ data: statsRaw }, { data: postsRaw }] = client
     ? await Promise.all([
         playerIds.length && completedGameIds.length
