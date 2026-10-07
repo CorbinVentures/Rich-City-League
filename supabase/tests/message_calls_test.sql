@@ -67,13 +67,13 @@ select is(
   'the requested media kind is stored'
 );
 
-select throws_ok($
+select throws_ok($$
   select public.start_message_call(
     current_setting('test.call_conversation_id')::uuid,
     '42424242-4242-4424-8424-424242424242',
     'audio'
   )
-$, 'P0001', 'One of you is already on a call',
+$$, 'P0001', 'One of you is already on a call',
   'a second simultaneous call is rejected');
 
 select set_config('request.jwt.claim.sub', '43434343-4343-4434-8434-434343434343', true);
@@ -133,13 +133,13 @@ on conflict do nothing;
 set role authenticated;
 select set_config('request.jwt.claim.sub', '41414141-4141-4414-8414-414141414141', true);
 
-select throws_ok($
+select throws_ok($$
   select public.start_message_call(
     current_setting('test.call_conversation_id')::uuid,
     '42424242-4242-4424-8424-424242424242',
     'audio'
   )
-$, 'P0001', 'This member is not available for calls',
+$$, 'P0001', 'This member is not available for calls',
   'blocking a member prevents new calls');
 
 select * from finish();
