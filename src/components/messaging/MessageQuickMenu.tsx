@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FaComments, FaMagnifyingGlass, FaPenToSquare, FaStar, FaUsers, FaXmark } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
@@ -68,6 +69,7 @@ export function MessageQuickMenu({
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<QuickItem[]>([]);
@@ -133,7 +135,8 @@ export function MessageQuickMenu({
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent | TouchEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !panelRef.current?.contains(target)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false);
@@ -181,10 +184,10 @@ export function MessageQuickMenu({
         {unreadCount > 0 && <em>{unreadCount > 9 ? '9+' : unreadCount}</em>}
       </button>
 
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <>
           <button type="button" className="rcl-message-quick-backdrop" aria-label="Close messages" onClick={() => setOpen(false)} />
-          <section className="rcl-message-quick-panel" role="dialog" aria-modal="true" aria-label="RCH Messages">
+          <section ref={panelRef} className="rcl-message-quick-panel" role="dialog" aria-modal="true" aria-label="RCH Messages">
             <header className="rcl-message-quick-head">
               <div>
                 <span>RCH Messages</span>
@@ -286,7 +289,8 @@ export function MessageQuickMenu({
               <span>Messages stay available from the top bar.</span>
             </footer>
           </section>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
