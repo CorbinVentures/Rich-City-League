@@ -73,6 +73,19 @@ function isVideoAttachment(url: string | null) {
   return Boolean(url && /\.(mp4|webm|mov|ogv)(?:$|\?)/i.test(url));
 }
 
+function mediaStoragePath(url: string | null) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const marker = '/storage/v1/object/public/media/';
+    const index = parsed.pathname.indexOf(marker);
+    if (index < 0) return null;
+    return decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
 function timeLabel(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
@@ -123,6 +136,8 @@ export default function ConversationPage() {
   const channelRef = useRef<any>(null);
   const typingTimers = useRef<Record<string, number>>({});
   const lastTypingSent = useRef(0);
+  const messageIdsRef = useRef<string[]>([]);
+  const meNameRef = useRef('RCH member');
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -135,10 +150,22 @@ export default function ConversationPage() {
   const memberMap = useMemo(() => new Map(members.map((member) => [member.profile_id, member.profile])), [members]);
   const messageMap = useMemo(() => new Map(messages.map((message) => [message.id, message])), [messages]);
 
+  useEffect(() => {
+    messageIdsRef.current = messages.map((message) => message.id);
+  }, [messages]);
+
+  useEffect(() => {
+    meNameRef.current = displayName(me?.profile);
+  }, [me?.profile]);
+
   const markRead = useCallback(async () => {
     if (!db || !user) return;
-    const readAt = new Date().toISOString();
-    await db.from('conversation_members').update({ last_read_at: readAt }).eq('conversation_id', conversationId).eq('profile_id', user.id);
+    const result = await db.rpc('mark_conversation_read', { target_conversation_id: conversationId });
+    if (result.error) {
+      setError((current) => current || 'Unable to update read status.');
+      return;
+    }
+    const readAt = typeof result.data === 'string' ? result.data : new Date().toISOString();
     setMembers((current) => current.map((member) => member.profile_id === user.id ? { ...member, last_read_at: readAt } : member));
   }, [conversationId, db, user]);
 
@@ -162,7 +189,11 @@ export default function ConversationPage() {
       return;
     }
     const result = await db.from('message_reactions').select('message_id,profile_id,reaction_key,created_at').in('message_id', messageIds);
-    if (!result.error) setReactions((result.data ?? []) as Reaction[]);
+    if (result.error) {
+      setError((current) => current || 'Unable to refresh message reactions.');
+      return;
+    }
+    setReactions((result.data ?? []) as Reaction[]);
   }, [db]);
 
   const load = useCallback(async (initial = true) => {
@@ -219,7 +250,7 @@ export default function ConversationPage() {
         setMessages((current) => current.map((message) => message.id === next.id ? next : message));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
-        void loadReactions(messages.map((message) => message.id));
+        void loadReactions(messageIdsRef.current);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_members', filter: `conversation_id=eq.${conversationId}` }, () => {
         void loadMembers();
@@ -242,7 +273,7 @@ export default function ConversationPage() {
       })
       .subscribe((status: string) => {
         if (status === 'SUBSCRIBED') {
-          void channel.track({ profile_id: user.id, name: displayName(me?.profile), online_at: new Date().toISOString() });
+          void channel.track({ profile_id: user.id, name: meNameRef.current, online_at: new Date().toISOString() });
         }
       });
 
@@ -252,7 +283,7 @@ export default function ConversationPage() {
       typingTimers.current = {};
       void supabase.removeChannel(channel);
     };
-  }, [conversation, conversationId, loadMembers, loadReactions, markRead, me?.profile, messages, supabase, user]);
+  }, [conversation, conversationId, loadMembers, loadReactions, markRead, supabase, user]);
 
   useEffect(() => {
     let active = true;
@@ -269,6 +300,11 @@ export default function ConversationPage() {
     setLoadingOlder(true);
     const oldest = messages[0].created_at;
     const result = await db.from('messages').select('id,conversation_id,sender_id,body,attachment_url,reply_to_id,deleted_at,edited_at,created_at').eq('conversation_id', conversationId).lt('created_at', oldest).order('created_at', { ascending: false }).limit(PAGE_SIZE);
+    if (result.error) {
+      setError(result.error.message || 'Unable to load earlier messages.');
+      setLoadingOlder(false);
+      return;
+    }
     const older = ((result.data ?? []) as Message[]).reverse();
     setMessages((current) => [...older, ...current]);
     setHasOlder(older.length === PAGE_SIZE);
@@ -298,7 +334,7 @@ export default function ConversationPage() {
       cacheControl: '3600',
     });
     if (uploaded.error) throw uploaded.error;
-    return supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+    return { path, url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl };
   };
 
   const resetComposer = () => {
@@ -328,14 +364,16 @@ export default function ConversationPage() {
     setSending(true);
     setError('');
 
+    let uploadedPath: string | null = null;
     try {
-      const attachmentUrl = attachmentFile ? await uploadAttachment() : null;
+      const attachment = attachmentFile ? await uploadAttachment() : null;
+      uploadedPath = attachment?.path ?? null;
       const fallbackBody = attachmentFile ? (attachmentFile.type.startsWith('video/') ? 'Shared a video' : 'Shared a photo') : '';
       const result = await db.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
         body: trimmed || fallbackBody,
-        attachment_url: attachmentUrl,
+        attachment_url: attachment?.url ?? null,
         reply_to_id: replyTo?.id ?? null,
       }).select('id,conversation_id,sender_id,body,attachment_url,reply_to_id,deleted_at,edited_at,created_at').single();
 
@@ -345,6 +383,9 @@ export default function ConversationPage() {
       resetComposer();
       window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
     } catch (sendError) {
+      if (uploadedPath && supabase) {
+        await supabase.storage.from('media').remove([uploadedPath]);
+      }
       setError(sendError instanceof Error ? sendError.message : 'Unable to send that message.');
     }
 
@@ -367,19 +408,34 @@ export default function ConversationPage() {
   const toggleReaction = async (messageId: string, reactionKey: string) => {
     if (!db || !user) return;
     const exists = reactions.some((reaction) => reaction.message_id === messageId && reaction.profile_id === user.id && reaction.reaction_key === reactionKey);
-    if (exists) {
-      await db.from('message_reactions').delete().eq('message_id', messageId).eq('profile_id', user.id).eq('reaction_key', reactionKey);
-    } else {
-      await db.from('message_reactions').insert({ message_id: messageId, profile_id: user.id, reaction_key: reactionKey });
+    const result = exists
+      ? await db.from('message_reactions').delete().eq('message_id', messageId).eq('profile_id', user.id).eq('reaction_key', reactionKey)
+      : await db.from('message_reactions').insert({ message_id: messageId, profile_id: user.id, reaction_key: reactionKey });
+    if (result.error) {
+      setError(result.error.message || 'Unable to update that reaction.');
+      return;
     }
     setReactionOpen(null);
-    await loadReactions(messages.map((message) => message.id));
+    await loadReactions(messageIdsRef.current);
   };
 
   const deleteMessage = async (message: Message) => {
     if (!db || !user || message.sender_id !== user.id) return;
-    const result = await db.from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', message.id).eq('sender_id', user.id);
-    if (result.error) setError(result.error.message);
+    const attachmentPath = mediaStoragePath(message.attachment_url);
+    const result = await db.from('messages').update({
+      body: 'Message removed',
+      attachment_url: null,
+      reply_to_id: null,
+      deleted_at: new Date().toISOString(),
+    }).eq('id', message.id).eq('sender_id', user.id);
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
+    if (attachmentPath && supabase) {
+      const removed = await supabase.storage.from('media').remove([attachmentPath]);
+      if (removed.error) setError('Message removed, but its uploaded media could not be cleaned up.');
+    }
     setMessageMenu(null);
   };
 
@@ -641,7 +697,7 @@ export default function ConversationPage() {
 
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
-                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/profile' : `/social/profile/${member.profile_id}`}>
+                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/social/profile/me' : `/social/profile/${member.profile_id}`}>
                   <span><ProfileAvatarMedia src={member.profile?.avatar_url} alt={displayName(member.profile)} className="h-full w-full object-cover" /></span>
                   <div><strong>{member.profile_id === user?.id ? 'You' : displayName(member.profile)}</strong><small>{member.role === 'admin' ? 'Conversation admin' : member.profile?.role ?? 'Member'}</small></div>
                   {onlineIds.includes(member.profile_id) && <i />}
