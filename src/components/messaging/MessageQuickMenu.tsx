@@ -286,11 +286,10 @@ export function MessageQuickMenu({
             </div>
 
             <footer className="rcl-message-quick-dock">
-              <Link href="/messages?compose=1" onClick={openComposer}>
-                <FaPenToSquare />
-                Start a new message
+              <Link href="/messages" onClick={() => setOpen(false)}>
+                View all messages
+                <span aria-hidden="true">→</span>
               </Link>
-              <span>Messages stay available from the top bar.</span>
             </footer>
           </section>
         </>,
