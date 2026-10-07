@@ -185,14 +185,14 @@ select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020
 
 select lives_ok($$
   insert into public.message_reactions (message_id, profile_id, reaction_key)
-  values (current_setting('test.messaging_message_id')::uuid, auth.uid(), 'fire')
+  values (current_setting('test.messaging_message_id')::uuid, auth.uid(), 'facts')
 $$, 'a conversation member can react to a message');
 
 select lives_ok($$
   delete from public.message_reactions
   where message_id = current_setting('test.messaging_message_id')::uuid
     and profile_id = auth.uid()
-    and reaction_key = 'fire'
+    and reaction_key = 'facts'
 $$, 'a member can remove their own reaction');
 
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
