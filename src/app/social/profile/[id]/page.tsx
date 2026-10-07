@@ -46,7 +46,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
 
   const { data: profile } = await client
     .from('profiles')
-    .select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,created_at,is_vip,vip_label,is_system_account,system_account_key')
+    .select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,created_at,is_vip,vip_label,is_system_account,system_account_key,qualified_referral_count')
     .eq('id', id)
     .eq('is_active', true)
     .maybeSingle() as any;
@@ -208,7 +208,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           {!profile.is_system_account && <ProfileViewInsights profileId={profile.id} />}
 
           <div className={`rcl-profile-status-banner status-${repStatus.key}`}><small>REPUTATION STATUS</small><strong>{repStatus.label}</strong><span>Level {socialLevel} · {repProgress.remaining} REP to Level {socialLevel+1}</span></div>
-          <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>REP</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span></div>
+          <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>REP</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span><span><b>{profile.qualified_referral_count ?? 0}</b><small>Recruited</small></span></div>
           <div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
         </div>
       </section>
