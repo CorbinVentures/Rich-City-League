@@ -737,7 +737,7 @@ export default function NetworkHome() {
           <div className="rcl-feed-intro-actions">
             <div className="rcl-feed-search" role="search">
               <FaMagnifyingGlass className="rcl-feed-search-icon"/>
-              <input aria-label="Search this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search posts, people and topics"/>
+              <input aria-label="Search posts, people and topics in this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search the feed"/>
               {search && <button type="button" onClick={()=>setSearch('')} className="rcl-feed-search-clear" aria-label="Clear feed search"><FaXmark/></button>}
             </div>
             {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}

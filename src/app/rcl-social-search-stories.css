@@ -601,19 +601,22 @@
 }
 
 
-/* ---------- Mobile search field hardening ----------
- * Keep the feed search as one clean control. iOS/PWA form styling must not
- * render a second rounded rectangle inside the search shell.
+/* ---------- Feed search: single outline on mobile and desktop ----------
+ * The shared form rule has four :not() selectors and !important declarations.
+ * Match and exceed that specificity so its border/radius/background cannot
+ * draw a second input box inside the visible search pill on iOS or desktop.
+ * Keep keyboard focus on the parent via :focus-within above.
  */
-.rcl-platform-root .rcl-feed-search > input[type="search"] {
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
   display: block !important;
+  flex: 1 1 0% !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 44px !important;
   min-height: 44px !important;
   margin: 0 !important;
   border: 0 !important;
-  border-style: none !important;
+  border-color: transparent !important;
   border-radius: 0 !important;
   outline: 0 !important;
   background: transparent !important;
@@ -623,16 +626,17 @@
   appearance: none !important;
 }
 
-.rcl-platform-root .rcl-feed-search > input[type="search"]:focus {
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus {
   border: 0 !important;
+  border-color: transparent !important;
   outline: 0 !important;
   box-shadow: none !important;
 }
 
-.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-decoration,
-.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-cancel-button,
-.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-results-button,
-.rcl-platform-root .rcl-feed-search > input[type="search"]::-webkit-search-results-decoration {
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::-webkit-search-decoration,
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::-webkit-search-cancel-button,
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::-webkit-search-results-button,
+.rcl-platform-root .rcl-feed-search > input[type="search"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::-webkit-search-results-decoration {
   display: none !important;
   -webkit-appearance: none !important;
 }
