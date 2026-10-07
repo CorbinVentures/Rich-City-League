@@ -1,7 +1,7 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple, FaComments,
   FaCompass, FaCrown, FaGlobe, FaHandshake, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
-  FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUsers
+  FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUserPlus, FaUsers
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 import type { RCLNavGroup } from '@/lib/rcl-navigation';
@@ -29,7 +29,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Messages',href:'/messages',icon:FaComments},
       {label:'Notifications',href:'/notifications',icon:FaBell},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
-      {label:'REP + Badges',href:'/badges',icon:FaMedal},
+      {label:'REP + Badges',href:'/badges',icon:FaMedal},\n      {label:'Invite + Earn',href:'/referrals',icon:FaUserPlus},
     ],
   },
   {
