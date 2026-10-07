@@ -29,7 +29,8 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Messages',href:'/messages',icon:FaComments},
       {label:'Notifications',href:'/notifications',icon:FaBell},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
-      {label:'REP + Badges',href:'/badges',icon:FaMedal},\n      {label:'Invite + Earn',href:'/referrals',icon:FaUserPlus},
+      {label:'REP + Badges',href:'/badges',icon:FaMedal},
+      {label:'Invite + Earn',href:'/referrals',icon:FaUserPlus},
     ],
   },
   {
