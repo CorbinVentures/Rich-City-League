@@ -1,6 +1,6 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaCalendarDays, FaChartSimple,
-  FaComments, FaCompass, FaCrown, FaFilm, FaGear, FaGlobe, FaHandshake, FaHouse, FaListOl,
+   FaCompass, FaCrown, FaFilm, FaGear, FaGlobe, FaHandshake, FaHouse, FaListOl,
   FaLocationDot, FaMedal, FaNewspaper, FaPeopleGroup, FaPlay, FaPlus,
   FaShirt, FaTrophy, FaUser, FaUsers
 } from 'react-icons/fa6';
@@ -45,7 +45,6 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Home Feed',href:'/social',icon:FaHouse},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
-      {label:'Messages',href:'/messages',icon:FaComments},
       {label:'Notifications',href:'/notifications',icon:FaBell},
       {label:'REP + Badges',href:'/badges',icon:FaMedal},
     ],
