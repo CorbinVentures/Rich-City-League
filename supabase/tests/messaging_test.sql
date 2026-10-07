@@ -71,9 +71,9 @@ select lives_ok($group_message$
   )
 $group_message$, 'a group member can send a message');
 
-select lives_ok($
+select lives_ok($initial_read$
   select public.mark_conversation_read(current_setting('test.messaging_direct_id')::uuid)
-$$, 'a member can mark their conversation read');
+$initial_read$, 'a member can mark their conversation read');
 
 select ok(
   (
