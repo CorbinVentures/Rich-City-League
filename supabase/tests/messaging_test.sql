@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(20);
 
 set role postgres;
 
@@ -62,7 +62,16 @@ select is(
   'the group contains the creator and selected members'
 );
 
-select lives_ok($$
+select lives_ok($group_message$
+  insert into public.messages (conversation_id, sender_id, body)
+  values (
+    current_setting('test.messaging_group_id')::uuid,
+    auth.uid(),
+    'Group messaging action test'
+  )
+$group_message$, 'a group member can send a message');
+
+select lives_ok($
   select public.mark_conversation_read(current_setting('test.messaging_direct_id')::uuid)
 $$, 'a member can mark their conversation read');
 
@@ -115,6 +124,30 @@ select lives_ok($message$
 $message$, 'a conversation member can send a message');
 
 select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020', true);
+
+select is(
+  (
+    select unread_count
+    from public.get_message_inbox()
+    where conversation_id = current_setting('test.messaging_direct_id')::uuid
+  ),
+  1::bigint,
+  'a new direct message appears unread for the recipient'
+);
+
+select lives_ok($read$
+  select public.mark_conversation_read(current_setting('test.messaging_direct_id')::uuid)
+$read$, 'the recipient can mark the new direct message read');
+
+select is(
+  (
+    select unread_count
+    from public.get_message_inbox()
+    where conversation_id = current_setting('test.messaging_direct_id')::uuid
+  ),
+  0::bigint,
+  'marking the conversation read clears its unread count'
+);
 
 select is(
   (
