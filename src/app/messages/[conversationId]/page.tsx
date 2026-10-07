@@ -80,7 +80,7 @@ const legacyReactionEmoji: Record<string, string> = {
 const VOICE_NOTE_MAX_BYTES = 10 * 1024 * 1024;
 
 function isAudioAttachment(url: string | null) {
-  return Boolean(url && /\.(m4a|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
+  return Boolean(url && /\/voice-[^/?]+\.(m4a|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
 }
 
 function audioExtension(type: string) {
@@ -166,6 +166,7 @@ export default function ConversationPage() {
   const [infoTab, setInfoTab] = useState<'media' | 'links'>('media');
   const [toast, setToast] = useState('');
   const [recording, setRecording] = useState(false);
+  const [recordingStarting, setRecordingStarting] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -470,7 +471,8 @@ export default function ConversationPage() {
       ? audioExtension(attachmentFile.type)
       : socialMediaExtension(attachmentFile.type);
     if (!extension) throw new Error('That attachment type is not supported.');
-    const path = `${user.id}/messages/${conversationId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const filename = `${attachmentFile.type.startsWith('audio/') ? 'voice-' : ''}${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const path = `${user.id}/messages/${conversationId}/${filename}`;
     const uploaded = await supabase.storage.from('media').upload(path, attachmentFile, {
       upsert: false,
       contentType: attachmentFile.type,
@@ -613,11 +615,12 @@ export default function ConversationPage() {
       stopVoiceRecording();
       return;
     }
-    if (editing) return;
+    if (recordingStarting || editing) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setError('Voice notes are not supported in this browser.');
       return;
     }
+    setRecordingStarting(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
@@ -652,6 +655,7 @@ export default function ConversationPage() {
         showToast('Voice note ready to send');
       };
       recorder.start(250);
+      setRecordingStarting(false);
       setAttachmentFile(null);
       setAttachmentPreview('');
       setRecordingSeconds(0);
@@ -670,6 +674,7 @@ export default function ConversationPage() {
       recorderStreamRef.current = null;
       recorderRef.current = null;
       setRecording(false);
+      setRecordingStarting(false);
       setError(recordError instanceof Error ? recordError.message : 'Microphone access is required for voice notes.');
     }
   };
@@ -819,7 +824,7 @@ export default function ConversationPage() {
                   {conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}
                   {peer && onlineIds.includes(peer.id) && <i />}
                 </div>
-                <div>
+                <div className="rcl-thread-identity">
                   <h1>{conversationTitle}</h1>
                   <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
@@ -973,7 +978,7 @@ export default function ConversationPage() {
                   {!editing && <>
                     <button type="button" onClick={() => imageInputRef.current?.click()} aria-label="Attach photo"><FiImage /></button>
                     <button type="button" onClick={() => videoInputRef.current?.click()} aria-label="Attach video"><FiVideo /></button>
-                    <button type="button" onClick={() => void startVoiceRecording()} className={recording ? 'recording' : ''} aria-label={recording ? 'Stop voice recording' : 'Record voice note'}>{recording ? <FiStopCircle /> : <FiMic />}</button>
+                    <button type="button" disabled={recordingStarting} onClick={() => void startVoiceRecording()} className={recording ? 'recording' : ''} aria-label={recordingStarting ? 'Starting voice recorder' : recording ? 'Stop voice recording' : 'Record voice note'}>{recording ? <FiStopCircle /> : <FiMic />}</button>
                     <input ref={imageInputRef} type="file" accept={SOCIAL_IMAGE_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                     <input ref={videoInputRef} type="file" accept={SOCIAL_VIDEO_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                   </>}
