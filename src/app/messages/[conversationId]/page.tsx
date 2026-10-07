@@ -13,7 +13,9 @@ import {
   FiEdit2,
   FiImage,
   FiInfo,
+  FiLink,
   FiMessageCircle,
+  FiMic,
   FiMoreHorizontal,
   FiPhone,
   FiCornerUpLeft,
@@ -21,7 +23,9 @@ import {
   FiSearch,
   FiSmile,
   FiStar,
+  FiStopCircle,
   FiTrash2,
+  FiUser,
   FiUsers,
   FiVideo,
   FiX,
@@ -59,13 +63,39 @@ type Preference = { is_pinned: boolean; muted_until: string | null; archived_at:
 
 const PAGE_SIZE = 40;
 const reactionOptions = [
-  ['like', '👍'],
-  ['love', '❤️'],
   ['fire', '🔥'],
+  ['hoop', '🏀'],
+  ['facts', '💯'],
+  ['watch', '👀'],
   ['laugh', '😂'],
-  ['wow', '😮'],
-  ['clutch', '🏀'],
+  ['love', '❤️'],
 ] as const;
+
+const legacyReactionEmoji: Record<string, string> = {
+  like: '👍',
+  wow: '😮',
+  clutch: '🏀',
+};
+
+const VOICE_NOTE_MAX_BYTES = 10 * 1024 * 1024;
+
+function isAudioAttachment(url: string | null) {
+  return Boolean(url && /\/voice-[^/?]+\.(m4a|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
+}
+
+function audioExtension(type: string) {
+  if (/mp4|m4a|x-m4a/i.test(type)) return 'm4a';
+  if (/mpeg|mp3/i.test(type)) return 'mp3';
+  if (/ogg/i.test(type)) return 'ogg';
+  if (/aac/i.test(type)) return 'aac';
+  return 'webm';
+}
+
+function formatRecordingTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${minutes}:${remainder.toString().padStart(2, '0')}`;
+}
 
 function displayName(profile?: Profile | null) {
   return profile?.display_name ?? profile?.username ?? 'RCH member';
@@ -133,6 +163,11 @@ export default function ConversationPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState('');
   const [searchCursor, setSearchCursor] = useState(0);
+  const [infoTab, setInfoTab] = useState<'media' | 'links'>('media');
+  const [toast, setToast] = useState('');
+  const [recording, setRecording] = useState(false);
+  const [recordingStarting, setRecordingStarting] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -145,6 +180,12 @@ export default function ConversationPage() {
   const lastTypingSent = useRef(0);
   const messageIdsRef = useRef<string[]>([]);
   const meNameRef = useRef('RCH member');
+  const swipeReplyRef = useRef<{ id: string; x: number; y: number } | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recorderStreamRef = useRef<MediaStream | null>(null);
+  const recorderChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<number | null>(null);
+  const recordingAcquireRef = useRef(false);
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -165,6 +206,19 @@ export default function ConversationPage() {
   const activeSearchId = searchMatches.length
     ? searchMatches[((searchCursor % searchMatches.length) + searchMatches.length) % searchMatches.length].id
     : null;
+  const sharedMedia = useMemo(
+    () => messages.filter((message) => message.attachment_url && !message.deleted_at),
+    [messages],
+  );
+  const sharedLinks = useMemo(() => messages.flatMap((message) => {
+    if (message.deleted_at) return [];
+    const matches = message.body.match(/https?:\/\/[^\s]+/gi) ?? [];
+    return matches.map((href) => ({
+      messageId: message.id,
+      href: href.replace(/[),.!?]+$/, ''),
+      label: href.replace(/^https?:\/\//i, '').replace(/\/$/, ''),
+    }));
+  }), [messages]);
 
   useEffect(() => {
     messageIdsRef.current = messages.map((message) => message.id);
@@ -215,17 +269,22 @@ export default function ConversationPage() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [searchOpen]);
 
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast((current) => current === message ? '' : current), 2600);
+  }, []);
+
   const markRead = useCallback(async () => {
     if (!db || !user) return;
     if (typeof document !== 'undefined' && (document.visibilityState !== 'visible' || !document.hasFocus())) return;
     const result = await db.rpc('mark_conversation_read', { target_conversation_id: conversationId });
     if (result.error) {
-      setError((current) => current || 'Unable to update read status.');
+      showToast('Read status will sync when the connection catches up.');
       return;
     }
     const readAt = typeof result.data === 'string' ? result.data : new Date().toISOString();
     setMembers((current) => current.map((member) => member.profile_id === user.id ? { ...member, last_read_at: readAt } : member));
-  }, [conversationId, db, user]);
+  }, [conversationId, db, showToast, user]);
 
   const loadMembers = useCallback(async () => {
     if (!db || !user) return;
@@ -358,13 +417,19 @@ export default function ConversationPage() {
 
   useEffect(() => {
     let active = true;
-    if (!attachmentFile || attachmentFile.size > 8 * 1024 * 1024) {
+    if (!attachmentFile || attachmentFile.type.startsWith('audio/') || attachmentFile.size > 8 * 1024 * 1024) {
       setAttachmentPreview('');
       return () => { active = false; };
     }
     void readMediaPreview(attachmentFile).then((preview) => { if (active) setAttachmentPreview(preview); });
     return () => { active = false; };
   }, [attachmentFile]);
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
+    if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const loadOlder = async () => {
     if (!db || !messages.length || loadingOlder) return;
@@ -385,10 +450,17 @@ export default function ConversationPage() {
 
   const chooseAttachment = (file: File | null) => {
     if (!file) return;
-    const issue = socialMediaError(file);
-    if (issue) {
-      setError(issue);
-      return;
+    if (file.type.startsWith('audio/')) {
+      if (file.size <= 0 || file.size > VOICE_NOTE_MAX_BYTES) {
+        setError('Voice notes must be 10MB or smaller.');
+        return;
+      }
+    } else {
+      const issue = socialMediaError(file);
+      if (issue) {
+        setError(issue);
+        return;
+      }
     }
     setAttachmentFile(file);
     setError('');
@@ -396,9 +468,12 @@ export default function ConversationPage() {
 
   const uploadAttachment = async () => {
     if (!supabase || !user || !attachmentFile) return null;
-    const extension = socialMediaExtension(attachmentFile.type);
+    const extension = attachmentFile.type.startsWith('audio/')
+      ? audioExtension(attachmentFile.type)
+      : socialMediaExtension(attachmentFile.type);
     if (!extension) throw new Error('That attachment type is not supported.');
-    const path = `${user.id}/messages/${conversationId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const filename = `${attachmentFile.type.startsWith('audio/') ? 'voice-' : ''}${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const path = `${user.id}/messages/${conversationId}/${filename}`;
     const uploaded = await supabase.storage.from('media').upload(path, attachmentFile, {
       upsert: false,
       contentType: attachmentFile.type,
@@ -448,7 +523,13 @@ export default function ConversationPage() {
     try {
       const attachment = attachmentFile ? await uploadAttachment() : null;
       uploadedPath = attachment?.path ?? null;
-      const fallbackBody = attachmentFile ? (attachmentFile.type.startsWith('video/') ? 'Shared a video' : 'Shared a photo') : '';
+      const fallbackBody = attachmentFile
+        ? (attachmentFile.type.startsWith('audio/')
+          ? 'Shared a voice note'
+          : attachmentFile.type.startsWith('video/')
+            ? 'Shared a video'
+            : 'Shared a photo')
+        : '';
       const result = await db.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
@@ -519,6 +600,109 @@ export default function ConversationPage() {
 
   const focusComposer = () => {
     window.requestAnimationFrame(() => composerRef.current?.focus());
+  };
+
+  const stopVoiceRecording = () => {
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    setRecording(false);
+  };
+
+  const startVoiceRecording = async () => {
+    if (recording) {
+      stopVoiceRecording();
+      return;
+    }
+    if (recordingAcquireRef.current || recordingStarting || editing) return;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setError('Voice notes are not supported in this browser.');
+      return;
+    }
+    recordingAcquireRef.current = true;
+    setRecordingStarting(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      const supportedType = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg']
+        .find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = supportedType ? new MediaRecorder(stream, { mimeType: supportedType }) : new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      recorderStreamRef.current = stream;
+      recorderChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recorderChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        if (recordingTimerRef.current) {
+          window.clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        const type = recorder.mimeType || supportedType || 'audio/webm';
+        const blob = new Blob(recorderChunksRef.current, { type });
+        recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+        recorderStreamRef.current = null;
+        recorderRef.current = null;
+        recorderChunksRef.current = [];
+        setRecording(false);
+        setRecordingSeconds(0);
+        if (!blob.size) {
+          setError('That voice note was empty. Try recording again.');
+          return;
+        }
+        chooseAttachment(new File([blob], `voice-note-${Date.now()}.${audioExtension(type)}`, { type }));
+        showToast('Voice note ready to send');
+      };
+      recorder.start(250);
+      recordingAcquireRef.current = false;
+      setRecordingStarting(false);
+      setAttachmentFile(null);
+      setAttachmentPreview('');
+      setRecordingSeconds(0);
+      setRecording(true);
+      recordingTimerRef.current = window.setInterval(() => {
+        setRecordingSeconds((seconds) => {
+          if (seconds >= 119) {
+            window.setTimeout(stopVoiceRecording, 0);
+            return 120;
+          }
+          return seconds + 1;
+        });
+      }, 1000);
+    } catch (recordError) {
+      recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+      recorderStreamRef.current = null;
+      recorderRef.current = null;
+      recordingAcquireRef.current = false;
+      setRecording(false);
+      setRecordingStarting(false);
+      setError(recordError instanceof Error ? recordError.message : 'Microphone access is required for voice notes.');
+    }
+  };
+
+  const beginSwipeReply = (event: React.TouchEvent, messageId: string) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    swipeReplyRef.current = { id: messageId, x: touch.clientX, y: touch.clientY };
+  };
+
+  const finishSwipeReply = (event: React.TouchEvent, message: Message) => {
+    const start = swipeReplyRef.current;
+    swipeReplyRef.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch || start.id !== message.id || message.deleted_at) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (dx < 56 || Math.abs(dy) > 44) return;
+    setReplyTo(message);
+    setEditing(null);
+    setReactionOpen(null);
+    setMessageMenu(null);
+    showToast('Replying to message');
+    focusComposer();
   };
 
   const editMessage = (message: Message) => {
@@ -633,16 +817,18 @@ export default function ConversationPage() {
         </div>
 
         {error && <div className="rcl-message-error">{error}<button type="button" onClick={() => setError('')}>Dismiss</button></div>}
+        {toast && <div className="rcl-message-toast" role="status">{toast}</div>}
 
         {conversation && (
           <div className={`rcl-thread-workspace ${showInfo ? 'show-info' : ''}`}>
             <section className="rcl-thread-main">
               <header className="rcl-thread-header">
+                <Link href="/messages" className="rcl-thread-mobile-back" aria-label="Back to messages"><FiArrowLeft /></Link>
                 <div className="rcl-thread-avatar">
                   {conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}
                   {peer && onlineIds.includes(peer.id) && <i />}
                 </div>
-                <div>
+                <div className="rcl-thread-identity">
                   <h1>{conversationTitle}</h1>
                   <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
@@ -650,7 +836,7 @@ export default function ConversationPage() {
                   <button type="button" onClick={() => startDirectCall('audio')} aria-label="Start voice call" title="Voice call"><FiPhone /></button>
                   <button type="button" onClick={() => startDirectCall('video')} aria-label="Start video call" title="Video call"><FiVideo /></button>
                 </>}
-                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search messages"><FiSearch /></button>
+                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={`rcl-thread-header-search ${searchOpen ? 'active' : ''}`} aria-label="Search messages"><FiSearch /></button>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
 
@@ -690,11 +876,16 @@ export default function ConversationPage() {
                   const grouped = previous && previous.sender_id === message.sender_id && (new Date(message.created_at).getTime() - new Date(previous.created_at).getTime()) < 5 * 60 * 1000 && !newDay;
                   const reply = message.reply_to_id ? messageMap.get(message.reply_to_id) : null;
                   const messageReactions = reactionsFor(message.id);
-                  const attachmentOnly = message.attachment_url && ['Shared a photo', 'Shared a video'].includes(message.body);
+                  const attachmentOnly = message.attachment_url && ['Shared a photo', 'Shared a video', 'Shared a voice note'].includes(message.body);
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}>
+                    <article
+                      id={`rch-message-${message.id}`}
+                      className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}
+                      onTouchStart={(event) => beginSwipeReply(event, message.id)}
+                      onTouchEnd={(event) => finishSwipeReply(event, message)}
+                    >
                       {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -710,9 +901,11 @@ export default function ConversationPage() {
                             <div className="rcl-message-bubble">
                               {message.attachment_url && (
                                 <div className="rcl-message-attachment">
-                                  {isVideoAttachment(message.attachment_url)
-                                    ? <video src={message.attachment_url} controls playsInline preload="metadata" />
-                                    : <img src={message.attachment_url} alt="Message attachment" />}
+                                  {isAudioAttachment(message.attachment_url)
+                                    ? <div className="rcl-message-voice-note"><FiMic /><audio src={message.attachment_url} controls preload="metadata" /></div>
+                                    : isVideoAttachment(message.attachment_url)
+                                      ? <video src={message.attachment_url} controls playsInline preload="metadata" />
+                                      : <img src={message.attachment_url} alt="Message attachment" />}
                                 </div>
                               )}
                               {!attachmentOnly && <p>{message.body}</p>}
@@ -740,7 +933,7 @@ export default function ConversationPage() {
                             {messageReactions.length > 0 && (
                               <div className="rcl-message-reactions">
                                 {messageReactions.map(([key, data]) => {
-                                  const emoji = reactionOptions.find(([option]) => option === key)?.[1] ?? '•';
+                                  const emoji = reactionOptions.find(([option]) => option === key)?.[1] ?? legacyReactionEmoji[key] ?? '•';
                                   return <button type="button" key={key} onClick={() => void toggleReaction(message.id, key)} className={data.mine ? 'mine' : ''}>{emoji}<span>{data.count}</span></button>;
                                 })}
                               </div>
@@ -773,12 +966,14 @@ export default function ConversationPage() {
                 {attachmentFile && !editing && (
                   <div className="rcl-attachment-preview">
                     <div>
-                      {attachmentPreview ? attachmentFile.type.startsWith('video/')
-                        ? <video src={safeMediaPreviewUrl(attachmentPreview)} muted />
-                        : <img src={safeMediaPreviewUrl(attachmentPreview)} alt="" />
-                        : attachmentFile.type.startsWith('video/') ? <FiVideo /> : <FiImage />}
+                      {attachmentFile.type.startsWith('audio/')
+                        ? <FiMic />
+                        : attachmentPreview ? attachmentFile.type.startsWith('video/')
+                          ? <video src={safeMediaPreviewUrl(attachmentPreview)} muted />
+                          : <img src={safeMediaPreviewUrl(attachmentPreview)} alt="" />
+                          : attachmentFile.type.startsWith('video/') ? <FiVideo /> : <FiImage />}
                     </div>
-                    <span><strong>{attachmentFile.type.startsWith('video/') ? 'Video ready' : 'Photo ready'}</strong><small>{Math.max(1, Math.round(attachmentFile.size / 1024))} KB</small></span>
+                    <span><strong>{attachmentFile.type.startsWith('audio/') ? 'Voice note ready' : attachmentFile.type.startsWith('video/') ? 'Video ready' : 'Photo ready'}</strong><small>{Math.max(1, Math.round(attachmentFile.size / 1024))} KB</small></span>
                     <button type="button" onClick={() => setAttachmentFile(null)} aria-label="Remove attachment"><FiX /></button>
                   </div>
                 )}
@@ -787,9 +982,12 @@ export default function ConversationPage() {
                   {!editing && <>
                     <button type="button" onClick={() => imageInputRef.current?.click()} aria-label="Attach photo"><FiImage /></button>
                     <button type="button" onClick={() => videoInputRef.current?.click()} aria-label="Attach video"><FiVideo /></button>
+                    <button type="button" disabled={recordingStarting} onClick={() => void startVoiceRecording()} className={recording ? 'recording' : ''} aria-label={recordingStarting ? 'Starting voice recorder' : recording ? 'Stop voice recording' : 'Record voice note'}>{recording ? <FiStopCircle /> : <FiMic />}</button>
                     <input ref={imageInputRef} type="file" accept={SOCIAL_IMAGE_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                     <input ref={videoInputRef} type="file" accept={SOCIAL_VIDEO_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                   </>}
+
+                  {recording && <div className="rcl-voice-recording"><i /><span>Recording {formatRecordingTime(recordingSeconds)}</span></div>}
 
                   <textarea
                     ref={composerRef}
@@ -807,7 +1005,7 @@ export default function ConversationPage() {
                     aria-label="Write a message"
                   />
 
-                  <button type="submit" disabled={sending || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
+                  <button type="submit" disabled={sending || recording || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
                 </div>
                 <small className="rcl-composer-hint">{!editing && body.trim() ? 'Draft saved on this device · ' : ''}Enter to send · Shift + Enter for a new line{body.length > 3600 ? ` · ${4000 - body.length} characters left` : ''}</small>
               </form>
@@ -822,10 +1020,13 @@ export default function ConversationPage() {
               </header>
 
               <div className="rcl-thread-info-actions">
+                <button type="button" onClick={() => { setShowInfo(false); setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''}><FiSearch /><span>Search</span></button>
                 <button type="button" onClick={() => void savePreference({ is_pinned: !preference.is_pinned })} className={preference.is_pinned ? 'active' : ''}><FiStar /><span>{preference.is_pinned ? 'Pinned' : 'Pin'}</span></button>
                 <button type="button" onClick={() => void savePreference({ muted_until: muted ? null : '2099-12-31T23:59:59.000Z' })} className={muted ? 'active' : ''}><FiBellOff /><span>{muted ? 'Muted' : 'Mute'}</span></button>
                 <button type="button" onClick={() => void savePreference({ archived_at: preference.archived_at ? null : new Date().toISOString() })} className={preference.archived_at ? 'active' : ''}><FiArchive /><span>{preference.archived_at ? 'Archived' : 'Archive'}</span></button>
               </div>
+
+              {peer && <Link href={`/social/profile/${peer.id}`} className="rcl-thread-profile-link"><FiUser /><span>View basketball profile</span></Link>}
 
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
@@ -837,12 +1038,26 @@ export default function ConversationPage() {
               </section>
 
               <section className="rcl-thread-shared">
-                <div><strong>Shared media</strong><span>{messages.filter((message) => message.attachment_url && !message.deleted_at).length}</span></div>
-                <div className="rcl-shared-grid">
-                  {messages.filter((message) => message.attachment_url && !message.deleted_at).slice(-6).reverse().map((message) => <a key={message.id} href={message.attachment_url!} target="_blank" rel="noopener noreferrer">
-                    {isVideoAttachment(message.attachment_url) ? <span><FiVideo /></span> : <img src={message.attachment_url!} alt="" />}
-                  </a>)}
+                <div><strong>Shared in this chat</strong><span>{sharedMedia.length + sharedLinks.length}</span></div>
+                <div className="rcl-thread-shared-tabs" role="tablist" aria-label="Shared conversation content">
+                  <button type="button" role="tab" aria-selected={infoTab === 'media'} className={infoTab === 'media' ? 'active' : ''} onClick={() => setInfoTab('media')}>Media <span>{sharedMedia.length}</span></button>
+                  <button type="button" role="tab" aria-selected={infoTab === 'links'} className={infoTab === 'links' ? 'active' : ''} onClick={() => setInfoTab('links')}>Links <span>{sharedLinks.length}</span></button>
                 </div>
+                {infoTab === 'media' ? (
+                  sharedMedia.length ? <div className="rcl-shared-grid">
+                    {sharedMedia.slice(-12).reverse().map((message) => <a key={message.id} href={message.attachment_url!} target="_blank" rel="noopener noreferrer">
+                      {isAudioAttachment(message.attachment_url)
+                        ? <span><FiMic /></span>
+                        : isVideoAttachment(message.attachment_url)
+                          ? <span><FiVideo /></span>
+                          : <img src={message.attachment_url!} alt="" />}
+                    </a>)}
+                  </div> : <p className="rcl-thread-shared-empty">Photos, videos, and voice notes shared here will stay easy to find.</p>
+                ) : (
+                  sharedLinks.length ? <div className="rcl-shared-links">
+                    {sharedLinks.slice(-12).reverse().map((item, index) => <a key={`${item.messageId}-${index}`} href={item.href} target="_blank" rel="noopener noreferrer"><FiLink /><span>{item.label}</span></a>)}
+                  </div> : <p className="rcl-thread-shared-empty">Links shared in this conversation will appear here.</p>
+                )}
               </section>
 
               <Link href="/settings/privacy" className="rcl-thread-privacy">Messaging privacy & safety</Link>

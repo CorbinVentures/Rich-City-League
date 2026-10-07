@@ -602,6 +602,26 @@
   text-transform: uppercase;
 }
 
+.rcl-message-toast {
+  position: fixed;
+  z-index: 180;
+  left: 50%;
+  top: calc(78px + env(safe-area-inset-top));
+  max-width: min(420px, calc(100vw - 28px));
+  transform: translateX(-50%);
+  border: 1px solid #D9E4EF;
+  border-radius: 999px;
+  background: rgba(15,37,71,.96);
+  padding: 9px 14px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(15,37,71,.18);
+  backdrop-filter: blur(12px);
+}
+
 .rcl-message-skeletons > div {
   display: flex;
   min-height: 82px;
@@ -967,6 +987,17 @@
   background: rgba(255,255,255,.98);
 }
 
+.rcl-thread-mobile-back {
+  display: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  flex: 0 0 36px;
+  border-radius: 11px;
+  color: #526A84 !important;
+  font-size: 18px;
+}
+
 .rcl-thread-avatar,
 .rcl-thread-info-avatar {
   position: relative;
@@ -1002,7 +1033,7 @@
   background: #24B47E;
 }
 
-.rcl-thread-header > div:nth-child(2) {
+.rcl-thread-identity {
   min-width: 0;
   flex: 1;
 }
@@ -1202,6 +1233,27 @@
   width: 100%;
   max-height: 360px;
   object-fit: cover;
+}
+
+.rcl-message-voice-note {
+  display: flex;
+  min-width: 230px;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+}
+
+.rcl-message-voice-note > svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: #3B82F6;
+}
+
+.rcl-message-voice-note audio {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
 }
 
 .rcl-message-deleted {
@@ -1538,6 +1590,41 @@
   color: #2563EB;
 }
 
+.rcl-composer-row > button.recording {
+  background: #FEE2E2;
+  color: #DC2626;
+  box-shadow: 0 0 0 4px rgba(220,38,38,.08);
+}
+
+.rcl-voice-recording {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border: 1px solid #F4C4C4;
+  border-radius: 999px;
+  background: #FFF5F5;
+  padding: 0 11px;
+  color: #B42318;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.rcl-voice-recording i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #DC2626;
+  box-shadow: 0 0 0 0 rgba(220,38,38,.35);
+  animation: rcl-voice-pulse 1.1s ease-out infinite;
+}
+
+@keyframes rcl-voice-pulse {
+  70% { box-shadow: 0 0 0 7px rgba(220,38,38,0); }
+  100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+}
+
 .rcl-composer-row textarea {
   min-height: 40px !important;
   max-height: 120px;
@@ -1642,7 +1729,7 @@
 
 .rcl-thread-info-actions {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: repeat(4,1fr);
   gap: 6px;
   padding: 0 12px 15px;
   border-bottom: 1px solid #E5EDF5;
@@ -1669,6 +1756,25 @@
 .rcl-thread-info-actions button span {
   font-size: 8px;
   font-weight: 800;
+}
+
+.rcl-thread-profile-link {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0 12px 12px;
+  border: 1px solid #D9E4EF;
+  border-radius: 11px;
+  background: #fff;
+  color: #315E94 !important;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.rcl-thread-profile-link svg {
+  color: #3B82F6;
 }
 
 .rcl-thread-members,
@@ -1761,6 +1867,43 @@
   background: #24B47E;
 }
 
+.rcl-thread-shared-tabs {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 5px;
+  margin-bottom: 9px;
+}
+
+.rcl-thread-shared-tabs button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid #D9E4EF;
+  border-radius: 9px;
+  background: #fff;
+  color: #718399;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.rcl-thread-shared-tabs button.active {
+  border-color: #B7D1F4;
+  background: #EAF2FF;
+  color: #2563EB;
+}
+
+.rcl-thread-shared-tabs button span {
+  display: inline-grid;
+  min-width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 999px;
+  background: #EEF3F8;
+  font-size: 7px;
+}
+
 .rcl-shared-grid {
   display: grid;
   grid-template-columns: repeat(3,1fr);
@@ -1781,6 +1924,48 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.rcl-shared-links {
+  display: grid;
+  gap: 5px;
+}
+
+.rcl-shared-links a {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  border: 1px solid #E1E9F1;
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 9px;
+  color: #526A84 !important;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.rcl-shared-links a svg {
+  flex: 0 0 auto;
+  color: #3B82F6;
+}
+
+.rcl-shared-links a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rcl-thread-shared-empty {
+  margin: 0;
+  border: 1px dashed #D9E4EF;
+  border-radius: 10px;
+  padding: 12px;
+  color: #8A99AA;
+  font-size: 8px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .rcl-thread-privacy {
@@ -2031,17 +2216,13 @@
   }
 
   .rcl-thread-topline {
-    min-height: 44px;
-    margin: 0;
-    padding: 5px 10px;
-    border-bottom: 1px solid #E5EDF5;
-    background: #fff;
+    display: none;
   }
 
   .rcl-thread-workspace,
   .rcl-thread-workspace.show-info {
     display: block;
-    height: calc(100dvh - 108px);
+    height: calc(100dvh - 64px);
     min-height: 0;
     border: 0;
     border-radius: 0;
@@ -2054,7 +2235,40 @@
 
   .rcl-thread-header {
     min-height: 60px;
-    padding: 7px 10px;
+    gap: 7px;
+    padding: 7px 8px;
+  }
+
+  .rcl-thread-mobile-back {
+    display: grid;
+  }
+
+  .rcl-thread-header-search {
+    display: none !important;
+  }
+
+  .rcl-thread-header > button {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+
+  .rcl-thread-identity {
+    min-width: 0;
+  }
+
+  .rcl-thread-avatar {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .rcl-thread-header h1 {
+    font-size: 13px;
+  }
+
+  .rcl-thread-header p {
+    font-size: 8px;
   }
 
   .rcl-thread-scroll {
@@ -2108,6 +2322,19 @@
 
   .rcl-composer-row {
     gap: 4px;
+  }
+
+  .rcl-voice-recording {
+    position: absolute;
+    right: 54px;
+    bottom: calc(52px + env(safe-area-inset-bottom));
+    z-index: 8;
+    min-height: 32px;
+    box-shadow: 0 8px 20px rgba(15,37,71,.12);
+  }
+
+  .rcl-message-voice-note {
+    min-width: min(245px, 68vw);
   }
 
   .rcl-composer-row > button:not(.rcl-send-button) {
