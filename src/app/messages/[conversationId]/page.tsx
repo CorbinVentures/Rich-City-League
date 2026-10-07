@@ -13,6 +13,7 @@ import {
   FiEdit2,
   FiImage,
   FiInfo,
+  FiLink,
   FiMessageCircle,
   FiMoreHorizontal,
   FiPhone,
@@ -22,6 +23,7 @@ import {
   FiSmile,
   FiStar,
   FiTrash2,
+  FiUser,
   FiUsers,
   FiVideo,
   FiX,
@@ -133,6 +135,8 @@ export default function ConversationPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [threadSearch, setThreadSearch] = useState('');
   const [searchCursor, setSearchCursor] = useState(0);
+  const [infoTab, setInfoTab] = useState<'media' | 'links'>('media');
+  const [toast, setToast] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -145,6 +149,7 @@ export default function ConversationPage() {
   const lastTypingSent = useRef(0);
   const messageIdsRef = useRef<string[]>([]);
   const meNameRef = useRef('RCH member');
+  const swipeReplyRef = useRef<{ id: string; x: number; y: number } | null>(null);
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -165,6 +170,19 @@ export default function ConversationPage() {
   const activeSearchId = searchMatches.length
     ? searchMatches[((searchCursor % searchMatches.length) + searchMatches.length) % searchMatches.length].id
     : null;
+  const sharedMedia = useMemo(
+    () => messages.filter((message) => message.attachment_url && !message.deleted_at),
+    [messages],
+  );
+  const sharedLinks = useMemo(() => messages.flatMap((message) => {
+    if (message.deleted_at) return [];
+    const matches = message.body.match(/https?:\/\/[^\s]+/gi) ?? [];
+    return matches.map((href) => ({
+      messageId: message.id,
+      href: href.replace(/[),.!?]+$/, ''),
+      label: href.replace(/^https?:\/\//i, '').replace(/\/$/, ''),
+    }));
+  }), [messages]);
 
   useEffect(() => {
     messageIdsRef.current = messages.map((message) => message.id);
@@ -215,17 +233,22 @@ export default function ConversationPage() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [searchOpen]);
 
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast((current) => current === message ? '' : current), 2600);
+  }, []);
+
   const markRead = useCallback(async () => {
     if (!db || !user) return;
     if (typeof document !== 'undefined' && (document.visibilityState !== 'visible' || !document.hasFocus())) return;
     const result = await db.rpc('mark_conversation_read', { target_conversation_id: conversationId });
     if (result.error) {
-      setError((current) => current || 'Unable to update read status.');
+      showToast('Read status will sync when the connection catches up.');
       return;
     }
     const readAt = typeof result.data === 'string' ? result.data : new Date().toISOString();
     setMembers((current) => current.map((member) => member.profile_id === user.id ? { ...member, last_read_at: readAt } : member));
-  }, [conversationId, db, user]);
+  }, [conversationId, db, showToast, user]);
 
   const loadMembers = useCallback(async () => {
     if (!db || !user) return;
@@ -521,6 +544,28 @@ export default function ConversationPage() {
     window.requestAnimationFrame(() => composerRef.current?.focus());
   };
 
+  const beginSwipeReply = (event: React.TouchEvent, messageId: string) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    swipeReplyRef.current = { id: messageId, x: touch.clientX, y: touch.clientY };
+  };
+
+  const finishSwipeReply = (event: React.TouchEvent, message: Message) => {
+    const start = swipeReplyRef.current;
+    swipeReplyRef.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch || start.id !== message.id || message.deleted_at) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (dx < 56 || Math.abs(dy) > 44) return;
+    setReplyTo(message);
+    setEditing(null);
+    setReactionOpen(null);
+    setMessageMenu(null);
+    showToast('Replying to message');
+    focusComposer();
+  };
+
   const editMessage = (message: Message) => {
     setEditing(message);
     setReplyTo(null);
@@ -633,11 +678,13 @@ export default function ConversationPage() {
         </div>
 
         {error && <div className="rcl-message-error">{error}<button type="button" onClick={() => setError('')}>Dismiss</button></div>}
+        {toast && <div className="rcl-message-toast" role="status">{toast}</div>}
 
         {conversation && (
           <div className={`rcl-thread-workspace ${showInfo ? 'show-info' : ''}`}>
             <section className="rcl-thread-main">
               <header className="rcl-thread-header">
+                <Link href="/messages" className="rcl-thread-mobile-back" aria-label="Back to messages"><FiArrowLeft /></Link>
                 <div className="rcl-thread-avatar">
                   {conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}
                   {peer && onlineIds.includes(peer.id) && <i />}
@@ -650,7 +697,7 @@ export default function ConversationPage() {
                   <button type="button" onClick={() => startDirectCall('audio')} aria-label="Start voice call" title="Voice call"><FiPhone /></button>
                   <button type="button" onClick={() => startDirectCall('video')} aria-label="Start video call" title="Video call"><FiVideo /></button>
                 </>}
-                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search messages"><FiSearch /></button>
+                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={`rcl-thread-header-search ${searchOpen ? 'active' : ''}`} aria-label="Search messages"><FiSearch /></button>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
 
@@ -694,7 +741,12 @@ export default function ConversationPage() {
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}>
+                    <article
+                      id={`rch-message-${message.id}`}
+                      className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}
+                      onTouchStart={(event) => beginSwipeReply(event, message.id)}
+                      onTouchEnd={(event) => finishSwipeReply(event, message)}
+                    >
                       {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -822,10 +874,13 @@ export default function ConversationPage() {
               </header>
 
               <div className="rcl-thread-info-actions">
+                <button type="button" onClick={() => { setShowInfo(false); setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''}><FiSearch /><span>Search</span></button>
                 <button type="button" onClick={() => void savePreference({ is_pinned: !preference.is_pinned })} className={preference.is_pinned ? 'active' : ''}><FiStar /><span>{preference.is_pinned ? 'Pinned' : 'Pin'}</span></button>
                 <button type="button" onClick={() => void savePreference({ muted_until: muted ? null : '2099-12-31T23:59:59.000Z' })} className={muted ? 'active' : ''}><FiBellOff /><span>{muted ? 'Muted' : 'Mute'}</span></button>
                 <button type="button" onClick={() => void savePreference({ archived_at: preference.archived_at ? null : new Date().toISOString() })} className={preference.archived_at ? 'active' : ''}><FiArchive /><span>{preference.archived_at ? 'Archived' : 'Archive'}</span></button>
               </div>
+
+              {peer && <Link href={`/social/profile/${peer.id}`} className="rcl-thread-profile-link"><FiUser /><span>View basketball profile</span></Link>}
 
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
@@ -837,12 +892,22 @@ export default function ConversationPage() {
               </section>
 
               <section className="rcl-thread-shared">
-                <div><strong>Shared media</strong><span>{messages.filter((message) => message.attachment_url && !message.deleted_at).length}</span></div>
-                <div className="rcl-shared-grid">
-                  {messages.filter((message) => message.attachment_url && !message.deleted_at).slice(-6).reverse().map((message) => <a key={message.id} href={message.attachment_url!} target="_blank" rel="noopener noreferrer">
-                    {isVideoAttachment(message.attachment_url) ? <span><FiVideo /></span> : <img src={message.attachment_url!} alt="" />}
-                  </a>)}
+                <div><strong>Shared in this chat</strong><span>{sharedMedia.length + sharedLinks.length}</span></div>
+                <div className="rcl-thread-shared-tabs" role="tablist" aria-label="Shared conversation content">
+                  <button type="button" role="tab" aria-selected={infoTab === 'media'} className={infoTab === 'media' ? 'active' : ''} onClick={() => setInfoTab('media')}>Media <span>{sharedMedia.length}</span></button>
+                  <button type="button" role="tab" aria-selected={infoTab === 'links'} className={infoTab === 'links' ? 'active' : ''} onClick={() => setInfoTab('links')}>Links <span>{sharedLinks.length}</span></button>
                 </div>
+                {infoTab === 'media' ? (
+                  sharedMedia.length ? <div className="rcl-shared-grid">
+                    {sharedMedia.slice(-12).reverse().map((message) => <a key={message.id} href={message.attachment_url!} target="_blank" rel="noopener noreferrer">
+                      {isVideoAttachment(message.attachment_url) ? <span><FiVideo /></span> : <img src={message.attachment_url!} alt="" />}
+                    </a>)}
+                  </div> : <p className="rcl-thread-shared-empty">Photos and videos shared here will stay easy to find.</p>
+                ) : (
+                  sharedLinks.length ? <div className="rcl-shared-links">
+                    {sharedLinks.slice(-12).reverse().map((item, index) => <a key={`${item.messageId}-${index}`} href={item.href} target="_blank" rel="noopener noreferrer"><FiLink /><span>{item.label}</span></a>)}
+                  </div> : <p className="rcl-thread-shared-empty">Links shared in this conversation will appear here.</p>
+                )}
               </section>
 
               <Link href="/settings/privacy" className="rcl-thread-privacy">Messaging privacy & safety</Link>
