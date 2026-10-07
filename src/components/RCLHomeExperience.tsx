@@ -12,11 +12,10 @@ type Team={id:string;name:string;logo_url?:string|null};
 type Game={id:string;home_team_id:string;away_team_id:string;scheduled_at:string;venue_id?:string|null;status:string;home_score:number;away_score:number};
 type Standing={id:string;team_id:string;wins:number;losses:number;rank?:number|null};
 type Player={id:string;first_name:string;last_name:string;photo_url?:string|null;position?:string|null;jersey_number?:string|null};
-type IQ={player_id:string;rcl_rating:number;court_performance_score:number;exposure_index:number;player_archetype?:string|null};
 type News={id:string;slug:string;title:string;published_at?:string|null};
 type Post={id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
 type Stat={player_id:string;points:number;assists:number};
-type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
+type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
 
 const worldCards=[
   {title:'Social',copy:'Highlights, conversations, stories and the people shaping basketball around you.',href:'/social',icon:FaComments},
@@ -41,7 +40,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
   return <main className="rcl-social-landing">
     <section className="rcl-social-landing-hero">
       <div className="rcl-landing-copy">
-        <p className="rcl-landing-kicker">RCL · Richmond basketball social</p>
+        <p className="rcl-landing-kicker">RCH · Virginia basketball network</p>
         <h1>Your basketball world.<br/><span>All in one place.</span></h1>
         <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
         <div className="rcl-landing-actions">
@@ -51,11 +50,11 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
         <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>
       </div>
 
-      <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
-        <div className="rcl-landing-phone-top"><b>RCL</b><span>For You</span><i>•••</i></div>
+      <div className="rcl-landing-phone" aria-label="Preview of the Rich City Hoops social experience">
+        <div className="rcl-landing-phone-top"><b>RCH</b><span>For You</span><i>•••</i></div>
         <div className="rcl-landing-story-row">{featured.slice(0,4).map(player=><span key={player.id}>{player.photo_url?<Image src={player.photo_url} alt="" width={64} height={64}/>:<b>{player.first_name[0]}{player.last_name[0]}</b>}</span>)}</div>
         <div className="rcl-landing-preview-post">
-          <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>
+          <div><span className="rcl-preview-avatar">R</span><p><b>Rich City Hoops</b><small>Virginia Basketball Network</small></p></div>
           <strong>Basketball here is bigger than a schedule.</strong>
           <p>Follow the people, runs, stories and competition that make the city move.</p>
           <div className="rcl-preview-actions"><span>🏀 React</span><span>💬 Comment</span><span>↗ Share</span></div>
@@ -72,7 +71,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
       <div className="rcl-league-copy">
         <p className="rcl-landing-kicker">Premier competition</p>
         <h2>Rich City League</h2>
-        <p>The flagship league of the RCL platform. Games, stats, rankings, stories and league history get a premium stage without making the entire platform feel like a league-management website.</p>
+        <p>The flagship league of the Rich City Hoops platform. Games, stats, rankings, stories and league history get a premium stage without making the entire platform feel like a league-management website.</p>
         <div className="rcl-landing-actions"><Link href="/league" className="rcl-landing-primary">Enter League Center <FaArrowRight/></Link><Link href="/standings" className="rcl-landing-secondary"><FaTrophy/> Standings</Link></div>
       </div>
       <div className="rcl-league-scoreboard">
@@ -89,18 +88,18 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
         const ppg=s&&s.gp?s.points/s.gp:0;
         return <Link href={'/players/'+player.id} key={player.id} className="rcl-person-card">
           <div>{player.photo_url?<Image src={player.photo_url} alt={`${player.first_name} ${player.last_name}`} width={540} height={540}/>:<span>{player.first_name[0]}{player.last_name[0]}</span>}</div>
-          <p><small>{player.position??'Player'}{player.jersey_number?` · #${player.jersey_number}`:''}</small><b>{player.first_name} {player.last_name}</b><em>{s?.gp?`${ppg.toFixed(1)} PPG`:'RCL Profile'}</em></p>
+          <p><small>{player.position??'Player'}{player.jersey_number?` · #${player.jersey_number}`:''}</small><b>{player.first_name} {player.last_name}</b><em>{s?.gp?`${ppg.toFixed(1)} PPG`:'RCH Profile'}</em></p>
         </Link>;
       })}{!featured.length&&<div className="rcl-calm-empty">Player profiles will appear here as the community grows.</div>}</div>
     </section>
 
     <section className="rcl-landing-section rcl-community-pulse">
       <div className="rcl-landing-section-head"><div><p>Community pulse</p><h2>What basketball is talking about.</h2></div><Link href="/social">Open feed <FaArrowRight/></Link></div>
-      <div className="rcl-pulse-grid">{posts.slice(0,4).map(post=><Link href="/social" key={post.id}><span><FaUserGroup/></span><div><b>{post.author?.display_name||post.author?.first_name||'RCL Community'}</b><p>{post.body}</p></div></Link>)}{!posts.length&&<div className="rcl-calm-empty">Community posts will appear here.</div>}</div>
+      <div className="rcl-pulse-grid">{posts.slice(0,4).map(post=><Link href="/social" key={post.id}><span><FaUserGroup/></span><div><b>{post.author?.display_name||post.author?.first_name||'RCH Community'}</b><p>{post.body}</p></div></Link>)}{!posts.length&&<div className="rcl-calm-empty">Community posts will appear here.</div>}</div>
     </section>
 
     <section className="rcl-landing-section rcl-revenue-lifestyle">
-      <div className="rcl-landing-section-head"><div><p>More from RCL</p><h2>Membership and merch without interrupting the game.</h2></div></div>
+      <div className="rcl-landing-section-head"><div><p>More from RCH</p><h2>Membership and merch without interrupting the game.</h2></div></div>
       <div className="rcl-lifestyle-grid">
         <Link href="/membership" className="rcl-lifestyle-card"><span><FaCrown/></span><div><small>RCL+</small><h3>Your basketball life, organized.</h3><p>My Hoops, Passport tools, analytics, saves and premium basketball utility.</p><b>Explore membership <FaArrowRight/></b></div></Link>
         <Link href="/shop" className="rcl-lifestyle-card"><span><FaShirt/></span><div><small>RCL Drops</small><h3>Wear the culture.</h3><p>Limited league and community releases presented like drops, not banner ads.</p><b>Shop RCL <FaArrowRight/></b></div></Link>
@@ -109,8 +108,8 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
     </section>
 
     {news.length>0&&<section className="rcl-landing-section">
-      <div className="rcl-landing-section-head"><div><p>From RCL</p><h2>Stories worth knowing.</h2></div><Link href="/news">All news <FaArrowRight/></Link></div>
-      <div className="rcl-editorial-row">{news.slice(0,3).map(item=><Link href={'/news/'+item.slug} key={item.id}><small>RCL</small><b>{item.title}</b><FaArrowRight/></Link>)}</div>
+      <div className="rcl-landing-section-head"><div><p>From RCH</p><h2>Stories worth knowing.</h2></div><Link href="/news">All news <FaArrowRight/></Link></div>
+      <div className="rcl-editorial-row">{news.slice(0,3).map(item=><Link href={'/news/'+item.slug} key={item.id}><small>RCH</small><b>{item.title}</b><FaArrowRight/></Link>)}</div>
     </section>}
   </main>;
 }
