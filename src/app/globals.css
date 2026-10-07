@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --rcl-orange: #3B82F6;
   --rcl-navy: #101c2d;
   --rcl-blue: #4da3ff;
@@ -14,8 +14,8 @@
 
 body {
   margin: 0;
-  background: var(--rcl-charcoal);
-  color: var(--rcl-cream);
+  background: #F6F9FC;
+  color: #0F2547;
   font-family: Arial, Helvetica, sans-serif;
 }
 
