@@ -185,6 +185,7 @@ export default function ConversationPage() {
   const recorderStreamRef = useRef<MediaStream | null>(null);
   const recorderChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
+  const recordingAcquireRef = useRef(false);
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -615,11 +616,12 @@ export default function ConversationPage() {
       stopVoiceRecording();
       return;
     }
-    if (recordingStarting || editing) return;
+    if (recordingAcquireRef.current || recordingStarting || editing) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setError('Voice notes are not supported in this browser.');
       return;
     }
+    recordingAcquireRef.current = true;
     setRecordingStarting(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -655,6 +657,7 @@ export default function ConversationPage() {
         showToast('Voice note ready to send');
       };
       recorder.start(250);
+      recordingAcquireRef.current = false;
       setRecordingStarting(false);
       setAttachmentFile(null);
       setAttachmentPreview('');
@@ -673,6 +676,7 @@ export default function ConversationPage() {
       recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
       recorderStreamRef.current = null;
       recorderRef.current = null;
+      recordingAcquireRef.current = false;
       setRecording(false);
       setRecordingStarting(false);
       setError(recordError instanceof Error ? recordError.message : 'Microphone access is required for voice notes.');
