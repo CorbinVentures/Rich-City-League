@@ -80,14 +80,14 @@ export function SiteHeader(){
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
   const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_PRIMARY_NAV_ITEMS;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
-  const profileHref=user?'/social/profile/me':'/auth/sign-in?redirect=/social';
+  const profileHref=user?'/social/profile/me':'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
 
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
-      <Link href={memberMode?'/social':'/'} className="rcl-universal-brand" aria-label="RCL home">
+      <Link href={memberMode?'/social':'/'} className="rcl-universal-brand" aria-label="RCH home">
         <span className="rcl-universal-mark">R</span>
-        <span><b>RCL</b><small>Basketball Social</small></span>
+        <span><b>RCH</b><small>Basketball Social</small></span>
       </Link>
 
       <nav className="rcl-universal-nav" aria-label="Primary navigation">
@@ -108,7 +108,7 @@ export function SiteHeader(){
       <div className="rcl-universal-account">
         <Link href={profileHref} className="rcl-universal-profile">
           <span className="rcl-universal-avatar">{user?<ProfileAvatarMedia src={profile?.avatar_url} alt={displayName} className="h-full w-full object-cover" />:'R'}</span>
-          <span><b>{user?displayName:'Join RCL'}</b><small>{user?'View basketball identity':'Create a free profile'}</small></span>
+          <span><b>{user?displayName:'Join RCH'}</b><small>{user?'View basketball identity':'Create a free profile'}</small></span>
           <strong>›</strong>
         </Link>
         {user?<>

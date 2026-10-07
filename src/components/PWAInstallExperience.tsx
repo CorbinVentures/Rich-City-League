@@ -252,7 +252,7 @@ export function PWAInstallExperience() {
   if (installed || !visible) return null;
 
   return (
-    <aside className="rcl-pwa-install" aria-label="Install Rich City League app">
+    <aside className="rcl-pwa-install" aria-label="Install Rich City Hoops app">
       <div className="rcl-pwa-install-card">
         <button type="button" onClick={dismiss} className="rcl-pwa-close" aria-label="Dismiss install prompt">
           <FaXmark />
@@ -261,20 +261,20 @@ export function PWAInstallExperience() {
         <div className="rcl-pwa-install-heading">
           <Image src="/icon?v=black-r-1" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
           <div>
-            <span className="rcl-pwa-kicker">RCL APP</span>
-            <h2>{ios ? 'Add RCL to your Home Screen' : 'Install the RCL app'}</h2>
+            <span className="rcl-pwa-kicker">RCH APP</span>
+            <h2>{ios ? 'Add RCH to your Home Screen' : 'Install the RCH app'}</h2>
           </div>
         </div>
 
         {!showIOSGuide ? (
           <>
             <p className="rcl-pwa-copy">
-              Launch Rich City League full-screen with app-style navigation, faster return access, push alerts, and Home Screen notification badges.
+              Launch Rich City Hoops full-screen with app-style navigation, faster return access, push alerts, and Home Screen notification badges.
             </p>
             <div className="rcl-pwa-actions">
               <button type="button" onClick={() => void install()} className="rcl-pwa-primary">
                 {ios ? <FaArrowUpFromBracket /> : <FaDownload />}
-                {ios ? 'Show me how' : 'Install RCL'}
+                {ios ? 'Show me how' : 'Install RCH'}
               </button>
               <button type="button" onClick={dismiss} className="rcl-pwa-secondary">Not now</button>
             </div>

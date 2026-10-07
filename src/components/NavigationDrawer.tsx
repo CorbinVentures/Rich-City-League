@@ -31,7 +31,7 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
     <div className="rcl-navigation-panel">
       <div className="rcl-navigation-heading">
         <div>
-          <p className="rcl-nav-eyebrow">RCL · Basketball Social</p>
+          <p className="rcl-nav-eyebrow">RCH · Basketball Social</p>
           <h2 id={headingId}>Your basketball world</h2>
           <p>Home stays social. Discover helps you find basketball. Rich City League remains the flagship competition.</p>
         </div>
