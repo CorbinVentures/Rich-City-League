@@ -1,15 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FiArchive,
   FiBellOff,
+  FiCheckCircle,
   FiEdit3,
   FiMessageCircle,
   FiSearch,
   FiStar,
   FiUsers,
+  FiZap,
   FiX,
 } from 'react-icons/fi';
 import { Container } from '@/components/Container';
@@ -18,7 +20,8 @@ import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-type InboxView = 'INBOX' | 'UNREAD' | 'PINNED' | 'GROUPS' | 'ARCHIVED';
+type InboxView = 'INBOX' | 'PRIORITY' | 'UNREAD' | 'PINNED' | 'GROUPS' | 'ARCHIVED';
+type InboxSort = 'RECENT' | 'UNREAD' | 'NAME';
 type ProfileResult = { id: string; display_name: string | null; username: string | null; avatar_url: string | null; role: string };
 type InboxRow = {
   conversation_id: string;
@@ -45,6 +48,7 @@ type InboxRow = {
 
 const views: { key: InboxView; label: string; icon: typeof FiMessageCircle }[] = [
   { key: 'INBOX', label: 'Inbox', icon: FiMessageCircle },
+  { key: 'PRIORITY', label: 'Priority', icon: FiZap },
   { key: 'UNREAD', label: 'Unread', icon: FiMessageCircle },
   { key: 'PINNED', label: 'Pinned', icon: FiStar },
   { key: 'GROUPS', label: 'Groups', icon: FiUsers },
@@ -65,6 +69,7 @@ export default function MessagesPage() {
   const db = supabase as any;
   const [items, setItems] = useState<ConversationListItem[]>([]);
   const [view, setView] = useState<InboxView>('INBOX');
+  const [sort, setSort] = useState<InboxSort>('RECENT');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -75,13 +80,31 @@ export default function MessagesPage() {
   const [selectedPeople, setSelectedPeople] = useState<ProfileResult[]>([]);
   const [groupTitle, setGroupTitle] = useState('');
   const [starting, setStarting] = useState(false);
+  const [markingRead, setMarkingRead] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const openComposer = () => setComposeOpen(true);
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTypingTarget = tagName === 'input' || tagName === 'textarea' || Boolean(target?.isContentEditable);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === 'n') {
+        event.preventDefault();
+        openComposer();
+      }
+    };
     if (new URLSearchParams(window.location.search).get('compose') === '1') openComposer();
     window.addEventListener('rch-open-message-composer', openComposer);
-    return () => window.removeEventListener('rch-open-message-composer', openComposer);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('rch-open-message-composer', openComposer);
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, []);
 
   const loadConversations = useCallback(async () => {
@@ -174,15 +197,37 @@ export default function MessagesPage() {
     if (!matchesSearch) return false;
     if (view === 'ARCHIVED') return item.isArchived;
     if (item.isArchived) return false;
+    if (view === 'PRIORITY') return item.unread > 0 || Boolean(item.isPinned);
     if (view === 'UNREAD') return item.unread > 0;
     if (view === 'PINNED') return item.isPinned;
     if (view === 'GROUPS') return ['GROUP', 'TEAM', 'COMMUNITY'].includes(item.type);
     return true;
   });
 
+  const sortedVisible = [...visible].sort((a, b) => {
+    if (sort === 'UNREAD') return b.unread - a.unread || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    if (sort === 'NAME') return a.title.localeCompare(b.title);
+    if (Boolean(a.isPinned) !== Boolean(b.isPinned)) return a.isPinned ? -1 : 1;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+
   const unreadTotal = items.filter((item) => !item.isArchived).reduce((sum, item) => sum + item.unread, 0);
   const pinnedTotal = items.filter((item) => item.isPinned && !item.isArchived).length;
   const groupTotal = items.filter((item) => ['GROUP', 'TEAM', 'COMMUNITY'].includes(item.type) && !item.isArchived).length;
+  const priorityTotal = items.filter((item) => !item.isArchived && (item.unread > 0 || item.isPinned)).length;
+
+  const markAllRead = async () => {
+    if (!db || markingRead) return;
+    const unread = items.filter((item) => !item.isArchived && item.unread > 0);
+    if (!unread.length) return;
+    setMarkingRead(true);
+    setError('');
+    const results = await Promise.all(unread.map((item) => db.rpc('mark_conversation_read', { target_conversation_id: item.id })));
+    const failed = results.find((result) => result.error);
+    if (failed?.error) setError(failed.error.message || 'Some conversations could not be marked read.');
+    await loadConversations();
+    setMarkingRead(false);
+  };
 
   const savePreference = async (item: ConversationListItem, patch: Record<string, unknown>) => {
     if (!db || !user) return;
@@ -288,7 +333,7 @@ export default function MessagesPage() {
             </div>
             <nav aria-label="Message views">
               {views.map(({ key, label, icon: Icon }) => {
-                const count = key === 'UNREAD' ? unreadTotal : key === 'PINNED' ? pinnedTotal : key === 'GROUPS' ? groupTotal : undefined;
+                const count = key === 'PRIORITY' ? priorityTotal : key === 'UNREAD' ? unreadTotal : key === 'PINNED' ? pinnedTotal : key === 'GROUPS' ? groupTotal : undefined;
                 return <button key={key} type="button" onClick={() => setView(key)} className={view === key ? 'active' : ''}><Icon /><span>{label}</span>{typeof count === 'number' && count > 0 ? <b>{count}</b> : null}</button>;
               })}
             </nav>
@@ -302,13 +347,24 @@ export default function MessagesPage() {
             <header className="rcl-inbox-toolbar">
               <div className="rcl-inbox-title">
                 <h2>{views.find((item) => item.key === view)?.label ?? 'Inbox'}</h2>
-                <span>{visible.length} conversation{visible.length === 1 ? '' : 's'}</span>
+                <span>{sortedVisible.length} conversation{sortedVisible.length === 1 ? '' : 's'}</span>
               </div>
-              <label className="rcl-message-search">
-                <FiSearch />
-                <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search conversations" aria-label="Search conversations" />
-                {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><FiX /></button>}
-              </label>
+              <div className="rcl-inbox-toolbar-actions">
+                {unreadTotal > 0 && <button type="button" className="rcl-mark-read-button" disabled={markingRead} onClick={() => void markAllRead()}><FiCheckCircle /> <span>{markingRead ? 'Updating…' : 'Mark all read'}</span></button>}
+                <label className="rcl-inbox-sort">
+                  <span>Sort</span>
+                  <select value={sort} onChange={(event) => setSort(event.target.value as InboxSort)} aria-label="Sort conversations">
+                    <option value="RECENT">Priority + recent</option>
+                    <option value="UNREAD">Unread first</option>
+                    <option value="NAME">Name A–Z</option>
+                  </select>
+                </label>
+                <label className="rcl-message-search">
+                  <FiSearch />
+                  <input ref={searchInputRef} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search conversations" aria-label="Search conversations" />
+                  {search && <button type="button" onClick={() => setSearch('')} aria-label="Clear search"><FiX /></button>}
+                </label>
+              </div>
             </header>
 
             {error && <div className="rcl-message-error">{error}<button type="button" onClick={() => { setError(''); void loadConversations(); }}>Retry</button></div>}
@@ -318,7 +374,7 @@ export default function MessagesPage() {
                 <div className="rcl-message-skeletons">{[1,2,3,4,5].map((row) => <div key={row}><i /><span><b /><em /></span></div>)}</div>
               ) : (
                 <ConversationList
-                  items={visible}
+                  items={sortedVisible}
                   emptyMessage={items.length ? 'No conversations match this view.' : 'Start a conversation with someone in the RCH community.'}
                   onPin={togglePin}
                   onMute={toggleMute}
