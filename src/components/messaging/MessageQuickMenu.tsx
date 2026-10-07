@@ -169,7 +169,7 @@ export function MessageQuickMenu({
   };
 
   const filters: Array<{ key: QuickFilter; label: string; count?: number }> = [
-    { key: 'all', label: 'Inbox' },
+    { key: 'all', label: 'All' },
     { key: 'unread', label: 'Unread', count: unreadCount },
     { key: 'groups', label: 'Groups', count: groups },
     { key: 'pinned', label: 'Pinned', count: pinned },
@@ -195,14 +195,13 @@ export function MessageQuickMenu({
           <section ref={panelRef} className="rcl-message-quick-panel" role="dialog" aria-modal="true" aria-label="RCH Messages">
             <header className="rcl-message-quick-head">
               <div>
-                <span>RCH Messages</span>
                 <h2>Messages</h2>
                 <p>{unreadCount > 0 ? `${unreadCount} unread message${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}</p>
               </div>
               <div className="rcl-message-quick-head-actions">
                 <Link className="rcl-message-quick-compose" href="/messages?compose=1" onClick={openComposer} aria-label="Start a new message" title="New message">
                   <FaPenToSquare />
-                  <span>New</span>
+                  <span>New message</span>
                 </Link>
                 <button type="button" onClick={() => setOpen(false)} aria-label="Close messages">
                   <FaXmark />
@@ -287,11 +286,10 @@ export function MessageQuickMenu({
             </div>
 
             <footer className="rcl-message-quick-dock">
-              <Link href="/messages?compose=1" onClick={openComposer}>
-                <FaPenToSquare />
-                Start a new message
+              <Link href="/messages" onClick={() => setOpen(false)}>
+                View all messages
+                <span aria-hidden="true">→</span>
               </Link>
-              <span>Messages stay available from the top bar.</span>
             </footer>
           </section>
         </>,
