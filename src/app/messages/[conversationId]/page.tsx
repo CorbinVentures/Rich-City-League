@@ -80,7 +80,7 @@ const legacyReactionEmoji: Record<string, string> = {
 const VOICE_NOTE_MAX_BYTES = 10 * 1024 * 1024;
 
 function isAudioAttachment(url: string | null) {
-  return Boolean(url && /\.(m4a|mp4|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
+  return Boolean(url && /\.(m4a|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
 }
 
 function audioExtension(type: string) {
@@ -1043,7 +1043,7 @@ export default function ConversationPage() {
                           ? <span><FiVideo /></span>
                           : <img src={message.attachment_url!} alt="" />}
                     </a>)}
-                  </div> : <p className="rcl-thread-shared-empty">Photos and videos shared here will stay easy to find.</p>
+                  </div> : <p className="rcl-thread-shared-empty">Photos, videos, and voice notes shared here will stay easy to find.</p>
                 ) : (
                   sharedLinks.length ? <div className="rcl-shared-links">
                     {sharedLinks.slice(-12).reverse().map((item, index) => <a key={`${item.messageId}-${index}`} href={item.href} target="_blank" rel="noopener noreferrer"><FiLink /><span>{item.label}</span></a>)}
