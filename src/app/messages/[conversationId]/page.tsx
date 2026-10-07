@@ -15,6 +15,7 @@ import {
   FiInfo,
   FiLink,
   FiMessageCircle,
+  FiMic,
   FiMoreHorizontal,
   FiPhone,
   FiCornerUpLeft,
@@ -22,6 +23,7 @@ import {
   FiSearch,
   FiSmile,
   FiStar,
+  FiStopCircle,
   FiTrash2,
   FiUser,
   FiUsers,
@@ -61,13 +63,39 @@ type Preference = { is_pinned: boolean; muted_until: string | null; archived_at:
 
 const PAGE_SIZE = 40;
 const reactionOptions = [
-  ['like', '👍'],
-  ['love', '❤️'],
   ['fire', '🔥'],
+  ['hoop', '🏀'],
+  ['facts', '💯'],
+  ['watch', '👀'],
   ['laugh', '😂'],
-  ['wow', '😮'],
-  ['clutch', '🏀'],
+  ['love', '❤️'],
 ] as const;
+
+const legacyReactionEmoji: Record<string, string> = {
+  like: '👍',
+  wow: '😮',
+  clutch: '🏀',
+};
+
+const VOICE_NOTE_MAX_BYTES = 10 * 1024 * 1024;
+
+function isAudioAttachment(url: string | null) {
+  return Boolean(url && /\.(m4a|mp4|webm|ogg|oga|mp3|aac)(?:$|\?)/i.test(url));
+}
+
+function audioExtension(type: string) {
+  if (/mp4|m4a|x-m4a/i.test(type)) return 'm4a';
+  if (/mpeg|mp3/i.test(type)) return 'mp3';
+  if (/ogg/i.test(type)) return 'ogg';
+  if (/aac/i.test(type)) return 'aac';
+  return 'webm';
+}
+
+function formatRecordingTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${minutes}:${remainder.toString().padStart(2, '0')}`;
+}
 
 function displayName(profile?: Profile | null) {
   return profile?.display_name ?? profile?.username ?? 'RCH member';
@@ -137,6 +165,8 @@ export default function ConversationPage() {
   const [searchCursor, setSearchCursor] = useState(0);
   const [infoTab, setInfoTab] = useState<'media' | 'links'>('media');
   const [toast, setToast] = useState('');
+  const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -150,6 +180,10 @@ export default function ConversationPage() {
   const messageIdsRef = useRef<string[]>([]);
   const meNameRef = useRef('RCH member');
   const swipeReplyRef = useRef<{ id: string; x: number; y: number } | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recorderStreamRef = useRef<MediaStream | null>(null);
+  const recorderChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<number | null>(null);
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -381,13 +415,19 @@ export default function ConversationPage() {
 
   useEffect(() => {
     let active = true;
-    if (!attachmentFile || attachmentFile.size > 8 * 1024 * 1024) {
+    if (!attachmentFile || attachmentFile.type.startsWith('audio/') || attachmentFile.size > 8 * 1024 * 1024) {
       setAttachmentPreview('');
       return () => { active = false; };
     }
     void readMediaPreview(attachmentFile).then((preview) => { if (active) setAttachmentPreview(preview); });
     return () => { active = false; };
   }, [attachmentFile]);
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current) window.clearInterval(recordingTimerRef.current);
+    if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const loadOlder = async () => {
     if (!db || !messages.length || loadingOlder) return;
@@ -408,10 +448,17 @@ export default function ConversationPage() {
 
   const chooseAttachment = (file: File | null) => {
     if (!file) return;
-    const issue = socialMediaError(file);
-    if (issue) {
-      setError(issue);
-      return;
+    if (file.type.startsWith('audio/')) {
+      if (file.size <= 0 || file.size > VOICE_NOTE_MAX_BYTES) {
+        setError('Voice notes must be 10MB or smaller.');
+        return;
+      }
+    } else {
+      const issue = socialMediaError(file);
+      if (issue) {
+        setError(issue);
+        return;
+      }
     }
     setAttachmentFile(file);
     setError('');
@@ -419,7 +466,9 @@ export default function ConversationPage() {
 
   const uploadAttachment = async () => {
     if (!supabase || !user || !attachmentFile) return null;
-    const extension = socialMediaExtension(attachmentFile.type);
+    const extension = attachmentFile.type.startsWith('audio/')
+      ? audioExtension(attachmentFile.type)
+      : socialMediaExtension(attachmentFile.type);
     if (!extension) throw new Error('That attachment type is not supported.');
     const path = `${user.id}/messages/${conversationId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const uploaded = await supabase.storage.from('media').upload(path, attachmentFile, {
@@ -471,7 +520,13 @@ export default function ConversationPage() {
     try {
       const attachment = attachmentFile ? await uploadAttachment() : null;
       uploadedPath = attachment?.path ?? null;
-      const fallbackBody = attachmentFile ? (attachmentFile.type.startsWith('video/') ? 'Shared a video' : 'Shared a photo') : '';
+      const fallbackBody = attachmentFile
+        ? (attachmentFile.type.startsWith('audio/')
+          ? 'Shared a voice note'
+          : attachmentFile.type.startsWith('video/')
+            ? 'Shared a video'
+            : 'Shared a photo')
+        : '';
       const result = await db.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
@@ -542,6 +597,81 @@ export default function ConversationPage() {
 
   const focusComposer = () => {
     window.requestAnimationFrame(() => composerRef.current?.focus());
+  };
+
+  const stopVoiceRecording = () => {
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (recorderRef.current && recorderRef.current.state !== 'inactive') recorderRef.current.stop();
+    setRecording(false);
+  };
+
+  const startVoiceRecording = async () => {
+    if (recording) {
+      stopVoiceRecording();
+      return;
+    }
+    if (editing) return;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setError('Voice notes are not supported in this browser.');
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      const supportedType = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg']
+        .find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = supportedType ? new MediaRecorder(stream, { mimeType: supportedType }) : new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      recorderStreamRef.current = stream;
+      recorderChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recorderChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        if (recordingTimerRef.current) {
+          window.clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+        const type = recorder.mimeType || supportedType || 'audio/webm';
+        const blob = new Blob(recorderChunksRef.current, { type });
+        recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+        recorderStreamRef.current = null;
+        recorderRef.current = null;
+        recorderChunksRef.current = [];
+        setRecording(false);
+        setRecordingSeconds(0);
+        if (!blob.size) {
+          setError('That voice note was empty. Try recording again.');
+          return;
+        }
+        chooseAttachment(new File([blob], `voice-note-${Date.now()}.${audioExtension(type)}`, { type }));
+        showToast('Voice note ready to send');
+      };
+      recorder.start(250);
+      setAttachmentFile(null);
+      setAttachmentPreview('');
+      setRecordingSeconds(0);
+      setRecording(true);
+      recordingTimerRef.current = window.setInterval(() => {
+        setRecordingSeconds((seconds) => {
+          if (seconds >= 119) {
+            window.setTimeout(stopVoiceRecording, 0);
+            return 120;
+          }
+          return seconds + 1;
+        });
+      }, 1000);
+    } catch (recordError) {
+      recorderStreamRef.current?.getTracks().forEach((track) => track.stop());
+      recorderStreamRef.current = null;
+      recorderRef.current = null;
+      setRecording(false);
+      setError(recordError instanceof Error ? recordError.message : 'Microphone access is required for voice notes.');
+    }
   };
 
   const beginSwipeReply = (event: React.TouchEvent, messageId: string) => {
@@ -737,7 +867,7 @@ export default function ConversationPage() {
                   const grouped = previous && previous.sender_id === message.sender_id && (new Date(message.created_at).getTime() - new Date(previous.created_at).getTime()) < 5 * 60 * 1000 && !newDay;
                   const reply = message.reply_to_id ? messageMap.get(message.reply_to_id) : null;
                   const messageReactions = reactionsFor(message.id);
-                  const attachmentOnly = message.attachment_url && ['Shared a photo', 'Shared a video'].includes(message.body);
+                  const attachmentOnly = message.attachment_url && ['Shared a photo', 'Shared a video', 'Shared a voice note'].includes(message.body);
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
@@ -762,9 +892,11 @@ export default function ConversationPage() {
                             <div className="rcl-message-bubble">
                               {message.attachment_url && (
                                 <div className="rcl-message-attachment">
-                                  {isVideoAttachment(message.attachment_url)
-                                    ? <video src={message.attachment_url} controls playsInline preload="metadata" />
-                                    : <img src={message.attachment_url} alt="Message attachment" />}
+                                  {isAudioAttachment(message.attachment_url)
+                                    ? <div className="rcl-message-voice-note"><FiMic /><audio src={message.attachment_url} controls preload="metadata" /></div>
+                                    : isVideoAttachment(message.attachment_url)
+                                      ? <video src={message.attachment_url} controls playsInline preload="metadata" />
+                                      : <img src={message.attachment_url} alt="Message attachment" />}
                                 </div>
                               )}
                               {!attachmentOnly && <p>{message.body}</p>}
@@ -792,7 +924,7 @@ export default function ConversationPage() {
                             {messageReactions.length > 0 && (
                               <div className="rcl-message-reactions">
                                 {messageReactions.map(([key, data]) => {
-                                  const emoji = reactionOptions.find(([option]) => option === key)?.[1] ?? '•';
+                                  const emoji = reactionOptions.find(([option]) => option === key)?.[1] ?? legacyReactionEmoji[key] ?? '•';
                                   return <button type="button" key={key} onClick={() => void toggleReaction(message.id, key)} className={data.mine ? 'mine' : ''}>{emoji}<span>{data.count}</span></button>;
                                 })}
                               </div>
@@ -825,12 +957,14 @@ export default function ConversationPage() {
                 {attachmentFile && !editing && (
                   <div className="rcl-attachment-preview">
                     <div>
-                      {attachmentPreview ? attachmentFile.type.startsWith('video/')
-                        ? <video src={safeMediaPreviewUrl(attachmentPreview)} muted />
-                        : <img src={safeMediaPreviewUrl(attachmentPreview)} alt="" />
-                        : attachmentFile.type.startsWith('video/') ? <FiVideo /> : <FiImage />}
+                      {attachmentFile.type.startsWith('audio/')
+                        ? <FiMic />
+                        : attachmentPreview ? attachmentFile.type.startsWith('video/')
+                          ? <video src={safeMediaPreviewUrl(attachmentPreview)} muted />
+                          : <img src={safeMediaPreviewUrl(attachmentPreview)} alt="" />
+                          : attachmentFile.type.startsWith('video/') ? <FiVideo /> : <FiImage />}
                     </div>
-                    <span><strong>{attachmentFile.type.startsWith('video/') ? 'Video ready' : 'Photo ready'}</strong><small>{Math.max(1, Math.round(attachmentFile.size / 1024))} KB</small></span>
+                    <span><strong>{attachmentFile.type.startsWith('audio/') ? 'Voice note ready' : attachmentFile.type.startsWith('video/') ? 'Video ready' : 'Photo ready'}</strong><small>{Math.max(1, Math.round(attachmentFile.size / 1024))} KB</small></span>
                     <button type="button" onClick={() => setAttachmentFile(null)} aria-label="Remove attachment"><FiX /></button>
                   </div>
                 )}
@@ -839,9 +973,12 @@ export default function ConversationPage() {
                   {!editing && <>
                     <button type="button" onClick={() => imageInputRef.current?.click()} aria-label="Attach photo"><FiImage /></button>
                     <button type="button" onClick={() => videoInputRef.current?.click()} aria-label="Attach video"><FiVideo /></button>
+                    <button type="button" onClick={() => void startVoiceRecording()} className={recording ? 'recording' : ''} aria-label={recording ? 'Stop voice recording' : 'Record voice note'}>{recording ? <FiStopCircle /> : <FiMic />}</button>
                     <input ref={imageInputRef} type="file" accept={SOCIAL_IMAGE_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                     <input ref={videoInputRef} type="file" accept={SOCIAL_VIDEO_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                   </>}
+
+                  {recording && <div className="rcl-voice-recording"><i /><span>Recording {formatRecordingTime(recordingSeconds)}</span></div>}
 
                   <textarea
                     ref={composerRef}
@@ -859,7 +996,7 @@ export default function ConversationPage() {
                     aria-label="Write a message"
                   />
 
-                  <button type="submit" disabled={sending || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
+                  <button type="submit" disabled={sending || recording || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
                 </div>
                 <small className="rcl-composer-hint">{!editing && body.trim() ? 'Draft saved on this device · ' : ''}Enter to send · Shift + Enter for a new line{body.length > 3600 ? ` · ${4000 - body.length} characters left` : ''}</small>
               </form>
@@ -900,7 +1037,11 @@ export default function ConversationPage() {
                 {infoTab === 'media' ? (
                   sharedMedia.length ? <div className="rcl-shared-grid">
                     {sharedMedia.slice(-12).reverse().map((message) => <a key={message.id} href={message.attachment_url!} target="_blank" rel="noopener noreferrer">
-                      {isVideoAttachment(message.attachment_url) ? <span><FiVideo /></span> : <img src={message.attachment_url!} alt="" />}
+                      {isAudioAttachment(message.attachment_url)
+                        ? <span><FiMic /></span>
+                        : isVideoAttachment(message.attachment_url)
+                          ? <span><FiVideo /></span>
+                          : <img src={message.attachment_url!} alt="" />}
                     </a>)}
                   </div> : <p className="rcl-thread-shared-empty">Photos and videos shared here will stay easy to find.</p>
                 ) : (
