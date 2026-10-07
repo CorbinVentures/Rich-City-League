@@ -1,17 +1,29 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { isLaunchContentReady } from '@/lib/pwa-launch';
 
-/** The native OS splash hands off to this lightweight, session-only intro. */
+/** The same lightweight intro covers each document and client-side page transition. */
 export function PWALaunchIntro() {
+  const pathname = usePathname();
+  const firstPathname = useRef(pathname);
+
   useEffect(() => {
     const root = document.documentElement;
-    if (root.dataset.rchLaunch !== 'active') return;
+    if (/^\/auth(?:\/|$)/.test(pathname)) {
+      root.dataset.rchLaunch = 'done';
+      return;
+    }
+    root.dataset.rchLaunch = 'active';
+    let released = false;
     const finishWhenReady = () => {
+      if (released) return;
       if (!isLaunchContentReady(document)) return;
+      released = true;
       root.dataset.rchLaunch = 'done';
       observer.disconnect();
+      window.clearTimeout(minimumDisplay);
     };
     const observer = new MutationObserver(finishWhenReady);
     observer.observe(document.body, {
@@ -20,13 +32,14 @@ export function PWALaunchIntro() {
       attributes: true,
       attributeFilter: ['aria-busy', 'data-rch-launch-pending'],
     });
-    finishWhenReady();
+    const minimumDisplay = window.setTimeout(finishWhenReady, firstPathname.current === pathname ? 0 : 250);
     const timeout = window.setTimeout(() => {
+      released = true;
       root.dataset.rchLaunch = 'done';
       observer.disconnect();
     }, 6000);
-    return () => { observer.disconnect(); window.clearTimeout(timeout); };
-  }, []);
+    return () => { released = true; observer.disconnect(); window.clearTimeout(minimumDisplay); window.clearTimeout(timeout); };
+  }, [pathname]);
 
   return (
     <div className="rch-launch">
