@@ -1033,7 +1033,7 @@
   background: #24B47E;
 }
 
-.rcl-thread-header > div:nth-child(2) {
+.rcl-thread-identity {
   min-width: 0;
   flex: 1;
 }
@@ -2253,7 +2253,7 @@
     flex: 0 0 36px;
   }
 
-  .rcl-thread-header > div:nth-child(3) {
+  .rcl-thread-identity {
     min-width: 0;
   }
 
