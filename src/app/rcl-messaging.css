@@ -3236,3 +3236,253 @@
     display: none;
   }
 }
+
+
+/* RCH voice + video calling */
+.rch-call-layer{
+  position:fixed;
+  inset:0;
+  z-index:1400;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(7,16,27,.68);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.rch-call-stage{
+  position:relative;
+  width:min(980px,calc(100vw - 48px));
+  height:min(720px,calc(100dvh - 48px));
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:28px;
+  background:#07101b;
+  box-shadow:0 30px 90px rgba(0,0,0,.38);
+  color:#fff;
+}
+.rch-call-stage.audio-only{
+  width:min(520px,calc(100vw - 48px));
+  height:min(620px,calc(100dvh - 48px));
+  background:radial-gradient(circle at 50% 28%,rgba(68,118,162,.34),transparent 38%),linear-gradient(160deg,#0b1724,#07101b 58%,#111b27);
+}
+.rch-call-stage-head{
+  position:absolute;
+  z-index:5;
+  top:0;
+  left:0;
+  right:0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:20px 22px 42px;
+  background:linear-gradient(180deg,rgba(0,0,0,.68),transparent);
+}
+.rch-call-stage-head>div{display:flex;flex-direction:column;gap:2px}
+.rch-call-stage-head strong{font-size:16px;line-height:1.2}
+.rch-call-stage-head span{font-size:12px;color:rgba(255,255,255,.72)}
+.rch-call-stage-head button{
+  display:grid;
+  place-items:center;
+  width:38px;
+  height:38px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:999px;
+  background:rgba(5,12,20,.56);
+  color:#fff;
+}
+.rch-call-remote-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#050b12;
+}
+.rch-call-local-video{
+  position:absolute;
+  z-index:4;
+  right:22px;
+  bottom:112px;
+  width:min(24vw,210px);
+  aspect-ratio:3/4;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,.68);
+  border-radius:20px;
+  background:#101820;
+  box-shadow:0 18px 50px rgba(0,0,0,.34);
+  transform:scaleX(-1);
+}
+.rch-call-local-video.camera-off{opacity:.12}
+.rch-call-video-waiting{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+  background:radial-gradient(circle at 50% 42%,rgba(46,103,151,.28),rgba(5,11,18,.92) 48%);
+}
+.rch-call-video-waiting>div,.rch-call-audio-identity>div{
+  width:112px;
+  height:112px;
+  overflow:hidden;
+  border-radius:999px;
+  border:3px solid rgba(255,255,255,.18);
+  background:#172432;
+}
+.rch-call-video-waiting strong,.rch-call-audio-identity h2{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.rch-call-video-waiting span,.rch-call-audio-identity p{font-size:13px;color:rgba(255,255,255,.7)}
+.rch-call-audio-media{position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none}
+.rch-call-audio-identity{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+}
+.rch-call-controls{
+  position:absolute;
+  z-index:6;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px 14px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  background:rgba(4,10,16,.72);
+  box-shadow:0 16px 50px rgba(0,0,0,.28);
+  backdrop-filter:blur(14px);
+}
+.rch-call-controls button{
+  display:flex;
+  min-width:72px;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:11px;
+}
+.rch-call-controls button svg{
+  width:46px;
+  height:46px;
+  padding:13px;
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+}
+.rch-call-controls button.off svg{background:rgba(255,255,255,.26)}
+.rch-call-controls button.hangup svg{background:#dc2626}
+.rch-call-error-banner{
+  position:absolute;
+  z-index:8;
+  left:50%;
+  top:76px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  max-width:min(90%,560px);
+  padding:10px 14px;
+  border-radius:12px;
+  background:rgba(127,29,29,.94);
+  color:#fff;
+  font-size:13px;
+}
+.rch-call-error-banner button{border:0;background:transparent;color:#fff}
+.rch-call-incoming-layer{background:rgba(7,16,27,.54)}
+.rch-call-incoming{
+  width:min(390px,calc(100vw - 36px));
+  padding:34px 28px 28px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:30px;
+  background:linear-gradient(160deg,#0d1d2d,#07101b);
+  box-shadow:0 30px 90px rgba(0,0,0,.4);
+  color:#fff;
+  text-align:center;
+}
+.rch-call-pulse{
+  width:104px;
+  height:104px;
+  margin:0 auto 22px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#172432;
+  box-shadow:0 0 0 0 rgba(147,197,253,.35);
+  animation:rch-call-pulse 1.8s infinite;
+}
+.rch-call-incoming>p{margin:0 0 5px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#9fc9ef}
+.rch-call-incoming h2{margin:0;font-size:28px;line-height:1.08;letter-spacing:-.03em}
+.rch-call-incoming>span{display:block;margin-top:7px;font-size:13px;color:rgba(255,255,255,.62)}
+.rch-call-incoming-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:34px;
+}
+.rch-call-incoming-actions button{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:12px;
+}
+.rch-call-incoming-actions button svg{
+  width:58px;
+  height:58px;
+  padding:17px;
+  border-radius:999px;
+}
+.rch-call-incoming-actions .decline svg{background:#dc2626}
+.rch-call-incoming-actions .accept svg{background:#16a34a}
+.rch-call-error{display:block;margin-top:12px;color:#fecaca}
+.rch-call-layer.is-minimized{
+  inset:auto 18px calc(18px + env(safe-area-inset-bottom)) auto;
+  display:block;
+  padding:0;
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  pointer-events:none;
+}
+.rch-call-layer.is-minimized .rch-call-stage{
+  width:280px;
+  height:158px;
+  border-radius:18px;
+  pointer-events:auto;
+}
+.rch-call-layer.is-minimized .rch-call-stage.audio-only{height:112px}
+.rch-call-layer.is-minimized .rch-call-stage-head{padding:14px;background:linear-gradient(180deg,rgba(0,0,0,.76),rgba(0,0,0,.18))}
+.rch-call-layer.is-minimized .rch-call-audio-identity{display:none}
+.rch-call-layer.is-minimized .rch-call-local-video,.rch-call-layer.is-minimized .rch-call-video-waiting{display:none}
+@keyframes rch-call-pulse{
+  0%{box-shadow:0 0 0 0 rgba(147,197,253,.34)}
+  70%{box-shadow:0 0 0 18px rgba(147,197,253,0)}
+  100%{box-shadow:0 0 0 0 rgba(147,197,253,0)}
+}
+@media(max-width:640px){
+  .rch-call-layer{padding:0}
+  .rch-call-stage,.rch-call-stage.audio-only{width:100vw;height:100dvh;border:0;border-radius:0}
+  .rch-call-stage-head{padding:calc(14px + env(safe-area-inset-top)) 16px 42px}
+  .rch-call-local-video{right:14px;bottom:calc(104px + env(safe-area-inset-bottom));width:30vw;max-width:132px;border-radius:15px}
+  .rch-call-controls{bottom:calc(16px + env(safe-area-inset-bottom));gap:8px;padding:8px 10px}
+  .rch-call-controls button{min-width:62px}
+  .rch-call-controls button svg{width:44px;height:44px}
+  .rch-call-layer.is-minimized{right:10px;bottom:calc(78px + env(safe-area-inset-bottom))}
+  .rch-call-layer.is-minimized .rch-call-stage{width:220px;height:124px;border-radius:16px}
+  .rch-call-layer.is-minimized .rch-call-stage.audio-only{height:92px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rch-call-pulse{animation:none}
+}
