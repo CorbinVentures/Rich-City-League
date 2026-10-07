@@ -84,6 +84,11 @@ begin
     raise exception 'This member is not available for calls';
   end if;
 
+  perform pg_advisory_xact_lock(
+    hashtext('rch-call:' || least(me::text, target_profile_id::text)),
+    hashtext(greatest(me::text, target_profile_id::text))
+  );
+
   update public.message_calls
   set status = 'missed',
       ended_at = now(),
