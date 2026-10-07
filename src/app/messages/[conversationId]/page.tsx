@@ -133,6 +133,7 @@ export default function ConversationPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const channelRef = useRef<any>(null);
   const typingTimers = useRef<Record<string, number>>({});
   const lastTypingSent = useRef(0);
@@ -439,12 +440,17 @@ export default function ConversationPage() {
     setMessageMenu(null);
   };
 
+  const focusComposer = () => {
+    window.requestAnimationFrame(() => composerRef.current?.focus());
+  };
+
   const editMessage = (message: Message) => {
     setEditing(message);
     setReplyTo(null);
     setAttachmentFile(null);
     setBody(message.body);
     setMessageMenu(null);
+    focusComposer();
   };
 
   const savePreference = async (patch: Partial<Preference>) => {
@@ -563,7 +569,7 @@ export default function ConversationPage() {
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
+                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
                       {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -574,7 +580,7 @@ export default function ConversationPage() {
                           <div className="rcl-message-deleted">Message removed</div>
                         ) : (
                           <>
-                            {reply && <button type="button" className="rcl-reply-quote"><FiCornerUpLeft /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
+                            {reply && <button type="button" className="rcl-reply-quote" onClick={() => document.getElementById(`rch-message-${reply.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} aria-label="Jump to replied message"><FiCornerUpLeft /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
 
                             <div className="rcl-message-bubble">
                               {message.attachment_url && (
@@ -588,7 +594,7 @@ export default function ConversationPage() {
                             </div>
 
                             <div className="rcl-message-actions">
-                              <button type="button" onClick={() => setReplyTo(message)} aria-label="Reply"><FiCornerUpLeft /></button>
+                              <button type="button" onClick={() => { setReplyTo(message); setEditing(null); focusComposer(); }} aria-label="Reply"><FiCornerUpLeft /></button>
                               <button type="button" onClick={() => setReactionOpen(reactionOpen === message.id ? null : message.id)} aria-label="React"><FiSmile /></button>
                               {mine && <button type="button" onClick={() => setMessageMenu(messageMenu === message.id ? null : message.id)} aria-label="More message actions"><FiMoreHorizontal /></button>}
                             </div>
@@ -661,6 +667,7 @@ export default function ConversationPage() {
                   </>}
 
                   <textarea
+                    ref={composerRef}
                     value={body}
                     onChange={(event) => broadcastTyping(event.target.value)}
                     onKeyDown={(event) => {
