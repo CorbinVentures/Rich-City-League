@@ -17,6 +17,7 @@ import {
   FiMoreHorizontal,
   FiCornerUpLeft,
   FiSend,
+  FiSearch,
   FiSmile,
   FiStar,
   FiTrash2,
@@ -128,12 +129,16 @@ export default function ConversationPage() {
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [showJump, setShowJump] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [threadSearch, setThreadSearch] = useState('');
+  const [searchCursor, setSearchCursor] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<any>(null);
   const typingTimers = useRef<Record<string, number>>({});
   const lastTypingSent = useRef(0);
@@ -147,9 +152,18 @@ export default function ConversationPage() {
     ? displayName(peer)
     : conversation?.title ?? 'RCH conversation';
   const muted = Boolean(preference.muted_until && new Date(preference.muted_until).getTime() > Date.now());
+  const draftKey = user ? `rch-message-draft:${user.id}:${conversationId}` : '';
 
   const memberMap = useMemo(() => new Map(members.map((member) => [member.profile_id, member.profile])), [members]);
   const messageMap = useMemo(() => new Map(messages.map((message) => [message.id, message])), [messages]);
+  const searchMatches = useMemo(() => {
+    const query = threadSearch.trim().toLowerCase();
+    if (!query) return [];
+    return messages.filter((message) => !message.deleted_at && message.body.toLowerCase().includes(query));
+  }, [messages, threadSearch]);
+  const activeSearchId = searchMatches.length
+    ? searchMatches[((searchCursor % searchMatches.length) + searchMatches.length) % searchMatches.length].id
+    : null;
 
   useEffect(() => {
     messageIdsRef.current = messages.map((message) => message.id);
@@ -158,6 +172,47 @@ export default function ConversationPage() {
   useEffect(() => {
     meNameRef.current = displayName(me?.profile);
   }, [me?.profile]);
+
+  useEffect(() => {
+    if (!draftKey || typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(draftKey);
+    if (saved) setBody((current) => current || saved);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey || editing || typeof window === 'undefined') return;
+    const timer = window.setTimeout(() => {
+      if (body.trim()) window.localStorage.setItem(draftKey, body);
+      else window.localStorage.removeItem(draftKey);
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [body, draftKey, editing]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTypingTarget = tagName === 'input' || tagName === 'textarea' || Boolean(target?.isContentEditable);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        setSearchOpen(true);
+        window.requestAnimationFrame(() => searchInputRef.current?.focus());
+        return;
+      }
+      if (event.key === 'Escape') {
+        setReactionOpen(null);
+        setMessageMenu(null);
+        if (searchOpen) {
+          setSearchOpen(false);
+          setThreadSearch('');
+        } else if (!isTypingTarget) {
+          setShowInfo(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [searchOpen]);
 
   const markRead = useCallback(async () => {
     if (!db || !user) return;
@@ -360,6 +415,15 @@ export default function ConversationPage() {
     setAttachmentPreview('');
   };
 
+  const restoreDraftAfterEdit = () => {
+    const saved = draftKey && typeof window !== 'undefined' ? window.localStorage.getItem(draftKey) ?? '' : '';
+    setEditing(null);
+    setReplyTo(null);
+    setAttachmentFile(null);
+    setAttachmentPreview('');
+    setBody(saved);
+  };
+
   const send = async (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = body.trim();
@@ -370,7 +434,7 @@ export default function ConversationPage() {
       setSending(true);
       const result = await db.from('messages').update({ body: trimmed, edited_at: new Date().toISOString() }).eq('id', editing.id).eq('sender_id', user.id);
       if (result.error) setError(result.error.message);
-      else resetComposer();
+      else restoreDraftAfterEdit();
       setSending(false);
       return;
     }
@@ -395,6 +459,7 @@ export default function ConversationPage() {
       if (result.error) throw result.error;
       const sent = result.data as Message;
       setMessages((current) => current.some((message) => message.id === sent.id) ? current : [...current, sent]);
+      if (draftKey && typeof window !== 'undefined') window.localStorage.removeItem(draftKey);
       resetComposer();
       window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
     } catch (sendError) {
@@ -482,6 +547,18 @@ export default function ConversationPage() {
     setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 360);
   };
 
+  const jumpSearch = (direction: number) => {
+    if (!searchMatches.length) return;
+    const next = ((searchCursor + direction) % searchMatches.length + searchMatches.length) % searchMatches.length;
+    setSearchCursor(next);
+    const target = searchMatches[next];
+    window.requestAnimationFrame(() => document.getElementById(`rch-message-${target.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
+
+  useEffect(() => {
+    setSearchCursor(searchMatches.length ? searchMatches.length - 1 : 0);
+  }, [threadSearch, searchMatches.length]);
+
   const presenceText = (() => {
     if (!conversation) return '';
     if (conversation.conversation_type === 'direct') {
@@ -534,6 +611,7 @@ export default function ConversationPage() {
         <div className="rcl-thread-topline">
           <Link href="/messages"><FiArrowLeft /> Messages</Link>
           <div>
+            <button type="button" onClick={() => { setSearchOpen((value) => !value); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search this conversation"><FiSearch /></button>
             <button type="button" onClick={() => void savePreference({ is_pinned: !preference.is_pinned })} className={preference.is_pinned ? 'active' : ''} aria-label={preference.is_pinned ? 'Unpin conversation' : 'Pin conversation'}><FiStar /></button>
             <button type="button" onClick={() => void savePreference({ muted_until: muted ? null : '2099-12-31T23:59:59.000Z' })} className={muted ? 'active' : ''} aria-label={muted ? 'Unmute conversation' : 'Mute conversation'}><FiBellOff /></button>
             <button type="button" onClick={() => setShowInfo((value) => !value)} className={showInfo ? 'active' : ''} aria-label="Conversation details"><FiInfo /></button>
@@ -554,8 +632,26 @@ export default function ConversationPage() {
                   <h1>{conversationTitle}</h1>
                   <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
+                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search messages"><FiSearch /></button>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
+
+              {searchOpen && (
+                <div className="rcl-thread-searchbar" role="search">
+                  <FiSearch />
+                  <input
+                    ref={searchInputRef}
+                    value={threadSearch}
+                    onChange={(event) => setThreadSearch(event.target.value)}
+                    placeholder="Search this conversation"
+                    aria-label="Search this conversation"
+                  />
+                  <span>{threadSearch.trim() ? `${searchMatches.length ? searchCursor + 1 : 0}/${searchMatches.length}` : '⌘F'}</span>
+                  <button type="button" onClick={() => jumpSearch(-1)} disabled={!searchMatches.length} aria-label="Previous match">↑</button>
+                  <button type="button" onClick={() => jumpSearch(1)} disabled={!searchMatches.length} aria-label="Next match">↓</button>
+                  <button type="button" onClick={() => { setSearchOpen(false); setThreadSearch(''); }} aria-label="Close search"><FiX /></button>
+                </div>
+              )}
 
               <div className="rcl-thread-scroll" ref={scrollRef} onScroll={onScroll}>
                 {hasOlder && <button type="button" onClick={() => void loadOlder()} disabled={loadingOlder} className="rcl-load-older">{loadingOlder ? 'Loading…' : 'Load earlier messages'}</button>}
@@ -580,7 +676,7 @@ export default function ConversationPage() {
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
+                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}>
                       {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -652,7 +748,7 @@ export default function ConversationPage() {
                   <div className="rcl-composer-context">
                     <span>{editing ? <FiEdit2 /> : <FiCornerUpLeft />}</span>
                     <div><strong>{editing ? 'Editing message' : `Replying to ${replyTo?.sender_id === user?.id ? 'yourself' : displayName(memberMap.get(replyTo?.sender_id ?? ''))}`}</strong><p>{editing?.body ?? replyTo?.body}</p></div>
-                    <button type="button" onClick={() => { setReplyTo(null); if (editing) { setEditing(null); setBody(''); } }} aria-label="Cancel"><FiX /></button>
+                    <button type="button" onClick={() => { setReplyTo(null); if (editing) restoreDraftAfterEdit(); }} aria-label="Cancel"><FiX /></button>
                   </div>
                 )}
 
@@ -695,7 +791,7 @@ export default function ConversationPage() {
 
                   <button type="submit" disabled={sending || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
                 </div>
-                <small className="rcl-composer-hint">Enter to send · Shift + Enter for a new line</small>
+                <small className="rcl-composer-hint">{!editing && body.trim() ? 'Draft saved on this device · ' : ''}Enter to send · Shift + Enter for a new line{body.length > 3600 ? ` · ${4000 - body.length} characters left` : ''}</small>
               </form>
             </section>
 
