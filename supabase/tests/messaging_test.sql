@@ -222,14 +222,14 @@ values (auth.uid(), '10101010-1010-4010-8010-101010101010');
 
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
 
-select throws_ok($
+select throws_ok($blocked_direct$
   insert into public.messages (conversation_id, sender_id, body)
   values (
     current_setting('test.messaging_direct_id')::uuid,
     auth.uid(),
     'Blocked message'
   )
-$, '42501', null, 'blocking a member prevents new direct messages');
+$blocked_direct$, '42501', null, 'blocking a member prevents new direct messages');
 
 select throws_ok($blocked_group$
   select public.start_group_conversation(
