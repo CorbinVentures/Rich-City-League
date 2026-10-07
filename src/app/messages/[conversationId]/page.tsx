@@ -161,6 +161,7 @@ export default function ConversationPage() {
 
   const markRead = useCallback(async () => {
     if (!db || !user) return;
+    if (typeof document !== 'undefined' && (document.visibilityState !== 'visible' || !document.hasFocus())) return;
     const result = await db.rpc('mark_conversation_read', { target_conversation_id: conversationId });
     if (result.error) {
       setError((current) => current || 'Unable to update read status.');
@@ -230,6 +231,19 @@ export default function ConversationPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!conversation) return;
+    const markWhenActive = () => {
+      if (document.visibilityState === 'visible' && document.hasFocus()) void markRead();
+    };
+    document.addEventListener('visibilitychange', markWhenActive);
+    window.addEventListener('focus', markWhenActive);
+    return () => {
+      document.removeEventListener('visibilitychange', markWhenActive);
+      window.removeEventListener('focus', markWhenActive);
+    };
+  }, [conversation, markRead]);
 
   useEffect(() => {
     if (!supabase || !user || !conversation) return;
@@ -424,9 +438,6 @@ export default function ConversationPage() {
     if (!db || !user || message.sender_id !== user.id) return;
     const attachmentPath = mediaStoragePath(message.attachment_url);
     const result = await db.from('messages').update({
-      body: 'Message removed',
-      attachment_url: null,
-      reply_to_id: null,
       deleted_at: new Date().toISOString(),
     }).eq('id', message.id).eq('sender_id', user.id);
     if (result.error) {
