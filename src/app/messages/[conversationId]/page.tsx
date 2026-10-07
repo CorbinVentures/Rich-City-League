@@ -18,6 +18,7 @@ import {
   FiMic,
   FiMoreHorizontal,
   FiPhone,
+  FiPlus,
   FiCornerUpLeft,
   FiSend,
   FiSearch,
@@ -167,6 +168,7 @@ export default function ConversationPage() {
   const [toast, setToast] = useState('');
   const [recording, setRecording] = useState(false);
   const [recordingStarting, setRecordingStarting] = useState(false);
+  const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -257,6 +259,7 @@ export default function ConversationPage() {
       if (event.key === 'Escape') {
         setReactionOpen(null);
         setMessageMenu(null);
+        setAttachmentMenuOpen(false);
         if (searchOpen) {
           setSearchOpen(false);
           setThreadSearch('');
@@ -463,6 +466,7 @@ export default function ConversationPage() {
       }
     }
     setAttachmentFile(file);
+    setAttachmentMenuOpen(false);
     setError('');
   };
 
@@ -489,6 +493,7 @@ export default function ConversationPage() {
     setEditing(null);
     setAttachmentFile(null);
     setAttachmentPreview('');
+    setAttachmentMenuOpen(false);
   };
 
   const restoreDraftAfterEdit = () => {
@@ -836,8 +841,7 @@ export default function ConversationPage() {
                   <button type="button" onClick={() => startDirectCall('audio')} aria-label="Start voice call" title="Voice call"><FiPhone /></button>
                   <button type="button" onClick={() => startDirectCall('video')} aria-label="Start video call" title="Video call"><FiVideo /></button>
                 </>}
-                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={`rcl-thread-header-search ${searchOpen ? 'active' : ''}`} aria-label="Search messages"><FiSearch /></button>
-                <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
+                <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiInfo /></button>
               </header>
 
               {searchOpen && (
