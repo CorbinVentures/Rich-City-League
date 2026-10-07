@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(16);
 
 set role postgres;
 
@@ -97,21 +97,22 @@ $$, 'pin mute and archive preferences can be saved');
 
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
 
-select lives_ok($$
+select lives_ok($
+  with inserted as (
+    insert into public.messages (conversation_id, sender_id, body)
+    values (
+      current_setting('test.messaging_direct_id')::uuid,
+      auth.uid(),
+      'Messaging action test'
+    )
+    returning id
+  )
   select set_config(
     'test.messaging_message_id',
-    (
-      insert into public.messages (conversation_id, sender_id, body)
-      values (
-        current_setting('test.messaging_direct_id')::uuid,
-        auth.uid(),
-        'Messaging action test'
-      )
-      returning id
-    )::text,
+    (select id::text from inserted),
     true
   )
-$$, 'a conversation member can send a message');
+$, 'a conversation member can send a message');
 
 select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020', true);
 
