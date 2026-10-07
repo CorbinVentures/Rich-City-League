@@ -82,7 +82,7 @@ select {
   text-shadow:none!important;
 }
 .rcl-platform-root :where(p,li,dd,dt) {
-  color:inherit;
+  text-wrap:pretty;
 }
 .rcl-platform-root [class~="text-white"] { color:var(--rcl-v3-ink)!important; }
 .rcl-platform-root [class*="text-white/"],
