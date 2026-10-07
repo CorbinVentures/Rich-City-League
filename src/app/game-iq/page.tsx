@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getUpcomingGames } from '@/lib/game-schedule';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
@@ -12,7 +13,7 @@ export default async function GameIQPublicPage() {
   const { data: { user } } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
   const scorebookHref = user ? '/portal/scorebook' : '/auth/sign-in?next=%2Fportal%2Fscorebook';
   const completed = games.filter((game) => game.status === 'completed').slice(0, 12);
-  const upcoming = games.filter((game) => game.status !== 'completed').slice(0, 6);
+  const upcoming = getUpcomingGames(games).slice(0, 6);
 
   const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? 'Team';
 

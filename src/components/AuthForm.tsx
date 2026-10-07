@@ -52,7 +52,8 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
     setMessage('');
     try {
       if (mode === 'sign-in') {
-        const requestedNext = new URLSearchParams(window.location.search).get('next');
+        const params = new URLSearchParams(window.location.search);
+        const requestedNext = params.get('next') ?? params.get('redirect');
         const hasExplicitNext = Boolean(requestedNext);
         let destination = getSafePostAuthPath(requestedNext, '/dashboard');
         await signIn(email, password);
@@ -114,7 +115,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         await resetPassword(email);
         setMessage('Password recovery instructions have been sent if this email exists.');
       }
-    } catch {}
+    } catch {
+      setMessage('Unable to complete this request. Please check the details above and try again.');
+    }
   }
 
   const inputClass = "mt-2 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 font-normal outline-none transition focus:border-rcl-gold";
@@ -138,7 +141,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
 
       {(mode !== 'sign-up' || step === 1) && <>
         <label className="block text-sm font-semibold" htmlFor="auth-email">Email<input id="auth-email" required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} /></label>
-        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={8} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="absolute inset-y-2 right-1 min-w-14 text-sm text-rcl-gold">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-gray-400">Use at least 8 characters.</span>}</label>}
+        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={mode === 'sign-up' ? 8 : undefined} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="absolute inset-y-2 right-1 min-w-14 text-sm text-rcl-gold">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-gray-400">Use at least 8 characters.</span>}</label>}
         {mode === 'sign-up' && <label className="block text-sm font-semibold">Confirm password<input required minLength={8} type={showPassword ? 'text' : 'password'} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className={inputClass} /></label>}
       </>}
 
@@ -167,7 +170,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City League</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCL Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={signupHasSession ? "/discover" : "/auth/sign-in?next=/discover"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">Discover RCL</Link></div>}
 
       {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
-      {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
+      {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
       {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}</div>}
     </form>
   );

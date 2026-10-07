@@ -37,7 +37,11 @@ export function DraftConfiguredRules() {
     return () => { active = false; };
   }, [db, supabase]);
 
-  if (!draft) return null;
+  if (!draft) return <section id="official-draft-rules" className="scroll-mt-24 border-t border-white/10 p-8 text-white">
+    <Container maxWidth="xl"><h2 className="text-2xl font-bold">Official draft rules</h2>
+      <p className="mt-4">Rules for the next draft have not been published yet. The pick clock, rounds, roster limits and commissioner rules will appear here when the league publishes the draft.</p>
+    </Container>
+  </section>;
 
   return <section id="official-draft-rules" className="border-t border-white/10 bg-[#03070d] pb-24 pt-10 text-white">
     <Container maxWidth="xl">

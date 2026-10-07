@@ -45,7 +45,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
         <h1>Your basketball world.<br/><span>All in one place.</span></h1>
         <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
         <div className="rcl-landing-actions">
-          <Link href={user?'/social':'/register'} className="rcl-landing-primary">{user?'Open your feed':'Join free'} <FaArrowRight/></Link>
+          <Link href={user?'/social':'/auth/sign-up'} className="rcl-landing-primary">{user?'Open your feed':'Join free'} <FaArrowRight/></Link>
           <Link href="/social" className="rcl-landing-secondary"><FaPlay/> See what&apos;s happening</Link>
         </div>
         <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>

@@ -4,6 +4,7 @@ export function cn(...classes: (string | undefined | boolean)[]): string {
 
 export function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('en-US', {
+    timeZone: 'America/New_York',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -12,6 +13,8 @@ export function formatDate(date: string | Date): string {
 
 export function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('en-US', {
+    timeZone: 'America/New_York',
+    timeZoneName: 'short',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
