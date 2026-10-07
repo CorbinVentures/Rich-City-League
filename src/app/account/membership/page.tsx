@@ -23,7 +23,7 @@ export default function AccountMembershipPage() {
   const supabase = useMemo(() => getSupabaseClient(true), []);
   const db = supabase as any;
   const [planCode, setPlanCode] = useState<MembershipPlanCode>('free');
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);\n  const [earnedPlusUntil, setEarnedPlusUntil] = useState<string | null>(null);
   const [interval, setInterval] = useState<MembershipBillingInterval>('annual');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
@@ -33,12 +33,15 @@ export default function AccountMembershipPage() {
   const load = useCallback(async () => {
     if (!db || !user) { setLoading(false); return; }
     setLoading(true);
-    const [{ data: current }, { data: row }] = await Promise.all([
+    const [{ data: current }, { data: row }, { data: referralRaw }] = await Promise.all([
       db.rpc('current_membership_plan'),
       db.from('member_subscriptions').select('plan_code,status,billing_interval,provider_customer_id,current_period_end,cancel_at_period_end,trial_end').eq('user_id', user.id).maybeSingle(),
+      db.rpc('referral_stats', { target_profile: user.id }),
     ]);
     setPlanCode(isMembershipPlanCode(current) ? current : 'free');
     setSubscription((row ?? null) as Subscription | null);
+    const referralRow = Array.isArray(referralRaw) ? referralRaw[0] : referralRaw;
+    setEarnedPlusUntil(referralRow?.rcl_plus_until ?? null);
     if (row?.billing_interval === 'monthly' || row?.billing_interval === 'annual') setInterval(row.billing_interval);
     setLoading(false);
   }, [db, user]);
@@ -73,7 +76,9 @@ export default function AccountMembershipPage() {
 
   const current = MEMBERSHIP_PLANS[planCode];
   const paid = planCode !== 'free' && subscription && ['active','trialing'].includes(subscription.status);
+  const earnedPlus = planCode === 'rcl_plus' && !paid && Boolean(earnedPlusUntil && new Date(earnedPlusUntil).getTime() > Date.now());
   const periodLabel = subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+  const earnedPeriodLabel = earnedPlusUntil ? new Date(earnedPlusUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
 
   return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
     <section className="border-b border-white/10 bg-[radial-gradient(circle_at_80%_5%,rgba(59,130,246,.16),transparent_30%),#050a10] py-12">
@@ -86,8 +91,8 @@ export default function AccountMembershipPage() {
         {error&&<div className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/[.05] p-4 text-sm text-red-100">{error}</div>}
 
         <section className="rounded-3xl border border-rcl-blue/20 bg-[#071522]/55 p-6 sm:p-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.24em] text-rcl-blue">Current membership</p><h2 className="mt-2 font-display text-4xl font-black uppercase">{current.name}</h2><p className="mt-2 max-w-xl text-sm leading-6 text-white/45">{current.tagline}</p></div><div className="text-left sm:text-right"><p className="text-[10px] font-black uppercase tracking-wider text-white/30">Status</p><p className="mt-1 font-black uppercase text-rcl-orange">{subscription?.status || 'Free member'}</p>{periodLabel&&<p className="mt-1 text-xs text-white/35">{subscription?.cancel_at_period_end?'Access ends':'Next period'} {periodLabel}</p>}</div></div>
-          <div className="mt-6 flex flex-wrap gap-3">{paid&&subscription?.provider_customer_id?<button onClick={portal} disabled={Boolean(busy)} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"><FaCreditCard /> {busy==='portal'?'Opening…':'Manage billing'}</button>:null}<Link href="/my-hoops" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider">Open My Hoops <FaArrowRight /></Link></div>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.24em] text-rcl-blue">Current membership</p><h2 className="mt-2 font-display text-4xl font-black uppercase">{current.name}</h2><p className="mt-2 max-w-xl text-sm leading-6 text-white/45">{current.tagline}</p></div><div className="text-left sm:text-right"><p className="text-[10px] font-black uppercase tracking-wider text-white/30">Status</p><p className="mt-1 font-black uppercase text-rcl-orange">{earnedPlus?'Earned through referrals':subscription?.status || 'Free member'}</p>{earnedPlus&&earnedPeriodLabel?<p className="mt-1 text-xs text-white/35">Referral access through {earnedPeriodLabel}</p>:periodLabel&&<p className="mt-1 text-xs text-white/35">{subscription?.cancel_at_period_end?'Access ends':'Next period'} {periodLabel}</p>}</div></div>
+          <div className="mt-6 flex flex-wrap gap-3">{paid&&subscription?.provider_customer_id?<button onClick={portal} disabled={Boolean(busy)} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"><FaCreditCard /> {busy==='portal'?'Opening…':'Manage billing'}</button>:null}<Link href="/my-hoops" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider">Open My Hoops <FaArrowRight /></Link>{earnedPlus&&<Link href="/referrals" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-5 text-xs font-black uppercase tracking-wider text-rcl-orange">Referral rewards <FaArrowRight /></Link>}</div>
         </section>
 
         {!paid&&<section className="mt-8">
