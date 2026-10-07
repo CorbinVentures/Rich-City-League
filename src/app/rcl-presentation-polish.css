@@ -64,6 +64,28 @@ body {
   word-break: normal;
 }
 
+/*
+ * Sitewide contrast guard.
+ * Zero-specificity defaults keep ordinary copy readable on the light platform
+ * without defeating explicit Tailwind/component text colors. Intentional dark
+ * media/competition zones receive their own readable light-copy fallback.
+ */
+:where(.rcl-platform-root) :where(p,li,dd,dt,figcaption) {
+  color: var(--rcl-v3-copy, #64748B);
+  opacity: 1;
+}
+
+:where(.rcl-platform-root) :where(
+  .rcl-dark-media,
+  .rcl-league-feature,
+  .rcl-league-scoreboard,
+  .rcl-draft-platform,
+  .rcl-scorebook-immersive,
+  .city-hero
+) :where(p,li,dd,dt,figcaption) {
+  color: #CBD5E1;
+}
+
 .rcl-platform-root :where(a,button,label,span,strong,small) {
   max-width: 100%;
   overflow-wrap: break-word;
