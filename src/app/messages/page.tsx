@@ -78,7 +78,10 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (new URLSearchParams(window.location.search).get('compose') === '1') setComposeOpen(true);
+    const openComposer = () => setComposeOpen(true);
+    if (new URLSearchParams(window.location.search).get('compose') === '1') openComposer();
+    window.addEventListener('rch-open-message-composer', openComposer);
+    return () => window.removeEventListener('rch-open-message-composer', openComposer);
   }, []);
 
   const loadConversations = useCallback(async () => {
@@ -154,7 +157,12 @@ export default function MessagesPage() {
       let request = db.from('profiles').select('id,display_name,username,avatar_url,role').eq('is_active', true).neq('id', user.id).limit(20);
       if (query) request = request.or(`display_name.ilike.%${query}%,username.ilike.%${query}%`);
       const result = await request;
-      setPeople((result.data ?? []) as ProfileResult[]);
+      if (result.error) {
+        setPeople([]);
+        setError(result.error.message || 'Unable to search members right now.');
+      } else {
+        setPeople((result.data ?? []) as ProfileResult[]);
+      }
       setPeopleLoading(false);
     }, 180);
     return () => window.clearTimeout(timer);
@@ -203,6 +211,13 @@ export default function MessagesPage() {
 
   const closeComposer = () => {
     setComposeOpen(false);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('compose')) {
+        url.searchParams.delete('compose');
+        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+      }
+    }
     setPeopleSearch('');
     setSelectedPeople([]);
     setGroupTitle('');
