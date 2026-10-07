@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FaArrowRight, FaComments, FaMagnifyingGlass, FaPenToSquare, FaUsers, FaXmark } from 'react-icons/fa6';
+import { FaComments, FaMagnifyingGlass, FaPenToSquare, FaStar, FaUsers, FaXmark } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
+
+type QuickFilter = 'all' | 'unread' | 'groups' | 'pinned';
 
 type QuickInboxRow = {
   conversation_id: string;
@@ -15,6 +17,7 @@ type QuickInboxRow = {
   latest_created_at: string | null;
   latest_sender_id: string | null;
   unread_count: number | string | null;
+  is_pinned: boolean | null;
   archived_at: string | null;
   peer_id: string | null;
   peer_display_name: string | null;
@@ -33,6 +36,7 @@ type QuickItem = {
   isGroup: boolean;
   memberCount: number;
   lastSenderIsMe: boolean;
+  isPinned: boolean;
 };
 
 function conversationTitle(row: QuickInboxRow) {
@@ -64,10 +68,11 @@ export function MessageQuickMenu({
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<QuickItem[]>([]);
   const [query, setQuery] = useState('');
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [filter, setFilter] = useState<QuickFilter>('all');
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
 
@@ -95,14 +100,23 @@ export function MessageQuickMenu({
         isGroup: row.conversation_type !== 'direct',
         memberCount: Number(row.member_count ?? 0),
         lastSenderIsMe: row.latest_sender_id === userId,
+        isPinned: Boolean(row.is_pinned),
       }))
-      .slice(0, 12));
+      .sort((a, b) => Number(b.isPinned) - Number(a.isPinned) || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 24));
     setLoading(false);
   };
 
   useEffect(() => {
     if (!open) return;
     void load();
+    const frame = window.requestAnimationFrame(() => searchRef.current?.focus());
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   useEffect(() => {
@@ -135,11 +149,23 @@ export function MessageQuickMenu({
   }, [open]);
 
   const visible = items.filter((item) => {
-    if (showUnreadOnly && item.unread < 1) return false;
+    if (filter === 'unread' && item.unread < 1) return false;
+    if (filter === 'groups' && !item.isGroup) return false;
+    if (filter === 'pinned' && !item.isPinned) return false;
     const term = query.trim().toLowerCase();
     if (!term) return true;
     return `${item.title} ${item.preview}`.toLowerCase().includes(term);
-  }).slice(0, 7);
+  });
+
+  const groups = items.filter((item) => item.isGroup).length;
+  const pinned = items.filter((item) => item.isPinned).length;
+
+  const filters: Array<{ key: QuickFilter; label: string; count?: number }> = [
+    { key: 'all', label: 'Inbox' },
+    { key: 'unread', label: 'Unread', count: unreadCount },
+    { key: 'groups', label: 'Groups', count: groups },
+    { key: 'pinned', label: 'Pinned', count: pinned },
+  ];
 
   return (
     <div className="rcl-message-quick-wrap" ref={rootRef}>
@@ -156,77 +182,111 @@ export function MessageQuickMenu({
       </button>
 
       {open && (
-        <section className="rcl-message-quick-panel" role="dialog" aria-label="Quick messages">
-          <header className="rcl-message-quick-head">
-            <div>
-              <span>RCH Messages</span>
-              <h2>Messages</h2>
+        <>
+          <button type="button" className="rcl-message-quick-backdrop" aria-label="Close messages" onClick={() => setOpen(false)} />
+          <section className="rcl-message-quick-panel" role="dialog" aria-modal="true" aria-label="RCH Messages">
+            <header className="rcl-message-quick-head">
+              <div>
+                <span>RCH Messages</span>
+                <h2>Messages</h2>
+                <p>{unreadCount > 0 ? `${unreadCount} unread message${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}</p>
+              </div>
+              <div className="rcl-message-quick-head-actions">
+                <Link className="rcl-message-quick-compose" href="/messages?compose=1" onClick={() => setOpen(false)} aria-label="Start a new message" title="New message">
+                  <FaPenToSquare />
+                  <span>New</span>
+                </Link>
+                <button type="button" onClick={() => setOpen(false)} aria-label="Close messages">
+                  <FaXmark />
+                </button>
+              </div>
+            </header>
+
+            <label className="rcl-message-quick-search">
+              <FaMagnifyingGlass />
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search conversations"
+                aria-label="Search conversations"
+                autoComplete="off"
+              />
+              {query && <button type="button" onClick={() => setQuery('')} aria-label="Clear search"><FaXmark /></button>}
+            </label>
+
+            <div className="rcl-message-quick-tabs" role="tablist" aria-label="Message filters">
+              {filters.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === item.key}
+                  className={filter === item.key ? 'active' : ''}
+                  onClick={() => setFilter(item.key)}
+                >
+                  {item.label}
+                  {typeof item.count === 'number' && item.count > 0 && <span>{item.count > 99 ? '99+' : item.count}</span>}
+                </button>
+              ))}
             </div>
-            <div>
-              <Link href="/messages?compose=1" onClick={() => setOpen(false)} aria-label="New message" title="New message">
+
+            <div className="rcl-message-quick-sectionbar">
+              <strong>{filter === 'all' ? 'Recent conversations' : filters.find((item) => item.key === filter)?.label}</strong>
+              <span>{visible.length} {visible.length === 1 ? 'conversation' : 'conversations'}</span>
+            </div>
+
+            <div className="rcl-message-quick-list">
+              {loading && [1,2,3,4,5].map((item) => (
+                <div className="rcl-message-quick-skeleton" key={item}><i /><span><b /><small /></span></div>
+              ))}
+
+              {!loading && loadError && (
+                <div className="rcl-message-quick-state">
+                  <FaComments />
+                  <strong>Messages are taking a second.</strong>
+                  <p>Your inbox could not refresh.</p>
+                  <button type="button" onClick={() => void load()}>Try again</button>
+                </div>
+              )}
+
+              {!loading && !loadError && visible.map((item) => (
+                <Link key={item.id} href={`/messages/${item.id}`} onClick={() => setOpen(false)} className={`rcl-message-quick-item ${item.unread ? 'unread' : ''}`}>
+                  <span className="rcl-message-quick-avatar">
+                    {item.isGroup ? <FaUsers /> : <ProfileAvatarMedia src={item.avatarUrl} alt={item.title} className="h-full w-full rounded-full object-cover" />}
+                    {item.unread > 0 && <i />}
+                  </span>
+                  <span className="rcl-message-quick-copy">
+                    <span className="rcl-message-quick-title">
+                      <strong>{item.title}</strong>
+                      {item.isPinned && <FaStar aria-label="Pinned" />}
+                      <time dateTime={item.updatedAt}>{formatQuickTime(item.updatedAt)}</time>
+                    </span>
+                    <small>{item.lastSenderIsMe && item.preview ? 'You: ' : ''}{item.preview || (item.isGroup ? `${item.memberCount} members` : 'Start the conversation')}</small>
+                    {item.isGroup && <span className="rcl-message-quick-meta">{item.memberCount || 'Group'}{item.memberCount ? ' members' : ''}</span>}
+                  </span>
+                  {item.unread > 0 && <b className="rcl-message-quick-count">{item.unread > 99 ? '99+' : item.unread}</b>}
+                </Link>
+              ))}
+
+              {!loading && !loadError && visible.length === 0 && (
+                <div className="rcl-message-quick-state">
+                  <FaComments />
+                  <strong>{query ? 'No matching conversations' : filter === 'unread' ? 'You’re caught up' : filter === 'groups' ? 'No group conversations yet' : filter === 'pinned' ? 'Nothing pinned yet' : 'No conversations yet'}</strong>
+                  <p>{query ? 'Try another name or phrase.' : filter === 'unread' ? 'No unread messages right now.' : 'Start a new conversation from the button above.'}</p>
+                </div>
+              )}
+            </div>
+
+            <footer className="rcl-message-quick-dock">
+              <Link href="/messages?compose=1" onClick={() => setOpen(false)}>
                 <FaPenToSquare />
+                Start a new message
               </Link>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close messages">
-                <FaXmark />
-              </button>
-            </div>
-          </header>
-
-          <label className="rcl-message-quick-search">
-            <FaMagnifyingGlass />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search Messenger" aria-label="Search messages" />
-            {query && <button type="button" onClick={() => setQuery('')} aria-label="Clear search"><FaXmark /></button>}
-          </label>
-
-          <div className="rcl-message-quick-tabs" role="tablist" aria-label="Message filters">
-            <button type="button" className={!showUnreadOnly ? 'active' : ''} onClick={() => setShowUnreadOnly(false)}>Inbox</button>
-            <button type="button" className={showUnreadOnly ? 'active' : ''} onClick={() => setShowUnreadOnly(true)}>
-              Unread {unreadCount > 0 && <span>{unreadCount > 99 ? '99+' : unreadCount}</span>}
-            </button>
-          </div>
-
-          <div className="rcl-message-quick-list">
-            {loading && [1,2,3,4].map((item) => (
-              <div className="rcl-message-quick-skeleton" key={item}><i /><span><b /><small /></span></div>
-            ))}
-
-            {!loading && loadError && (
-              <div className="rcl-message-quick-state">
-                <FaComments />
-                <strong>Messages are taking a second.</strong>
-                <button type="button" onClick={() => void load()}>Try again</button>
-              </div>
-            )}
-
-            {!loading && !loadError && visible.map((item) => (
-              <Link key={item.id} href={`/messages/${item.id}`} onClick={() => setOpen(false)} className={`rcl-message-quick-item ${item.unread ? 'unread' : ''}`}>
-                <span className="rcl-message-quick-avatar">
-                  {item.isGroup ? <FaUsers /> : <ProfileAvatarMedia src={item.avatarUrl} alt={item.title} className="h-full w-full rounded-full object-cover" />}
-                  {item.unread > 0 && <i />}
-                </span>
-                <span className="rcl-message-quick-copy">
-                  <span><strong>{item.title}</strong><time>{formatQuickTime(item.updatedAt)}</time></span>
-                  <small>{item.lastSenderIsMe && item.preview ? 'You: ' : ''}{item.preview || (item.isGroup ? `${item.memberCount} members` : 'Start the conversation')}</small>
-                </span>
-                {item.unread > 0 && <b className="rcl-message-quick-count">{item.unread > 99 ? '99+' : item.unread}</b>}
-              </Link>
-            ))}
-
-            {!loading && !loadError && visible.length === 0 && (
-              <div className="rcl-message-quick-state">
-                <FaComments />
-                <strong>{query ? 'No matching conversations' : showUnreadOnly ? 'You’re caught up' : 'No conversations yet'}</strong>
-                <p>{query ? 'Try another name or phrase.' : showUnreadOnly ? 'No unread messages right now.' : 'Start a conversation with someone in RCH.'}</p>
-              </div>
-            )}
-          </div>
-
-          <footer className="rcl-message-quick-footer">
-            <Link href="/messages" onClick={() => setOpen(false)}>
-              See all in Messages <FaArrowRight />
-            </Link>
-          </footer>
-        </section>
+              <span>Messages stay available from the top bar.</span>
+            </footer>
+          </section>
+        </>
       )}
     </div>
   );
