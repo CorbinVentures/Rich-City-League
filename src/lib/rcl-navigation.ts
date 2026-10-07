@@ -1,6 +1,6 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaCalendarDays, FaChartSimple,
-   FaCompass, FaCrown, FaFilm, FaGear, FaGlobe, FaHandshake, FaHouse, FaListOl,
+  FaCompass, FaCrown, FaFilm, FaGear, FaGlobe, FaHandshake, FaHouse, FaListOl,
   FaLocationDot, FaMedal, FaNewspaper, FaPeopleGroup, FaPlay, FaPlus,
   FaShirt, FaTrophy, FaUser, FaUsers
 } from 'react-icons/fa6';
