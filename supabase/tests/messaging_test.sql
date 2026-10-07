@@ -214,9 +214,11 @@ select is(
   'deleted message content is masked in the inbox preview'
 );
 
+set role postgres;
 insert into public.blocks (blocker_id, blocked_id)
-values (auth.uid(), '10101010-1010-4010-8010-101010101010');
+values ('20202020-2020-4020-8020-202020202020', '10101010-1010-4010-8010-101010101010');
 
+set role authenticated;
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
 
 select throws_ok($blocked_direct$
@@ -236,10 +238,13 @@ select throws_ok($blocked_group$
 $blocked_group$, 'P0001', 'One or more selected members are unavailable',
   'blocking a member prevents adding them to a new group conversation');
 
-select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020', true);
+set role postgres;
 delete from public.blocks
-where blocker_id = auth.uid()
+where blocker_id = '20202020-2020-4020-8020-202020202020'
   and blocked_id = '10101010-1010-4010-8010-101010101010';
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020', true);
 update public.profiles set message_policy = 'nobody' where id = auth.uid();
 
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
