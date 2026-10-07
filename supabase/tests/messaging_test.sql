@@ -1,6 +1,6 @@
 begin;
 
-select plan(20);
+select plan(21);
 
 set role postgres;
 
@@ -222,14 +222,22 @@ values (auth.uid(), '10101010-1010-4010-8010-101010101010');
 
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
 
-select throws_ok($$
+select throws_ok($
   insert into public.messages (conversation_id, sender_id, body)
   values (
     current_setting('test.messaging_direct_id')::uuid,
     auth.uid(),
     'Blocked message'
   )
-$$, '42501', null, 'blocking a member prevents new direct messages');
+$, '42501', null, 'blocking a member prevents new direct messages');
+
+select throws_ok($blocked_group$
+  select public.start_group_conversation(
+    array['20202020-2020-4020-8020-202020202020'::uuid,'30303030-3030-4030-8030-303030303030'::uuid],
+    'Blocked group'
+  )
+$blocked_group$, 'P0001', 'One or more selected members are unavailable',
+  'blocking a member prevents adding them to a new group conversation');
 
 select set_config('request.jwt.claim.sub', '20202020-2020-4020-8020-202020202020', true);
 delete from public.blocks
