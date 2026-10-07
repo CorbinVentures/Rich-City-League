@@ -198,10 +198,7 @@ $$, 'a member can remove their own reaction');
 select set_config('request.jwt.claim.sub', '10101010-1010-4010-8010-101010101010', true);
 
 update public.messages
-set body = 'Message removed',
-    attachment_url = null,
-    reply_to_id = null,
-    deleted_at = now()
+set deleted_at = now()
 where id = current_setting('test.messaging_message_id')::uuid
   and sender_id = auth.uid();
 
