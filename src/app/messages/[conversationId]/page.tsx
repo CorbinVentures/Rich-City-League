@@ -1023,29 +1023,37 @@ export default function ConversationPage() {
             <aside className="rcl-thread-info">
               <header>
                 <button type="button" onClick={() => setShowInfo(false)} aria-label="Close details"><FiX /></button>
-                <div className="rcl-thread-info-avatar">{conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}</div>
+                <div className="rcl-thread-info-avatar">
+                  {conversation.conversation_type === 'direct' ? <ProfileAvatarMedia src={peer?.avatar_url} alt={displayName(peer)} className="h-full w-full object-cover" /> : <FiUsers />}
+                  {peer && onlineIds.includes(peer.id) && <i />}
+                </div>
                 <h2>{conversationTitle}</h2>
-                <p>{presenceText}</p>
+                {peer?.username ? <p>@{peer.username}</p> : <p>{conversation.conversation_type === 'group' ? `${members.length} members` : presenceText}</p>}
+                {conversation.conversation_type === 'direct' && <span className="rcl-thread-info-presence">{presenceText}</span>}
               </header>
 
-              <div className="rcl-thread-info-actions">
-                <button type="button" onClick={() => { setShowInfo(false); setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''}><FiSearch /><span>Search</span></button>
+              <div className={conversation.conversation_type === 'direct' ? 'rcl-thread-info-actions direct' : 'rcl-thread-info-actions'}>
+                {conversation.conversation_type === 'direct' && peer && <>
+                  <button type="button" onClick={() => startDirectCall('audio')}><FiPhone /><span>Call</span></button>
+                  <button type="button" onClick={() => startDirectCall('video')}><FiVideo /><span>Video</span></button>
+                </>}
                 <button type="button" onClick={() => void savePreference({ is_pinned: !preference.is_pinned })} className={preference.is_pinned ? 'active' : ''}><FiStar /><span>{preference.is_pinned ? 'Pinned' : 'Pin'}</span></button>
                 <button type="button" onClick={() => void savePreference({ muted_until: muted ? null : '2099-12-31T23:59:59.000Z' })} className={muted ? 'active' : ''}><FiBellOff /><span>{muted ? 'Muted' : 'Mute'}</span></button>
                 <button type="button" onClick={() => void savePreference({ archived_at: preference.archived_at ? null : new Date().toISOString() })} className={preference.archived_at ? 'active' : ''}><FiArchive /><span>{preference.archived_at ? 'Archived' : 'Archive'}</span></button>
               </div>
 
-              {peer && <Link href={`/social/profile/${peer.id}`} className="rcl-thread-profile-link"><FiUser /><span>View basketball profile</span></Link>}
+              <button type="button" className="rcl-thread-search-link" onClick={() => { setShowInfo(false); setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }}><FiSearch /><span>Search this conversation</span></button>
 
-              <section className="rcl-thread-members">
+              {peer && <Link href={'/social/profile/' + peer.id} className="rcl-thread-profile-link"><FiUser /><span><strong>View Basketball Profile</strong><small>Stats, teams, posts, and more</small></span><b>›</b></Link>}
+
+              {conversation.conversation_type !== 'direct' && <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
-                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/social/profile/me' : `/social/profile/${member.profile_id}`}>
+                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/social/profile/me' : '/social/profile/' + member.profile_id}>
                   <span><ProfileAvatarMedia src={member.profile?.avatar_url} alt={displayName(member.profile)} className="h-full w-full object-cover" /></span>
                   <div><strong>{member.profile_id === user?.id ? 'You' : displayName(member.profile)}</strong><small>{member.role === 'admin' ? 'Conversation admin' : member.profile?.role ?? 'Member'}</small></div>
                   {onlineIds.includes(member.profile_id) && <i />}
                 </Link>)}
-              </section>
-
+              </section>}
               <section className="rcl-thread-shared">
                 <div><strong>Shared in this chat</strong><span>{sharedMedia.length + sharedLinks.length}</span></div>
                 <div className="rcl-thread-shared-tabs" role="tablist" aria-label="Shared conversation content">
