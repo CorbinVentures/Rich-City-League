@@ -1,6 +1,6 @@
 begin;
 
-select plan(10);
+select plan(12);
 
 set role postgres;
 
@@ -67,6 +67,15 @@ select is(
   'the requested media kind is stored'
 );
 
+select throws_ok($
+  select public.start_message_call(
+    current_setting('test.call_conversation_id')::uuid,
+    '42424242-4242-4424-8424-424242424242',
+    'audio'
+  )
+$, 'P0001', 'One of you is already on a call',
+  'a second simultaneous call is rejected');
+
 select set_config('request.jwt.claim.sub', '43434343-4343-4434-8434-434343434343', true);
 
 select is(
@@ -115,6 +124,23 @@ select ok(
   public.finish_message_call(current_setting('test.message_call_id')::uuid, 'ended', 'hangup'),
   'a participant can end the call'
 );
+
+set role postgres;
+insert into public.blocks (blocker_id, blocked_id)
+values ('42424242-4242-4424-8424-424242424242', '41414141-4141-4414-8414-414141414141')
+on conflict do nothing;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '41414141-4141-4414-8414-414141414141', true);
+
+select throws_ok($
+  select public.start_message_call(
+    current_setting('test.call_conversation_id')::uuid,
+    '42424242-4242-4424-8424-424242424242',
+    'audio'
+  )
+$, 'P0001', 'This member is not available for calls',
+  'blocking a member prevents new calls');
 
 select * from finish();
 rollback;
