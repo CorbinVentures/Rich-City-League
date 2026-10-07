@@ -3007,3 +3007,232 @@
     min-height: 78px;
   }
 }
+
+
+/* ---------- Messaging command-center enhancements ---------- */
+.rcl-inbox-toolbar-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 1;
+}
+
+.rcl-mark-read-button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border: 1px solid #D8E4F0;
+  border-radius: 11px;
+  background: #F8FBFE;
+  padding: 0 11px;
+  color: #45698F;
+  font-size: 9px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.rcl-mark-read-button:hover {
+  border-color: #BFD6F5;
+  background: #EEF5FF;
+  color: #2563EB;
+}
+
+.rcl-mark-read-button:disabled {
+  opacity: .55;
+}
+
+.rcl-inbox-sort {
+  position: relative;
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  border: 1px solid #D8E4F0;
+  border-radius: 11px;
+  background: #fff;
+  padding: 0 9px;
+}
+
+.rcl-inbox-sort > span {
+  color: #8A99AA;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.rcl-inbox-sort select {
+  min-height: 34px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #2E4E72;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.rcl-thread-main {
+  position: relative;
+}
+
+.rcl-thread-header > button.active {
+  background: #EAF2FF;
+  color: #2563EB;
+}
+
+.rcl-thread-searchbar {
+  position: absolute;
+  z-index: 18;
+  top: 76px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #CBDCEB;
+  border-radius: 14px;
+  background: rgba(255,255,255,.98);
+  padding: 6px 7px 6px 13px;
+  box-shadow: 0 14px 34px rgba(15,37,71,.14);
+  backdrop-filter: blur(12px);
+}
+
+.rcl-thread-searchbar > svg {
+  flex: 0 0 auto;
+  color: #64809F;
+}
+
+.rcl-thread-searchbar input {
+  min-width: 0;
+  min-height: 32px !important;
+  flex: 1;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  color: #0F2547 !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
+}
+
+.rcl-thread-searchbar > span {
+  flex: 0 0 auto;
+  min-width: 36px;
+  color: #8A99AA;
+  font-size: 9px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.rcl-thread-searchbar > button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  flex: 0 0 31px;
+  border: 0;
+  border-radius: 9px;
+  background: #F1F5F9;
+  color: #59718B;
+  font-size: 12px;
+}
+
+.rcl-thread-searchbar > button:hover:not(:disabled) {
+  background: #E5EFFC;
+  color: #2563EB;
+}
+
+.rcl-thread-searchbar > button:disabled {
+  opacity: .35;
+}
+
+.rcl-chat-message.search-hit .rcl-message-bubble {
+  outline: 3px solid rgba(59,130,246,.22);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 1px rgba(59,130,246,.22), 0 10px 24px rgba(37,99,235,.12);
+}
+
+.rcl-composer-hint {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .rcl-inbox-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .rcl-inbox-toolbar-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .rcl-inbox-toolbar-actions .rcl-message-search {
+    flex: 1;
+    width: auto;
+  }
+
+  .rcl-mark-read-button span,
+  .rcl-inbox-sort > span {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .rcl-inbox-toolbar-actions {
+    display: grid;
+    grid-template-columns: auto auto minmax(0,1fr);
+    gap: 6px;
+  }
+
+  .rcl-mark-read-button {
+    width: 40px;
+    min-height: 42px;
+    padding: 0;
+  }
+
+  .rcl-inbox-sort {
+    min-height: 42px;
+    padding-inline: 7px;
+  }
+
+  .rcl-inbox-sort select {
+    max-width: 92px;
+    font-size: 9px;
+  }
+
+  .rcl-thread-searchbar {
+    top: 66px;
+    left: 8px;
+    right: 8px;
+    min-height: 48px;
+    border-radius: 12px;
+    padding-left: 11px;
+  }
+
+  .rcl-thread-searchbar input {
+    font-size: 16px !important;
+  }
+
+  .rcl-thread-searchbar > span {
+    min-width: 32px;
+  }
+}
+
+@media (max-width: 390px) {
+  .rcl-inbox-toolbar-actions {
+    grid-template-columns: auto minmax(0,1fr);
+  }
+
+  .rcl-inbox-sort {
+    display: none;
+  }
+}

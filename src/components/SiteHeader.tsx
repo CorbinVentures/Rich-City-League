@@ -46,12 +46,18 @@ export function SiteHeader(){
       }
     };
     void Promise.all([loadNotifications(),loadMessages()]);
+    const refreshNotifications=()=>void loadNotifications();
+    window.addEventListener('rcl:notification-state-changed',refreshNotifications);
     const channel=supabase.channel('rcl_header_activity')
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`recipient_id=eq.${user.id}`},()=>void loadNotifications())
+      .on('postgres_changes',{event:'*',schema:'public',table:'notifications',filter:`recipient_id=eq.${user.id}`},()=>void loadNotifications())
       .on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>void loadMessages())
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversation_members',filter:`profile_id=eq.${user.id}`},()=>void loadMessages())
+      .on('postgres_changes',{event:'*',schema:'public',table:'conversation_preferences',filter:`profile_id=eq.${user.id}`},()=>void loadMessages())
       .subscribe();
-    return()=>{void supabase.removeChannel(channel);};
+    return()=>{
+      window.removeEventListener('rcl:notification-state-changed',refreshNotifications);
+      void supabase.removeChannel(channel);
+    };
   },[user,supabase]);
 
   useEffect(()=>setMenuOpen(false),[pathname]);

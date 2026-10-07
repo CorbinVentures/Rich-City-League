@@ -17,6 +17,7 @@ import {
   FiMoreHorizontal,
   FiCornerUpLeft,
   FiSend,
+  FiSearch,
   FiSmile,
   FiStar,
   FiTrash2,
@@ -73,6 +74,19 @@ function isVideoAttachment(url: string | null) {
   return Boolean(url && /\.(mp4|webm|mov|ogv)(?:$|\?)/i.test(url));
 }
 
+function mediaStoragePath(url: string | null) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const marker = '/storage/v1/object/public/media/';
+    const index = parsed.pathname.indexOf(marker);
+    if (index < 0) return null;
+    return decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
 function timeLabel(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
@@ -115,14 +129,21 @@ export default function ConversationPage() {
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [showJump, setShowJump] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [threadSearch, setThreadSearch] = useState('');
+  const [searchCursor, setSearchCursor] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<any>(null);
   const typingTimers = useRef<Record<string, number>>({});
   const lastTypingSent = useRef(0);
+  const messageIdsRef = useRef<string[]>([]);
+  const meNameRef = useRef('RCH member');
 
   const me = members.find((member) => member.profile_id === user?.id);
   const others = members.filter((member) => member.profile_id !== user?.id);
@@ -131,14 +152,77 @@ export default function ConversationPage() {
     ? displayName(peer)
     : conversation?.title ?? 'RCH conversation';
   const muted = Boolean(preference.muted_until && new Date(preference.muted_until).getTime() > Date.now());
+  const draftKey = user ? `rch-message-draft:${user.id}:${conversationId}` : '';
 
   const memberMap = useMemo(() => new Map(members.map((member) => [member.profile_id, member.profile])), [members]);
   const messageMap = useMemo(() => new Map(messages.map((message) => [message.id, message])), [messages]);
+  const searchMatches = useMemo(() => {
+    const query = threadSearch.trim().toLowerCase();
+    if (!query) return [];
+    return messages.filter((message) => !message.deleted_at && message.body.toLowerCase().includes(query));
+  }, [messages, threadSearch]);
+  const activeSearchId = searchMatches.length
+    ? searchMatches[((searchCursor % searchMatches.length) + searchMatches.length) % searchMatches.length].id
+    : null;
+
+  useEffect(() => {
+    messageIdsRef.current = messages.map((message) => message.id);
+  }, [messages]);
+
+  useEffect(() => {
+    meNameRef.current = displayName(me?.profile);
+  }, [me?.profile]);
+
+  useEffect(() => {
+    if (!draftKey || typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(draftKey);
+    if (saved) setBody((current) => current || saved);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey || editing || typeof window === 'undefined') return;
+    const timer = window.setTimeout(() => {
+      if (body.trim()) window.localStorage.setItem(draftKey, body);
+      else window.localStorage.removeItem(draftKey);
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [body, draftKey, editing]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+      const isTypingTarget = tagName === 'input' || tagName === 'textarea' || Boolean(target?.isContentEditable);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        setSearchOpen(true);
+        window.requestAnimationFrame(() => searchInputRef.current?.focus());
+        return;
+      }
+      if (event.key === 'Escape') {
+        setReactionOpen(null);
+        setMessageMenu(null);
+        if (searchOpen) {
+          setSearchOpen(false);
+          setThreadSearch('');
+        } else if (!isTypingTarget) {
+          setShowInfo(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [searchOpen]);
 
   const markRead = useCallback(async () => {
     if (!db || !user) return;
-    const readAt = new Date().toISOString();
-    await db.from('conversation_members').update({ last_read_at: readAt }).eq('conversation_id', conversationId).eq('profile_id', user.id);
+    if (typeof document !== 'undefined' && (document.visibilityState !== 'visible' || !document.hasFocus())) return;
+    const result = await db.rpc('mark_conversation_read', { target_conversation_id: conversationId });
+    if (result.error) {
+      setError((current) => current || 'Unable to update read status.');
+      return;
+    }
+    const readAt = typeof result.data === 'string' ? result.data : new Date().toISOString();
     setMembers((current) => current.map((member) => member.profile_id === user.id ? { ...member, last_read_at: readAt } : member));
   }, [conversationId, db, user]);
 
@@ -162,7 +246,11 @@ export default function ConversationPage() {
       return;
     }
     const result = await db.from('message_reactions').select('message_id,profile_id,reaction_key,created_at').in('message_id', messageIds);
-    if (!result.error) setReactions((result.data ?? []) as Reaction[]);
+    if (result.error) {
+      setError((current) => current || 'Unable to refresh message reactions.');
+      return;
+    }
+    setReactions((result.data ?? []) as Reaction[]);
   }, [db]);
 
   const load = useCallback(async (initial = true) => {
@@ -200,6 +288,19 @@ export default function ConversationPage() {
   }, [load]);
 
   useEffect(() => {
+    if (!conversation) return;
+    const markWhenActive = () => {
+      if (document.visibilityState === 'visible' && document.hasFocus()) void markRead();
+    };
+    document.addEventListener('visibilitychange', markWhenActive);
+    window.addEventListener('focus', markWhenActive);
+    return () => {
+      document.removeEventListener('visibilitychange', markWhenActive);
+      window.removeEventListener('focus', markWhenActive);
+    };
+  }, [conversation, markRead]);
+
+  useEffect(() => {
     if (!supabase || !user || !conversation) return;
 
     const channel = supabase.channel(`rch-conversation-${conversationId}`, {
@@ -219,7 +320,7 @@ export default function ConversationPage() {
         setMessages((current) => current.map((message) => message.id === next.id ? next : message));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, () => {
-        void loadReactions(messages.map((message) => message.id));
+        void loadReactions(messageIdsRef.current);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'conversation_members', filter: `conversation_id=eq.${conversationId}` }, () => {
         void loadMembers();
@@ -242,7 +343,7 @@ export default function ConversationPage() {
       })
       .subscribe((status: string) => {
         if (status === 'SUBSCRIBED') {
-          void channel.track({ profile_id: user.id, name: displayName(me?.profile), online_at: new Date().toISOString() });
+          void channel.track({ profile_id: user.id, name: meNameRef.current, online_at: new Date().toISOString() });
         }
       });
 
@@ -252,7 +353,7 @@ export default function ConversationPage() {
       typingTimers.current = {};
       void supabase.removeChannel(channel);
     };
-  }, [conversation, conversationId, loadMembers, loadReactions, markRead, me?.profile, messages, supabase, user]);
+  }, [conversation, conversationId, loadMembers, loadReactions, markRead, supabase, user]);
 
   useEffect(() => {
     let active = true;
@@ -269,6 +370,11 @@ export default function ConversationPage() {
     setLoadingOlder(true);
     const oldest = messages[0].created_at;
     const result = await db.from('messages').select('id,conversation_id,sender_id,body,attachment_url,reply_to_id,deleted_at,edited_at,created_at').eq('conversation_id', conversationId).lt('created_at', oldest).order('created_at', { ascending: false }).limit(PAGE_SIZE);
+    if (result.error) {
+      setError(result.error.message || 'Unable to load earlier messages.');
+      setLoadingOlder(false);
+      return;
+    }
     const older = ((result.data ?? []) as Message[]).reverse();
     setMessages((current) => [...older, ...current]);
     setHasOlder(older.length === PAGE_SIZE);
@@ -298,7 +404,7 @@ export default function ConversationPage() {
       cacheControl: '3600',
     });
     if (uploaded.error) throw uploaded.error;
-    return supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
+    return { path, url: supabase.storage.from('media').getPublicUrl(path).data.publicUrl };
   };
 
   const resetComposer = () => {
@@ -307,6 +413,15 @@ export default function ConversationPage() {
     setEditing(null);
     setAttachmentFile(null);
     setAttachmentPreview('');
+  };
+
+  const restoreDraftAfterEdit = () => {
+    const saved = draftKey && typeof window !== 'undefined' ? window.localStorage.getItem(draftKey) ?? '' : '';
+    setEditing(null);
+    setReplyTo(null);
+    setAttachmentFile(null);
+    setAttachmentPreview('');
+    setBody(saved);
   };
 
   const send = async (event: React.FormEvent) => {
@@ -319,7 +434,7 @@ export default function ConversationPage() {
       setSending(true);
       const result = await db.from('messages').update({ body: trimmed, edited_at: new Date().toISOString() }).eq('id', editing.id).eq('sender_id', user.id);
       if (result.error) setError(result.error.message);
-      else resetComposer();
+      else restoreDraftAfterEdit();
       setSending(false);
       return;
     }
@@ -328,23 +443,29 @@ export default function ConversationPage() {
     setSending(true);
     setError('');
 
+    let uploadedPath: string | null = null;
     try {
-      const attachmentUrl = attachmentFile ? await uploadAttachment() : null;
+      const attachment = attachmentFile ? await uploadAttachment() : null;
+      uploadedPath = attachment?.path ?? null;
       const fallbackBody = attachmentFile ? (attachmentFile.type.startsWith('video/') ? 'Shared a video' : 'Shared a photo') : '';
       const result = await db.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
         body: trimmed || fallbackBody,
-        attachment_url: attachmentUrl,
+        attachment_url: attachment?.url ?? null,
         reply_to_id: replyTo?.id ?? null,
       }).select('id,conversation_id,sender_id,body,attachment_url,reply_to_id,deleted_at,edited_at,created_at').single();
 
       if (result.error) throw result.error;
       const sent = result.data as Message;
       setMessages((current) => current.some((message) => message.id === sent.id) ? current : [...current, sent]);
+      if (draftKey && typeof window !== 'undefined') window.localStorage.removeItem(draftKey);
       resetComposer();
       window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
     } catch (sendError) {
+      if (uploadedPath && supabase) {
+        await supabase.storage.from('media').remove([uploadedPath]);
+      }
       setError(sendError instanceof Error ? sendError.message : 'Unable to send that message.');
     }
 
@@ -367,20 +488,36 @@ export default function ConversationPage() {
   const toggleReaction = async (messageId: string, reactionKey: string) => {
     if (!db || !user) return;
     const exists = reactions.some((reaction) => reaction.message_id === messageId && reaction.profile_id === user.id && reaction.reaction_key === reactionKey);
-    if (exists) {
-      await db.from('message_reactions').delete().eq('message_id', messageId).eq('profile_id', user.id).eq('reaction_key', reactionKey);
-    } else {
-      await db.from('message_reactions').insert({ message_id: messageId, profile_id: user.id, reaction_key: reactionKey });
+    const result = exists
+      ? await db.from('message_reactions').delete().eq('message_id', messageId).eq('profile_id', user.id).eq('reaction_key', reactionKey)
+      : await db.from('message_reactions').insert({ message_id: messageId, profile_id: user.id, reaction_key: reactionKey });
+    if (result.error) {
+      setError(result.error.message || 'Unable to update that reaction.');
+      return;
     }
     setReactionOpen(null);
-    await loadReactions(messages.map((message) => message.id));
+    await loadReactions(messageIdsRef.current);
   };
 
   const deleteMessage = async (message: Message) => {
     if (!db || !user || message.sender_id !== user.id) return;
-    const result = await db.from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', message.id).eq('sender_id', user.id);
-    if (result.error) setError(result.error.message);
+    const attachmentPath = mediaStoragePath(message.attachment_url);
+    const result = await db.from('messages').update({
+      deleted_at: new Date().toISOString(),
+    }).eq('id', message.id).eq('sender_id', user.id);
+    if (result.error) {
+      setError(result.error.message);
+      return;
+    }
+    if (attachmentPath && supabase) {
+      const removed = await supabase.storage.from('media').remove([attachmentPath]);
+      if (removed.error) setError('Message removed, but its uploaded media could not be cleaned up.');
+    }
     setMessageMenu(null);
+  };
+
+  const focusComposer = () => {
+    window.requestAnimationFrame(() => composerRef.current?.focus());
   };
 
   const editMessage = (message: Message) => {
@@ -389,6 +526,7 @@ export default function ConversationPage() {
     setAttachmentFile(null);
     setBody(message.body);
     setMessageMenu(null);
+    focusComposer();
   };
 
   const savePreference = async (patch: Partial<Preference>) => {
@@ -408,6 +546,18 @@ export default function ConversationPage() {
     if (!node) return;
     setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 360);
   };
+
+  const jumpSearch = (direction: number) => {
+    if (!searchMatches.length) return;
+    const next = ((searchCursor + direction) % searchMatches.length + searchMatches.length) % searchMatches.length;
+    setSearchCursor(next);
+    const target = searchMatches[next];
+    window.requestAnimationFrame(() => document.getElementById(`rch-message-${target.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  };
+
+  useEffect(() => {
+    setSearchCursor(searchMatches.length ? searchMatches.length - 1 : 0);
+  }, [threadSearch, searchMatches.length]);
 
   const presenceText = (() => {
     if (!conversation) return '';
@@ -461,6 +611,7 @@ export default function ConversationPage() {
         <div className="rcl-thread-topline">
           <Link href="/messages"><FiArrowLeft /> Messages</Link>
           <div>
+            <button type="button" onClick={() => { setSearchOpen((value) => !value); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search this conversation"><FiSearch /></button>
             <button type="button" onClick={() => void savePreference({ is_pinned: !preference.is_pinned })} className={preference.is_pinned ? 'active' : ''} aria-label={preference.is_pinned ? 'Unpin conversation' : 'Pin conversation'}><FiStar /></button>
             <button type="button" onClick={() => void savePreference({ muted_until: muted ? null : '2099-12-31T23:59:59.000Z' })} className={muted ? 'active' : ''} aria-label={muted ? 'Unmute conversation' : 'Mute conversation'}><FiBellOff /></button>
             <button type="button" onClick={() => setShowInfo((value) => !value)} className={showInfo ? 'active' : ''} aria-label="Conversation details"><FiInfo /></button>
@@ -481,8 +632,26 @@ export default function ConversationPage() {
                   <h1>{conversationTitle}</h1>
                   <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
+                <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search messages"><FiSearch /></button>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
+
+              {searchOpen && (
+                <div className="rcl-thread-searchbar" role="search">
+                  <FiSearch />
+                  <input
+                    ref={searchInputRef}
+                    value={threadSearch}
+                    onChange={(event) => setThreadSearch(event.target.value)}
+                    placeholder="Search this conversation"
+                    aria-label="Search this conversation"
+                  />
+                  <span>{threadSearch.trim() ? `${searchMatches.length ? searchCursor + 1 : 0}/${searchMatches.length}` : '⌘F'}</span>
+                  <button type="button" onClick={() => jumpSearch(-1)} disabled={!searchMatches.length} aria-label="Previous match">↑</button>
+                  <button type="button" onClick={() => jumpSearch(1)} disabled={!searchMatches.length} aria-label="Next match">↓</button>
+                  <button type="button" onClick={() => { setSearchOpen(false); setThreadSearch(''); }} aria-label="Close search"><FiX /></button>
+                </div>
+              )}
 
               <div className="rcl-thread-scroll" ref={scrollRef} onScroll={onScroll}>
                 {hasOlder && <button type="button" onClick={() => void loadOlder()} disabled={loadingOlder} className="rcl-load-older">{loadingOlder ? 'Loading…' : 'Load earlier messages'}</button>}
@@ -507,7 +676,7 @@ export default function ConversationPage() {
 
                   return <div key={message.id}>
                     {newDay && <div className="rcl-message-day"><span>{dateLabel(message.created_at)}</span></div>}
-                    <article className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''}`}>
+                    <article id={`rch-message-${message.id}`} className={`rcl-chat-message ${mine ? 'mine' : 'theirs'} ${grouped ? 'grouped' : ''} ${activeSearchId === message.id ? 'search-hit' : ''}`}>
                       {!mine && !grouped && <div className="rcl-chat-avatar"><ProfileAvatarMedia src={sender?.avatar_url} alt={displayName(sender)} className="h-full w-full object-cover" /></div>}
                       {!mine && grouped && <div className="rcl-chat-avatar-spacer" />}
 
@@ -518,7 +687,7 @@ export default function ConversationPage() {
                           <div className="rcl-message-deleted">Message removed</div>
                         ) : (
                           <>
-                            {reply && <button type="button" className="rcl-reply-quote"><FiCornerUpLeft /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
+                            {reply && <button type="button" className="rcl-reply-quote" onClick={() => document.getElementById(`rch-message-${reply.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} aria-label="Jump to replied message"><FiCornerUpLeft /><span><strong>{reply.sender_id === user?.id ? 'You' : displayName(memberMap.get(reply.sender_id))}</strong>{reply.deleted_at ? 'Message removed' : reply.body}</span></button>}
 
                             <div className="rcl-message-bubble">
                               {message.attachment_url && (
@@ -532,7 +701,7 @@ export default function ConversationPage() {
                             </div>
 
                             <div className="rcl-message-actions">
-                              <button type="button" onClick={() => setReplyTo(message)} aria-label="Reply"><FiCornerUpLeft /></button>
+                              <button type="button" onClick={() => { setReplyTo(message); setEditing(null); focusComposer(); }} aria-label="Reply"><FiCornerUpLeft /></button>
                               <button type="button" onClick={() => setReactionOpen(reactionOpen === message.id ? null : message.id)} aria-label="React"><FiSmile /></button>
                               {mine && <button type="button" onClick={() => setMessageMenu(messageMenu === message.id ? null : message.id)} aria-label="More message actions"><FiMoreHorizontal /></button>}
                             </div>
@@ -579,7 +748,7 @@ export default function ConversationPage() {
                   <div className="rcl-composer-context">
                     <span>{editing ? <FiEdit2 /> : <FiCornerUpLeft />}</span>
                     <div><strong>{editing ? 'Editing message' : `Replying to ${replyTo?.sender_id === user?.id ? 'yourself' : displayName(memberMap.get(replyTo?.sender_id ?? ''))}`}</strong><p>{editing?.body ?? replyTo?.body}</p></div>
-                    <button type="button" onClick={() => { setReplyTo(null); if (editing) { setEditing(null); setBody(''); } }} aria-label="Cancel"><FiX /></button>
+                    <button type="button" onClick={() => { setReplyTo(null); if (editing) restoreDraftAfterEdit(); }} aria-label="Cancel"><FiX /></button>
                   </div>
                 )}
 
@@ -605,6 +774,7 @@ export default function ConversationPage() {
                   </>}
 
                   <textarea
+                    ref={composerRef}
                     value={body}
                     onChange={(event) => broadcastTyping(event.target.value)}
                     onKeyDown={(event) => {
@@ -621,7 +791,7 @@ export default function ConversationPage() {
 
                   <button type="submit" disabled={sending || (!body.trim() && !attachmentFile)} className="rcl-send-button" aria-label={editing ? 'Save edit' : 'Send message'}><FiSend /></button>
                 </div>
-                <small className="rcl-composer-hint">Enter to send · Shift + Enter for a new line</small>
+                <small className="rcl-composer-hint">{!editing && body.trim() ? 'Draft saved on this device · ' : ''}Enter to send · Shift + Enter for a new line{body.length > 3600 ? ` · ${4000 - body.length} characters left` : ''}</small>
               </form>
             </section>
 
@@ -641,7 +811,7 @@ export default function ConversationPage() {
 
               <section className="rcl-thread-members">
                 <div><strong>People</strong><span>{members.length}</span></div>
-                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/profile' : `/social/profile/${member.profile_id}`}>
+                {members.map((member) => <Link key={member.profile_id} href={member.profile_id === user?.id ? '/social/profile/me' : `/social/profile/${member.profile_id}`}>
                   <span><ProfileAvatarMedia src={member.profile?.avatar_url} alt={displayName(member.profile)} className="h-full w-full object-cover" /></span>
                   <div><strong>{member.profile_id === user?.id ? 'You' : displayName(member.profile)}</strong><small>{member.role === 'admin' ? 'Conversation admin' : member.profile?.role ?? 'Member'}</small></div>
                   {onlineIds.includes(member.profile_id) && <i />}
