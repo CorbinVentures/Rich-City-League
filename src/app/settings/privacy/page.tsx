@@ -29,6 +29,7 @@ export default function PrivacyCenter() {
       return;
     }
     let active = true;
+    setPolicyLoading(true);
     void (db as any).from('profiles').select('message_policy').eq('id', user.id).maybeSingle().then(({ data, error }: { data?: { message_policy?: string } | null; error?: { message?: string } | null }) => {
       if (!active) return;
       if (error) setMessage(error.message || 'Unable to load messaging privacy.');
