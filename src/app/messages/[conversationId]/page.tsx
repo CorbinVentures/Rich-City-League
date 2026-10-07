@@ -15,6 +15,7 @@ import {
   FiInfo,
   FiMessageCircle,
   FiMoreHorizontal,
+  FiPhone,
   FiCornerUpLeft,
   FiSend,
   FiSearch,
@@ -559,6 +560,19 @@ export default function ConversationPage() {
     setSearchCursor(searchMatches.length ? searchMatches.length - 1 : 0);
   }, [threadSearch, searchMatches.length]);
 
+  const startDirectCall = (kind: 'audio' | 'video') => {
+    if (!peer || conversation?.conversation_type !== 'direct') return;
+    window.dispatchEvent(new CustomEvent('rch:start-message-call', {
+      detail: {
+        conversationId,
+        calleeId: peer.id,
+        kind,
+        peerName: displayName(peer),
+        peerAvatar: peer.avatar_url,
+      },
+    }));
+  };
+
   const presenceText = (() => {
     if (!conversation) return '';
     if (conversation.conversation_type === 'direct') {
@@ -632,6 +646,10 @@ export default function ConversationPage() {
                   <h1>{conversationTitle}</h1>
                   <p>{typingNames.length ? `${typingNames.join(', ')} ${typingNames.length === 1 ? 'is' : 'are'} typing…` : presenceText}</p>
                 </div>
+                {conversation.conversation_type === 'direct' && peer && <>
+                  <button type="button" onClick={() => startDirectCall('audio')} aria-label="Start voice call" title="Voice call"><FiPhone /></button>
+                  <button type="button" onClick={() => startDirectCall('video')} aria-label="Start video call" title="Video call"><FiVideo /></button>
+                </>}
                 <button type="button" onClick={() => { setSearchOpen(true); window.requestAnimationFrame(() => searchInputRef.current?.focus()); }} className={searchOpen ? 'active' : ''} aria-label="Search messages"><FiSearch /></button>
                 <button type="button" onClick={() => setShowInfo((value) => !value)} aria-label="Conversation information"><FiMoreHorizontal /></button>
               </header>
