@@ -727,7 +727,7 @@ export default function NetworkHome() {
   }, [posts, stories, runs, currentProfile?.rep, currentProfile?.level]);
 
   return (
-    <main className="rcl-social-world min-h-screen pb-24 lg:pb-0">
+    <main data-rch-launch-pending={loading} className="rcl-social-world min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
       {notice && <div className="fixed left-1/2 top-20 z-[79] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-blue/25 bg-[#071522] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
