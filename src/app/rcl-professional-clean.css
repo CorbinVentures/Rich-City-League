@@ -179,10 +179,6 @@ html body {
   text-transform: none !important;
 }
 
-.rcl-platform-root :where(h1,h2,h3) + p {
-  color: rgba(225,235,242,.58);
-}
-
 .rcl-platform-root :where(button, a)[class*="uppercase"]:not(.rcl-vip-chip),
 .rcl-platform-root :where(button, a)[class*="tracking-widest"]:not(.rcl-vip-chip) {
   letter-spacing: .045em !important;

@@ -25,6 +25,20 @@ describe('sitewide presentation polish', () => {
     expect(css).toContain('.rcl-universal-bottom a span');
   });
 
+  it('prevents legacy dark-theme rules from washing out sitewide body copy', () => {
+    const globals = readFileSync(join(root, 'src/app/globals.css'), 'utf8');
+    const mockup = readFileSync(join(root, 'src/app/rcl-mockup-system.css'), 'utf8');
+    const professional = readFileSync(join(root, 'src/app/rcl-professional-clean.css'), 'utf8');
+    const polish = readFileSync(join(root, 'src/app/rcl-presentation-polish.css'), 'utf8');
+
+    expect(globals).toContain('color-scheme: light;');
+    expect(mockup).not.toContain(':where(p,li,dd,dt) {\n  color:inherit;');
+    expect(professional).not.toContain('color: rgba(225,235,242,.58);');
+    expect(polish).toContain(':where(.rcl-platform-root) :where(p,li,dd,dt,figcaption)');
+    expect(polish).toContain('color: var(--rcl-v3-copy, #64748B);');
+    expect(polish).toContain('opacity: 1;');
+  });
+
   it('keeps shared components friendly to wrapping content', () => {
     const button = readFileSync(join(root, 'src/components/Button.tsx'), 'utf8');
     const card = readFileSync(join(root, 'src/components/Card.tsx'), 'utf8');
