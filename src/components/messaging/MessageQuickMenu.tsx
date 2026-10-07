@@ -163,6 +163,11 @@ export function MessageQuickMenu({
   const groups = items.filter((item) => item.isGroup).length;
   const pinned = items.filter((item) => item.isPinned).length;
 
+  const openComposer = () => {
+    window.dispatchEvent(new Event('rch-open-message-composer'));
+    setOpen(false);
+  };
+
   const filters: Array<{ key: QuickFilter; label: string; count?: number }> = [
     { key: 'all', label: 'Inbox' },
     { key: 'unread', label: 'Unread', count: unreadCount },
@@ -195,7 +200,7 @@ export function MessageQuickMenu({
                 <p>{unreadCount > 0 ? `${unreadCount} unread message${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}</p>
               </div>
               <div className="rcl-message-quick-head-actions">
-                <Link className="rcl-message-quick-compose" href="/messages?compose=1" onClick={() => setOpen(false)} aria-label="Start a new message" title="New message">
+                <Link className="rcl-message-quick-compose" href="/messages?compose=1" onClick={openComposer} aria-label="Start a new message" title="New message">
                   <FaPenToSquare />
                   <span>New</span>
                 </Link>
@@ -282,7 +287,7 @@ export function MessageQuickMenu({
             </div>
 
             <footer className="rcl-message-quick-dock">
-              <Link href="/messages?compose=1" onClick={() => setOpen(false)}>
+              <Link href="/messages?compose=1" onClick={openComposer}>
                 <FaPenToSquare />
                 Start a new message
               </Link>
