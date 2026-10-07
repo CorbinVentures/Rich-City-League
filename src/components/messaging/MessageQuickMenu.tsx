@@ -189,7 +189,7 @@ export function MessageQuickMenu({
               <div>
                 <span>RCH Messages</span>
                 <h2>Messages</h2>
-                <p>{unreadCount > 0 ? `${unreadCount} unread conversation${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}</p>
+                <p>{unreadCount > 0 ? `${unreadCount} unread message${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}</p>
               </div>
               <div className="rcl-message-quick-head-actions">
                 <Link className="rcl-message-quick-compose" href="/messages?compose=1" onClick={() => setOpen(false)} aria-label="Start a new message" title="New message">
