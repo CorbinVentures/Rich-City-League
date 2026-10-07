@@ -1,5 +1,5 @@
 import {
-  FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple, 
+  FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple,
   FaCompass, FaCrown, FaGlobe, FaHandshake, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
   FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUserPlus, FaUsers
 } from 'react-icons/fa6';
