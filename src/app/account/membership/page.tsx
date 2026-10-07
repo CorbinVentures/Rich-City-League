@@ -23,7 +23,8 @@ export default function AccountMembershipPage() {
   const supabase = useMemo(() => getSupabaseClient(true), []);
   const db = supabase as any;
   const [planCode, setPlanCode] = useState<MembershipPlanCode>('free');
-  const [subscription, setSubscription] = useState<Subscription | null>(null);\n  const [earnedPlusUntil, setEarnedPlusUntil] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [earnedPlusUntil, setEarnedPlusUntil] = useState<string | null>(null);
   const [interval, setInterval] = useState<MembershipBillingInterval>('annual');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
