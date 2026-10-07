@@ -984,8 +984,13 @@ export default function ConversationPage() {
 
                 <div className="rcl-composer-row">
                   {!editing && <>
-                    <button type="button" onClick={() => imageInputRef.current?.click()} aria-label="Attach photo"><FiImage /></button>
-                    <button type="button" onClick={() => videoInputRef.current?.click()} aria-label="Attach video"><FiVideo /></button>
+                    <div className="rcl-attachment-menu-wrap">
+                      <button type="button" className={attachmentMenuOpen ? 'rcl-attachment-menu-trigger active' : 'rcl-attachment-menu-trigger'} onClick={() => setAttachmentMenuOpen((value) => !value)} aria-label="Add an attachment" aria-expanded={attachmentMenuOpen}><FiPlus /></button>
+                      {attachmentMenuOpen && <div className="rcl-attachment-menu">
+                        <button type="button" onClick={() => { setAttachmentMenuOpen(false); imageInputRef.current?.click(); }}><FiImage /><span><strong>Photo</strong><small>Share an image</small></span></button>
+                        <button type="button" onClick={() => { setAttachmentMenuOpen(false); videoInputRef.current?.click(); }}><FiVideo /><span><strong>Video</strong><small>Share a clip</small></span></button>
+                      </div>}
+                    </div>
                     <button type="button" disabled={recordingStarting} onClick={() => void startVoiceRecording()} className={recording ? 'recording' : ''} aria-label={recordingStarting ? 'Starting voice recorder' : recording ? 'Stop voice recording' : 'Record voice note'}>{recording ? <FiStopCircle /> : <FiMic />}</button>
                     <input ref={imageInputRef} type="file" accept={SOCIAL_IMAGE_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
                     <input ref={videoInputRef} type="file" accept={SOCIAL_VIDEO_ACCEPT} className="hidden" onChange={(event) => { chooseAttachment(event.target.files?.[0] ?? null); event.currentTarget.value = ''; }} />
