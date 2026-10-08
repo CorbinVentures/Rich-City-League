@@ -80,7 +80,8 @@ export function SiteHeader(){
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
   const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_PRIMARY_NAV_ITEMS;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
-  const profileHref=user?'/social/profile/me':'/auth/sign-up';
+  const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
+  const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
 
   return <>
@@ -94,8 +95,9 @@ export function SiteHeader(){
         {primaryItems.map(item=>{
           const Icon=item.icon;
           const selected=active(item.href);
+          const destination=resolveMemberHref(item.href);
           const create=item.href==='/create';
-          return <Link key={item.href} href={item.href} aria-current={selected?'page':undefined} className={`${selected?'active':''} ${create?'rcl-primary-create':''}`}>
+          return <Link key={item.href} href={destination} aria-current={selected?'page':undefined} className={`${selected?'active':''} ${create?'rcl-primary-create':''}`}>
             <Icon/><span>{item.label}</span>
           </Link>;
         })}
@@ -147,8 +149,9 @@ export function SiteHeader(){
       {bottomItems.map(item=>{
         const Icon=item.icon;
         const selected=active(item.href);
+        const destination=resolveMemberHref(item.href);
         const create=item.href==='/create';
-        return <Link key={item.href} href={item.href} aria-current={selected?'page':undefined} className={`${selected?'active':''} ${create?'rcl-mobile-create':''}`}>
+        return <Link key={item.href} href={destination} aria-current={selected?'page':undefined} className={`${selected?'active':''} ${create?'rcl-mobile-create':''}`}>
           <Icon/><span>{item.label}</span>
         </Link>;
       })}
