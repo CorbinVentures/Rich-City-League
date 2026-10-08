@@ -137,7 +137,8 @@ export function PWAInstallExperience() {
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [installed, setInstalled] = useState(false);
 
-  const suppressPrompt = pathname === '/access'
+  const suppressPrompt = pathname === '/app'
+    || pathname === '/access'
     || pathname === '/member-access'
     || pathname.startsWith('/auth/')
     || pathname.startsWith('/legal');
