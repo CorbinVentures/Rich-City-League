@@ -7,6 +7,7 @@ import type { Database } from '@/types/database';
 import { FaArrowLeft, FaBasketball, FaBullhorn, FaCamera, FaShieldHalved, FaUserGroup } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
+import { ProfileMusicPicker } from '@/components/ProfileMusicPicker';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -138,11 +139,11 @@ export default function ProfilePage() {
         </section>
 
         <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
-          <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile soundtrack</p>
-          <h2 className="mt-1 font-display text-2xl font-black uppercase">Bring your profile to life</h2>
-          <p className="mt-2 text-sm leading-6 text-white/40">Paste a YouTube link and choose the song that plays when people visit your profile.</p>
-          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">YouTube song link<input value={profileSongUrl} onChange={e => setProfileSongUrl(e.target.value)} maxLength={500} placeholder="https://www.youtube.com/watch?v=..." className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label>
-          <p className="mt-3 text-xs leading-5 text-white/30">RCL will attempt to start it when your profile opens. Browsers may require the visitor to tap play.</p>
+          <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile music</p>
+          <h2 className="mt-1 font-display text-2xl font-black uppercase">Choose your profile song</h2>
+          <p className="mt-2 text-sm leading-6 text-white/70">Search the Audius catalog, listen and select a song for your profile. No YouTube link needed.</p>
+          <ProfileMusicPicker value={profileSongUrl} onChange={setProfileSongUrl} />
+          <p className="mt-4 text-xs leading-5 text-white/65">After choosing, tap Save RCL profile below. Playback is free; Safari may require visitors to tap Play.</p>
         </section>
 
         <div className="flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row sm:items-center sm:justify-between">
