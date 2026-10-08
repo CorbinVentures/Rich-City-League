@@ -156,6 +156,7 @@ export function PWAInstallExperience() {
     const beforeInstall = (event: Event) => {
       event.preventDefault();
       const installEvent = event as BeforeInstallPromptEvent;
+      (window as Window & { __rchInstallPrompt?: BeforeInstallPromptEvent }).__rchInstallPrompt = installEvent;
       setDeferredPrompt(installEvent);
       setEligible(true);
     };
@@ -165,6 +166,7 @@ export function PWAInstallExperience() {
       setVisible(false);
       setShowIOSGuide(false);
       setDeferredPrompt(null);
+      delete (window as Window & { __rchInstallPrompt?: BeforeInstallPromptEvent }).__rchInstallPrompt;
       document.documentElement.dataset.rclDisplayMode = 'standalone';
     };
 
