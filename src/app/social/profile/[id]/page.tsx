@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicClient } from '@/lib/public-data';
-import { FaArrowLeft, FaBasketball, FaLocationDot } from 'react-icons/fa6';
+import { FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { ProfileSoundtrack } from '@/components/ProfileSoundtrack';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
 import { SocialIdentity } from '@/components/SocialIdentity';
@@ -179,13 +179,6 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   };
 
   return <main className={'rcl-social-secondary rcl-social-profile min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#05080d]/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4">
-        <Link href="/social" className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-white/70 transition hover:border-rcl-blue/30 hover:text-white" aria-label="Back to RCL Home"><FaArrowLeft /></Link>
-        <div className="min-w-0"><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-blue">RCL Social · Identity</p><p className="truncate text-sm font-black">{name}</p></div>
-      </div>
-    </header>
-
     <div className="mx-auto max-w-5xl">
       <section className="relative border-b border-white/10 bg-[#09111a]">
         <div className="h-44 overflow-hidden bg-[radial-gradient(circle_at_80%_15%,rgba(21,159,255,.2),transparent_35%),linear-gradient(135deg,#0a1b2a,#03070d)] sm:h-64">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
