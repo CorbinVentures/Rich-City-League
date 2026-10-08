@@ -26,7 +26,7 @@ export default async function HomePage() {
       ])
     : [{ data: [] }, { data: [] }];
 
-  const playerIds = (playersRaw ?? []).map(player => player.id);
+  const playerIds = (playersRaw ?? []).map(player => player.id).filter((id): id is string => Boolean(id));
   const { data: statsRaw } = client && playerIds.length && completedGameIds.size
     ? await client.from('player_game_stats').select('game_id,player_id,points,assists')
         .in('player_id', playerIds).in('game_id', [...completedGameIds]).limit(250)
