@@ -405,3 +405,19 @@ html body .rch-browser-loading-mark { color: #fff !important; font-size: 45px; f
 @media (prefers-reduced-motion: reduce) {
   html body .rch-download-button { transition: none; }
 }
+
+html body .rch-download-legal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 65px;
+  padding-top: 23px;
+  border-top: 1px solid #28445f;
+  color: #a8c2dc !important;
+  font-size: 12px;
+}
+html body .rch-download-legal nav { display: flex; flex-wrap: wrap; gap: 18px; }
+html body .rch-download-legal a { color: #c8e5ff !important; font-weight: 700; }
+html body .rch-download-legal a:focus-visible { outline: 3px solid #a8d9ff; outline-offset: 5px; }
