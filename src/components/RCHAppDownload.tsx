@@ -48,10 +48,11 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
       setPrompt(event as InstallEvent);
     };
     const complete = () => {
-      setInstalled(true);
+      // Installing does not turn the current browser tab into a standalone app.
+      setInstalled(isInstalled());
       setPrompt(null);
       delete (window as Window & { __rchInstallPrompt?: InstallEvent }).__rchInstallPrompt;
-      setStatus('RCH is installed. Open it from your apps.');
+      setStatus('RCH was added to your apps. Open it from your Home Screen to access the full platform.');
     };
     window.addEventListener('beforeinstallprompt', ready);
     window.addEventListener('appinstalled', complete);
