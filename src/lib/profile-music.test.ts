@@ -32,6 +32,15 @@ describe('profile music', () => {
     });
   });
 
+  it('builds a link to the selected track from its artist handle and slug', () => {
+    expect(normalizeAudiusTrack({
+      id: 'AbC12',
+      title: 'City Anthem',
+      user: { name: 'Artist', handle: 'artist' },
+      permalink: 'city-anthem',
+    })?.permalink).toBe('https://audius.co/artist/city-anthem');
+  });
+
   it('excludes unavailable and gated music', () => {
     expect(normalizeAudiusTrack({ id: 'One1', title: 'Locked', is_stream_gated: true })).toBeNull();
     expect(normalizeAudiusTrack({ id: 'One1', title: 'Disabled', is_streamable: false })).toBeNull();
