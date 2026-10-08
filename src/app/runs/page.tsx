@@ -425,7 +425,7 @@ export default function RunsPage() {
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
           <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your schedule is live</p><p className="mt-1 text-sm text-white/60">Every date has its own RSVP and invitation.</p></div><button type="button" onClick={() => setCreatedRuns([])} aria-label="Dismiss new runs" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">{createdRuns.map(run=><div key={run.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rcl-blue/15 bg-[#071522] px-4 py-3"><div><p className="font-semibold text-sm">{run.title}</p><p className="text-xs text-white/45">{new Date(run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p></div><div className="flex gap-2"><ShareRunButton id={run.id} title={run.title}/><Link href={`/runs/${run.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View</Link></div></div>)}</div>
-        </section>
+        </section>}
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {view === 'runs' && <section>
