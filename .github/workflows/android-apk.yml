@@ -30,8 +30,10 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Configure Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Use preinstalled Android SDK
+        run: |
+          test -n "$ANDROID_HOME"
+          command -v sdkmanager
 
       - name: Install Android platform and Bubblewrap
         run: |
