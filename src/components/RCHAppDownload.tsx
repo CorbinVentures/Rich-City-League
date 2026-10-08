@@ -173,7 +173,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
                 <>
                   <p>Download the signed Android package from our official app link. Your phone may ask you to approve installing an app from your browser.</p>
                   <a href={apkUrl} rel="noopener noreferrer" className="rch-download-button rch-download-secondary"><FaDownload aria-hidden="true"/> Download signed APK</a>
-                  <p className="rch-download-footnote">Only install APKs distributed through RCH's official site. Android may show a sideloading warning.</p>
+                  <p className="rch-download-footnote">Only install APKs distributed through RCH&apos;s official site. Android may show a sideloading warning.</p>
                 </>
               ) : (
                 <>
