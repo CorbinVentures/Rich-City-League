@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FaBell, FaPhone, FaXmark } from 'react-icons/fa6';
@@ -55,30 +55,48 @@ export function PWAAppAlertsOnboarding() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [dismissedUser, setDismissedUser] = useState<string | null>(null);
+  const checkedUser = useRef<string | null>(null);
 
   useEffect(() => {
-    if (loading || !user || !supabase || isExcludedPath(pathname) || dismissedUser === user.id) {
+    if (!user) {
+      checkedUser.current = null;
       setVisible(false);
       return;
     }
+    if (loading || !supabase || isExcludedPath(pathname) || dismissedUser === user.id) {
+      setVisible(false);
+      return;
+    }
+    // Do not recheck or reopen the prompt on every client-side navigation.
+    if (checkedUser.current === user.id) return;
 
     let cancelled = false;
     const timer = window.setTimeout(() => {
       const checkPermission = async () => {
-        if (wasRecentlyDismissed(user.id)) return;
+        if (wasRecentlyDismissed(user.id)) {
+          checkedUser.current = user.id;
+          return;
+        }
 
         const state = getAppAlertState();
         // Never prompt when notifications are blocked, unsupported or when
         // iOS needs the Home Screen installation step first.
-        if (state === 'unsupported' || state === 'not-installed' || state === 'denied') return;
+        if (state === 'unsupported' || state === 'not-installed' || state === 'denied') {
+          checkedUser.current = user.id;
+          return;
+        }
 
         if (state === 'granted') {
           // Already-permitted devices reconnect silently after login; only
           // request a tap if the subscription cannot be restored.
-          if (await rebindExistingAppAlerts(supabase as any)) return;
+          if (await rebindExistingAppAlerts(supabase as any)) {
+            checkedUser.current = user.id;
+            return;
+          }
         }
 
         if (cancelled) return;
+        checkedUser.current = user.id;
         setNeedsSubscription(state === 'granted');
         setError('');
         setVisible(true);
@@ -174,7 +192,7 @@ export function PWAAppAlertsOnboarding() {
           Not now
         </button>
         <p className="mt-3 text-center text-xs leading-5 text-white/65">
-          You control alerts anytime in <Link href="/settings/notifications" onClick={() => setVisible(false)} className="font-semibold text-[#91ceff] underline underline-offset-2">Notification Settings</Link>.
+          You control alerts anytime in <Link href="/settings/notifications" onClick={dismiss} className="font-semibold text-[#91ceff] underline underline-offset-2">Notification Settings</Link>.
         </p>
       </section>
     </div>
