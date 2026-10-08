@@ -1,0 +1,303 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+type Row<T> = T;
+type Insert<T> = Partial<T> & Pick<T, Exclude<keyof T, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'started_at' | 'assessed_at' | 'captured_at'>>;
+type Update<T> = Partial<T>;
+
+type TableDef<T> = { Row: T; Insert: Insert<T>; Update: Update<T>; Relationships: [] };
+type ViewDef<T> = { Row: T; Insert: never; Update: never; Relationships: [] };
+
+interface LegacyDatabase {
+  public: {
+    Tables: {
+      profiles: { Row: Row<ProfileRow>; Insert: Insert<ProfileRow>; Update: Update<ProfileRow>; Relationships: [] };
+      leagues: { Row: League; Insert: Insert<League>; Update: Update<League>; Relationships: [] };
+      seasons: { Row: Season; Insert: Insert<Season>; Update: Update<Season>; Relationships: [] };
+      divisions: { Row: Division; Insert: Insert<Division>; Update: Update<Division>; Relationships: [] };
+      venues: { Row: Venue; Insert: Insert<Venue>; Update: Update<Venue>; Relationships: [] };
+      teams: { Row: Team; Insert: Insert<Team>; Update: Update<Team>; Relationships: [] };
+      team_seasons: { Row: TeamSeason; Insert: Insert<TeamSeason>; Update: Update<TeamSeason>; Relationships: [] };
+      players: { Row: Player; Insert: Insert<Player>; Update: Update<Player>; Relationships: [] };
+      team_coaches: { Row: TeamCoach; Insert: Insert<TeamCoach>; Update: Update<TeamCoach>; Relationships: [] };
+      rosters: { Row: Roster; Insert: Insert<Roster>; Update: Update<Roster>; Relationships: [] };
+      games: { Row: Game; Insert: Insert<Game>; Update: Update<Game>; Relationships: [] };
+      game_events: { Row: GameEvent; Insert: Insert<GameEvent>; Update: Update<GameEvent>; Relationships: [] };
+      game_lineups: { Row: GameLineup; Insert: Insert<GameLineup>; Update: Update<GameLineup>; Relationships: [] };
+      game_ai_insights: { Row: GameAIInsight; Insert: Insert<GameAIInsight>; Update: Update<GameAIInsight>; Relationships: [] };
+      player_game_stats: { Row: PlayerGameStats; Insert: Insert<PlayerGameStats>; Update: Update<PlayerGameStats>; Relationships: [] };
+      team_game_stats: { Row: TeamGameStats; Insert: Insert<TeamGameStats>; Update: Update<TeamGameStats>; Relationships: [] };
+      standings: { Row: Standing; Insert: Insert<Standing>; Update: Update<Standing>; Relationships: [] };
+      registrations: { Row: Registration; Insert: Insert<Registration>; Update: Update<Registration>; Relationships: [] };
+      posts: { Row: Post; Insert: Insert<Post>; Update: Update<Post>; Relationships: [] };
+      comments: { Row: Comment; Insert: Insert<Comment>; Update: Update<Comment>; Relationships: [] };
+      likes: { Row: Like; Insert: Like; Update: Partial<Like>; Relationships: [] };
+      follows: { Row: Follow; Insert: Follow; Update: Partial<Follow>; Relationships: [] };
+      news: { Row: News; Insert: Insert<News>; Update: Update<News>; Relationships: [] };
+      media: { Row: Media; Insert: Insert<Media>; Update: Update<Media>; Relationships: [] };
+      awards: { Row: Award; Insert: Insert<Award>; Update: Update<Award>; Relationships: [] };
+      staff: { Row: Staff; Insert: Insert<Staff>; Update: Update<Staff>; Relationships: [] };
+      notifications: { Row: Notification; Insert: Insert<Notification>; Update: Update<Notification>; Relationships: [] };
+      commissioners: { Row: Commissioner; Insert: Insert<Commissioner>; Update: Update<Commissioner>; Relationships: [] };
+      site_settings: { Row: SiteSetting; Insert: Insert<SiteSetting>; Update: Update<SiteSetting>; Relationships: [] };
+      badges: { Row: Badge; Insert: Insert<Badge>; Update: Update<Badge>; Relationships: [] };
+      player_badges: { Row: PlayerBadge; Insert: Insert<PlayerBadge>; Update: Update<PlayerBadge>; Relationships: [] };
+      coach_badges: { Row: CoachBadge; Insert: Insert<CoachBadge>; Update: Update<CoachBadge>; Relationships: [] };
+      fan_badges: { Row: FanBadge; Insert: Insert<FanBadge>; Update: Update<FanBadge>; Relationships: [] };
+      player_of_week: { Row: PlayerOfWeek; Insert: Insert<PlayerOfWeek>; Update: Update<PlayerOfWeek>; Relationships: [] };
+      reactions: { Row: Reaction; Insert: Insert<Reaction>; Update: Update<Reaction>; Relationships: [] };
+      reaction_types: { Row: ReactionType; Insert: Insert<ReactionType>; Update: Update<ReactionType>; Relationships: [] };
+      audit_logs: { Row: AuditLog; Insert: Insert<AuditLog>; Update: Update<AuditLog>; Relationships: [] };
+      friendships: { Row: Friendship; Insert: Insert<Friendship>; Update: Update<Friendship>; Relationships: [] };
+      blocks: { Row: Block; Insert: Block; Update: Partial<Block>; Relationships: [] };
+      stories: { Row: Story; Insert: Insert<Story>; Update: Update<Story>; Relationships: [] };
+      story_views: { Row: StoryView; Insert: StoryView; Update: Partial<StoryView>; Relationships: [] };
+      conversations: { Row: Conversation; Insert: Insert<Conversation>; Update: Update<Conversation>; Relationships: [] };
+      conversation_members: { Row: ConversationMember; Insert: ConversationMember; Update: Partial<ConversationMember>; Relationships: [] };
+      messages: { Row: Message; Insert: Insert<Message>; Update: Update<Message>; Relationships: [] };
+      communities: { Row: Community; Insert: Insert<Community>; Update: Update<Community>; Relationships: [] };
+      community_members: { Row: CommunityMember; Insert: CommunityMember; Update: Partial<CommunityMember>; Relationships: [] };
+      community_posts: { Row: CommunityPost; Insert: Insert<CommunityPost>; Update: Update<CommunityPost>; Relationships: [] };
+      notification_preferences: { Row: NotificationPreference; Insert: Insert<NotificationPreference>; Update: Update<NotificationPreference>; Relationships: [] };
+      user_activity: { Row: UserActivity; Insert: Insert<UserActivity>; Update: Update<UserActivity>; Relationships: [] };
+      xp_transactions: { Row: XpTransaction; Insert: Insert<XpTransaction>; Update: Update<XpTransaction>; Relationships: [] };
+      user_levels: { Row: UserLevel; Insert: Insert<UserLevel>; Update: Update<UserLevel>; Relationships: [] };
+      reports: { Row: Report; Insert: Insert<Report>; Update: Update<Report>; Relationships: [] };
+      saved_posts: { Row: SavedPost; Insert: SavedPost; Update: Partial<SavedPost>; Relationships: [] };
+      player_iq_profiles: { Row: PlayerIQProfile; Insert: Insert<PlayerIQProfile>; Update: Update<PlayerIQProfile>; Relationships: [] };
+      player_iq_history: { Row: PlayerIQHistory; Insert: Insert<PlayerIQHistory>; Update: Update<PlayerIQHistory>; Relationships: [] };
+      teammate_evaluations: { Row: TeammateEvaluation; Insert: Insert<TeammateEvaluation>; Update: Update<TeammateEvaluation>; Relationships: [] };
+      profile_roles: { Row: ProfileRole; Insert: Insert<ProfileRole>; Update: Update<ProfileRole>; Relationships: [] };
+      fan_profiles: { Row: FanProfile; Insert: Insert<FanProfile>; Update: Update<FanProfile>; Relationships: [] };
+      score_explanations: { Row: ScoreExplanation; Insert: Insert<ScoreExplanation>; Update: Update<ScoreExplanation>; Relationships: [] };
+      fantasy_seasons: { Row: FantasySeason; Insert: Insert<FantasySeason>; Update: Update<FantasySeason>; Relationships: [] };
+      fantasy_teams: { Row: FantasyTeam; Insert: Insert<FantasyTeam>; Update: Update<FantasyTeam>; Relationships: [] };
+      fantasy_rosters: { Row: FantasyRoster; Insert: FantasyRoster; Update: Partial<FantasyRoster>; Relationships: [] };
+      fantasy_scores: { Row: FantasyScore; Insert: Insert<FantasyScore>; Update: Update<FantasyScore>; Relationships: [] };
+      fantasy_matchups: { Row: FantasyMatchup; Insert: Insert<FantasyMatchup>; Update: Update<FantasyMatchup>; Relationships: [] };
+      shop_categories: { Row: ShopCategory; Insert: Insert<ShopCategory>; Update: Update<ShopCategory>; Relationships: [] };
+      shop_collections: { Row: ShopCollection; Insert: Insert<ShopCollection>; Update: Update<ShopCollection>; Relationships: [] };
+      products: { Row: Product; Insert: Insert<Product>; Update: Update<Product>; Relationships: [] };
+      product_variants: { Row: ProductVariant; Insert: Insert<ProductVariant>; Update: Update<ProductVariant>; Relationships: [] };
+      product_favorites: { Row: ProductFavorite; Insert: ProductFavorite; Update: Partial<ProductFavorite>; Relationships: [] };
+      carts: { Row: Cart; Insert: Insert<Cart>; Update: Update<Cart>; Relationships: [] };
+      cart_items: { Row: CartItem; Insert: Insert<CartItem>; Update: Update<CartItem>; Relationships: [] };
+      orders: { Row: Order; Insert: Insert<Order>; Update: Update<Order>; Relationships: [] };
+      order_items: { Row: OrderItem; Insert: Insert<OrderItem>; Update: Update<OrderItem>; Relationships: [] };
+      inventory_adjustments: { Row: InventoryAdjustment; Insert: Insert<InventoryAdjustment>; Update: Update<InventoryAdjustment>; Relationships: [] };
+      tryout_sessions: { Row: TryoutSession; Insert: Insert<TryoutSession>; Update: Update<TryoutSession>; Relationships: [] };
+      tryout_registrations: { Row: TryoutRegistration; Insert: Insert<TryoutRegistration>; Update: Update<TryoutRegistration>; Relationships: [] };
+      tryout_attendance: { Row: TryoutAttendance; Insert: Insert<TryoutAttendance>; Update: Update<TryoutAttendance>; Relationships: [] };
+      player_evaluations: { Row: PlayerEvaluation; Insert: Insert<PlayerEvaluation>; Update: Update<PlayerEvaluation>; Relationships: [] };
+      draft_pools: { Row: DraftPool; Insert: Insert<DraftPool>; Update: Update<DraftPool>; Relationships: [] };
+      drafts: { Row: Draft; Insert: Insert<Draft>; Update: Update<Draft>; Relationships: [] };
+      draft_order: { Row: DraftOrder; Insert: Insert<DraftOrder>; Update: Update<DraftOrder>; Relationships: [] };
+      draft_picks: { Row: DraftPick; Insert: Insert<DraftPick>; Update: Update<DraftPick>; Relationships: [] };
+      roster_status_history: { Row: RosterStatusHistory; Insert: Insert<RosterStatusHistory>; Update: Update<RosterStatusHistory>; Relationships: [] };
+      league_transactions: { Row: LeagueTransaction; Insert: Insert<LeagueTransaction>; Update: Update<LeagueTransaction>; Relationships: [] };
+      league_requests: { Row: LeagueRequest; Insert: Insert<LeagueRequest>; Update: Update<LeagueRequest>; Relationships: [] };
+      league_request_messages: { Row: LeagueRequestMessage; Insert: Insert<LeagueRequestMessage>; Update: Update<LeagueRequestMessage>; Relationships: [] };
+      game_participation_status: { Row: GameParticipationStatus; Insert: Insert<GameParticipationStatus>; Update: Update<GameParticipationStatus>; Relationships: [] };
+      discipline_categories: { Row: DisciplineCategory; Insert: Insert<DisciplineCategory>; Update: Update<DisciplineCategory>; Relationships: [] };
+      discipline_cases: { Row: DisciplineCase; Insert: Insert<DisciplineCase>; Update: Update<DisciplineCase>; Relationships: [] };
+      discipline_appeals: { Row: DisciplineAppeal; Insert: Insert<DisciplineAppeal>; Update: Update<DisciplineAppeal>; Relationships: [] };
+      lab_sessions: TableDef<LabSession>;
+      lab_program_enrollments: TableDef<LabProgramEnrollment>;
+      lab_assessments: TableDef<LabAssessment>;
+      lab_notebook_entries: TableDef<LabNotebookEntry>;
+      lab_film_entries: TableDef<LabFilmEntry>;
+      lab_challenge_attempts: TableDef<LabChallengeAttempt>;
+      lab_proof_snapshots: TableDef<LabProofSnapshot>;
+    };
+    Views: {
+      public_players: ViewDef<PublicPlayer>;
+      public_player_iq: ViewDef<PublicPlayerIQ>;
+    };
+    Functions: {
+      record_draft_pick: { Args: { target_draft: string; target_team: string; target_player: string }; Returns: DraftPick };
+      manage_draft_clock: { Args: { target_draft: string; target_action: string; target_extension_seconds?: number }; Returns: Draft };
+      configure_draft_order: { Args: { target_draft: string; ordered_teams: string[] }; Returns: undefined };
+      can_manage_game: { Args: { target_game_id: string }; Returns: boolean };
+      rebuild_game_stats: { Args: { target_game_id: string }; Returns: undefined };
+      rebuild_season_standings: { Args: { target_season_id: string }; Returns: undefined };
+      set_starting_lineup: { Args: { target_game_id: string; target_team_id: string; target_period: number; target_player_ids: string[] }; Returns: GameEvent };
+      record_substitution: { Args: { target_game_id: string; target_team_id: string; target_period: number; target_clock_seconds: number; target_player_out: string; target_player_in: string }; Returns: GameEvent };
+      rebuild_game_lineups: { Args: { target_game_id: string }; Returns: undefined };
+      record_game_event: { Args: { target_game_id: string; p_period_number: number; p_clock_seconds: number; p_event_type: string; p_team_id?: string | null; p_player_id?: string | null; p_secondary_player_id?: string | null; p_player_in_id?: string | null; p_player_out_id?: string | null; p_points?: number; p_shot_value?: number | null; p_shot_result?: string | null; p_shot_x?: number | null; p_shot_y?: number | null; p_shot_zone?: string | null; p_foul_type?: string | null; p_turnover_type?: string | null; p_metadata?: Json }; Returns: GameEvent };
+      void_game_event: { Args: { target_event_id: string }; Returns: GameEvent };
+      finalize_game_scorebook: { Args: { target_game_id: string }; Returns: Game };
+      complete_lab_session: { Args: { target_session: string }; Returns: LabSession };
+      refresh_lab_proof: { Args: { target_profile: string }; Returns: undefined };
+      share_lab_achievement: { Args: { achievement_title: string; achievement_body: string }; Returns: string };
+    };
+    Enums: {
+      app_role: 'player' | 'coach' | 'fan' | 'staff' | 'admin';
+      season_status: 'draft' | 'registration' | 'active' | 'completed' | 'archived';
+      registration_status: 'pending' | 'approved' | 'waitlisted' | 'rejected' | 'cancelled';
+      game_status: 'scheduled' | 'live' | 'completed' | 'cancelled' | 'postponed';
+      content_status: 'draft' | 'published' | 'archived';
+    };
+    CompositeTypes: Record<string, never>;
+  };
+}
+
+export type Database = import('./database.generated').Database;
+
+export interface ProfileRow { id: string; username: string | null; first_name: string | null; last_name: string | null; display_name: string | null; avatar_url: string | null; cover_url?: string | null; profile_song_url?: string | null; bio: string | null; phone: string | null; location?: string | null; profile_visibility?: 'public' | 'friends' | 'private'; role: Database['public']['Enums']['app_role']; is_active: boolean; created_at: string; updated_at: string; }
+export interface League { id: string; name: string; slug: string; description: string | null; city: string; state: string; is_active: boolean; created_at: string; updated_at: string; }
+export interface Season { id: string; league_id: string; name: string; slug: string; start_date: string; end_date: string; status: Database['public']['Enums']['season_status']; registration_open: boolean; created_at: string; updated_at: string; }
+export interface Division { id: string; season_id: string; name: string; age_group: string | null; gender: string | null; max_teams: number | null; created_at: string; }
+export interface Venue { id: string; name: string; address: string | null; city: string | null; state: string | null; postal_code: string | null; latitude: number | null; longitude: number | null; amenities: Json; created_at: string; }
+export interface Team { id: string; league_id: string; name: string; slug: string; short_name: string | null; logo_url: string | null; primary_color: string | null; secondary_color: string | null; city: string | null; description: string | null; is_active: boolean; created_at: string; updated_at: string; }
+export interface TeamSeason { id: string; team_id: string; season_id: string; division_id: string | null; seed: number | null; created_at: string; }
+export interface Player { id: string; profile_id: string | null; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; date_of_birth: string | null; hometown: string | null; photo_url: string | null; is_active: boolean; created_at: string; updated_at: string; }
+export interface PublicPlayer { id: string; first_name: string; last_name: string; jersey_number: string | null; position: string | null; height_inches: number | null; hometown: string | null; photo_url: string | null; is_active: boolean; }
+export interface TeamCoach { id: string; team_id: string; profile_id: string; title: string; created_at: string; }
+export interface Roster { id: string; team_season_id: string; player_id: string; jersey_number: string | null; is_captain: boolean; joined_at: string; left_at: string | null; created_at: string; }
+export interface Game { id: string; season_id: string; division_id: string | null; home_team_id: string; away_team_id: string; venue_id: string | null; scheduled_at: string; status: Database['public']['Enums']['game_status']; home_score: number; away_score: number; notes: string | null; period_count: number; period_length_seconds: number; shot_clock_seconds: number | null; scorebook_mode: 'quick' | 'pro'; scorebook_status: 'not_started' | 'live' | 'paused' | 'final' | 'locked'; created_by: string | null; created_at: string; updated_at: string; }
+export type GameEventType =
+  | 'shot_made' | 'shot_missed' | 'free_throw_made' | 'free_throw_missed'
+  | 'rebound_off' | 'rebound_def' | 'assist' | 'steal' | 'block'
+  | 'turnover' | 'foul' | 'substitution' | 'timeout' | 'violation'
+  | 'period_start' | 'period_end' | 'score_adjustment' | 'possession';
+
+export interface GameEvent {
+  id: string;
+  game_id: string;
+  period_number: number;
+  clock_seconds: number;
+  sequence_no: number;
+  event_type: GameEventType;
+  team_id: string | null;
+  player_id: string | null;
+  secondary_player_id: string | null;
+  player_in_id: string | null;
+  player_out_id: string | null;
+  points: number;
+  shot_value: 1 | 2 | 3 | null;
+  shot_result: 'made' | 'missed' | null;
+  shot_x: number | null;
+  shot_y: number | null;
+  shot_zone: string | null;
+  foul_type: string | null;
+  turnover_type: string | null;
+  metadata: Json;
+  created_by: string | null;
+  created_at: string;
+  voided_at: string | null;
+}
+export interface GameLineup {
+  id: string; game_id: string; team_id: string; player_ids: string[]; period_number: number;
+  started_clock_seconds: number; ended_clock_seconds: number | null; plus_minus: number;
+  possessions: number; points_for: number; points_against: number; created_at: string; segment_key?: string | null; seconds_played: number;
+}
+export interface GameAIInsight {
+  id: string; game_id: string; insight_type: string; title: string; body: string;
+  data: Json; confidence: number | null; generated_at: string; created_by: string | null;
+}
+
+export interface PlayerGameStats { id: string; game_id: string; player_id: string; team_id: string; minutes: number | null; points: number; rebounds: number; assists: number; steals: number; blocks: number; turnovers: number; fouls: number; field_goals_made: number; field_goals_attempted: number; plus_minus: number; three_pointers_made: number; three_pointers_attempted: number; free_throws_made: number; free_throws_attempted: number; created_at: string; updated_at: string; }
+export interface TeamGameStats { id: string; game_id: string; team_id: string; points: number; rebounds: number; assists: number; turnovers: number; fouls: number; }
+export interface Standing { id: string; season_id: string; division_id: string | null; team_id: string; wins: number; losses: number; ties: number; points_for: number; points_against: number; streak: string | null; rank: number | null; updated_at: string; }
+export interface Registration { id: string; season_id: string; division_id: string | null; applicant_id: string | null; team_id: string | null; first_name: string; last_name: string; email: string; date_of_birth: string | null; emergency_contact: Json; status: Database['public']['Enums']['registration_status']; submitted_at: string; reviewed_at: string | null; reviewed_by: string | null; notes: string | null; }
+export interface Post { id: string; author_id: string; body: string; media_urls: Json; status: Database['public']['Enums']['content_status']; created_at: string; updated_at: string; }
+export interface Comment { id: string; post_id: string; author_id: string; body: string; parent_id?: string | null; created_at: string; }
+export interface Like { post_id: string; user_id: string; created_at: string; }
+export interface Follow { follower_id: string; following_id: string; created_at: string; }
+export interface News { id: string; author_id: string | null; title: string; slug: string; excerpt: string | null; body: string; cover_image_url: string | null; status: Database['public']['Enums']['content_status']; published_at: string | null; created_at: string; updated_at: string; }
+export interface Media { id: string; uploader_id: string | null; title: string; description: string | null; storage_path: string; media_type: string; status: Database['public']['Enums']['content_status']; created_at: string; }
+export interface Award { id: string; season_id: string; player_id: string | null; team_id: string | null; name: string; description: string | null; awarded_at: string; created_at: string; }
+export interface Staff { id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
+export interface Notification { id: string; recipient_id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; }
+export interface TryoutSession { id: string; season_id: string; venue_id: string | null; starts_at: string; ends_at: string; capacity: number; eligibility: string; evaluator_staff_ids: string[]; notes: string | null; status: 'DRAFT'|'OPEN'|'FULL'|'COMPLETED'|'CANCELLED'; created_by: string; created_at: string; }
+export interface TryoutRegistration { id: string; session_id: string; player_id: string; registered_by: string; created_at: string; }
+export interface TryoutAttendance { id: string; registration_id: string; status: 'PRESENT'|'ABSENT'|'EXCUSED'|'LATE'; marked_by: string; notes: string | null; marked_at: string; }
+export interface PlayerEvaluation { id: string; player_id: string; session_id: string; evaluator_id: string; scores: Json; evaluation_score: number; notes: string | null; created_at: string; }
+export interface DraftPool { id: string; season_id: string; player_id: string; eligible: boolean; eligibility_reason: string | null; added_by: string; updated_at: string; }
+export interface Draft { id: string; season_id: string; name: string; rounds: number; roster_limit: number; status: 'SETUP'|'OPEN'|'PAUSED'|'COMPLETED'|'CANCELLED'; current_pick: number; clock_duration_seconds: number; clock_started_at: string | null; clock_deadline_at: string | null; clock_remaining_seconds: number | null; created_by: string; created_at: string; }
+export interface DraftOrder { id: string; draft_id: string; pick_number: number; round_number: number; team_id: string; created_at: string; }
+export interface DraftPick { id: string; draft_id: string; pick_number: number; round_number: number; team_id: string; player_id: string; selected_by: string; selected_at: string; }
+export interface RosterStatusHistory { id: string; roster_id: string; status: 'ACTIVE'|'INACTIVE'|'DNP'|'SUSPENDED'|'INJURED'|'RELEASED'|'TRADED'|'WAIVED'; reason: string | null; effective_at: string; changed_by: string; created_at: string; }
+export interface LeagueTransaction { id: string; season_id: string; transaction_type: string; sending_team_id: string | null; receiving_team_id: string | null; player_ids: string[]; status: string; notes: string | null; reason: string | null; proposed_by: string; approved_by: string | null; executed_at: string | null; created_at: string; updated_at: string; }
+export interface LeagueRequest { id: string; requester_id: string; team_id: string | null; category: string; subject: string; description: string; status: string; assigned_to: string | null; resolution: string | null; created_at: string; updated_at: string; }
+export interface LeagueRequestMessage { id: string; request_id: string; author_id: string; body: string; created_at: string; }
+export interface GameParticipationStatus { id: string; game_id: string; player_id: string; status: string; reason: string | null; recorded_by: string; created_at: string; }
+export interface DisciplineCategory { id: string; name: string; is_active: boolean; created_at: string; }
+export interface DisciplineCase { id: string; player_id: string | null; reported_profile_id: string | null; game_id: string | null; team_id: string | null; category_id: string | null; incident_date: string; description: string; evidence: Json; witnesses: string | null; status: string; decision: string | null; sanction: string | null; decision_notes: string | null; created_by: string; decision_maker: string | null; decided_at: string | null; created_at: string; updated_at: string; }
+export interface DisciplineAppeal { id: string; case_id: string; submitted_by: string; reason: string; outcome: string | null; reviewer_id: string | null; decision_notes: string | null; submitted_at: string; decided_at: string | null; }
+export interface Commissioner { id: string; league_id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
+
+export interface SiteSetting { key: string; value: Json; created_at: string; updated_at: string; }
+export interface Badge { id: string; name: string; description: string; category: string; icon: string; tier: string; requirement_type: string; requirement_value: number; is_active: boolean; created_at: string; updated_at: string; }
+export interface PlayerBadge { id: string; player_id: string; badge_id: string; game_id: string | null; earned_at: string; created_at: string; }
+export interface FanBadge { id: string; profile_id: string; badge_id: string; earned_at: string; created_at: string; }
+export interface CoachBadge { id: string; profile_id: string; badge_id: string; earned_at: string; created_at: string; }
+export interface PlayerOfWeek { id: string; player_id: string; season_id: string; week_number: number; description: string; stats: Json; is_active: boolean; created_at: string; updated_at: string; }
+export interface Reaction { id: string; post_id: string; user_id: string; type: 'bucket' | 'heat' | 'strong' | 'locked' | 'money' | 'watch' | 'king' | 'certified' | 'highlight' | 'champ'; created_at: string; }
+export interface ReactionType { id: string; emoji: string; label: string; sort_order: number; is_active: boolean; created_at: string; updated_at: string; }
+export interface AuditLog { id: string; user_id: string | null; action: string; details: string | null; created_at: string; }
+export interface Friendship { id: string; requester_id: string; addressee_id: string; status: 'pending' | 'accepted' | 'declined' | 'cancelled'; created_at: string; updated_at: string; }
+export interface Block { blocker_id: string; blocked_id: string; created_at: string; }
+export interface Story { id: string; author_id: string; story_type: 'text' | 'photo' | 'video' | 'game_day' | 'highlight'; body: string | null; media_url: string | null; expires_at: string; audience: 'public' | 'friends' | 'private'; created_at: string; }
+export interface StoryView { story_id: string; viewer_id: string; viewed_at: string; }
+export interface Conversation { id: string; title: string | null; conversation_type: 'direct' | 'group' | 'team' | 'community' | 'announcement'; created_by: string; created_at: string; updated_at: string; }
+export interface ConversationMember { conversation_id: string; profile_id: string; role: 'member' | 'admin'; last_read_at: string | null; joined_at: string; }
+export interface Message { id: string; conversation_id: string; sender_id: string; body: string; attachment_url: string | null; reply_to_id: string | null; deleted_at: string | null; created_at: string; }
+export interface Community { id: string; name: string; slug: string; description: string | null; community_type: string; privacy: 'public' | 'private' | 'invite_only'; logo_url: string | null; cover_url: string | null; created_by: string; location_slug: string | null; is_system_community: boolean; created_at: string; updated_at: string; }
+export interface CommunityMember { community_id: string; profile_id: string; role: 'member' | 'moderator' | 'admin'; joined_at: string; }
+export interface CommunityPost { id: string; community_id: string; author_id: string; body: string; created_at: string; updated_at: string; }
+export interface NotificationPreference { profile_id: string; messages: boolean; friend_requests: boolean; comments: boolean; reactions: boolean; announcements: boolean; updated_at: string; }
+export interface UserActivity { id: string; profile_id: string; activity_type: string; entity_type: string | null; entity_id: string | null; metadata: Json; created_at: string; }
+export interface XpTransaction { id: string; profile_id: string; amount: number; reason: string; source_type: string | null; source_id: string | null; created_at: string; }
+export interface UserLevel { profile_id: string; xp: number; level: number; current_streak: number; updated_at: string; }
+export interface Report { id: string; reporter_id: string; reported_profile_id: string | null; post_id: string | null; message_id: string | null; reason: string; status: 'open' | 'reviewing' | 'resolved' | 'dismissed'; reviewed_by: string | null; created_at: string; }
+export interface SavedPost { profile_id: string; post_id: string; created_at: string; }
+export interface PlayerIQProfile {
+  player_id: string; rcl_rating: number; court_performance_score: number; skill_profile_score: number;
+  teammate_grade_score: number; community_popularity_score: number; growth_consistency_score: number;
+  exposure_index: number; player_archetype: string | null; rating_trend: 'rising' | 'stable' | 'declining';
+  previous_rating: number | null; rating_change: number; games_evaluated: number;
+  last_calculated_at: string | null; created_at: string; updated_at: string;
+}
+export interface PublicPlayerIQ extends Omit<PlayerIQProfile, 'created_at' | 'updated_at'> {}
+export interface PlayerIQHistory {
+  id: string; player_id: string; rcl_rating: number; court_performance_score: number;
+  skill_profile_score: number; teammate_grade_score: number; community_popularity_score: number;
+  growth_consistency_score: number; exposure_index: number; calculated_at: string;
+}
+export interface TeammateEvaluation {
+  id: string; game_id: string; evaluator_player_id: string; teammate_player_id: string;
+  communication: number; unselfishness: number; effort: number; leadership: number;
+  defense: number; team_chemistry: number; coachability: number; created_at: string;
+}
+export interface ProfileRole { profile_id: string; role: Database['public']['Enums']['app_role']; status: 'active' | 'pending' | 'revoked'; verified_at: string | null; verified_by: string | null; created_at: string; }
+export interface FanProfile { profile_id: string; favorite_team_id: string | null; fan_level: number; games_attended: number; created_at: string; updated_at: string; }
+export interface ScoreExplanation { id: string; profile_id: string | null; player_id: string | null; score_type: 'player_index' | 'player_win_factor' | 'coach_index' | 'fan_win_factor'; score: number; components: Json; data_points: number; calculated_at: string; }
+export interface FantasySeason { id: string; season_id: string; name: string; status: 'draft' | 'active' | 'completed'; scoring_rules: Json; champion_fantasy_team_id: string | null; created_at: string; }
+export interface FantasyTeam { id: string; fantasy_season_id: string; manager_id: string; name: string; total_points: number; wins: number; losses: number; created_at: string; }
+export interface FantasyRoster { fantasy_team_id: string; player_id: string; roster_slot: 'starter' | 'bench' | 'ir'; acquired_at: string; }
+export interface FantasyScore { id: string; fantasy_team_id: string; player_id: string; game_id: string; fantasy_points: number; scoring_breakdown: Json; created_at: string; }
+export interface FantasyMatchup { id: string; fantasy_season_id: string; week_number: number; starts_at: string; ends_at: string; home_team_id: string; away_team_id: string; home_points: number; away_points: number; status: 'scheduled' | 'live' | 'final'; winner_team_id: string | null; created_at: string; }
+export interface ShopCategory { id: string; name: string; slug: string; created_at: string; }
+export interface ShopCollection { id: string; name: string; slug: string; description: string | null; is_published: boolean; created_at: string; updated_at: string; }
+export interface Product { id: string; name: string; slug: string; description: string | null; short_description: string | null; category_id: string | null; collection_id: string | null; price: number; compare_at_price: number | null; currency: string; status: 'DRAFT' | 'ACTIVE' | 'SOLD_OUT' | 'ARCHIVED' | 'SCHEDULED'; featured: boolean; limited_edition: boolean; thumbnail_url: string | null; images: Json; team: string | null; release_date: string | null; edition_size: number | null; created_at: string; updated_at: string; }
+export interface ProductVariant { id: string; product_id: string; sku: string; name: string; size: string | null; color: string | null; inventory: number; reserved: number; created_at: string; updated_at: string; }
+export interface ProductFavorite { user_id: string; product_id: string; created_at: string; }
+export interface Cart { id: string; user_id: string; created_at: string; updated_at: string; }
+export interface CartItem { cart_id: string; variant_id: string; quantity: number; created_at: string; updated_at: string; }
+export interface Order { id: string; order_number: string; user_id: string | null; customer_email: string; customer_name: string | null; shipping_address: Json; subtotal: number; shipping: number; tax: number; total: number; payment_status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | 'PARTIALLY_REFUNDED'; fulfillment_status: 'UNFULFILLED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'; tracking_number: string | null; created_at: string; updated_at: string; }
+export interface OrderItem { id: string; order_id: string; product_id: string | null; variant_id: string | null; product_snapshot: Json; variant_snapshot: Json | null; quantity: number; unit_price: number; created_at: string; }
+export interface InventoryAdjustment { id: string; variant_id: string; quantity_delta: number; reason: string; created_by: string | null; created_at: string; }
+
+export interface LabSession { id:string; profile_id:string; title:string; skill:string; duration_minutes:number; status:'planned'|'in_progress'|'completed'; source:'builder'|'program'|'coach'|'challenge'; workout:Json; completed_at:string|null; created_at:string; }
+export interface LabProgramEnrollment { id:string; profile_id:string; program_key:string; program_name:string; total_sessions:number; completed_sessions:number; focus:string|null; status:'active'|'completed'|'paused'; started_at:string; completed_at:string|null; }
+export interface LabAssessment { id:string; profile_id:string; category:'scoring'|'creation'|'playmaking'|'defense'|'athleticism'|'iq'; score:number; verification_status:'self'|'coach'|'rcl_verified'; notes:string|null; assessed_at:string; created_at:string; }
+export interface LabNotebookEntry { id:string; profile_id:string; session_id:string|null; title:string; body:string; visibility:'private'|'coach'; created_at:string; updated_at:string; }
+export interface LabFilmEntry { id:string; profile_id:string; title:string; media_url:string|null; possession_type:string|null; lesson:string; visibility:'private'|'coach'; created_at:string; }
+export interface LabChallengeAttempt { id:string; profile_id:string; challenge_key:string; challenge_name:string; result:number; attempts:number|null; verification_status:'self'|'coach'|'rcl_verified'; created_at:string; }
+export interface LabProofSnapshot { id:string; profile_id:string; category:string; lab_score:number|null; game_metric:string; game_value:number|null; games_sampled:number; captured_at:string; }
