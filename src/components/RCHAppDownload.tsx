@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 import {
   FaArrowRight, FaArrowUpFromBracket, FaBasketball, FaCheck,
   FaCircleInfo, FaDownload, FaMobileScreenButton, FaShieldHalved,
@@ -23,7 +24,12 @@ function detectDevice(): Device {
 
 function isInstalled() {
   const withStandalone = navigator as Navigator & { standalone?: boolean };
-  return window.matchMedia('(display-mode: standalone)').matches || withStandalone.standalone === true;
+  return isMobileStandaloneExperience({
+    standalone: window.matchMedia('(display-mode: standalone)').matches || withStandalone.standalone === true,
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    maxTouchPoints: navigator.maxTouchPoints,
+  });
 }
 
 export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
@@ -42,10 +48,11 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
       setPrompt(event as InstallEvent);
     };
     const complete = () => {
-      setInstalled(true);
+      // Installing does not turn the current browser tab into a standalone app.
+      setInstalled(isInstalled());
       setPrompt(null);
       delete (window as Window & { __rchInstallPrompt?: InstallEvent }).__rchInstallPrompt;
-      setStatus('RCH is installed. Open it from your apps.');
+      setStatus('RCH was added to your apps. Open it from your Home Screen to access the full platform.');
     };
     window.addEventListener('beforeinstallprompt', ready);
     window.addEventListener('appinstalled', complete);
@@ -91,13 +98,17 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
       <section className="rch-download-hero" aria-labelledby="rch-download-title">
         <div className="rch-download-hero-inner">
           <div className="rch-download-copy">
-            <span className="rch-download-eyebrow">RCH · YOUR BASKETBALL WORLD</span>
-            <h1 id="rch-download-title">Take Richmond basketball <em>with you.</em></h1>
-            <p className="rch-download-intro">Your people, your runs, your highlights and Rich City League—all in one app-style experience.</p>
+            <div className="rch-download-identity" aria-label="Rich City Hoops">
+              <span className="rch-download-identity-symbol">R</span>
+              <div><strong>RICH CITY <span>HOOPS</span></strong><small>THE CITY. THE GAME. THE COMMUNITY.</small></div>
+            </div>
+            <span className="rch-download-eyebrow">RCH · MADE FOR THE CITY. BUILT FOR YOUR PHONE.</span>
+            <h1 id="rch-download-title">Richmond hoops. <em>One home.</em></h1>
+            <p className="rch-download-intro">The local basketball scene finally has a home. Connect with players, find open runs, share highlights, earn REP, and follow Rich City League—all through the RCH mobile app.</p>
             <div className="rch-download-benefits">
-              <span><FaCheck aria-hidden="true" /> Free to install</span>
-              <span><FaCheck aria-hidden="true" /> Full-screen experience</span>
-              <span><FaCheck aria-hidden="true" /> Connected to your RCH account</span>
+              <span><FaCheck aria-hidden="true" /> Free to join</span>
+              <span><FaCheck aria-hidden="true" /> Real mobile app experience</span>
+              <span><FaCheck aria-hidden="true" /> Your city, your basketball identity</span>
             </div>
             <div className="rch-download-main-action">
               {installed ? (
@@ -120,21 +131,30 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
                 </a>
               )}
               <span className="rch-download-action-note">
-                {installed ? 'RCH is already installed on this device.' : device === 'iphone'
-                  ? 'Apple requires one final Home Screen confirmation.'
+                {installed ? 'You are already using the mobile app.' : device === 'iphone'
+                  ? 'Use Safari’s Add to Home Screen option to unlock the full experience.'
                   : device === 'android' && apkUrl
                   ? 'Android may ask you to approve installation from this source.'
-                  : 'No subscription required.'}
+                  : device === 'other'
+                  ? 'Open this page on an iPhone or Android phone to install.'
+                  : 'Install from Chrome to use the full RCH experience.'}
               </span>
             </div>
+            <div className="rch-download-account-links">
+              <Link href="/auth/sign-up">Create your free profile <FaArrowRight aria-hidden="true" /></Link>
+              <Link href="/auth/sign-in">Already a member? Sign in</Link>
+            </div>
+            <p className="rch-download-browser-note">Browser access is for registration and profile setup. The basketball platform opens in the installed mobile app.</p>
           </div>
           <div className="rch-download-device-art" aria-hidden="true">
+            <div className="rch-download-device-top"><b>RCH</b><span>RICHMOND, VA · 804</span></div>
             <div className="rch-download-logo"><Image src="/icon?v=black-r-1" alt="" width={100} height={100} unoptimized /></div>
-            <strong>RICH CITY HOOPS</strong>
-            <span>THE CITY. THE GAME. THE COMMUNITY.</span>
-            <div className="rch-download-screen-stats">
-              <div><FaBasketball/><b>Runs</b><small>Find your next game</small></div>
-              <div><FaMobileScreenButton/><b>Social</b><small>Your basketball network</small></div>
+            <strong>YOUR CITY. YOUR COURT.</strong>
+            <span>ONE BASKETBALL WORLD.</span>
+            <div className="rch-download-preview-list">
+              <div><FaBasketball /><span><b>OPEN RUNS</b><small>Find your next game</small></span><FaArrowRight /></div>
+              <div><FaMobileScreenButton /><span><b>THE COMMUNITY</b><small>Post. Message. Connect.</small></span><FaArrowRight /></div>
+              <div><FaCheck /><span><b>REP + BADGES</b><small>Build your name in the city</small></span><FaArrowRight /></div>
             </div>
           </div>
         </div>
@@ -142,9 +162,9 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
 
       <section className="rch-download-content" id="rch-app-instructions" aria-label="Choose a download method">
         <div className="rch-download-content-heading">
-          <span className="rch-download-kicker">GET STARTED</span>
-          <h2>Choose your device</h2>
-          <p>RCH works on Android and iPhone. Installation is different on each platform.</p>
+          <span className="rch-download-kicker">YOUR PASS TO THE CITY</span>
+          <h2>Get RCH on your phone</h2>
+          <p>A mobile install unlocks the full RCH experience. Choose your phone below and follow the quick steps.</p>
         </div>
         <div className="rch-download-choice" role="group" aria-label="Select device">
           <button type="button" className={device === 'iphone' ? 'selected' : ''} aria-pressed={device === 'iphone'} onClick={() => chooseDevice('iphone')}>iPhone / iPad</button>
@@ -197,7 +217,11 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
           <FaShieldHalved aria-hidden="true"/>
           <p><b>Official Rich City Hoops installation page.</b> Avoid third-party app download sites and unknown configuration profiles. Your account and basketball community stay at richcityhoops.com.</p>
         </div>
-        <p className="rch-download-return"><Link href="/social">Explore RCH first <FaArrowRight aria-hidden="true"/></Link></p>
+        <p className="rch-download-return"><Link href="/auth/sign-up">Create your free RCH profile <FaArrowRight aria-hidden="true"/></Link> <Link href="/auth/sign-in">Sign in</Link></p>
+        <footer className="rch-download-legal" aria-label="Rich City Hoops legal information">
+          <span>© {new Date().getFullYear()} Rich City Hoops · Richmond, VA</span>
+          <nav aria-label="Legal"><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/community-guidelines">Guidelines</Link></nav>
+        </footer>
       </section>
     </main>
   );
