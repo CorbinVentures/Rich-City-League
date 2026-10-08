@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-  FaArrowRight, FaArrowUpFromBracket, FaBasketball, FaCheck,
+  FaArrowRight, FaArrowUpFromBracket, FaCheck,
   FaCircleInfo, FaDownload, FaMobileScreenButton, FaShieldHalved,
 } from 'react-icons/fa6';
 
@@ -36,6 +36,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
   useEffect(() => {
     setDevice(detectDevice());
     setInstalled(isInstalled());
+    setPrompt((window as Window & { __rchInstallPrompt?: InstallEvent }).__rchInstallPrompt ?? null);
     const ready = (event: Event) => {
       event.preventDefault();
       setPrompt(event as InstallEvent);
@@ -43,6 +44,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
     const complete = () => {
       setInstalled(true);
       setPrompt(null);
+      delete (window as Window & { __rchInstallPrompt?: InstallEvent }).__rchInstallPrompt;
       setStatus('RCH is installed. Open it from your apps.');
     };
     window.addEventListener('beforeinstallprompt', ready);
@@ -63,6 +65,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
       await prompt.prompt();
       const result = await prompt.userChoice;
       setPrompt(null);
+      delete (window as Window & { __rchInstallPrompt?: InstallEvent }).__rchInstallPrompt;
       if (result.outcome === 'accepted') setStatus('Follow your browser confirmation to finish installing RCH.');
       else setStatus('Installation cancelled. You can try again from the browser menu.');
     } catch {
