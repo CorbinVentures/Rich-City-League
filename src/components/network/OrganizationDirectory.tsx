@@ -41,7 +41,13 @@ export function OrganizationDirectory({organizations,initialRegion='all',showReg
 
   const surface=initialRegion==='all'?'organization-directory-card':`organization-region-${initialRegion}-card`;
 
+  const unclaimed = organizations.filter(org => !org.is_claimed && org.network_tier !== 'flagship').length;
+
   return <section>
+    {unclaimed > 0 && <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-rcl-blue/25 bg-rcl-blue/[.055] p-5">
+      <div><p className="text-[10px] font-black uppercase tracking-[.17em] text-rcl-blue">Bring your organization onto RCH</p><h3 className="mt-1 text-lg font-semibold">{unclaimed} listings ready for their organizers</h3><p className="mt-1 max-w-2xl text-xs leading-5 text-white/50">If you know an owner, share their free claim link. Verified representatives can manage profiles and submit upcoming events.</p></div>
+      <button type="button" onClick={() => setOwnership('claimable')} className="rounded-xl bg-rcl-blue px-4 py-3 text-xs font-bold text-[#03101a]">Find a claimable listing</button>
+    </div>}
     <div className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/55 p-4 sm:p-5">
       <div className="grid gap-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <label className="relative block">
@@ -78,8 +84,29 @@ function OrganizationCard({org}:{org:DirectoryOrganization}) {
     <h3 className="mt-4 font-display text-2xl font-black uppercase">{org.name}</h3>
     <div className="mt-2 flex flex-wrap gap-3 text-[10px] font-black uppercase tracking-wide text-white/35"><span className="flex items-center gap-1.5"><FaPeopleGroup/>{networkTypeLabel(org.organization_type)}</span><span className="flex items-center gap-1.5"><FaLocationDot/>{org.city?`${org.city}, ${org.state}`:networkRegionLabel(org.region)}</span></div>
     <p className="mt-3 line-clamp-3 min-h-[72px] text-sm leading-6 text-white/40">{org.description||'Virginia organization connected to the RCH Network.'}</p>
-    <div className="mt-5 flex flex-wrap gap-2"><Link href={`/organizations/${org.slug}`} className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 text-[10px] font-black uppercase ${flagship?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]'}`}>View page <FaArrowRight/></Link>{!org.is_claimed&&!flagship&&<Link href={`/organizations/${org.slug}/claim`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-[10px] font-black uppercase text-white/60">Claim</Link>}</div>
+    <div className="mt-5 flex flex-wrap gap-2"><Link href={`/organizations/${org.slug}`} className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 text-[10px] font-black uppercase ${flagship?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]'}`}>View page <FaArrowRight/></Link>{!org.is_claimed&&!flagship&&<><Link href={`/organizations/${org.slug}/claim`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-[10px] font-black uppercase text-white/60">Claim free</Link><ClaimInviteButton slug={org.slug} name={org.name}/></>}</div>
   </article>;
 }
 
 function Badge({copy,orange=false}:{copy:string;orange?:boolean}) { return <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[.1em] ${orange?'border-rcl-orange/30 bg-rcl-orange/10 text-rcl-orange':'border-rcl-blue/30 bg-rcl-blue/10 text-rcl-blue'}`}>{!orange&&<FaCircleCheck/>}{copy}</span>; }
+
+// Help members recruit real organization owners without impersonating their pages.
+function ClaimInviteButton({ slug, name }: { slug: string; name: string }) {
+  const [status, setStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+  async function share() {
+    const url = new URL(`/organizations/${encodeURIComponent(slug)}/claim`, window.location.origin).toString();
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `Claim ${name} on Rich City Hoops`, text: `Are you part of ${name}? Your free RCH organization listing is ready to claim.`, url });
+        setStatus('idle');
+      } else {
+        await navigator.clipboard.writeText(url);
+        setStatus('copied');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      setStatus('error');
+    }
+  }
+  return <button type="button" onClick={() => void share()} className="inline-flex min-h-10 items-center rounded-xl border border-rcl-blue/25 px-3 text-[10px] font-black uppercase text-rcl-blue">{status === 'copied' ? 'Invite copied ✓' : status === 'error' ? 'Retry invite' : 'Invite owner'}</button>;
+}

@@ -149,7 +149,7 @@ export async function POST(request: Request) {
   const xml = await response.text();
   const item = selectCandidate(payload.account, parseFeed(xml));
   if (!item) {
-    return NextResponse.json({ error: 'No sufficiently fresh sourced story was found. Nothing should publish.' }, { status: 404 });
+    return NextResponse.json({ account: payload.account, candidate: false, reason: 'No sufficiently fresh sourced story was found. Nothing should publish.' });
   }
 
   return NextResponse.json({

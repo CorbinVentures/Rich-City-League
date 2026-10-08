@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady } from '../src/lib/pwa-launch';
+import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
 
 function launch({ path = '/social' } = {}) {
   const dataset: Record<string, string> = {};
@@ -24,7 +24,8 @@ describe('page launch intro', () => {
   it('always releases the screen after the safety timeout', () => {
     const result = launch();
     expect(result.dataset.rchLaunch).toBe('active');
-    expect(result.timers.at(-1)?.delay).toBe(6000);
+    expect(result.timers.at(-1)?.delay).toBe(RCH_LAUNCH_FALLBACK_MS);
+    expect(RCH_LAUNCH_ROUTE_DELAY_MS).toBeGreaterThan(250);
     result.timers.at(-1)?.callback();
     expect(result.dataset.rchLaunch).toBe('done');
   });

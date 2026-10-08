@@ -18,7 +18,7 @@ html[data-rch-launch="active"] body .rch-launch {
   visibility: visible;
   pointer-events: auto;
   transition: none;
-  animation: rch-launch-failsafe 0s 6s forwards;
+  animation: rch-launch-failsafe 0s 4s forwards;
 }
 html body .rch-launch-brand {
   position: absolute;

@@ -2,43 +2,82 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { isLaunchContentReady } from '@/lib/pwa-launch';
+import { isLaunchContentReady, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_MIN_DISPLAY_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '@/lib/pwa-launch';
 
-/** The same lightweight intro covers each document and client-side page transition. */
+/**
+ * Full branded intro on document load. On client navigation, only show it if
+ * the destination is still pending after a short delay. Fast routes stay clear.
+ */
 export function PWALaunchIntro() {
   const pathname = usePathname();
-  const firstPathname = useRef(pathname);
+  const hasMounted = useRef(false);
 
   useEffect(() => {
     const root = document.documentElement;
+    const isDocumentLoad = !hasMounted.current;
+    hasMounted.current = true;
+
     if (/^\/auth(?:\/|$)/.test(pathname)) {
       root.dataset.rchLaunch = 'done';
       return;
     }
-    root.dataset.rchLaunch = 'active';
+
     let released = false;
-    const finishWhenReady = () => {
+    let canFinish = !isDocumentLoad;
+    let observer: MutationObserver | undefined;
+    let showDelay: number | undefined;
+    let minimumDisplay: number | undefined;
+    let readinessCheck: number | undefined;
+    let fallback: number | undefined;
+
+    const release = () => {
       if (released) return;
-      if (!isLaunchContentReady(document)) return;
       released = true;
       root.dataset.rchLaunch = 'done';
-      observer.disconnect();
-      window.clearTimeout(minimumDisplay);
+      observer?.disconnect();
+      if (showDelay !== undefined) window.clearTimeout(showDelay);
+      if (minimumDisplay !== undefined) window.clearTimeout(minimumDisplay);
+      if (readinessCheck !== undefined) window.clearTimeout(readinessCheck);
+      if (fallback !== undefined) window.clearTimeout(fallback);
     };
-    const observer = new MutationObserver(finishWhenReady);
+
+    const finishWhenReady = () => {
+      if (canFinish && isLaunchContentReady(document)) release();
+    };
+
+    if (isDocumentLoad) {
+      root.dataset.rchLaunch = 'active';
+      minimumDisplay = window.setTimeout(() => {
+        canFinish = true;
+        finishWhenReady();
+      }, RCH_LAUNCH_MIN_DISPLAY_MS);
+    } else {
+      root.dataset.rchLaunch = 'done';
+      if (!isLaunchContentReady(document)) {
+        showDelay = window.setTimeout(() => {
+          if (!released && !isLaunchContentReady(document)) root.dataset.rchLaunch = 'active';
+        }, RCH_LAUNCH_ROUTE_DELAY_MS);
+      }
+    }
+
+    observer = new MutationObserver(finishWhenReady);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['aria-busy', 'data-rch-launch-pending'],
     });
-    const minimumDisplay = window.setTimeout(finishWhenReady, firstPathname.current === pathname ? 0 : 250);
-    const timeout = window.setTimeout(() => {
+    readinessCheck = window.setTimeout(finishWhenReady, 0);
+    fallback = window.setTimeout(release, RCH_LAUNCH_FALLBACK_MS);
+
+    return () => {
       released = true;
-      root.dataset.rchLaunch = 'done';
-      observer.disconnect();
-    }, 6000);
-    return () => { released = true; observer.disconnect(); window.clearTimeout(minimumDisplay); window.clearTimeout(timeout); };
+      observer?.disconnect();
+      if (showDelay !== undefined) window.clearTimeout(showDelay);
+      if (minimumDisplay !== undefined) window.clearTimeout(minimumDisplay);
+      if (readinessCheck !== undefined) window.clearTimeout(readinessCheck);
+      if (fallback !== undefined) window.clearTimeout(fallback);
+    };
   }, [pathname]);
 
   return (

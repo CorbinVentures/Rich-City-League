@@ -41,7 +41,7 @@ export default async function OrganizationsPage() {
         <Stat value={claimable} label="Listings available to claim" icon={<FaBullhorn/>}/>
       </section>
 
-      <section className="mt-10">
+      <section className="mt-10" id="organization-directory">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">Statewide discovery</p><h2 className="mt-2 font-display text-3xl font-black uppercase">Find an organization</h2></div><p className="max-w-xl text-xs leading-5 text-white/35">Don&apos;t see the group or business you need? Anyone can suggest a free listing. Organization representatives can claim it after RCH verifies their connection.</p></div>
         <OrganizationDirectory organizations={organizations}/>
       </section>

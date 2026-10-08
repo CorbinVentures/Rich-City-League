@@ -7,6 +7,7 @@ import { Container } from '@/components/Container';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { runInviteUrl, validateRunStart } from '@/lib/run-activation';
 import {
   FaArrowUpRightFromSquare,
   FaBasketball,
@@ -143,6 +144,7 @@ export default function RunsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [createdRun, setCreatedRun] = useState<{ id: string; title: string } | null>(null);
   const [form, setForm] = useState(emptyForm);
 
   const load = async () => {
@@ -243,6 +245,15 @@ export default function RunsPage() {
       setError('Add a title, court or location, date, and start time.');
       return;
     }
+    const startError = validateRunStart(form.date, form.time);
+    if (startError) {
+      setError(startError);
+      return;
+    }
+    if (!Number.isInteger(form.max_players) || form.max_players < 2 || form.max_players > 50) {
+      setError('Capacity must be between 2 and 50 players.');
+      return;
+    }
     setBusy('create');
     setError('');
     const startsAt = new Date(`${form.date}T${form.time}`).toISOString();
@@ -265,11 +276,15 @@ export default function RunsPage() {
       setBusy(null);
       return;
     }
-    if (data?.id) await db.from('run_players').insert({ run_id: data.id, profile_id: user.id });
+    if (data?.id) {
+      const { error: hostJoinError } = await db.from('run_players').insert({ run_id: data.id, profile_id: user.id });
+      if (hostJoinError) console.error('Run created, but automatic host RSVP failed.', hostJoinError);
+      setCreatedRun({ id: data.id, title: form.title.trim() });
+    }
     setForm(emptyForm);
     setShowCreate(false);
     setBusy(null);
-    setNotice(form.run_type === 'social' ? 'Meetup posted to RCL Open Runs.' : 'Run posted to RCL Open Runs.');
+    setNotice(form.run_type === 'social' ? 'Meetup published. Invite people to join.' : 'Run published. Invite players to fill the court.');
     setView('runs');
     void load();
   };
@@ -392,6 +407,10 @@ export default function RunsPage() {
         />
 
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
+        {createdRun && <section aria-label="Share your new run" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
+          <div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your run is live</p><p className="mt-1 text-base font-semibold">{createdRun.title}</p><p className="mt-1 text-xs text-white/50">The court fills when people know about it. Send your invitation now.</p></div>
+          <div className="flex flex-wrap items-center gap-2"><ShareRunButton id={createdRun.id} title={createdRun.title} /><Link href={`/runs/${createdRun.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View run</Link><button type="button" onClick={() => setCreatedRun(null)} aria-label="Dismiss run invitation" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
+        </section>}
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {view === 'runs' && <section>
@@ -404,7 +423,7 @@ export default function RunsPage() {
             </div>
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">No scheduled runs match these filters</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/40">Create a competitive run, organize a social meetup, or pick a court from the directory below.</p><button onClick={() => openCreateForCourt()} className="mt-5 rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Post a run</button></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Be the first to get Richmond running'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('courts')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">Explore RVA courts</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
         {view === 'courts' && <section>
@@ -477,7 +496,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   return <article className="min-w-0 overflow-hidden rounded-2xl border border-rcl-blue/14 bg-[#071522]/48">
     <div className="border-b border-white/8 p-5">
       <div className="flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1.5 rounded-lg border border-rcl-blue/16 bg-rcl-blue/[.06] px-2.5 py-1 text-[11px] font-semibold text-rcl-blue">{typeIcon}{runTypeLabels[run.run_type]}</span><span className="rounded-lg border border-white/8 px-2.5 py-1 text-[11px] font-medium text-white/38">{run.game_format}</span><span className="ml-auto text-[11px] text-white/32">{skillLabels[run.skill_level]}</span></div>
-      <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]">{run.title}</h2>
+      <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]"><Link href={`/runs/${run.id}`} className="hover:text-rcl-blue">{run.title}</Link></h2>
       {run.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/42">{run.description}</p>}
     </div>
     <div className="space-y-3 p-5 text-sm text-white/55">
@@ -485,7 +504,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <div className="flex min-w-0 items-start gap-3"><FaLocationDot className="mt-1 shrink-0 text-rcl-blue" /><span className="min-w-0 break-words">{run.location}</span></div>
       <div className="flex items-center gap-3"><FaPeopleGroup className="shrink-0 text-rcl-blue" /><span>{count}/{run.max_players} attending</span></div>
       <div className="flex flex-wrap gap-2 pt-2">
-        <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button>
+        <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button><ShareRunButton id={run.id} title={run.title} />
         {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
       </div>
       {participantCanHighlight && <div className="mt-2 rounded-xl border border-white/7 bg-black/15 p-3"><p className="text-xs leading-5 text-white/38">Played here? Post a photo or video from this run, then claim the run-highlight bonus.</p><div className="mt-2 flex flex-wrap gap-2"><Link href="/social?compose=1" className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/62">Post highlight</Link><button disabled={highlightClaimed || busy === `highlight-${run.id}`} onClick={() => void onClaimHighlight(run)} className="rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-2 text-xs font-semibold text-rcl-blue disabled:opacity-45">{highlightClaimed ? 'Highlight bonus claimed ✓' : 'Claim +35 REP'}</button></div></div>}
@@ -534,4 +553,27 @@ function CreateRunModal({ form, setForm, courts, busy, onClose, onSubmit }: {
       <button disabled={busy} className="sm:col-span-2 rounded-xl bg-rcl-blue px-5 py-3.5 text-sm font-semibold text-[#071018] disabled:opacity-50">{busy ? 'Publishing…' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
     </form>
   </div></div>;
+}
+
+/** A native share sheet on mobile; copy-link fallback for desktop browsers. */
+function ShareRunButton({ id, title }: { id: string; title: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  async function share() {
+    const url = runInviteUrl(window.location.origin, id);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text: 'Join this basketball run on Rich City Hoops.', url });
+        setState('idle');
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setState('copied');
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      setState('error');
+    }
+  }
+
+  return <button type="button" onClick={() => void share()} className="rounded-xl border border-rcl-blue/25 bg-rcl-blue/[.05] px-4 py-2.5 text-xs font-semibold text-rcl-blue">{state === 'copied' ? 'Link copied ✓' : state === 'error' ? 'Try sharing again' : 'Share invite'}</button>;
 }

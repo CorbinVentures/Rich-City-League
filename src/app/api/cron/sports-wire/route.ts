@@ -179,7 +179,7 @@ async function generateWireItem(db: SupabaseClient, desk: Desk) {
     .limit(12);
   const recent = (recentRows ?? []).map((row: any) => String(row.body || '').slice(0, 500));
 
-  const model = process.env.OPENAI_SPORTS_WIRE_MODEL?.trim() || 'gpt-6-sol';
+  const model = process.env.OPENAI_SPORTS_WIRE_MODEL?.trim() || 'gpt-5.6-luna';
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {
@@ -280,6 +280,10 @@ export async function GET(request: Request) {
     : (Object.keys(deskConfig) as Desk[]).filter(desk => deskConfig[desk].hours.includes(hour));
 
   if (!desks.length) return NextResponse.json({ ok: true, dispatched: [], reason: 'No sports wire desk is scheduled for this Eastern hour.' });
+
+  if (!process.env.OPENAI_API_KEY?.trim()) {
+    return NextResponse.json({ ok: false, dispatched: [], error: 'Sports wire generation is not configured.', requiredSetting: 'OPENAI_API_KEY' }, { status: 503 });
+  }
 
   const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const results = [];
