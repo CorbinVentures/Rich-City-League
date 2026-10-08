@@ -7,6 +7,10 @@ export const RCH_LAUNCH_MIN_DISPLAY_MS = 250;
 export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   const root = document.documentElement;
   if (/^\\/auth(?:\\/|$)/.test(location.pathname)) return;
+  const nav = navigator;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
+  const mobile = /iPhone|iPad|iPod|Android|Mobile/i.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
+  if (!standalone || !mobile) return;
   root.dataset.rchLaunch = 'active';
   window.setTimeout(() => { root.dataset.rchLaunch = 'done'; }, ${RCH_LAUNCH_FALLBACK_MS});
 })();`;
