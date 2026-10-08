@@ -74,7 +74,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Manage and grow an organization without turning RCL into league-management software',
     items:[
       {label:'For Organizations',href:'/network/partners',icon:FaBullhorn},
-      {label:'Sponsor + Advertise',href:'/sponsors',icon:FaBullhorn},
+      {label:'Sponsor + Advertise',href:'/sponsors',icon:FaHandshake},
       {label:'Sponsor Dashboard',href:'/sponsors/dashboard',icon:FaHandshake},
       {label:'Partner Dashboard',href:'/network/dashboard',icon:FaChartSimple},
       {label:'Organization Profile',href:'/network/dashboard/profile',icon:FaUser},
