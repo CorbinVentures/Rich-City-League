@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { FaMusic, FaPause, FaPlay, FaVolumeHigh } from 'react-icons/fa6';
+import { FaMusic, FaPause, FaPlay, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
 
 function getYouTubeId(value: string) {
   try {
@@ -18,12 +18,14 @@ function getYouTubeId(value: string) {
 
 export function ProfileSoundtrack({ url, profileName }: { url?: string | null; profileName: string }) {
   const videoId = useMemo(() => (url ? getYouTubeId(url) : null), [url]);
-  const [started, setStarted] = useState(true);
+  // null: autoplay attempted; true: visitor pressed Play; false: visitor paused.
+  // Do not label an attempted autoplay as "playing" since the browser can block it.
+  const [manualPlayback, setManualPlayback] = useState<boolean | null>(null);
   const [muted, setMuted] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    setStarted(true);
+    setManualPlayback(null);
     setMuted(false);
     setReloadKey(0);
   }, [videoId]);
@@ -31,32 +33,31 @@ export function ProfileSoundtrack({ url, profileName }: { url?: string | null; p
   if (!videoId) return null;
 
   const origin = typeof window === 'undefined' ? '' : window.location.origin;
-  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${started ? 1 : 0}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&origin=${encodeURIComponent(origin)}&mute=${muted ? 1 : 0}&v=${reloadKey}`;
+  const wantsPlayback = manualPlayback !== false;
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${wantsPlayback ? 1 : 0}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&origin=${encodeURIComponent(origin)}&mute=${muted ? 1 : 0}&v=${reloadKey}`;
 
   const togglePlayback = () => {
-    setStarted(value => !value);
-    setReloadKey(key => key + 1);
+    // Initial click always retries Play (important when browsers block autoplay).
+    setManualPlayback(previous => previous === true ? false : true);
+    setReloadKey(value => value + 1);
   };
 
-  return <section className="relative mt-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-4 shadow-sm sm:p-5" aria-label={`${profileName}'s profile soundtrack`}>
+  return <section className="relative mt-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 px-4 py-3 shadow-sm" aria-label={`${profileName}'s profile soundtrack`}>
     <div className="flex items-center gap-3">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-blue text-white"><FaMusic /></span>
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rcl-blue text-white" aria-hidden="true"><FaMusic /></span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Profile soundtrack</p>
-        <p className="mt-1 truncate text-sm font-semibold text-[#71839A]">YouTube audio</p>
+        <p className="truncate text-sm font-bold text-white">Profile song</p>
+        <p className="mt-0.5 text-xs text-white/65" aria-live="polite">
+          {manualPlayback === false ? 'Paused' : manualPlayback === true ? 'Playback requested' : 'Autoplay attempted · tap Play if silent'}
+        </p>
       </div>
-      <button type="button" onClick={togglePlayback} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-rcl-blue text-white transition hover:brightness-110" aria-label={started ? 'Pause profile soundtrack' : 'Play profile soundtrack'}>{started ? <FaPause /> : <FaPlay />}</button>
+      <button type="button" onClick={togglePlayback} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rcl-blue text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label={manualPlayback === true ? 'Pause profile song' : 'Play profile song'}>
+        {manualPlayback === true ? <FaPause /> : <FaPlay />}
+      </button>
+      <button type="button" onClick={() => { setMuted(value => !value); setReloadKey(value => value + 1); }} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/20 text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label={muted ? 'Unmute profile song' : 'Mute profile song'} aria-pressed={muted}>
+        {muted ? <FaVolumeXmark /> : <FaVolumeHigh />}
+      </button>
     </div>
-
-    <div className="mt-4 flex items-center gap-3 rounded-xl border border-[#E1E8F0] bg-white px-4 py-3">
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${started ? 'bg-rcl-blue/10 text-rcl-blue' : 'bg-[#F1F4F8] text-[#71839A]'}`} aria-hidden="true"><FaMusic /></div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-[#0F2547]">{started ? 'Playing your profile song' : 'Profile song paused'}</p>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E8EEF5]"><span className={`block h-full rounded-full bg-rcl-blue transition-all ${started ? 'w-2/3' : 'w-1/4'}`} /></div>
-      </div>
-      <button type="button" onClick={() => { setMuted(value => !value); setReloadKey(key => key + 1); }} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#71839A] transition hover:bg-[#F1F4F8] hover:text-[#0F2547]" aria-label={muted ? 'Unmute profile soundtrack' : 'Mute profile soundtrack'}><FaVolumeHigh /></button>
-    </div>
-
-    <iframe key={`${videoId}-${reloadKey}-${muted}-${started}`} title={`${profileName}'s profile soundtrack audio`} src={embedUrl} allow="autoplay; encrypted-media; picture-in-picture" aria-hidden="true" className="pointer-events-none absolute h-px w-px opacity-0" />
+    <iframe key={`${videoId}-${reloadKey}-${muted}-${manualPlayback}`} title={`${profileName}'s profile soundtrack audio`} src={embedUrl} allow="autoplay; encrypted-media; picture-in-picture" aria-hidden="true" className="pointer-events-none absolute h-px w-px opacity-0" />
   </section>;
 }
