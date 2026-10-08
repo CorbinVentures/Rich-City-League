@@ -53,6 +53,10 @@ export async function GET(request: Request) {
     });
   }
 
+  if (!process.env.OPENAI_API_KEY?.trim()) {
+    return NextResponse.json({ ok: false, published: false, beat, error: 'News generation is not configured.', requiredSetting: 'OPENAI_API_KEY' }, { status: 503 });
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)?.trim();
   if (!supabaseUrl || !serviceKey) {

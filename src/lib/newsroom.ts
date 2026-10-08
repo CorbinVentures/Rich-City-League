@@ -376,7 +376,7 @@ export async function generateNewsArticle(db: SupabaseClient, beat: NewsBeat) {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) throw new Error('OPENAI_API_KEY is not configured.');
 
-  const model = process.env.OPENAI_NEWSROOM_MODEL?.trim() || 'gpt-6-sol';
+  const model = process.env.OPENAI_NEWSROOM_MODEL?.trim() || 'gpt-5.6-terra';
   const recent = await recentNewsContext(db);
   const leagueContext = beat === 'rich-city-league' ? await richCityLeagueContext(db) : null;
   const businessContext = beat === 'rcl-insider' ? await rclBusinessContext(db) : null;

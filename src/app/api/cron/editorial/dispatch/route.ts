@@ -110,6 +110,11 @@ export async function GET(request: Request) {
     }
 
     const candidate = await research.json();
+    if (candidate?.candidate === false) {
+      // An empty, current-source search is not a production error.
+      results.push({ account, ok: true, published: false, reason: candidate.reason || 'No verifiable update today.' });
+      continue;
+    }
     const publish = await fetch(`${origin}/api/cron/editorial`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${secret}` },
