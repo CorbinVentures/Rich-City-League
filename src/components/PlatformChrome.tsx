@@ -8,7 +8,12 @@ import { LegalFooter } from '@/components/LegalFooter';
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAccessGateway = pathname === '/access';
+  const isStandalonePage = pathname === '/app' || pathname === '/profile' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/');
   const isImmersiveScorebook = pathname === '/portal/scorebook';
+
+  if (isStandalonePage) {
+    return <div className="rcl-platform-root rch-isolated-page"><a className="rcl-skip-link" href="#rcl-content">Skip to content</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
+  }
 
   if (isAccessGateway) {
     return <div className="rcl-access-gateway"><a className="rcl-skip-link" href="#rcl-content">Skip to content</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
