@@ -29,6 +29,7 @@ export default function ProfilePage() {
   const [location, setLocation] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
+  const [profileSongUrl, setProfileSongUrl] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'friends' | 'private'>('public');
   const [role, setRole] = useState<SelectedRole>('fan');
   const [saved, setSaved] = useState(false);
@@ -41,6 +42,7 @@ export default function ProfilePage() {
     setLocation(profile?.location ?? '');
     setAvatarUrl(profile?.avatar_url ?? '');
     setCoverUrl(profile?.cover_url ?? '');
+    setProfileSongUrl(profile?.profile_song_url ?? '');
     setVisibility(profile?.profile_visibility ?? 'public');
     if (profile?.role === 'player' || profile?.role === 'coach' || profile?.role === 'fan') setRole(profile.role === 'coach' ? 'official' : profile.role);
   }, [profile]);
@@ -69,7 +71,7 @@ export default function ProfilePage() {
     if (!supabase || !user || saving) return;
     setSaving(true);
     const writeClient = supabase as unknown as SupabaseClient;
-    const profileResult = await writeClient.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null, location: location.trim() || null, avatar_url: avatarUrl.trim() || null, cover_url: coverUrl.trim() || null, profile_visibility: visibility }).eq('id', user.id);
+    const profileResult = await writeClient.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null, location: location.trim() || null, avatar_url: avatarUrl.trim() || null, cover_url: coverUrl.trim() || null, profile_song_url: profileSongUrl.trim() || null, profile_visibility: visibility }).eq('id', user.id);
     if (profileResult.error) { setError('Unable to save your profile details.'); setSaving(false); return; }
     if (isPrivileged) { setSaved(true); setSaving(false); return; }
     const requestedRole = role === 'official' ? 'coach' : role;
@@ -133,6 +135,17 @@ export default function ProfilePage() {
           <div className="mt-6 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"/></label><div><p className="text-xs font-black uppercase tracking-wider text-white/40">Account role</p><p className="mt-2 flex h-12 items-center rounded-xl border border-white/10 bg-black/20 px-4 text-sm font-black uppercase text-white/55">{isPrivileged ? profile?.role?.toUpperCase() : role.toUpperCase()}</p></div></div>
           <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">Bio<textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={500} placeholder="Tell the RCL community who you are…" className="mt-2 h-32 w-full resize-none rounded-xl border border-rcl-blue/15 bg-black/25 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/><span className="mt-1 block text-right text-xs text-white/25">{bio.length}/500</span></label>
           <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Location<input value={location} onChange={e => setLocation(e.target.value)} maxLength={100} placeholder="Richmond, VA" className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label><label className="block text-xs font-black uppercase tracking-wider text-white/40">Profile visibility<select value={visibility} onChange={e => setVisibility(e.target.value as 'public'|'friends'|'private')} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></label></div>
+        </section>
+
+        <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile soundtrack</p>
+          <h2 className="mt-1 font-display text-2xl font-black uppercase">Bring your profile to life</h2>
+          <p className="mt-2 text-sm leading-6 text-white/40">Paste a YouTube link and choose the song that plays when people visit your profile.</p>
+          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">
+            YouTube song link
+            <input value={profileSongUrl} onChange={e => setProfileSongUrl(e.target.value)} maxLength={500} placeholder="https://www.youtube.com/watch?v=..." className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/>
+          </label>
+          <p className="mt-3 text-xs leading-5 text-white/30">RCL will attempt to start it when your profile opens. Browsers may require the visitor to tap play.</p>
         </section>
 
         <div className="flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row sm:items-center sm:justify-between">
