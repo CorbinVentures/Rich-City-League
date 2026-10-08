@@ -38,32 +38,25 @@ export function ProfileSoundtrack({ url, profileName }: { url?: string | null; p
     setReloadKey(key => key + 1);
   };
 
-  const startPlayback = () => {
-    setStarted(true);
-    setMuted(false);
-    setReloadKey(key => key + 1);
-  };
-
-  return <section className="relative mt-5 overflow-hidden rounded-3xl border border-rcl-orange/30 bg-[radial-gradient(circle_at_78%_12%,rgba(46,130,255,.2),transparent_34%),linear-gradient(135deg,#0b1d30,#050b12)] p-4 shadow-[0_24px_60px_rgba(3,7,13,.28)] sm:p-5" aria-label={`${profileName}'s profile soundtrack`}>
+  return <section className="relative mt-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-4 shadow-sm sm:p-5" aria-label={`${profileName}'s profile soundtrack`}>
     <div className="flex items-center gap-3">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-rcl-orange text-black shadow-[0_8px_22px_rgba(238,116,28,.25)]"><FaMusic /></span>
-      <p className="flex-1 text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile soundtrack</p>
-      <button type="button" onClick={togglePlayback} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-black/30 text-white transition hover:border-rcl-orange/60" aria-label={started ? 'Pause profile soundtrack' : 'Play profile soundtrack'}>{started ? <FaPause /> : <FaPlay />}</button>
-    </div>
-
-    <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-[#071522] p-3 shadow-inner sm:p-5">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(59,130,246,.28),transparent_46%),linear-gradient(160deg,rgba(7,21,34,.25),rgba(2,6,12,.9))]" />
-      <img src="/rch-boombox.webp" alt="Retro boombox profile player" className="relative z-10 mx-auto block w-full max-w-[520px] rounded-xl object-contain drop-shadow-[0_18px_22px_rgba(0,0,0,.5)]" />
-      <div className="absolute inset-x-5 bottom-5 z-20 flex items-center justify-between gap-3 sm:inset-x-8 sm:bottom-8">
-        <span className="rounded-full border border-white/15 bg-[#03070d]/85 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-white/75 backdrop-blur">{started ? 'Now playing' : 'Paused'}</span>
-        <button type="button" onClick={startPlayback} className="grid h-12 w-12 place-items-center rounded-full bg-rcl-orange text-black shadow-lg transition hover:scale-105" aria-label={started ? 'Restart profile soundtrack' : 'Play profile soundtrack'}>{started ? <FaPause /> : <FaPlay />}</button>
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-blue text-white"><FaMusic /></span>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Profile soundtrack</p>
+        <p className="mt-1 truncate text-sm font-semibold text-[#71839A]">YouTube audio</p>
       </div>
-      <iframe key={`${videoId}-${reloadKey}-${muted}-${started}`} title={`${profileName}'s profile soundtrack audio`} src={embedUrl} allow="autoplay; encrypted-media; picture-in-picture" aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-px w-px -translate-x-1/2 -translate-y-1/2 opacity-0" />
+      <button type="button" onClick={togglePlayback} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-rcl-blue text-white transition hover:brightness-110" aria-label={started ? 'Pause profile soundtrack' : 'Play profile soundtrack'}>{started ? <FaPause /> : <FaPlay />}</button>
     </div>
 
-    <div className="mt-3 flex items-center justify-between gap-3 text-xs text-white/40">
-      <span>Audio via YouTube</span>
-      <button type="button" onClick={() => { setMuted(value => !value); setReloadKey(key => key + 1); }} className="inline-flex items-center gap-2 font-bold text-white/60 transition hover:text-white"><FaVolumeHigh />{muted ? 'Unmute' : 'Mute'}</button>
+    <div className="mt-4 flex items-center gap-3 rounded-xl border border-[#E1E8F0] bg-white px-4 py-3">
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${started ? 'bg-rcl-blue/10 text-rcl-blue' : 'bg-[#F1F4F8] text-[#71839A]'}`} aria-hidden="true"><FaMusic /></div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-bold text-[#0F2547]">{started ? 'Playing your profile song' : 'Profile song paused'}</p>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E8EEF5]"><span className={`block h-full rounded-full bg-rcl-blue transition-all ${started ? 'w-2/3' : 'w-1/4'}`} /></div>
+      </div>
+      <button type="button" onClick={() => { setMuted(value => !value); setReloadKey(key => key + 1); }} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#71839A] transition hover:bg-[#F1F4F8] hover:text-[#0F2547]" aria-label={muted ? 'Unmute profile soundtrack' : 'Mute profile soundtrack'}><FaVolumeHigh /></button>
     </div>
+
+    <iframe key={`${videoId}-${reloadKey}-${muted}-${started}`} title={`${profileName}'s profile soundtrack audio`} src={embedUrl} allow="autoplay; encrypted-media; picture-in-picture" aria-hidden="true" className="pointer-events-none absolute h-px w-px opacity-0" />
   </section>;
 }
