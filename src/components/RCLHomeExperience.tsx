@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import {
   FaArrowRight, FaBasketball, FaComments, FaCompass, FaLocationDot,
-  FaPlay, FaShirt, FaCrown, FaTrophy, FaUserGroup
+  FaPlay, FaDownload, FaShirt, FaCrown, FaTrophy, FaUserGroup
 } from 'react-icons/fa6';
 
 type Team={id:string;name:string;logo_url?:string|null};
@@ -46,6 +46,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
         <div className="rcl-landing-actions">
           <Link href={user?'/social':'/auth/sign-up'} className="rcl-landing-primary">{user?'Open your feed':'Join free'} <FaArrowRight/></Link>
           <Link href="/social" className="rcl-landing-secondary"><FaPlay/> See what&apos;s happening</Link>
+          <Link href="/app" className="rcl-landing-secondary"><FaDownload/> Get the RCH App</Link>
         </div>
         <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>
       </div>
