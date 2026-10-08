@@ -1,0 +1,167 @@
+/* Dedicated, accessible RCH installation landing page. */
+html body .rcl-platform-root main.rch-download-page {
+  background: #f5f8fc !important;
+  color: #102647 !important;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+html body .rch-download-hero {
+  background: linear-gradient(130deg, #0c2342 0%, #153b67 62%, #0b2340 100%) !important;
+  color: #fff !important;
+  padding: clamp(40px,7vw,82px) max(22px,calc((100vw - 1120px)/2));
+}
+html body .rch-download-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0,1.4fr) minmax(250px,.7fr);
+  gap: clamp(28px,5vw,80px);
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+html body .rch-download-eyebrow,
+html body .rch-download-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  color: #7cb7ff !important;
+}
+html body .rch-download-hero h1 {
+  margin: 20px 0;
+  max-width: 680px;
+  font-size: clamp(38px,5.2vw,70px);
+  font-weight: 850 !important;
+  line-height: 1.08;
+  letter-spacing: -.048em;
+  color: #ffffff !important;
+}
+html body .rch-download-hero h1 em {
+  font-style: normal;
+  color: #94c9ff !important;
+}
+html body .rch-download-intro {
+  max-width: 620px;
+  color: #d6e5f7 !important;
+  line-height: 1.65;
+  font-size: clamp(16px,2vw,19px);
+}
+html body .rch-download-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 25px 0 24px;
+}
+html body .rch-download-benefits span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e5f2ff !important;
+}
+html body .rch-download-benefits svg { color: #9ed4ff !important; }
+html body .rch-download-main-action { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+html body .rch-download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 13px 23px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+html body .rch-download-primary {
+  background: #c4e6ff !important;
+  border: 2px solid #c4e6ff !important;
+  color: #092440 !important;
+}
+html body .rch-download-primary:hover { background: #e2f4ff !important; }
+html body .rch-download-action-note { color: #d3e4f7 !important; font-size: 12px; }
+html body .rch-download-device-art {
+  width: min(100%,335px);
+  min-height: 390px;
+  justify-self: center;
+  padding: 42px 22px 28px;
+  border: 5px solid #6c9aca;
+  border-radius: 36px;
+  background: #f7faff !important;
+  color: #102647 !important;
+  box-shadow: 0 20px 75px rgba(0,0,0,.32);
+  text-align: center;
+}
+html body .rch-download-logo {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 18px;
+  border: 1px solid #d3e2f1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+}
+html body .rch-download-logo img { display: block; width: 100%; height: 100%; }
+html body .rch-download-device-art > strong { display: block; color: #102647 !important; font-size: 20px; letter-spacing: -.02em; }
+html body .rch-download-device-art > span { display: block; color: #455f7d !important; font-size: 10px; font-weight: 800; letter-spacing: .12em; margin: 12px 0 30px; }
+html body .rch-download-screen-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+html body .rch-download-screen-stats div { display: flex; flex-direction: column; align-items: center; gap: 7px; background: #e9f2fc !important; color: #102647 !important; padding: 16px 7px; border-radius: 11px; }
+html body .rch-download-screen-stats svg { color: #397fc8 !important; font-size: 20px; }
+html body .rch-download-screen-stats b { color: #102647 !important; font-size: 14px; }
+html body .rch-download-screen-stats small { color: #455f7d !important; font-size: 11px; line-height: 1.4; }
+html body .rch-download-content { width: min(760px,calc(100% - 40px)); margin: 0 auto; padding: 55px 0 20px; scroll-margin-top: 80px; }
+html body .rch-download-content-heading { text-align: center; }
+html body .rch-download-content-heading h2 { margin: 10px 0; color: #102647 !important; font-size: clamp(27px,4vw,38px); line-height: 1.18; }
+html body .rch-download-content-heading p { color: #4b617a !important; line-height: 1.6; }
+html body .rch-download-choice { display: flex; justify-content: center; gap: 12px; margin: 27px 0 20px; }
+html body .rch-download-choice button {
+  min-height: 45px;
+  padding: 9px 22px;
+  border: 1px solid #adbed2;
+  border-radius: 11px;
+  background: #fff !important;
+  color: #152c49 !important;
+  font-weight: 800;
+}
+html body .rch-download-choice button.selected { background: #132f51 !important; border-color: #132f51 !important; color: #fff !important; }
+html body .rch-download-guide {
+  border: 1px solid #cad9e8;
+  border-radius: 18px;
+  padding: clamp(22px,4vw,32px);
+  background: #fff !important;
+  color: #142d4c !important;
+  box-shadow: 0 13px 40px rgba(28,58,92,.07);
+}
+html body .rch-download-guide-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+html body .rch-download-guide-heading > svg { width: 40px; height: 40px; padding: 9px; border-radius: 10px; background: #e2f0ff; color: #174c84 !important; flex-shrink: 0; }
+html body .rch-download-guide-heading span { display: block; color: #2664ac !important; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; font-weight: 800; }
+html body .rch-download-guide-heading h3 { margin: 4px 0 0; font-size: 23px; color: #102647 !important; }
+html body .rch-download-guide > p { color: #3c5673 !important; line-height: 1.7; font-size: 15px; }
+html body .rch-download-steps { display: grid; gap: 12px; list-style: none; padding: 0; margin: 24px 0; }
+html body .rch-download-steps li { display: flex; align-items: flex-start; gap: 13px; font-size: 14px; line-height: 1.65; color: #213d5c !important; }
+html body .rch-download-steps li > b { display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px; background: #e0efff; color: #123d69 !important; }
+html body .rch-download-steps strong { color: #102647 !important; }
+html body .rch-download-secondary { background: #102f55 !important; border: 2px solid #102f55 !important; color: #fff !important; margin-top: 20px; }
+html body .rch-download-secondary:hover { background: #205184 !important; }
+html body .rch-download-footnote, html body .rch-download-status { margin-top: 18px; font-size: 13px !important; }
+html body .rch-download-status { border-left: 3px solid #3683d0; padding: 11px 13px; background: #e8f3ff !important; color: #153956 !important; border-radius: 6px; }
+html body .rch-download-trust { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; padding: 16px 18px; border: 1px solid #cad9e8; border-radius: 14px; background: #eaf2fb !important; color: #294561 !important; }
+html body .rch-download-trust svg { flex-shrink: 0; margin-top: 2px; color: #205184 !important; }
+html body .rch-download-trust p { color: #294561 !important; font-size: 13px; line-height: 1.65; }
+html body .rch-download-trust b { color: #102647 !important; }
+html body .rch-download-return { margin-top: 25px; text-align: center; }
+html body .rch-download-return a { display: inline-flex; gap: 8px; align-items: center; color: #1b588f !important; font-weight: 800; }
+html body .rch-download-button:focus-visible, html body .rch-download-choice button:focus-visible { outline: 3px solid #268bff !important; outline-offset: 3px; }
+@media (max-width: 760px) {
+  html body .rch-download-hero { padding: 36px 22px 45px; }
+  html body .rch-download-hero-inner { grid-template-columns: 1fr; }
+  html body .rch-download-device-art { width: min(100%,280px); min-height: 290px; padding: 20px; }
+  html body .rch-download-device-art > span { margin-bottom: 16px; }
+  html body .rch-download-benefits { flex-direction: column; }
+  html body .rch-download-button { width: 100%; text-align: center; }
+  html body .rch-download-main-action { align-items: stretch; }
+  html body .rch-download-content { padding-top: 39px; }
+  html body .rch-download-choice button { flex: 1; padding: 9px 7px; }
+}
