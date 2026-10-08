@@ -1,0 +1,93 @@
+/* Accessible, opaque install experience on the regular site.
+ * Keep these rules after the legacy theme layers: the prompt is mounted outside
+ * .rcl-platform-root, and its surface must never inherit page-through contrast.
+ */
+html body .rcl-pwa-install-card {
+  background: #0b2541 !important;
+  background-image: none !important;
+  color: #f8fbff !important;
+  border: 1px solid #56738e !important;
+  box-shadow: 0 18px 55px rgba(4, 18, 38, .36) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+html body .rcl-pwa-install-heading h2,
+html body .rcl-pwa-ios-guide b {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+html body .rcl-pwa-kicker,
+html body .rcl-pwa-guide-title {
+  color: #b7e2ff !important;
+  opacity: 1 !important;
+}
+
+html body .rcl-pwa-copy {
+  color: #d9e6f3 !important;
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 1 !important;
+}
+
+html body .rcl-pwa-close,
+html body .rcl-pwa-secondary {
+  background: #183b5c !important;
+  border-color: #7392ad !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html body .rcl-pwa-close {
+  width: 36px;
+  height: 36px;
+}
+
+html body .rcl-pwa-primary {
+  background: #bfe5ff !important;
+  border-color: #d6efff !important;
+  color: #071b30 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .rcl-pwa-primary:focus-visible,
+html body .rcl-pwa-secondary:focus-visible,
+html body .rcl-pwa-close:focus-visible {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 2px;
+}
+
+html body .rcl-pwa-ios-guide {
+  border-top-color: #496781 !important;
+}
+
+html body .rcl-pwa-ios-guide li {
+  background: #153653 !important;
+  border-color: #56738e !important;
+  color: #f8fbff !important;
+}
+
+html body .rcl-pwa-ios-guide li > span {
+  background: #cceaff !important;
+  color: #08223c !important;
+}
+
+html body .rcl-pwa-ios-guide small {
+  color: #d9e6f3 !important;
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 1 !important;
+}
+
+@media (max-width: 767px) {
+  html body .rcl-pwa-install-card {
+    max-height: min(72dvh, 580px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
