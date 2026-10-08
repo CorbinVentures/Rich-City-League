@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { BasketballOSToday } from '@/components/BasketballOSToday';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Today in RCL | Rich City League' },
-  description: 'Your personalized Rich City League basketball command center for games, REP, missions, runs, training, highlights and community activity.',
+  title: { absolute: 'RCH Today | Rich City Hoops' },
+  description: 'RCH Today: real Richmond basketball activity, local runs, community conversation, organizations, and Rich City League games.',
   alternates: { canonical: '/today' },
 };
 
