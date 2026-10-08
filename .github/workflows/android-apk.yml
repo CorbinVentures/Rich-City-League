@@ -16,6 +16,9 @@ jobs:
     name: Build Android Trusted Web Activity
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
 
@@ -32,8 +35,11 @@ jobs:
 
       - name: Use preinstalled Android SDK
         run: |
-          test -n "$ANDROID_HOME"
-          command -v sdkmanager
+          set -euo pipefail
+          test -d "$ANDROID_HOME/cmdline-tools"
+          sdkmanager_bin="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"
+          test -n "$sdkmanager_bin"
+          echo "$(dirname "$sdkmanager_bin")" >> "$GITHUB_PATH"
 
       - name: Install Android platform and Bubblewrap
         run: |
