@@ -1,6 +1,6 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple,
-  FaCompass, FaCrown, FaGlobe, FaHandshake, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
+  FaCompass, FaCrown, FaDownload, FaGlobe, FaHandshake, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
   FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUserPlus, FaUsers
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
@@ -24,6 +24,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Your identity, people, conversations and personalized basketball world',
     items:[
       {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
       {label:'My Profile',href:'/social/profile/me',icon:FaUser},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},

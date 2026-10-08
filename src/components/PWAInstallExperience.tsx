@@ -137,7 +137,8 @@ export function PWAInstallExperience() {
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [installed, setInstalled] = useState(false);
 
-  const suppressPrompt = pathname === '/access'
+  const suppressPrompt = pathname === '/app'
+    || pathname === '/access'
     || pathname === '/member-access'
     || pathname.startsWith('/auth/')
     || pathname.startsWith('/legal');
@@ -155,6 +156,7 @@ export function PWAInstallExperience() {
     const beforeInstall = (event: Event) => {
       event.preventDefault();
       const installEvent = event as BeforeInstallPromptEvent;
+      (window as Window & { __rchInstallPrompt?: BeforeInstallPromptEvent }).__rchInstallPrompt = installEvent;
       setDeferredPrompt(installEvent);
       setEligible(true);
     };
@@ -164,6 +166,7 @@ export function PWAInstallExperience() {
       setVisible(false);
       setShowIOSGuide(false);
       setDeferredPrompt(null);
+      delete (window as Window & { __rchInstallPrompt?: BeforeInstallPromptEvent }).__rchInstallPrompt;
       document.documentElement.dataset.rclDisplayMode = 'standalone';
     };
 

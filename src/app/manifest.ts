@@ -21,6 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     icons: [
       { src:'/favicon.svg?v=black-r-1', sizes:'any', type:'image/svg+xml', purpose:'any' },
+      { src:'/icon-192.png', sizes:'192x192', type:'image/png', purpose:'any' },
       { src:'/icon?v=black-r-1', sizes:'512x512', type:'image/png', purpose:'any' },
       { src:'/icon?v=black-r-1', sizes:'512x512', type:'image/png', purpose:'maskable' },
     ],
