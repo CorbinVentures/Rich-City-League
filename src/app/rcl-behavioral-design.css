@@ -1,0 +1,458 @@
+/*
+ * RCL Behavioral Design System
+ * Final visual authority layer.
+ *
+ * Psychology goals:
+ * - dark neutrals create immersion without visual fatigue
+ * - orange is scarce and means action / active state / meaningful attention
+ * - gold means prestige / premium / earned status
+ * - green means completion / success
+ * - blue means neutral information
+ * - red means destructive / urgent only
+ * - surfaces are quiet so people, media, scores and next actions carry the emotion
+ */
+
+:root {
+  --rcl-psych-bg: #090d12;
+  --rcl-psych-bg-deep: #06090d;
+  --rcl-psych-surface: #111820;
+  --rcl-psych-surface-2: #18212c;
+  --rcl-psych-surface-3: #202b37;
+  --rcl-psych-border: #26313d;
+  --rcl-psych-border-soft: rgba(167, 176, 188, .14);
+  --rcl-psych-text: #f5f7fa;
+  --rcl-psych-muted: #a7b0bc;
+  --rcl-psych-subtle: #778391;
+  --rcl-psych-orange: #ff6a00;
+  --rcl-psych-orange-soft: #ff8a33;
+  --rcl-psych-orange-wash: rgba(255, 106, 0, .10);
+  --rcl-psych-gold: #f4bf4f;
+  --rcl-psych-gold-soft: #ffdd8a;
+  --rcl-psych-success: #32d583;
+  --rcl-psych-info: #46a8ff;
+  --rcl-psych-danger: #ff5664;
+  --rcl-psych-radius: 14px;
+  --rcl-psych-radius-sm: 10px;
+  --rcl-psych-shadow: 0 16px 42px rgba(0, 0, 0, .22);
+  --rcl-psych-shadow-soft: 0 8px 24px rgba(0, 0, 0, .16);
+
+  /* Restore the actual RCL brand accent after the prior ice-blue authority layers. */
+  --rcl-bg: var(--rcl-psych-bg) !important;
+  --rcl-surface: var(--rcl-psych-surface) !important;
+  --rcl-surface-2: var(--rcl-psych-surface-2) !important;
+  --rcl-line: var(--rcl-psych-border-soft) !important;
+  --rcl-muted: var(--rcl-psych-muted) !important;
+  --rcl-charcoal: var(--rcl-psych-bg) !important;
+  --rcl-navy: var(--rcl-psych-surface) !important;
+  --rcl-cream: var(--rcl-psych-text) !important;
+  --rcl-orange: var(--rcl-psych-orange) !important;
+  --rcl-orange-corporate: var(--rcl-psych-orange) !important;
+  --rcl-court-orange: var(--rcl-psych-orange) !important;
+  --rcl-basket-orange: var(--rcl-psych-orange) !important;
+  --rcl-gold: var(--rcl-psych-gold) !important;
+  --rcl-blue: var(--rcl-psych-info) !important;
+}
+
+html {
+  background: var(--rcl-psych-bg-deep) !important;
+}
+
+html body {
+  color: var(--rcl-psych-text) !important;
+  background:
+    radial-gradient(circle at 84% -10%, rgba(255, 106, 0, .045), transparent 26rem),
+    radial-gradient(circle at 7% 74%, rgba(70, 168, 255, .025), transparent 34rem),
+    linear-gradient(180deg, #0a0f15 0%, var(--rcl-psych-bg) 52%, var(--rcl-psych-bg-deep) 100%) !important;
+  background-attachment: fixed;
+}
+
+body::before {
+  opacity: .018 !important;
+}
+
+::selection {
+  background: rgba(255, 106, 0, .86) !important;
+  color: #090d12 !important;
+}
+
+/* -------------------- Readability / hierarchy -------------------- */
+body,
+button,
+input,
+textarea,
+select {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.rcl-platform-root :where(h1, h2, h3, h4) {
+  color: var(--rcl-psych-text) !important;
+  text-shadow: none !important;
+  text-wrap: balance;
+}
+
+.rcl-platform-root :where(h1, h2) {
+  font-weight: 740 !important;
+}
+
+.rcl-platform-root h1 {
+  letter-spacing: -.04em !important;
+}
+
+.rcl-platform-root h2 {
+  letter-spacing: -.03em !important;
+}
+
+.rcl-platform-root :where(p, li) {
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.rcl-platform-root :where(p, li, small)[class*="text-white/4"],
+.rcl-platform-root :where(p, li, small)[class*="text-white/5"],
+.rcl-platform-root :where(p, li, small)[class*="text-slate"],
+.rcl-platform-root :where(p, li, small)[class*="text-gray"] {
+  color: var(--rcl-psych-muted) !important;
+}
+
+.rcl-kicker,
+.rcl-world .rcl-kicker,
+.rcl-world .rcl-home-content .rcl-kicker,
+.text-rcl-orange {
+  color: var(--rcl-psych-orange) !important;
+}
+
+.text-rcl-gold {
+  color: var(--rcl-psych-gold) !important;
+}
+
+.text-rcl-blue {
+  color: var(--rcl-psych-info) !important;
+}
+
+/* Legacy utility color rescue: orange once again means intentional attention. */
+.rcl-platform-root [class*="text-orange-"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"],
+.rcl-platform-root [class*="text-[#3B82F6"] {
+  color: var(--rcl-psych-orange) !important;
+}
+
+/* -------------------- Quiet surfaces -------------------- */
+.rcl-panel,
+.rcl-game-card,
+.rcl-news-card,
+.city-dashboard,
+.city-section,
+.lab-panel,
+.lab-workout,
+.rcl-draft-module,
+.rcl-admin-module,
+.rcl-navigation-panel {
+  border-color: var(--rcl-psych-border-soft) !important;
+  background: linear-gradient(145deg, rgba(24, 33, 44, .93), rgba(14, 20, 28, .96)) !important;
+  box-shadow: var(--rcl-psych-shadow-soft) !important;
+}
+
+.rcl-platform-root :where(section, article, aside, form, div)[class*="rounded-3xl"][class*="border"],
+.rcl-platform-root :where(section, article, aside, form, div)[class*="rounded-2xl"][class*="border"] {
+  border-color: var(--rcl-psych-border-soft) !important;
+  box-shadow: var(--rcl-psych-shadow-soft) !important;
+}
+
+.rcl-platform-root :where(.rcl-card, .rcl-panel, .rcl-game-card, .rcl-news-card, .rcl-admin-module):hover {
+  border-color: rgba(167, 176, 188, .24) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Basketball texture stays atmospheric, never competes with content. */
+.rcl-platform-root main::before,
+.rcl-platform-root main::after {
+  opacity: .18 !important;
+}
+
+.rcl-hero,
+.city-hero,
+.rcl-draft-hero {
+  background:
+    radial-gradient(circle at 80% 25%, rgba(255, 106, 0, .065), transparent 23rem),
+    linear-gradient(145deg, #121b25 0%, #0b1118 56%, #080c11 100%) !important;
+  border-color: var(--rcl-psych-border-soft) !important;
+}
+
+/* -------------------- Action scarcity -------------------- */
+.rcl-button,
+.rcl-draft-primary,
+.rcl-primary-action,
+.rcl-platform-root :where(button, a)[class*="bg-rcl-orange"] {
+  border: 1px solid rgba(255, 138, 51, .46) !important;
+  border-radius: var(--rcl-psych-radius-sm) !important;
+  background: linear-gradient(145deg, var(--rcl-psych-orange-soft), var(--rcl-psych-orange)) !important;
+  color: #090d12 !important;
+  box-shadow: 0 10px 24px rgba(255, 106, 0, .13) !important;
+  font-weight: 760 !important;
+}
+
+.rcl-button:hover,
+.rcl-draft-primary:hover,
+.rcl-primary-action:hover,
+.rcl-platform-root :where(button, a)[class*="bg-rcl-orange"]:hover {
+  background: linear-gradient(145deg, #ff963f, #ff7414) !important;
+  box-shadow: 0 12px 28px rgba(255, 106, 0, .18) !important;
+  transform: translateY(-1px) !important;
+}
+
+.rcl-button:active,
+.rcl-draft-primary:active,
+.rcl-primary-action:active {
+  transform: translateY(0) scale(.99) !important;
+}
+
+/* Blue is informational / secondary, not the default emotional CTA. */
+.rcl-platform-root :where(button, a)[class*="bg-rcl-blue"] {
+  border: 1px solid rgba(70, 168, 255, .26) !important;
+  background: rgba(70, 168, 255, .12) !important;
+  color: #d8ecff !important;
+  box-shadow: none !important;
+}
+
+.rcl-secondary-action,
+.rcl-platform-root :where(button, a)[class*="bg-white/"] {
+  border-color: rgba(167, 176, 188, .18) !important;
+}
+
+/* Active controls receive one restrained orange signal rather than full orange chrome. */
+.rcl-filter-row button.active {
+  border-color: rgba(255, 106, 0, .32) !important;
+  background: var(--rcl-psych-orange-wash) !important;
+  color: #ffd8bd !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 106, 0, .06) !important;
+}
+
+/* -------------------- Forms: reduce uncertainty -------------------- */
+.rcl-platform-root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+.rcl-platform-root textarea,
+.rcl-platform-root select {
+  border: 1px solid var(--rcl-psych-border) !important;
+  border-radius: var(--rcl-psych-radius-sm) !important;
+  background: #0d141c !important;
+  color: var(--rcl-psych-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018) !important;
+}
+
+.rcl-platform-root input::placeholder,
+.rcl-platform-root textarea::placeholder {
+  color: #6f7b88 !important;
+}
+
+.rcl-platform-root input:focus,
+.rcl-platform-root textarea:focus,
+.rcl-platform-root select:focus {
+  border-color: rgba(255, 106, 0, .58) !important;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, .10) !important;
+  outline: none !important;
+}
+
+:where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--rcl-psych-orange) !important;
+}
+
+/* -------------------- Navigation: orientation before decoration -------------------- */
+.rcl-universal-sidebar,
+.rcl-home-sidebar {
+  background: linear-gradient(180deg, rgba(17, 24, 32, .985), rgba(8, 13, 18, .995)) !important;
+  border-right-color: var(--rcl-psych-border-soft) !important;
+  box-shadow: 14px 0 40px rgba(0,0,0,.16) !important;
+}
+
+.rcl-universal-topbar,
+.rcl-home-topbar,
+.rcl-member-topbar {
+  background: rgba(9, 13, 18, .88) !important;
+  border-bottom-color: var(--rcl-psych-border-soft) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
+}
+
+.rcl-universal-mark,
+.rcl-home-mark,
+.rcl-universal-wordmark > span,
+.rcl-home-wordmark > span {
+  border-color: rgba(255, 106, 0, .28) !important;
+  background: rgba(255, 106, 0, .075) !important;
+  color: #ffd8bd !important;
+  box-shadow: none !important;
+}
+
+.rcl-universal-brand i,
+.rcl-home-brand i,
+.rcl-universal-wordmark i,
+.rcl-home-wordmark i,
+.rcl-member-sidebar .rcl-universal-brand small,
+.rcl-member-topbar .rcl-universal-wordmark i {
+  color: var(--rcl-psych-orange) !important;
+}
+
+.rcl-universal-nav a,
+.rcl-home-sidebar nav a,
+.rcl-universal-more,
+.rcl-home-all-rcl {
+  color: #aeb8c3 !important;
+}
+
+.rcl-universal-nav a svg,
+.rcl-home-sidebar nav a svg,
+.rcl-universal-more svg,
+.rcl-home-all-rcl svg {
+  color: #7f8b98 !important;
+}
+
+.rcl-universal-nav a:hover,
+.rcl-home-sidebar nav a:hover,
+.rcl-universal-more:hover,
+.rcl-home-all-rcl:hover {
+  border-color: rgba(167, 176, 188, .13) !important;
+  background: rgba(255,255,255,.035) !important;
+  color: var(--rcl-psych-text) !important;
+}
+
+.rcl-universal-nav a.active,
+.rcl-home-sidebar nav a.active,
+.rcl-universal-nav a[aria-current="page"],
+.rcl-home-sidebar nav a[aria-current="page"] {
+  border-color: rgba(255, 106, 0, .16) !important;
+  background: linear-gradient(90deg, rgba(255, 106, 0, .10), rgba(255, 106, 0, .025)) !important;
+  color: var(--rcl-psych-text) !important;
+  box-shadow: inset 2px 0 0 var(--rcl-psych-orange) !important;
+}
+
+.rcl-universal-nav a.active svg,
+.rcl-home-sidebar nav a.active svg,
+.rcl-universal-nav a[aria-current="page"] svg,
+.rcl-home-sidebar nav a[aria-current="page"] svg {
+  color: var(--rcl-psych-orange) !important;
+}
+
+.rcl-universal-avatar {
+  border-color: rgba(167, 176, 188, .18) !important;
+  background: var(--rcl-psych-surface-2) !important;
+  color: var(--rcl-psych-text) !important;
+}
+
+.rcl-universal-bottom {
+  background: rgba(9, 13, 18, .94) !important;
+  border-top-color: var(--rcl-psych-border-soft) !important;
+  box-shadow: 0 -10px 28px rgba(0,0,0,.18) !important;
+}
+
+.rcl-universal-bottom a.active,
+.rcl-universal-bottom a[aria-current="page"],
+.rcl-universal-bottom button.active {
+  color: var(--rcl-psych-orange) !important;
+}
+
+/* -------------------- Semantic color language -------------------- */
+.bg-rcl-gold {
+  background: linear-gradient(145deg, var(--rcl-psych-gold-soft), var(--rcl-psych-gold)) !important;
+  color: #171207 !important;
+}
+
+.border-rcl-gold {
+  border-color: rgba(244, 191, 79, .42) !important;
+}
+
+.rcl-vip-chip,
+.rcl-status-premium {
+  border-color: rgba(244, 191, 79, .45) !important;
+  background: linear-gradient(135deg, rgba(79, 58, 13, .96), rgba(173, 125, 28, .94)) !important;
+  color: #fff0be !important;
+  box-shadow: 0 8px 22px rgba(120, 83, 14, .15) !important;
+}
+
+.rcl-status-success {
+  border-color: rgba(50, 213, 131, .30) !important;
+  background: rgba(50, 213, 131, .10) !important;
+  color: #92efbd !important;
+}
+
+.rcl-status-info {
+  border-color: rgba(70, 168, 255, .30) !important;
+  background: rgba(70, 168, 255, .10) !important;
+  color: #a9d6ff !important;
+}
+
+.rcl-status-danger {
+  border-color: rgba(255, 86, 100, .34) !important;
+  background: rgba(255, 86, 100, .10) !important;
+  color: #ffabb2 !important;
+}
+
+.rcl-status-live {
+  border-color: rgba(255, 86, 100, .34) !important;
+  background: rgba(255, 86, 100, .10) !important;
+  color: #ffabb2 !important;
+}
+
+/* -------------------- Progress / reward cues -------------------- */
+.rcl-progress-track {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: #1b2530;
+}
+
+.rcl-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--rcl-psych-orange), var(--rcl-psych-orange-soft));
+}
+
+.rcl-next-action {
+  border-left: 2px solid var(--rcl-psych-orange) !important;
+  background: linear-gradient(90deg, rgba(255, 106, 0, .065), transparent 72%) !important;
+}
+
+/* -------------------- Motion means feedback, not decoration -------------------- */
+.rcl-platform-root :where(a, button) {
+  transition-duration: 160ms !important;
+  transition-timing-function: ease-out !important;
+}
+
+.rcl-platform-root :where(a, button):focus-visible {
+  outline: 2px solid var(--rcl-psych-orange) !important;
+  outline-offset: 3px !important;
+}
+
+/* Decorative infinite shimmer is intentionally removed from normal status display. */
+.rcl-vip-chip::after {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+/* -------------------- Mobile cognitive load / touch comfort -------------------- */
+@media (max-width: 767px) {
+  .rcl-platform-root :where(button, a[role="button"], input, select, textarea) {
+    min-height: 44px;
+  }
+
+  .rcl-platform-root :where(p, li) {
+    font-size: max(.925rem, 14px);
+  }
+
+  .rcl-platform-root :where(h1) {
+    max-width: 18ch;
+  }
+
+  .rcl-universal-bottom :where(a, button) {
+    min-height: 58px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

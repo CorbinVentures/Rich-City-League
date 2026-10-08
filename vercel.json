@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/admin/leagueapps?action=sync-competition",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/leagueapps-people",
+      "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/cron/editorial/dispatch",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/official/daily",
+      "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/cron/newsroom/daily",
+      "schedule": "20 * * * *"
+    },
+    {
+      "path": "/api/cron/sports-wire",
+      "schedule": "40 * * * *"
+    }
+  ]
+}

@@ -141,10 +141,7 @@ export default function ProfilePage() {
           <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile soundtrack</p>
           <h2 className="mt-1 font-display text-2xl font-black uppercase">Bring your profile to life</h2>
           <p className="mt-2 text-sm leading-6 text-white/40">Paste a YouTube link and choose the song that plays when people visit your profile.</p>
-          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">
-            YouTube song link
-            <input value={profileSongUrl} onChange={e => setProfileSongUrl(e.target.value)} maxLength={500} placeholder="https://www.youtube.com/watch?v=..." className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/>
-          </label>
+          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">YouTube song link<input value={profileSongUrl} onChange={e => setProfileSongUrl(e.target.value)} maxLength={500} placeholder="https://www.youtube.com/watch?v=..." className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label>
           <p className="mt-3 text-xs leading-5 text-white/30">RCL will attempt to start it when your profile opens. Browsers may require the visitor to tap play.</p>
         </section>
 

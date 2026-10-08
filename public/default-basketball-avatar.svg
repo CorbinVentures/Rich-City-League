@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Default basketball player profile</title>
+  <desc id="desc">A dark basketball player silhouette on a clean white and light blue background.</desc>
+  <rect width="512" height="512" fill="#ffffff"/>
+  <circle cx="256" cy="256" r="238" fill="#f5f9ff"/>
+  <circle cx="256" cy="256" r="210" fill="#eaf2ff"/>
+  <path d="M84 388c42-43 91-70 146-80 50-9 100-3 147 19 26 12 49 29 70 51v92H84z" fill="#0f2547"/>
+  <circle cx="251" cy="178" r="62" fill="#0f2547"/>
+  <path d="M187 236c26-17 57-26 91-25 43 1 81 17 110 49l-37 66c-20-23-44-36-72-39-35-4-69 7-101 33l-47-54c17-12 36-22 56-30z" fill="#0f2547"/>
+  <path d="M360 242c19-30 42-54 68-73 16-12 34-20 52-26l13 43c-17 8-32 17-44 28-20 17-36 39-49 66z" fill="#0f2547"/>
+  <path d="M151 263c-18 7-35 17-49 30-17 15-30 33-39 53l43 22c9-16 19-29 31-39 11-9 25-17 41-23z" fill="#0f2547"/>
+  <circle cx="438" cy="126" r="47" fill="#111827"/>
+  <path d="M392 126h92M438 80c12 18 18 33 18 46s-6 28-18 47M438 80c-12 18-18 33-18 46s6 28 18 47M405 94c15 9 26 20 33 32 7 12 11 25 12 40M471 94c-15 9-26 20-33 32-7 12-11 25-12 40" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+  <path d="M111 414c39-37 83-60 132-69 61-11 120 2 176 40" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity=".65"/>
+</svg>

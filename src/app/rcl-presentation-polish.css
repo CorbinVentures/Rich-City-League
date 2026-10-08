@@ -1,0 +1,531 @@
+/*
+ * RCL sitewide presentation polish.
+ * Final authority layer loaded after the visual/rebrand stack.
+ * Purpose: prevent text collisions/overflow, normalize responsive rhythm,
+ * improve small-screen readability, and keep intentional dark media zones intact.
+ */
+
+:root {
+  --rcl-polish-gutter: clamp(1rem, 2.6vw, 1.5rem);
+  --rcl-polish-reading: 68ch;
+}
+
+/* ---------- Universal containment ---------- */
+html,
+body,
+.rcl-platform-root,
+.rcl-platform-root > main {
+  width: 100%;
+  max-width: 100%;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.rcl-platform-root :where(
+  main,section,article,aside,header,footer,nav,form,fieldset,
+  div,ul,ol,li,figure,figcaption
+) {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.rcl-platform-root :where(.grid,.flex) > * {
+  min-width: 0;
+}
+
+.rcl-platform-root :where(img,video,iframe,canvas,picture) {
+  max-width: 100% !important;
+}
+
+.rcl-platform-root :where(pre,code) {
+  max-width: 100%;
+}
+
+.rcl-platform-root pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- Typography that always fits ---------- */
+.rcl-platform-root :where(h1,h2,h3,h4,h5,h6) {
+  max-width: 100%;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
+.rcl-platform-root :where(p,li,dd,dt,figcaption) {
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/*
+ * Sitewide contrast guard.
+ * Zero-specificity defaults keep ordinary copy readable on the light platform
+ * without defeating explicit Tailwind/component text colors. Intentional dark
+ * media/competition zones receive their own readable light-copy fallback.
+ */
+:where(.rcl-platform-root) :where(p,li,dd,dt,figcaption) {
+  color: var(--rcl-v3-copy, #64748B);
+  opacity: 1;
+}
+
+:where(.rcl-platform-root) :where(
+  .rcl-dark-media,
+  .rcl-league-feature,
+  .rcl-league-scoreboard,
+  .rcl-draft-platform,
+  .rcl-scorebook-immersive,
+  .city-hero
+) :where(p,li,dd,dt,figcaption) {
+  color: #CBD5E1;
+}
+
+.rcl-platform-root :where(a,button,label,span,strong,small) {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.rcl-platform-root :where(
+  [class*="break-all"],
+  [class*="break-words"]
+) {
+  overflow-wrap: anywhere !important;
+}
+
+.rcl-platform-root :where(
+  [class*="text-[8px]"],
+  [class*="text-[9px]"]
+) {
+  font-size: .625rem !important;
+  line-height: 1.35 !important;
+}
+
+.rcl-platform-root [class*="text-[10px]"] {
+  font-size: .6875rem !important;
+  line-height: 1.4 !important;
+}
+
+.rcl-platform-root [class*="text-[11px]"] {
+  line-height: 1.4 !important;
+}
+
+/* Keep editorial copy comfortably readable without stretching across the viewport. */
+.rcl-platform-root :where(p)[class*="leading-6"],
+.rcl-platform-root :where(p)[class*="leading-7"] {
+  max-width: var(--rcl-polish-reading);
+}
+
+/* ---------- Shared heroes ---------- */
+.rcl-corporate-page-hero h1,
+.rcl-client-page-hero h1 {
+  max-width: 24ch !important;
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem) !important;
+  line-height: 1.08 !important;
+}
+
+.rcl-corporate-page-hero :where(p),
+.rcl-client-page-hero :where(p) {
+  overflow-wrap: break-word;
+}
+
+.rcl-corporate-page-hero :where(a,button),
+.rcl-client-page-hero :where(a,button) {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.rcl-corporate-page-hero > *,
+.rcl-client-page-hero > * {
+  min-width: 0;
+}
+
+/* ---------- Cards, lists, and data ---------- */
+.rcl-platform-root :where(
+  .rcl-card,.rcl-panel,.rcl-game-card,.rcl-news-card,.rcl-feed-post,
+  .rcl-feed-composer,.rcl-story-rail,.rcl-platform-panel,
+  article[class*="rounded"],section[class*="rounded"],aside[class*="rounded"]
+) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rcl-platform-root :where(
+  .rcl-card,.rcl-panel,.rcl-game-card,.rcl-news-card,.rcl-feed-post,
+  .rcl-platform-panel
+) :where(h1,h2,h3,h4,p,strong,span,small) {
+  max-width: 100%;
+}
+
+.rcl-platform-root :where(.overflow-x-auto,.overflow-x-scroll) {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rcl-platform-root table {
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.rcl-platform-root table[class*="min-w-"] {
+  min-width: 40rem !important;
+}
+
+.rcl-platform-root :where(th,td) {
+  vertical-align: middle;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+.rcl-platform-root :where(th,td) :where(a,span,strong) {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* ---------- Controls and action rows ---------- */
+.rcl-platform-root :where(input,textarea,select,button) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rcl-platform-root textarea {
+  resize: vertical;
+}
+
+.rcl-platform-root :where(button,a)[class*="inline-flex"],
+.rcl-platform-root :where(button,a)[class*="flex"] {
+  min-width: 0;
+}
+
+.rcl-platform-root :where(button,a)[class*="tracking-wider"],
+.rcl-platform-root :where(button,a)[class*="tracking-widest"],
+.rcl-platform-root :where(button,a)[class*="tracking-["] {
+  line-height: 1.25;
+}
+
+.rcl-platform-root :where(button,a) > svg {
+  flex: 0 0 auto;
+}
+
+/* Preserve intentional single-line table/filter chips while allowing them to scroll. */
+.rcl-platform-root :where(.overflow-x-auto,.overflow-x-scroll) .whitespace-nowrap {
+  flex: 0 0 auto;
+}
+
+/* ---------- Navigation ---------- */
+.rcl-universal-brand,
+.rcl-universal-profile,
+.rcl-universal-wordmark,
+.rcl-global-search,
+.rcl-universal-nav a,
+.rcl-universal-bottom a {
+  min-width: 0;
+}
+
+.rcl-universal-brand > span:last-child,
+.rcl-universal-profile > span:nth-child(2),
+.rcl-universal-wordmark b,
+.rcl-global-search span,
+.rcl-universal-nav a span,
+.rcl-universal-bottom a span {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rcl-universal-brand :where(b,small),
+.rcl-universal-profile :where(b,small),
+.rcl-universal-nav a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rcl-universal-bottom a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.15;
+}
+
+/* ---------- Home/feed content guards ---------- */
+.rcl-landing-copy,
+.rcl-league-copy,
+.rcl-landing-section-head > *,
+.rcl-world-card,
+.rcl-lifestyle-card,
+.rcl-person-card,
+.rcl-pulse-grid > * {
+  min-width: 0;
+}
+
+.rcl-pulse-grid p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.rcl-editorial-row b,
+.rcl-person-card b,
+.rcl-mini-standings b {
+  overflow-wrap: break-word;
+}
+
+/* ---------- Intentional dark presentation zones ---------- */
+.rcl-dark-media,
+.rcl-dark-media *,
+.rcl-league-feature,
+.rcl-league-feature *,
+.rcl-league-scoreboard,
+.rcl-league-scoreboard *,
+.rcl-draft-platform,
+.rcl-draft-platform *,
+.rcl-scorebook-immersive,
+.rcl-scorebook-immersive *,
+.city-hero,
+.city-hero * {
+  text-shadow: none;
+}
+
+/* ---------- Mobile finish ---------- */
+@media (max-width: 767px) {
+  .rcl-platform-root :where(input,textarea,select) {
+    font-size: 16px !important; /* Prevent iOS focus zoom. */
+  }
+
+  .rcl-platform-root :where(h1,.rcl-display) {
+    font-size: clamp(1.9rem, 8.5vw, 2.7rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .rcl-platform-root h2 {
+    font-size: clamp(1.35rem, 6.2vw, 1.9rem) !important;
+    line-height: 1.12 !important;
+  }
+
+  .rcl-platform-root h3 {
+    font-size: clamp(1.05rem, 4.8vw, 1.45rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .rcl-platform-root :where(button,a)[class*="uppercase"] {
+    letter-spacing: .045em !important;
+  }
+
+  .rcl-platform-root :where(button,a) {
+    white-space: normal;
+  }
+
+  .rcl-platform-root :where(
+    [class*="min-w-["],
+    [class*="min-w-48"],
+    [class*="min-w-52"],
+    [class*="min-w-56"],
+    [class*="min-w-64"],
+    [class*="min-w-72"],
+    [class*="min-w-80"],
+    [class*="min-w-96"]
+  ):not(table) {
+    min-width: 0 !important;
+  }
+
+  .rcl-platform-root :where([class*="w-screen"]) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .rcl-platform-root :where([class*="px-8"],[class*="px-10"],[class*="px-12"]) {
+    padding-left: var(--rcl-polish-gutter) !important;
+    padding-right: var(--rcl-polish-gutter) !important;
+  }
+
+  .rcl-platform-root :where([class*="p-10"],[class*="p-12"]) {
+    padding: 1.25rem !important;
+  }
+
+  .rcl-platform-root table[class*="min-w-"] {
+    min-width: 36rem !important;
+  }
+
+  .rcl-corporate-page-hero h1,
+  .rcl-client-page-hero h1 {
+    max-width: none !important;
+    font-size: clamp(1.7rem, 7.8vw, 2.25rem) !important;
+  }
+
+  .rcl-universal-topbar {
+    gap: .5rem !important;
+  }
+
+  .rcl-global-search {
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 479px) {
+  .rcl-platform-root [class*="tracking-["] {
+    letter-spacing: .05em !important;
+  }
+
+  .rcl-platform-root :where(.flex)[class*="justify-between"] {
+    column-gap: .75rem;
+  }
+}
+
+@media (max-width: 359px) {
+  .rcl-universal-wordmark b {
+    display: none !important;
+  }
+
+  .rcl-global-search span {
+    display: none !important;
+  }
+
+  .rcl-universal-topbar {
+    padding-left: .75rem !important;
+    padding-right: .75rem !important;
+  }
+
+  .rcl-universal-bottom {
+    padding-left: .25rem !important;
+    padding-right: .25rem !important;
+  }
+
+  .rcl-universal-bottom a span {
+    font-size: 9px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcl-platform-root *,
+  .rcl-platform-root *::before,
+  .rcl-platform-root *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ---------- Mobile browser homepage repair ----------
+ * These selectors intentionally load after legacy executive/mobile rules.
+ * The regular Safari/Chrome website was inheriting old dark-shell button colors
+ * on the white header and a generic min-width reset was collapsing the player rail.
+ */
+.rcl-topbar-signin {
+  display:inline-flex!important;
+  width:auto!important;
+  min-width:72px!important;
+  height:40px!important;
+  min-height:40px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 14px!important;
+  border:1px solid var(--rcl-v3-ink)!important;
+  border-radius:999px!important;
+  background:var(--rcl-v3-ink)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+.rcl-social-landing .rcl-landing-lede {
+  color:var(--rcl-v3-copy)!important;
+  opacity:1!important;
+}
+
+@media (max-width: 639px) {
+  .rcl-social-landing-hero {
+    gap:30px!important;
+  }
+
+  .rcl-social-landing .rcl-landing-lede {
+    margin-top:20px!important;
+    max-width:34rem!important;
+    color:#566B83!important;
+    font-size:1rem!important;
+    line-height:1.65!important;
+  }
+
+  .rcl-social-landing .rcl-landing-actions {
+    gap:10px!important;
+    margin-top:24px!important;
+  }
+
+  .rcl-social-landing .rcl-landing-primary,
+  .rcl-social-landing .rcl-landing-secondary {
+    min-height:48px!important;
+    width:auto!important;
+    max-width:100%!important;
+    padding-inline:18px!important;
+    white-space:nowrap!important;
+  }
+
+  .rcl-social-landing .rcl-people-row {
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 2px 10px!important;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .rcl-social-landing .rcl-people-row::-webkit-scrollbar {
+    display:none;
+  }
+
+  .rcl-social-landing .rcl-person-card {
+    flex:0 0 min(78vw,300px)!important;
+    width:min(78vw,300px)!important;
+    min-width:min(78vw,300px)!important;
+    max-width:300px!important;
+    scroll-snap-align:start;
+  }
+
+  .rcl-social-landing .rcl-person-card p {
+    padding:16px!important;
+  }
+
+  .rcl-social-landing .rcl-person-card b {
+    margin-top:5px!important;
+    font-size:1rem!important;
+    line-height:1.25!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    hyphens:none!important;
+  }
+
+  .rcl-social-landing .rcl-person-card small,
+  .rcl-social-landing .rcl-person-card em {
+    font-size:.7rem!important;
+    line-height:1.35!important;
+  }
+}
+
+@media (max-width: 420px) {
+  .rcl-universal-topbar {
+    padding-inline:12px!important;
+  }
+
+  .rcl-universal-tools {
+    gap:6px!important;
+  }
+
+  .rcl-topbar-signin {
+    min-width:68px!important;
+    padding-inline:12px!important;
+    font-size:11px!important;
+  }
+}

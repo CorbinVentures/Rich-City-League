@@ -204,7 +204,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           </div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
-          {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
+          {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
           {!profile.is_system_account && <ProfileViewInsights profileId={profile.id} />}

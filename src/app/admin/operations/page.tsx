@@ -1,0 +1,231 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { AdminWorkspace } from '@/components/AdminWorkspace';
+import Link from 'next/link';
+import { Container } from '@/components/Container';
+import { useAuth } from '@/hooks/useAuth';
+import { getSupabaseClient } from '@/lib/supabase';
+import type { DisciplineCase, Draft, DraftPool, LeagueRequest, Team, TryoutSession } from '@/types/database';
+
+const categories = ['TRADE_REQUEST', 'ROSTER_CHANGE', 'PLAYER_RELEASE', 'PLAYER_ACTIVATION', 'DNP_INQUIRY', 'CONDUCT_CONCERN', 'GENERAL'];
+
+export default function LeagueOperationsPage() {
+  const { profile, loading: authLoading } = useAuth();
+  const supabase = useMemo(() => getSupabaseClient(), []);
+  const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database> | null;
+  const [sessions, setSessions] = useState<TryoutSession[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [pool, setPool] = useState<DraftPool[]>([]);
+  const [requests, setRequests] = useState<LeagueRequest[]>([]);
+  const [cases, setCases] = useState<DisciplineCase[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [tryoutRegistrations, setTryoutRegistrations] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<Array<{ id: string; name: string }>>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamSeasonLinks, setTeamSeasonLinks] = useState<Array<{ team_id: string; season_id: string }>>([]);
+  const [orderDraftId, setOrderDraftId] = useState('');
+  const [orderValues, setOrderValues] = useState<string[]>([]);
+  const [busy, setBusy] = useState(true);
+  const [message, setMessage] = useState('');
+  const [sessionForm, setSessionForm] = useState({ season_id: '', starts_at: '', ends_at: '', capacity: 30 });
+  const [draftForm, setDraftForm] = useState({ season_id: '', name: '', rounds: 4, roster_limit: 12 });
+
+  const isStaff = profile?.role === 'admin' || profile?.role === 'staff';
+
+  async function load() {
+    if (!supabase || !isStaff) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    setBusy(true);
+    const [sessionResult, draftResult, poolResult, requestResult, caseResult, transactionResult, registrationResult, registrationReviewResult, seasonResult, teamResult, teamSeasonResult] = await Promise.all([
+      db.from('tryout_sessions').select('*').order('starts_at'),
+      db.from('drafts').select('*').order('created_at', { ascending: false }),
+      db.from('draft_pools').select('*').order('updated_at', { ascending: false }),
+      db.from('league_requests').select('*').order('updated_at', { ascending: false }),
+      db.from('discipline_cases').select('*').order('created_at', { ascending: false }),
+      db.from('league_transactions').select('*').order('updated_at', { ascending: false }),
+      db.from('tryout_registrations').select('*, player:players(id,first_name,last_name), session:tryout_sessions(id,starts_at)').order('created_at', { ascending: false }).limit(100),
+      db.from('registrations').select('*').order('submitted_at', { ascending: false }).limit(100),
+      db.from('seasons').select('id,name').order('start_date', { ascending: false }),
+      db.from('teams').select('*').eq('is_active', true).order('name'),
+      db.from('team_seasons').select('team_id,season_id'),
+    ]);
+    if (sessionResult.error || draftResult.error || poolResult.error || requestResult.error || caseResult.error || transactionResult.error || registrationResult.error || registrationReviewResult.error || seasonResult.error || teamResult.error || teamSeasonResult.error) {
+      setMessage('Unable to load league operations.');
+    } else {
+      setSessions((sessionResult.data ?? []) as TryoutSession[]);
+      setDrafts((draftResult.data ?? []) as Draft[]);
+      setPool((poolResult.data ?? []) as DraftPool[]);
+      setRequests((requestResult.data ?? []) as LeagueRequest[]);
+      setCases((caseResult.data ?? []) as DisciplineCase[]);
+      setTransactions((transactionResult.data ?? []) as any[]);
+      setTryoutRegistrations((registrationResult.data ?? []) as any[]);
+      setRegistrations((registrationReviewResult.data ?? []) as any[]);
+      setSeasons((seasonResult.data ?? []) as Array<{ id: string; name: string }>);
+      setTeams((teamResult.data ?? []) as Team[]);
+      setTeamSeasonLinks((teamSeasonResult.data ?? []) as Array<{ team_id: string; season_id: string }>);
+    }
+    setBusy(false);
+  }
+
+  useEffect(() => { void load(); }, [supabase, isStaff]);
+
+  async function createTryout(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !profile || !sessionForm.season_id) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { error } = await db.from('tryout_sessions').insert({ ...sessionForm, starts_at: new Date(sessionForm.starts_at).toISOString(), ends_at: new Date(sessionForm.ends_at).toISOString(), capacity: Number(sessionForm.capacity), created_by: profile.id } as never);
+    setMessage(error ? error.message : 'Tryout session created.');
+    if (!error) void load();
+  }
+
+  async function createDraft(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !profile || !draftForm.season_id) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { error } = await db.from('drafts').insert({ ...draftForm, rounds: Number(draftForm.rounds), roster_limit: Number(draftForm.roster_limit), created_by: profile.id } as never);
+    setMessage(error ? error.message : 'Draft created in setup mode.');
+    if (!error) void load();
+  }
+
+  async function updateRequest(id: string, status: string) {
+    if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { error } = await db.from('league_requests').update({ status } as never).eq('id', id);
+    setMessage(error ? error.message : 'Request status updated.');
+    if (!error) void load();
+  }
+
+  async function updateDraftPool(id: string, eligible: boolean) {
+    if (!db) return;
+    const { error } = await db.from('draft_pools').update({ eligible } as never).eq('id', id);
+    setMessage(error ? error.message : 'Draft eligibility updated.');
+    if (!error) void load();
+  }
+
+  async function updateTransaction(id: string, status: string) {
+    if (!db) return;
+    const { error } = await db.from('league_transactions').update({
+      status,
+      approved_by: ['APPROVED', 'EXECUTED'].includes(status) ? profile?.id : null,
+      executed_at: status === 'EXECUTED' ? new Date().toISOString() : null,
+    } as never).eq('id', id);
+    setMessage(error ? error.message : 'League transaction updated.');
+    if (!error) void load();
+  }
+
+  async function updateDiscipline(id: string, patch: Record<string, unknown>) {
+    if (!db) return;
+    const { error } = await db.from('discipline_cases').update({
+      ...patch,
+      decision_maker: profile?.id,
+      decided_at: ['DECIDED', 'FINAL', 'CLOSED'].includes(String(patch.status)) ? new Date().toISOString() : null,
+    } as never).eq('id', id);
+    setMessage(error ? error.message : 'Discipline case updated.');
+    if (!error) void load();
+  }
+
+  async function updateRegistration(id: string, status: string) {
+    if (!db || !profile) return;
+    const { error } = await db.from('registrations').update({ status, reviewed_at: new Date().toISOString(), reviewed_by: profile.id } as never).eq('id', id);
+    setMessage(error ? error.message : 'Registration reviewed.');
+    if (!error) void load();
+  }
+
+  async function updateAttendance(id: string, status: string) {
+    if (!db) return;
+    const { error } = await db.from('tryout_attendance').upsert({
+      registration_id: id,
+      status,
+      marked_by: profile?.id,
+      marked_at: new Date().toISOString(),
+    } as never, { onConflict: 'registration_id' });
+    setMessage(error ? error.message : 'Attendance updated.');
+    if (!error) void load();
+  }
+
+  async function updateSession(id: string, status: TryoutSession['status']) {
+    if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { error } = await db.from('tryout_sessions').update({ status } as never).eq('id', id);
+    setMessage(error ? error.message : 'Tryout status updated.');
+    if (!error) void load();
+  }
+
+  async function updateDraft(id: string, status: Draft['status']) {
+    if (!supabase) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const action = status === 'OPEN' ? 'OPEN' : status === 'PAUSED' ? 'PAUSE' : 'COMPLETE';
+    const { error } = await db.rpc('manage_draft_clock' as never, {
+      target_draft: id,
+      target_action: action,
+      target_extension_seconds: 0,
+    } as never);
+    setMessage(error ? error.message : `Draft ${status.toLowerCase()}.`);
+    if (!error) void load();
+  }
+
+  async function saveDraftOrder(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !orderDraftId || orderValues.some((teamId) => !teamId)) return;
+    const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
+    const { error } = await db.rpc('configure_draft_order' as never, {
+      target_draft: orderDraftId,
+      ordered_teams: orderValues,
+    } as never);
+    setMessage(error ? error.message : 'Draft order saved.');
+  }
+
+  if (authLoading || busy) return <main><AdminWorkspace /><Container maxWidth="xl" className="py-16"><div className="h-8 w-72 animate-pulse rounded bg-white/10" /></Container></main>;
+  if (!profile || !isStaff) return <main><AdminWorkspace /><Container maxWidth="lg" className="py-16"><h1 className="font-display text-3xl font-bold">League operations access required</h1><p className="mt-3 text-gray-400">This command center is limited to authorized league staff.</p></Container></main>;
+
+  const availableOrderTeams = teams.filter((team) => {
+    const selectedDraft = drafts.find((draft) => draft.id === orderDraftId);
+    return selectedDraft ? teamSeasonLinks.some((link) => link.team_id === team.id && link.season_id === selectedDraft.season_id) : false;
+  });
+
+  return <main className="min-h-screen pb-20"><AdminWorkspace /><Container maxWidth="xl" className="py-10">
+    <Link href="/admin" className="text-sm text-rcl-gold">← Command center</Link>
+    <p className="mt-8 text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">RCL league operations</p>
+    <h1 className="mt-2 font-display text-5xl font-bold">The league room</h1>
+    <p className="mt-3 max-w-2xl text-gray-400">Run the player lifecycle from tryout registration through draft, roster status, requests, and discipline. Every change is protected by Supabase authorization and recorded in the audit log.</p>
+    {message && <p className="mt-5 rounded-lg bg-rcl-gold/10 p-3 text-sm text-rcl-gold">{message}</p>}
+    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {[
+        ['Tryouts', sessions.length, 'OPEN sessions', sessions.filter((s) => s.status === 'OPEN').length],
+        ['Drafts', drafts.length, 'On the clock', drafts.filter((d) => d.status === 'OPEN').length],
+        ['Draft pool', pool.length, 'Eligible', pool.filter((p) => p.eligible).length],
+        ['Requests', requests.length, 'Needs review', requests.filter((r) => !['RESOLVED', 'CLOSED'].includes(r.status)).length],
+        ['Discipline', cases.length, 'Open cases', cases.filter((c) => !['FINAL', 'CLOSED'].includes(c.status)).length],
+      ].map(([label, total, sub, value]) => <div key={String(label)} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"><p className="text-xs uppercase tracking-widest text-gray-500">{label}</p><p className="mt-2 text-3xl font-bold">{total}</p><p className="mt-2 text-xs text-rcl-gold">{value} {sub}</p></div>)}
+    </div>
+    <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Preseason tryouts</h2><form onSubmit={createTryout} className="mt-5 grid gap-3 sm:grid-cols-2">
+        <select aria-label="Tryout season" required value={sessionForm.season_id} onChange={(e) => setSessionForm({ ...sessionForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white"><option value="">Season</option>{seasons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+        <input aria-label="Capacity" required type="number" min="1" value={sessionForm.capacity} onChange={(e) => setSessionForm({ ...sessionForm, capacity: Number(e.target.value) })} placeholder="Capacity" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
+        <input aria-label="Tryout starts at" required type="datetime-local" value={sessionForm.starts_at} onChange={(e) => setSessionForm({ ...sessionForm, starts_at: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
+        <input aria-label="Tryout ends at" required type="datetime-local" value={sessionForm.ends_at} onChange={(e) => setSessionForm({ ...sessionForm, ends_at: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
+        <button className="rounded-lg bg-rcl-gold px-4 py-3 font-bold text-black sm:col-span-2">Create tryout session</button>
+      </form><div className="mt-6 space-y-2">{sessions.map((s) => <div key={s.id} className="flex items-center justify-between rounded-lg border border-white/10 p-3 text-sm"><span>{new Date(s.starts_at).toLocaleString()} · cap {s.capacity}</span><select aria-label="Session status" value={s.status} onChange={(e) => void updateSession(s.id, e.target.value as TryoutSession['status'])} className="rounded border border-white/10 bg-black/30 p-2 text-white">{['DRAFT','OPEN','FULL','COMPLETED','CANCELLED'].map((v) => <option key={v}>{v}</option>)}</select></div>)}</div></section>
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Draft room</h2><form onSubmit={createDraft} className="mt-5 grid gap-3 sm:grid-cols-2">
+        <select aria-label="Draft season" required value={draftForm.season_id} onChange={(e) => setDraftForm({ ...draftForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white sm:col-span-2"><option value="">Season</option>{seasons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+        <input aria-label="Draft name" required value={draftForm.name} onChange={(e) => setDraftForm({ ...draftForm, name: e.target.value })} placeholder="Draft name" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white sm:col-span-2" />
+        <input aria-label="Rounds" required type="number" min="1" value={draftForm.rounds} onChange={(e) => setDraftForm({ ...draftForm, rounds: Number(e.target.value) })} placeholder="Rounds" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
+        <input aria-label="Roster limit" required type="number" min="1" value={draftForm.roster_limit} onChange={(e) => setDraftForm({ ...draftForm, roster_limit: Number(e.target.value) })} placeholder="Roster limit" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
+        <button className="rounded-lg bg-rcl-orange px-4 py-3 font-bold text-black sm:col-span-2">Create draft</button>
+      </form><div className="mt-6 space-y-2">{drafts.map((d) => <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-sm"><span>{d.name} · pick {d.current_pick}</span><div className="flex items-center gap-2"><span className="rounded-full bg-white/10 px-3 py-1 text-xs">{d.status}</span>{d.status === 'SETUP' && <button type="button" onClick={() => void updateDraft(d.id, 'OPEN')} className="rounded bg-rcl-orange px-3 py-1 text-xs font-bold text-black">Open</button>}{d.status === 'OPEN' && <button type="button" onClick={() => void updateDraft(d.id, 'PAUSED')} className="rounded border border-white/20 px-3 py-1 text-xs">Pause</button>}{d.status === 'PAUSED' && <button type="button" onClick={() => void updateDraft(d.id, 'OPEN')} className="rounded bg-rcl-orange px-3 py-1 text-xs font-bold text-black">Resume</button>}{['OPEN', 'PAUSED'].includes(d.status) && <button type="button" onClick={() => void updateDraft(d.id, 'COMPLETED')} className="rounded border border-red-400/40 px-3 py-1 text-xs text-red-300">Complete</button>}</div></div>)}</div><form onSubmit={saveDraftOrder} className="mt-6 border-t border-white/10 pt-6"><h3 className="font-semibold">Configure official pick order</h3><p className="mt-1 text-xs text-gray-500">Choose a team for every pick before opening a draft. The database, not the client, enforces this order.</p><select aria-label="Draft" required value={orderDraftId} onChange={(event) => { const id = event.target.value; const draft = drafts.find((item) => item.id === id); const draftTeams = teams.filter((team) => teamSeasonLinks.some((link) => link.team_id === team.id && link.season_id === draft?.season_id)); setOrderDraftId(id); setOrderValues(draft ? Array.from({ length: draft.rounds * draftTeams.length }, (_, index) => draftTeams[index % Math.max(draftTeams.length, 1)]?.id ?? '') : []); }} className="mt-3 w-full rounded-lg border border-white/10 bg-black/30 p-3 text-white"><option value="">Select setup draft</option>{drafts.filter((d) => d.status === 'SETUP').map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>{orderValues.length > 0 && <div className="mt-3 grid gap-2 sm:grid-cols-2">{orderValues.map((teamId, index) => <label key={index} className="text-xs text-gray-400">Pick {index + 1}<select required value={teamId} onChange={(event) => setOrderValues((values) => values.map((value, position) => position === index ? event.target.value : value))} className="mt-1 w-full rounded border border-white/10 bg-black/30 p-2 text-white">{availableOrderTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>)}</div>}<button disabled={orderValues.length === 0} className="mt-4 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-black disabled:opacity-40">Save official order</button></form></section>
+    </div>
+    <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Request center</h2><div className="mt-5 space-y-3">{requests.slice(0, 8).map((r) => <div key={r.id} className="rounded-lg border border-white/10 p-4"><div className="flex justify-between gap-3"><div><p className="font-semibold">{r.subject}</p><p className="mt-1 text-xs text-gray-500">{r.category}</p></div><select aria-label="Request status" value={r.status} onChange={(e) => void updateRequest(r.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white">{['SUBMITTED','UNDER_REVIEW','NEEDS_INFORMATION','APPROVED','DENIED','RESOLVED','CLOSED'].map((v) => <option key={v}>{v}</option>)}</select></div></div>)}{requests.length === 0 && <p className="text-sm text-gray-500">No requests are waiting for staff.</p>}</div></section>
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Discipline center</h2><div className="mt-5 space-y-3">{cases.slice(0, 12).map((c) => <div key={c.id} className="rounded-lg border border-white/10 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold">{c.description.slice(0, 80)}</p><p className="mt-2 text-xs text-gray-500">Incident {c.incident_date} · case {c.id.slice(0, 8)}</p></div><select aria-label="Case status" value={c.status} onChange={(e) => void updateDiscipline(c.id, { status: e.target.value })} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white">{['OPEN','UNDER_REVIEW','DECIDED','APPEALED','FINAL','CLOSED'].map((v) => <option key={v}>{v}</option>)}</select></div><div className="mt-3 flex flex-wrap gap-2"><select aria-label="Case sanction" value={c.sanction ?? ''} onChange={(e) => void updateDiscipline(c.id, { sanction: e.target.value || null })} className="rounded border border-white/10 bg-black/30 p-2 text-xs text-white"><option value="">No sanction</option>{['WARNING','FINE','GAME_SUSPENSION','MULTI_GAME_SUSPENSION','PROBATION','GAME_REMOVAL','ROSTER_RESTRICTION','LEAGUE_SUSPENSION','DISMISSAL'].map((v) => <option key={v}>{v}</option>)}</select><input aria-label="Decision" defaultValue={c.decision ?? ''} onBlur={(e) => { if (e.target.value !== (c.decision ?? '')) void updateDiscipline(c.id, { decision: e.target.value || null }); }} placeholder="Decision" className="min-w-48 flex-1 rounded border border-white/10 bg-black/30 p-2 text-xs text-white" /></div></div>)}{cases.length === 0 && <p className="text-sm text-gray-500">No disciplinary cases.</p>}</div></section>
+    </div>
+    <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-bold">Registration review</h2><span className="text-xs text-white/35">{registrations.length} recent</span></div><div className="mt-5 max-h-96 space-y-2 overflow-auto">{registrations.map((r) => <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-xs"><div><p className="font-semibold">{r.first_name} {r.last_name}</p><p className="mt-1 text-white/35">{r.email} · {r.status}</p></div><select aria-label="Request status" value={r.status} onChange={(e) => void updateRegistration(r.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-2 text-white">{['pending','approved','waitlisted','rejected','withdrawn'].map((v) => <option key={v}>{v}</option>)}</select></div>)}{registrations.length === 0 && <p className="text-sm text-gray-500">No registration records.</p>}</div></section>
+    <div className="mt-8 grid gap-8 lg:grid-cols-3">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Draft eligibility</h2><div className="mt-5 max-h-80 space-y-2 overflow-auto">{pool.slice(0, 50).map((p) => <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 p-3 text-xs"><span className="truncate">{p.player_id}</span><button type="button" onClick={() => void updateDraftPool(p.id, !p.eligible)} className={p.eligible ? 'rounded bg-rcl-orange px-3 py-1 font-bold text-black' : 'rounded border border-white/20 px-3 py-1 font-bold text-white/60'}>{p.eligible ? 'ELIGIBLE' : 'HOLD'}</button></div>)}{pool.length === 0 && <p className="text-sm text-gray-500">No draft pool records.</p>}</div></section>
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Tryout attendance</h2><div className="mt-5 max-h-80 space-y-2 overflow-auto">{tryoutRegistrations.slice(0, 50).map((r) => <div key={r.id} className="rounded-lg border border-white/10 p-3 text-xs"><p className="font-semibold">{r.player?.first_name ?? 'Player'} {r.player?.last_name ?? ''}</p><p className="mt-1 text-white/35">{r.session?.starts_at ? new Date(r.session.starts_at).toLocaleString() : 'Session'}</p><div className="mt-2 flex flex-wrap gap-1">{['PRESENT','ABSENT','EXCUSED','LATE'].map((v) => <button key={v} type="button" onClick={() => void updateAttendance(r.id, v)} className="rounded border border-white/10 px-2 py-1 text-xs font-bold hover:border-rcl-orange">{v}</button>)}</div></div>)}{tryoutRegistrations.length === 0 && <p className="text-sm text-gray-500">No tryout registrations.</p>}</div></section>
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Transactions</h2><div className="mt-5 max-h-80 space-y-2 overflow-auto">{transactions.slice(0, 50).map((t) => <div key={t.id} className="rounded-lg border border-white/10 p-3 text-xs"><div className="flex items-center justify-between gap-2"><span className="font-semibold">{t.transaction_type}</span><select aria-label="Registration status" value={t.status} onChange={(e) => void updateTransaction(t.id, e.target.value)} className="rounded border border-white/10 bg-black/30 p-1 text-white">{['DRAFT','PROPOSED','TEAM_APPROVED','LEAGUE_REVIEW','APPROVED','DECLINED','CANCELLED','EXECUTED'].map((v) => <option key={v}>{v}</option>)}</select></div><p className="mt-2 text-white/35">{t.reason || t.notes || 'No transaction notes'}</p></div>)}{transactions.length === 0 && <p className="text-sm text-gray-500">No league transactions.</p>}</div></section>
+    </div>
+    <p className="mt-8 text-xs text-gray-500">Request categories supported: {categories.join(' · ')}. Private evaluator notes and discipline records are never exposed to public queries.</p>
+  </Container></main>;
+}

@@ -1,0 +1,231 @@
+.rcl-pwa-install {
+  position: fixed;
+  z-index: 120;
+  right: 18px;
+  bottom: 22px;
+  width: min(390px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.rcl-pwa-install-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(21,159,255,.26);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(21,159,255,.17), transparent 32%),
+    radial-gradient(circle at 98% 100%, rgba(59,130,246,.14), transparent 36%),
+    rgba(3,7,13,.97);
+  padding: 17px;
+  color: #f6f8fb;
+  box-shadow: 0 24px 80px rgba(0,0,0,.48), 0 0 0 1px rgba(255,255,255,.025) inset;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  pointer-events: auto;
+}
+
+.rcl-pwa-install-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #159fff 25%, #3B82F6 72%, transparent);
+  opacity: .9;
+}
+
+.rcl-pwa-close {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 50%;
+  background: rgba(255,255,255,.04);
+  color: rgba(246,248,251,.52);
+}
+
+.rcl-pwa-install-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-right: 34px;
+}
+
+.rcl-pwa-icon {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.36);
+}
+
+.rcl-pwa-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: #3B82F6;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+
+.rcl-pwa-install-heading h2 {
+  margin: 0;
+  font-family: var(--font-display, 'Space Grotesk'), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -.02em;
+}
+
+.rcl-pwa-copy {
+  margin: 13px 0 0;
+  color: rgba(246,248,251,.58);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.rcl-pwa-actions {
+  display: flex;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.rcl-pwa-primary,
+.rcl-pwa-secondary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 13px;
+  padding: 0 15px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+
+.rcl-pwa-primary {
+  flex: 1;
+  border: 1px solid rgba(59,130,246,.9);
+  background: linear-gradient(135deg, #3B82F6, #ff6a34);
+  color: #03070d;
+  box-shadow: 0 9px 24px rgba(59,130,246,.18);
+}
+
+.rcl-pwa-secondary {
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.035);
+  color: rgba(246,248,251,.58);
+}
+
+.rcl-pwa-ios-guide {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 13px;
+}
+
+.rcl-pwa-guide-title {
+  margin: 0 0 10px;
+  color: #159fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.rcl-pwa-ios-guide ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rcl-pwa-ios-guide li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 9px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  background: rgba(7,21,34,.62);
+  padding: 10px;
+}
+
+.rcl-pwa-ios-guide li > span {
+  grid-row: 1 / 3;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(21,159,255,.12);
+  color: #159fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.rcl-pwa-ios-guide b {
+  color: #f6f8fb;
+  font-size: 11px;
+}
+
+.rcl-pwa-ios-guide small {
+  margin-top: 2px;
+  color: rgba(246,248,251,.42);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+html,
+body {
+  background: #03070d;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 767px) {
+  .rcl-pwa-install {
+    right: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    width: calc(100vw - 24px);
+  }
+
+  .rcl-pwa-install-card {
+    border-radius: 21px;
+    padding: 15px;
+  }
+
+  .rcl-pwa-install-heading h2 {
+    font-size: 17px;
+  }
+}
+
+@media (display-mode: standalone) {
+  html,
+  body {
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    min-height: 100svh;
+  }
+
+  .rcl-platform-root {
+    min-height: 100dvh;
+  }
+
+  .rcl-pwa-install,
+  .rcl-legal-footer {
+    display: none !important;
+  }
+}

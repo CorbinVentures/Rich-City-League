@@ -1,0 +1,66 @@
+
+.rcl-draft-platform,
+.city-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.rcl-draft-platform::before,
+.city-hero::before {
+  content: "";
+  position: absolute;
+  inset: auto -15% -18rem;
+  height: 34rem;
+  pointer-events: none;
+  opacity: .14;
+  background:
+    radial-gradient(ellipse at 50% 0, transparent 0 7rem, rgba(59,130,246,.9) 7.1rem 7.18rem, transparent 7.25rem),
+    radial-gradient(ellipse at 50% 0, transparent 0 15rem, rgba(255,255,255,.28) 15.1rem 15.18rem, transparent 15.25rem),
+    repeating-linear-gradient(90deg, transparent 0 7rem, rgba(255,255,255,.07) 7.05rem 7.12rem);
+  transform: perspective(600px) rotateX(58deg);
+  transform-origin: center bottom;
+}
+
+/* Orange becomes the signature interaction color across the branded surfaces. */
+.rcl-button,
+.city-court {
+  background-color: var(--rcl-basket-orange) !important;
+}
+
+.rcl-button:hover {
+  background-color: #ff8a45 !important;
+}
+
+@media (max-width: 639px) {
+  .rcl-home-hero {
+    min-height: calc(100svh - 9.5rem) !important;
+  }
+
+  .rcl-home-hero::before {
+    background:
+      radial-gradient(ellipse at 75% 118%, transparent 0 5rem, rgba(59,130,246,.18) 5.1rem 5.2rem, transparent 5.3rem),
+      radial-gradient(ellipse at 75% 118%, transparent 0 11rem, rgba(255,255,255,.05) 11.1rem 11.2rem, transparent 11.3rem);
+  }
+
+  .rcl-home-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .rcl-home-section-head h2 {
+    font-size: 25px !important;
+  }
+
+  .rcl-platform-root::after {
+    right: -3rem;
+    bottom: 6rem;
+    font-size: 11rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcl-home-hero::before,
+  .rcl-home-hero::after {
+    animation: none !important;
+  }
+}
