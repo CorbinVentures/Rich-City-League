@@ -38,8 +38,13 @@ export function normalizeAudiusTrack(raw: unknown): MusicTrack | null {
   if (typeof item.title !== 'string' || !item.title.trim()) return null;
   if (item.is_streamable === false || item.is_stream_gated === true || item.access?.stream === false) return null;
   const link = typeof item.permalink === 'string' ? item.permalink : '';
+  const handle = typeof item.user?.handle === 'string' ? item.user.handle.replace(/^@/, '') : '';
   const permalink = /^https:\/\/(www\.)?audius\.co\//i.test(link)
-    ? link : `https://audius.co/`;
+    ? link : link.startsWith('/') && !link.startsWith('//')
+      ? `https://audius.co${link}`
+      : handle && /^[a-zA-Z0-9_.-]+$/.test(handle) && /^[a-zA-Z0-9_.-]+$/.test(link)
+        ? `https://audius.co/${encodeURIComponent(handle)}/${encodeURIComponent(link)}`
+        : 'https://audius.co/';
   const art = item.artwork?.['150x150'] || item.artwork?.['480x480'];
   return {
     id: item.id,
