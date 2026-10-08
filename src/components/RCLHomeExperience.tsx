@@ -12,11 +12,10 @@ type Team={id:string;name:string;logo_url?:string|null};
 type Game={id:string;home_team_id:string;away_team_id:string;scheduled_at:string;venue_id?:string|null;status:string;home_score:number;away_score:number};
 type Standing={id:string;team_id:string;wins:number;losses:number;rank?:number|null};
 type Player={id:string;first_name:string;last_name:string;photo_url?:string|null;position?:string|null;jersey_number?:string|null};
-type IQ={player_id:string;rcl_rating:number;court_performance_score:number;exposure_index:number;player_archetype?:string|null};
 type News={id:string;slug:string;title:string;published_at?:string|null};
 type Post={id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
 type Stat={player_id:string;points:number;assists:number};
-type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];iq:IQ[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
+type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
 
 const worldCards=[
   {title:'Social',copy:'Highlights, conversations, stories and the people shaping basketball around you.',href:'/social',icon:FaComments},
@@ -41,7 +40,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
   return <main className="rcl-social-landing">
     <section className="rcl-social-landing-hero">
       <div className="rcl-landing-copy">
-        <p className="rcl-landing-kicker">RCL · Richmond basketball social</p>
+        <p className="rcl-landing-kicker">RCH · Richmond basketball social</p>
         <h1>Your basketball world.<br/><span>All in one place.</span></h1>
         <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
         <div className="rcl-landing-actions">
@@ -52,7 +51,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
       </div>
 
       <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
-        <div className="rcl-landing-phone-top"><b>RCL</b><span>For You</span><i>•••</i></div>
+        <div className="rcl-landing-phone-top"><b>RCH</b><span>For You</span><i>•••</i></div>
         <div className="rcl-landing-story-row">{featured.slice(0,4).map(player=><span key={player.id}>{player.photo_url?<Image src={player.photo_url} alt="" width={64} height={64}/>:<b>{player.first_name[0]}{player.last_name[0]}</b>}</span>)}</div>
         <div className="rcl-landing-preview-post">
           <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>

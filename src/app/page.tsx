@@ -3,7 +3,7 @@ import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
-export const metadata: Metadata = { title: { absolute: 'Rich City League | Richmond VA Basketball League' }, description: 'Join Richmond\'s basketball community. Rich City League combines competitive league play, player stats, profiles, runs, media, fantasy basketball and RVA hoops culture.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://richcityhoops.com/rcl-share-20261002.png',width:1200,height:630,alt:'RCL — Richmond basketball social'}],url:'/',title:'Rich City League | Richmond VA Basketball League',description:'Competitive Richmond basketball, player stats, runs, community and year-round RVA hoops culture.'} };
+export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Richmond Basketball Community' }, description: 'Join Rich City Hoops free. Connect with Richmond players, find pickup runs, share highlights and follow Rich City League competition.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://richcityhoops.com/rcl-share-20261002.png',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Richmond Basketball Community',description:'Richmond basketball connected: players, runs, highlights, and Rich City League.'} };
 
 export const revalidate = 60;
 
@@ -17,16 +17,21 @@ export default async function HomePage() {
   const standingsLabel = [season?.name, divisions.find(item=>item.id === divisionId)?.name].filter(Boolean).join(' · ');
   const completedGameIds = new Set(games.filter(game => game.status === 'completed' && (!season || game.season_id === season.id)).map(game => game.id));
 
-  const [{ data: playersRaw }, { data: iqRaw }, { data: statsRaw }, { data: postsRaw }] = client
+  // The landing page displays just six players and three posts. Never fetch an
+  // unused player-IQ ranking or 1,000 unrelated game-stat rows for first paint.
+  const [{ data: playersRaw }, { data: postsRaw }] = client
     ? await Promise.all([
         client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
-        client.from('public_player_iq').select('player_id,rcl_rating,court_performance_score,exposure_index,player_archetype').order('rcl_rating', { ascending: false }).limit(20),
-        client.from('player_game_stats').select('game_id,player_id,points,assists').limit(1000),
         client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }];
 
-  const currentStats = (statsRaw ?? []).filter((stat) => completedGameIds.has(stat.game_id));
+  const playerIds = (playersRaw ?? []).map(player => player.id);
+  const { data: statsRaw } = client && playerIds.length && completedGameIds.size
+    ? await client.from('player_game_stats').select('game_id,player_id,points,assists')
+        .in('player_id', playerIds).in('game_id', [...completedGameIds]).limit(250)
+    : { data: [] };
+  const currentStats = statsRaw ?? [];
 
   return (
     <>
@@ -37,7 +42,6 @@ export default async function HomePage() {
         standings={previewStandings}
         standingsLabel={standingsLabel}
         players={(playersRaw ?? []) as any}
-        iq={(iqRaw ?? []) as any}
         stats={currentStats as any}
         news={news}
         posts={(postsRaw ?? []) as any}
