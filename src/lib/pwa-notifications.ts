@@ -91,17 +91,26 @@ export async function enableAppAlerts(db: any) {
   return subscription;
 }
 
-export async function rebindExistingAppAlerts(db: any) {
-  if (typeof window === 'undefined' || getAppAlertState() !== 'granted') return false;
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (!subscription) return false;
-    await saveSubscription(db, subscription);
-    return true;
-  } catch {
-    return false;
+// Multiple notification components can try to repair a device subscription on
+// login. Share the attempt so only one subscription is created at a time.
+let grantedPermissionSync: Promise<boolean> | null = null;
+
+export function rebindExistingAppAlerts(db: any): Promise<boolean> {
+  if (typeof window === 'undefined' || getAppAlertState() !== 'granted') return Promise.resolve(false);
+  if (!grantedPermissionSync) {
+    grantedPermissionSync = (async () => {
+      try {
+        // This never asks for permission again: the user already granted it.
+        // It also restores a missing push subscription, not only an existing one.
+        await enableAppAlerts(db);
+        return true;
+      } catch {
+        // Browsers that require a fresh gesture will use the one-tap opt-in.
+        return false;
+      }
+    })().finally(() => { grantedPermissionSync = null; });
   }
+  return grantedPermissionSync;
 }
 
 export async function unsubscribeLocalAppAlerts() {
