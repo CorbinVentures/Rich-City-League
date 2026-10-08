@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-  FaArrowRight, FaArrowUpFromBracket, FaCheck,
+  FaArrowRight, FaArrowUpFromBracket, FaBasketball, FaCheck,
   FaCircleInfo, FaDownload, FaMobileScreenButton, FaShieldHalved,
 } from 'react-icons/fa6';
 
