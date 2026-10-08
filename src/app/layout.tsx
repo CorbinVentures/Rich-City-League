@@ -25,6 +25,7 @@ import './rcl-social-search-stories.css';
 import './rcl-social-composer.css';
 import './rcl-messaging.css';
 import './rch-launch.css';
+import './rcl-pwa-contrast.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
