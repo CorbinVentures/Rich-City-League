@@ -7,7 +7,7 @@ import { Container } from '@/components/Container';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { runInviteUrl, validateRunStart } from '@/lib/run-activation';
+import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
 import {
   FaArrowUpRightFromSquare,
   FaBasketball,
@@ -117,11 +117,13 @@ const emptyForm = {
   description: '',
   run_type: 'competitive' as RunType,
   allow_fan_checkin: true,
+  repeat_weeks: 1 as 1 | 4,
 };
 
 export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
+  const createIntent = searchParams.get('create') === '1';
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -144,7 +146,7 @@ export default function RunsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [createdRun, setCreatedRun] = useState<{ id: string; title: string } | null>(null);
+  const [createdRuns, setCreatedRuns] = useState<Array<{ id:string; title:string; starts_at:string }>>([]);
   const [form, setForm] = useState(emptyForm);
 
   const load = async () => {
@@ -210,6 +212,8 @@ export default function RunsPage() {
 
   useEffect(() => { void load(); }, [supabase, user?.id]);
 
+  useEffect(() => { if (createIntent) setShowCreate(true); }, [createIntent]);
+
   useEffect(() => {
     if (!courtParam || !courts.length) return;
     const match=courts.find(court=>court.slug===courtParam);
@@ -235,58 +239,69 @@ export default function RunsPage() {
 
   const createRun = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (busy === 'create') return;
     if (!db || !user) {
-      setError('Sign in to create a run or meetup.');
+      window.location.href = `/auth/sign-in?next=${encodeURIComponent('/runs?create=1')}`;
       return;
     }
-    const court = courts.find((item) => item.slug === form.location_slug);
+    const court = courts.find(item => item.slug === form.location_slug);
     const location = court ? `${court.name} — ${court.address}` : form.custom_location.trim();
     if (!form.title.trim() || !location || !form.date || !form.time) {
       setError('Add a title, court or location, date, and start time.');
       return;
     }
     const startError = validateRunStart(form.date, form.time);
-    if (startError) {
-      setError(startError);
-      return;
-    }
+    if (startError) { setError(startError); return; }
     if (!Number.isInteger(form.max_players) || form.max_players < 2 || form.max_players > 50) {
       setError('Capacity must be between 2 and 50 players.');
       return;
     }
     setBusy('create');
     setError('');
-    const startsAt = new Date(`${form.date}T${form.time}`).toISOString();
-    const { data, error: insertError } = await db.from('runs').insert({
-      host_id: user.id,
-      title: form.title.trim(),
-      description: form.description.trim() || null,
-      location,
-      location_slug: court?.slug ?? null,
-      starts_at: startsAt,
-      skill_level: form.skill_level,
-      game_format: form.game_format,
-      max_players: form.max_players,
-      status: 'open',
-      run_type: form.run_type,
-      allow_fan_checkin: form.allow_fan_checkin,
-    }).select('id').single();
-    if (insertError) {
-      setError(insertError.message);
+    try {
+      const starts = buildWeeklyRunStarts(form.date, form.time, form.repeat_weeks);
+      const seriesId = starts.length > 1 ? crypto.randomUUID() : null;
+      const shared = {
+        host_id: user.id,
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        court_name: court?.name ?? form.custom_location.trim().slice(0, 160),
+        location,
+        location_slug: court?.slug ?? null,
+        skill_level: form.skill_level,
+        game_format: form.game_format.toLowerCase(),
+        max_players: form.max_players,
+        capacity: form.max_players,
+        status: 'open',
+        run_type: form.run_type,
+        allow_fan_checkin: form.allow_fan_checkin,
+      };
+      // Bulk insert is atomic: no partial series when a row fails.
+      const rows = starts.map((starts_at, recurrence_sequence) => ({
+        ...shared, starts_at,
+        recurrence_series_id: seriesId,
+        recurrence_sequence: seriesId ? recurrence_sequence : null,
+      }));
+      const { data, error: insertError } = await db.from('runs')
+        .insert(rows).select('id,title,starts_at');
+      if (insertError) throw insertError;
+      const created = ((data ?? []) as Array<{id:string;title:string;starts_at:string}>)
+        .sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
+      if (!created.length) throw new Error('Run publication did not return the new schedule.');
+      const { error: hostJoinError } = await db.from('run_players')
+        .insert(created.map(run => ({ run_id: run.id, profile_id: user.id })));
+      if (hostJoinError) console.error('Runs created, but automatic host RSVP failed:',hostJoinError);
+      setCreatedRuns(created);
+      setForm(emptyForm);
+      setShowCreate(false);
+      setNotice(`${created.length === 1 ? 'Run is' : `${created.length} weekly runs are`} live. Share ${created.length === 1 ? 'the link' : 'each date'} with your crew.${hostJoinError ? ' Host RSVP needs attention.' : ''}`);
+      setView('runs');
+      void load();
+    } catch (createError) {
+      setError(createError instanceof Error ? createError.message : 'Unable to schedule this run.');
+    } finally {
       setBusy(null);
-      return;
     }
-    if (data?.id) {
-      const { error: hostJoinError } = await db.from('run_players').insert({ run_id: data.id, profile_id: user.id });
-      if (hostJoinError) console.error('Run created, but automatic host RSVP failed.', hostJoinError);
-      setCreatedRun({ id: data.id, title: form.title.trim() });
-    }
-    setForm(emptyForm);
-    setShowCreate(false);
-    setBusy(null);
-    setNotice(form.run_type === 'social' ? 'Meetup published. Invite people to join.' : 'Run published. Invite players to fill the court.');
-    setView('runs');
-    void load();
   };
 
   const joinRun = async (run: Run) => {
@@ -407,10 +422,10 @@ export default function RunsPage() {
         />
 
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
-        {createdRun && <section aria-label="Share your new run" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
-          <div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your run is live</p><p className="mt-1 text-base font-semibold">{createdRun.title}</p><p className="mt-1 text-xs text-white/50">The court fills when people know about it. Send your invitation now.</p></div>
-          <div className="flex flex-wrap items-center gap-2"><ShareRunButton id={createdRun.id} title={createdRun.title} /><Link href={`/runs/${createdRun.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View run</Link><button type="button" onClick={() => setCreatedRun(null)} aria-label="Dismiss run invitation" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
-        </section>}
+        {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
+          <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your schedule is live</p><p className="mt-1 text-sm text-white/60">Every date has its own RSVP and invitation.</p></div><button type="button" onClick={() => setCreatedRuns([])} aria-label="Dismiss new runs" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{createdRuns.map(run=><div key={run.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rcl-blue/15 bg-[#071522] px-4 py-3"><div><p className="font-semibold text-sm">{run.title}</p><p className="text-xs text-white/45">{new Date(run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p></div><div className="flex gap-2"><ShareRunButton id={run.id} title={run.title}/><Link href={`/runs/${run.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View</Link></div></div>)}</div>
+        </section>
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {view === 'runs' && <section>
@@ -548,9 +563,10 @@ function CreateRunModal({ form, setForm, courts, busy, onClose, onSubmit }: {
       <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
       <label><span className="text-xs font-semibold text-white/42">Competition level</span><select value={form.skill_level} onChange={(event) => setForm({ ...form, skill_level: event.target.value as SkillLevel })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value="all">Everyone</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="elite">Elite</option></select></label>
       <label><span className="text-xs font-semibold text-white/42">Capacity</span><input type="number" min={2} max={50} value={form.max_players} onChange={(event) => setForm({ ...form, max_players: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Schedule</span><select value={form.repeat_weeks} onChange={event=>setForm({...form,repeat_weeks:Number(event.target.value) as 1|4})} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value={1}>One run</option><option value={4}>Repeat weekly · 4 weeks</option></select><small className="mt-2 block text-xs text-white/40">Each date has its own RSVP.</small></label>
       <label className="flex items-end"><span className="flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-white/10 bg-[#050b11] px-4 text-xs text-white/55"><input type="checkbox" checked={form.allow_fan_checkin} onChange={(event) => setForm({ ...form, allow_fan_checkin: event.target.checked })} className="accent-[#91cef2]" /> Allow fan check-ins</span></label>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Details</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows={3} placeholder="Competition level, winners-stay rules, jerseys, parking, meetup details…" className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
-      <button disabled={busy} className="sm:col-span-2 rounded-xl bg-rcl-blue px-5 py-3.5 text-sm font-semibold text-[#071018] disabled:opacity-50">{busy ? 'Publishing…' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
+      <button disabled={busy} className="sm:col-span-2 rounded-xl bg-rcl-blue px-5 py-3.5 text-sm font-semibold text-[#071018] disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
     </form>
   </div></div>;
 }
