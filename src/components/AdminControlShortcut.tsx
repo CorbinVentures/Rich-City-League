@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 export function AdminControlShortcut() {
   const pathname = usePathname();
   const { profile } = useAuth();
-  if (profile?.role !== 'admin' || pathname.startsWith('/admin/control-center')) return null;
+  if (profile?.role !== 'admin' || pathname.startsWith('/admin/control-center') || pathname.startsWith('/social/profile/')) return null;
 
   return (
     <Link
