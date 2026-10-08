@@ -1,44 +1,49 @@
-# RCH Android APK release checklist
+# Rich City Hoops Android APK: free release operations
 
-The /app route never advertises an APK until the `RCH_ANDROID_APK_URL` environment variable points to an HTTPS .apk URL. Until a signed package is available, Android visitors get the browser's standard install experience.
+## What is already automated
 
-## Generate a genuine APK
+- **App identity:** `com.richcityhoops.app`, product name **Rich City Hoops**, launch URL `https://richcityhoops.com/social?source=android`.
+- **Web ownership:** `https://richcityhoops.com/.well-known/assetlinks.json` includes the SHA-256 fingerprint for the RCH production release signing certificate.
+- **Free builds:** GitHub Actions `Build RCH Android APK` uses Bubblewrap and the public repository's free standard runners.
+- **Free hosting:** The manual release job publishes `RCH-Android.apk` and a SHA-256 checksum to the public repository's GitHub Releases.
+- **Auto-display:** The site `/app` page detects a published `android-v*` GitHub Release with exactly the `RCH-Android.apk` asset and then shows **Download Android APK**. Until it exists, Android visitors get the existing web-app install fallback.
+- **Validation:** Pull requests touching this configuration build an **unsigned** APK artifact. This is for CI only, NOT an installable or releasable package.
 
-Use Google's Bubblewrap Trusted Web Activity tool against the existing PWA manifest:
+## One-time owner action: KEEP THE SIGNING KEY
 
-```bash
-npm install -g @bubblewrap/cli
-bubblewrap init --manifest=https://richcityhoops.com/manifest.webmanifest
-bubblewrap build
-```
+The production signing certificate has already been generated separately from the source code. The owner must download the **private backup** provided in the ChatGPT delivery and store it securely in two locations under their control. Do not put its contents into Git, commit history, public issues, PRs, or screenshots.
 
-Choose a stable Android application ID (for example, `com.richcityhoops.app`), compatible version info, the production website origin, and the official RCH icons.
+The private backup contains:
+- `rch-android-release.p12`: encrypted PKCS12 keystore, alias `rch_release`.
+- `SIGNING-KEY-BACKUP.txt`: keystore password, package ID, and public certificate fingerprint.
+- `GITHUB-SECRET-RCH_ANDROID_KEYSTORE_BASE64.txt`: pasteable base64 form of the encrypted keystore.
 
-**Important:** Create a dedicated production signing key. Back it up securely, never commit the keystore or passwords to GitHub, and keep the same key for subsequent updates. Build and test on actual Android devices before publishing.
+In GitHub, open this repository → **Settings → Secrets and variables → Actions → New repository secret**. Create exactly:
 
-## Verify trust / full-screen rendering
+1. `RCH_ANDROID_KEYSTORE_BASE64`: the **entire one-line contents** of `GITHUB-SECRET-RCH_ANDROID_KEYSTORE_BASE64.txt`.
+2. `RCH_ANDROID_KEYSTORE_PASSWORD`: the password shown in `SIGNING-KEY-BACKUP.txt`.
 
-Trusted Web Activities require Android Digital Asset Links. Once the signing key exists, extract its SHA-256 certificate fingerprint using `keytool -list -v -keystore <your-keystore>`. Publish a JSON file at `https://richcityhoops.com/.well-known/assetlinks.json` with:
+Do NOT paste either secret into chat. The GitHub workflow uses the same password for the keystore and key. The workflow checks that the signing certificate matches the published Digital Asset Links fingerprint before it can release.
 
-```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.richcityhoops.app",
-    "sha256_cert_fingerprints": ["REPLACE_WITH_REAL_SIGNING_FINGERPRINT"]
-  }
-}]
-```
+## First signed release
 
-The placeholder is **documentation only**; do not deploy it. Verify the file, package name, fingerprint, site asset associations, and signed APK before calling the app verified. Without Digital Asset Links, Android can show browser UI.
+1. Check that the deployment containing `/.well-known/assetlinks.json` is live. Its certificate must match:
+   `C8:8E:3D:2C:D3:4E:85:04:31:60:C4:70:51:CD:4D:4E:20:84:39:B7:F2:AA:90:23:74:FA:C6:EA:07:BF:18:6E`.
+2. In GitHub **Actions → Build RCH Android APK → Run workflow** (select the `main` branch). The job generates a signed APK using the secure Actions secrets, uploads it as a temporary Actions artifact, and publishes a free GitHub Release.
+3. Verify the release contains `RCH-Android.apk` plus `RCH-Android.apk.sha256`. Run a malware scan; verify SHA-256, certificate and package ID. Test on an actual Android device **before sharing the link publicly**. Check login, routing, back navigation, notifications and whether the app launches without browser chrome. Browser UI instead of full-screen usually means Digital Asset Links verification failed.
+4. Once the release is published, allow up to 5 minutes for `richcityhoops.com/app` to detect the APK automatically. If it takes longer, refresh; check GitHub release state and the Vercel deployment. Do not use an unsigned test artifact as a public download.
 
-## Publish the download
+## Future updates
 
-1. Scan the signed release APK and install/test it on actual Android devices. Test sign-in, routing, notifications, and updates.
-2. Publish the APK under an official HTTPS location (for example, a trusted RCH-owned downloads location with the correct `application/vnd.android.package-archive` content type). Prefer app-release hosting over committing large APK binaries to the Next.js repository.
-3. Set **server-side** `RCH_ANDROID_APK_URL` on the Vercel production project to that verified HTTPS URL. Its path must end in `.apk`.
-4. Redeploy the site. On Android, the primary /app button switches from PWA installation to **Download Android APK**.
-5. Publish a signed update policy, version number, and checksum, and prepare Google Play distribution to reduce sideloading friction.
+Do not lose or rotate the signing key casually. New APK builds need the **same keystore** to be accepted as an update on existing devices. The workflow generates a rising Android version code for each run. A new manually triggered workflow creates a new GitHub Release and becomes the latest download. Plan upgrades and migration to Google Play before making the app widely available.
 
-iOS **cannot** silently install a PWA from a website or automatically install an app via a configuration profile. Safari users must select Share -> Add to Home Screen -> Open as Web App -> Add, or the organization can create a separate native iOS app distributed through the App Store.
+## Costs and alternatives
+
+- Bubblewrap is open source and does not charge a packaging fee.
+- Public repositories use GitHub's standard Actions runners without billed minutes; release asset hosting has no bandwidth limit, subject to GitHub's terms and abuse limits.
+- Direct APK sideloading has friction: users must explicitly approve downloads/installation from their browser and may see Android security warnings. It is **not** silent installation.
+- Optional Google Play distribution has a one-time $25 developer-account registration fee. iPhone installation is a different platform and cannot be automated by a website.
+
+## Security
+
+Never commit `android.keystore`, `.p12` or the plaintext secret files to this public repository. The build workflow only reconstructs the keystore in its short-lived signing job. Its GitHub release contains signed binaries and checksums, never private keys or passwords. If the signing backup is lost, existing installations cannot be updated with a different key.
