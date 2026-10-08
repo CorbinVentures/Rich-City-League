@@ -14,6 +14,7 @@ import {
   FaMedal,
   FaPeopleGroup,
   FaPlay,
+  FaUserPlus,
   FaTrophy,
 } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
@@ -74,6 +75,12 @@ type Run = {
   max_players: number;
 };
 
+type CityPost = {
+  id: string; author_id: string; body: string; created_at: string;
+  author_name: string;
+};
+type ClaimableOrganization = { id:string; slug:string; name:string; city:string|null };
+
 type Highlight = {
   id: string;
   title: string;
@@ -113,6 +120,8 @@ export function BasketballOSToday() {
   const [games, setGames] = useState<UpcomingGame[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [cityPosts, setCityPosts] = useState<CityPost[]>([]);
+  const [claimableOrganizations, setClaimableOrganizations] = useState<ClaimableOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
@@ -130,11 +139,13 @@ export function BasketballOSToday() {
     weekStart.setUTCHours(0, 0, 0, 0);
     const week = weekStart.toISOString().slice(0, 10);
 
-    const [missionsResult, gamesResult, runsResult, highlightsResult] = await Promise.all([
+    const [missionsResult, gamesResult, runsResult, highlightsResult, cityPostsResult, organizationsResult] = await Promise.all([
       db.from('weekly_missions').select('id,mission_key,title,description,event_type,rep_dimension,target_count,reward_xp,icon,sort_order').eq('is_active', true).order('sort_order'),
       db.from('games').select('id,scheduled_at,status,home_score,away_score,home:teams!games_home_team_id_fkey(name,short_name),away:teams!games_away_team_id_fkey(name,short_name)').in('status', ['scheduled', 'live']).gte('scheduled_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()).order('scheduled_at').limit(4),
       db.from('runs').select('id,title,court_name,location,starts_at,skill_level,max_players').neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(3),
       db.from('player_highlights').select('id,title,category,clip_url,thumbnail_url,player:players(first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
+      db.from('posts').select('id,author_id,body,created_at').eq('status','published').eq('is_automated',false).order('created_at',{ascending:false}).limit(4),
+      db.from('network_organizations').select('id,slug,name,city').eq('status','active').eq('is_claimed',false).neq('network_tier','flagship').order('name').limit(3),
     ]);
 
     if (missionsResult.error) setError('Missions could not be loaded.');
@@ -142,6 +153,22 @@ export function BasketballOSToday() {
     setGames((gamesResult.data ?? []) as UpcomingGame[]);
     setRuns((runsResult.data ?? []) as Run[]);
     setHighlights((highlightsResult.data ?? []) as Highlight[]);
+    setClaimableOrganizations((organizationsResult.data ?? []) as ClaimableOrganization[]);
+
+    // Surface genuine member activity only; official automated posts can be read in the feed.
+    const communityRows = (cityPostsResult.data ?? []) as Array<Omit<CityPost,'author_name'>>;
+    if (communityRows.length) {
+      const authorIds = [...new Set(communityRows.map(post => post.author_id))];
+      const { data: authors } = await db.from('profiles')
+        .select('id,display_name,username').in('id', authorIds)
+        .eq('is_active',true).eq('profile_visibility','public');
+      const names = new Map<string,string>(
+        (authors ?? []).map((profile: { id:string; display_name:string|null; username:string|null }) =>
+          [profile.id, profile.display_name || profile.username || 'RCH member']
+        )
+      );
+      setCityPosts(communityRows.map(post => ({ ...post, author_name:names.get(post.author_id) || 'RCH member' })));
+    } else setCityPosts([]);
 
     if (user) {
       const [progressResult, repResult] = await Promise.all([
@@ -187,12 +214,12 @@ export function BasketballOSToday() {
 
   return <main className="min-h-screen bg-[#03070d] pb-28 text-white">
     <ClientPageHero
-      eyebrow="RCL Basketball OS"
-      title="Today in RCL"
+      eyebrow="Rich City Hoops · Daily"
+      title="RCH Today"
       accent={rep ? `${rep.status_label} · Level ${rep.level}` : 'Your basketball world'}
-      description="One personalized command center for tonight’s games, your REP, weekly missions, runs, highlights and everything moving across Rich City League."
+      description="Your daily home for real Richmond basketball: players, court activity, new conversations, RCL games and opportunities to get involved."
       assetKey="social.cover"
-      actions={<div className="flex flex-wrap gap-2"><Link href="/social" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black">Open social <FaArrowRight /></Link><Link href="/dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider">My career</Link></div>}
+      actions={<div className="flex flex-wrap gap-2"><Link href="/social?compose=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black">Post an update <FaArrowRight /></Link><Link href="/runs?create=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider">Host a run</Link></div>}
       meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5 shadow-xl backdrop-blur"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Your REP</p><p className="mt-1 font-display text-4xl font-black">{rep?.total_xp ?? 0}</p><p className="mt-2 text-xs text-white/40">{user ? `${completed}/${missions.length || 6} weekly missions complete` : 'Sign in to activate your REP board'}</p></div>}
     />
 
@@ -200,15 +227,34 @@ export function BasketballOSToday() {
       {notice && <div className="mb-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] px-5 py-4 text-sm font-semibold text-emerald-100">{notice}</div>}
       {error && <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-400/[.06] px-5 py-4 text-sm text-red-100">{error}</div>}
 
+      <section aria-label="Your next moves" className="mb-7 grid gap-3 sm:grid-cols-3">
+        <Link href="/social?compose=1" className="group rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-5 transition hover:bg-rcl-orange/10"><FaBasketball className="text-xl text-rcl-orange" /><h2 className="mt-3 text-lg font-black">Show the city your game</h2><p className="mt-1 text-xs leading-5 text-white/50">Share a clip, ask a hoops question or introduce yourself.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-rcl-orange">Create a post <FaArrowRight/></span></Link>
+        <Link href="/runs?create=1" className="group rounded-2xl border border-rcl-blue/25 bg-rcl-blue/[.055] p-5 transition hover:bg-rcl-blue/10"><FaLocationDot className="text-xl text-rcl-blue"/><h2 className="mt-3 text-lg font-black">Put together a real run</h2><p className="mt-1 text-xs leading-5 text-white/50">Pick a Richmond court, set the time, invite your group.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-rcl-blue">Set up a run <FaArrowRight/></span></Link>
+        <Link href="/referrals" className="group rounded-2xl border border-white/15 bg-white/[.025] p-5 transition hover:bg-white/[.05]"><FaUserPlus className="text-xl text-white/75"/><h2 className="mt-3 text-lg font-black">Bring your people</h2><p className="mt-1 text-xs leading-5 text-white/50">Invite your friends and unlock rewards when they participate.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/70">Share your link <FaArrowRight/></span></Link>
+      </section>
+
+      <section aria-label="Richmond community activity" className="mb-7 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
+        <article className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/65 p-5 sm:p-7">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">City Pulse · Real members</p><h2 className="mt-2 font-display text-2xl font-black uppercase">What Richmond is saying</h2></div><Link href="/social" className="text-xs font-black uppercase text-rcl-blue">Full feed <FaArrowRight className="inline ml-1"/></Link></div>
+          {cityPosts.length ? <div className="mt-5 space-y-3">{cityPosts.map(post=><Link key={post.id} href={`/social/post/${post.id}`} className="block rounded-2xl border border-white/10 bg-white/[.025] p-4 hover:border-rcl-blue/30"><p className="text-xs font-bold text-rcl-blue">{post.author_name} <span className="ml-2 font-normal text-white/35">{prettyDate(post.created_at)}</span></p><p className="mt-2 line-clamp-3 whitespace-pre-line text-sm leading-6 text-white/70">{post.body || 'Shared an update'}</p></Link>)}</div> : <div className="mt-5 rounded-2xl border border-dashed border-white/15 p-6"><p className="text-base font-semibold">Start the conversation.</p><p className="mt-2 text-sm text-white/55">The feed has room for more real voices. Introduce yourself or share a clip from your last run.</p><Link href="/social?compose=1" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-rcl-blue">Be one of the first to post <FaArrowRight/></Link></div>}
+        </article>
+        <article className="rounded-3xl border border-white/10 bg-[#071018] p-5 sm:p-7">
+          <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The Richmond Network</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Help bring organizations on board</h2>
+          <p className="mt-2 text-xs leading-5 text-white/50">Know someone who operates one of these organizations? Send them a free page-claim link.</p>
+          {claimableOrganizations.length ? <div className="mt-4 space-y-2">{claimableOrganizations.map(org=><Link key={org.id} href={`/organizations/${org.slug}/claim`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm hover:border-rcl-blue/35"><span className="truncate">{org.name}<small className="block text-white/35">{org.city || 'Virginia'}</small></span><FaArrowRight className="shrink-0 text-rcl-blue"/></Link>)}</div> : <p className="mt-4 text-sm text-white/45">Browse participating organizations and businesses across Virginia.</p>}
+          <Link href="/organizations" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-blue">Organization directory <FaArrowRight/></Link>
+        </article>
+      </section>
+
       <section className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
         <article className="overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,.16),transparent_38%),#071018] p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.24em] text-rcl-orange"><FaFire className="mr-2 inline" />Game Night</p><h2 className="mt-2 font-display text-3xl font-black uppercase">{nextGame ? `${nextGame.away?.name ?? 'Away'} vs ${nextGame.home?.name ?? 'Home'}` : 'The next matchup is loading'}</h2></div>{nextGame?.status === 'live' && <span className="rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-red-300">Live now</span>}</div>
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.24em] text-rcl-orange"><FaFire className="mr-2 inline" />Game Night</p><h2 className="mt-2 font-display text-3xl font-black uppercase">{nextGame ? `${nextGame.away?.name ?? 'Away'} vs ${nextGame.home?.name ?? 'Home'}` : 'No matchup scheduled yet'}</h2></div>{nextGame?.status === 'live' && <span className="rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-red-300">Live now</span>}</div>
           {nextGame ? <><p className="mt-3 text-sm text-white/50">{prettyDate(nextGame.scheduled_at)}</p>{nextGame.status === 'live' && <p className="mt-5 font-display text-5xl font-black">{nextGame.away_score}<span className="mx-3 text-white/20">–</span>{nextGame.home_score}</p>}<div className="mt-7 flex flex-wrap gap-2"><Link href={`/games/${nextGame.id}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black"><FaPlay /> Open Game Night</Link>{nextGame.status === 'scheduled' && <Link href="/pickem" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase tracking-wider">Make a pick</Link>}</div></> : <p className="mt-5 max-w-xl text-sm leading-6 text-white/40">As soon as the next official game is scheduled it becomes the primary live destination here.</p>}
         </article>
 
         <article className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/55 p-6">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-blue"><FaLocationDot className="mr-2 inline" />Next Run</p>
-          {nextRun ? <><h2 className="mt-3 font-display text-2xl font-black uppercase">{nextRun.title}</h2><p className="mt-2 text-sm leading-6 text-white/45">{nextRun.court_name || nextRun.location}</p><p className="mt-3 text-xs font-black uppercase tracking-wider text-rcl-orange">{prettyDate(nextRun.starts_at)} · {nextRun.skill_level}</p><Link href="/runs" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Open runs <FaArrowRight /></Link></> : <><h2 className="mt-3 font-display text-2xl font-black uppercase">Find your next court</h2><p className="mt-2 text-sm leading-6 text-white/40">Browse Richmond, Henrico and Chesterfield courts or create the next run.</p><Link href="/runs" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Explore court network <FaArrowRight /></Link></>}
+          {nextRun ? <><h2 className="mt-3 font-display text-2xl font-black uppercase">{nextRun.title}</h2><p className="mt-2 text-sm leading-6 text-white/45">{nextRun.court_name || nextRun.location}</p><p className="mt-3 text-xs font-black uppercase tracking-wider text-rcl-orange">{prettyDate(nextRun.starts_at)} · {nextRun.skill_level}</p><Link href="/runs" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Open runs <FaArrowRight /></Link></> : <><h2 className="mt-3 font-display text-2xl font-black uppercase">Find your next court</h2><p className="mt-2 text-sm leading-6 text-white/40">Browse Richmond, Henrico and Chesterfield courts or create the next run.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/runs?create=1" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Host the first run <FaArrowRight /></Link><Link href="/runs" className="text-xs font-bold text-white/55">Browse courts</Link></div></>}
         </article>
       </section>
 
