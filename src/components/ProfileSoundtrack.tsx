@@ -1,63 +1,108 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaMusic, FaPause, FaPlay, FaVolumeHigh, FaVolumeXmark } from 'react-icons/fa6';
-
-function getYouTubeId(value: string) {
-  try {
-    const url = new URL(value);
-    if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('/')[0] || null;
-    if (url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com') {
-      if (url.pathname === '/watch') return url.searchParams.get('v');
-      if (url.pathname.startsWith('/shorts/')) return url.pathname.split('/')[2] || null;
-      if (url.pathname.startsWith('/embed/')) return url.pathname.split('/')[2] || null;
-    }
-  } catch {}
-  return null;
-}
+import { audiusStreamUrl, profileTrackId, type MusicTrack } from '@/lib/profile-music';
 
 export function ProfileSoundtrack({ url, profileName }: { url?: string | null; profileName: string }) {
-  const videoId = useMemo(() => (url ? getYouTubeId(url) : null), [url]);
-  // null: autoplay attempted; true: visitor pressed Play; false: visitor paused.
-  // Do not label an attempted autoplay as "playing" since the browser can block it.
-  const [manualPlayback, setManualPlayback] = useState<boolean | null>(null);
+  const id = profileTrackId(url);
+  const [track, setTrack] = useState<MusicTrack | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'buffering' | 'playing' | 'paused' | 'error'>('loading');
   const [muted, setMuted] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    setManualPlayback(null);
-    setMuted(false);
-    setReloadKey(0);
-  }, [videoId]);
+    if (!id) { setTrack(null); return; }
+    const controller = new AbortController();
+    setTrack(null); setStatus('loading'); setMuted(false); setProgress(0);
+    fetch(`/api/music/track?id=${encodeURIComponent(id)}`, { signal: controller.signal })
+      .then(async response => {
+        if (!response.ok) throw new Error('Song unavailable');
+        const data: { track?: MusicTrack } = await response.json();
+        if (!data.track) throw new Error('Song unavailable');
+        if (!controller.signal.aborted) setTrack(data.track);
+      })
+      .catch(() => { if (!controller.signal.aborted) setStatus('error'); });
+    return () => { controller.abort(); audioRef.current?.pause(); };
+  }, [id]);
 
-  if (!videoId) return null;
+  useEffect(() => {
+    if (!track || !audioRef.current) return;
+    const audio = audioRef.current;
+    audio.muted = false;
+    setStatus('ready');
+    // Best-effort autoplay. Safari/iOS normally requires a visitor's tap.
+    // Reflect the real audio element's playback events, not the request.
+    void audio.play().catch(() => setStatus('ready'));
+  }, [track]);
 
-  const origin = typeof window === 'undefined' ? '' : window.location.origin;
-  const wantsPlayback = manualPlayback !== false;
-  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${wantsPlayback ? 1 : 0}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&origin=${encodeURIComponent(origin)}&mute=${muted ? 1 : 0}&v=${reloadKey}`;
+  if (!id) return null;
 
-  const togglePlayback = () => {
-    // Initial click always retries Play (important when browsers block autoplay).
-    setManualPlayback(previous => previous === true ? false : true);
-    setReloadKey(value => value + 1);
+  const togglePlayback = async () => {
+    const audio = audioRef.current;
+    if (!audio || !track) return;
+    if (!audio.paused) { audio.pause(); setStatus('paused'); return; }
+    setStatus('buffering');
+    try { await audio.play(); }
+    catch { setStatus('error'); }
   };
 
-  return <section className="relative mt-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 px-4 py-3 shadow-sm" aria-label={`${profileName}'s profile soundtrack`}>
-    <div className="flex items-center gap-3">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rcl-blue text-white" aria-hidden="true"><FaMusic /></span>
+  const toggleMuted = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    setMuted(audio.muted);
+  };
+
+  const statusLabel = ({
+    loading: 'Loading song…',
+    ready: 'Tap Play to listen',
+    buffering: 'Loading audio…',
+    playing: 'Now playing',
+    paused: 'Paused',
+    error: 'Unable to play · try again',
+  } as const)[status];
+
+  return <section className="mt-5 rounded-2xl border border-[#D6E0EF] bg-white px-3 py-3 shadow-sm sm:px-4"
+    aria-label={`${profileName}'s profile song`} style={{ color: '#132947', backgroundColor: '#FFFFFF' }}>
+    <div className="flex min-w-0 items-center gap-3">
+      {track?.artworkUrl
+        ? <img src={track.artworkUrl} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+        : <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#E8EFF8] text-[#225F9C]"><FaMusic /></span>}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-white">Profile song</p>
-        <p className="mt-0.5 text-xs text-white/65" aria-live="polite">
-          {manualPlayback === false ? 'Paused' : manualPlayback === true ? 'Playback requested' : 'Autoplay attempted · tap Play if silent'}
-        </p>
+        <p className="truncate text-sm font-bold text-[#132947]">{track?.title || 'Profile song'}</p>
+        <p className="truncate text-xs text-[#566986]">{track?.artist || (status === 'error' ? 'Audius music unavailable' : 'Audius')}</p>
+        <p className="mt-0.5 text-[11px] font-semibold text-[#4774A5]" role="status">{statusLabel}</p>
       </div>
-      <button type="button" onClick={togglePlayback} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rcl-blue text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label={manualPlayback === true ? 'Pause profile song' : 'Play profile song'}>
-        {manualPlayback === true ? <FaPause /> : <FaPlay />}
+      <button type="button" onClick={() => void togglePlayback()} disabled={!track}
+        aria-label={status === 'playing' ? 'Pause profile song' : 'Play profile song'}
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#2677E6] text-white transition hover:brightness-110 disabled:opacity-40">
+        {status === 'playing' ? <FaPause /> : <FaPlay />}
       </button>
-      <button type="button" onClick={() => { setMuted(value => !value); setReloadKey(value => value + 1); }} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/20 text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" aria-label={muted ? 'Unmute profile song' : 'Mute profile song'} aria-pressed={muted}>
+      <button type="button" onClick={toggleMuted} disabled={!track}
+        aria-label={muted ? 'Unmute profile song' : 'Mute profile song'} aria-pressed={muted}
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#D6E0EF] text-[#132947] disabled:opacity-40">
         {muted ? <FaVolumeXmark /> : <FaVolumeHigh />}
       </button>
     </div>
-    <iframe key={`${videoId}-${reloadKey}-${muted}-${manualPlayback}`} title={`${profileName}'s profile soundtrack audio`} src={embedUrl} allow="autoplay; encrypted-media; picture-in-picture" aria-hidden="true" className="pointer-events-none absolute h-px w-px opacity-0" />
+    {track && <div className="mt-2 flex items-center justify-between gap-3">
+      <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-[#E7EDF6]" aria-label="Song playback progress">
+        <div className="h-full rounded-full bg-[#2677E6]" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+      </div>
+      <a href={track.permalink} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold text-[#225F9C] underline">Audius ↗</a>
+    </div>}
+    {track && <audio key={track.id} ref={audioRef} src={audiusStreamUrl(track.id)} preload="none"
+      onPlaying={() => setStatus('playing')}
+      onWaiting={() => setStatus('buffering')}
+      onPause={() => setStatus(previous => previous === 'error' ? previous : 'paused')}
+      onEnded={() => { setStatus('ready'); setProgress(0); }}
+      onError={() => setStatus('error')}
+      onTimeUpdate={event => {
+        const audio = event.currentTarget;
+        const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : track.duration;
+        setProgress(duration > 0 ? audio.currentTime / duration * 100 : 0);
+      }}
+    />}
   </section>;
 }
