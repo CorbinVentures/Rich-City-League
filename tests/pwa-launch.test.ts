@@ -2,26 +2,41 @@ import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
 
-function launch({ path = '/social' } = {}) {
+function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1 }: {
+  path?: string;
+  standalone?: boolean;
+  userAgent?: string;
+  platform?: string;
+  maxTouchPoints?: number;
+} = {}) {
   const dataset: Record<string, string> = {};
   const timers: Array<{ callback: () => void; delay: number }> = [];
   runInNewContext(PWA_LAUNCH_BOOTSTRAP, {
     document: { documentElement: { dataset } },
     location: { pathname: path },
-    window: { setTimeout: (callback: () => void, delay: number) => timers.push({ callback, delay }) },
+    navigator: { userAgent, platform, maxTouchPoints, standalone },
+    window: {
+      matchMedia: () => ({ matches: standalone }),
+      setTimeout: (callback: () => void, delay: number) => timers.push({ callback, delay }),
+    },
   });
   return { dataset, timers };
 }
 
 describe('page launch intro', () => {
-  it('starts for every regular page load', () => {
+  it('starts for installed mobile app page loads', () => {
     expect(launch().dataset.rchLaunch).toBe('active');
     expect(launch({ path: '/discover' }).dataset.rchLaunch).toBe('active');
+  });
+  it('does not cover ordinary browsers or desktop PWAs', () => {
+    expect(launch({ standalone: false }).dataset.rchLaunch).toBeUndefined();
+    expect(launch({ standalone: true, userAgent: 'Mozilla/5.0 Windows NT 10.0', platform: 'Win32' }).dataset.rchLaunch).toBeUndefined();
+    expect(launch({ standalone: true, userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 0 }).dataset.rchLaunch).toBeUndefined();
   });
   it('does not cover account recovery', () => {
     expect(launch({ path: '/auth/confirm' }).dataset.rchLaunch).toBeUndefined();
   });
-  it('always releases the screen after the safety timeout', () => {
+  it('always releases the app screen after the safety timeout', () => {
     const result = launch();
     expect(result.dataset.rchLaunch).toBe('active');
     expect(result.timers.at(-1)?.delay).toBe(RCH_LAUNCH_FALLBACK_MS);
