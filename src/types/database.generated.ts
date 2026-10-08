@@ -3869,6 +3869,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           cover_url: string | null
+          profile_song_url: string | null
           created_at: string
           display_name: string | null
           first_name: string | null
