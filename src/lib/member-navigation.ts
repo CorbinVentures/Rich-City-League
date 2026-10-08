@@ -13,7 +13,7 @@ export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Discover',href:'/discover',icon:FaCompass},
   {label:'Create',href:'/create',icon:FaPlus,action:'create'},
   {label:'Runs',href:'/runs',icon:FaLocationDot},
-  {label:'League',href:'/league',icon:FaBasketball},
+  {label:'Profile',href:'/profile',icon:FaUser},
 ];
 
 export const RCL_MEMBER_DESKTOP_NAV=RCL_MEMBER_PRIMARY_NAV;
@@ -26,7 +26,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Home Feed',href:'/social',icon:FaHouse},
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
-      {label:'My Profile',href:'/social/profile/me',icon:FaUser},
+      {label:'My Profile',href:'/profile',icon:FaUser},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
       {label:'Notifications',href:'/notifications',icon:FaBell},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
@@ -89,10 +89,11 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
 const SOCIAL=['/social'];
 const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
 const RUNS=['/runs','/richmond-basketball-runs'];
+const PROFILE=['/profile','/social/profile'];
 const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isMemberNavigationActive(pathname:string,href:string){
-  const family=href==='/social'?SOCIAL:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  const family=href==='/social'?SOCIAL:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
   if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   const clean=href.split('?')[0];
   return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));
