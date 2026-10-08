@@ -218,6 +218,10 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
           <p><b>Official Rich City Hoops installation page.</b> Avoid third-party app download sites and unknown configuration profiles. Your account and basketball community stay at richcityhoops.com.</p>
         </div>
         <p className="rch-download-return"><Link href="/auth/sign-up">Create your free RCH profile <FaArrowRight aria-hidden="true"/></Link> <Link href="/auth/sign-in">Sign in</Link></p>
+        <footer className="rch-download-legal" aria-label="Rich City Hoops legal information">
+          <span>© {new Date().getFullYear()} Rich City Hoops · Richmond, VA</span>
+          <nav aria-label="Legal"><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/community-guidelines">Guidelines</Link></nav>
+        </footer>
       </section>
     </main>
   );
