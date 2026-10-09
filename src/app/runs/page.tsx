@@ -104,6 +104,7 @@ export default function RunsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
+  const [runSearch, setRunSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -335,7 +336,9 @@ export default function RunsPage() {
     const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
     const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
     const courtMatch = !courtParam || run.location_slug === courtParam;
-    return skillMatch && typeMatch && courtMatch;
+    const words = runSearch.trim().toLowerCase();
+    const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
+    return skillMatch && typeMatch && courtMatch && searchMatch;
   });
 
   return (
@@ -392,9 +395,11 @@ export default function RunsPage() {
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {(['all', 'intermediate', 'advanced', 'elite'] as const).map((item) => <button key={item} onClick={() => setSkillFilter(item)} className={`rounded-xl border px-3.5 py-2 text-xs font-semibold ${skillFilter === item ? 'border-rcl-blue/35 bg-rcl-blue/12 text-rcl-blue' : 'border-white/8 text-white/35'}`}>{item === 'all' ? 'Any level' : skillLabels[item]}</button>)}
             </div>
+            <input aria-label="Search upcoming runs by court or city" type="search" value={runSearch} onChange={event => setRunSearch(event.target.value)}
+              placeholder="Find a run by city, court or title" className="min-h-11 rounded-xl border border-white/20 bg-[#071522] px-4 text-sm text-white placeholder:text-white/55 outline-none focus:border-rcl-blue/40 lg:col-span-2" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Be the first to get Richmond running'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Bring basketball runs to your area'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
         {view === 'rewards' && <section>
@@ -450,6 +455,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <div className="flex min-w-0 items-start gap-3"><FaLocationDot className="mt-1 shrink-0 text-rcl-blue" /><span className="min-w-0 break-words">{run.location}</span></div>
       <div className="flex items-center gap-3"><FaPeopleGroup className="shrink-0 text-rcl-blue" /><span>{count}/{run.max_players} attending</span></div>
       <div className="flex flex-wrap gap-2 pt-2">
+        <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(run.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-white/85">Directions <FaArrowUpRightFromSquare className="ml-1.5" /></a>
         <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button><ShareRunButton id={run.id} title={run.title} />
         {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
       </div>
