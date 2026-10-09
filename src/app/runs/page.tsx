@@ -105,6 +105,7 @@ export default function RunsPage() {
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
+  const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
