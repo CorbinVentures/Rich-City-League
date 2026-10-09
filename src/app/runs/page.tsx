@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
+import { RunArenaHero } from '@/components/runs/RunArenaHero';
+import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
+import './runs-arena.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
@@ -343,31 +346,26 @@ export default function RunsPage() {
   });
 
   return (
-    <main className="rcl-social-secondary min-h-screen overflow-x-hidden bg-[#05080d] pb-28 text-white">
-      <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
-        <Container maxWidth="xl" className="py-6 sm:py-7">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Runs</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Open Runs</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Find pickup games, organize runs and invite players to courts across Virginia.</p>
-              {courtParam&&selectedCourt&&<div className="mt-3 inline-flex items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-1.5 text-xs font-semibold text-rcl-blue"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-1 text-white/40 hover:text-white">Clear</Link></div>}
-            </div>
-            <button onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Host a run / meetup</button>
+    <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
+      <RunArenaHero
+        activeMode={typeFilter}
+        onHost={() => openCreateForCourt(selectedCourt ?? undefined)}
+        onMode={mode => {
+          setTypeFilter(mode);
+          setView('runs');
+          document.getElementById('rch-upcoming-runs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      />
+      <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
+        {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <span className="text-xs font-bold uppercase tracking-[.2em] text-[#84baf0]">Virginia's basketball community</span>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setView('runs')} className={'rounded-xl border px-3 py-2 text-xs font-bold '+(view==='runs'?'border-[#459fff] bg-[#134c8a] text-white':'border-[#2c5178] text-[#c5d8ef]')}>Runs + Rankings</button>
+            <button type="button" onClick={() => setView('rewards')} className={'rounded-xl border px-3 py-2 text-xs font-bold '+(view==='rewards'?'border-[#459fff] bg-[#134c8a] text-white':'border-[#2c5178] text-[#c5d8ef]')}>REP Rewards</button>
           </div>
-        </Container>
-      </header>
-
-      <Container maxWidth="xl" className="py-5 sm:py-7">
-        <nav className="mb-6 grid grid-cols-2 gap-1 rounded-2xl border border-white/8 bg-[#09131d]/80 p-1" aria-label="Open Runs sections">
-          {([
-            ['runs', 'Runs', FaBasketball],
-            ['rewards', 'Rewards', FaTrophy],
-          ] as const).map(([key, label, Icon]) => (
-            <button key={key} onClick={() => setView(key)} className={`flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition sm:text-sm ${view === key ? 'bg-rcl-blue text-[#071018]' : 'text-white/45 hover:bg-white/[.04] hover:text-white'}`}><Icon className="shrink-0" /><span className="truncate">{label}</span></button>
-          ))}
-        </nav>
-
+        </div>
+        {view === 'runs' && <RunArenaLeaderboard />}
         <NetworkSponsoredPlacement
           placement="regional-feature"
           surface="rch-runs-presenting"
@@ -388,10 +386,14 @@ export default function RunsPage() {
         </section>}
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
-        {view === 'runs' && <section>
+        {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-xl font-black text-white sm:text-2xl"><FaCalendarDays className="text-[#82caff]"/> Upcoming Runs</h2>
+            <button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');}} className="text-xs font-bold text-[#6cbaff]">See all runs →</button>
+          </div>
           <div className="mb-5 grid gap-3 lg:grid-cols-[auto_1fr] lg:items-center">
             <div className="flex flex-wrap gap-2">
-              {(['all', 'competitive', 'social', 'training'] as const).map((item) => <button key={item} onClick={() => setTypeFilter(item)} className={`rounded-xl border px-3.5 py-2 text-xs font-semibold ${typeFilter === item ? 'border-rcl-blue/45 bg-rcl-blue text-[#071018]' : 'border-white/10 bg-white/[.025] text-white/48'}`}>{item === 'all' ? 'All activity' : runTypeLabels[item]}</button>)}
+              {(['all', 'competitive', 'social', 'training'] as const).map(item => <button type="button" key={item} aria-pressed={typeFilter===item} onClick={() => setTypeFilter(item)} className="rch-arena-upcoming-filter rounded-xl border px-3 py-2 text-xs font-bold">{item==='all'?'All runs':runTypeLabels[item]}</button>)}
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {(['all', 'intermediate', 'advanced', 'elite'] as const).map((item) => <button key={item} onClick={() => setSkillFilter(item)} className={`rounded-xl border px-3.5 py-2 text-xs font-semibold ${skillFilter === item ? 'border-rcl-blue/35 bg-rcl-blue/12 text-rcl-blue' : 'border-white/8 text-white/35'}`}>{item === 'all' ? 'Any level' : skillLabels[item]}</button>)}
@@ -400,7 +402,7 @@ export default function RunsPage() {
               placeholder="Find a run by city, court or title" className="min-h-11 rounded-xl border border-white/20 bg-[#071522] px-4 text-sm text-white placeholder:text-white/55 outline-none focus:border-rcl-blue/40 lg:col-span-2" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Bring basketball runs to your area'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rch-arena-empty rounded-2xl border border-dashed p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Bring basketball runs to your area'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
         {view === 'rewards' && <section>
@@ -445,7 +447,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   const participantCanHighlight = (joined || host) && highlightWindow;
   const typeIcon = run.run_type === 'competitive' ? <FaTrophy /> : run.run_type === 'training' ? <FaDumbbell /> : <FaPeopleGroup />;
 
-  return <article className="min-w-0 overflow-hidden rounded-2xl border border-rcl-blue/14 bg-[#071522]/48">
+  return <article className="rch-arena-game-card min-w-0 overflow-hidden rounded-2xl">
     <div className="border-b border-white/8 p-5">
       <div className="flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1.5 rounded-lg border border-rcl-blue/16 bg-rcl-blue/[.06] px-2.5 py-1 text-[11px] font-semibold text-rcl-blue">{typeIcon}{runTypeLabels[run.run_type]}</span><span className="rounded-lg border border-white/8 px-2.5 py-1 text-[11px] font-medium text-white/38">{run.game_format}</span><span className="ml-auto text-[11px] text-white/32">{skillLabels[run.skill_level]}</span></div>
       <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]"><Link href={`/runs/${run.id}`} className="hover:text-rcl-blue">{run.title}</Link></h2>
