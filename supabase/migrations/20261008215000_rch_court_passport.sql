@@ -62,7 +62,6 @@ begin
     or not (p_lat between -90 and 90)
     or not (p_lon between -180 and 180)
     or not (p_accuracy between 0 and 100)
-    or not isfinite(p_lat) or not isfinite(p_lon) or not isfinite(p_accuracy)
   then raise exception 'Please enable precise location and try again'; end if;
 
   select * into court from public.basketball_locations
