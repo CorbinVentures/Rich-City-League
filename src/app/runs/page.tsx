@@ -406,7 +406,7 @@ export default function RunsPage() {
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Competitive runs, pickup basketball and social meetups across Richmond, Henrico and Chesterfield.</p>
               {courtParam&&selectedCourt&&<div className="mt-3 inline-flex items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-1.5 text-xs font-semibold text-rcl-blue"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-1 text-white/40 hover:text-white">Clear</Link></div>}
             </div>
-            <div className="flex flex-wrap gap-2"><Link href="/radar" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-rcl-blue/35 px-5 text-sm font-semibold text-sky-200"><FaLocationDot /> Basketball Radar</Link><button onClick={() => openCreateForCourt()} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Create run / meetup</button></div>
+            <div className="flex flex-wrap gap-2"><Link href="/radar" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-rcl-blue/35 px-5 text-sm font-semibold text-sky-200"><FaLocationDot /> Basketball Radar</Link><button onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Create run / meetup</button></div>
           </div>
         </Container>
       </header>
