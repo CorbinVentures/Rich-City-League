@@ -359,7 +359,7 @@ export default function RunsPage() {
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs font-bold uppercase tracking-[.2em] text-[#84baf0]">Virginia's basketball community</span>
+          <span className="text-xs font-bold uppercase tracking-[.2em] text-[#84baf0]">Virginia basketball community</span>
           <div className="flex gap-2">
             <button type="button" onClick={() => setView('runs')} className={'rounded-xl border px-3 py-2 text-xs font-bold '+(view==='runs'?'border-[#459fff] bg-[#134c8a] text-white':'border-[#2c5178] text-[#c5d8ef]')}>Runs + Rankings</button>
             <button type="button" onClick={() => setView('rewards')} className={'rounded-xl border px-3 py-2 text-xs font-bold '+(view==='rewards'?'border-[#459fff] bg-[#134c8a] text-white':'border-[#2c5178] text-[#c5d8ef]')}>REP Rewards</button>
