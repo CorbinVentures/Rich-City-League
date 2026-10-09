@@ -61,6 +61,7 @@ const isCheckinEligible = (c: Court) =>
 export default function BasketballRadarPage() {
   const { user } = useAuth();
   const db = useMemo(() => getSupabaseClient() as any, []);
+  const memberId = user?.id;
   const [courts, setCourts] = useState<Court[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [communities, setCommunities] = useState<CourtCommunity[]>([]);
@@ -92,7 +93,7 @@ export default function BasketballRadarPage() {
         db.from('communities')
           .select('slug,name,location_slug')
           .not('location_slug', 'is', null).limit(300),
-        user ? db.from('court_checkins').select('court_slug,checked_in_on').eq('profile_id', user.id).limit(500)
+        memberId ? db.from('court_checkins').select('court_slug,checked_in_on').eq('profile_id', memberId).limit(500)
           : Promise.resolve({ data: [], error: null }),
       ]);
       if (courtResult.error || runResult.error) throw courtResult.error || runResult.error;
@@ -105,11 +106,11 @@ export default function BasketballRadarPage() {
     } finally {
       setLoading(false);
     }
-  }, [db, user?.id]);
+  }, [db, memberId]);
 
   useEffect(() => { void reload(); }, [reload]);
 
-  async function useMyLocation() {
+  async function requestLocation() {
     setLocationState('requesting');
     setError('');
     try {
@@ -208,7 +209,7 @@ export default function BasketballRadarPage() {
             Find courts, runs and basketball communities around you. Show up, check in and build your REP.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <button type="button" onClick={() => void useMyLocation()} disabled={locationState === 'requesting'}
+            <button type="button" onClick={() => void requestLocation()} disabled={locationState === 'requesting'}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-sky-300 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-50">
               <FaLocationArrow /> {locationState === 'requesting' ? 'Locating…' : origin ? 'Refresh my location' : 'Find near me'}
             </button>
