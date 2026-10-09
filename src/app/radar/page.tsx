@@ -15,7 +15,7 @@ type Court = {
   slug: string; name: string; address: string; locality: string; area: string;
   latitude: number | null; longitude: number | null; venue_type: string;
   verification_status: string; access_type: string; hours_text: string | null;
-  open_gym_text: string | null; source_label: string | null;
+  open_gym_text: string | null; source_label: string | null; source_url: string | null;
 };
 type Run = {
   id: string; title: string; location: string; location_slug: string | null;
@@ -311,7 +311,9 @@ export default function BasketballRadarPage() {
                       <span className="rounded-lg border border-white/15 px-2 py-1.5">{court.access_type === 'public' ? 'Listed public' : court.access_type === 'varies' ? 'Access not confirmed' : court.access_type.replaceAll('_', ' ')}</span>
                       {court.open_gym_text && <span className="rounded-lg border border-white/15 px-2 py-1.5">Open-gym schedule</span>}
                       {visited.has(court.slug) && <span className="flex items-center gap-1 rounded-lg border border-sky-300/30 px-2 py-1.5 text-sky-200"><FaCircleCheck /> Visited</span>}
-                      {court.source_label && <span className="rounded-lg border border-white/15 px-2 py-1.5">Source: {court.source_label}</span>}
+                      {court.source_label && (court.source_url
+                        ? <a href={court.source_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-white/15 px-2 py-1.5 text-sky-200">Source: {court.source_label} <FaArrowUpRightFromSquare /></a>
+                        : <span className="rounded-lg border border-white/15 px-2 py-1.5">Source: {court.source_label}</span>)}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button type="button" onClick={() => setSelected(court)} className="min-h-10 rounded-xl border border-white/25 px-3 text-xs font-semibold text-white">
@@ -381,6 +383,10 @@ export default function BasketballRadarPage() {
             </aside>
           </div>
         )}
+        <p className="mt-8 text-center text-xs leading-5 text-slate-400">
+          Community map data © <a className="underline hover:text-sky-200" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, licensed under ODbL 1.0.
+          Mapped locations are not guarantees of public access or playable conditions.
+        </p>
       </Container>
     </main>
   );
