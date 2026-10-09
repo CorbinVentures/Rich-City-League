@@ -155,8 +155,8 @@ export function RunArenaLeaderboard() {
 
   return <>
     <section className="rch-arena-profile rounded-[22px] border border-[#235486]/65 p-4 sm:p-5" aria-label="My basketball REP">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="rch-arena-profile-layout">
+        <div className="rch-arena-person">
           <RankAvatar name={myName} src={profile?.avatar_url} size={62}/>
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[.14em] text-[#8cb9ef]">{user ? 'Your Court Reputation' : 'Join the RCH community'}</p>
@@ -164,11 +164,15 @@ export function RunArenaLeaderboard() {
             <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#b2d9ff]"><FaCrown className="text-[#facc59]"/> {user ? 'LEVEL ' + (level?.level ?? 1) : 'Sign in to earn REP'}</span>
           </div>
         </div>
-        <div className="grid min-w-[195px] flex-1 grid-cols-3 gap-2 sm:max-w-sm">
-          <div className="rounded-xl bg-[#071423]/80 p-2.5 text-center"><FaFire className="mx-auto text-orange-400"/><p className="mt-1 text-lg font-black text-white">{level?.current_streak ?? 0}</p><span className="text-[10px] text-[#a6c0db]">Streak</span></div>
-          <div className="rounded-xl bg-[#071423]/80 p-2.5 text-center"><FaTrophy className="mx-auto text-[#facc59]"/><p className="mt-1 text-lg font-black text-white">{myWins}</p><span className="text-[10px] text-[#a6c0db]">Ranked wins</span></div>
-          <div className="rounded-xl bg-[#071423]/80 p-2.5 text-center"><FaMedal className="mx-auto text-[#56b7ff]"/><p className="mt-1 text-lg font-black text-white">{level?.xp ?? 0}</p><span className="text-[10px] text-[#a6c0db]">REP</span></div>
+        <div className="rch-arena-metrics">
+          <div className="rch-arena-metric"><FaFire className="mx-auto text-orange-400"/><p className="mt-1 text-lg font-black text-white">{level?.current_streak ?? 0}</p><span className="text-[10px] text-[#a6c0db]">Streak</span></div>
+          <div className="rch-arena-metric"><FaTrophy className="mx-auto text-[#facc59]"/><p className="mt-1 text-lg font-black text-white">{myWins}</p><span className="text-[10px] text-[#a6c0db]">Ranked wins</span></div>
+          <div className="rch-arena-metric"><FaMedal className="mx-auto text-[#56b7ff]"/><p className="mt-1 text-lg font-black text-white">{level?.xp ?? 0}</p><span className="text-[10px] text-[#a6c0db]">REP</span></div>
         </div>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#335779]/50 pt-3">
+        <p className="text-[11px] font-medium text-[#b6cee9]">{user ? 'Your participation builds your RCH reputation' : 'Join real runs and earn REP'}</p>
+        <Link href="/badges" className="text-[11px] font-bold text-[#72baff]">See badges →</Link>
       </div>
     </section>
 
@@ -177,7 +181,7 @@ export function RunArenaLeaderboard() {
         <div><h2 id="rch-run-rank-title" className="flex items-center gap-2 text-xl font-black tracking-tight text-white"><FaCrown className="text-[#f5cf69]"/> Leaderboard</h2>
           <p className="mt-1 text-xs leading-5 text-[#a3bad5]">Independently reviewed competitive Open Run stats</p>
         </div>
-        <div className="inline-flex rounded-full border border-[#2e587f] bg-[#071322] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
+        <div className="rch-arena-rank-tabs inline-flex rounded-full border border-[#2e587f] bg-[#071322] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
           {(['city','state'] as const).map(value=><button type="button" key={value}
             onClick={()=>{setScope(value);setShowAll(false);}}
             className={'rounded-full px-4 py-2 transition '+(scope===value?'bg-[#268dff] text-white shadow-[0_0_15px_rgba(45,148,255,.4)]':'text-[#b9cce2]')}
@@ -189,7 +193,7 @@ export function RunArenaLeaderboard() {
         <input className="min-h-9 w-36 rounded-lg border border-[#315e8e] bg-[#071526] px-3 text-sm text-white outline-none focus:border-[#55b0ff]" value={city} maxLength={40} onChange={e=>setCity(e.target.value)} placeholder="Richmond"/>
       </label>}
       {loadingRanks ? <p className="py-8 text-center text-sm text-[#9eb8d6]">Loading the rankings…</p>
-      : leaders.length===0 ? <div className="mt-4 rounded-xl border border-dashed border-[#315c86] bg-[#0a1b2d]/80 px-4 py-8 text-center">
+      : leaders.length===0 ? <div className="rch-arena-rank-empty mt-4 rounded-xl border border-dashed px-4 py-6 text-center">
         <FaBasketball className="mx-auto text-3xl text-[#4da3ff]"/>
         <p className="mt-3 font-bold text-white">The leaderboard is waiting for its first ranked run</p>
         <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#b0c5df]">Play a competitive run, submit a box score, and get it verified. Only real confirmed results will appear here.</p>
@@ -206,7 +210,7 @@ export function RunArenaLeaderboard() {
         </div>)}
       </div>}
       <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" onClick={()=>{setStatsOpen(true);setMessage('');}} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#167aff] to-[#32a8ff] px-4 text-sm font-black text-white shadow-[0_4px_18px_rgba(32,145,255,.27)]"><FaChartSimple/> Add Stats <FaArrowRight/></button>
+        <button type="button" onClick={()=>{setStatsOpen(true);setMessage('');}} className="rch-arena-add-stats inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#167aff] to-[#32a8ff] px-4 text-sm font-black text-white shadow-[0_4px_18px_rgba(32,145,255,.27)]"><FaChartSimple/> Add Stats <FaArrowRight/></button>
         {leaders.length>3 && <button type="button" className="min-h-11 rounded-xl border border-[#355e8a] px-4 text-xs font-semibold text-[#cce1f5]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top three':'Full leaderboard'}</button>}
       </div>
       <p className="mt-3 text-[11px] leading-5 text-[#90abc8]">Rankings use verified results from competitive runs only. Submitting stats never awards REP by itself.</p>
