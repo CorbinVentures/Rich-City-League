@@ -125,9 +125,14 @@ export function RunVenuePicker({ selected, onSelect, onClear }: {
         {!results.length && <p className="px-2 py-3 text-xs leading-5 text-white/65">No named venues found. Try a city or another name—or type a custom location below.</p>}
       </div>}
     </div>}
-    <button type="button" onClick={() => { onClear(); setQuery(''); setIsSearching(false); }} className="mt-3 text-xs font-semibold text-rcl-blue">
-      Use my own address or an unlisted court instead
-    </button>
+    <div className="mt-3 flex flex-wrap gap-3">
+      <button type="button" onClick={() => { onClear(); setQuery(''); setIsSearching(false); }} className="text-xs font-semibold text-rcl-blue">
+        Use my own address or an unlisted court
+      </button>
+      {!isSearching && <button type="button" onClick={() => { onClear(); setIsSearching(true); }} className="text-xs font-semibold text-white/80">
+        Search the venue database
+      </button>}
+    </div>
     <p className="mt-2 text-[11px] leading-5 text-white/45">Court data is for choosing a location for a game, not a guarantee a facility is available to play.</p>
   </div>;
 }
