@@ -169,8 +169,10 @@ export default function RunsPage() {
         db.from('basketball_locations')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('is_active', true)
+          .in('area', ['Richmond', 'Henrico', 'Chesterfield', 'Roanoke', 'Newport News'])
           .order('area')
-          .order('name'),
+          .order('name')
+          .limit(500),
         db.from('badges')
           .select('id,name,description,icon,tier,requirement_type,requirement_value')
           .eq('is_active', true)
@@ -198,7 +200,14 @@ export default function RunsPage() {
       }
 
       setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [] })));
-      setCourts((courtsResult.data ?? []) as Court[]);
+      const courtRows = (courtsResult.data ?? []) as Court[];
+      if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
+        const { data: selectedCourtRow } = await db.from('basketball_locations')
+          .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
+          .eq('slug', courtParam).eq('is_active', true).maybeSingle();
+        if (selectedCourtRow) courtRows.unshift(selectedCourtRow as Court);
+      }
+      setCourts(courtRows);
       setBadges((badgesResult.data ?? []) as Badge[]);
       setCheckins(new Set((checkinsResult.data ?? []).map((row: any) => row.run_id)));
       setHighlightClaims(new Set((highlightsResult.data ?? []).map((row: any) => row.run_id)));
@@ -378,7 +387,13 @@ export default function RunsPage() {
     ? `${selectedCourt.name}, ${selectedCourt.address}, ${selectedCourt.locality}, VA`
     : `basketball courts ${mapArea} Virginia`;
 
-  const directionsHref = (court: Court) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${court.name}, ${court.address}, ${court.locality}, VA`)}`;
+  const directionsHref = (court: Court) => {
+    const noAddress = court.address.startsWith('Street address not provided') || court.address.startsWith('Park court') || court.address.startsWith('See map coordinates');
+    const destination = noAddress && court.latitude !== null && court.longitude !== null
+      ? `${court.latitude},${court.longitude}`
+      : `${court.name}, ${court.address}, ${court.locality}, VA`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+  };
 
   return (
     <main className="rcl-social-secondary min-h-screen overflow-x-hidden bg-[#05080d] pb-28 text-white">
@@ -530,9 +545,10 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
 
 function CourtCard({ court, directionsHref, onMap, onMeetup }: { court: Court; directionsHref: string; onMap: () => void; onMeetup: () => void }) {
   return <article className="min-w-0 rounded-2xl border border-rcl-blue/12 bg-[#09131d]/72 p-5">
-    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{court.area} · {court.venue_type}</p><h3 className="mt-1 break-words text-lg font-semibold">{court.name}</h3></div><span className="shrink-0 rounded-full border border-rcl-blue/14 bg-rcl-blue/[.05] px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-rcl-blue/70">{court.verification_status === 'official' ? 'Verified' : 'Provider'}</span></div>
-    <p className="mt-2 text-sm leading-5 text-white/40">{court.address}<br />{court.locality}, VA {court.postal_code}</p>
-    <div className="mt-4 flex flex-wrap gap-2 text-[11px]"><span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{accessLabels[court.access_type]}</span>{court.court_count && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{court.court_count} court{court.court_count === 1 ? '' : 's'}</span>}{court.lights && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">Lighted</span>}</div>
+    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{court.area} · {court.venue_type}</p><h3 className="mt-1 break-words text-lg font-semibold">{court.name}</h3></div><span className="shrink-0 rounded-full border border-rcl-blue/14 bg-rcl-blue/[.05] px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-rcl-blue/70">{court.verification_status === 'community' ? 'Mapped · unverified' : court.verification_status === 'official' ? 'Official listing' : 'Provider listing'}</span></div>
+    <p className="mt-2 text-sm leading-5 text-white/40">{court.address}<br />{court.locality}, VA {court.postal_code ?? ''}</p>
+    {court.verification_status === 'community' && <p className="mt-3 text-xs font-medium text-amber-200">Access and condition are not confirmed. Check before visiting.</p>}
+    <div className="mt-4 flex flex-wrap gap-2 text-[11px]"><span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{court.access_type === 'varies' ? 'Access unconfirmed' : accessLabels[court.access_type]}</span>{court.court_count && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{court.court_count} court{court.court_count === 1 ? '' : 's'}</span>}{court.lights && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">Lighted</span>}</div>
     {court.hours_text && <div className="mt-4 flex items-start gap-2 text-xs leading-5 text-white/38"><FaClock className="mt-1 shrink-0 text-rcl-blue/65" /><span>{court.hours_text}</span></div>}
     {court.open_gym_text && <div className="mt-3 rounded-xl border border-rcl-blue/12 bg-rcl-blue/[.045] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-rcl-blue">Open gym / drop-in</p><p className="mt-1 text-xs leading-5 text-white/48">{court.open_gym_text}</p></div>}
     <div className="mt-4 grid grid-cols-3 gap-2"><button onClick={onMap} className="rounded-xl border border-white/9 px-2 py-2.5 text-xs font-semibold text-white/55">Map</button><a href={directionsHref} target="_blank" rel="noreferrer" className="rounded-xl border border-white/9 px-2 py-2.5 text-center text-xs font-semibold text-white/55">Directions</a><button onClick={onMeetup} className="rounded-xl bg-rcl-blue px-2 py-2.5 text-xs font-semibold text-[#071018]">Meetup</button></div>
