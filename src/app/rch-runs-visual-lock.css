@@ -351,3 +351,53 @@
     margin:0!important;
   }
 }
+
+/* Match the approved dark top/bottom chrome only while the Runs page is shown.
+ * Uses :has() so the shared header does not need route-specific conditionals. */
+html body:has(main.rch-arena-shell) .rcl-universal-topbar {
+  border-bottom-color:#264f7b!important;
+  background:rgba(5,17,33,.97)!important;
+  box-shadow:0 5px 18px rgba(1,7,14,.20)!important;
+  color:#f3faff!important;
+}
+html body:has(main.rch-arena-shell) .rcl-universal-wordmark,
+html body:has(main.rch-arena-shell) .rcl-universal-wordmark :is(b,i){
+  color:#f4f9ff!important;
+}
+html body:has(main.rch-arena-shell) .rcl-universal-wordmark > span {
+  border-color:#396b9b!important;
+  background:#102944!important;
+  color:#71b9ff!important;
+}
+html body:has(main.rch-arena-shell) .rcl-universal-tools > a:not(.rcl-topbar-signin),
+html body:has(main.rch-arena-shell) .rcl-universal-tools > button {
+  border-color:#305478!important;
+  background:#102a47!important;
+  color:#dbeeff!important;
+}
+html body:has(main.rch-arena-shell) .rcl-global-search {
+  border-color:#37618e!important;
+  background:#102a47!important;
+  color:#bed9ef!important;
+}
+@media(max-width:959px){
+  html body:has(main.rch-arena-shell) .rcl-universal-bottom {
+    border-top-color:#28547d!important;
+    background:rgba(5,18,34,.97)!important;
+    box-shadow:0 -6px 24px rgba(2,9,19,.30)!important;
+  }
+  html body:has(main.rch-arena-shell) .rcl-universal-bottom a:not(.rcl-mobile-create) {
+    color:#a5c0dc!important;
+    background:transparent!important;
+  }
+  html body:has(main.rch-arena-shell) .rcl-universal-bottom a.active:not(.rcl-mobile-create),
+  html body:has(main.rch-arena-shell) .rcl-universal-bottom a.active svg {
+    color:#58afff!important;
+  }
+  html body:has(main.rch-arena-shell) .rcl-universal-bottom a.rcl-mobile-create {
+    border-color:#439fff!important;
+    background:#1c83fa!important;
+    color:#fff!important;
+    box-shadow:0 5px 23px rgba(38,131,245,.3)!important;
+  }
+}
