@@ -308,3 +308,46 @@
   .rcl-platform-root main.rch-arena-shell .rch-arena-mode :is(span,strong) {font-size:10.5px!important;}
   .rcl-platform-root main.rch-arena-shell .rch-arena-metric {padding:8px 2px!important;}
 }
+
+.rcl-platform-root main.rch-arena-shell .rch-arena-game-cover {
+  background-image:linear-gradient(0deg,rgba(3,17,34,.28),rgba(4,16,34,.08)),url('/rch-runs-night-court.svg')!important;
+  background-size:cover!important;
+  background-position:center 68%!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-game-cover > div {
+  background:linear-gradient(0deg,rgba(3,13,29,.94),rgba(3,13,29,.04))!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-game-cover span {
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-rank-empty p,
+.rcl-platform-root main.rch-arena-shell .rch-arena-empty p {
+  color:#bdd3ea!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metric svg {
+  display:block!important;
+  margin:0 auto 4px!important;
+}
+@media(max-width:699px){
+  .rcl-platform-root main.rch-arena-shell .rch-arena-hero > div:last-child {
+    padding-top:35px!important;
+    padding-bottom:30px!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-hero h1 {
+    margin-top:12px!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-mode-tagline {
+    font-size:10px!important;
+    line-height:1.3!important;
+    color:#b2cce7!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-person > div p {
+    white-space:normal!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-rank-tabs {
+    margin:0!important;
+  }
+}
