@@ -1,0 +1,310 @@
+/*
+ * RCH Open Runs — intentionally immersive arena, scoped exclusively to /runs.
+ * This file is loaded LAST from root layout because the platform has several
+ * broad !important light-theme layers. Other pages remain light/unaffected.
+ */
+.rcl-platform-root > main.rch-arena-shell {
+  --rcl-v3-canvas:#05111f!important;
+  --rcl-v3-surface:#0c2035!important;
+  --rcl-v3-soft:#102a47!important;
+  --rcl-v3-border:#274f78!important;
+  --rcl-v3-ink:#f4f9ff!important;
+  --rcl-v3-copy:#b8cbe2!important;
+  --rcl-v3-muted:#90adc9!important;
+  --rcl-v3-primary:#248bfa!important;
+  --rcl-v3-primary-soft:#17395e!important;
+  --rcl-uniform-canvas:#05111f!important;
+  --rcl-uniform-surface:#0c2035!important;
+  --rcl-uniform-soft:#102a47!important;
+  --rcl-uniform-border:#274f78!important;
+  --rcl-uniform-text:#f4f9ff!important;
+  --rcl-uniform-text-2:#b8cbe2!important;
+  --rcl-uniform-muted:#90adc9!important;
+  --rcl-uniform-primary:#248bfa!important;
+  --rcl-social-canvas:#05111f!important;
+  --rcl-social-surface:#0c2035!important;
+  --rcl-social-border:#274f78!important;
+  --rcl-social-text:#f4f9ff!important;
+  --rcl-social-text-2:#b8cbe2!important;
+  --rcl-psych-bg:#05111f!important;
+  --rcl-psych-text:#f4f9ff!important;
+  --rcl-psych-muted:#a7bed7!important;
+  --rcl-psych-surface:#0c2035!important;
+  background:#05111f!important;
+  color:#f4f9ff!important;
+  color-scheme:dark;
+  isolation:isolate;
+}
+.rcl-platform-root main.rch-arena-shell :is(h1,h2,h3,h4,h5,h6) {
+  color:#f6faff!important;
+  text-shadow:none!important;
+  font-weight:800!important;
+}
+.rcl-platform-root main.rch-arena-shell [class~="text-white"],
+.rcl-platform-root main.rch-arena-shell [class*="text-white/"],
+.rcl-platform-root main.rch-arena-shell [class~="text-gray-300"],
+.rcl-platform-root main.rch-arena-shell [class~="text-slate-300"] {
+  color:#f1f6ff!important;
+}
+.rcl-platform-root main.rch-arena-shell [class*="text-white/"],
+.rcl-platform-root main.rch-arena-shell [class~="text-gray-400"],
+.rcl-platform-root main.rch-arena-shell [class~="text-slate-400"] {
+  color:#aec6e1!important;
+}
+.rcl-platform-root main.rch-arena-shell :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),select,textarea){
+  color:#f4f9ff!important;
+  border-color:#34618e!important;
+  background:#081a2e!important;
+  box-shadow:none!important;
+}
+.rcl-platform-root main.rch-arena-shell input::placeholder,
+.rcl-platform-root main.rch-arena-shell textarea::placeholder {
+  color:#9bb4d0!important;
+  opacity:1!important;
+}
+.rcl-platform-root main.rch-arena-shell input:focus-visible,
+.rcl-platform-root main.rch-arena-shell select:focus-visible {
+  border-color:#56b5ff!important;
+  box-shadow:0 0 0 3px rgba(43,153,255,.18)!important;
+}
+.rcl-platform-root main.rch-arena-shell :where(section,article,aside,form,div,header)[class*="bg-white/"],
+.rcl-platform-root main.rch-arena-shell :where(section,article,aside,form,div,header)[class*="bg-[#0"],
+.rcl-platform-root main.rch-arena-shell :where(section,article,aside,form,div,header)[class*="bg-[#1"]{
+  background-color:#0c2035!important;
+  color:#f2f8ff!important;
+}
+.rcl-platform-root main.rch-arena-shell :where(section,article,aside,form,div,header)[class*="border-white/"] {
+  border-color:#28547d!important;
+}
+.rcl-platform-root main.rch-arena-shell :where(a,button)[class*="bg-rcl-blue"] {
+  background:#217ef5!important;
+  border-color:#4eaaff!important;
+  color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-hero {
+  min-height:355px!important;
+  background-image:linear-gradient(90deg,rgba(2,8,19,.94) 0%,rgba(3,13,30,.8) 37%,rgba(3,15,33,.22) 100%),url('/rch-runs-night-court.svg')!important;
+  background-size:cover!important;
+  background-position:center 48%!important;
+  background-repeat:no-repeat!important;
+  border-bottom-color:#245185!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-lights {
+  opacity:.15!important;
+  background:radial-gradient(circle at 76% 60%,rgba(52,144,255,.34),transparent 45%)!important;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-arena-skyline,.rch-arena-floor,.rch-arena-hero-hoop){
+  display:none!important;
+}
+.rcl-platform-root main.rch-arena-shell h1.rch-arena-headline {
+  color:#fff!important;
+  font-family:Impact,"Arial Black",system-ui,sans-serif!important;
+  font-size:clamp(4.1rem,16.5vw,7.6rem)!important;
+  font-weight:950!important;
+  line-height:.87!important;
+  letter-spacing:-.04em!important;
+  font-style:italic!important;
+  text-transform:none!important;
+  text-shadow:0 3px 3px rgba(0,0,0,.6),0 0 24px rgba(90,176,255,.55)!important;
+  overflow-wrap:normal!important;
+  width:max-content;
+  max-width:100%;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-cta,
+.rcl-platform-root main.rch-arena-shell .rch-arena-add-stats {
+  border:1px solid #7ccfff!important;
+  background:linear-gradient(110deg,#1173fa,#31aeff)!important;
+  color:#fff!important;
+  box-shadow:0 7px 24px rgba(23,125,254,.28),inset 0 1px 0 rgba(255,255,255,.25)!important;
+  white-space:nowrap;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-mode {
+  background:linear-gradient(145deg,#102c4c 0%,#07182b 100%)!important;
+  color:#f4f9ff!important;
+  border:1px solid #315d88!important;
+  border-radius:16px!important;
+  box-shadow:inset 0 1px 0 rgba(155,210,255,.12)!important;
+  min-width:0!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-mode-active {
+  border:2px solid #338dff!important;
+  background:linear-gradient(140deg,#123e77,#071c38)!important;
+  box-shadow:0 0 0 1px rgba(24,115,247,.25),0 0 18px rgba(36,137,255,.25)!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-mode :is(span,strong) {
+  color:#f2f7ff!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-mode .rch-arena-mode-tagline {
+  color:#b0cbe4!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-profile,
+.rcl-platform-root main.rch-arena-shell .rch-arena-panel {
+  background:linear-gradient(145deg,#102a48,#081727)!important;
+  color:#f4f9ff!important;
+  border:1px solid #29537c!important;
+  box-shadow:inset 0 1px 0 rgba(129,190,255,.1),0 9px 22px rgba(0,0,0,.19)!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-profile-layout {
+  display:grid!important;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:15px!important;
+  width:100%!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-person {
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  width:100%!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-person > div {
+  min-width:0!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metrics {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metric {
+  min-width:0!important;
+  width:100%!important;
+  padding:9px 5px!important;
+  border-radius:10px!important;
+  background:#071a30!important;
+  text-align:center!important;
+  overflow:hidden!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metric :is(p,span) {
+  margin:0!important;
+  display:block!important;
+  width:100%!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  line-height:1.4!important;
+  text-align:center!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metric p {
+  font-size:19px!important;
+  font-weight:850!important;
+  color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-metric span {
+  font-size:10px!important;
+  color:#a8c4df!important;
+  text-overflow:ellipsis!important;
+  overflow:hidden!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-panel .rch-arena-rank-empty {
+  border:1px dashed #37618d!important;
+  background:#0b2038!important;
+  color:#d8e8ff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-panel .rch-arena-rank-empty :is(p,span) {
+  color:#bbd0e7!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-panel :is(h2,h3) {
+  color:#f5faff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-rank-tabs {
+  display:inline-flex!important;
+  background:#061627!important;
+  border-color:#2e5883!important;
+  overflow:hidden!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-rank-tabs button {
+  color:#d7e8fc!important;
+  min-width:68px!important;
+  border-radius:100px!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-rank-tabs button[aria-pressed="true"] {
+  background:#1786ff!important;
+  box-shadow:0 0 13px rgba(39,158,255,.28)!important;
+  color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-game-card {
+  background:linear-gradient(165deg,#102b49,#081827)!important;
+  border:1px solid #2c577f!important;
+  color:#f3f8ff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-empty {
+  background:linear-gradient(145deg,#0d2949,#071b30)!important;
+  border-color:#35618c!important;
+  color:#f3f8ff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-empty p {color:#aac8e8!important;}
+.rcl-platform-root main.rch-arena-shell .rch-arena-upcoming-filter {
+  background:#132c49!important;
+  border:1px solid #35618b!important;
+  color:#d8e9fa!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-upcoming-filter[aria-pressed="true"] {
+  background:#157cff!important;
+  border-color:#459fff!important;
+  color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-run-slider {
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:minmax(248px,78vw)!important;
+  gap:13px!important;
+  overflow-x:auto!important;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+  padding:3px 1px 14px!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-arena-run-slider > * {
+  scroll-snap-align:start;
+  min-width:0!important;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-arena-mode,.rch-arena-panel,.rch-arena-profile,.rch-arena-metric) {
+  text-shadow:none!important;
+}
+@media(min-width:800px){
+  .rcl-platform-root main.rch-arena-shell .rch-arena-run-slider {
+    grid-auto-flow:row!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-columns:initial!important;
+    overflow:visible!important;
+  }
+}
+@media(max-width:699px){
+  .rcl-platform-root main.rch-arena-shell .rch-arena-hero {min-height:347px!important;background-position:57% 50%!important;}
+  .rcl-platform-root main.rch-arena-shell h1.rch-arena-headline {
+    font-size:clamp(3.9rem,17vw,5.6rem)!important;
+    line-height:.9!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-profile-layout {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:14px!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-person {
+    display:flex!important;
+    align-items:center!important;
+    gap:12px!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-metrics {
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-mode {padding:11px 8px!important;}
+  .rcl-platform-root main.rch-arena-shell .rch-arena-mode :is(span,strong) {
+    font-size:clamp(11px,2.65vw,14px)!important;
+    letter-spacing:0!important;
+    white-space:normal!important;
+    overflow-wrap:normal!important;
+    line-height:1.2!important;
+  }
+  .rcl-platform-root main.rch-arena-shell .rch-arena-panel {padding:15px!important;}
+}
+@media(max-width:370px){
+  .rcl-platform-root main.rch-arena-shell .rch-arena-mode :is(span,strong) {font-size:10.5px!important;}
+  .rcl-platform-root main.rch-arena-shell .rch-arena-metric {padding:8px 2px!important;}
+}
