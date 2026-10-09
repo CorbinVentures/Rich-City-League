@@ -17,7 +17,7 @@ export function isNavigationActive(pathname:string,href:string){
 const SOCIAL_FAMILY=['/social'];
 const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
 const CREATE_FAMILY=['/create'];
-const RUNS_FAMILY=['/runs','/richmond-basketball-runs'];
+const RUNS_FAMILY=['/runs','/radar','/richmond-basketball-runs'];
 const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isPrimaryNavigationActive(pathname:string,href:string){

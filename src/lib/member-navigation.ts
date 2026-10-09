@@ -39,6 +39,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Find people, teams, organizations, media and opportunities around you',
     items:[
       {label:'Discover Basketball',href:'/discover',icon:FaCompass},
+      {label:'Basketball Radar',href:'/radar',icon:FaLocationDot},
       {label:'Players',href:'/players',icon:FaUser},
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
