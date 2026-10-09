@@ -15,7 +15,7 @@ type Court = {
   slug: string; name: string; address: string; locality: string; area: string;
   latitude: number | null; longitude: number | null; venue_type: string;
   verification_status: string; access_type: string; hours_text: string | null;
-  open_gym_text: string | null;
+  open_gym_text: string | null; source_label: string | null; source_url: string | null;
 };
 type Run = {
   id: string; title: string; location: string; location_slug: string | null;
@@ -25,7 +25,7 @@ type CourtCommunity = { slug: string; name: string; location_slug: string };
 type HistoryRow = { court_slug: string; checked_in_on: string };
 type LatLon = { latitude: number; longitude: number };
 type RadarCourt = Court & { miles: number | null };
-type RadarRun = Run & { miles: number | null; court: Court | undefined };
+type RadarRun = Run & { miles: number | null; court: Pick<Court, 'slug' | 'latitude' | 'longitude'> | undefined };
 type Tab = 'courts' | 'runs';
 
 const RAD = Math.PI / 180;
@@ -54,7 +54,9 @@ function localVirginiaDate(): string {
 }
 const miLabel = (m: number | null) => m === null ? 'Distance unknown' : m.toFixed(1) + ' mi';
 const mapsUrl = (c: Court) => 'https://www.google.com/maps/search/?api=1&query='
-  + encodeURIComponent(c.name + ', ' + c.address + ', ' + c.locality + ', VA');
+  + encodeURIComponent(c.address.startsWith('Street address not provided') || c.address.startsWith('Park court') || c.address.startsWith('See map coordinates')
+    ? (c.latitude !== null && c.longitude !== null ? c.latitude + ',' + c.longitude : c.name + ', ' + c.locality + ', VA')
+    : c.name + ', ' + c.address + ', ' + c.locality + ', VA');
 const isCheckinEligible = (c: Court) =>
   c.latitude !== null && c.longitude !== null && ['official', 'provider'].includes(c.verification_status);
 
@@ -63,6 +65,10 @@ export default function BasketballRadarPage() {
   const db = useMemo(() => getSupabaseClient() as any, []);
   const memberId = user?.id;
   const [courts, setCourts] = useState<Court[]>([]);
+  const [hasMoreCourts, setHasMoreCourts] = useState(false);
+  const [loadingMoreCourts, setLoadingMoreCourts] = useState(false);
+  const [runLocations, setRunLocations] = useState<Array<Pick<Court, 'slug' | 'latitude' | 'longitude'>>>([]);
+  const courtPageSize = 60;
   const [runs, setRuns] = useState<Run[]>([]);
   const [communities, setCommunities] = useState<CourtCommunity[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
@@ -82,9 +88,10 @@ export default function BasketballRadarPage() {
     setLoading(true);
     try {
       const [courtResult, runResult, communityResult, historyResult] = await Promise.all([
-        db.from('basketball_locations')
-          .select('slug,name,address,locality,area,latitude,longitude,venue_type,verification_status,access_type,hours_text,open_gym_text')
-          .eq('is_active', true).order('name').limit(300),
+        db.rpc('search_basketball_locations', {
+          p_lat: origin?.latitude ?? null, p_lon: origin?.longitude ?? null,
+          p_radius_miles: radius, p_search: search.trim(), p_limit: courtPageSize, p_offset: 0,
+        }),
         db.from('runs')
           .select('id,title,location,location_slug,starts_at,run_type,game_format,status')
           .in('status', ['open', 'full'])
@@ -98,7 +105,13 @@ export default function BasketballRadarPage() {
       ]);
       if (courtResult.error || runResult.error) throw courtResult.error || runResult.error;
       setCourts((courtResult.data ?? []) as Court[]);
+      setHasMoreCourts((courtResult.data ?? []).length === courtPageSize);
       setRuns((runResult.data ?? []) as Run[]);
+      const runSlugs = [...new Set(((runResult.data ?? []) as Run[]).map(run => run.location_slug).filter((value): value is string => Boolean(value)))];
+      if (runSlugs.length) {
+        const locationResult = await db.from('basketball_locations').select('slug,latitude,longitude').in('slug',runSlugs);
+        if (!locationResult.error) setRunLocations(locationResult.data ?? []);
+      } else setRunLocations([]);
       if (!communityResult.error) setCommunities((communityResult.data ?? []) as CourtCommunity[]);
       if (!historyResult.error) setHistory((historyResult.data ?? []) as HistoryRow[]);
     } catch (cause) {
@@ -106,9 +119,30 @@ export default function BasketballRadarPage() {
     } finally {
       setLoading(false);
     }
-  }, [db, memberId]);
+  }, [db, memberId, origin?.latitude, origin?.longitude, radius, search]);
 
   useEffect(() => { void reload(); }, [reload]);
+
+  async function loadMoreCourts() {
+    if (!db || !hasMoreCourts || loadingMoreCourts) return;
+    setLoadingMoreCourts(true);
+    try {
+      const { data, error: pageError } = await db.rpc('search_basketball_locations', {
+        p_lat: origin?.latitude ?? null, p_lon: origin?.longitude ?? null,
+        p_radius_miles: radius, p_search: search.trim(), p_limit: courtPageSize, p_offset: courts.length,
+      });
+      if (pageError) throw pageError;
+      setCourts(current => {
+        const seen = new Set(current.map(court => court.slug));
+        return [...current, ...((data ?? []) as Court[]).filter(court => !seen.has(court.slug))];
+      });
+      setHasMoreCourts((data ?? []).length === courtPageSize);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not load more basketball courts.');
+    } finally {
+      setLoadingMoreCourts(false);
+    }
+  }
 
   async function requestLocation() {
     setLocationState('requesting');
@@ -138,7 +172,7 @@ export default function BasketballRadarPage() {
   }, [courts, origin, radius, search]);
 
   const visibleRuns = useMemo<RadarRun[]>(() => {
-    const bySlug = new Map(courts.map(c => [c.slug, c]));
+    const bySlug = new Map([...runLocations, ...courts].map(c => [c.slug, c]));
     const q = search.trim().toLowerCase();
     return runs.map(run => {
       const court = run.location_slug ? bySlug.get(run.location_slug) : undefined;
@@ -152,7 +186,7 @@ export default function BasketballRadarPage() {
       .sort((a, b) => origin
         ? (a.miles ?? Infinity) - (b.miles ?? Infinity) || a.starts_at.localeCompare(b.starts_at)
         : a.starts_at.localeCompare(b.starts_at));
-  }, [runs, courts, origin, radius, search]);
+  }, [runs, courts, runLocations, origin, radius, search]);
 
   const communityByCourt = useMemo(() => new Map(communities.map(c => [c.location_slug, c])), [communities]);
   const visited = new Set(history.map(h => h.court_slug));
@@ -229,7 +263,7 @@ export default function BasketballRadarPage() {
         {error && <div role="alert" className="mb-4 rounded-xl border border-red-300/30 bg-red-950/40 px-4 py-3 text-sm text-red-100">{error}</div>}
         <section className="rounded-2xl border border-white/15 bg-[#0b1722] p-4 sm:p-5" aria-label="Radar filters">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-white">{origin ? 'Near your current location' : 'Explore Richmond and Central Virginia'}</p>
+            <p className="text-sm font-semibold text-white">{origin ? 'Near your current location' : 'Explore basketball courts across Virginia'}</p>
             <button type="button" onClick={() => void reload()} className="flex items-center gap-2 text-xs font-semibold text-sky-300"><FaRotate /> Refresh results</button>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -237,7 +271,7 @@ export default function BasketballRadarPage() {
               placeholder="Search courts, cities or runs…" className="min-h-11 min-w-0 flex-1 rounded-xl border border-white/20 bg-[#06101a] px-4 text-sm text-white placeholder:text-slate-400 outline-none focus:border-sky-300" />
             <select aria-label="Search radius" value={radius} disabled={!origin} onChange={e => setRadius(Number(e.target.value))}
               className="min-h-11 rounded-xl border border-white/20 bg-[#06101a] px-3 text-sm text-white disabled:opacity-50">
-              {[5, 15, 30, 50].map(mi => <option key={mi} value={mi}>{mi} miles</option>)}
+              {[5, 15, 30, 50, 100, 250].map(mi => <option key={mi} value={mi}>{mi} miles</option>)}
             </select>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
@@ -272,10 +306,14 @@ export default function BasketballRadarPage() {
                         {court.miles !== null ? miLabel(court.miles) : 'Court'}
                       </span>
                     </div>
+                    {court.verification_status === 'community' && <p className="mt-2 text-xs font-semibold text-amber-200">Mapped court · Access and playability not confirmed. Check before visiting.</p>}
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-200">
-                      <span className="rounded-lg border border-white/15 px-2 py-1.5">{court.access_type === 'public' ? 'Public access' : court.access_type.replaceAll('_', ' ')}</span>
+                      <span className="rounded-lg border border-white/15 px-2 py-1.5">{court.access_type === 'public' ? 'Listed public' : court.access_type === 'varies' ? 'Access not confirmed' : court.access_type.replaceAll('_', ' ')}</span>
                       {court.open_gym_text && <span className="rounded-lg border border-white/15 px-2 py-1.5">Open-gym schedule</span>}
                       {visited.has(court.slug) && <span className="flex items-center gap-1 rounded-lg border border-sky-300/30 px-2 py-1.5 text-sky-200"><FaCircleCheck /> Visited</span>}
+                      {court.source_label && (court.source_url
+                        ? <a href={court.source_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-white/15 px-2 py-1.5 text-sky-200">Source: {court.source_label} <FaArrowUpRightFromSquare /></a>
+                        : <span className="rounded-lg border border-white/15 px-2 py-1.5">Source: {court.source_label}</span>)}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button type="button" onClick={() => setSelected(court)} className="min-h-10 rounded-xl border border-white/25 px-3 text-xs font-semibold text-white">
@@ -294,6 +332,7 @@ export default function BasketballRadarPage() {
                     </div>
                   </article>;
                 })}
+                {hasMoreCourts && <button type="button" onClick={() => void loadMoreCourts()} disabled={loadingMoreCourts} className="w-full rounded-xl border border-sky-300/30 bg-[#0b1722] px-4 py-3 text-sm font-bold text-sky-200 disabled:opacity-60">{loadingMoreCourts ? 'Loading more courts…' : 'Load more basketball courts'}</button>}
               </>}
               {tab === 'runs' && <>
                 {visibleRuns.length === 0 && <div className="rounded-2xl border border-dashed border-sky-300/25 bg-[#0b1722] p-8 text-center">
@@ -333,7 +372,7 @@ export default function BasketballRadarPage() {
                   <button type="button" onClick={() => setSelected(null)} className="text-xs font-bold text-sky-300">Close</button>
                 </div>
                 <iframe title={'Map of ' + selected.name} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                  src={'https://www.google.com/maps?q=' + encodeURIComponent(selected.name + ', ' + selected.address + ', ' + selected.locality + ', VA') + '&output=embed'}
+                  src={'https://www.google.com/maps?q=' + encodeURIComponent(selected.latitude !== null && selected.longitude !== null ? selected.latitude + ',' + selected.longitude : selected.name + ', ' + selected.address + ', ' + selected.locality + ', VA') + '&output=embed'}
                   className="h-64 w-full rounded-xl border-0" />
               </div>}
               <div className="rounded-2xl border border-white/15 bg-[#0b1722] p-5">
@@ -344,6 +383,10 @@ export default function BasketballRadarPage() {
             </aside>
           </div>
         )}
+        <p className="mt-8 text-center text-xs leading-5 text-slate-400">
+          Community map data © <a className="underline hover:text-sky-200" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>, licensed under ODbL 1.0.
+          Mapped locations are not guarantees of public access or playable conditions.
+        </p>
       </Container>
     </main>
   );
