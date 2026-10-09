@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
+import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -13,11 +14,8 @@ import {
   FaBasketball,
   FaCalendarDays,
   FaCircleCheck,
-  FaClock,
   FaDumbbell,
   FaLocationDot,
-  FaMagnifyingGlass,
-  FaMap,
   FaMedal,
   FaPeopleGroup,
   FaPlus,
@@ -28,7 +26,7 @@ import {
 
 type RunType = 'competitive' | 'social' | 'training';
 type SkillLevel = 'all' | 'beginner' | 'intermediate' | 'advanced' | 'elite';
-type ViewMode = 'runs' | 'courts' | 'map' | 'rewards';
+type ViewMode = 'runs' | 'rewards';
 
 type Run = {
   id: string;
@@ -46,29 +44,6 @@ type Run = {
   allow_fan_checkin: boolean;
   host?: { display_name: string | null; username: string | null; avatar_url?: string | null };
   players?: string[];
-};
-
-type Court = {
-  slug: string;
-  name: string;
-  address: string;
-  locality: string;
-  region: string;
-  postal_code: string | null;
-  area: string;
-  venue_type: 'outdoor' | 'indoor' | 'mixed';
-  access_type: 'public' | 'free_pass' | 'membership' | 'reservation' | 'varies';
-  court_count: number | null;
-  lights: boolean | null;
-  latitude: number | null;
-  longitude: number | null;
-  hours_text: string | null;
-  open_gym_text: string | null;
-  source_label: string | null;
-  source_url: string | null;
-  last_verified_on: string | null;
-  verification_status: 'official' | 'provider' | 'community';
-  notes: string | null;
 };
 
 type Badge = {
@@ -93,14 +68,6 @@ const runTypeLabels: Record<RunType, string> = {
   competitive: 'Competitive run',
   social: 'Social meetup',
   training: 'Training',
-};
-
-const accessLabels: Record<Court['access_type'], string> = {
-  public: 'Public / free',
-  free_pass: 'Free access pass',
-  membership: 'Membership / guest',
-  reservation: 'Reservation',
-  varies: 'Schedule varies',
 };
 
 const badgeTypes = ['run_checkins', 'player_run_checkins', 'fan_run_checkins', 'run_highlights'];
@@ -137,11 +104,8 @@ export default function RunsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
-  const [areaFilter, setAreaFilter] = useState<'all' | 'Richmond' | 'Henrico' | 'Chesterfield'>('all');
-  const [courtTypeFilter, setCourtTypeFilter] = useState<'all' | 'open-gym' | Court['venue_type']>('all');
-  const [courtSearch, setCourtSearch] = useState('');
+  const [runSearch, setRunSearch] = useState('');
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
-  const [mapArea, setMapArea] = useState('Richmond');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -169,10 +133,9 @@ export default function RunsPage() {
         db.from('basketball_locations')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('is_active', true)
-          .in('area', ['Richmond', 'Henrico', 'Chesterfield', 'Roanoke', 'Newport News'])
-          .order('area')
+          .in('verification_status', ['official', 'provider'])
           .order('name')
-          .limit(500),
+          .limit(125),
         db.from('badges')
           .select('id,name,description,icon,tier,requirement_type,requirement_value')
           .eq('is_active', true)
@@ -228,8 +191,6 @@ export default function RunsPage() {
     const match=courts.find(court=>court.slug===courtParam);
     if (!match) return;
     setSelectedCourt(match);
-    setCourtSearch(match.name);
-    if (match.area==='Richmond'||match.area==='Henrico'||match.area==='Chesterfield') setAreaFilter(match.area);
   }, [courtParam,courts]);
 
   useEffect(() => {
@@ -246,6 +207,11 @@ export default function RunsPage() {
     setShowCreate(true);
   };
 
+  const pickRunVenue = (venue: Court) => {
+    setCourts(current => current.some(court => court.slug === venue.slug) ? current : [...current, venue]);
+    setForm(current => ({ ...current, location_slug: venue.slug, custom_location: '' }));
+  };
+
   const createRun = async (event: React.FormEvent) => {
     event.preventDefault();
     if (busy === 'create') return;
@@ -254,7 +220,7 @@ export default function RunsPage() {
       return;
     }
     const court = courts.find(item => item.slug === form.location_slug);
-    const location = court ? `${court.name} — ${court.address}` : form.custom_location.trim();
+    const location = court ? runVenueLocation(court) : form.custom_location.trim();
     if (!form.title.trim() || !location || !form.date || !form.time) {
       setError('Add a title, court or location, date, and start time.');
       return;
@@ -371,29 +337,10 @@ export default function RunsPage() {
     const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
     const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
     const courtMatch = !courtParam || run.location_slug === courtParam;
-    return skillMatch && typeMatch && courtMatch;
+    const words = runSearch.trim().toLowerCase();
+    const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
+    return skillMatch && typeMatch && courtMatch && searchMatch;
   });
-
-  const visibleCourts = courts.filter((court) => {
-    const areaMatch = areaFilter === 'all' || court.area === areaFilter;
-    const typeMatch = courtTypeFilter === 'all'
-      || (courtTypeFilter === 'open-gym' ? Boolean(court.open_gym_text) : court.venue_type === courtTypeFilter || court.venue_type === 'mixed');
-    const search = courtSearch.trim().toLowerCase();
-    const searchMatch = !search || `${court.name} ${court.address} ${court.locality} ${court.area}`.toLowerCase().includes(search);
-    return areaMatch && typeMatch && searchMatch;
-  });
-
-  const mapQuery = selectedCourt
-    ? `${selectedCourt.name}, ${selectedCourt.address}, ${selectedCourt.locality}, VA`
-    : `basketball courts ${mapArea} Virginia`;
-
-  const directionsHref = (court: Court) => {
-    const noAddress = court.address.startsWith('Street address not provided') || court.address.startsWith('Park court') || court.address.startsWith('See map coordinates');
-    const destination = noAddress && court.latitude !== null && court.longitude !== null
-      ? `${court.latitude},${court.longitude}`
-      : `${court.name}, ${court.address}, ${court.locality}, VA`;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
-  };
 
   return (
     <main className="rcl-social-secondary min-h-screen overflow-x-hidden bg-[#05080d] pb-28 text-white">
@@ -403,20 +350,18 @@ export default function RunsPage() {
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">RCL Runs</p>
               <h1 className="mt-1 text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Open Runs</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Competitive runs, pickup basketball and social meetups across Richmond, Henrico and Chesterfield.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">Find pickup games, organize runs and invite players to courts across Virginia.</p>
               {courtParam&&selectedCourt&&<div className="mt-3 inline-flex items-center gap-2 rounded-full border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-1.5 text-xs font-semibold text-rcl-blue"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-1 text-white/40 hover:text-white">Clear</Link></div>}
             </div>
-            <div className="flex flex-wrap gap-2"><Link href="/radar" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-rcl-blue/35 px-5 text-sm font-semibold text-sky-200"><FaLocationDot /> Basketball Radar</Link><button onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Create run / meetup</button></div>
+            <button onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-rcl-blue px-5 text-sm font-semibold text-[#071018]"><FaPlus /> Host a run / meetup</button>
           </div>
         </Container>
       </header>
 
       <Container maxWidth="xl" className="py-5 sm:py-7">
-        <nav className="mb-6 grid grid-cols-4 gap-1 rounded-2xl border border-white/8 bg-[#09131d]/80 p-1" aria-label="Open Runs sections">
+        <nav className="mb-6 grid grid-cols-2 gap-1 rounded-2xl border border-white/8 bg-[#09131d]/80 p-1" aria-label="Open Runs sections">
           {([
             ['runs', 'Runs', FaBasketball],
-            ['courts', 'Courts', FaLocationDot],
-            ['map', 'Map', FaMap],
             ['rewards', 'Rewards', FaTrophy],
           ] as const).map(([key, label, Icon]) => (
             <button key={key} onClick={() => setView(key)} className={`flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition sm:text-sm ${view === key ? 'bg-rcl-blue text-[#071018]' : 'text-white/45 hover:bg-white/[.04] hover:text-white'}`}><Icon className="shrink-0" /><span className="truncate">{label}</span></button>
@@ -451,34 +396,11 @@ export default function RunsPage() {
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {(['all', 'intermediate', 'advanced', 'elite'] as const).map((item) => <button key={item} onClick={() => setSkillFilter(item)} className={`rounded-xl border px-3.5 py-2 text-xs font-semibold ${skillFilter === item ? 'border-rcl-blue/35 bg-rcl-blue/12 text-rcl-blue' : 'border-white/8 text-white/35'}`}>{item === 'all' ? 'Any level' : skillLabels[item]}</button>)}
             </div>
+            <input aria-label="Search upcoming runs by court or city" type="search" value={runSearch} onChange={event => setRunSearch(event.target.value)}
+              placeholder="Find a run by city, court or title" className="min-h-11 rounded-xl border border-white/20 bg-[#071522] px-4 text-sm text-white placeholder:text-white/55 outline-none focus:border-rcl-blue/40 lg:col-span-2" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Be the first to get Richmond running'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('courts')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">Explore RVA courts</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
-        </section>}
-
-        {view === 'courts' && <section>
-          <div className="mb-5 rounded-2xl border border-rcl-blue/12 bg-[#09131d]/70 p-4">
-            <div className="relative"><FaMagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/28" /><input value={courtSearch} onChange={(event) => setCourtSearch(event.target.value)} placeholder="Search court, neighborhood or address" className="w-full rounded-xl border border-white/8 bg-[#050b11] py-3 pl-11 pr-4 text-sm outline-none placeholder:text-white/25 focus:border-rcl-blue/35" /></div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {(['all', 'Richmond', 'Henrico', 'Chesterfield'] as const).map((area) => <button key={area} onClick={() => setAreaFilter(area)} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${areaFilter === area ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/38'}`}>{area === 'all' ? 'All RVA' : area}</button>)}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(['all', 'open-gym', 'outdoor', 'indoor'] as const).map((kind) => <button key={kind} onClick={() => setCourtTypeFilter(kind)} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${courtTypeFilter === kind ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/38'}`}>{kind === 'all' ? 'All courts' : kind === 'open-gym' ? 'Open gym schedules' : kind[0].toUpperCase() + kind.slice(1)}</button>)}
-            </div>
-          </div>
-
-          <div className="mb-4 flex items-end justify-between gap-3"><div><p className="text-xs font-semibold text-white/32">RVA COURT DIRECTORY</p><h2 className="mt-1 text-xl font-semibold">{visibleCourts.length} verified locations</h2></div><button onClick={() => setView('map')} className="inline-flex items-center gap-2 text-xs font-semibold text-rcl-blue"><FaMap /> Map view</button></div>
-          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{visibleCourts.map((court) => <CourtCard key={court.slug} court={court} directionsHref={directionsHref(court)} onMap={() => { setSelectedCourt(court); setView('map'); }} onMeetup={() => openCreateForCourt(court, 'social')} />)}</div>
-        </section>}
-
-        {view === 'map' && <section>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold text-white/32">RVA BASKETBALL MAP</p><h2 className="mt-1 text-xl font-semibold">Find a court, then build the run</h2></div>{selectedCourt && <button onClick={() => setSelectedCourt(null)} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/50">Show area results</button>}</div>
-          <div className="overflow-hidden rounded-2xl border border-rcl-blue/16 bg-[#071522]/50">
-            <iframe title="RVA basketball courts map" src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`} className="h-[52vh] min-h-[390px] w-full border-0 grayscale-[.25]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-          </div>
-          {!selectedCourt && <div className="mt-3 flex flex-wrap gap-2">{['Richmond', 'Henrico', 'Chesterfield'].map((area) => <button key={area} onClick={() => setMapArea(area)} className={`rounded-xl border px-4 py-2 text-xs font-semibold ${mapArea === area ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/40'}`}>{area}</button>)}</div>}
-          {selectedCourt && <div className="mt-4 rounded-2xl border border-rcl-blue/14 bg-[#09131d]/80 p-5"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-semibold text-rcl-blue">{selectedCourt.area} · {selectedCourt.venue_type}</p><h3 className="mt-1 text-xl font-semibold">{selectedCourt.name}</h3><p className="mt-1 text-sm text-white/45">{selectedCourt.address}, {selectedCourt.locality}, VA</p></div><div className="flex gap-2"><a href={directionsHref(selectedCourt)} target="_blank" rel="noreferrer" className="rounded-xl border border-white/10 px-4 py-2.5 text-xs font-semibold text-white/65">Directions</a><button onClick={() => openCreateForCourt(selectedCourt)} className="rounded-xl bg-rcl-blue px-4 py-2.5 text-xs font-semibold text-[#071018]">Create run</button></div></div></div>}
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{courts.slice(0, 12).map((court) => <button key={court.slug} onClick={() => setSelectedCourt(court)} className="min-w-0 rounded-xl border border-white/8 bg-white/[.02] p-4 text-left hover:border-rcl-blue/25"><b className="block truncate text-sm">{court.name}</b><span className="mt-1 block truncate text-xs text-white/35">{court.area} · {court.venue_type}</span></button>)}</div>
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rounded-2xl border border-dashed border-rcl-blue/18 bg-[#071522]/42 p-8 text-center sm:p-12"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-4 text-2xl font-semibold">{runs.length ? 'No runs match these filters' : 'Bring basketball runs to your area'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/50">{runs.length ? 'Try another filter or bring your own crew.' : 'Start a real pickup game or meetup, pick the court and time, then share your run link with your group.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="grid gap-4 lg:grid-cols-2">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
         {view === 'rewards' && <section>
@@ -493,7 +415,7 @@ export default function RunsPage() {
         </section>}
       </Container>
 
-      {showCreate && <CreateRunModal form={form} setForm={setForm} courts={courts} busy={busy === 'create'} onClose={() => setShowCreate(false)} onSubmit={createRun} />}
+      {showCreate && <CreateRunModal form={form} setForm={setForm} courts={courts} onPickVenue={pickRunVenue} busy={busy === 'create'} onClose={() => setShowCreate(false)} onSubmit={createRun} />}
     </main>
   );
 }
@@ -534,6 +456,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <div className="flex min-w-0 items-start gap-3"><FaLocationDot className="mt-1 shrink-0 text-rcl-blue" /><span className="min-w-0 break-words">{run.location}</span></div>
       <div className="flex items-center gap-3"><FaPeopleGroup className="shrink-0 text-rcl-blue" /><span>{count}/{run.max_players} attending</span></div>
       <div className="flex flex-wrap gap-2 pt-2">
+        <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(run.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-white/85">Directions <FaArrowUpRightFromSquare className="ml-1.5" /></a>
         <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button><ShareRunButton id={run.id} title={run.title} />
         {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
       </div>
@@ -543,27 +466,15 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   </article>;
 }
 
-function CourtCard({ court, directionsHref, onMap, onMeetup }: { court: Court; directionsHref: string; onMap: () => void; onMeetup: () => void }) {
-  return <article className="min-w-0 rounded-2xl border border-rcl-blue/12 bg-[#09131d]/72 p-5">
-    <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{court.area} · {court.venue_type}</p><h3 className="mt-1 break-words text-lg font-semibold">{court.name}</h3></div><span className="shrink-0 rounded-full border border-rcl-blue/14 bg-rcl-blue/[.05] px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-rcl-blue/70">{court.verification_status === 'community' ? 'Mapped · unverified' : court.verification_status === 'official' ? 'Official listing' : 'Provider listing'}</span></div>
-    <p className="mt-2 text-sm leading-5 text-white/40">{court.address}<br />{court.locality}, VA {court.postal_code ?? ''}</p>
-    {court.verification_status === 'community' && <p className="mt-3 text-xs font-medium text-amber-200">Access and condition are not confirmed. Check before visiting.</p>}
-    <div className="mt-4 flex flex-wrap gap-2 text-[11px]"><span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{court.access_type === 'varies' ? 'Access unconfirmed' : accessLabels[court.access_type]}</span>{court.court_count && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">{court.court_count} court{court.court_count === 1 ? '' : 's'}</span>}{court.lights && <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-white/45">Lighted</span>}</div>
-    {court.hours_text && <div className="mt-4 flex items-start gap-2 text-xs leading-5 text-white/38"><FaClock className="mt-1 shrink-0 text-rcl-blue/65" /><span>{court.hours_text}</span></div>}
-    {court.open_gym_text && <div className="mt-3 rounded-xl border border-rcl-blue/12 bg-rcl-blue/[.045] p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-rcl-blue">Open gym / drop-in</p><p className="mt-1 text-xs leading-5 text-white/48">{court.open_gym_text}</p></div>}
-    <div className="mt-4 grid grid-cols-3 gap-2"><button onClick={onMap} className="rounded-xl border border-white/9 px-2 py-2.5 text-xs font-semibold text-white/55">Map</button><a href={directionsHref} target="_blank" rel="noreferrer" className="rounded-xl border border-white/9 px-2 py-2.5 text-center text-xs font-semibold text-white/55">Directions</a><button onClick={onMeetup} className="rounded-xl bg-rcl-blue px-2 py-2.5 text-xs font-semibold text-[#071018]">Meetup</button></div>
-    {court.source_url && <a href={court.source_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-[10px] text-white/25 hover:text-rcl-blue">Source: {court.source_label || 'venue provider'} <FaArrowUpRightFromSquare /></a>}
-  </article>;
-}
-
 function RewardRule({ icon, value, title, detail }: { icon: React.ReactNode; value: string; title: string; detail: string }) {
   return <article className="rounded-2xl border border-rcl-blue/14 bg-[#09131d]/72 p-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/[.07] text-rcl-blue">{icon}</span><div><p className="text-xs font-semibold text-rcl-blue">{value}</p><h3 className="font-semibold">{title}</h3></div></div><p className="mt-3 text-sm leading-6 text-white/42">{detail}</p></article>;
 }
 
-function CreateRunModal({ form, setForm, courts, busy, onClose, onSubmit }: {
+function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onSubmit }: {
   form: typeof emptyForm;
   setForm: React.Dispatch<React.SetStateAction<typeof emptyForm>>;
   courts: Court[];
+  onPickVenue: (venue: Court) => void;
   busy: boolean;
   onClose: () => void;
   onSubmit: (event: React.FormEvent) => Promise<void>;
@@ -572,7 +483,7 @@ function CreateRunModal({ form, setForm, courts, busy, onClose, onSubmit }: {
     <form onSubmit={onSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
-      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Court / venue</span><select value={form.location_slug} onChange={(event) => setForm({ ...form, location_slug: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm outline-none"><option value="">Custom / other location</option>{courts.map((court) => <option key={court.slug} value={court.slug}>{court.name} · {court.area}</option>)}</select></label>
+      <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
       {!form.location_slug && <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Custom location</span><input value={form.custom_location} onChange={(event) => setForm({ ...form, custom_location: event.target.value })} placeholder="Court name and address" className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>}
       <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
       <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
