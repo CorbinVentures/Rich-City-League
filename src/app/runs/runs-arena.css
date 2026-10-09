@@ -93,3 +93,29 @@
 @media(prefers-reduced-motion:reduce){
   .rch-arena-shell * {scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}
 }
+
+/* The host-run dialog is portaled to document.body (outside the arena's
+   isolated stacking context). Preserve its dark inputs and 16px iOS text size. */
+.rch-run-create-dialog { color-scheme: dark; }
+.rch-run-create-dialog :is(input:not([type="checkbox"]), select, textarea) {
+  color: #f4f9ff !important;
+  background: #081a2e !important;
+  border-color: #34618e !important;
+  color-scheme: dark;
+}
+.rch-run-create-dialog :is(input, textarea)::placeholder {
+  color: #9bb4d0 !important;
+  opacity: 1;
+}
+.rch-run-create-dialog :is(input, select, textarea):focus-visible {
+  outline: 2px solid #56b5ff;
+  outline-offset: 2px;
+}
+.rch-run-create-dialog form label > span:first-child {
+  color: #b8cbe2;
+}
+@media (max-width: 639px) {
+  .rch-run-create-dialog :is(input:not([type="checkbox"]), select, textarea) {
+    font-size: 16px !important; /* Avoid Safari zoom when focusing fields. */
+  }
+}
