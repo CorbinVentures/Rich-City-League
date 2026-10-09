@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700" role="img" aria-label="Illuminated city basketball court at night">
+<defs>
+ <linearGradient id="sky" x1="0" x2=".7" y2="1"><stop stop-color="#030a1a"/><stop offset=".55" stop-color="#0c366d"/><stop offset="1" stop-color="#020711"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#4da9ff" stop-opacity=".56"/><stop offset=".35" stop-color="#1679e7" stop-opacity=".26"/><stop offset="1" stop-color="#1474cb" stop-opacity="0"/></radialGradient>
+ <radialGradient id="warm"><stop stop-color="#ffe5a4" stop-opacity=".90"/><stop offset=".12" stop-color="#f0ba62" stop-opacity=".35"/><stop offset="1" stop-color="#f0a850" stop-opacity="0"/></radialGradient>
+ <linearGradient id="ground" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#12385b"/><stop offset=".38" stop-color="#0b2747"/><stop offset="1" stop-color="#030b19"/></linearGradient>
+ <linearGradient id="glass"><stop stop-color="#2370e4" stop-opacity=".5"/><stop offset="1" stop-color="#98d6ff" stop-opacity=".96"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="12"/></filter>
+ <filter id="lightblur"><feGaussianBlur stdDeviation="3"/></filter>
+ <pattern id="fence" width="27" height="27" patternUnits="userSpaceOnUse"><path d="M-13.5 0 13.5 27 40.5 0M-13.5 27 13.5 0 40.5 27" fill="none" stroke="#6ca0cf" stroke-width=".75" opacity=".42"/></pattern>
+ <pattern id="windows" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M7 7h5v8H7zm12 6h4v6h-4z" fill="#4ba4ff" opacity=".33"/></pattern>
+ <pattern id="noise" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M2 3h1v1H2zm4 1h1v1H6z" fill="#aacdeb" opacity=".13"/></pattern>
+</defs>
+<path d="M0 0H1400V700H0z" fill="url(#sky)"/>
+<ellipse cx="1023" cy="205" rx="570" ry="360" fill="url(#glow)"/>
+<ellipse cx="140" cy="308" rx="240" ry="270" fill="url(#glow)" opacity=".46"/>
+<!-- skyline -->
+<g fill="#041328">
+<path d="M0 205h56v-50h40v73h55V119h94v95h51V80h78v147h44v-94h75v76h67v-69h62v64h64V95h75v121h54V128h82v116h58V79h82v133h62V139h85v88h50v-72h100v95h91V121h73v101h48V0h110v253h36V157h55v77h26v466H0z"/>
+</g>
+<g fill="url(#windows)" opacity=".85">
+<path d="M0 205h56v-50h40v73h55V119h94v95h51V80h78v147h44v-94h75v76h67v-69h62v64h64V95h75v121h54V128h82v116h58V79h82v133h62V139h85v88h50v-72h100v95h91V121h73v101h48V0h110v253h36V157h55v77h26v466H0z"/>
+</g>
+<path d="M0 255H1400V438H0z" fill="#020914" opacity=".52"/>
+<!-- trees silhouettes -->
+<g fill="#030d18"><path d="M0 265c30-48 37-40 80-55 45-2 60 26 111 14 41-23 71-3 90 31l-2 90H0z"/><path d="M1155 259c36-57 82-64 113-38 35-14 70 5 86 38 27-17 38-2 46 11v111h-245z"/></g>
+<!-- lamps / spill -->
+<g><path d="M118 190V515M1280 167V480" stroke="#304968" stroke-width="9"/><path d="M103 188h33M1264 166h33" stroke="#536a85" stroke-width="7"/><ellipse cx="119" cy="195" rx="170" ry="196" fill="url(#warm)"/><ellipse cx="1280" cy="184" rx="260" ry="270" fill="url(#warm)" opacity=".67"/><circle cx="119" cy="185" r="9" fill="#fff8d4"/><circle cx="1280" cy="170" r="10" fill="#fff8d4"/></g>
+<!-- fenced court -->
+<path d="M0 260H1400V510H0z" fill="url(#fence)" opacity=".76"/>
+<path d="M0 260H1400M0 383H1400M0 510H1400M225 260v250M470 260v250M730 260v250M985 260v250M1240 260v250" stroke="#53769a" stroke-width="4" opacity=".56"/>
+<path d="M0 427q400-15 780 0 310-20 620-8v281H0z" fill="url(#ground)"/>
+<path d="M0 473 1400 451" stroke="#388fe4" stroke-opacity=".31" stroke-width="4"/>
+<!-- floor / court perspective -->
+<path d="M-200 710 490 470 1278 474 1550 705Z" fill="#0a2340" opacity=".69"/>
+<path d="M-70 675 465 484 1308 487 1490 664M140 655 560 517 1195 520 1342 644" stroke="#7ec5ff" stroke-width="3" opacity=".42" fill="none"/>
+<path d="M675 487v208M680 492c-180-5-180 176 0 181 175-1 175-179 0-181z" stroke="#75c1ff" stroke-width="3" opacity=".34" fill="none"/>
+<path d="M0 545q490 50 1400 7" stroke="#67b7fd" opacity=".24" stroke-width="2" fill="none"/>
+<!-- rim backboard -->
+<path d="M1094 120 1286 117 1286 348 1094 351z" stroke="#2b96ff" stroke-width="22" opacity=".45" fill="none" filter="url(#blur)"/>
+<path d="M1094 120 1286 117 1286 348 1094 351z" stroke="url(#glass)" stroke-width="9" fill="#0a2748" fill-opacity=".42"/>
+<path d="M1155 203h75v80h-75z" stroke="#b6dcfb" stroke-width="5" fill="none"/>
+<ellipse cx="1194" cy="304" rx="51" ry="10" fill="none" stroke="#f5a773" stroke-width="10" filter="url(#lightblur)" opacity=".48"/>
+<ellipse cx="1194" cy="304" rx="51" ry="10" fill="none" stroke="#ec945f" stroke-width="6"/>
+<path d="M1146 307 1156 377 1236 377 1240 307M1158 311 1173 373M1181 314 1190 378M1207 314 1205 378M1233 311 1222 375M1151 327 1235 346M1154 346 1229 365" stroke="#d9eeff" stroke-width="2" opacity=".9"/>
+<path d="M1286 237h29v465" stroke="#22446b" stroke-width="12"/>
+<text x="1134" y="184" font-family="Arial,sans-serif" font-size="52" font-style="italic" font-weight="900" fill="#9dd2ff" opacity=".8">RCH</text>
+<!-- graffiti banners -->
+<g font-family="Arial,sans-serif" font-weight="900" fill="#80b9f3" opacity=".26" transform="rotate(-11 725 295)"><text x="645" y="288" font-size="34">GOOD RUNS.</text><text x="644" y="329" font-size="28">BETTER PEOPLE.</text></g>
+<!-- wet floor reflections -->
+<path d="M910 493q185 8 398-8l-28 178-150-17z" fill="url(#glow)" opacity=".22"/>
+<path d="M1065 532h250M1014 576h355M1050 604h308" stroke="#2b8af7" stroke-width="2" opacity=".22"/>
+<path d="M0 0H1400V700H0z" fill="url(#noise)" opacity=".5"/>
+<path d="M0 0H1400V700H0z" fill="url(#sky)" opacity=".15"/>
+</svg>
