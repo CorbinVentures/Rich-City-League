@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
@@ -484,8 +485,40 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
   onClose: () => void;
   onSubmit: (event: React.FormEvent) => Promise<void>;
 }) {
-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/78 p-0 backdrop-blur-sm sm:items-center sm:p-6"><div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-white/10 bg-[#09121b] p-5 sm:rounded-3xl sm:p-7"><div className="flex items-center justify-between gap-4"><div><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/65">Open Runs</p><h2 className="mt-1 text-2xl font-semibold">Create basketball activity</h2></div><button onClick={onClose} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 text-white/50"><FaXmark /></button></div>
-    <form onSubmit={onSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
+  // The Runs page is isolated for its arena theme. Portal outside that stacking
+  // context so the shared sticky header and bottom navigation cannot cover the form.
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => {
+    setPortalReady(true);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, []);
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  if (!portalReady) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[1200] flex h-[100dvh] items-center justify-center bg-black/80 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:p-6"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <section role="dialog" aria-modal="true" aria-labelledby="rch-create-run-title" className="rch-run-create-dialog flex max-h-full min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#28547d] bg-[#09121b] text-white shadow-2xl sm:rounded-3xl">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-[#28547d] px-5 py-4 sm:px-7">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[#91cef2]">Open Runs</p>
+            <h2 id="rch-create-run-title" className="mt-1 text-xl font-semibold leading-tight sm:text-2xl">Create basketball activity</h2>
+          </div>
+          <button type="button" aria-label="Close activity form" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#28547d] text-[#c5dbf1]"><FaXmark /></button>
+        </header>
+        <form id="rch-create-run-form" onSubmit={onSubmit} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7">
+          <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
       <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
@@ -498,9 +531,15 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
       <label><span className="text-xs font-semibold text-white/42">Schedule</span><select value={form.repeat_weeks} onChange={event=>setForm({...form,repeat_weeks:Number(event.target.value) as 1|4})} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value={1}>One run</option><option value={4}>Repeat weekly · 4 weeks</option></select><small className="mt-2 block text-xs text-white/40">Each date has its own RSVP.</small></label>
       <label className="flex items-end"><span className="flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-white/10 bg-[#050b11] px-4 text-xs text-white/55"><input type="checkbox" checked={form.allow_fan_checkin} onChange={(event) => setForm({ ...form, allow_fan_checkin: event.target.checked })} className="accent-[#91cef2]" /> Allow fan check-ins</span></label>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Details</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows={3} placeholder="Competition level, winners-stay rules, jerseys, parking, meetup details…" className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
-      <button disabled={busy} className="sm:col-span-2 rounded-xl bg-rcl-blue px-5 py-3.5 text-sm font-semibold text-[#071018] disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
-    </form>
-  </div></div>;
+          </div>
+        </form>
+        <footer className="shrink-0 border-t border-[#28547d] bg-[#09121b] px-5 py-3 sm:px-7">
+          <button type="submit" form="rch-create-run-form" disabled={busy} className="min-h-12 w-full rounded-xl bg-[#217ef5] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
+        </footer>
+      </section>
+    </div>,
+    document.body
+  );
 }
 
 /** A native share sheet on mobile; copy-link fallback for desktop browsers. */
