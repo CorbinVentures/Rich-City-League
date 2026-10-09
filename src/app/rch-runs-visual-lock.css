@@ -401,3 +401,10 @@ html body:has(main.rch-arena-shell) .rcl-global-search {
     box-shadow:0 5px 23px rgba(38,131,245,.3)!important;
   }
 }
+
+html body:has(main.rch-arena-shell) a[aria-label="Open administrator control center"] {
+  border-color:#2d5d8d!important;
+  background:rgba(6,28,54,.94)!important;
+  color:#8ac6ff!important;
+  box-shadow:0 6px 15px rgba(0,0,0,.22)!important;
+}
