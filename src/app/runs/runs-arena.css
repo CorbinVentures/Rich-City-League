@@ -1,0 +1,95 @@
+/* Dedicated RCH Runs arena theme. Intentionally NOT .rcl-social-secondary:
+   that global legacy rule forcibly makes dark pages white on mobile. */
+.rch-arena-shell {
+  min-height:100vh;
+  background:radial-gradient(circle at 50% 12%,rgba(23,87,151,.22),transparent 34rem),#05101e;
+  color:#fff;
+  color-scheme:dark;
+}
+.rch-arena-shell h1,.rch-arena-shell h2,.rch-arena-shell h3 {
+  color:#fff;
+}
+.rch-arena-shell input,.rch-arena-shell select,.rch-arena-shell textarea {
+  color:#fff;
+  color-scheme:dark;
+}
+.rch-arena-shell input::placeholder,.rch-arena-shell textarea::placeholder {color:#8ba9c8;}
+.rch-arena-hero {
+  min-height:345px;
+  background:linear-gradient(90deg,rgba(3,12,26,.92),rgba(3,12,26,.52) 52%,rgba(3,12,26,.24)),
+    radial-gradient(ellipse at 90% 0,rgba(31,132,249,.47),transparent 50%),
+    linear-gradient(160deg,#082444,#04172c 60%,#030913);
+}
+.rch-arena-lights {
+  background:radial-gradient(ellipse at 87% 43%,rgba(28,151,255,.34),transparent 30%),
+    radial-gradient(circle at 7% 2%,rgba(55,145,255,.20),transparent 32%),
+    repeating-linear-gradient(0deg,transparent 0 19px,rgba(94,160,232,.075) 20px 21px),
+    repeating-linear-gradient(90deg,transparent 0 19px,rgba(94,160,232,.075) 20px 21px);
+  opacity:.77;
+}
+.rch-arena-skyline {
+  background:linear-gradient(90deg,#081627 0 10%,#0b2644 10% 19%,#081629 19% 29%,#0c2a4b 29% 38%,#081527 38% 46%,#09213c 46% 57%,#0d3156 57% 64%,#081b32 64% 72%,#0e3760 72% 83%,#08182c 83%);
+  clip-path:polygon(0 50%,9% 50%,9% 25%,13% 25%,13% 44%,19% 44%,19% 10%,25% 10%,25% 55%,31% 55%,31% 35%,38% 35%,38% 0,46% 0,46% 54%,51% 54%,51% 22%,58% 22%,58% 42%,66% 42%,66% 8%,72% 8%,72% 58%,78% 58%,78% 32%,86% 32%,86% 47%,92% 47%,92% 20%,100% 20%,100% 100%,0 100%);
+}
+.rch-arena-floor {
+  background:linear-gradient(0deg,rgba(4,15,30,.95),rgba(18,93,172,.14)),
+    repeating-linear-gradient(0deg,transparent 0 43px,rgba(54,143,240,.13) 44px 45px),
+    repeating-linear-gradient(90deg,transparent 0 69px,rgba(54,143,240,.13) 70px 71px);
+  box-shadow:inset 0 20px 25px rgba(4,15,27,.78);
+  transform:perspective(480px) rotateX(25deg) scale(1.2);
+  transform-origin:bottom;
+}
+.rch-arena-headline {
+  text-shadow:0 0 22px rgba(68,151,255,.45);
+  font-style:italic;
+  letter-spacing:-.055em;
+}
+.rch-arena-mode {
+  background:linear-gradient(150deg,rgba(18,47,80,.98),rgba(7,21,39,.96));
+  border-color:rgba(76,158,245,.46);
+  box-shadow:inset 0 1px 0 rgba(110,182,255,.10);
+}
+.rch-arena-mode-active {
+  border-color:#429fff;
+  background:linear-gradient(140deg,rgba(16,72,147,.8),rgba(5,27,55,.98));
+  box-shadow:inset 0 0 0 1px #1687fe,0 0 15px rgba(36,137,255,.35);
+}
+.rch-arena-profile {
+  background:linear-gradient(118deg,rgba(24,57,96,.96),rgba(10,26,48,.96));
+  box-shadow:inset 0 1px 0 rgba(110,180,255,.13);
+}
+.rch-arena-panel {
+  background:linear-gradient(160deg,#0b2037 0%,#081524 100%);
+  box-shadow:0 12px 30px rgba(0,0,0,.21);
+}
+.rch-arena-game-card {
+  border:1px solid rgba(73,142,219,.40)!important;
+  background:linear-gradient(160deg,rgba(12,35,61,.98),rgba(6,19,36,.99))!important;
+  box-shadow:0 6px 26px rgba(0,0,0,.15);
+}
+.rch-arena-shell .rch-arena-game-card:hover {
+  border-color:#309cff!important;
+  box-shadow:0 0 17px rgba(44,137,247,.2);
+}
+.rch-arena-shell .rch-arena-empty {
+  background:linear-gradient(150deg,rgba(10,37,69,.82),rgba(4,18,34,.9));
+  border-color:#285482;
+}
+.rch-arena-shell .rch-arena-upcoming-filter {
+  border-color:rgba(97,152,210,.40);
+  background:rgba(12,39,71,.84);
+  color:#d6e9fb;
+}
+.rch-arena-shell .rch-arena-upcoming-filter[aria-pressed="true"] {
+  border-color:#4aafff;
+  background:#187bef;
+  color:#fff;
+}
+@media(max-width:480px){
+  .rch-arena-hero {min-height:335px;}
+  .rch-arena-headline {font-size:3.5rem;}
+  .rch-arena-mode {min-height:99px;padding:12px 10px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .rch-arena-shell * {scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}
