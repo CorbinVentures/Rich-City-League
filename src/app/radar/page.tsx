@@ -15,7 +15,7 @@ type Court = {
   slug: string; name: string; address: string; locality: string; area: string;
   latitude: number | null; longitude: number | null; venue_type: string;
   verification_status: string; access_type: string; hours_text: string | null;
-  open_gym_text: string | null;
+  open_gym_text: string | null; source_label: string | null;
 };
 type Run = {
   id: string; title: string; location: string; location_slug: string | null;
@@ -25,7 +25,7 @@ type CourtCommunity = { slug: string; name: string; location_slug: string };
 type HistoryRow = { court_slug: string; checked_in_on: string };
 type LatLon = { latitude: number; longitude: number };
 type RadarCourt = Court & { miles: number | null };
-type RadarRun = Run & { miles: number | null; court: Court | undefined };
+type RadarRun = Run & { miles: number | null; court: Pick<Court, 'slug' | 'latitude' | 'longitude'> | undefined };
 type Tab = 'courts' | 'runs';
 
 const RAD = Math.PI / 180;
