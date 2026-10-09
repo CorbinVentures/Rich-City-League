@@ -372,7 +372,7 @@ export default function BasketballRadarPage() {
                   <button type="button" onClick={() => setSelected(null)} className="text-xs font-bold text-sky-300">Close</button>
                 </div>
                 <iframe title={'Map of ' + selected.name} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                  src={'https://www.google.com/maps?q=' + encodeURIComponent(selected.name + ', ' + selected.address + ', ' + selected.locality + ', VA') + '&output=embed'}
+                  src={'https://www.google.com/maps?q=' + encodeURIComponent(selected.latitude !== null && selected.longitude !== null ? selected.latitude + ',' + selected.longitude : selected.name + ', ' + selected.address + ', ' + selected.locality + ', VA') + '&output=embed'}
                   className="h-64 w-full rounded-xl border-0" />
               </div>}
               <div className="rounded-2xl border border-white/15 bg-[#0b1722] p-5">
