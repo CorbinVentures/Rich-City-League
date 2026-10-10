@@ -173,6 +173,7 @@ export default function VirginiaWorld() {
   const [activities,setActivities]=useState<WorldPoint[]>([]);
   const [courts,setCourts]=useState<WorldPoint[]>([]);
   const [searchCourts,setSearchCourts]=useState<WorldPoint[]>([]);
+  const [starterCourts,setStarterCourts]=useState<WorldPoint[]>([]);
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const [userLocation,setUserLocation]=useState<GeoPosition|null>(null);
   const [locationError,setLocationError]=useState('');
@@ -180,7 +181,11 @@ export default function VirginiaWorld() {
   const [moreCourts,setMoreCourts]=useState(false);
   const [courtLimit,setCourtLimit]=useState(300);
   const [loadingData,setLoadingData]=useState(true);
-  const allPoints=useMemo(()=>[...activities,...courts,...searchCourts.filter(p=>!courts.some(v=>v.id===p.id))],[activities,courts,searchCourts]);
+  const allPoints=useMemo(()=>{
+    const unique=new Map<string,WorldPoint>();
+    for(const point of [...activities,...courts,...searchCourts,...starterCourts])unique.set(point.id,point);
+    return [...unique.values()];
+  },[activities,courts,searchCourts,starterCourts]);
   const selected=allPoints.find(p=>p.id===selectedId)??null;
   const fallbackCities=useMemo(()=>VIRGINIA_CITIES.filter(c=>['richmond','roanoke','bristol','charlottesville','fredericksburg','alexandria','norfolk','virginia-beach'].includes(c.id)),[]);
   const mapShown=mapMode==='3d'&&mapReady&&tilesReady&&!mapFailure;
@@ -191,6 +196,7 @@ export default function VirginiaWorld() {
   const city=VIRGINIA_CITIES.find(c=>c.id===cityId)??null;
   const displayed=useMemo(()=>shown
     .filter(p=>!city || milesBetween(p,city)<32)
+    .filter(p=>p.kind!=='court'||!(/\bOSM\b|^Basketball Court ·|^Fairfax County Basketball Court #/i.test(p.title)))
     .sort((a,b)=>userLocation
       ? milesBetween(a,userLocation)-milesBetween(b,userLocation)
       : a.startsAt && b.startsAt ? a.startsAt.localeCompare(b.startsAt) : a.kind==='court'?1:-1)
@@ -356,6 +362,26 @@ export default function VirginiaWorld() {
     if(source?.setData)source.setData(featureCollection(shown.filter(p=>view.zoom>=9.2 || p.kind!=='court' || searchIds.has(p.id))));
   },[mapReady,shown,searchCourts,view.zoom]);
 
+  // Show named, usable locations immediately, without depending on GPS or a 3D map.
+  useEffect(()=>{
+    let cancelled=false;
+    async function loadStarterCourts(){
+      const db=getSupabaseClient() as any;
+      if(!db)return;
+      const {data,error}=await db.rpc('search_run_venues',{p_search:'',p_limit:40});
+      if(cancelled||error)return;
+      setStarterCourts(((data??[]) as CourtRow[]).filter(row=>virginiaCoordinates(row.latitude,row.longitude))
+        .map(row=>({
+          id:'court:'+row.slug,kind:'court' as const,title:row.name,detail:row.address,
+          city:row.locality,lat:row.latitude!,lon:row.longitude!,precision:'venue' as const,
+          href:'/runs?court='+encodeURIComponent(row.slug),access:row.access_type,
+          verified:row.verification_status,type:row.venue_type,slug:row.slug
+        })));
+    }
+    loadStarterCourts();
+    return()=>{cancelled=true;};
+  },[]);
+
   // Statewide court search works even before a user flies into a city.
   useEffect(()=>{
     const search=query.trim();
@@ -380,16 +406,18 @@ export default function VirginiaWorld() {
   },[query]);
 
   useEffect(()=>{
-    if(!mapReady || view.zoom<9.2){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
+    if(!cityId && (!mapReady || view.zoom<9.2)){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
     let cancelled=false;
     const timer=window.setTimeout(async()=>{
       const db=getSupabaseClient() as any;if(!db)return;
       setLoadingCourts(true);
       try{
         const map=mapRef.current;
-        if(!map)return;
-        const center=map.getCenter(),bounds=map.getBounds();
-        const radius=Math.min(140,Math.max(2,Math.ceil(milesBetween(
+        const selectedCity=VIRGINIA_CITIES.find(item=>item.id===cityId);
+        if(!map && !selectedCity)return;
+        const center=selectedCity?{lat:selectedCity.lat,lng:selectedCity.lon}:map.getCenter();
+        const bounds=map?.getBounds();
+        const radius=selectedCity?26:Math.min(140,Math.max(2,Math.ceil(milesBetween(
           {lat:center.lat,lon:center.lng},{lat:bounds.getNorthEast().lat,lon:bounds.getNorthEast().lng}))));
         const result:CourtRow[]=[];
         let full=false;
@@ -417,7 +445,7 @@ export default function VirginiaWorld() {
       finally{if(!cancelled)setLoadingCourts(false);}
     },260);
     return()=>{cancelled=true;window.clearTimeout(timer);};
-  },[mapReady,view.lat,view.lon,view.zoom,courtLimit]);
+  },[mapReady,view.lat,view.lon,view.zoom,courtLimit,cityId]);
 
   const toggle3d=()=>{
     if(mapShown){setMapMode('atlas');return;}
