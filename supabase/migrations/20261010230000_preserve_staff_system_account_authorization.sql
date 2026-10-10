@@ -10,8 +10,9 @@ DECLARE
   v_privileged boolean;
   v_staff_manager boolean;
 BEGIN
-  v_privileged := session_user IN ('postgres','supabase_admin')
-    OR coalesce(auth.role(),'')='service_role'
+  -- Rely on signed JWT role and actual profile role, not SECURITY DEFINER
+  -- current_user or the underlying database connection identity.
+  v_privileged := coalesce(auth.role(),'')='service_role'
     OR public.is_admin();
   -- configure_system_account() intentionally authorizes staff as well as admins.
   -- Keep that trusted RPC working; ordinary members fail both role checks.
