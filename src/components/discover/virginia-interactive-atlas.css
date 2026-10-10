@@ -1,0 +1,121 @@
+.rch-live-atlas{
+  position:absolute;inset:0;z-index:2;overflow:hidden;isolation:isolate;
+  background:radial-gradient(ellipse at 50% 56%,#113653 0%,#09233a 48%,#061728 100%);
+  touch-action:none;cursor:grab;outline:none;user-select:none;
+}
+.rch-live-atlas:active{cursor:grabbing}
+.rch-live-atlas:focus-visible{outline:2px solid #83c6ff;outline-offset:-4px}
+.rch-live-atlas-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,#02142399 0%,transparent 28%,transparent 73%,#031323bb 100%)}
+.rch-live-atlas-stage{
+  position:absolute;top:50%;left:0;width:100%;aspect-ratio:1000/620;z-index:2;
+  will-change:transform;backface-visibility:hidden;transform-style:preserve-3d;
+}
+.rch-live-atlas-stage:focus{outline:0}
+.rch-live-atlas-image{
+  position:absolute;inset:0;background:url('/virginia-world-fallback.svg') center/100% 100% no-repeat;
+  filter:saturate(1.13) brightness(1.08);pointer-events:none;
+}
+.rch-live-atlas.perspective .rch-live-atlas-image{filter:saturate(1.23) brightness(1.06) drop-shadow(0 22px 18px #0008)}
+.rch-live-atlas-city,.rch-live-atlas-point{
+  position:absolute;z-index:4;border:0;background:transparent;padding:0;
+  display:flex;align-items:center;flex-direction:column;cursor:pointer;
+  color:#fff!important;
+  transform:translate(-50%,-100%) scale(var(--rch-counter-zoom,1));
+  transform-origin:center bottom;
+  filter:drop-shadow(0 3px 8px #000b);
+  min-width:44px;min-height:48px;justify-content:flex-end;
+}
+.rch-live-atlas-city-dot{
+  width:32px;height:32px;display:grid;place-items:center;
+  color:#fcfeff;background:#1261a4;border:2px solid #e5f4ff;border-radius:50%;
+  font-size:13px;box-shadow:0 0 0 4px #2e98ff39,0 3px 10px #000a;
+  transition:box-shadow .15s,background .15s;
+}
+.rch-live-atlas-city:after{content:'';width:2px;height:9px;background:#a8e0ff;box-shadow:0 1px 5px #48bbff}
+.rch-live-atlas-city-label{
+  display:block;max-width:112px;padding:4px 8px;background:#06182ae8;
+  border:1px solid #3e739b;border-radius:7px;color:#eaf7ff!important;
+  font-size:10px;font-weight:850;white-space:nowrap;line-height:1.3;letter-spacing:.01em;
+}
+.rch-live-atlas-city:hover .rch-live-atlas-city-dot,.rch-live-atlas-city.active .rch-live-atlas-city-dot{
+  background:#438ff1;box-shadow:0 0 0 6px #429cff66,0 4px 15px #0008;
+}
+.rch-live-atlas-city.active .rch-live-atlas-city-label{border-color:#7cc4ff;color:#fff!important}
+.rch-live-atlas-point{
+  width:27px;height:27px;min-height:27px;min-width:27px;border-radius:50%;
+  justify-content:center;display:grid;place-items:center;
+  background:#f09a2c;border:2px solid white;box-shadow:0 0 0 5px #ffad3c2b;
+  font-size:12px;
+}
+.rch-live-atlas-point.event{background:#db654d;box-shadow:0 0 0 5px #f1745140}
+.rch-live-atlas-point.run{background:#efac45}
+.rch-live-atlas-point.selected{background:#347eff;box-shadow:0 0 0 8px #419cff53}
+.rch-live-atlas-user{
+  position:absolute;z-index:7;width:20px;height:20px;border-radius:50%;
+  transform:translate(-50%,-50%) scale(var(--rch-counter-zoom,1));
+  transform-origin:center;background:#3e9bff;border:4px solid white;
+  box-shadow:0 0 0 10px #388cff4e,0 0 20px #348dff;
+  pointer-events:none;
+}
+.rch-live-atlas-toolbar{
+  position:absolute;z-index:12;top:72px;right:12px;
+  display:flex;flex-direction:column;gap:1px;padding:4px;
+  background:#051b2bdc;border:1px solid #3d779e;border-radius:13px;
+  box-shadow:0 6px 20px #0009;backdrop-filter:blur(9px);
+}
+.rch-live-atlas-toolbar button{
+  width:35px;height:34px;min-height:34px;display:grid;place-items:center;
+  color:#daefff!important;border:0;border-radius:8px;background:transparent;
+  cursor:pointer;font-size:13px;
+}
+.rch-live-atlas-toolbar button:disabled{opacity:.3;cursor:default}
+.rch-live-atlas-toolbar button:not(:disabled):hover,.rch-live-atlas-toolbar button:focus-visible{
+  background:#2b6699;outline:none;
+}
+.rch-live-atlas-selection{
+  position:absolute;left:12px;bottom:57px;z-index:9;
+  width:min(320px,calc(100% - 85px));
+  padding:11px 13px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;
+  border:1px solid #487fa6;background:#061a2cee;border-radius:14px;
+  color:#e8f6ff;box-shadow:0 8px 24px #000a;backdrop-filter:blur(10px);
+  pointer-events:auto;
+}
+.rch-live-atlas-selection-type{font-size:10px;display:flex;align-items:center;gap:6px;color:#9bd2ff}
+.rch-live-atlas-selection strong{
+  color:#fff!important;font-size:14px;font-weight:900;line-height:1.2;
+  max-width:100%;overflow-wrap:anywhere;
+}
+.rch-live-atlas-selection a,.rch-live-atlas-selection button:not(.rch-live-atlas-back){
+  display:flex;align-items:center;gap:8px;color:#7ec4ff!important;font-size:11px;
+  font-weight:800;cursor:pointer;background:transparent;border:0;padding:4px 0;
+}
+.rch-live-atlas-selection.city span{font-size:10px;color:#b6cfe4}
+.rch-live-atlas-back{
+  background:transparent;border:0;color:#a6d3f8;display:flex;align-items:center;
+  gap:7px;font-size:10px;font-weight:850;cursor:pointer;padding:0 0 4px;
+}
+.rch-live-atlas-hint{
+  position:absolute;z-index:8;bottom:58px;left:12px;
+  border-radius:999px;border:1px solid #407aa4;background:#04192acf;
+  padding:8px 11px;font-size:10px;color:#cbdeef;
+  pointer-events:none;
+}
+.rch-live-atlas-scale{
+  position:absolute;z-index:8;bottom:20px;right:12px;
+  font-size:10px;font-weight:900;font-variant-numeric:tabular-nums;
+  color:#b1d9f7;pointer-events:none;background:#041526b8;padding:4px 6px;border-radius:6px;
+}
+@media(max-width:700px){
+  .rch-live-atlas-toolbar{top:73px;right:9px;border-radius:10px}
+  .rch-live-atlas-toolbar button{width:30px;height:30px;min-height:30px;font-size:12px}
+  .rch-live-atlas-city-dot{width:27px;height:27px;font-size:11px}
+  .rch-live-atlas-city-label{max-width:88px;font-size:9px;padding:3px 6px}
+  .rch-live-atlas-city{min-width:40px}
+  .rch-live-atlas-selection{bottom:56px;left:9px;padding:9px 11px}
+  .rch-live-atlas-selection strong{font-size:12px}
+  .rch-live-atlas-hint{left:8px;bottom:58px;font-size:9px;max-width:calc(100% - 80px);line-height:1.3}
+  .rch-live-atlas-scale{bottom:15px;right:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rch-live-atlas-city-dot{transition:none}
+}
