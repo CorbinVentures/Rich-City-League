@@ -1,9 +1,9 @@
-/* Branded full-screen page transition. Only PWALaunchIntro owns this overlay. */
+/* One seamless Rich City Hoops cinematic launch screen. */
 html body .rch-launch {
   position: fixed; inset: 0; z-index: 2147483000;
   display: grid; place-items: center; overflow: hidden;
   background: radial-gradient(circle at 50% 42%, #193459, #08182e 55%, #040b19) !important;
-  color: #fff9ec !important; opacity: 0; visibility: hidden; pointer-events: none;
+  opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .22s ease, visibility .22s;
   contain: layout paint;
 }
@@ -15,61 +15,36 @@ html body .rch-launch::before {
 html[data-rch-launch="active"] body .rch-launch {
   opacity: 1; visibility: visible; pointer-events: auto;
   transition: opacity .15s ease;
-  animation: rch-launch-failsafe 0s 4s forwards;
+  /* Emergency-only failsafe, not the video duration. */
+  animation: rch-launch-failsafe 0s 12s forwards;
 }
 html body .rch-launch-brand {
-  position: relative; width: min(84vw, 420px); aspect-ratio: 1;
-  display: grid; place-items: center; margin-top: -5vh;
+  position: relative; width: min(88vw, 480px); aspect-ratio: 1;
+  display: grid; place-items: center;
   filter: drop-shadow(0 16px 40px rgba(0,0,0,.28));
 }
-html body .rch-launch-poster, html body .rch-launch-video {
-  grid-area: 1 / 1; display: block; width: 100%; height: 100%; object-fit: contain;
+html body .rch-launch-video {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; transition: opacity .16s ease-in;
 }
-html body .rch-launch-poster {
-  display: grid; place-items: center;
-  color: #f7d37c !important;
-  font-family: Georgia, serif; font-weight: 800;
-  font-size: clamp(18px, 5vw, 29px);
-  letter-spacing: .10em; text-align: center;
-  animation: rch-poster-breathe 3s ease-in-out infinite;
-}
-html body .rch-launch-video { opacity: 0; transition: opacity .18s ease-in; }
 html body .rch-launch-video.is-ready { opacity: 1; }
-html body .rch-launch-footer {
-  position: absolute; bottom: max(7%, calc(env(safe-area-inset-bottom) + 22px));
-  left: 0; right: 0; display: grid; justify-items: center; gap: 17px;
-  text-align: center; padding: 0 16px;
-}
-html body .rch-launch-footer p {
-  margin: 0; color: #f8edcf !important; font-size: clamp(12px, 3.6vw, 15px);
-  font-weight: 600; line-height: 1.5; letter-spacing: .04em;
-}
-html body .rch-launch-dots { display: flex; gap: 10px; }
-html body .rch-launch-dots i {
-  width: 6px; height: 6px; border-radius: 50%; background: #eec467;
-  box-shadow: 0 0 9px rgba(242,189,79,.42);
-  animation: rch-dot-pulse 1.25s ease-in-out infinite;
-}
-html body .rch-launch-dots i:nth-child(2) { animation-delay: .17s; }
-html body .rch-launch-dots i:nth-child(3) { animation-delay: .34s; }
 html body .rch-launch-skip {
   position: absolute; top: 0; right: 0; width: 1px; height: 1px;
   overflow: hidden; clip-path: inset(50%);
 }
 html body .rch-launch-skip:focus-visible {
-  top: calc(env(safe-area-inset-top) + 18px); right: 18px; width: auto; height: auto;
-  padding: 10px 14px; clip-path: none; border: 2px solid #e8b64b;
-  border-radius: 8px; background: #fff !important; color: #07152b !important; z-index: 3;
+  top: calc(env(safe-area-inset-top) + 18px); right: 18px;
+  width: auto; height: auto; padding: 10px 14px; clip-path: none;
+  border: 2px solid #e8b64b; border-radius: 8px;
+  background: #fff !important; color: #07152b !important; z-index: 3;
 }
-@keyframes rch-poster-breathe { 50% { filter: brightness(1.08) drop-shadow(0 0 12px rgba(235,189,81,.27)); } }
-@keyframes rch-dot-pulse { 50% { opacity: .32; transform: translateY(-2px); } }
-@keyframes rch-launch-failsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+@keyframes rch-launch-failsafe {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   html body .rch-launch, html body .rch-launch-video { transition: none; }
   html body .rch-launch-video { display: none; }
-  html body .rch-launch-poster, html body .rch-launch-dots i { animation: none; }
 }
 @media (max-height: 480px) {
-  html body .rch-launch-brand { width: min(45vh, 250px); margin-top: 0; }
-  html body .rch-launch-footer { bottom: max(3%, env(safe-area-inset-bottom)); gap: 8px; }
+  html body .rch-launch-brand { width: min(44vh, 250px); }
 }
