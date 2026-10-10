@@ -40,12 +40,18 @@ jobs:
           sdkmanager_bin="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n 1)"
           test -n "$sdkmanager_bin"
           echo "$(dirname "$sdkmanager_bin")" >> "$GITHUB_PATH"
+          # Bubblewrap currently expects an SDK-root /bin or /tools directory,
+          # but GitHub runners install sdkmanager under cmdline-tools/latest/bin.
+          if [[ ! -e "$ANDROID_HOME/bin" ]]; then
+            sudo ln -s "$(dirname "$sdkmanager_bin")" "$ANDROID_HOME/bin"
+          fi
+          test -d "$ANDROID_HOME/bin"
 
       - name: Install Android platform and Bubblewrap
         run: |
           set -euo pipefail
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platforms;android-36" "build-tools;36.1.0"
           npm install --global @bubblewrap/cli
           mkdir -p "$HOME/.bubblewrap"
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > "$HOME/.bubblewrap/config.json"
