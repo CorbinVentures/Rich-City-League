@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
+import { BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { getPlayerDetail, getPublicClient } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
 import { FaAward, FaBolt, FaCircleCheck } from 'react-icons/fa6';
@@ -177,21 +178,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
               </p>
             ) : (
               <div className="mt-4 grid grid-cols-2 gap-3">
-                {earnedBadges.map((eb) => {
-                  const badge = eb.badge;
-                  const tierColor = 
-                    badge.tier === 'elite' ? 'border-purple-500 text-purple-400 bg-purple-500/10' :
-                    badge.tier === 'gold' ? 'border-rcl-gold text-rcl-gold bg-rcl-gold/10' :
-                    badge.tier === 'silver' ? 'border-blue-400 text-blue-300 bg-blue-500/10' :
-                    'border-amber-700 text-amber-500 bg-amber-700/10';
-                  return (
-                    <div key={eb.id} className={`flex flex-col items-center justify-center rounded-xl border p-3 text-center shadow-lg transition hover:scale-105 ${tierColor}`}>
-                      <span className="text-3xl mb-1">{badge.icon || '🏆'}</span>
-                      <span className="block text-xs font-black tracking-wider uppercase truncate max-w-full">{badge.name}</span>
-                      <span className="block text-xs font-bold tracking-widest text-gray-400 uppercase mt-0.5">{badge.tier}</span>
-                    </div>
-                  );
-                })}
+                {earnedBadges.filter((eb:any) => eb.badge).map((eb:any) => <BadgeShowcaseCard key={eb.id} badge={eb.badge} earnedAt={eb.earned_at} compact />)}
               </div>
             )}
           </div>
