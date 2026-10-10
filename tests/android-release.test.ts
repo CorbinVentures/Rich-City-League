@@ -7,6 +7,9 @@ const twa = JSON.parse(read('android/twa-manifest.json')) as {
   packageId: string;
   host: string;
   signingKey: { path: string; alias: string };
+  webManifestUrl: string;
+  fullScopeUrl: string;
+  startUrl: string;
   fingerprints: Array<{ value: string }>;
 };
 const links = JSON.parse(read('public/.well-known/assetlinks.json')) as Array<{
@@ -19,8 +22,13 @@ describe('free Android release pipeline', () => {
   it('associates richcityhoops.com with the same signing fingerprint used for Android', () => {
     expect(twa.packageId).toBe('com.richcityhoops.app');
     expect(twa.host).toBe('www.richcityhoops.com');
+    expect(twa.webManifestUrl).toBe('https://www.richcityhoops.com/manifest.webmanifest');
+    expect(twa.fullScopeUrl).toBe('https://www.richcityhoops.com/');
+    expect(twa.startUrl).toContain('/social');
     expect(twa.signingKey.alias).toBe('rch_release');
     expect(links[0].target.package_name).toBe(twa.packageId);
+    expect(twa.fingerprints).toHaveLength(1);
+    expect(twa.fingerprints[0].value).toMatch(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
     expect(links[0].relation).toContain('delegate_permission/common.handle_all_urls');
     expect(links[0].target.sha256_cert_fingerprints).toEqual(twa.fingerprints.map(f => f.value));
   });
