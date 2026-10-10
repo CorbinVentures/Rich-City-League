@@ -6,10 +6,12 @@
   --metal-glow: rgba(220, 148, 85, .24);
   position: relative;
   display: block;
-  width: var(--medal-size);
-  height: var(--medal-size);
+  width: min(var(--medal-size), 100%);
+  aspect-ratio: 1;
+  height: auto;
   flex: none;
   perspective: 650px;
+  contain: layout style;
   isolation: isolate;
 }
 
