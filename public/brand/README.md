@@ -1,21 +1,13 @@
-# RCH animated global loader asset
+# RCH animated global loading screen
 
-The global transition component is wired to `/brand/rch-loader.mp4` with this `rch-loader-poster.svg` as a safe fallback.
+The global loader is wired to the committed `public/brand/rch-loader.mp4` (720×720, 24 fps, 4-second H.264 loop) and `rch-loader-poster.svg` (reduced-motion or no-video fallback). The production file was optimized from the approved `RCH_Animated_Logo_Living_Loop.mp4` without changing the logo design.
 
-## Required media file
+## Interaction
+- Installed mobile PWA boot: intro displays while app content initializes.
+- Client-side route clicks / browser history: delayed transition (325 ms) only when navigation is slow.
+- Content readiness releases overlay, with a 4-second absolute fail-safe.
+- Account recovery routes are excluded.
+- Muted, inline, auto-looping video; reduced-motion preference uses the SVG fallback.
+- Overlay includes accessible status text and a keyboard skip control.
 
-Copy the **already approved** `RCH_Animated_Logo_Living_Loop.mp4` into `public/brand/rch-loader.mp4` before shipping the final video-branded treatment. The player is autoplay + muted + playsInline + loop.
-
-The original MP4 is a generated ChatGPT artifact; the GitHub connection can write text but does not accept container-local binary file paths. Until the MP4 is added, the SVG fallback appears with a subtle CSS animation, and no broken-video placeholder is shown.
-
-Do **not** link production UI to temporary signed URLs or a ChatGPT sandbox URL.
-
-## Behavior
-
-- Full-screen loader on installed mobile PWA first boot.
-- Intent-based overlay for slow internal route transitions and browser history navigation.
-- No delay on fast navigation; delayed reveal prevents flashes.
-- Releases on destination readiness, with a 4-second absolute fail-safe.
-- Does not cover login/password recovery routes.
-- Honors reduced-motion preferences.
-- RCHExperienceGate continues to handle browser installation prompts.
+The loader reuses `PWALaunchIntro`, not a second standalone loader, and `src/app/loading.tsx` remains a lightweight Suspense skeleton beneath it.
