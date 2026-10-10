@@ -28,7 +28,7 @@
 .rch-world-map .maplibregl-canvas{outline:0}
 .rch-world-map .maplibregl-ctrl-top-right{top:18px;right:16px}
 .rch-world-map .maplibregl-ctrl-group{background:#0b1d30;border:1px solid #567b9c;box-shadow:0 6px 26px #0008}
-.rch-world-map .maplibregl-ctrl-group button{background:#0b1d30;filter:invert(1) brightness(1.5)}
+.rch-world-map .maplibregl-ctrl-group button{background:#0b1d30}.rch-world-map .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:invert(1) brightness(1.5)}
 .rch-world-map .maplibregl-ctrl-attrib{font-size:9px!important;background:#0b1d30dd!important;color:#b7d3ee!important;border-radius:6px}
 .rch-world-map .maplibregl-ctrl-attrib a{color:#9ed2ff!important}
 .rch-world-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:30px;color:#c1d5e9;pointer-events:none}
@@ -79,7 +79,7 @@
 .rch-world-more{color:#96c9ff;text-align:center;font-weight:800;font-size:12px;border-top:1px solid #2c4a68;padding:12px;cursor:pointer}
 .rch-world-more:disabled{opacity:.5;cursor:wait}
 .rch-world-data-note{padding:10px 20px;font-size:10px;line-height:1.6;color:#99b0c6;border-top:1px solid #25435c}
-.rch-world-shortcuts{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #345575}
+.rch-world-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #345575}
 .rch-world-shortcuts a{display:flex;align-items:center;justify-content:center;gap:7px;padding:16px 8px;color:#99cbff;font-size:11px;font-weight:900}
 .rch-world-shortcuts a+a{border-left:1px solid #345575}
 .rch-world-city-section{max-width:1600px;margin:35px auto 0}
