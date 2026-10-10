@@ -338,7 +338,7 @@ export default function VirginiaWorld() {
   },[mapReady,shown,view.zoom]);
 
   useEffect(()=>{
-    if(!mapReady || view.zoom<9.2){setCourts([]);setMoreCourts(false);return;}
+    if(!mapReady || view.zoom<9.2){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
     let cancelled=false;
     const timer=window.setTimeout(async()=>{
       const db=getSupabaseClient() as any;if(!db)return;
@@ -387,7 +387,7 @@ export default function VirginiaWorld() {
   return <main className="rch-world-page">
     <div className="rch-world-head">
       <div>
-        <Link href="/home" className="rch-world-back"><FaArrowLeft/> Home</Link>
+        <Link href="/" className="rch-world-back"><FaArrowLeft/> Home</Link>
         <p className="rch-world-eyebrow">RICH CITY HOOPS / VIRGINIA WORLD</p>
         <h1><FaCompass/> Discover Basketball</h1>
         <p className="rch-world-subtitle">Your statewide basketball world. Explore cities, discover places, and find real activity.</p>
@@ -469,7 +469,7 @@ export default function VirginiaWorld() {
         {moreCourts&&view.zoom>=9.2&&<button type="button" className="rch-world-more" disabled={loadingCourts}
           onClick={()=>setCourtLimit(v=>v+300)}>Load more mapped courts</button>}
         <p className="rch-world-data-note">Only published events and upcoming runs are displayed. Unverified court listings do not guarantee public access.</p>
-        <div className="rch-world-shortcuts"><Link href="/runs">Open Runs <FaArrowRight/></Link><Link href="/network">Virginia Network <FaArrowRight/></Link></div>
+        <div className="rch-world-shortcuts"><Link href="/runs">Open Runs <FaArrowRight/></Link><Link href="/network">VA Network <FaArrowRight/></Link><Link href="/discover/community">People & REP <FaArrowRight/></Link></div>
       </aside>
     </div>
 
