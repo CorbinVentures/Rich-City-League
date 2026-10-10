@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" role="img" aria-label="Rich City Hoops">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071326"/><stop offset="1" stop-color="#09294f"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#97661b"/><stop offset=".52" stop-color="#f8d17a"/><stop offset="1" stop-color="#b9801d"/></linearGradient>
+    <radialGradient id="night"><stop stop-color="#152e55"/><stop offset="1" stop-color="#071326"/></radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="640" height="640" fill="url(#night)"/>
+  <circle cx="320" cy="292" r="215" fill="none" stroke="#daa73c" stroke-opacity=".14" stroke-width="2"/>
+  <path d="M155 80H383C484 80 535 137 535 219C535 290 497 333 432 347L542 486H435L329 356H283V486H155Z" fill="url(#gold)"/>
+  <path d="M173 98H383C471 98 516 145 516 219C516 286 478 328 398 332L509 468H446L338 338H264V468H173Z" fill="url(#navy)"/>
+  <path d="M264 169H385C441 169 463 193 463 230C463 268 436 285 385 285H264Z" fill="#f8edce"/>
+  <path d="M279 183H384C425 183 449 199 449 230C449 260 425 272 384 272H279Z" fill="url(#gold)"/>
+  <path d="M346 185C376 210 385 241 376 271M391 184C416 212 423 243 408 270M280 230H446" fill="none" stroke="#062449" stroke-width="8"/>
+  <g fill="#082342" stroke="#e6b452" stroke-width="1.7">
+    <rect x="190" y="382" width="34" height="65"/><rect x="227" y="364" width="30" height="83"/>
+    <rect x="260" y="343" width="35" height="104"/><rect x="298" y="372" width="22" height="75"/>
+    <rect x="324" y="360" width="25" height="87"/><rect x="352" y="371" width="29" height="76"/>
+    <rect x="384" y="349" width="27" height="98"/>
+  </g>
+  <path d="M188 453H438M188 465Q315 452 438 465M188 474Q314 467 438 474" stroke="url(#gold)" stroke-width="4" fill="none"/>
+  <path d="M185 450H437" stroke="#e7b655" stroke-width="7"/>
+  <text x="320" y="555" font-family="Georgia,serif" font-size="39" font-weight="bold" letter-spacing="2" text-anchor="middle" fill="#fff8e8">RICH CITY HOOPS</text>
+  <path d="M205 583H280M360 583H435" stroke="url(#gold)" stroke-width="3"/>
+  <path d="M292 584 288 568 300 575 320 560 340 575 352 568 348 584Z" fill="url(#gold)"/>
+</svg>
