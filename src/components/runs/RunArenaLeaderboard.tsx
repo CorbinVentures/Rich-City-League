@@ -6,13 +6,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaChartSimple, FaCircleCheck, FaCrown, FaFire, FaLocationDot, FaMedal, FaTrophy, FaXmark } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { buildRunLeaderboardDisplay, type RunLeaderboardEntry } from '@/lib/run-leaderboard-preview';
 
 type RankScope = 'city' | 'state';
-type Leader = {
-  profile_id: string; player_name: string; avatar_url: string | null; city: string;
-  games: number; ppg: number | string; apg: number | string; rpg: number | string;
-  wins: number; rep: number; player_level: number;
-};
+type Leader = RunLeaderboardEntry;
 type EligibleRun = { id: string; title: string; starts_at: string; location: string; host_id: string };
 type ReviewRow = { id: string; run_id: string; profile_id: string; points: number; rebounds: number; assists: number; won: boolean; name: string; run_title: string };
 type MySubmission = { run_id: string; review_status: string };
@@ -34,6 +31,7 @@ export function RunArenaLeaderboard() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [loadingRanks, setLoadingRanks] = useState(true);
+  const [ranksUnavailable, setRanksUnavailable] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [profile, setProfile] = useState<{display_name: string | null; username: string | null; avatar_url: string | null; location: string | null} | null>(null);
   const [level, setLevel] = useState<{xp: number; level: number; current_streak: number} | null>(null);
@@ -46,11 +44,11 @@ export function RunArenaLeaderboard() {
   const [reload, setReload] = useState(0);
 
   const fetchRanks = useCallback(async () => {
-    if (!db) { setLoadingRanks(false); return; }
+    if (!db) { setLeaders([]); setRanksUnavailable(true); setLoadingRanks(false); return; }
     setLoadingRanks(true);
     const { data, error } = await db.rpc('get_competitive_run_leaderboard', { p_scope: scope, p_city: city, p_limit: 30 });
-    if (!error) setLeaders((data ?? []) as Leader[]);
-    else { setLeaders([]); setMessage('Rankings are temporarily unavailable.'); }
+    if (!error) { setLeaders((data ?? []) as Leader[]); setRanksUnavailable(false); }
+    else { setLeaders([]); setRanksUnavailable(true); }
     setLoadingRanks(false);
   }, [db, scope, city]);
 
@@ -151,7 +149,9 @@ export function RunArenaLeaderboard() {
 
   const myName = profile?.display_name || profile?.username || 'Your RCH Player';
   const myWins = leaders.find(entry=>entry.profile_id===user?.id)?.wins ?? 0;
-  const shown = showAll ? leaders : leaders.slice(0,3);
+  const ranked = useMemo(() => buildRunLeaderboardDisplay(leaders, scope, city), [leaders, scope, city]);
+  const demoCount = ranked.filter(entry => entry.isDemo).length;
+  const shown = showAll ? ranked : ranked.slice(0,3);
 
   return <>
     <section className="rch-arena-profile rounded-[22px] border border-[#235486]/65 p-4 sm:p-5" aria-label="My basketball REP">
@@ -179,7 +179,7 @@ export function RunArenaLeaderboard() {
     <section className="rch-arena-panel mt-4 rounded-[22px] border border-[#234e78]/80 p-4 sm:p-5" aria-labelledby="rch-run-rank-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h2 id="rch-run-rank-title" className="flex items-center gap-2 text-xl font-black tracking-tight text-white"><FaCrown className="text-[#f5cf69]"/> Leaderboard</h2>
-          <p className="mt-1 text-xs leading-5 text-[#a3bad5]">Independently reviewed competitive Open Run stats</p>
+          <p className="mt-1 text-xs leading-5 text-[#a3bad5]">Verified competitive Open Run stats plus a sample rankings preview</p>
         </div>
         <div className="rch-arena-rank-tabs inline-flex rounded-full border border-[#2e587f] bg-[#071322] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
           {(['city','state'] as const).map(value=><button type="button" key={value}
@@ -192,16 +192,22 @@ export function RunArenaLeaderboard() {
         <span>City</span>
         <input className="min-h-9 w-36 rounded-lg border border-[#315e8e] bg-[#071526] px-3 text-sm text-white outline-none focus:border-[#55b0ff]" value={city} maxLength={40} onChange={e=>setCity(e.target.value)} placeholder="Richmond"/>
       </label>}
-      {loadingRanks ? <p className="py-8 text-center text-sm text-[#9eb8d6]">Loading the rankings…</p>
-      : leaders.length===0 ? <div className="rch-arena-rank-empty mt-4 rounded-xl border border-dashed px-4 py-6 text-center">
-        <FaBasketball className="mx-auto text-3xl text-[#4da3ff]"/>
-        <p className="mt-3 font-bold text-white">The leaderboard is waiting for its first ranked run</p>
-        <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#b0c5df]">Play a competitive run, submit a box score, and get it verified. Only real confirmed results will appear here.</p>
-      </div> : <div className="mt-4 space-y-2">
-        {shown.map((entry,index)=><div key={entry.profile_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-[#214064] bg-[#10233a]/90 p-3">
+
+      {!loadingRanks && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-bold text-[#bbd5f1]" aria-live="polite">
+        <span><span className="text-[#6ed8ac]">●</span> {leaders.length} verified player{leaders.length===1?'':'s'}</span>
+        {demoCount>0 && <span><span className="text-[#f5cf69]">◇</span> {demoCount} sample player{demoCount===1?'':'s'}</span>}
+      </div>}
+      {ranksUnavailable && !loadingRanks && <p role="status" className="mt-3 rounded-lg border border-[#876334] bg-[#392710]/60 p-3 text-xs text-[#f9dba5]">Live verified rankings are temporarily unavailable. The players shown below are examples only.</p>}
+      {loadingRanks ? <p className="py-8 text-center text-sm text-[#9eb8d6]">Loading the rankings…</p> : <div className="mt-4 space-y-2">
+        {shown.map((entry,index)=><div key={entry.profile_id} className={'flex flex-wrap items-center gap-3 rounded-xl border p-3 '+(entry.isDemo?'border-[#355272] bg-[#11243b]/70':'border-[#266b9f] bg-[#102e4e]/90')}>
           <span className={'grid size-8 shrink-0 place-items-center rounded-lg font-black '+(index===0?'bg-[#f1c55a] text-[#112039]':index===1?'bg-[#becde2] text-[#112039]':index===2?'bg-[#d7a173] text-[#112039]':'bg-[#204669] text-white')}>{index+1}</span>
           <RankAvatar name={entry.player_name} src={entry.avatar_url} size={42}/>
-          <div className="min-w-[125px] flex-1"><p className="truncate text-sm font-black text-white">{entry.player_name}</p>
+          <div className="min-w-[125px] flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="truncate text-sm font-black text-white">{entry.player_name}</p>
+              {entry.isDemo ? <span className="shrink-0 rounded-md border border-[#90733b] bg-[#584522]/50 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#f5dc9b]">Sample</span>
+                : <span className="shrink-0 rounded-md border border-[#31856a] bg-[#153f35] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#9df1d2]">Verified</span>}
+            </div>
             <p className="mt-1 truncate text-xs text-[#a5bad2]">{entry.city}, VA · {entry.games} game{entry.games===1?'':'s'}</p>
           </div>
           <div className="grid min-w-[150px] flex-1 grid-cols-4 gap-2 text-center sm:max-w-sm">
@@ -211,9 +217,9 @@ export function RunArenaLeaderboard() {
       </div>}
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" onClick={()=>{setStatsOpen(true);setMessage('');}} className="rch-arena-add-stats inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#167aff] to-[#32a8ff] px-4 text-sm font-black text-white shadow-[0_4px_18px_rgba(32,145,255,.27)]"><FaChartSimple/> Add Stats <FaArrowRight/></button>
-        {leaders.length>3 && <button type="button" className="min-h-11 rounded-xl border border-[#355e8a] px-4 text-xs font-semibold text-[#cce1f5]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top three':'Full leaderboard'}</button>}
+        {ranked.length>3 && <button type="button" className="min-h-11 rounded-xl border border-[#355e8a] px-4 text-xs font-semibold text-[#cce1f5]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top three':'Full leaderboard'}</button>}
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-[#90abc8]">Rankings use verified results from competitive runs only. Submitting stats never awards REP by itself.</p>
+      <p className="mt-3 text-[11px] leading-5 text-[#90abc8]">Verified players always take the top spots as their stats are approved. Sample players are fictional previews only: they do not earn REP or count as official results.</p>
     </section>
 
     {statsOpen && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-[#02060b]/90 p-0 sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label="Submit and review competitive stats">
