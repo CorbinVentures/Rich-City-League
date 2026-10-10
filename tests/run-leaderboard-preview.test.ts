@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildRunLeaderboardDisplay, type RunLeaderboardEntry } from '../src/lib/run-leaderboard-preview';
+import { buildRunLeaderboardDisplay, runPlayerInitials, type RunLeaderboardEntry } from '../src/lib/run-leaderboard-preview';
 
 const real = (id: string): RunLeaderboardEntry => ({
   profile_id: id, player_name: 'Verified ' + id, avatar_url: null, city: 'Richmond',
@@ -14,7 +14,7 @@ describe('Open Runs sample leaderboard', () => {
     expect(rows.map((row) => row.profile_id)).toEqual(
       [...new Set(rows.map((row) => row.profile_id))]
     );
-    expect(rows[0].player_name).toBe('Sample Guard');
+    expect(rows[0].player_name).toBe('Jalen Cross');
     expect(rows.some((row) => row.city === 'Norfolk')).toBe(true);
   });
 
@@ -24,7 +24,7 @@ describe('Open Runs sample leaderboard', () => {
     expect(rows.slice(0, 2).map((row) => row.profile_id)).toEqual(['verified-2', 'verified-1']);
     expect(rows.slice(0, 2).every((row) => !row.isDemo)).toBe(true);
     expect(rows.slice(2).every((row) => row.isDemo)).toBe(true);
-    expect(rows[2].player_name).toBe('Sample Guard');
+    expect(rows[2].player_name).toBe('Jalen Cross');
   });
 
   it('removes sample rows when ten or more real athletes qualify', () => {
@@ -47,4 +47,21 @@ describe('Open Runs sample leaderboard', () => {
     expect(verified).not.toHaveProperty('isDemo');
     expect(rows[0]).toMatchObject({ profile_id: 'original', isDemo: false, rep: 50 });
   });
+  it('uses the fictional named players and preserves sample-only identities', () => {
+    const names = buildRunLeaderboardDisplay([], 'state', 'Richmond').map((row) => row.player_name);
+    expect(names.slice(0, 6)).toEqual([
+      'Jalen Cross', 'Malik Rivers', 'Tre Carter',
+      'Devon Price', 'Zion Hart', 'Kobe Ellis',
+    ]);
+    expect(names.every((name) => !name.startsWith('Sample '))).toBe(true);
+  });
+
+  it('creates first/last initials that stay legible inside compact avatar circles', () => {
+    expect(runPlayerInitials('Jalen Cross')).toBe('JC');
+    expect(runPlayerInitials('Malik Rivers')).toBe('MR');
+    expect(runPlayerInitials('  Tre   Carter ')).toBe('TC');
+    expect(runPlayerInitials('Player')).toBe('PL');
+    expect(runPlayerInitials('  ')).toBe('RH');
+  });
+
 });

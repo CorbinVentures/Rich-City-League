@@ -85,6 +85,147 @@
   background:#187bef;
   color:#fff;
 }
+
+/* Runs ranking cards: stacked at phone widths, side-by-side only where
+   the player name and four stats can genuinely fit on one row. */
+.rch-run-rank-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #28537f;
+  border-radius: 17px;
+  background: linear-gradient(120deg, #0b2744, #081c33 80%);
+  box-shadow: inset 0 1px 0 rgba(99, 183, 255, .07);
+}
+.rch-run-rank-card-first {
+  border-color: #319bff;
+  box-shadow: 0 0 0 1px rgba(40, 144, 255, .14), inset 0 1px 0 rgba(99, 183, 255, .12);
+}
+.rch-run-rank-card-verified {
+  background: linear-gradient(120deg, #103052, #0a2038 80%);
+}
+.rch-run-rank-identity {
+  display: grid;
+  grid-template-columns: 34px 44px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  min-width: 0;
+}
+.rch-run-rank-place {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 39px;
+  border-radius: 9px;
+  font-weight: 900;
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.rch-run-rank-gold { background: #f7c54d; color: #0a1c33; }
+.rch-run-rank-silver { background: #bfd2ea; color: #0a1c33; }
+.rch-run-rank-bronze { background: #dda26e; color: #0a1c33; }
+.rch-run-rank-regular { background: #193956; color: #e1efff; }
+.rch-run-rank-details { min-width: 0; }
+.rch-run-rank-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(15px, 4.2vw, 19px);
+  font-weight: 850;
+  line-height: 1.25;
+  color: #f7fbff;
+}
+.rch-run-rank-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 19px;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 1px 7px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.4;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.rch-run-rank-status-sample {
+  border-color: #c19641;
+  background: rgba(123, 81, 23, .27);
+  color: #f9d989;
+}
+.rch-run-rank-status-verified {
+  border-color: #439e7f;
+  background: rgba(32, 109, 80, .24);
+  color: #b6ffe1;
+}
+.rch-run-rank-location {
+  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #acc5e1;
+}
+.rch-run-rank-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  min-width: 0;
+}
+.rch-run-rank-stat {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-width: 0;
+  min-height: 56px;
+  padding: 7px 2px;
+  border: 1px solid #204c76;
+  border-radius: 10px;
+  background: rgba(5, 21, 39, .8);
+  text-align: center;
+}
+.rch-run-rank-stat strong {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  color: #54b1ff;
+  font-size: clamp(15px, 4.1vw, 22px);
+  line-height: 1.22;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.rch-run-rank-stat span {
+  display: block;
+  margin-top: 4px;
+  color: #b0cbe8;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .04em;
+}
+@media(min-width:820px) {
+  .rch-run-rank-card {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+  }
+  .rch-run-rank-identity { column-gap: 14px; }
+  .rch-run-rank-stat { min-height: 74px; }
+  .rch-run-rank-stat strong { font-size: 22px; }
+}
+@media(max-width:359px) {
+  .rch-run-rank-card { padding: 10px; }
+  .rch-run-rank-identity { grid-template-columns: 30px 40px minmax(0, 1fr); column-gap: 8px; }
+  .rch-run-rank-place { width: 30px; height: 36px; }
+  .rch-run-rank-stats { gap: 5px; }
+  .rch-run-rank-stat strong { font-size: 15px; }
+}
+
 @media(max-width:480px){
   .rch-arena-hero {min-height:335px;}
   .rch-arena-headline {font-size:3.5rem;}
