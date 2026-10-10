@@ -26,12 +26,22 @@ export function PWALaunchIntro() {
   // after navigation commits and cannot, by itself, show a pending transition.
   useEffect(() => {
     let timer: number | undefined;
-    const clear = () => { if (timer !== undefined) window.clearTimeout(timer); };
+    let navigationSafety: number | undefined;
+    const clear = () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      if (navigationSafety !== undefined) window.clearTimeout(navigationSafety);
+    };
     const arm = () => {
       clear();
       timer = window.setTimeout(() => {
         if (!authRoute(window.location.pathname) && document.documentElement.dataset.rchLaunch !== 'active') {
           document.documentElement.dataset.rchLaunch = 'active';
+          // A cancelled or failed client navigation must never leave an active overlay.
+          navigationSafety = window.setTimeout(() => {
+            if (document.documentElement.dataset.rchLaunch === 'active') {
+              document.documentElement.dataset.rchLaunch = 'done';
+            }
+          }, RCH_LAUNCH_FALLBACK_MS);
         }
       }, RCH_LAUNCH_ROUTE_DELAY_MS);
     };
