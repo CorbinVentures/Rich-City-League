@@ -24,7 +24,9 @@ describe('Virginia 3D map never hides the Atlas for a blank street map',()=>{
   it('reveals MapLibre only after visible geography is present',()=>expect(isVirginiaBasemapRenderable(map())).toBe(true));
   it('always renders the local Atlas behind the optional 3D canvas',()=>{
     const source=readFileSync(join(process.cwd(),'src/components/discover/VirginiaWorld.tsx'),'utf8');
-    expect(source).toContain("rch-world-atlas'+(mapMode==='3d'");
-    expect(source).not.toContain("!mapShown&&<div className=\"rch-world-atlas\"");
+    expect(source).toContain('<VirginiaInteractiveAtlas');
+    expect(source).toContain('mode={mapMode}');
+    expect(source).toContain('onCitySelect={moveCity}');
+    expect(source).not.toContain('!mapShown&&<VirginiaInteractiveAtlas');
   });
 });
