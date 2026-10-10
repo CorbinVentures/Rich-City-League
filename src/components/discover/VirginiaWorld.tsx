@@ -220,6 +220,10 @@ export default function VirginiaWorld() {
       position=>{
         const lat=position.coords.latitude,lon=position.coords.longitude;
         setUserLocation({lat,lon});
+        if(fly&&virginiaCoordinates(lat,lon)){
+          const closest=[...VIRGINIA_CITIES].sort((a,b)=>milesBetween(a,{lat,lon})-milesBetween(b,{lat,lon}))[0];
+          if(closest&&milesBetween(closest,{lat,lon})<70)setCityId(closest.id);
+        }
         if(mapRef.current){
           userPinRef.current?.remove();
           const dot=document.createElement('span');dot.className='rch-world-you';dot.title='Your approximate location';
@@ -232,19 +236,33 @@ export default function VirginiaWorld() {
   },[]);
 
   useEffect(()=>{
+    // Do not fetch tiles when the atlas is active. Mobile WebGL should be opt-in.
+    if(mapMode!=='3d')return;
     let active=true;let map:MapInstance|null=null;
+    tilesReadyRef.current=false;
+    setTilesReady(false);
+    setMapReady(false);
     loadMapLibrary().then(lib=>{
+      if(typeof lib.supported==='function'&&!lib.supported()){
+        throw new Error('This browser cannot run the 3D map renderer');
+      }
       if(!active||!hostRef.current)return;
       map=new lib.Map({container:hostRef.current,style:WORLD_STYLE,center:[INITIAL.lon,INITIAL.lat],
         zoom:INITIAL.zoom,minZoom:5,maxZoom:18,pitch:43,bearing:-10,maxPitch:75,antialias:true,
         attributionControl:true});
       mapRef.current=map;
       map.addControl(new lib.NavigationControl({showCompass:true}),'top-right');
-      map.on('sourcedata',(event:any)=>{
+      const confirmTiles=()=>{
         if(!active)return;
-        if(event.sourceId==='openmaptiles' && event.sourceDataType==='content' && (event.tile||event.coord)){
+        if(map?.isSourceLoaded?.('openmaptiles')){
           tilesReadyRef.current=true;
           setTilesReady(true);
+        }
+      };
+      map.on('idle',confirmTiles);
+      map.on('sourcedata',(event:any)=>{
+        if(event.sourceId==='openmaptiles' && (event.isSourceLoaded||event.tile||event.coord)){
+          confirmTiles();
         }
       });
       map.on('load',()=>{
@@ -292,11 +310,6 @@ export default function VirginiaWorld() {
         }
       });
     }).catch(()=>{if(active){setMapFailure(true);setMapError('3D mode is unavailable here. The Virginia Atlas is still interactive.');}});
-    if(navigator.permissions?.query) {
-      navigator.permissions.query({name:'geolocation'}).then(status=>{
-        if(active&&status.state==='granted') startLocation(false);
-      }).catch(()=>{});
-    }
     return ()=>{
       active=false;
       if(positionWatchRef.current!==null) navigator.geolocation.clearWatch(positionWatchRef.current);
@@ -306,7 +319,17 @@ export default function VirginiaWorld() {
       map?.remove();
       mapRef.current=null;
     };
-  },[moveCity,startLocation]);
+  },[mapMode,moveCity]);
+
+  useEffect(()=>{
+    let active=true;
+    if(navigator.permissions?.query){
+      navigator.permissions.query({name:'geolocation'}).then(status=>{
+        if(active&&status.state==='granted')startLocation(false);
+      }).catch(()=>{});
+    }
+    return()=>{active=false;};
+  },[startLocation]);
 
   useEffect(()=>{
     let cancelled=false;
@@ -452,13 +475,17 @@ export default function VirginiaWorld() {
   },[mapReady,view.lat,view.lon,view.zoom,courtLimit,cityId]);
 
   const toggle3d=()=>{
-    if(mapMode==='3d'){setMapMode('atlas');return;}
-    if(mapFailure){setMapError('3D tiles are unavailable on this connection. Continue exploring the Virginia Atlas.');return;}
+    if(mapMode==='3d'){setMapMode('atlas');setMapError('');return;}
+    tilesReadyRef.current=false;
+    setMapFailure(false);
+    setMapError('');
     setMapMode('3d');
-    window.setTimeout(()=>mapRef.current?.resize(),100);
     window.setTimeout(()=>{
-      if(!tilesReadyRef.current){setMapMode('atlas');setMapError('3D tiles timed out. Virginia Atlas is ready to explore.');}
-    },9000);
+      if(!tilesReadyRef.current){
+        setMapMode('atlas');
+        setMapError('Detailed 3D tiles could not load. The Virginia Atlas remains available.');
+      }
+    },12000);
   };
   const openPoint=(point:WorldPoint)=>{
     setSelectedId(point.id);
@@ -483,7 +510,7 @@ export default function VirginiaWorld() {
         <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search city, court, run or event…" type="search"/>
         {query&&<button type="button" aria-label="Clear search" onClick={()=>setQuery('')}><FaXmark/></button>}
       </label>
-      <button type="button" className="rch-world-locate" onClick={()=>startLocation(true)}><FaCrosshairs/> <span>Find me</span></button>
+      <button type="button" className="rch-world-locate" aria-label="Find my approximate location" onClick={()=>startLocation(true)}><FaCrosshairs/> <span className="rch-world-locate-label">Find me</span></button>
     </div>
     {cityResults.length>0&&<div className="rch-world-suggestions">{cityResults.map(c=><button type="button" key={c.id} onClick={()=>{moveCity(c);setQuery('');}}>{c.symbol} {c.name}<FaArrowRight/></button>)}</div>}
     <div className="rch-world-filters" role="group" aria-label="Filter map locations">
@@ -501,7 +528,7 @@ export default function VirginiaWorld() {
             transformOrigin:atlasPosition(city.lat,city.lon).left+' '+atlasPosition(city.lat,city.lon).top
           }:undefined}>
             <div className="rch-world-atlas-art" aria-hidden="true"/>
-            {fallbackCities.map(c=><button key={c.id} type="button" className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
+            {fallbackCities.map(c=><button key={c.id} type="button" data-city={c.id} className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
               style={atlasPosition(c.lat,c.lon)} onClick={()=>moveCity(c)} aria-label={'Explore basketball near '+c.name}>
               <span className="rch-world-atlas-city-icon">🏀</span>
               <span className="rch-world-atlas-city-name">{c.name}</span>
@@ -524,7 +551,7 @@ export default function VirginiaWorld() {
         </div>
         {mapMode==='3d'&&!mapShown&&<div className="rch-world-3d-status" role="status">Preparing detailed map…</div>}
         <div className="rch-world-layer-note"><FaLayerGroup/> {mapShown?'Pinch, tilt and rotate':'Tap a city to explore its basketball'}</div>
-        {mapError&&<div className="rch-world-map-error" role="status">{mapError}</div>}
+        {mapError&&mapMode==='3d'&&<div className="rch-world-map-error" role="status">{mapError}</div>}
         <div className="rch-world-map-credit">Court data © OpenStreetMap contributors · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">ODbL</a></div>
       </div>
 
