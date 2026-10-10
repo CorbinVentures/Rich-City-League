@@ -1,0 +1,20 @@
+# Never commit release signing material or build outputs.
+android/android.keystore
+android/*.keystore
+android/*.p12
+android/*.jks
+android/.gradle/
+android/.idea/
+android/build/
+android/app/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/gradle.properties
+android/settings.gradle
+android/build.gradle
+android/manifest-checksum.txt
+android/app-release-*.apk
+android/app-release-*.aab
+android/*.apk
+android/*.aab
