@@ -1,0 +1,26 @@
+name: Runner provisioning diagnostics
+
+on:
+  push:
+    branches:
+      - ci/runner-diagnostic-20261010
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print runner metadata
+        run: echo "ubuntu-latest allocated"
+  ubuntu-22-04:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Print runner metadata
+        run: echo "ubuntu-22.04 allocated"
+  ubuntu-slim:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Print runner metadata
+        run: echo "ubuntu-slim allocated"
