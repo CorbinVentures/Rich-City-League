@@ -157,6 +157,7 @@ async function readAllUpcoming(db:any,table:'runs'|'network_events',now:string) 
 export default function VirginiaWorld() {
   const hostRef=useRef<HTMLDivElement|null>(null);
   const mapRef=useRef<MapInstance|null>(null);
+  const tilesReadyRef=useRef(false);
   const cityPinsRef=useRef<Array<{remove:()=>void;getElement:()=>HTMLElement}>>([]);
   const userPinRef=useRef<{remove:()=>void}|null>(null);
   const positionWatchRef=useRef<number|null>(null);
@@ -241,7 +242,10 @@ export default function VirginiaWorld() {
       map.addControl(new lib.NavigationControl({showCompass:true}),'top-right');
       map.on('sourcedata',(event:any)=>{
         if(!active)return;
-        if(event.sourceId==='openmaptiles' && event.sourceDataType==='content')setTilesReady(true);
+        if(event.sourceId==='openmaptiles' && event.sourceDataType==='content' && (event.tile||event.coord)){
+          tilesReadyRef.current=true;
+          setTilesReady(true);
+        }
       });
       map.on('load',()=>{
         if(!active)return;
@@ -453,7 +457,7 @@ export default function VirginiaWorld() {
     setMapMode('3d');
     window.setTimeout(()=>mapRef.current?.resize(),100);
     window.setTimeout(()=>{
-      if(!tilesReady && !mapFailure){setMapMode('atlas');setMapError('3D tiles timed out. Virginia Atlas is ready to explore.');}
+      if(!tilesReadyRef.current){setMapMode('atlas');setMapError('3D tiles timed out. Virginia Atlas is ready to explore.');}
     },9000);
   };
   const openPoint=(point:WorldPoint)=>{
