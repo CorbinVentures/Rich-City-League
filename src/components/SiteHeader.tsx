@@ -82,7 +82,7 @@ export function SiteHeader(){
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
   const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
-  const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
+  const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
 
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
