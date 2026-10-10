@@ -28,7 +28,8 @@ type View = {lat:number; lon:number; zoom:number};
 type MapInstance = any;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-const WORLD_STYLE='https://tiles.openfreemap.org/styles/liberty';
+const WORLD_STYLE='https://tiles.openfreemap.org/styles/dark';
+const atlasPosition=(lat:number,lon:number)=>({left:((lon+84.15)/9.7*100).toFixed(2)+'%',top:((39.75-lat)/3.6*100).toFixed(2)+'%'});
 const INITIAL:View={lat:37.55,lon:-79.35,zoom:6.7};
 const FILTERS:{id:Filter;label:string}[]=[
   {id:'all',label:'Everything'},{id:'events',label:'Events'},
@@ -160,6 +161,9 @@ export default function VirginiaWorld() {
   const userPinRef=useRef<{remove:()=>void}|null>(null);
   const positionWatchRef=useRef<number|null>(null);
   const [mapReady,setMapReady]=useState(false);
+  const [tilesReady,setTilesReady]=useState(false);
+  const [mapMode,setMapMode]=useState<'atlas'|'3d'>('atlas');
+  const [mapFailure,setMapFailure]=useState(false);
   const [mapError,setMapError]=useState('');
   const [dataError,setDataError]=useState('');
   const [filter,setFilter]=useState<Filter>('all');
@@ -178,6 +182,9 @@ export default function VirginiaWorld() {
   const [loadingData,setLoadingData]=useState(true);
   const allPoints=useMemo(()=>[...activities,...courts,...searchCourts.filter(p=>!courts.some(v=>v.id===p.id))],[activities,courts,searchCourts]);
   const selected=allPoints.find(p=>p.id===selectedId)??null;
+  const fallbackCities=useMemo(()=>VIRGINIA_CITIES.filter(c=>['richmond','roanoke','bristol','charlottesville','fredericksburg','alexandria','norfolk','virginia-beach'].includes(c.id)),[]);
+  const mapShown=mapMode==='3d'&&mapReady&&tilesReady&&!mapFailure;
+  const cityMapPoints=useMemo(()=>allPoints.filter(p=>p.kind!=='court'||Boolean(cityId)).filter(p=>!cityId || milesBetween(p,VIRGINIA_CITIES.find(c=>c.id===cityId)!)<32).slice(0,36),[allPoints,cityId]);
   const shown=useMemo(()=>allPoints.filter(p=>pointMatchesFilter(p,filter) &&
     (!query.trim() || (p.title+' '+p.city+' '+p.detail).toLowerCase().includes(query.trim().toLowerCase()))
   ),[allPoints,filter,query]);
@@ -226,6 +233,10 @@ export default function VirginiaWorld() {
         attributionControl:true});
       mapRef.current=map;
       map.addControl(new lib.NavigationControl({showCompass:true}),'top-right');
+      map.on('sourcedata',(event:any)=>{
+        if(!active)return;
+        if(event.sourceId==='openmaptiles' && event.sourceDataType==='content')setTilesReady(true);
+      });
       map.on('load',()=>{
         if(!active)return;
         tintMap(map);addLayers(map);
@@ -264,9 +275,13 @@ export default function VirginiaWorld() {
       });
       map.on('error',(event:any)=>{
         if(!active)return;
-        if(!map?.loaded() && event?.error?.message) setMapError('Map tiles are temporarily unavailable. You can still browse the registered activity below.');
+        if(event?.error) {
+          setMapFailure(true);
+          setMapMode('atlas');
+          setMapError('3D map tiles could not load. Virginia Atlas remains available.');
+        }
       });
-    }).catch(()=>{if(active)setMapError('The interactive 3D map is unavailable on this connection. Browse by city below.');});
+    }).catch(()=>{if(active){setMapFailure(true);setMapError('3D mode is unavailable here. The Virginia Atlas is still interactive.');}});
     if(navigator.permissions?.query) {
       navigator.permissions.query({name:'geolocation'}).then(status=>{
         if(active&&status.state==='granted') startLocation(false);
@@ -404,6 +419,15 @@ export default function VirginiaWorld() {
     return()=>{cancelled=true;window.clearTimeout(timer);};
   },[mapReady,view.lat,view.lon,view.zoom,courtLimit]);
 
+  const toggle3d=()=>{
+    if(mapShown){setMapMode('atlas');return;}
+    if(mapFailure){setMapError('3D tiles are unavailable on this connection. Continue exploring the Virginia Atlas.');return;}
+    setMapMode('3d');
+    window.setTimeout(()=>mapRef.current?.resize(),100);
+    window.setTimeout(()=>{
+      if(!tilesReady && !mapFailure){setMapMode('atlas');setMapError('3D tiles timed out. Virginia Atlas is ready to explore.');}
+    },9000);
+  };
   const openPoint=(point:WorldPoint)=>{
     setSelectedId(point.id);
     mapRef.current?.easeTo({center:[point.lon,point.lat],zoom:Math.max(view.zoom,point.precision==='venue'?13:10.5),duration:700});
