@@ -542,7 +542,7 @@ export default function VirginiaWorld() {
             <div className="rch-world-atlas-art" aria-hidden="true"/>
             {fallbackCities.map(c=><button key={c.id} type="button" data-city={c.id} className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
               style={atlasPosition(c.lat,c.lon)} onClick={()=>moveCity(c)} aria-label={'Explore basketball near '+c.name}>
-              <span className="rch-world-atlas-city-icon">🏀</span>
+              <span className="rch-world-atlas-city-icon" aria-hidden="true">{c.symbol}</span>
               <span className="rch-world-atlas-city-name">{c.name}</span>
             </button>)}
             {cityMapPoints.filter(point=>pointMatchesFilter(point,filter)).slice(0,18).map(point=>
