@@ -448,7 +448,7 @@ export default function VirginiaWorld() {
   },[mapReady,view.lat,view.lon,view.zoom,courtLimit,cityId]);
 
   const toggle3d=()=>{
-    if(mapShown){setMapMode('atlas');return;}
+    if(mapMode==='3d'){setMapMode('atlas');return;}
     if(mapFailure){setMapError('3D tiles are unavailable on this connection. Continue exploring the Virginia Atlas.');return;}
     setMapMode('3d');
     window.setTimeout(()=>mapRef.current?.resize(),100);
@@ -468,8 +468,8 @@ export default function VirginiaWorld() {
       <div>
         <Link href="/" className="rch-world-back"><FaArrowLeft/> Home</Link>
         <p className="rch-world-eyebrow">RICH CITY HOOPS / VIRGINIA WORLD</p>
-        <h1><FaCompass/> Discover Basketball</h1>
-        <p className="rch-world-subtitle">Your statewide basketball world. Explore cities, discover places, and find real activity.</p>
+        <h1>Discover <span>Basketball</span></h1>
+        <p className="rch-world-subtitle">Explore Virginia basketball. Find real courts, open runs and upcoming events.</p>
       </div>
       <button className="rch-world-overview" type="button" onClick={overview}><FaRotate/> Virginia overview</button>
     </div>
@@ -490,14 +490,34 @@ export default function VirginiaWorld() {
 
     <div className="rch-world-layout">
       <div className="rch-world-map-shell">
-        <div className="rch-world-map" ref={hostRef} role="region" aria-label="Interactive 3D map of Virginia basketball locations"/>
-        {!mapReady&&<div className="rch-world-loading" aria-live="polite">
-          <div className="rch-world-loading-symbol">VA</div>
-          <b>{mapError?'Map unavailable':'Building your Virginia basketball world…'}</b>
-          <span>{mapError||'Loading terrain, cities and courts'}</span>
+        <div className="rch-world-map" ref={hostRef} role="region" aria-label="3D street map of Virginia" style={{opacity:mapShown?1:0,pointerEvents:mapShown?'auto':'none'}}/>
+        {!mapShown&&<div className="rch-world-atlas" role="region" aria-label="Interactive Virginia geographic atlas">
+          <div className="rch-world-atlas-scene">
+            <div className="rch-world-atlas-art" aria-hidden="true"/>
+            {fallbackCities.map(c=><button key={c.id} type="button" className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
+              style={atlasPosition(c.lat,c.lon)} onClick={()=>moveCity(c)} aria-label={'Explore basketball near '+c.name}>
+              <span className="rch-world-atlas-city-icon">🏀</span>
+              <span className="rch-world-atlas-city-name">{c.name}</span>
+            </button>)}
+            {cityMapPoints.filter(point=>pointMatchesFilter(point,filter)).slice(0,18).map(point=>
+              <button key={point.id} className={'rch-world-atlas-event '+(selectedId===point.id?'chosen':'')}
+                type="button" style={atlasPosition(point.lat,point.lon)}
+                onClick={()=>openPoint(point)} aria-label={'View '+point.title} title={point.title}>
+                <span>{point.kind==='event'?'★':point.kind==='run'?'🏀':'·'}</span>
+              </button>)}
+            {userLocation&&virginiaCoordinates(userLocation.lat,userLocation.lon)&&
+              <span className="rch-world-atlas-you" style={atlasPosition(userLocation.lat,userLocation.lon)} aria-label="Your approximate location" title="You are here"/>}
+          </div>
         </div>}
-        {mapReady&&<div className="rch-world-map-hud"><span className="rch-world-online-dot"/> {city?.name||'Virginia'} <span>·</span> {view.zoom>=9.2?'City explorer':'Statewide explorer'}</div>}
-        {mapReady&&<div className="rch-world-layer-note"><FaLayerGroup/> Tilt, rotate and zoom to enter a city</div>}
+        <div className="rch-world-map-hud"><span className="rch-world-online-dot"/> {city?.name||'Virginia'} <span>·</span> {city?'City explorer':'Explore the state'}</div>
+        <div className="rch-world-map-controls">
+          <button type="button" className={mapMode==='3d'?'active':''} aria-pressed={mapShown}
+            onClick={toggle3d} title="Toggle detailed 3D street map">{mapMode==='3d'?'Atlas':'3D'}</button>
+          <button type="button" onClick={overview} aria-label="Return to Virginia overview"><FaRotate/></button>
+        </div>
+        {mapMode==='3d'&&!mapShown&&<div className="rch-world-3d-status" role="status">Preparing detailed map…</div>}
+        <div className="rch-world-layer-note"><FaLayerGroup/> {mapShown?'Pinch, tilt and rotate':'Tap a city to explore its basketball'}</div>
+        {mapError&&<div className="rch-world-map-error" role="status">{mapError}</div>}
         <div className="rch-world-map-credit">Court data © OpenStreetMap contributors · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">ODbL</a></div>
       </div>
 
@@ -523,29 +543,32 @@ export default function VirginiaWorld() {
           </div>
         </div>:<div className="rch-world-intro">
           <div className="rch-world-destination-icon">{city?.symbol||'🏀'}</div>
-          <h2>{city?.name||'The whole state. One basketball community.'}</h2>
-          <p>{city?city.landmark+' · Explore courts, runs and events around '+city.name+'.':'Tap a 3D city landmark to fly in, or search a city and explore its courts.'}</p>
+          <h2>{city?.name||'Where will you hoop?'}</h2>
+          <p>{city?city.landmark+' · Browse locations and scheduled activity around '+city.name+'.':'Discover real basketball locations across Virginia. Choose a city to explore more.'}</p>
           {city&&<button type="button" className="rch-world-text-button" onClick={overview}>← Return to Virginia</button>}
         </div>}
         <div className="rch-world-panel-divider"/>
         <div className="rch-world-panel-list-head">
-          <h3>{city?'Around '+city.name:userLocation?'Near your location':'Upcoming & mapped'}</h3>
-          <small>{loadingData||loadingCourts?'Updating…':shown.length+' on map'}</small>
+          <h3>{city?'Around '+city.name:'Where will you hoop?'}</h3>
+          <small>{loadingData||loadingCourts?'Updating…':displayed.length+' places to explore'}</small>
         </div>
         {dataError&&<p className="rch-world-warning" role="status">{dataError}</p>}
         {locationError&&<p className="rch-world-warning" role="status">{locationError}</p>}
         <div className="rch-world-list">
           {displayed.map(item=><button type="button" key={item.id} onClick={()=>openPoint(item)}
             className={selectedId===item.id?'selected':''}>
-            <span className="rch-world-list-icon">{item.kind==='court'?'🏀':item.kind==='event'?'🎟️':'🔥'}</span>
-            <span className="rch-world-list-copy"><strong>{item.title}</strong><small>{item.city} · {item.startsAt?formatWhen(item.startsAt):item.kind==='court'?'Basketball location':'Upcoming'}</small></span>
+            <span className={'rch-world-list-icon kind-'+item.kind}>{item.kind==='court'?'🏀':item.kind==='event'?'★':'🔥'}</span>
+            <span className="rch-world-list-copy"><strong>{item.title}</strong>
+              <small><FaLocationDot/> {item.city}, VA <em>{item.kind==='court'?'Court':item.kind==='event'?'Event':item.type==='training'?'Training':'Open run'}</em></small>
+              <span className="rch-world-list-bottom">{item.startsAt?formatWhen(item.startsAt):item.verified==='community'?'Location · access unverified':item.type==='indoor'?'Indoor basketball venue':'Basketball location'}</span>
+            </span>
             <FaArrowRight/>
           </button>)}
           {!displayed.length&&<div className="rch-world-empty">{loadingData?'Finding registered activity…':
-            view.zoom<9.2?'Choose a city to explore its mapped venues and basketball activity.':
+            !cityId?'Select a city to reveal more mapped basketball courts.':
             'No matching locations are displayed here yet. Try another filter or move the map.'}</div>}
         </div>
-        {moreCourts&&view.zoom>=9.2&&<button type="button" className="rch-world-more" disabled={loadingCourts}
+        {moreCourts&&Boolean(cityId)&&<button type="button" className="rch-world-more" disabled={loadingCourts}
           onClick={()=>setCourtLimit(v=>v+300)}>Load more mapped courts</button>}
         <p className="rch-world-data-note">Only published events and upcoming runs are displayed. Unverified court listings do not guarantee public access.</p>
         <div className="rch-world-shortcuts"><Link href="/runs">Open Runs <FaArrowRight/></Link><Link href="/network">VA Network <FaArrowRight/></Link><Link href="/discover/community">People & REP <FaArrowRight/></Link></div>
