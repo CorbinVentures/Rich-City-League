@@ -78,19 +78,19 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
 select throws_ok($
   update public.profiles set is_system_account=true where id=auth.uid()
-$, '42501', 'Only staff can change system-account identity',
+$$, '42501', 'Only staff can change system-account identity',
   'ordinary members cannot impersonate an official system account');
 select throws_ok($
   update public.profiles set system_account_key='fake-rch' where id=auth.uid()
-$, '42501', 'Only staff can change system-account identity',
+$$, '42501', 'Only staff can change system-account identity',
   'ordinary members cannot claim official account keys');
 select throws_ok($
   update public.profiles set qualified_referral_count=100 where id=auth.uid()
-$, '42501', 'Referral totals are computed by the server',
+$$, '42501', 'Referral totals are computed by the server',
   'ordinary members cannot inflate earned referral counts');
 select lives_ok($
   update public.profiles set bio='Basketball member' where id=auth.uid()
-$, 'ordinary members may still edit normal profile fields');
+$$, 'ordinary members may still edit normal profile fields');
 select lives_ok($$
   insert into public.registrations
     (id, season_id, division_id, applicant_id, first_name, last_name, email)
@@ -142,13 +142,13 @@ select set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc
 select lives_ok($
   select public.configure_system_account(
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid,'test-official','RCH Official Test')
-$, 'authorized staff can still configure an official system account');
+$$, 'authorized staff can still configure an official system account');
 select is((select system_account_key from public.profiles
   where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),'test-official'::text,
   'official account key is updated only through the authorized staff flow');
 select throws_ok($
   update public.profiles set qualified_referral_count=20 where id=auth.uid()
-$, '42501', 'Referral totals are computed by the server',
+$$, '42501', 'Referral totals are computed by the server',
   'staff cannot directly fabricate referral totals');
 select lives_ok($$
   insert into public.registrations
@@ -166,7 +166,7 @@ select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd
 select lives_ok($
   update public.profiles set qualified_referral_count=2
     where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
-$, 'authorized administrators can correct referral totals');
+$$, 'authorized administrators can correct referral totals');
 select lives_ok($$
   update public.seasons
   set name = 'Admin Test Season'
