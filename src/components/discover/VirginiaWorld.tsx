@@ -168,6 +168,7 @@ export default function VirginiaWorld() {
   const [view,setView]=useState<View>(INITIAL);
   const [activities,setActivities]=useState<WorldPoint[]>([]);
   const [courts,setCourts]=useState<WorldPoint[]>([]);
+  const [searchCourts,setSearchCourts]=useState<WorldPoint[]>([]);
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const [userLocation,setUserLocation]=useState<GeoPosition|null>(null);
   const [locationError,setLocationError]=useState('');
@@ -175,7 +176,7 @@ export default function VirginiaWorld() {
   const [moreCourts,setMoreCourts]=useState(false);
   const [courtLimit,setCourtLimit]=useState(300);
   const [loadingData,setLoadingData]=useState(true);
-  const allPoints=useMemo(()=>[...activities,...courts],[activities,courts]);
+  const allPoints=useMemo(()=>[...activities,...courts,...searchCourts.filter(p=>!courts.some(v=>v.id===p.id))],[activities,courts,searchCourts]);
   const selected=allPoints.find(p=>p.id===selectedId)??null;
   const shown=useMemo(()=>allPoints.filter(p=>pointMatchesFilter(p,filter) &&
     (!query.trim() || (p.title+' '+p.city+' '+p.detail).toLowerCase().includes(query.trim().toLowerCase()))
@@ -336,8 +337,32 @@ export default function VirginiaWorld() {
   useEffect(()=>{
     if(!mapReady)return;
     const source=mapRef.current?.getSource('rch-world-points');
-    if(source?.setData)source.setData(featureCollection(shown.filter(p=>view.zoom>=9.2 || p.kind!=='court')));
-  },[mapReady,shown,view.zoom]);
+    const searchIds=new Set(searchCourts.map(p=>p.id));
+    if(source?.setData)source.setData(featureCollection(shown.filter(p=>view.zoom>=9.2 || p.kind!=='court' || searchIds.has(p.id))));
+  },[mapReady,shown,searchCourts,view.zoom]);
+
+  // Statewide court search works even before a user flies into a city.
+  useEffect(()=>{
+    const search=query.trim();
+    if(search.length<3){setSearchCourts([]);return;}
+    let cancelled=false;
+    const timer=window.setTimeout(async()=>{
+      const db=getSupabaseClient() as any;
+      if(!db)return;
+      const {data,error}=await db.rpc('search_basketball_locations',{
+        p_lat:null,p_lon:null,p_radius_miles:15,p_search:search,p_limit:100,p_offset:0
+      });
+      if(cancelled||error)return;
+      setSearchCourts(((data??[]) as CourtRow[]).filter(row=>virginiaCoordinates(row.latitude,row.longitude))
+        .map(row=>({
+          id:'court:'+row.slug,kind:'court' as const,title:row.name,detail:row.address,
+          city:row.locality,lat:row.latitude!,lon:row.longitude!,precision:'venue' as const,
+          href:'/runs?court='+encodeURIComponent(row.slug),access:row.access_type,
+          verified:row.verification_status,type:row.venue_type,slug:row.slug
+        })));
+    },280);
+    return()=>{cancelled=true;window.clearTimeout(timer);};
+  },[query]);
 
   useEffect(()=>{
     if(!mapReady || view.zoom<9.2){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
