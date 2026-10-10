@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   isLaunchContentReady,
+  canDismissLaunch,
   RCH_LAUNCH_BOOT_FALLBACK_MS,
   RCH_LAUNCH_FALLBACK_MS,
   RCH_LAUNCH_MIN_DISPLAY_MS,
@@ -119,11 +120,8 @@ export function PWALaunchIntro() {
     };
 
     const checkReady = () => {
-      if (cancelled || !isLaunchContentReady(document)) return;
-      if (isBoot) {
-        // Never release the opening screen until the actual video has ended.
-        if (bootVideoFinished.current) dismiss();
-      } else if (routeCanDismiss) {
+      if (cancelled) return;
+      if (canDismissLaunch(isLaunchContentReady(document), isBoot, bootVideoFinished.current, routeCanDismiss)) {
         dismiss();
       }
     };
