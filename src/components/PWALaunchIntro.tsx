@@ -144,7 +144,7 @@ export function PWALaunchIntro() {
         Skip loading animation
       </button>
       <div className="rch-launch-brand">
-        <img className="rch-launch-poster" src="/brand/rch-loader-poster.webp?v=original-20261010" alt="" aria-hidden="true" />
+        <div className="rch-launch-poster" aria-hidden="true">RICH CITY HOOPS</div>
         {!videoFailed && (
           <video
             className={'rch-launch-video' + (videoReady ? ' is-ready' : '')}
@@ -152,8 +152,7 @@ export function PWALaunchIntro() {
             muted
             loop
             playsInline
-            preload="metadata"
-            poster="/brand/rch-loader-poster.webp?v=original-20261010"
+            preload="auto"
             aria-hidden="true"
             onLoadedData={() => setVideoReady(true)}
             onError={() => setVideoFailed(true)}
