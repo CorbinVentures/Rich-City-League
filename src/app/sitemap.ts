@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getLeagueSnapshot, getPublicClient, getPublishedNews } from '@/lib/public-data';
 
-const SITE = 'https://richcityhoops.com';
+const SITE = 'https://www.richcityhoops.com';
 const core = [
   ['',1,'daily'],
   ['/about',.9,'monthly'],
