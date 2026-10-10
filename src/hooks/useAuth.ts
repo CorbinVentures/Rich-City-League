@@ -29,6 +29,9 @@ function getAuthErrorMessage(error: unknown, fallback: string) {
   if (code === 'invalid_credentials' || message.includes('invalid login credentials')) return 'Invalid email or password.';
   if (code === 'email_not_confirmed' || message.includes('email not confirmed')) return 'Please confirm your email before signing in.';
   if (code === 'user_banned') return 'This account is unavailable. Contact the league administrator.';
+  if (code === 'unexpected_failure' || message.includes('timeout') || message.includes('context canceled') || message.includes('connection')) {
+    return 'The sign-in service is temporarily unavailable. Please try again shortly.';
+  }
   if (message.includes('password')) return 'Use a password with at least 8 characters.';
   return fallback;
 }
@@ -149,7 +152,10 @@ export function useAuth() {
     const getUser = async () => {
       try {
         if (!recoveryFlow) {
-          const { data } = await supabase.auth.getUser();
+          const { data, error: sessionError } = await supabase.auth.getUser();
+          // A transient refresh-token/GoTrue outage is not proof of sign-out.
+          // Do not silently apply a null user when the network call failed.
+          if (sessionError) throw sessionError;
           if (!mounted) return;
           await applySession(data.user);
         } else {
@@ -162,7 +168,7 @@ export function useAuth() {
       } catch (err) {
         console.error('Unable to load session', err);
         if (mounted) {
-          setError('Unable to load your session.');
+          setError(getAuthErrorMessage(err, 'Unable to load your session. Please retry.'));
           setRecoveryLoading(false);
         }
       } finally {
