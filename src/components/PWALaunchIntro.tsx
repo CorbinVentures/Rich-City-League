@@ -1,33 +1,79 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { isLaunchContentReady, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_MIN_DISPLAY_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '@/lib/pwa-launch';
+import {
+  isLaunchContentReady,
+  RCH_LAUNCH_FALLBACK_MS,
+  RCH_LAUNCH_MIN_DISPLAY_MS,
+  RCH_LAUNCH_ROUTE_DELAY_MS,
+} from '@/lib/pwa-launch';
+
+const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname);
 
 /**
- * Full branded intro on document load. On client navigation, only show it if
- * the destination is still pending after a short delay. Fast routes stay clear.
+ * One global loading screen for first PWA boot and slow client navigation.
+ * Do not add another full-screen route overlay: this is also the destination
+ * of the first-load bootstrap in pwa-launch.ts.
  */
 export function PWALaunchIntro() {
   const pathname = usePathname();
   const hasMounted = useRef(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  // Arm the loader before Next finishes a slow route. usePathname fires only
+  // after navigation commits and cannot, by itself, show a pending transition.
+  useEffect(() => {
+    let timer: number | undefined;
+    const clear = () => { if (timer !== undefined) window.clearTimeout(timer); };
+    const arm = () => {
+      clear();
+      timer = window.setTimeout(() => {
+        if (!authRoute(window.location.pathname) && document.documentElement.dataset.rchLaunch !== 'active') {
+          document.documentElement.dataset.rchLaunch = 'active';
+        }
+      }, RCH_LAUNCH_ROUTE_DELAY_MS);
+    };
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (!(event.target instanceof Element)) return;
+      const link = event.target.closest('a[href]');
+      if (!link || link.hasAttribute('download') || (link.getAttribute('target') && link.getAttribute('target') !== '_self')) return;
+      let next: URL;
+      try { next = new URL(link.href, window.location.href); } catch { return; }
+      const current = new URL(window.location.href);
+      if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || authRoute(next.pathname)) return;
+      if (next.pathname === current.pathname && next.search === current.search) return;
+      // React may prevent default in a handler after the native capture phase.
+      clear();
+      timer = window.setTimeout(() => { if (!event.defaultPrevented) arm(); }, 0);
+    };
+    document.addEventListener('click', onClick, true);
+    window.addEventListener('popstate', arm);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      window.removeEventListener('popstate', arm);
+      clear();
+    };
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    const isDocumentLoad = !hasMounted.current;
+    const firstLoad = !hasMounted.current;
     hasMounted.current = true;
 
-    if (/^\/auth(?:\/|$)/.test(pathname)) {
+    if (authRoute(pathname)) {
       root.dataset.rchLaunch = 'done';
       return;
     }
 
     let released = false;
-    let canFinish = !isDocumentLoad;
+    let allowRelease = false;
     let observer: MutationObserver | undefined;
-    let showDelay: number | undefined;
-    let minimumDisplay: number | undefined;
-    let readinessCheck: number | undefined;
+    let revealDelay: number | undefined;
+    let minimumTime: number | undefined;
+    let readyCheck: number | undefined;
     let fallback: number | undefined;
 
     const release = () => {
@@ -35,65 +81,80 @@ export function PWALaunchIntro() {
       released = true;
       root.dataset.rchLaunch = 'done';
       observer?.disconnect();
-      if (showDelay !== undefined) window.clearTimeout(showDelay);
-      if (minimumDisplay !== undefined) window.clearTimeout(minimumDisplay);
-      if (readinessCheck !== undefined) window.clearTimeout(readinessCheck);
+      if (revealDelay !== undefined) window.clearTimeout(revealDelay);
+      if (minimumTime !== undefined) window.clearTimeout(minimumTime);
+      if (readyCheck !== undefined) window.clearTimeout(readyCheck);
       if (fallback !== undefined) window.clearTimeout(fallback);
     };
 
-    const finishWhenReady = () => {
-      if (canFinish && isLaunchContentReady(document)) release();
+    const check = () => {
+      if (allowRelease && isLaunchContentReady(document)) release();
     };
 
-    if (isDocumentLoad) {
+    const alreadyShowing = root.dataset.rchLaunch === 'active';
+    if (firstLoad || alreadyShowing) {
       root.dataset.rchLaunch = 'active';
-      minimumDisplay = window.setTimeout(() => {
-        canFinish = true;
-        finishWhenReady();
+      minimumTime = window.setTimeout(() => {
+        allowRelease = true;
+        check();
       }, RCH_LAUNCH_MIN_DISPLAY_MS);
     } else {
       root.dataset.rchLaunch = 'done';
+      allowRelease = true;
       if (!isLaunchContentReady(document)) {
-        showDelay = window.setTimeout(() => {
+        revealDelay = window.setTimeout(() => {
           if (!released && !isLaunchContentReady(document)) root.dataset.rchLaunch = 'active';
         }, RCH_LAUNCH_ROUTE_DELAY_MS);
       }
     }
 
-    observer = new MutationObserver(finishWhenReady);
+    observer = new MutationObserver(check);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['aria-busy', 'data-rch-launch-pending'],
     });
-    readinessCheck = window.setTimeout(finishWhenReady, 0);
+    readyCheck = window.setTimeout(check, 0);
     fallback = window.setTimeout(release, RCH_LAUNCH_FALLBACK_MS);
 
     return () => {
       released = true;
       observer?.disconnect();
-      if (showDelay !== undefined) window.clearTimeout(showDelay);
-      if (minimumDisplay !== undefined) window.clearTimeout(minimumDisplay);
-      if (readinessCheck !== undefined) window.clearTimeout(readinessCheck);
+      if (revealDelay !== undefined) window.clearTimeout(revealDelay);
+      if (minimumTime !== undefined) window.clearTimeout(minimumTime);
+      if (readyCheck !== undefined) window.clearTimeout(readyCheck);
       if (fallback !== undefined) window.clearTimeout(fallback);
     };
   }, [pathname]);
 
   return (
-    <div className="rch-launch">
-      <span className="sr-only" role="status">Opening Rich City Hoops</span>
-      <button type="button" className="rch-launch-skip" onClick={() => { document.documentElement.dataset.rchLaunch = 'done'; }}>Skip opening screen</button>
-      <div className="rch-launch-brand" aria-hidden="true">
-        <svg className="rch-launch-mark" viewBox="0 0 280 205" focusable="false">
-          <path fill="currentColor" fillRule="evenodd" d="M62 8 254 4 267 20 240 78 204 108 240 201 161 201 136 141 112 141 79 201 1 201 87 34ZM134 49 113 96 168 83 186 68 191 49Z" />
-        </svg>
-        <div className="rch-launch-halo"><i /><i /><i /></div>
-        <p className="rch-launch-name">RICH CITY HOOPS</p>
+    <div className="rch-launch" aria-label="Rich City Hoops is loading" aria-busy="true">
+      <button type="button" className="rch-launch-skip" onClick={() => { document.documentElement.dataset.rchLaunch = 'done'; }}>
+        Skip loading animation
+      </button>
+      <div className="rch-launch-brand">
+        <img className="rch-launch-poster" src="/brand/rch-loader-poster.svg" alt="" aria-hidden="true" />
+        {!videoFailed && (
+          <video
+            className={'rch-launch-video' + (videoReady ? ' is-ready' : '')}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/brand/rch-loader-poster.svg"
+            aria-hidden="true"
+            onLoadedData={() => setVideoReady(true)}
+            onError={() => setVideoFailed(true)}
+          >
+            <source src="/brand/rch-loader.mp4" type="video/mp4" />
+          </video>
+        )}
       </div>
-      <div className="rch-launch-footer" aria-hidden="true">
-        <p>Richmond basketball, connected.</p>
-        <div className="rch-launch-dots"><i /><i /><i /></div>
+      <div className="rch-launch-footer" role="status" aria-live="polite">
+        <p>Loading your basketball world...</p>
+        <div className="rch-launch-dots" aria-hidden="true"><i /><i /><i /></div>
       </div>
     </div>
   );
