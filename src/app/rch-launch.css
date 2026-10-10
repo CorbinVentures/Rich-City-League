@@ -1,9 +1,10 @@
 /* One seamless Rich City Hoops cinematic launch screen. */
 html body .rch-launch {
   position: fixed; inset: 0; z-index: 2147483000;
-  width: 100%; height: 100dvh;
-  display: block; overflow: hidden;
-  background: #040b19 !important;
+  width: 100%; height: 100vh; height: 100dvh;
+  display: grid; place-items: center; overflow: hidden;
+  /* Full-screen cinematic navy/gold setting without cropping the square film. */
+  background: radial-gradient(ellipse 72% 52% at 50% 53%, #273449 0%, #101c31 47%, #040b19 100%) !important;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .22s ease, visibility .22s;
   contain: layout paint;
@@ -15,14 +16,19 @@ html[data-rch-launch="active"] body .rch-launch {
   animation: rch-launch-failsafe 0s 12s forwards;
 }
 html body .rch-launch-brand {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  display: block; overflow: hidden;
+  /* The supplied original is 960x960. Preserve its entire composition inside
+     the fullscreen backdrop rather than enlarging it to a tall phone ratio. */
+  position: relative;
+  width: min(100vw, 100vh); width: min(100vw, 100dvh);
+  height: min(100vw, 100vh); height: min(100vw, 100dvh);
+  max-width: 100%; max-height: 100%;
+  display: grid; place-items: center; overflow: hidden;
 }
 html body .rch-launch-video {
   display: block; width: 100%; height: 100%;
-  max-width: none; max-height: none;
-  object-fit: cover; object-position: center center;
+  max-width: 100%; max-height: 100%;
+  /* Keep the R, Richmond skyline, and complete Rich City Hoops title visible. */
+  object-fit: contain; object-position: center center;
   opacity: 0; transition: opacity .16s ease-in;
 }
 html body .rch-launch-video.is-ready { opacity: 1; }
