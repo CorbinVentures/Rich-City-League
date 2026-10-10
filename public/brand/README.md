@@ -1,14 +1,13 @@
-# RCH global loader — verified source media
+# RCH loading screen media
 
-The **correct** loader is the original user-uploaded cinematic navy-and-gold RCH logo animation, with the skyline, river reflections, orbiting gold light and the original RICH CITY HOOPS lettering. Do not substitute the simplified SVG-like R icon.
+The loader at `public/brand/rch-loader.mp4` is the **original cinematic Rich City Hoops animation uploaded by the user**, not the earlier simplified substitute.
 
-Expected files:
-- `public/brand/rch-loader.mp4` — 1,563,086 bytes, 512×512, H.264, 30 fps, 4.000 sec
-- `public/brand/rch-loader-poster.webp` — frame 0 from the exact MP4
+Verified Git blob: `c05724c655b22f493801d895693215dacbc6acba`
+Original source: `RCH_Animated_Logo_Living_Loop.mp4`
+Size: **1,445,372 bytes**, 960×960, H.264, 24 fps, 4 seconds.
 
-SHA-256 for `rch-loader.mp4`:
-`4b44b1430cc9618ad7d1ee088f979d8c69e70a35fb1fde1263ef4e2234e456c3`
+The production component references `/brand/rch-loader.mp4?v=original-20261010` to avoid stale PWA video cache.
 
-The old 106,260-byte placeholder at the same MP4 path is **not** the intended video. Replace that file with the verified user upload before merging this PR. The poster should also match the video so mobile users never see a different logo while video initializes.
+No alternate graphic is shown during video startup or for reduced-motion users: only the literal team name **RICH CITY HOOPS** is displayed until video is ready. The earlier `rch-loader-poster.svg` file is legacy and is not used by the loader.
 
-The loading overlay is reused by `PWALaunchIntro` for installed PWA startup and slow route changes. It releases on content readiness and has a 4-second fail-safe. Skip and reduced-motion behavior remain intact.
+The global overlay reuses `PWALaunchIntro`; the route/boot animation releases once content is ready with a 4-second fail-safe.
