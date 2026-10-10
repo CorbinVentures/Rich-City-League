@@ -1,16 +1,12 @@
 /* One seamless Rich City Hoops cinematic launch screen. */
 html body .rch-launch {
   position: fixed; inset: 0; z-index: 2147483000;
-  display: grid; place-items: center; overflow: hidden;
-  background: radial-gradient(circle at 50% 42%, #193459, #08182e 55%, #040b19) !important;
+  width: 100%; height: 100dvh;
+  display: block; overflow: hidden;
+  background: #040b19 !important;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .22s ease, visibility .22s;
   contain: layout paint;
-}
-html body .rch-launch::before {
-  content: ''; position: absolute; width: min(100vw, 760px); aspect-ratio: 1;
-  border-radius: 50%; background: radial-gradient(circle, rgba(224,176,70,.12), transparent 65%);
-  filter: blur(28px); pointer-events: none;
 }
 html[data-rch-launch="active"] body .rch-launch {
   opacity: 1; visibility: visible; pointer-events: auto;
@@ -19,12 +15,14 @@ html[data-rch-launch="active"] body .rch-launch {
   animation: rch-launch-failsafe 0s 12s forwards;
 }
 html body .rch-launch-brand {
-  position: relative; width: min(88vw, 480px); aspect-ratio: 1;
-  display: grid; place-items: center;
-  filter: drop-shadow(0 16px 40px rgba(0,0,0,.28));
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block; overflow: hidden;
 }
 html body .rch-launch-video {
-  display: block; width: 100%; height: 100%; object-fit: contain;
+  display: block; width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  object-fit: cover; object-position: center center;
   opacity: 0; transition: opacity .16s ease-in;
 }
 html body .rch-launch-video.is-ready { opacity: 1; }
@@ -44,7 +42,4 @@ html body .rch-launch-skip:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html body .rch-launch, html body .rch-launch-video { transition: none; }
   html body .rch-launch-video { display: none; }
-}
-@media (max-height: 480px) {
-  html body .rch-launch-brand { width: min(44vh, 250px); }
 }
