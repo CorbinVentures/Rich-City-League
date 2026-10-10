@@ -23,7 +23,7 @@
   },
   "appVersionCode": 1,
   "appVersion": "1.0.0",
-  "minSdkVersion": 23,
+  "minSdkVersion": 24,
   "orientation": "portrait-primary",
   "fallbackType": "customtabs",
   "shortcuts": [],
