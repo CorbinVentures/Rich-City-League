@@ -27,3 +27,16 @@ export function isLaunchContentReady(root: ParentNode): boolean {
   const content = root.querySelector('#rcl-content');
   return Boolean(content?.querySelector('main') && !content.querySelector('[aria-busy="true"], [data-rch-launch-pending="true"]'));
 }
+
+/**
+ * The opening sequence is gated by the actual video end event, never by
+ * hydration or a short elapsed-time minimum. Route loaders do not wait 4s.
+ */
+export function canDismissLaunch(
+  contentReady: boolean,
+  isBoot: boolean,
+  videoFinished: boolean,
+  routeCanDismiss: boolean,
+): boolean {
+  return contentReady && (isBoot ? videoFinished : routeCanDismiss);
+}
