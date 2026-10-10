@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
+import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
 
 function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1 }: {
   path?: string;
@@ -26,6 +26,7 @@ function launch({ path = '/social', standalone = true, userAgent = 'iPhone', pla
 describe('page launch intro', () => {
   it('starts for installed mobile app page loads', () => {
     expect(launch().dataset.rchLaunch).toBe('active');
+    expect(launch().dataset.rchLaunchBoot).toBe('pending');
     expect(launch({ path: '/discover' }).dataset.rchLaunch).toBe('active');
   });
   it('does not cover ordinary browsers or desktop PWAs', () => {
@@ -39,10 +40,20 @@ describe('page launch intro', () => {
   it('always releases the app screen after the safety timeout', () => {
     const result = launch();
     expect(result.dataset.rchLaunch).toBe('active');
-    expect(result.timers.at(-1)?.delay).toBe(RCH_LAUNCH_FALLBACK_MS);
+    expect(result.timers.at(-1)?.delay).toBe(RCH_LAUNCH_BOOT_FALLBACK_MS);
+    expect(RCH_LAUNCH_BOOT_FALLBACK_MS).toBeGreaterThan(4000);
     expect(RCH_LAUNCH_ROUTE_DELAY_MS).toBeGreaterThan(250);
     result.timers.at(-1)?.callback();
     expect(result.dataset.rchLaunch).toBe('done');
+  });
+  it('requires the actual final video frame before dismissing an installed-app intro', () => {
+    expect(canDismissLaunch(true, true, false, true)).toBe(false);
+    expect(canDismissLaunch(true, true, true, false)).toBe(true);
+    expect(canDismissLaunch(false, true, true, true)).toBe(false);
+    // A page-to-page transition is allowed to end as soon as it is ready.
+    expect(canDismissLaunch(true, false, false, true)).toBe(true);
+    expect(canDismissLaunch(true, false, false, false)).toBe(false);
+    expect(RCH_LAUNCH_FALLBACK_MS).toBe(4000);
   });
   it('waits for main content and feed readiness, not photos or unrelated widgets', () => {
     function documentState(main: boolean, pending: boolean) {
