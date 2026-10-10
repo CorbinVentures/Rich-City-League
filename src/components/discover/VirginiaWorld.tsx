@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
+import { isVirginiaBasemapRenderable } from '@/lib/virginia-map-readiness';
 import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates, type GeoPosition, type VirginiaCity } from '@/lib/virginia-world';
 import {
   FaArrowLeft, FaArrowRight, FaCalendarDays, FaCompass,
@@ -36,19 +37,6 @@ const FILTERS:{id:Filter;label:string}[]=[
   {id:'runs',label:'Open runs'},{id:'training',label:'Training'},{id:'courts',label:'Courts & parks'}
 ];
 let libraryPromise:Promise<any>|null=null;
-/** A style/source-ready signal isn't sufficient: require geometry actually present in the viewport. */
-function renderedGeographyIsVisible(map:MapInstance):boolean {
-  try {
-    if(!map.isStyleLoaded?.() || !map.isSourceLoaded?.('openmaptiles'))return false;
-    const style=map.getStyle?.();
-    const ids=(style?.layers??[])
-      .filter((layer:any)=>layer.source==='openmaptiles' &&
-        (layer.type==='fill'||layer.type==='line'||layer.type==='fill-extrusion'))
-      .map((layer:any)=>layer.id);
-    if(!ids.length)return false;
-    return map.queryRenderedFeatures(undefined,{layers:ids}).length>0;
-  }catch{return false;}
-}
 
 function loadMapLibrary():Promise<any> {
   if(typeof window==='undefined') return Promise.reject(new Error('Browser required'));
@@ -273,7 +261,7 @@ export default function VirginiaWorld() {
         const now=Date.now();
         if(now-lastCheck<200)return;
         lastCheck=now;
-        if(renderedGeographyIsVisible(map)){
+        if(isVirginiaBasemapRenderable(map)){
           tilesReadyRef.current=true;
           setTilesReady(true);
         }
