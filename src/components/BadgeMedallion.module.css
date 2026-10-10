@@ -1,0 +1,214 @@
+.scene {
+  --metal-light: #ffdc9a;
+  --metal-mid: #b97739;
+  --metal-dark: #59311d;
+  --metal-ink: #402010;
+  --metal-glow: rgba(220, 148, 85, .24);
+  position: relative;
+  display: block;
+  width: min(var(--medal-size), 100%);
+  aspect-ratio: 1;
+  height: auto;
+  flex: none;
+  perspective: 650px;
+  contain: layout style;
+  isolation: isolate;
+}
+
+.scene[data-tier='silver'] {
+  --metal-light: #f4faff;
+  --metal-mid: #9caec6;
+  --metal-dark: #46566f;
+  --metal-ink: #243a55;
+  --metal-glow: rgba(178, 221, 255, .26);
+}
+.scene[data-tier='gold'] {
+  --metal-light: #fff2aa;
+  --metal-mid: #d9a734;
+  --metal-dark: #735018;
+  --metal-ink: #543814;
+  --metal-glow: rgba(255, 200, 76, .30);
+}
+.scene[data-tier='elite'] {
+  --metal-light: #f8e7ff;
+  --metal-mid: #a786e9;
+  --metal-dark: #493378;
+  --metal-ink: #302455;
+  --metal-glow: rgba(186, 112, 252, .36);
+}
+.scene[data-tier='platinum'],
+.scene[data-tier='diamond'] {
+  --metal-light: #efffff;
+  --metal-mid: #78d8ea;
+  --metal-dark: #275b7b;
+  --metal-ink: #14465e;
+  --metal-glow: rgba(91, 237, 255, .38);
+}
+
+.aura {
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--metal-glow), transparent 71%);
+  filter: blur(13px);
+  animation: auraBreath 7s ease-in-out infinite alternate;
+}
+
+.coin {
+  position: absolute;
+  inset: 7%;
+  display: block;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  transform: rotateX(10deg) rotateY(-12deg) rotateZ(-4deg);
+  animation: medalHover 7.5s ease-in-out infinite alternate;
+}
+
+.edge,
+.underside,
+.face,
+.rim,
+.inner,
+.glint,
+.spark {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+}
+
+.edge {
+  inset: 0;
+  background: repeating-conic-gradient(from 8deg, var(--metal-light) 0deg 3deg, var(--metal-dark) 4deg 7deg, var(--metal-mid) 8deg 12deg);
+  transform: translateZ(-7px) translateY(3px);
+  box-shadow: 0 8px 0 -2px var(--metal-dark), 0 15px 18px rgba(0, 0, 0, .48);
+}
+
+.underside {
+  inset: 0;
+  background: conic-gradient(from 110deg, var(--metal-dark), var(--metal-mid), var(--metal-light), var(--metal-dark), var(--metal-light), var(--metal-dark));
+  transform: translateZ(-3px);
+  box-shadow: 0 3px 8px #0009, inset 0 0 0 2px var(--metal-dark);
+}
+
+.face {
+  inset: 0;
+  overflow: hidden;
+  transform: translateZ(4px);
+  background:
+    radial-gradient(circle at 27% 17%, #fff8 0, transparent 24%),
+    conic-gradient(from 212deg, var(--metal-dark), var(--metal-mid) 14%, var(--metal-light) 30%, var(--metal-mid) 45%, var(--metal-dark) 62%, var(--metal-light) 78%, var(--metal-mid) 89%, var(--metal-dark));
+  border: 1px solid var(--metal-light);
+  box-shadow:
+    inset 0 0 0 3px var(--metal-dark),
+    inset 0 0 0 5px var(--metal-light),
+    inset 0 0 0 7px var(--metal-mid),
+    inset 0 0 16px #0009,
+    0 1px 2px #fff7;
+}
+
+.rim {
+  inset: 9%;
+  background: repeating-conic-gradient(from 4deg, var(--metal-light) 0deg 2deg, var(--metal-mid) 3deg 6deg);
+  border: 1px solid var(--metal-dark);
+  box-shadow: 0 0 0 1px #fff4, inset 0 0 0 2px var(--metal-dark), inset 0 2px 7px #0009;
+}
+
+.inner {
+  inset: 13%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  background:
+    radial-gradient(ellipse at 34% 22%, #ffffff22, transparent 62%),
+    linear-gradient(145deg, var(--metal-ink), var(--metal-dark) 46%, var(--metal-ink));
+  border: 1px solid var(--metal-light);
+  box-shadow: inset 0 0 0 2px #0007, inset 0 5px 16px #0009, 0 1px 0 #fffa;
+  color: var(--metal-light);
+}
+
+.topBrand {
+  position: absolute;
+  top: 8%;
+  font-size: calc(var(--medal-size) * .075);
+  letter-spacing: .21em;
+  padding-left: .21em;
+  font-weight: 1000;
+  line-height: 1;
+  opacity: .9;
+  text-shadow: 0 1px 0 #000c, 0 -1px 0 #fff7;
+}
+
+.crest {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  width: 40%;
+  height: 40%;
+  color: var(--metal-light);
+  filter: drop-shadow(0 2px 1px #000b) drop-shadow(0 -1px 0 #fff6);
+}
+
+.rank {
+  position: absolute;
+  bottom: 9%;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: calc(var(--medal-size) * .105);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-shadow: 0 2px 1px #000a;
+}
+
+.glint {
+  inset: -50%;
+  pointer-events: none;
+  border-radius: 0;
+  background: linear-gradient(100deg, transparent 41%, #fff0 45%, #fffb 49%, #fff0 54%, transparent 59%);
+  transform: translateX(-75%) rotate(14deg);
+  animation: polish 9s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+.spark {
+  inset: 7%;
+  pointer-events: none;
+  background: radial-gradient(circle at 23% 19%, #fff 0, #fff6 1.2%, transparent 5%);
+  opacity: .6;
+}
+
+.scene:hover .coin {
+  animation-play-state: paused;
+  transform: rotateX(-8deg) rotateY(22deg) rotateZ(4deg) scale(1.075);
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1);
+}
+
+.scene:hover .aura {
+  filter: blur(16px);
+  opacity: 1;
+}
+
+@keyframes medalHover {
+  0% { transform: translateY(2%) rotateX(11deg) rotateY(-15deg) rotateZ(-4deg); }
+  100% { transform: translateY(-3%) rotateX(-7deg) rotateY(15deg) rotateZ(3deg); }
+}
+
+@keyframes polish {
+  0%, 23% { transform: translateX(-78%) rotate(14deg); }
+  48%, 100% { transform: translateX(78%) rotate(14deg); }
+}
+
+@keyframes auraBreath {
+  from { opacity: .45; transform: scale(.9); }
+  to { opacity: .87; transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *, .scene::before, .scene::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .coin { transform: rotateX(8deg) rotateY(-9deg) rotateZ(-3deg) !important; }
+  .glint { display: none; }
+}

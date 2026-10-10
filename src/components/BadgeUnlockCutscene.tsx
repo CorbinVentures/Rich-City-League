@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaBolt, FaTrophy, FaXmark } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
+import { BadgeMedallion } from '@/components/BadgeMedallion';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type Unlock = {
@@ -124,7 +125,7 @@ export function BadgeUnlockCutscene() {
     <button type="button" onClick={() => setCurrent(null)} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-white/45 hover:text-white" aria-label="Close badge unlock"><FaXmark/></button>
     <section className="relative w-full max-w-xl text-center">
       <p className="inline-flex items-center gap-2 rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-4 py-2 text-xs font-black uppercase tracking-[.28em] text-rcl-orange"><FaBolt/> Achievement unlocked</p>
-      <div className="relative mx-auto mt-8 grid h-44 w-44 place-items-center rounded-[2.5rem] border border-rcl-orange/40 bg-[linear-gradient(145deg,rgba(59,130,246,.18),rgba(21,159,255,.10))] shadow-[0_0_90px_rgba(59,130,246,.24)]"><div className="absolute inset-3 rounded-[2rem] border border-white/10"/><span className="relative text-7xl drop-shadow-2xl">{current.icon || '🏆'}</span><span className="absolute -bottom-3 rounded-full border border-rcl-blue/30 bg-[#071522] px-4 py-1.5 text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">{current.tier || 'RCL'} badge</span></div>
+      <div className="relative mx-auto mt-8 flex justify-center"><BadgeMedallion badge={current} size="lg" /></div>
       <p className="mt-10 text-xs font-black uppercase tracking-[.35em] text-white/35">Badge unlocked</p><h2 className="mt-3 font-display text-5xl font-black uppercase leading-none sm:text-6xl">{current.name}</h2>{current.description&&<p className="mx-auto mt-4 max-w-md text-sm leading-6 text-white/52">{current.description}</p>}
       <div className="mx-auto mt-7 flex max-w-sm items-center justify-center gap-3 border-t border-white/10 pt-6 text-xs font-black uppercase tracking-wider text-white/35"><FaTrophy className="text-rcl-orange"/> Added to your RCL identity</div><button type="button" onClick={() => setCurrent(null)} className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-rcl-orange px-7 text-xs font-black uppercase tracking-wider text-black">Continue</button>
     </section>

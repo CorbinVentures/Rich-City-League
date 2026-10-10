@@ -7,6 +7,7 @@ import { PublicProfileActions } from '@/components/PublicProfileActions';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { AchievementShareCard } from '@/components/AchievementShareCard';
+import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { ProfileViewInsights } from '@/components/ProfileViewInsights';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
@@ -62,14 +63,16 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     { data: repLedger },
     { data: earnedRepBadges },
     { data: playerRaw },
+    { data: earnedCoachBadges },
   ] = await Promise.all([
     client.from('posts').select('id,author_id,body,media_urls,created_at,is_automated,automation_type,target_profile_id').or(`author_id.eq.${id},target_profile_id.eq.${id}`).eq('status', 'published').order('created_at', { ascending: false }).limit(60) as any,
     client.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', id) as any,
     client.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', id) as any,
     client.from('user_levels').select('xp,level').eq('profile_id', id).maybeSingle() as any,
     client.from('xp_transactions').select('id,amount,reason,source_type,created_at').eq('profile_id', id).order('created_at', { ascending: false }).limit(20) as any,
-    client.from('fan_badges').select('id,earned_at,badge:badges(name,description,icon,tier,requirement_type)').eq('profile_id', id).order('earned_at', { ascending: false }) as any,
+    client.from('fan_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier,category,requirement_type)').eq('profile_id', id).order('earned_at', { ascending: false }) as any,
     client.from('players').select('id,profile_id,first_name,last_name,jersey_number,position,height_inches,hometown,photo_url').eq('profile_id', id).eq('is_active', true).maybeSingle() as any,
+    client.from('coach_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier,category,requirement_type)').eq('profile_id', id).order('earned_at', { ascending: false }) as any,
   ]);
 
   const player = playerRaw as PlayerRow | null;
@@ -157,7 +160,21 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   const nextLevelXp = repProgress.next;
   const repStatus = reputationStatus(socialLevel);
   const repRows = (repLedger ?? []) as Array<{id:string;amount:number;reason:string;source_type:string|null;created_at:string}>;
-  const allBadges = (earnedRepBadges ?? []) as any[];
+  // An identity can collect fan/community, player and coach awards at once.
+  // Deduplicate the same badge across award tables without losing its earliest unlock.
+  const { data: earnedPlayerBadges } = player?.id
+    ? await client.from('player_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier,category,requirement_type)').eq('player_id', player.id).order('earned_at', { ascending: false }) as any
+    : { data: [] };
+  const badgeAwards = [...(earnedRepBadges ?? []), ...(earnedCoachBadges ?? []), ...(earnedPlayerBadges ?? [])] as any[];
+  const badgeById = new Map<string, any>();
+  for (const award of badgeAwards) {
+    if (!award.badge || !award.badge_id) continue;
+    const existing = badgeById.get(award.badge_id);
+    if (!existing || new Date(award.earned_at).getTime() < new Date(existing.earned_at).getTime()) {
+      badgeById.set(award.badge_id, award);
+    }
+  }
+  const allBadges = [...badgeById.values()].sort((a,b) => new Date(b.earned_at).getTime() - new Date(a.earned_at).getTime());
   const latestAchievement = allBadges[0];
 
   const authoredPosts = postRows.filter((post)=>post.author_id===id);
@@ -205,6 +222,15 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           <div className={`rcl-profile-status-banner status-${repStatus.key}`}><small>REPUTATION STATUS</small><strong>{repStatus.label}</strong><span>Level {socialLevel} · {repProgress.remaining} REP to Level {socialLevel+1}</span></div>
           <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>REP</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span><span><b>{profile.qualified_referral_count ?? 0}</b><small>Recruited</small></span></div>
           <div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
+          {allBadges.length > 0 && <div className="mt-5 rounded-2xl border border-rcl-blue/20 bg-[#071522]/80 p-3 sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2"><b className="text-xs font-black uppercase tracking-[.15em] text-white/80">Achievement showcase</b><Link href={profileHref+'?tab=badges'} className="text-[11px] font-black uppercase tracking-wider text-rcl-blue">View all {allBadges.length} →</Link></div>
+            <div className="flex flex-wrap items-start justify-start gap-3">
+              {allBadges.slice(0, 3).map((award:any) => <Link key={award.badge_id} href={profileHref+'?tab=badges'} className="group flex w-24 flex-col items-center text-center" title={award.badge?.name}>
+                <BadgeMedallion badge={award.badge} size="xs" />
+                <span className="mt-1 line-clamp-2 text-[10px] font-bold leading-3 text-white/70">{award.badge?.name}</span>
+              </Link>)}
+            </div>
+          </div>}
         </div>
       </section>
 
@@ -285,7 +311,7 @@ function BadgesTab({name,username,repLabel,repStatus,socialLevel,followers,lates
   return <div>
     <div className="mb-5 grid gap-4 sm:grid-cols-2"><GrowthShareCard memberName={name} memberUsername={username} eyebrow="RCL Reputation" headline="REP Milestone" value={repLabel+' REP'} detail={repStatus+' · Level '+socialLevel+' — reputation earned through RCL activity.'} icon="⚡"/><GrowthShareCard memberName={name} memberUsername={username} eyebrow="RCL Community" headline="Social Reach" value={String(followers)} detail="Followers connected to this RCL identity." icon="🏀"/></div>
     {latestAchievement&&<div className="mb-5"><AchievementShareCard memberName={name} memberUsername={username} badgeName={latestAchievement.badge?.name || 'RCL Achievement'} badgeDescription={latestAchievement.badge?.description} badgeIcon={latestAchievement.badge?.icon} badgeTier={latestAchievement.badge?.tier} earnedAt={latestAchievement.earned_at}/></div>}
-    {allBadges.length?<div className="mb-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5"><div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Achievements</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Badge collection</h2></div><span className="text-xs font-black uppercase text-white/25">{allBadges.length} earned</span></div><div className="mt-4 grid gap-3 sm:grid-cols-2">{allBadges.map((item:any)=><article key={item.id} className="flex gap-3 rounded-xl border border-white/10 bg-black/15 p-3"><i className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-orange/10 not-italic text-2xl">{item.badge?.icon||'🏆'}</i><span className="min-w-0"><b className="block text-sm">{item.badge?.name || 'RCL Badge'}</b><small className="mt-1 block text-xs leading-5 text-white/35">{item.badge?.description || 'RCL achievement'}</small><em className="mt-1 block text-[10px] font-black uppercase not-italic tracking-wider text-rcl-blue">{item.badge?.tier || 'earned'}</em></span></article>)}</div></div>:<EmptyTab title="No badges yet" copy="Earned RCL achievements will collect here permanently."/>}
+    {allBadges.length?<div className="mb-5 rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-4 sm:p-5"><div className="flex items-end justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Achievements</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Badge collection</h2></div><span className="text-xs font-black uppercase text-white/45">{allBadges.length} earned</span></div><div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">{allBadges.map((item:any)=><BadgeShowcaseCard key={item.badge_id} badge={item.badge} earnedAt={item.earned_at} compact />)}</div></div>:<EmptyTab title="No badges yet" copy="Earned RCH achievements will collect here permanently."/>}
     <div className="rcl-profile-rep-ledger"><div className="rcl-rep-ledger-heading"><div><small>REPUTATION</small><h2>REP Activity</h2></div><span>{Math.max(0,nextLevelXp-rep)} REP to Level {socialLevel+1}</span></div>{repRows.length?<div>{repRows.slice(0,8).map((item)=><article key={item.id}><b>+{item.amount}</b><span><strong>{repReasonLabel(item.reason)}</strong><small>{item.source_type || 'RCL activity'} · {new Date(item.created_at).toLocaleDateString()}</small></span></article>)}</div>:<p>REP history will appear here as this identity contributes to RCL.</p>}</div>
   </div>;
 }
