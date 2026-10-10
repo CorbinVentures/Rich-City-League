@@ -365,3 +365,36 @@
 }
 
 @media(max-width:700px){.rch-world-page .rch-world-atlas-city.chosen{display:flex!important}}
+
+/* 3D is progressive enhancement: the illustrated state remains underneath live tiles. */
+.rch-world-atlas-tilted {
+  background:radial-gradient(ellipse at 52% 66%,#1b4260 0%,#071d30 62%,#041321 100%);
+}
+.rch-world-atlas-tilted .rch-world-atlas-scene{
+  filter:drop-shadow(0 22px 27px rgba(0,8,15,.85));
+  transition:transform .5s cubic-bezier(.2,.75,.25,1);
+}
+.rch-world-atlas-tilted .rch-world-atlas-art{
+  filter:saturate(1.5) contrast(1.1) brightness(1.08);
+}
+.rch-world-atlas-tilted .rch-world-atlas-city-icon{
+  box-shadow:0 8px 0 #582508,0 12px 18px #000b,0 0 0 5px #f883172e,0 0 19px #ff971880;
+}
+.rch-world-map-error{
+  top:auto!important;
+  bottom:98px!important;
+  left:12px!important;
+  right:12px!important;
+  max-width:min(380px,calc(100% - 24px))!important;
+  padding:8px 11px!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  color:#cbe2f7!important;
+  background:#0a253bdc!important;
+  border:1px solid #467a9f!important;
+}
+.rch-world-3d-status{font-size:10px!important}
+@media(max-width:640px){
+  .rch-world-page .rch-world-map-shell{height:370px!important;min-height:370px!important}
+  .rch-world-map-error{bottom:90px!important}
+}
