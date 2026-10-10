@@ -224,3 +224,7 @@
   .rch-world-map-shell{height:350px;min-height:350px}
   .rch-world-list-icon{width:60px;height:62px}
 }
+
+/* Keep the state border geographically proportional at narrow viewport sizes. */
+.rch-world-atlas-scene{left:0;right:0;top:50%;bottom:auto;width:100%;height:auto;aspect-ratio:1000/620;transform:translateY(-50%);transition:transform .65s ease}
+@media(prefers-reduced-motion:reduce){.rch-world-atlas-scene{transition:none}}
