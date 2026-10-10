@@ -3,7 +3,7 @@ import { getPublishedNews } from '@/lib/public-data';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const SITE = 'https://richcityhoops.com';
+const SITE = 'https://www.richcityhoops.com';
 
 function xml(value: string) {
   return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
@@ -14,7 +14,7 @@ export async function GET() {
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-<title>RCL Newsroom</title>
+<title>Rich City Hoops Newsroom</title>
 <link>${SITE}/news</link>
 <description>Rich City League, Richmond basketball and Richmond culture news from the RCL Newsroom.</description>
 <language>en-us</language>

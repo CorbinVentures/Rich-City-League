@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const SITE = 'https://richcityhoops.com';
+const SITE = 'https://www.richcityhoops.com';
 
 export const dynamic = 'force-dynamic';
 
