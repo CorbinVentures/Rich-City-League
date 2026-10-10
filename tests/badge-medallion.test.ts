@@ -3,7 +3,7 @@ import {
   badgeCrest,
   normalizeBadgeTier,
 } from '../src/components/BadgeMedallion';
-import { FaBasketball, FaCrown, FaFireFlameCurved, FaLocationDot, FaShieldHalved, FaTrophy } from 'react-icons/fa6';
+import { FaAward, FaBasketball, FaCrown, FaFireFlameCurved, FaLocationDot, FaShieldHalved, FaTrophy } from 'react-icons/fa6';
 
 describe('collectible badge visuals', () => {
   it('supports all collectible tiers and safely defaults unrecognized levels', () => {
@@ -25,6 +25,7 @@ describe('collectible badge visuals', () => {
 
   it('provides a recognizable fallback for unknown and unconfigured badges', () => {
     expect(badgeCrest({})).toBe(FaTrophy);
-    expect(badgeCrest({ name: 'Unknown Achievement' })).toBe(FaTrophy);
+    expect(badgeCrest({ name: 'Unknown Achievement' })).toBe(FaAward);
+    expect(badgeCrest({ name: 'Mystery Coin' })).toBe(FaTrophy);
   });
 });
