@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates, type GeoPosition, type VirginiaCity } from '@/lib/virginia-world';
 import {
-  FaArrowLeft, FaArrowRight, FaBasketball, FaCalendarDays, FaCompass,
+  FaArrowLeft, FaArrowRight, FaCalendarDays, FaCompass,
   FaCrosshairs, FaFilter, FaLayerGroup, FaLocationDot, FaMagnifyingGlass,
   FaRotate, FaXmark
 } from 'react-icons/fa6';
