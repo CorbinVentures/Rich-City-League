@@ -245,9 +245,11 @@ export default function VirginiaWorld() {
         });
         map.on('click','rch-world-clusters',(event:any)=>{
           const f=event.features?.[0],source=map.getSource('rch-world-points');
-          if(f&&source?.getClusterExpansionZoom) source.getClusterExpansionZoom(f.properties.cluster_id,(err:any,zoom:number)=>{
-            if(!err) map.easeTo({center:f.geometry.coordinates,zoom:zoom??map.getZoom()+2,duration:700});
-          });
+          if(f&&source?.getClusterExpansionZoom) {
+            source.getClusterExpansionZoom(f.properties.cluster_id)
+              .then((zoom:number)=>map.easeTo({center:f.geometry.coordinates,zoom,duration:700}))
+              .catch(()=>map.easeTo({center:f.geometry.coordinates,zoom:map.getZoom()+2,duration:700}));
+          }
         });
         map.on('click','rch-world-pins',(event:any)=>{
           const f=event.features?.[0];
