@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.richcityhoops.app",
+      "sha256_cert_fingerprints": [
+        "C8:8E:3D:2C:D3:4E:85:04:31:60:C4:70:51:CD:4D:4E:20:84:39:B7:F2:AA:90:23:74:FA:C6:EA:07:BF:18:6E"
+      ]
+    }
+  }
+]
