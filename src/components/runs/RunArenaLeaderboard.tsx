@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaChartSimple, FaCircleCheck, FaCrown, FaFire, FaLocationDot, FaMedal, FaTrophy, FaXmark } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { buildRunLeaderboardDisplay, type RunLeaderboardEntry } from '@/lib/run-leaderboard-preview';
+import { buildRunLeaderboardDisplay, runPlayerInitials, type RunLeaderboardEntry } from '@/lib/run-leaderboard-preview';
 
 type RankScope = 'city' | 'state';
 type Leader = RunLeaderboardEntry;
@@ -17,7 +17,7 @@ const emptyScore = { run: '', points: '0', rebounds: '0', assists: '0', won: fal
 
 function RankAvatar({ name, src, size = 44 }: { name: string; src?: string | null; size?: number }) {
   return <span className="relative grid shrink-0 place-items-center overflow-hidden rounded-full border-2 border-[#4196ff]/70 bg-[#123358] font-black text-[#d8eaff]" style={{width:size,height:size}}>
-    {src ? <Image src={src} width={size} height={size} unoptimized alt="" className="h-full w-full object-cover" /> : <span className="text-sm">{name.slice(0,2).toUpperCase()}</span>}
+    {src ? <Image src={src} width={size} height={size} unoptimized alt="" className="h-full w-full object-cover" /> : <span className="text-sm">{runPlayerInitials(name)}</span>}
   </span>;
 }
 const toNumber = (value: number | string | null | undefined) => Number(value ?? 0);
@@ -151,7 +151,7 @@ export function RunArenaLeaderboard() {
   const myWins = leaders.find(entry=>entry.profile_id===user?.id)?.wins ?? 0;
   const ranked = useMemo(() => buildRunLeaderboardDisplay(leaders, scope, city), [leaders, scope, city]);
   const demoCount = ranked.filter(entry => entry.isDemo).length;
-  const shown = showAll ? ranked : ranked.slice(0,3);
+  const shown = showAll ? ranked : ranked.slice(0,6);
 
   return <>
     <section className="rch-arena-profile rounded-[22px] border border-[#235486]/65 p-4 sm:p-5" aria-label="My basketball REP">
@@ -176,15 +176,20 @@ export function RunArenaLeaderboard() {
       </div>
     </section>
 
-    <section className="rch-arena-panel mt-4 rounded-[22px] border border-[#234e78]/80 p-4 sm:p-5" aria-labelledby="rch-run-rank-title">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><h2 id="rch-run-rank-title" className="flex items-center gap-2 text-xl font-black tracking-tight text-white"><FaCrown className="text-[#f5cf69]"/> Leaderboard</h2>
-          <p className="mt-1 text-xs leading-5 text-[#a3bad5]">Verified competitive Open Run stats plus a sample rankings preview</p>
+    <section className="rch-arena-panel mt-4 min-w-0 rounded-[22px] border border-[#234e78]/80 p-3 sm:p-5" aria-labelledby="rch-run-rank-title">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 id="rch-run-rank-title" className="text-[clamp(1.35rem,5vw,1.9rem)] font-black leading-tight tracking-tight text-white">
+            Runs <span className="text-[#3198ff]">Leaderboard</span>
+          </h2>
+          <p className="mt-1 text-xs font-semibold text-[#a7c2de]">
+            {demoCount>0 ? 'Sample preview · Verified stats take the lead' : 'Verified competitive run rankings'}
+          </p>
         </div>
-        <div className="rch-arena-rank-tabs inline-flex rounded-full border border-[#2e587f] bg-[#071322] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
-          {(['city','state'] as const).map(value=><button type="button" key={value}
+        <div className="inline-flex shrink-0 rounded-full border border-[#275b8c] bg-[#06172a] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
+          {(['state','city'] as const).map(value=><button type="button" key={value}
             onClick={()=>{setScope(value);setShowAll(false);}}
-            className={'rounded-full px-4 py-2 transition '+(scope===value?'bg-[#268dff] text-white shadow-[0_0_15px_rgba(45,148,255,.4)]':'text-[#b9cce2]')}
+            className={'min-h-10 min-w-[70px] rounded-full px-4 transition sm:min-w-[88px] '+(scope===value?'bg-[#1685f9] text-white shadow-[0_0_15px_rgba(45,148,255,.25)]':'text-[#b9cce2] hover:text-white')}
             aria-pressed={scope===value}>{value==='city'?'City':'State'}</button>)}
         </div>
       </div>
@@ -198,26 +203,27 @@ export function RunArenaLeaderboard() {
         {demoCount>0 && <span><span className="text-[#f5cf69]">◇</span> {demoCount} sample player{demoCount===1?'':'s'}</span>}
       </div>}
       {ranksUnavailable && !loadingRanks && <p role="status" className="mt-3 rounded-lg border border-[#876334] bg-[#392710]/60 p-3 text-xs text-[#f9dba5]">Live verified rankings are temporarily unavailable. The players shown below are examples only.</p>}
-      {loadingRanks ? <p className="py-8 text-center text-sm text-[#9eb8d6]">Loading the rankings…</p> : <div className="mt-4 space-y-2">
-        {shown.map((entry,index)=><div key={entry.profile_id} className={'flex flex-wrap items-center gap-3 rounded-xl border p-3 '+(entry.isDemo?'border-[#355272] bg-[#11243b]/70':'border-[#266b9f] bg-[#102e4e]/90')}>
-          <span className={'grid size-8 shrink-0 place-items-center rounded-lg font-black '+(index===0?'bg-[#f1c55a] text-[#112039]':index===1?'bg-[#becde2] text-[#112039]':index===2?'bg-[#d7a173] text-[#112039]':'bg-[#204669] text-white')}>{index+1}</span>
-          <RankAvatar name={entry.player_name} src={entry.avatar_url} size={42}/>
-          <div className="min-w-[125px] flex-1">
-            <div className="flex min-w-0 items-center gap-2">
-              <p className="truncate text-sm font-black text-white">{entry.player_name}</p>
-              {entry.isDemo ? <span className="shrink-0 rounded-md border border-[#90733b] bg-[#584522]/50 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#f5dc9b]">Sample</span>
-                : <span className="shrink-0 rounded-md border border-[#31856a] bg-[#153f35] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#9df1d2]">Verified</span>}
+      {loadingRanks ? <p className="py-8 text-center text-sm text-[#9eb8d6]">Loading the rankings…</p> : <ol className="mt-4 space-y-3" aria-label="Competitive Runs player rankings">
+        {shown.map((entry,index)=><li key={entry.profile_id} className={'rch-run-rank-card '+(index===0?'rch-run-rank-card-first ':'')+(entry.isDemo?'rch-run-rank-card-sample':'rch-run-rank-card-verified')}>
+          <div className="rch-run-rank-identity">
+            <span className={'rch-run-rank-place '+(index===0?'rch-run-rank-gold':index===1?'rch-run-rank-silver':index===2?'rch-run-rank-bronze':'rch-run-rank-regular')} aria-label={`Rank ${index+1}`}>{index+1}</span>
+            <RankAvatar name={entry.player_name} src={entry.avatar_url} size={44}/>
+            <div className="rch-run-rank-details">
+              <p className="rch-run-rank-name" title={entry.player_name}>{entry.player_name}</p>
+              <span className={'rch-run-rank-status '+(entry.isDemo?'rch-run-rank-status-sample':'rch-run-rank-status-verified')}>{entry.isDemo?'Sample':'Verified'}</span>
+              <p className="rch-run-rank-location" title={`${entry.city}, VA · ${entry.games} games`}>{entry.city}, VA · {entry.games} game{entry.games===1?'':'s'}</p>
             </div>
-            <p className="mt-1 truncate text-xs text-[#a5bad2]">{entry.city}, VA · {entry.games} game{entry.games===1?'':'s'}</p>
           </div>
-          <div className="grid min-w-[150px] flex-1 grid-cols-4 gap-2 text-center sm:max-w-sm">
-            {[[statLabel(entry.ppg),'PPG'],[statLabel(entry.apg),'APG'],[statLabel(entry.rpg),'RPG'],[String(entry.wins),'W']].map(([value,label])=><div key={label}><p className="text-sm font-black text-[#56b1ff]">{value}</p><span className="text-[10px] text-[#b2cbe4]">{label}</span></div>)}
+          <div className="rch-run-rank-stats" aria-label={`${entry.player_name} basketball statistics`}>
+            {[[statLabel(entry.ppg),'PPG'],[statLabel(entry.apg),'APG'],[statLabel(entry.rpg),'RPG'],[String(entry.wins),'W']].map(([value,label])=><div key={label} className="rch-run-rank-stat">
+              <strong>{value}</strong><span>{label}</span>
+            </div>)}
           </div>
-        </div>)}
-      </div>}
+        </li>)}
+      </ol>}
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" onClick={()=>{setStatsOpen(true);setMessage('');}} className="rch-arena-add-stats inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#167aff] to-[#32a8ff] px-4 text-sm font-black text-white shadow-[0_4px_18px_rgba(32,145,255,.27)]"><FaChartSimple/> Add Stats <FaArrowRight/></button>
-        {ranked.length>3 && <button type="button" className="min-h-11 rounded-xl border border-[#355e8a] px-4 text-xs font-semibold text-[#cce1f5]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top three':'Full leaderboard'}</button>}
+        {ranked.length>6 && <button type="button" className="min-h-11 rounded-xl border border-[#355e8a] px-4 text-xs font-semibold text-[#cce1f5]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top six':'Full leaderboard'}</button>}
       </div>
       <p className="mt-3 text-[11px] leading-5 text-[#90abc8]">Verified players always take the top spots as their stats are approved. Sample players are fictional previews only: they do not earn REP or count as official results.</p>
     </section>
