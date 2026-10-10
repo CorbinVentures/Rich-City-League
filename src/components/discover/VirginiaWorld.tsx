@@ -496,7 +496,10 @@ export default function VirginiaWorld() {
       <div className="rch-world-map-shell">
         <div className="rch-world-map" ref={hostRef} role="region" aria-label="3D street map of Virginia" style={{opacity:mapShown?1:0,pointerEvents:mapShown?'auto':'none'}}/>
         {!mapShown&&<div className="rch-world-atlas" role="region" aria-label="Interactive Virginia geographic atlas">
-          <div className="rch-world-atlas-scene">
+          <div className="rch-world-atlas-scene" style={city?{
+            transform:'translateY(-50%) scale(1.35)',
+            transformOrigin:atlasPosition(city.lat,city.lon).left+' '+atlasPosition(city.lat,city.lon).top
+          }:undefined}>
             <div className="rch-world-atlas-art" aria-hidden="true"/>
             {fallbackCities.map(c=><button key={c.id} type="button" className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
               style={atlasPosition(c.lat,c.lon)} onClick={()=>moveCity(c)} aria-label={'Explore basketball near '+c.name}>
