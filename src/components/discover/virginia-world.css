@@ -228,3 +228,138 @@
 /* Keep the state border geographically proportional at narrow viewport sizes. */
 .rch-world-atlas-scene{left:0;right:0;top:50%;bottom:auto;width:100%;height:auto;aspect-ratio:1000/620;transform:translateY(-50%);transition:transform .65s ease}
 @media(prefers-reduced-motion:reduce){.rch-world-atlas-scene{transition:none}}
+
+
+/* Isolate Discover's immersive canvas from global RCH uniform-light page rules. */
+.rcl-platform-root > main.rch-world-page {
+  background:linear-gradient(158deg,#061b33 0%,#051524 45%,#061a2b 100%)!important;
+  color:#f2f8ff!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:clip!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-head h1 {
+  color:#ffffff!important;
+  text-shadow:0 2px 16px #04112280!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-head h1 span {
+  color:#4ca3ff!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-eyebrow {
+  color:#72b4ff!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-subtitle,
+.rcl-platform-root > main.rch-world-page .rch-world-back {
+  color:#bbd0e6!important;
+}
+/* Specificity deliberately exceeds the global input reset's attribute selectors. */
+.rcl-platform-root > main.rch-world-page .rch-world-tools label.rch-world-search input[type="search"] {
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0 2px!important;
+  background:transparent!important;
+  color:#f4faff!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-tools label.rch-world-search input[type="search"]::placeholder {
+  color:#a5c1db!important;
+  opacity:1!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-tools {
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-search{
+  min-width:0;
+  max-width:none;
+  overflow:hidden;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-locate-label {
+  white-space:nowrap!important;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-atlas-city {
+  touch-action:manipulation;
+}
+.rcl-platform-root > main.rch-world-page .rch-world-map-shell {
+  overflow:hidden;
+}
+@media(max-width:700px) {
+  .rcl-platform-root > main.rch-world-page .rch-world-tools {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 48px!important;
+    align-items:stretch!important;
+    gap:9px!important;
+  }
+  .rcl-platform-root > main.rch-world-page .rch-world-tools label.rch-world-search {
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    height:48px!important;
+    padding:0 12px!important;
+  }
+  .rcl-platform-root > main.rch-world-page .rch-world-locate {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+    min-width:48px!important;
+    max-width:48px!important;
+    width:48px!important;
+    height:48px!important;
+    font-size:16px!important;
+    line-height:1!important;
+    overflow:hidden!important;
+  }
+  .rcl-platform-root > main.rch-world-page .rch-world-locate-label {
+    display:none!important;
+  }
+  .rcl-platform-root > main.rch-world-page .rch-world-locate svg {
+    width:19px!important;
+    height:19px!important;
+    flex-shrink:0!important;
+  }
+  .rch-world-page .rch-world-head h1 {
+    font-size:clamp(26px,8.2vw,36px)!important;
+    line-height:1.11!important;
+    overflow-wrap:normal!important;
+    letter-spacing:-.055em!important;
+  }
+  .rch-world-page .rch-world-head h1 span {display:inline-block;}
+  .rch-world-page .rch-world-head {
+    width:100%;
+    max-width:100%;
+  }
+  /* Reduce marker crowding without sacrificing access to the cities through search. */
+  .rch-world-page .rch-world-atlas-city[data-city="alexandria"],
+  .rch-world-page .rch-world-atlas-city[data-city="fredericksburg"],
+  .rch-world-page .rch-world-atlas-city[data-city="charlottesville"],
+  .rch-world-page .rch-world-atlas-city[data-city="norfolk"] {
+    display:none!important;
+  }
+  .rch-world-page .rch-world-atlas-city-name{
+    max-width:83px;
+    text-overflow:ellipsis;
+    overflow:hidden;
+    font-size:9px!important;
+  }
+  .rch-world-page .rch-world-atlas-city[data-city="virginia-beach"] .rch-world-atlas-city-name {
+    max-width:86px;
+    white-space:normal;
+    text-align:center;
+  }
+  .rch-world-page .rch-world-map-hud {max-width:calc(100% - 82px)!important;}
+  .rch-world-page .rch-world-map-shell{height:370px;min-height:370px}
+  .rch-world-page .rch-world-head {margin-bottom:15px}
+  .rch-world-page .rch-world-filters {min-width:0;max-width:100%}
+}
