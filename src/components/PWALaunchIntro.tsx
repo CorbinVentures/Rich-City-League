@@ -38,16 +38,16 @@ export function PWALaunchIntro() {
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (!(event.target instanceof Element)) return;
-      const link = event.target.closest('a[href]');
+      const link = event.target.closest<HTMLAnchorElement>('a[href]');
       if (!link || link.hasAttribute('download') || (link.getAttribute('target') && link.getAttribute('target') !== '_self')) return;
       let next: URL;
       try { next = new URL(link.href, window.location.href); } catch { return; }
       const current = new URL(window.location.href);
       if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || authRoute(next.pathname)) return;
-      if (next.pathname === current.pathname && next.search === current.search) return;
+      if (next.pathname === current.pathname) return;
       // React may prevent default in a handler after the native capture phase.
       clear();
-      timer = window.setTimeout(() => { if (!event.defaultPrevented) arm(); }, 0);
+      timer = window.setTimeout(arm, 0);
     };
     document.addEventListener('click', onClick, true);
     window.addEventListener('popstate', arm);
@@ -56,7 +56,7 @@ export function PWALaunchIntro() {
       window.removeEventListener('popstate', arm);
       clear();
     };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     const root = document.documentElement;
