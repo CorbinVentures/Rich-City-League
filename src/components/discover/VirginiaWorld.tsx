@@ -28,7 +28,8 @@ type View = {lat:number; lon:number; zoom:number};
 type MapInstance = any;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-const WORLD_STYLE='https://tiles.openfreemap.org/styles/liberty';
+const WORLD_STYLE='https://tiles.openfreemap.org/styles/dark';
+const atlasPosition=(lat:number,lon:number)=>({left:((lon+84.15)/9.7*100).toFixed(2)+'%',top:((39.75-lat)/3.6*100).toFixed(2)+'%'});
 const INITIAL:View={lat:37.55,lon:-79.35,zoom:6.7};
 const FILTERS:{id:Filter;label:string}[]=[
   {id:'all',label:'Everything'},{id:'events',label:'Events'},
@@ -156,10 +157,14 @@ async function readAllUpcoming(db:any,table:'runs'|'network_events',now:string) 
 export default function VirginiaWorld() {
   const hostRef=useRef<HTMLDivElement|null>(null);
   const mapRef=useRef<MapInstance|null>(null);
+  const tilesReadyRef=useRef(false);
   const cityPinsRef=useRef<Array<{remove:()=>void;getElement:()=>HTMLElement}>>([]);
   const userPinRef=useRef<{remove:()=>void}|null>(null);
   const positionWatchRef=useRef<number|null>(null);
   const [mapReady,setMapReady]=useState(false);
+  const [tilesReady,setTilesReady]=useState(false);
+  const [mapMode,setMapMode]=useState<'atlas'|'3d'>('atlas');
+  const [mapFailure,setMapFailure]=useState(false);
   const [mapError,setMapError]=useState('');
   const [dataError,setDataError]=useState('');
   const [filter,setFilter]=useState<Filter>('all');
@@ -169,6 +174,7 @@ export default function VirginiaWorld() {
   const [activities,setActivities]=useState<WorldPoint[]>([]);
   const [courts,setCourts]=useState<WorldPoint[]>([]);
   const [searchCourts,setSearchCourts]=useState<WorldPoint[]>([]);
+  const [starterCourts,setStarterCourts]=useState<WorldPoint[]>([]);
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const [userLocation,setUserLocation]=useState<GeoPosition|null>(null);
   const [locationError,setLocationError]=useState('');
@@ -176,14 +182,22 @@ export default function VirginiaWorld() {
   const [moreCourts,setMoreCourts]=useState(false);
   const [courtLimit,setCourtLimit]=useState(300);
   const [loadingData,setLoadingData]=useState(true);
-  const allPoints=useMemo(()=>[...activities,...courts,...searchCourts.filter(p=>!courts.some(v=>v.id===p.id))],[activities,courts,searchCourts]);
+  const allPoints=useMemo(()=>{
+    const unique=new Map<string,WorldPoint>();
+    for(const point of [...activities,...courts,...searchCourts,...starterCourts])unique.set(point.id,point);
+    return [...unique.values()];
+  },[activities,courts,searchCourts,starterCourts]);
   const selected=allPoints.find(p=>p.id===selectedId)??null;
+  const fallbackCities=useMemo(()=>VIRGINIA_CITIES.filter(c=>['richmond','roanoke','bristol','charlottesville','fredericksburg','alexandria','norfolk','virginia-beach'].includes(c.id)),[]);
+  const mapShown=mapMode==='3d'&&mapReady&&tilesReady&&!mapFailure;
+  const cityMapPoints=useMemo(()=>allPoints.filter(p=>p.kind!=='court'||Boolean(cityId)).filter(p=>!cityId || milesBetween(p,VIRGINIA_CITIES.find(c=>c.id===cityId)!)<32).slice(0,36),[allPoints,cityId]);
   const shown=useMemo(()=>allPoints.filter(p=>pointMatchesFilter(p,filter) &&
     (!query.trim() || (p.title+' '+p.city+' '+p.detail).toLowerCase().includes(query.trim().toLowerCase()))
   ),[allPoints,filter,query]);
   const city=VIRGINIA_CITIES.find(c=>c.id===cityId)??null;
   const displayed=useMemo(()=>shown
     .filter(p=>!city || milesBetween(p,city)<32)
+    .filter(p=>p.kind!=='court'||!(/\bOSM\b|^Basketball Court ·|^Fairfax County Basketball Court #/i.test(p.title)))
     .sort((a,b)=>userLocation
       ? milesBetween(a,userLocation)-milesBetween(b,userLocation)
       : a.startsAt && b.startsAt ? a.startsAt.localeCompare(b.startsAt) : a.kind==='court'?1:-1)
@@ -226,6 +240,13 @@ export default function VirginiaWorld() {
         attributionControl:true});
       mapRef.current=map;
       map.addControl(new lib.NavigationControl({showCompass:true}),'top-right');
+      map.on('sourcedata',(event:any)=>{
+        if(!active)return;
+        if(event.sourceId==='openmaptiles' && event.sourceDataType==='content' && (event.tile||event.coord)){
+          tilesReadyRef.current=true;
+          setTilesReady(true);
+        }
+      });
       map.on('load',()=>{
         if(!active)return;
         tintMap(map);addLayers(map);
@@ -264,9 +285,13 @@ export default function VirginiaWorld() {
       });
       map.on('error',(event:any)=>{
         if(!active)return;
-        if(!map?.loaded() && event?.error?.message) setMapError('Map tiles are temporarily unavailable. You can still browse the registered activity below.');
+        if(event?.error) {
+          setMapFailure(true);
+          setMapMode('atlas');
+          setMapError('3D map tiles could not load. Virginia Atlas remains available.');
+        }
       });
-    }).catch(()=>{if(active)setMapError('The interactive 3D map is unavailable on this connection. Browse by city below.');});
+    }).catch(()=>{if(active){setMapFailure(true);setMapError('3D mode is unavailable here. The Virginia Atlas is still interactive.');}});
     if(navigator.permissions?.query) {
       navigator.permissions.query({name:'geolocation'}).then(status=>{
         if(active&&status.state==='granted') startLocation(false);
@@ -341,6 +366,26 @@ export default function VirginiaWorld() {
     if(source?.setData)source.setData(featureCollection(shown.filter(p=>view.zoom>=9.2 || p.kind!=='court' || searchIds.has(p.id))));
   },[mapReady,shown,searchCourts,view.zoom]);
 
+  // Show named, usable locations immediately, without depending on GPS or a 3D map.
+  useEffect(()=>{
+    let cancelled=false;
+    async function loadStarterCourts(){
+      const db=getSupabaseClient() as any;
+      if(!db)return;
+      const {data,error}=await db.rpc('search_run_venues',{p_search:'',p_limit:40});
+      if(cancelled||error)return;
+      setStarterCourts(((data??[]) as CourtRow[]).filter(row=>virginiaCoordinates(row.latitude,row.longitude))
+        .map(row=>({
+          id:'court:'+row.slug,kind:'court' as const,title:row.name,detail:row.address,
+          city:row.locality,lat:row.latitude!,lon:row.longitude!,precision:'venue' as const,
+          href:'/runs?court='+encodeURIComponent(row.slug),access:row.access_type,
+          verified:row.verification_status,type:row.venue_type,slug:row.slug
+        })));
+    }
+    loadStarterCourts();
+    return()=>{cancelled=true;};
+  },[]);
+
   // Statewide court search works even before a user flies into a city.
   useEffect(()=>{
     const search=query.trim();
@@ -365,16 +410,18 @@ export default function VirginiaWorld() {
   },[query]);
 
   useEffect(()=>{
-    if(!mapReady || view.zoom<9.2){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
+    if(!cityId && (!mapReady || view.zoom<9.2)){setCourts([]);setMoreCourts(false);setLoadingCourts(false);return;}
     let cancelled=false;
     const timer=window.setTimeout(async()=>{
       const db=getSupabaseClient() as any;if(!db)return;
       setLoadingCourts(true);
       try{
         const map=mapRef.current;
-        if(!map)return;
-        const center=map.getCenter(),bounds=map.getBounds();
-        const radius=Math.min(140,Math.max(2,Math.ceil(milesBetween(
+        const selectedCity=VIRGINIA_CITIES.find(item=>item.id===cityId);
+        if(!map && !selectedCity)return;
+        const center=selectedCity?{lat:selectedCity.lat,lng:selectedCity.lon}:map.getCenter();
+        const bounds=map?.getBounds();
+        const radius=selectedCity?26:Math.min(140,Math.max(2,Math.ceil(milesBetween(
           {lat:center.lat,lon:center.lng},{lat:bounds.getNorthEast().lat,lon:bounds.getNorthEast().lng}))));
         const result:CourtRow[]=[];
         let full=false;
@@ -402,8 +449,17 @@ export default function VirginiaWorld() {
       finally{if(!cancelled)setLoadingCourts(false);}
     },260);
     return()=>{cancelled=true;window.clearTimeout(timer);};
-  },[mapReady,view.lat,view.lon,view.zoom,courtLimit]);
+  },[mapReady,view.lat,view.lon,view.zoom,courtLimit,cityId]);
 
+  const toggle3d=()=>{
+    if(mapMode==='3d'){setMapMode('atlas');return;}
+    if(mapFailure){setMapError('3D tiles are unavailable on this connection. Continue exploring the Virginia Atlas.');return;}
+    setMapMode('3d');
+    window.setTimeout(()=>mapRef.current?.resize(),100);
+    window.setTimeout(()=>{
+      if(!tilesReadyRef.current){setMapMode('atlas');setMapError('3D tiles timed out. Virginia Atlas is ready to explore.');}
+    },9000);
+  };
   const openPoint=(point:WorldPoint)=>{
     setSelectedId(point.id);
     mapRef.current?.easeTo({center:[point.lon,point.lat],zoom:Math.max(view.zoom,point.precision==='venue'?13:10.5),duration:700});
@@ -416,8 +472,8 @@ export default function VirginiaWorld() {
       <div>
         <Link href="/" className="rch-world-back"><FaArrowLeft/> Home</Link>
         <p className="rch-world-eyebrow">RICH CITY HOOPS / VIRGINIA WORLD</p>
-        <h1><FaCompass/> Discover Basketball</h1>
-        <p className="rch-world-subtitle">Your statewide basketball world. Explore cities, discover places, and find real activity.</p>
+        <h1>Discover <span>Basketball</span></h1>
+        <p className="rch-world-subtitle">Explore Virginia basketball. Find real courts, open runs and upcoming events.</p>
       </div>
       <button className="rch-world-overview" type="button" onClick={overview}><FaRotate/> Virginia overview</button>
     </div>
@@ -438,14 +494,37 @@ export default function VirginiaWorld() {
 
     <div className="rch-world-layout">
       <div className="rch-world-map-shell">
-        <div className="rch-world-map" ref={hostRef} role="region" aria-label="Interactive 3D map of Virginia basketball locations"/>
-        {!mapReady&&<div className="rch-world-loading" aria-live="polite">
-          <div className="rch-world-loading-symbol">VA</div>
-          <b>{mapError?'Map unavailable':'Building your Virginia basketball world…'}</b>
-          <span>{mapError||'Loading terrain, cities and courts'}</span>
+        <div className="rch-world-map" ref={hostRef} role="region" aria-label="3D street map of Virginia" style={{opacity:mapShown?1:0,pointerEvents:mapShown?'auto':'none'}}/>
+        {!mapShown&&<div className="rch-world-atlas" role="region" aria-label="Interactive Virginia geographic atlas">
+          <div className="rch-world-atlas-scene" style={city?{
+            transform:'translateY(-50%) scale(1.35)',
+            transformOrigin:atlasPosition(city.lat,city.lon).left+' '+atlasPosition(city.lat,city.lon).top
+          }:undefined}>
+            <div className="rch-world-atlas-art" aria-hidden="true"/>
+            {fallbackCities.map(c=><button key={c.id} type="button" className={'rch-world-atlas-city '+(cityId===c.id?'chosen':'')}
+              style={atlasPosition(c.lat,c.lon)} onClick={()=>moveCity(c)} aria-label={'Explore basketball near '+c.name}>
+              <span className="rch-world-atlas-city-icon">🏀</span>
+              <span className="rch-world-atlas-city-name">{c.name}</span>
+            </button>)}
+            {cityMapPoints.filter(point=>pointMatchesFilter(point,filter)).slice(0,18).map(point=>
+              <button key={point.id} className={'rch-world-atlas-event '+(selectedId===point.id?'chosen':'')}
+                type="button" style={atlasPosition(point.lat,point.lon)}
+                onClick={()=>openPoint(point)} aria-label={'View '+point.title} title={point.title}>
+                <span>{point.kind==='event'?'★':point.kind==='run'?'🏀':'·'}</span>
+              </button>)}
+            {userLocation&&virginiaCoordinates(userLocation.lat,userLocation.lon)&&
+              <span className="rch-world-atlas-you" style={atlasPosition(userLocation.lat,userLocation.lon)} aria-label="Your approximate location" title="You are here"/>}
+          </div>
         </div>}
-        {mapReady&&<div className="rch-world-map-hud"><span className="rch-world-online-dot"/> {city?.name||'Virginia'} <span>·</span> {view.zoom>=9.2?'City explorer':'Statewide explorer'}</div>}
-        {mapReady&&<div className="rch-world-layer-note"><FaLayerGroup/> Tilt, rotate and zoom to enter a city</div>}
+        <div className="rch-world-map-hud"><span className="rch-world-online-dot"/> {city?.name||'Virginia'} <span>·</span> {city?'City explorer':'Explore the state'}</div>
+        <div className="rch-world-map-controls">
+          <button type="button" className={mapMode==='3d'?'active':''} aria-pressed={mapShown}
+            onClick={toggle3d} title="Toggle detailed 3D street map">{mapMode==='3d'?'Atlas':'3D'}</button>
+          <button type="button" onClick={overview} aria-label="Return to Virginia overview"><FaRotate/></button>
+        </div>
+        {mapMode==='3d'&&!mapShown&&<div className="rch-world-3d-status" role="status">Preparing detailed map…</div>}
+        <div className="rch-world-layer-note"><FaLayerGroup/> {mapShown?'Pinch, tilt and rotate':'Tap a city to explore its basketball'}</div>
+        {mapError&&<div className="rch-world-map-error" role="status">{mapError}</div>}
         <div className="rch-world-map-credit">Court data © OpenStreetMap contributors · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">ODbL</a></div>
       </div>
 
@@ -471,29 +550,32 @@ export default function VirginiaWorld() {
           </div>
         </div>:<div className="rch-world-intro">
           <div className="rch-world-destination-icon">{city?.symbol||'🏀'}</div>
-          <h2>{city?.name||'The whole state. One basketball community.'}</h2>
-          <p>{city?city.landmark+' · Explore courts, runs and events around '+city.name+'.':'Tap a 3D city landmark to fly in, or search a city and explore its courts.'}</p>
+          <h2>{city?.name||'Where will you hoop?'}</h2>
+          <p>{city?city.landmark+' · Browse locations and scheduled activity around '+city.name+'.':'Discover real basketball locations across Virginia. Choose a city to explore more.'}</p>
           {city&&<button type="button" className="rch-world-text-button" onClick={overview}>← Return to Virginia</button>}
         </div>}
         <div className="rch-world-panel-divider"/>
         <div className="rch-world-panel-list-head">
-          <h3>{city?'Around '+city.name:userLocation?'Near your location':'Upcoming & mapped'}</h3>
-          <small>{loadingData||loadingCourts?'Updating…':shown.length+' on map'}</small>
+          <h3>{city?'Around '+city.name:'Where will you hoop?'}</h3>
+          <small>{loadingData||loadingCourts?'Updating…':displayed.length+' places to explore'}</small>
         </div>
         {dataError&&<p className="rch-world-warning" role="status">{dataError}</p>}
         {locationError&&<p className="rch-world-warning" role="status">{locationError}</p>}
         <div className="rch-world-list">
           {displayed.map(item=><button type="button" key={item.id} onClick={()=>openPoint(item)}
             className={selectedId===item.id?'selected':''}>
-            <span className="rch-world-list-icon">{item.kind==='court'?'🏀':item.kind==='event'?'🎟️':'🔥'}</span>
-            <span className="rch-world-list-copy"><strong>{item.title}</strong><small>{item.city} · {item.startsAt?formatWhen(item.startsAt):item.kind==='court'?'Basketball location':'Upcoming'}</small></span>
+            <span className={'rch-world-list-icon kind-'+item.kind}>{item.kind==='court'?'🏀':item.kind==='event'?'★':'🔥'}</span>
+            <span className="rch-world-list-copy"><strong>{item.title}</strong>
+              <small><FaLocationDot/> {item.city}, VA <em>{item.kind==='court'?'Court':item.kind==='event'?'Event':item.type==='training'?'Training':'Open run'}</em></small>
+              <span className="rch-world-list-bottom">{item.startsAt?formatWhen(item.startsAt):item.verified==='community'?'Location · access unverified':item.type==='indoor'?'Indoor basketball venue':'Basketball location'}</span>
+            </span>
             <FaArrowRight/>
           </button>)}
           {!displayed.length&&<div className="rch-world-empty">{loadingData?'Finding registered activity…':
-            view.zoom<9.2?'Choose a city to explore its mapped venues and basketball activity.':
+            !cityId?'Select a city to reveal more mapped basketball courts.':
             'No matching locations are displayed here yet. Try another filter or move the map.'}</div>}
         </div>
-        {moreCourts&&view.zoom>=9.2&&<button type="button" className="rch-world-more" disabled={loadingCourts}
+        {moreCourts&&Boolean(cityId)&&<button type="button" className="rch-world-more" disabled={loadingCourts}
           onClick={()=>setCourtLimit(v=>v+300)}>Load more mapped courts</button>}
         <p className="rch-world-data-note">Only published events and upcoming runs are displayed. Unverified court listings do not guarantee public access.</p>
         <div className="rch-world-shortcuts"><Link href="/runs">Open Runs <FaArrowRight/></Link><Link href="/network">VA Network <FaArrowRight/></Link><Link href="/discover/community">People & REP <FaArrowRight/></Link></div>
