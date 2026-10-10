@@ -136,6 +136,7 @@ export function PWAInstallExperience() {
   const [ios, setIos] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [installed, setInstalled] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
 
   const suppressPrompt = pathname === '/app'
     || pathname === '/access'
@@ -220,15 +221,22 @@ export function PWAInstallExperience() {
   }, []);
 
   useEffect(() => {
-    if (installed || !eligible || suppressPrompt || Date.now() < readDismissedUntil()) {
+    if (installed || (!eligible && !registrationComplete)
+      || (suppressPrompt && !registrationComplete)
+      || (!registrationComplete && Date.now() < readDismissedUntil())) {
       setVisible(false);
+      return;
+    }
+    if (registrationComplete) {
+      setVisible(true);
       return;
     }
     const timer = window.setTimeout(() => setVisible(true), 2200);
     return () => window.clearTimeout(timer);
-  }, [eligible, installed, suppressPrompt]);
+  }, [eligible, installed, registrationComplete, suppressPrompt]);
 
   const dismiss = () => {
+    setRegistrationComplete(false);
     storeDismissedUntil(TWO_WEEKS);
     setVisible(false);
     setShowIOSGuide(false);
@@ -239,7 +247,12 @@ export function PWAInstallExperience() {
       setShowIOSGuide(true);
       return;
     }
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Android Chrome may not provide a native event yet; the app page
+      // provides manual PWA guidance and the verified APK option if available.
+      window.location.assign('/app');
+      return;
+    }
 
     await deferredPrompt.prompt();
     const choice = await deferredPrompt.userChoice;
@@ -251,6 +264,16 @@ export function PWAInstallExperience() {
       setVisible(false);
     }
   };
+
+  useEffect(() => {
+    const onSignupComplete = () => setRegistrationComplete(true);
+    window.addEventListener('rch:registration-complete', onSignupComplete);
+    // OAuth registration navigates here after the protected profile RPC.
+    if (pathname === '/app' && new URLSearchParams(window.location.search).get('welcome') === '1') {
+      setRegistrationComplete(true);
+    }
+    return () => window.removeEventListener('rch:registration-complete', onSignupComplete);
+  }, [pathname]);
 
   if (installed || !visible) return null;
 
@@ -265,14 +288,14 @@ export function PWAInstallExperience() {
           <Image src="/icon?v=black-r-1" alt="" width={58} height={58} className="rcl-pwa-icon" unoptimized />
           <div>
             <span className="rcl-pwa-kicker">RCH APP</span>
-            <h2>{ios ? 'Add RCH to your Home Screen' : 'Install the RCH app'}</h2>
+            <h2>{registrationComplete ? 'Your profile is ready. Get the app!' : ios ? 'Add RCH to your Home Screen' : 'Install the RCH app'}</h2>
           </div>
         </div>
 
         {!showIOSGuide ? (
           <>
             <p className="rcl-pwa-copy">
-              Launch Rich City Hoops full-screen with app-style navigation, faster return access, push alerts, and Home Screen notification badges.
+              {registrationComplete ? 'One more step: add Rich City Hoops to your phone to open the full basketball platform.' : 'Launch Rich City Hoops full-screen with app-style navigation, faster return access, push alerts, and Home Screen notification badges.'}
             </p>
             <div className="rcl-pwa-actions">
               <button type="button" onClick={() => void install()} className="rcl-pwa-primary">
@@ -288,7 +311,7 @@ export function PWAInstallExperience() {
             <ol>
               <li><span>1</span><b>Tap Share</b><small>Use the square-with-arrow icon in your browser toolbar.</small></li>
               <li><span>2</span><b>Choose “Add to Home Screen”</b><small>Scroll the share sheet if the option is lower down.</small></li>
-              <li><span>3</span><b>Tap Add</b><small>Open RCL from the new icon, then enable alerts from Notifications to turn on push and the red unread badge.</small></li>
+              <li><span>3</span><b>Tap Add</b><small>Choose Open as Web App if shown, then open RCH from the new icon and enable alerts in Notifications.</small></li>
             </ol>
             <div className="rcl-pwa-actions">
               <button type="button" onClick={() => setShowIOSGuide(false)} className="rcl-pwa-primary">

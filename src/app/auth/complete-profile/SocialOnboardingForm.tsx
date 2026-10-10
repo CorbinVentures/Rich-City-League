@@ -152,7 +152,11 @@ export default function SocialOnboardingForm() {
         }
       }
 
-      window.location.replace(next);
+      // A completed OAuth profile should lead mobile-browser visitors to
+      // installation before the standalone-only basketball experience.
+      const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || navigatorWithStandalone.standalone === true;
+      window.location.replace(standalone ? next : '/app?welcome=1');
     } catch (saveError) {
       const code = typeof saveError === 'object' && saveError !== null && 'code' in saveError ? String((saveError as { code?: string }).code ?? '') : '';
       const message = saveError instanceof Error ? saveError.message : typeof saveError === 'object' && saveError !== null && 'message' in saveError ? String((saveError as { message?: string }).message ?? '') : '';
