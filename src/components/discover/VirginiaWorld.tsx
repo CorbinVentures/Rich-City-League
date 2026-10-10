@@ -321,7 +321,7 @@ export default function VirginiaWorld() {
             id:'event:'+e.id,kind:'event',title:e.title,
             detail:e.venue_name||'Venue information in event details',city:place.name,
             lat:place.lat,lon:place.lon,precision:'city',
-            href:'/network/events/'+encodeURIComponent(e.slug),
+            href:['/network','events',encodeURIComponent(e.slug)].join('/'),
             startsAt:e.starts_at,type:e.event_type,description:e.description
           });
         }
