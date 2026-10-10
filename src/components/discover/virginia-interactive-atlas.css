@@ -20,8 +20,8 @@
   position:absolute;z-index:4;border:0;background:transparent;padding:0;
   display:flex;align-items:center;flex-direction:column;cursor:pointer;
   color:#fff!important;
-  transform:translate(-50%,-100%) scale(var(--rch-counter-zoom,1));
-  transform-origin:center bottom;
+  transform:scale(var(--rch-counter-zoom,1)) translate(-50%,-100%);
+  transform-origin:top left;
   filter:drop-shadow(0 3px 8px #000b);
   min-width:44px;min-height:48px;justify-content:flex-end;
 }
@@ -52,8 +52,8 @@
 .rch-live-atlas-point.selected{background:#347eff;box-shadow:0 0 0 8px #419cff53}
 .rch-live-atlas-user{
   position:absolute;z-index:7;width:20px;height:20px;border-radius:50%;
-  transform:translate(-50%,-50%) scale(var(--rch-counter-zoom,1));
-  transform-origin:center;background:#3e9bff;border:4px solid white;
+  transform:scale(var(--rch-counter-zoom,1)) translate(-50%,-50%);
+  transform-origin:top left;background:#3e9bff;border:4px solid white;
   box-shadow:0 0 0 10px #388cff4e,0 0 20px #348dff;
   pointer-events:none;
 }
