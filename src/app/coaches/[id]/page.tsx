@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/Container';
+import { BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { getPublicClient } from '@/lib/public-data';
 import { FaAward, FaBolt, FaCircleCheck, FaCrown } from 'react-icons/fa6';
 
@@ -124,12 +125,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
               </div>
             ) : (
               <div className="mt-4 grid grid-cols-2 gap-3">
-                {earnedBadges.map((eb: any) => (
-                  <div key={eb.id} className="flex flex-col items-center justify-center rounded-xl border border-rcl-gold bg-rcl-gold/10 p-3 text-center shadow-lg transition">
-                    <span className="text-3xl mb-1">{eb.badge.icon || '🧠'}</span>
-                    <span className="block text-xs font-bold text-white truncate max-w-full">{eb.badge.name}</span>
-                  </div>
-                ))}
+                {earnedBadges.filter((eb:any) => eb.badge).map((eb:any) => <BadgeShowcaseCard key={eb.id} badge={eb.badge} earnedAt={eb.earned_at} compact />)}
               </div>
             )}
           </div>
