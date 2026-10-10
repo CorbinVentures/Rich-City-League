@@ -118,7 +118,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           }
         }
         setStep(4);
-        setMessage(session ? 'Your RCL identity is ready.' : 'Account created. Check your email to confirm your address.');
+        setMessage(session ? 'Your RCH identity is ready. Add the app to get started.' : 'Account created. Check your inbox to verify your email. Your welcome guide arrives after verification.');
+        // The shared install prompt opens as soon as registration succeeds.
+        window.dispatchEvent(new Event('rch:registration-complete'));
       } else {
         await resetPassword(email);
         setMessage('Password recovery instructions have been sent if this email exists.');
@@ -175,7 +177,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
       </div>}
 
-      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City League</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCL Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={mobileApp ? (signupHasSession ? "/discover" : "/auth/sign-in?next=/discover") : "/app"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">{mobileApp ? 'Discover RCH' : 'Get the RCH mobile app'}</Link></div>}
+      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City Hoops</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCH Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={mobileApp ? (signupHasSession ? "/discover" : "/auth/sign-in?next=/discover") : "/app"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">{mobileApp ? 'Discover RCH' : 'Get the RCH mobile app'}</Link></div>}
 
       {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
       {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
