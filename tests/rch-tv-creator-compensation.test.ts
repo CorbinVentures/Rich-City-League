@@ -15,6 +15,14 @@ describe('RCH TV creator compensation safety',()=>{
   expect(migration).toContain('largest');
   expect(migration).toContain('to authenticated');
  });
+ it('does not make browser-visible code capable of issuing Stripe transfers',()=>{
+  const route=source('src/app/api/admin/rch-tv/earnings/transfer/route.ts');
+  const sql=source('supabase/migrations/20261011142822_rch_tv_creator_stripe_connect_rails.sql');
+  expect(route).toContain('creatorTransfersEnabled()');
+  expect(route).toContain("status:'needs_review'");
+  expect(sql).toContain('earning_id uuid primary key');
+  expect(sql).toContain('row level security');
+ });
  it('never initiates a transfer by clicking the reconcile button',()=>{
   const page=source('src/app/admin/rch-tv/earnings/page.tsx');
   expect(page).not.toContain('/v1/transfers');

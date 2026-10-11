@@ -27,6 +27,7 @@ export default function RchCreatorCompensationAdmin(){
   const [periods,setPeriods]=useState<Row[]>([]);
   const [usage,setUsage]=useState<Row[]>([]);
   const [earnings,setEarnings]=useState<Row[]>([]);
+  const [transfers,setTransfers]=useState<Row[]>([]);
   const [busy,setBusy]=useState(false);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
@@ -45,12 +46,13 @@ export default function RchCreatorCompensationAdmin(){
       db.from('rch_creator_periods').select('*').order('month',{ascending:false}).limit(36),
       db.from('rch_creator_verified_usage').select('*').limit(1000),
       db.from('rch_creator_earnings').select('*').order('month',{ascending:false}).limit(1000),
+      db.from('rch_creator_disbursements').select('earning_id,status,stripe_transfer_id,initiated_at').limit(1000),
     ]);
     const failure=queries.find((q:Row)=>q.error);
     if(failure)setError(failure.error.message);
     else {
-      const [a,p,t,m,period,u,e]=queries.map((q:Row)=>q.data??[]);
-      setAccounts(a);setProfiles(p);setTitles(t);setMedia(m);setPeriods(period);setUsage(u);setEarnings(e);
+      const [a,p,t,m,period,u,e,x]=queries.map((q:Row)=>q.data??[]);
+      setAccounts(a);setProfiles(p);setTitles(t);setMedia(m);setPeriods(period);setUsage(u);setEarnings(e);setTransfers(x);
     }
     setLoading(false);
   },[authorized,db]);
@@ -122,6 +124,18 @@ export default function RchCreatorCompensationAdmin(){
     if(!window.confirm('Close and permanently lock this month? Verified viewing and the creator pool will be allocated. This does NOT pay anyone.'))return;
     await run(()=>db.rpc('rch_creator_close_month',{p_month:currentPeriod.month}),'Month closed and creator earnings allocated. Payments remain held.');
   }
+  async function transferViaStripe(row:Row){
+    if(!window.confirm('Transfer this approved earning from the RCH Stripe balance to the creator Connect account? This does not confirm their bank has received a payout.'))return;
+    await run(async()=>{
+      const response=await fetch('/api/admin/rch-tv/earnings/transfer',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({earningId:row.id})
+      });
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'Stripe transfer could not complete.');
+    },'Stripe transfer submitted. Verify the connected account balance and bank payout separately.');
+  }
+
   async function setPayout(row:Row,status:'approved'|'paid'){
     if(status==='paid'&&!paymentRefs[row.id]?.trim()){setError('Enter the confirmed external payment reference first.');return;}
     if(!window.confirm(status==='paid'?'Confirm the creator has already been paid outside RCH?':'Approve this held earning for separate external payment processing?'))return;
@@ -138,9 +152,9 @@ export default function RchCreatorCompensationAdmin(){
       <Link href="/admin/rch-tv" className="text-sm text-sky-300">← RCH TV administration</Link>
       <p className="mt-7 text-xs font-bold uppercase tracking-[.2em] text-rcl-orange">RCH TV / Creator finance</p>
       <h1 className="mt-2 font-display text-4xl font-black uppercase">Creator Compensation</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">Audited monthly revenue sharing and manual payout reconciliation. The 25% default pool is a proposal, not a guarantee or an active automatic payment program.</p>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">Audited monthly revenue sharing and manual payout reconciliation. The 25% default pool is a proposal, not a guarantee. Stripe onboarding and audited admin transfers are available when correctly configured; automatic payouts remain off.</p>
       <div className="mt-6 flex flex-wrap gap-3 text-xs font-bold">
-        <span className="rounded-full bg-amber-500/15 px-4 py-2 text-amber-200">Automatic payouts OFF</span>
+        <span className="rounded-full bg-amber-500/15 px-4 py-2 text-amber-200">Automatic payouts OFF · Stripe transfers require server activation</span>
         <span className="rounded-full bg-sky-500/15 px-4 py-2 text-sky-200">Evidence + signed rights required</span>
       </div>
       {error&&<p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
@@ -195,10 +209,10 @@ export default function RchCreatorCompensationAdmin(){
       <section className={card+' mt-8'}><h2 className="text-2xl font-bold">5 · Payout ledger</h2><p className="mt-2 text-sm text-white/60">Approve accounting records only after review. Actual funds must be sent through a verified external process; “Paid” is strictly a reconciliation entry, not a bank transfer.</p>
         <div className="mt-5 space-y-3">{!earnings.length&&<p className="text-sm text-white/50">No finalized earnings yet.</p>}
           {earnings.map(e=><article key={e.id} className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-4 md:grid-cols-[1fr_auto]">
-            <div><p className="font-bold">{profileName(e.creator_id)} · {monthLabel(e.month)}</p><p className="mt-1 text-xs text-white/50">{Number(e.qualified_seconds).toLocaleString()} qualified seconds · {e.status}</p>{e.payment_reference&&<p className="mt-1 break-all text-xs text-white/40">External ref: {e.payment_reference}</p>}</div>
+            <div><p className="font-bold">{profileName(e.creator_id)} · {monthLabel(e.month)}</p><p className="mt-1 text-xs text-white/50">{Number(e.qualified_seconds).toLocaleString()} qualified seconds · {e.status}</p>{e.payment_reference&&<p className="mt-1 break-all text-xs text-white/40">External ref: {e.payment_reference}</p>}{transfers.find(t=>t.earning_id===e.id)&&<p className="mt-1 text-xs text-sky-200">Stripe transfer: {transfers.find(t=>t.earning_id===e.id)?.status} · {transfers.find(t=>t.earning_id===e.id)?.stripe_transfer_id||'Investigation required'}</p>}</div>
             <div className="flex flex-wrap items-center gap-2"><b className="mr-2 text-xl">{money(Number(e.earned_cents))}</b>
               {e.status==='held'&&<button disabled={busy} className={button} onClick={()=>void setPayout(e,'approved')}>Approve</button>}
-              {e.status==='approved'&&<><input aria-label={'External payment reference for '+profileName(e.creator_id)} value={paymentRefs[e.id]??''} onChange={ev=>setPaymentRefs(p=>({...p,[e.id]:ev.target.value}))} placeholder="Confirmed payment reference" className={field+' max-w-64'}/><button disabled={busy||!paymentRefs[e.id]?.trim()} className={button} onClick={()=>void setPayout(e,'paid')}>Record paid</button></>}
+              {e.status==='approved'&&<>{!transfers.some(t=>t.earning_id===e.id)&&<button disabled={busy||!accounts.find(a=>a.profile_id===e.creator_id)?.stripe_payouts_enabled} className={button} onClick={()=>void transferViaStripe(e)}>Send via Stripe</button>}<input aria-label={'External payment reference for '+profileName(e.creator_id)} value={paymentRefs[e.id]??''} onChange={ev=>setPaymentRefs(p=>({...p,[e.id]:ev.target.value}))} placeholder="Confirmed payment reference" className={field+' max-w-64'}/><button disabled={busy||!paymentRefs[e.id]?.trim()} className={button} onClick={()=>void setPayout(e,'paid')}>Record paid</button></>}
             </div>
           </article>)}
         </div>
