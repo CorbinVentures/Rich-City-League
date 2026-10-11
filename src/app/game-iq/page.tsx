@@ -79,7 +79,7 @@ export default async function GameIQPublicPage() {
           <p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">COACHES + ADMIN</p>
           <p className="mt-2 text-sm text-white/50">The private RCL Game IQ scorebook contains advanced analytics, lineup intelligence and AI Coach tools.</p>
           <ScorebookAppLink className="mt-4 inline-flex rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black">Open staff scorebook →</ScorebookAppLink>
-          <p className="mt-2 text-xs text-[#64748B]">iPhone: tap Open staff scorebook to choose between the website and an experimental installed-app launcher.</p>
+          <p className="mt-2 text-xs text-[#64748B]">iPhone: tap Open staff scorebook to see the website link and instructions for the separately installed Scorebook app.</p>
         </div>
       </Container>
     </main>
