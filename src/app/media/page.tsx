@@ -8,6 +8,7 @@ import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
 import { resolveRchMediaUrl } from '@/lib/rch-tv-media';
+import { RchLiveViewer } from '@/components/media/RchLiveViewer';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -44,9 +45,6 @@ export default async function MediaPage() {
   const now = Date.now();
   const nextGame = [...games].filter((game) => !['completed', 'cancelled'].includes(game.status) && new Date(game.scheduled_at).getTime() >= now).sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
   const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? 'RCL Team';
-  const liveInputId = process.env.NEXT_PUBLIC_CLOUDFLARE_STREAM_LIVE_INPUT_ID?.trim();
-  const customerCode = process.env.NEXT_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE?.trim();
-  const playerUrl = liveInputId && customerCode ? `https://customer-${customerCode}.cloudflarestream.com/${liveInputId}/iframe` : null;
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <CorporatePageHero
@@ -69,7 +67,7 @@ export default async function MediaPage() {
 
       <section id="live-games" aria-labelledby="rch-tv-live-title" className="mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 shadow-[0_24px_70px_rgba(0,0,0,.22)]">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7"><div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">RCH TV Live</p><h2 id="rch-tv-live-title" className="mt-1 font-display text-2xl font-black uppercase">Live Games</h2></div><span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.16em] text-emerald-200">Free stream</span></div>
-        <div className="aspect-video w-full bg-black">{playerUrl ? <iframe src={playerUrl} title="RCH TV Live" className="h-full w-full border-0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /> : <div className="flex h-full flex-col items-center justify-center px-6 text-center"><FaPlay className="text-3xl text-rcl-blue"/><p className="mt-4 text-xs font-black uppercase tracking-[.25em] text-rcl-orange">Broadcast setup in progress</p><h3 className="mt-3 font-display text-2xl font-black uppercase sm:text-4xl">RCH TV Live is coming online.</h3><p className="mt-3 max-w-xl text-sm leading-6 text-white/40">When the live input is connected, official RCL games stream here free.</p></div>}</div>
+        <RchLiveViewer mode="live_games" />
         <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">{nextGame ? 'Next free broadcast' : 'RCH TV Live'}</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">{nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}</h3>{nextGame && <p className="mt-1 text-sm text-white/40">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}</div><div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No subscription required for games.</p></div></div>
       </section>
 
@@ -105,6 +103,7 @@ export default async function MediaPage() {
             <p className="mt-5 border-t border-white/10 pt-4 text-xs text-rcl-orange">Premiere to be announced</p>
           </div>
         </div>
+        <div className="mt-7 overflow-hidden rounded-2xl border border-white/15"><RchLiveViewer mode="the_pulse" /></div>
         {pulseEpisodes.length>0?<div className="mt-8"><h3 className="mb-5 font-display text-2xl font-black uppercase">Watch The Pulse</h3><MediaDirectory items={pulseEpisodes}/></div>:<div className="mt-7 rounded-xl border border-white/10 bg-black/20 p-5 text-sm text-white/55">Episodes will appear here when published. The show has not announced its first air date.</div>}
       </section>
 
