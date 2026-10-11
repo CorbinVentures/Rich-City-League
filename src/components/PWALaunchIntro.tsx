@@ -9,6 +9,7 @@ import {
   RCH_LAUNCH_FALLBACK_MS,
   RCH_LAUNCH_MIN_DISPLAY_MS,
   RCH_LAUNCH_ROUTE_DELAY_MS,
+  startRchLaunchAutoplay,
 } from '@/lib/pwa-launch';
 
 const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname);
@@ -24,6 +25,7 @@ export function PWALaunchIntro() {
   const bootInProgress = useRef(false);
   const bootVideoFinished = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const autoplayRequestedRef = useRef<HTMLVideoElement | null>(null);
   const checkReadyRef = useRef<() => void>(() => {});
   const dismissRef = useRef<() => void>(() => {});
   const [videoVisible, setVideoVisible] = useState(false);
@@ -176,6 +178,21 @@ export function PWALaunchIntro() {
     };
   }, [pathname]);
 
+  const requestVideoAutoplay = (video: HTMLVideoElement) => {
+    if (document.documentElement.dataset.rchLaunch !== 'active') return;
+    // loadeddata and canplay can fire together on Safari; one play() call
+    // avoids cancelling its own pending start with an AbortError.
+    if (autoplayRequestedRef.current === video) return;
+    autoplayRequestedRef.current = video;
+    void startRchLaunchAutoplay(video).then((started) => {
+      if (!started && autoplayRequestedRef.current === video) {
+        // Some iOS modes refuse even muted inline autoplay. Do not show
+        // WebKit's native play button or block entry waiting for a tap.
+        dismissRef.current();
+      }
+    });
+  };
+
   const onVideoEnded = () => {
     if (bootInProgress.current) {
       bootVideoFinished.current = true;
@@ -185,7 +202,8 @@ export function PWALaunchIntro() {
       const video = videoRef.current;
       if (video && document.documentElement.dataset.rchLaunch === 'active') {
         video.currentTime = 0;
-        void video.play().catch(() => {});
+        autoplayRequestedRef.current = null;
+        requestVideoAutoplay(video);
       }
     }
   };
@@ -204,12 +222,17 @@ export function PWALaunchIntro() {
             muted
             playsInline
             preload="auto"
-            onLoadedData={() => setVideoReady(true)}
-            onCanPlay={(event) => { void event.currentTarget.play().catch(() => {}); }}
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            onLoadedData={(event) => requestVideoAutoplay(event.currentTarget)}
+            onCanPlay={(event) => requestVideoAutoplay(event.currentTarget)}
+            onPlaying={() => setVideoReady(true)}
             onEnded={onVideoEnded}
             onError={() => {
-              bootVideoFinished.current = true;
-              checkReadyRef.current();
+              // Broken or unsupported media must never leave the app stuck
+              // at a poster frame (or require manual playback).
+              dismissRef.current();
             }}
           >
             <source src="/brand/rch-loader.mp4?v=full-intro-20261010" type="video/mp4" />

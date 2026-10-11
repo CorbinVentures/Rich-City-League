@@ -40,3 +40,22 @@ export function canDismissLaunch(
 ): boolean {
   return contentReady && (isBoot ? videoFinished : routeCanDismiss);
 }
+
+/**
+ * Request silent inline autoplay explicitly: WebKit may not promote muted
+ * React attributes into its playback policy until the media element loads.
+ * The caller must remove its loader if a device still denies playback,
+ * never leave a native "tap to play" prompt over the entire app.
+ */
+export async function startRchLaunchAutoplay(video: Pick<HTMLVideoElement, 'autoplay' | 'muted' | 'defaultMuted' | 'playsInline' | 'play'>): Promise<boolean> {
+  video.autoplay = true;
+  video.defaultMuted = true;
+  video.muted = true;
+  video.playsInline = true;
+  try {
+    await video.play();
+    return true;
+  } catch {
+    return false;
+  }
+}
