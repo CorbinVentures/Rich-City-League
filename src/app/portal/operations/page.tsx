@@ -1,6 +1,6 @@
-import { ScorebookAppLink } from '@/components/ScorebookAppLink';
 'use client';
 
+import { ScorebookAppLink } from '@/components/ScorebookAppLink';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
