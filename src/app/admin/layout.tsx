@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AdminTopbar, AdminWorkspace } from '@/components/AdminWorkspace';
+import { AdminRouteFrame } from '@/components/AdminRouteFrame';
 import './admin-theme.css';
 
 export const metadata: Metadata = {
@@ -9,15 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PrivateAreaLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="rch-admin-area">
-      <div className="rch-admin-frame">
-        <AdminWorkspace />
-        <div className="rch-admin-content">
-          <AdminTopbar />
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+  return <AdminRouteFrame>{children}</AdminRouteFrame>;
 }
