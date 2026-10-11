@@ -1,0 +1,235 @@
+/*
+ * RCH TV live production — explicit scoped contrast system.
+ * The member UI has multiple high-specificity light-surface rules. Broadcast
+ * controls and on-video graphics must stay dark in BOTH studio and public TV.
+ */
+.rch-broadcast-root,
+.rch-broadcast-stage {
+  min-height:100dvh;
+  background:#050e17 !important;
+  color:#f3faff !important;
+  color-scheme:dark;
+}
+.rch-broadcast-root main.rch-broadcast-studio {
+  --studio-blue:#91cef2;
+  --studio-border:rgba(166,206,238,.2);
+  min-height:100dvh;
+  padding-bottom:max(20px,env(safe-area-inset-bottom));
+  background:radial-gradient(ellipse at 70% -15%,rgba(37,111,158,.19),transparent 38rem),#050e17 !important;
+  color:#f3faff !important;
+}
+.rch-broadcast-root main.rch-broadcast-studio :where(h1,h2,h3,strong) {color:#f7fbff!important}
+.rch-broadcast-root .rch-studio-shell {min-width:0;}
+.rch-broadcast-root .rch-studio-heading {min-height:54px;}
+.rch-broadcast-root .rch-studio-mode-switch {margin-top:8px;margin-bottom:10px;}
+.rch-broadcast-root .rch-studio-card,
+.rch-broadcast-root .rch-studio-preview-sticky {
+  min-width:0;
+  border:1px solid var(--studio-border) !important;
+  border-radius:14px !important;
+  background:linear-gradient(155deg,#112338,#0a1725 85%) !important;
+  color:#f5faff !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.25);
+}
+.rch-broadcast-root .rch-studio-preview-sticky {overflow:hidden}
+.rch-broadcast-root .rch-studio-preview-head {
+  min-height:38px;
+  border-bottom:1px solid var(--studio-border) !important;
+  background:#0c1928 !important;
+  color:#f7fbff !important;
+}
+.rch-broadcast-root .rch-studio-video-frame {
+  position:relative;
+  width:100%;
+  background:#010509 !important;
+  border:0 !important;
+  isolation:isolate;
+}
+.rch-broadcast-root .rch-studio-video-frame video {
+  background:#010509 !important;
+  display:block;
+}
+.rch-broadcast-root .rch-studio-actions {
+  border-top:1px solid var(--studio-border)!important;
+  background:#0b1928!important;
+}
+.rch-broadcast-root .rch-studio-button,
+.rch-broadcast-root .rch-studio-tab {
+  background:#142c42 !important;
+  border:1px solid #35536d !important;
+  color:#f1f8ff !important;
+  box-shadow:none !important;
+  text-decoration:none !important;
+  font-family:inherit;
+  line-height:1.3;
+  transition:background-color .12s ease,border-color .12s ease;
+}
+.rch-broadcast-root .rch-studio-button:hover:not(:disabled),
+.rch-broadcast-root .rch-studio-tab:hover {
+  background:#1d3c57!important;
+}
+.rch-broadcast-root .rch-studio-button:focus-visible,
+.rch-broadcast-root .rch-studio-tab:focus-visible,
+.rch-broadcast-root .rch-studio-card :is(input,select):focus-visible {
+  outline:2px solid #91cef2!important;
+  outline-offset:2px;
+}
+.rch-broadcast-root .rch-studio-button-selected,
+.rch-broadcast-root .rch-studio-tab.is-active {
+  background:#1a3952!important;
+  border-color:#91cef2!important;
+  color:#ccedff!important;
+}
+.rch-broadcast-root .rch-studio-primary {
+  background:#91cef2!important;
+  border-color:#91cef2!important;
+  color:#061521!important;
+}
+.rch-broadcast-root .rch-studio-primary:hover:not(:disabled) {
+  background:#bbe6ff!important;
+  color:#05121e!important;
+}
+.rch-broadcast-root .rch-studio-live {
+  background:#dc3545!important;
+  border-color:#ee6570!important;
+  color:#fff!important;
+}
+.rch-broadcast-root .rch-studio-stop {color:#d7e6f2!important}
+.rch-broadcast-root .rch-studio-publish {
+  background:#193b4b!important;
+  border-color:#4c9db8!important;
+  color:#b6eaff!important;
+}
+.rch-broadcast-root .rch-studio-onair {
+  background:#142332!important;
+  border:1px solid #334c61!important;
+  color:#a5bacc!important;
+}
+.rch-broadcast-root .rch-studio-onair.is-live {
+  background:#482025!important;
+  border-color:#e04d58!important;
+  color:#ffe0e0!important;
+}
+.rch-broadcast-root .rch-studio-alert {
+  background:#3a1923!important;
+  border:1px solid rgba(249,117,129,.5)!important;
+  color:#ffd4d9!important;
+}
+.rch-broadcast-root .rch-studio-message {
+  background:#103046!important;
+  border:1px solid rgba(145,206,242,.36)!important;
+  color:#b6e5fb!important;
+}
+.rch-broadcast-root .rch-studio-card :is(input:not([type="checkbox"]):not([type="color"]),select,textarea) {
+  color:#f7fbff!important;
+  background:#06121e!important;
+  border:1px solid #3d5b75!important;
+  border-radius:8px!important;
+  width:100%;
+  font-size:14px;
+  margin-top:7px;
+  box-shadow:none!important;
+  min-height:44px;
+}
+.rch-broadcast-root .rch-studio-card :is(input,textarea)::placeholder {color:#91acc0!important}
+.rch-broadcast-root .rch-studio-card select option {color:#fff;background:#101e2d}
+.rch-broadcast-root .rch-studio-card input[type="checkbox"] {accent-color:#91cef2}
+.rch-broadcast-root .rch-studio-score-stepper {
+  border:1px solid #28455d!important;
+  background:#081827!important;
+}
+.rch-broadcast-root .rch-studio-tabs {display:none}
+.rch-broadcast-root .rch-studio-panels {align-items:start}
+@media (max-width:767px) {
+  .rch-broadcast-root .rch-studio-shell {padding:8px 10px 16px!important;}
+  .rch-broadcast-root .rch-studio-heading {min-height:45px;}
+  .rch-broadcast-root .rch-studio-preview-sticky {
+    position:sticky;
+    top:0;
+    z-index:40;
+    border-radius:10px!important;
+    box-shadow:0 7px 20px rgba(0,0,0,.65);
+  }
+  .rch-broadcast-root .rch-studio-preview-head {min-height:34px}
+  .rch-broadcast-root .rch-studio-video-frame {
+    aspect-ratio:16/9;
+    max-height:36svh;
+  }
+  .rch-broadcast-root .rch-studio-actions {
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:6px!important;
+    padding:8px!important;
+  }
+  .rch-broadcast-root .rch-studio-actions button {
+    font-size:11px!important;
+    min-width:0;
+    min-height:42px;
+    padding:6px!important;
+    white-space:normal;
+  }
+  .rch-broadcast-root .rch-studio-actions button:nth-child(-n+3) {grid-column:span 2;}
+  .rch-broadcast-root .rch-studio-actions button:nth-child(n+4) {grid-column:span 3;}
+  .rch-broadcast-root .rch-studio-tabs {display:grid!important;}
+  .rch-broadcast-root .rch-studio-tabs button {font-size:11px!important;}
+  .rch-broadcast-root .rch-studio-panels {
+    display:block!important;
+    margin-top:10px!important;
+  }
+  .rch-broadcast-root .rch-studio-panels > [data-panel] {display:none!important;}
+  .rch-broadcast-root .rch-studio-panels > [data-active="true"] {display:block!important;}
+  .rch-broadcast-root .rch-studio-card {border-radius:10px!important;}
+}
+
+/* On-video UI, including viewers outside /admin: prevent light-surface overrides. */
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay {
+  color:#fff!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.75);
+  isolation:isolate;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-brand,
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-lower,
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-ticker {
+  background:rgba(5,16,28,.94)!important;
+  color:#fff!important;
+  border-color:rgba(184,224,248,.35)!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-scoreboard,
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-pulse {
+  background:rgba(4,13,25,.96)!important;
+  border-color:rgba(180,212,239,.38)!important;
+  color:#fff!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-score-body {
+  color:#fff!important;
+  background:#07182a!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-score-top {
+  background:var(--rch-tv-accent)!important;
+  color:#061521!important;
+  text-shadow:none!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-live {
+  background:#c91e31!important;
+  color:#fff!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-sponsor {
+  color:#fff!important;
+  background:rgba(0,0,0,.9)!important;
+}
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-score-body span,
+:where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-score-body div {
+  color:#fff!important;
+}
+@media (max-width:520px) {
+  :where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-scoreboard {
+    max-width:min(100%,400px)!important;
+  }
+  :where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-lower {
+    padding:5px 9px!important;
+    font-size:10px!important;
+  }
+  :where(.rcl-platform-root,.rch-broadcast-root) .rch-tv-overlay.rch-tv-overlay .rch-tv-overlay-brand {
+    padding:6px 9px!important;
+  }
+}
