@@ -10,6 +10,7 @@ import { AchievementShareCard } from '@/components/AchievementShareCard';
 import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { ProfileViewInsights } from '@/components/ProfileViewInsights';
+import { ProfileWallFeed } from '@/components/social/ProfileWallFeed';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
 
 export const revalidate = 30;
@@ -28,10 +29,11 @@ type PlayerRow = {
 
 type StatRow = { game_id:string; points:number|null; rebounds:number|null; assists:number|null; steals:number|null; blocks:number|null; plus_minus:number|null };
 type ProfilePost = { id:string; author_id:string; body:string; media_urls:string[]; created_at:string; is_automated?:boolean; automation_type?:string|null; target_profile_id?:string|null };
-type ProfileTab = 'posts'|'highlights'|'stats'|'career'|'badges'|'media';
+type ProfileTab = 'wall'|'posts'|'highlights'|'stats'|'career'|'badges'|'media';
 
-const PROFILE_TABS: ProfileTab[] = ['posts','highlights','stats','career','badges','media'];
+const PROFILE_TABS: ProfileTab[] = ['wall','posts','highlights','stats','career','badges','media'];
 const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
+  wall:'Wall',
   posts:'Posts',
   highlights:'Highlights',
   stats:'Stats',
@@ -187,6 +189,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   const mediaRows = postRows.filter((post)=>(post.media_urls?.length ?? 0) > 0);
   const profileHref = `/social/profile/${id}`;
   const tabCounts:Record<ProfileTab,number> = {
+    wall:postRows.length,
     posts:authoredPosts.length,
     highlights:highlightRows.length,
     stats:basketball?.games ?? 0,
@@ -254,7 +257,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {PROFILE_TABS.map((tab)=>{
             const active=activeTab===tab;
-            const href=tab==='posts'?profileHref:`${profileHref}?tab=${tab}`;
+            const href=tab==='wall'?profileHref:`${profileHref}?tab=${tab}`;
             return <Link key={tab} href={href} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
               {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
               {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
@@ -264,6 +267,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
       </nav>
 
       <section className="px-4 py-6">
+        {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:authorMap.get(post.author_id) ?? null}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {activeTab==='highlights'&&<ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." />}
         {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
@@ -344,7 +348,7 @@ function ProfileFact({label,value}:{label:string;value:string}){
 
 function normalizeTab(value:string|string[]|undefined):ProfileTab{
   const candidate=Array.isArray(value)?value[0]:value;
-  return PROFILE_TABS.includes(candidate as ProfileTab)?candidate as ProfileTab:'posts';
+  return PROFILE_TABS.includes(candidate as ProfileTab)?candidate as ProfileTab:'wall';
 }
 
 function formatHeight(inches:number|null){
