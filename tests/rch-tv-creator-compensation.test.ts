@@ -8,7 +8,7 @@ describe('RCH TV creator compensation safety',()=>{
   expect(source('src/app/media/creators/dashboard/page.tsx')).toContain(".eq('creator_id',user.id)");
  });
  it('requires legal clearance and real evidence before allocating earnings',()=>{
-  const migration=source('supabase/migrations/20261011143000_rch_tv_creator_compensation.sql');
+  const migration=source('supabase/migrations/20261011141845_rch_tv_creator_compensation.sql');
   expect(migration).toContain('approved_requires_agreement');
   expect(migration).toContain('active_requires_rights');
   expect(migration).toContain('No eligible verified watch seconds');
