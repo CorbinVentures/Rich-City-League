@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { FaArrowRight, FaCircleCheck, FaFilm, FaRotate, FaUpload, FaUsers, FaVideo } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
+import type { IconType } from 'react-icons';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type MediaRecord = {
@@ -116,6 +117,12 @@ export default function RchTvAdminPage() {
   const published = media.filter(item => item.status==='published').length;
   const pendingCreators = applications.filter(item => item.status==='new'||item.status==='in_review').length;
   const licensed = acquisitions.filter(item => item.status==='licensed'||item.status==='published').length;
+  const stats: Array<{label:string;value:number;Icon:IconType}> = [
+    {label:'Published media',value:published,Icon:FaVideo},
+    {label:'Creator applications',value:applications.length,Icon:FaUsers},
+    {label:'Pending creator reviews',value:pendingCreators,Icon:FaUsers},
+    {label:'Licensed titles',value:licensed,Icon:FaFilm},
+  ];
   if (authLoading || loading) return <main className="min-h-screen px-5 py-12 text-white"><p role="status" className="text-sm text-white/60">Loading RCH TV operations…</p></main>;
   if (!authorized) return <main className="min-h-screen px-5 py-12 text-white"><h1 className="text-2xl font-bold">Administrator access required</h1><Link href="/media" className="mt-5 inline-block text-rcl-blue">Back to RCH TV</Link></main>;
 
@@ -134,12 +141,7 @@ export default function RchTvAdminPage() {
       {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
       {notice&&<p role="status" className="mt-5 rounded-xl border border-green-300/25 bg-green-300/10 p-4 text-sm text-green-200">{notice}</p>}
       <section aria-label="RCH TV status" className="mt-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          ['Published media',published,FaVideo],
-          ['Creator applications',applications.length,FaUsers],
-          ['Pending creator reviews',pendingCreators,FaUsers],
-          ['Licensed titles',licensed,FaFilm],
-        ].map(([label,value,Icon])=><div key={String(label)} className="rounded-xl border border-white/15 bg-white/[.035] p-5"><Icon className="text-rcl-blue" aria-hidden="true"/><p className="mt-3 text-xs text-white/60">{String(label)}</p><strong className="mt-1 block text-3xl tabular-nums">{Number(value)}</strong></div>)}
+        {stats.map(({label,value,Icon})=><div key={label} className="rounded-xl border border-white/15 bg-white/[.035] p-5"><Icon className="text-rcl-blue" aria-hidden="true"/><p className="mt-3 text-xs text-white/60">{label}</p><strong className="mt-1 block text-3xl tabular-nums">{value}</strong></div>)}
       </section>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
