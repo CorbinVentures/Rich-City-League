@@ -48,11 +48,11 @@ describe('RCH TV live production studio',()=>{
     expect(studio).toContain("publishTrack(track");
     expect(studio).toContain("saveConfig(config,true,mode)");
     expect(studio).toContain("saveConfig(config,false,mode)");
-    expect(studio).toContain('Camera / Canon capture input');
+    expect(studio).toContain('Video source');
     expect(studio).toContain('Increase');
-    expect(studio).toContain('Podcast title cards');
-    expect(studio).toContain('Publish graphics');
-    expect(studio).toContain('This version does not burn graphics');
+    expect(studio).toContain('The Pulse · Episode');
+    expect(studio).toContain('Publish Graphics');
+    expect(studio).toContain('Overlays are displayed over the RCH TV website feed');
   });
 
   it('connects both viewer channels to LiveKit with an offline fallback',()=>{
