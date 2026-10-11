@@ -1,3 +1,4 @@
+import { ScorebookAppLink, ScorebookIosLaunchTrial } from '@/components/ScorebookAppLink';
 import Link from 'next/link';
 import { getUpcomingGames } from '@/lib/game-schedule';
 import { Container } from '@/components/Container';
@@ -8,7 +9,6 @@ export const revalidate = 60;
 
 export default async function GameIQPublicPage() {
   const { teams, games, standings } = await getLeagueSnapshot();
-  const scorebookHref = 'https://rch-scorebook.vercel.app/';
   const completed = games.filter((game) => game.status === 'completed').slice(0, 12);
   const upcoming = getUpcomingGames(games).slice(0, 6);
 
@@ -78,7 +78,8 @@ export default async function GameIQPublicPage() {
         <div className="mt-10 rounded-2xl border border-rcl-gold/15 bg-rcl-gold/[.04] p-5">
           <p className="text-xs font-black uppercase tracking-[.25em] text-rcl-gold">COACHES + ADMIN</p>
           <p className="mt-2 text-sm text-white/50">The private RCL Game IQ scorebook contains advanced analytics, lineup intelligence and AI Coach tools.</p>
-          <Link href={scorebookHref} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black">Open staff scorebook →</Link>
+          <ScorebookAppLink className="mt-4 inline-flex rounded-xl bg-rcl-gold px-4 py-3 text-xs font-black uppercase tracking-widest text-black">Open staff scorebook →</ScorebookAppLink>
+          <ScorebookIosLaunchTrial />
         </div>
       </Container>
     </main>
