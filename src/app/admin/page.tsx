@@ -458,6 +458,7 @@ export default function AdminDashboardPage() {
               <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-white">
                 Platform <span className="text-rcl-gold">Overview</span>
               </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Manage Virginia basketball, monitor platform activity, and run league operations from one connected workspace.</p>
             </div>
 
             <div className="flex gap-2">
@@ -518,11 +519,18 @@ export default function AdminDashboardPage() {
                       { label: 'Games', value: analytics.games, foot: 'Scheduled & completed' },
                       { label: 'Posts', value: analytics.posts, foot: 'Social activity' },
                     ].map((stat, i) => (
-                      <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-lg text-center">
-                        <span className="block text-xs font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
-                        <span className="block font-display text-3xl font-extrabold text-white mt-1">{stat.value}</span>
+                      <div key={i} className="rch-admin-stat rounded-2xl border border-white/10 p-5">
+                        <span className="rch-admin-stat-label">{stat.label}</span>
+                        <strong className="rch-admin-stat-value tabular-nums">{Number(stat.value).toLocaleString()}</strong>
+                        <span className="rch-admin-stat-foot">{stat.foot}</span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Link href="/admin/control-center" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">Site controls <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Publishing, safety and platform tools</small></Link>
+                    <Link href="/admin/operations" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">League operations <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Tryouts, requests and competition management</small></Link>
+                    <Link href="/admin/network" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">Organization network <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Organizations, events and promotion review</small></Link>
                   </div>
 
                   {/* Audit logs */}
