@@ -11,6 +11,10 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const isStandalonePage = pathname === '/app' || pathname === '/profile' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/');
   const isImmersiveScorebook = pathname === '/portal/scorebook';
 
+  if (pathname === '/admin/rch-tv/studio') {
+    return <div className="rch-broadcast-root"><a className="rcl-skip-link" href="#rcl-content">Skip to broadcast studio</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
+  }
+
   if (isStandalonePage) {
     return <div className="rcl-platform-root rch-isolated-page"><a className="rcl-skip-link" href="#rcl-content">Skip to content</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
   }
