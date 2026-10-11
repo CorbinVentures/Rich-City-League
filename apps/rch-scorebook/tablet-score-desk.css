@@ -1,0 +1,96 @@
+/* RCH SCOREBOOK · TABLET GAME-DAY DESK
+   iPad-first layout. Uses the existing official scoring inputs/actions.
+   No local score calculations, no altered server API. */
+:root{--sb-blue:#3b82f6;--sb-navy:#0f2547;--sb-mist:#f6f9fc}
+.rch-ipad-desk{display:grid;grid-template-columns:minmax(215px,.83fr) minmax(360px,1.47fr) minmax(225px,.88fr);gap:12px;align-items:start;margin-top:12px}
+.rch-ipad-desk>.twocol{display:contents}
+.rch-ipad-live{min-width:0;display:flex;flex-direction:column;gap:10px}
+.rch-ipad-live>.tabs{margin:0!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px;gap:4px}
+.rch-ipad-live>.tabs button{min-width:0!important;padding:11px 6px!important;font-size:11px!important;min-height:42px}
+.rch-ipad-live>.panel{margin:0;min-height:395px;overflow:hidden}
+.rch-tablet-context{padding:13px 14px;margin:11px 0 9px;border-radius:14px;border:1px solid #bfddfa;background:linear-gradient(110deg,#eaf4ff,#f7fbff);color:#0f2547}
+.rch-tablet-context .label{font-size:10px;letter-spacing:.10em;font-weight:900;text-transform:uppercase;color:#3973b5}
+.rch-tablet-context .selection{display:block;font-size:21px;letter-spacing:-.04em;font-weight:1000;line-height:1.1;margin-top:5px;white-space:normal}
+.rch-tablet-context .hint{font-size:11px;color:#607994;margin-top:6px}
+.rch-ipad-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:9px}
+.rch-ipad-controls button{min-height:43px;border-radius:11px;padding:9px 12px;font-size:12px;font-weight:850;border:1px solid #c4d6ea;background:#fff;color:#143451}
+.rch-ipad-controls button[data-act="undo"]{border-color:#edbdc4;background:#fff5f6;color:#983c4d}
+.rch-ipad-controls button:disabled{opacity:.4}
+.rch-ipad-desk .controlpanel{min-width:0;min-height:470px;padding:14px!important;border-radius:17px!important}
+.rch-ipad-desk .controlpanel h2{font-size:17px!important}
+.rch-ipad-desk .controlpanel .chips{gap:5px;margin:13px 0!important}
+.rch-ipad-desk .controlpanel .chips button{max-width:100%;white-space:normal}
+.rch-ipad-desk .controlpanel>.row .eyebrow{color:#3170b9}
+.rch-ipad-desk .playergrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px;max-height:min(54vh,620px);overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 9px;scrollbar-width:thin;scrollbar-color:#acc9e9 #edf4fa}
+.rch-ipad-desk .player{min-height:81px!important;padding:9px 9px!important;display:grid;align-content:center;gap:2px}
+.rch-ipad-desk .player .id{font-size:12px!important;font-weight:1000}
+.rch-ipad-desk .player b{font-size:12px!important;font-weight:900}
+.rch-ipad-desk .player .mini{font-size:10px!important;margin-top:1px!important}
+.rch-ipad-desk .actiongrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+.rch-ipad-desk .act{min-height:80px!important;padding:9px 7px!important;font-size:15px!important;line-height:1.12;border-width:1.5px!important;touch-action:manipulation}
+.rch-ipad-desk .act small{font-size:10px!important}
+.rch-ipad-desk .act.good{background:#e6f7ee!important;border-color:#66c9a3!important;color:#136d4d!important}
+.rch-ipad-desk .act.miss{background:#fff2f3!important;border-color:#edafb8!important;color:#a34558!important}
+.rch-ipad-desk .act[data-arg="3make"]{background:#e7f0ff!important;border-color:#7db1f2!important;color:#1753b0!important}
+.rch-ipad-desk .act[data-arg="2make"]{background:#e5faf1!important;border-color:#64caa5!important;color:#116848!important}
+.rch-ipad-desk .act[data-arg="ftmake"]{background:#eef2ff!important;border-color:#9eb4eb!important;color:#294c9c!important}
+.rch-ipad-desk .act:active,.rch-ipad-desk .player:active{transform:scale(.965)!important}
+.rch-ipad-desk .actiongrid+.flex{gap:7px}
+.rch-ipad-desk .actiongrid+.flex .btn{min-height:44px}
+.rch-ipad-desk .timeline{max-height:min(51vh,600px)!important}
+.rch-ipad-desk .play{grid-template-columns:42px 1fr auto!important;gap:7px!important;padding:10px 1px!important}
+.rch-ipad-desk .play b{font-size:12px!important}
+.rch-ipad-desk .play .muted{font-size:10px!important}
+.rch-ipad-desk .court{max-width:100%!important}
+.rch-ipad-desk .lineupgrid{grid-template-columns:1fr!important}
+.rch-ipad-desk .lineupgrid label{padding:9px!important;font-size:12px}
+.rch-ipad-desk .field{margin:8px 0!important}
+.rch-ipad-desk .panel .row{align-items:start}
+.rch-ipad-desk .panel .row h3{font-size:16px}
+.rch-ipad-desk .notice{padding:12px!important;font-size:12px!important}
+.rch-ipad-desk .help{font-size:11px}
+.rch-ipad-desk .btn{min-height:42px}
+body.rch-score-tablet .header{position:sticky!important;top:0;z-index:80!important}
+body.rch-score-tablet .scorebar{position:sticky;top:69px;z-index:78!important;border-width:2px!important;box-shadow:0 8px 22px rgba(15,37,71,.11)!important;border-radius:18px!important}
+body.rch-score-tablet .teamscore b{font-size:clamp(35px,4vw,62px)!important}
+body.rch-score-tablet .teamscore small{font-size:12px!important}
+body.rch-score-tablet .centertime input{font-size:clamp(28px,3vw,46px)!important}
+body.rch-score-tablet .wrap{padding-top:10px!important}
+body.rch-score-tablet .gamenav{margin:4px 0 10px!important}
+body.rch-score-tablet .gamegrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+body.rch-score-tablet .game{min-height:178px!important;transition:transform .13s ease,border-color .13s ease}
+body.rch-score-tablet .game:active{transform:scale(.985)}
+body.rch-score-tablet .banner{padding:21px 25px!important}
+body.rch-score-tablet .viewtitle{margin:8px 0 14px!important}
+body.rch-score-tablet .viewtitle h1{font-size:clamp(28px,4vw,44px)!important}
+body.rch-score-tablet .gridstats{margin:13px 0!important}
+body.rch-score-tablet .tile{padding:14px!important}
+body.rch-score-tablet .tile strong{font-size:27px!important}
+body.rch-score-tablet .scorebar .teamscore{min-height:88px}
+.rch-ipad-hint{margin:8px 0;padding:10px 13px;border-radius:11px;border:1px solid #d9e4ef;background:#f2f7fe;color:#315272;font-size:12px;line-height:1.5}
+.rch-ipad-search-count{font-size:12px;color:#607994;margin:-7px 0 10px}
+@media (min-width:740px) and (max-width:1050px) {
+  .rch-ipad-desk{grid-template-columns:minmax(245px,.9fr) minmax(370px,1.5fr)}
+  .rch-ipad-live{grid-column:1/-1;display:grid;grid-template-columns:165px 1fr;gap:10px}
+  .rch-ipad-live>.tabs{display:grid;grid-template-columns:1fr 1fr;align-self:start}
+  .rch-ipad-live>.panel{min-height:170px}
+  .rch-ipad-desk .timeline{max-height:250px!important}
+  body.rch-score-tablet .gamegrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (min-width:740px) and (max-width:900px) {
+ body.rch-score-tablet .scorebar{top:58px}
+ body.rch-score-tablet .bottom{display:none!important}
+ body.rch-score-tablet .header .nav{display:flex!important}
+ body.rch-score-tablet .header .nav button{padding:8px!important;font-size:10px!important}
+ .rch-ipad-desk .actiongrid{gap:6px!important}
+ .rch-ipad-desk .act{font-size:13px!important}
+}
+@media (min-width:740px) and (max-width:780px) {
+  .rch-ipad-desk{grid-template-columns:minmax(225px,.9fr) minmax(310px,1.3fr)}
+  .rch-ipad-desk .actiongrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (min-width:740px) and (orientation:portrait) {
+  .rch-ipad-desk .playergrid{max-height:350px}
+  body.rch-score-tablet .scorebar{top:58px}
+  body.rch-score-tablet .wrap{padding-bottom:105px!important}
+}
