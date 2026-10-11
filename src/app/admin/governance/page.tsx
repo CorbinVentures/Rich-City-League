@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { Container } from '@/components/Container';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -121,11 +120,11 @@ export default function AdminGovernancePage() {
   const staffProfiles=profiles.filter(p=>['staff','admin'].includes(p.role));
   const coachProfiles=profiles.filter(p=>['coach','staff','admin'].includes(p.role));
 
-  if(authLoading) return <main><AdminWorkspace/><Container maxWidth="xl" className="py-16">Checking administrator access…</Container></main>;
-  if(!isAdmin) return <main><AdminWorkspace/><Container maxWidth="lg" className="py-16"><h1 className="rcl-display text-4xl uppercase">Admin access required</h1><Link href="/admin" className="rcl-link mt-5">Return to command center</Link></Container></main>;
+  if(authLoading) return <main><Container maxWidth="xl" className="py-16">Checking administrator access…</Container></main>;
+  if(!isAdmin) return <main><Container maxWidth="lg" className="py-16"><h1 className="rcl-display text-4xl uppercase">Admin access required</h1><Link href="/admin" className="rcl-link mt-5">Return to command center</Link></Container></main>;
 
   return <main className="min-h-screen pb-24 text-white">
-    <AdminWorkspace/>
+    
     <Container maxWidth="xl" className="py-10">
       <Link href="/admin" className="rcl-link">← Command center</Link>
       <div className="mt-8 flex flex-wrap items-end justify-between gap-5">
