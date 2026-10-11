@@ -13,7 +13,7 @@ describe('RCH TV creator compensation safety',()=>{
   expect(migration).toContain('active_requires_rights');
   expect(migration).toContain('No eligible verified watch seconds');
   expect(migration).toContain('largest');
-  expect(migration).toContain('Authenticated');
+  expect(migration).toContain('to authenticated');
  });
  it('never initiates a transfer by clicking the reconcile button',()=>{
   const page=source('src/app/admin/rch-tv/earnings/page.tsx');
