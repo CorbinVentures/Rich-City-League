@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { FaArrowRight, FaMagnifyingGlass } from 'react-icons/fa6';
+import { rchMediaKind } from '@/lib/rch-tv-media';
 
 type TeamItem = { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; division: string | null; season: string | null; wins: number | null; losses: number | null };
 type CoachItem = { id: string; profileId: string; name: string; title: string; team: string | null; teamSlug: string | null; wins: number | null; losses: number | null };
@@ -52,5 +53,36 @@ export function MediaDirectory({ items }: { items: MediaItem[] }) {
   const [category, setCategory] = useState('ALL');
   const categories = [...new Set(items.map((item) => item.type))];
   const filtered = items.filter((item) => category === 'ALL' || item.type === category);
-  return <div><div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-3">{['ALL', ...categories].map((item) => <button key={item} onClick={() => setCategory(item)} className={`whitespace-nowrap rounded-xl border px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${category === item ? 'border-rcl-orange bg-rcl-orange text-black' : 'border-white/10 text-white/45 hover:border-rcl-blue/35 hover:text-white'}`}>{item === 'ALL' ? 'All' : item}</button>)}</div>{!items.length ? <EmptyState title="The camera is ready." body="Official RCL photos, highlights, interviews, and features will appear here as they're published." /> : !filtered.length ? <EmptyState title="No media found." body="Choose another media type." /> : <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">{filtered.map((item) => <article key={item.id} className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55"><div className="aspect-video overflow-hidden bg-black"><img src={item.url} alt={item.title} className="h-full w-full object-cover" /></div><div className="p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.type}</p><h2 className="mt-2 font-display text-xl font-black uppercase">{item.title}</h2>{item.description && <p className="mt-2 text-sm leading-6 text-white/45">{item.description}</p>}<p className="mt-4 border-t border-white/10 pt-4 text-xs text-white/30">{new Date(item.createdAt).toLocaleDateString()}</p></div></article>)}</div>}</div>;
+  return <div>
+    <div className="mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-3" role="group" aria-label="Media type filter">
+      {['ALL', ...categories].map((item) => <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)} className={`whitespace-nowrap rounded-xl border px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${category === item ? 'border-rcl-orange bg-rcl-orange text-black' : 'border-white/10 text-white/45 hover:border-rcl-blue/35 hover:text-white'}`}>{item === 'ALL' ? 'All' : item}</button>)}
+    </div>
+    {!items.length
+      ? <EmptyState title="The camera is ready." body="RCH TV shows, interviews, photos and clips will appear here as they're published." />
+      : !filtered.length
+        ? <EmptyState title="No media found." body="Choose another media type." />
+        : <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((item) => {
+            const kind = rchMediaKind(item.type);
+            return <article key={item.id} className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55">
+              <div className="flex aspect-video items-center justify-center overflow-hidden bg-black">
+                {kind === 'video' ? (
+                  <video src={item.url} controls preload="metadata" playsInline className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>
+                ) : kind === 'image' ? (
+                  <img src={item.url} alt={item.title} loading="lazy" className="h-full w-full object-contain" />
+                ) : kind === 'audio' ? (
+                  <div className="w-full px-5 text-center"><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-rcl-blue">Listen on RCH TV</p><audio src={item.url} controls preload="none" className="w-full" aria-label={`Listen to ${item.title}`}>Your browser cannot play this audio.</audio></div>
+                ) : (
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-bold text-rcl-blue">Open media file <FaArrowRight className="ml-2 inline" /></a>
+                )}
+              </div>
+              <div className="p-5"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.type}</p>
+                <h2 className="mt-2 font-display text-xl font-black uppercase">{item.title}</h2>
+                {item.description && <p className="mt-2 text-sm leading-6 text-white/45">{item.description}</p>}
+                <p className="mt-4 border-t border-white/10 pt-4 text-xs text-white/50">{new Date(item.createdAt).toLocaleDateString('en-US')}</p>
+              </div>
+            </article>;
+          })}
+        </div>}
+  </div>;
 }
