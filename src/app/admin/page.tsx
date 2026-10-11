@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { AdminWorkspace } from '@/components/AdminWorkspace';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
@@ -432,7 +431,7 @@ export default function AdminDashboardPage() {
   }
 
   if (isAuthorizedAdmin === false) {
-    return (<main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(230,57,70,0.25),transparent_70%)] py-24 text-white flex items-center justify-center"><AdminWorkspace />
+    return (<main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(230,57,70,0.25),transparent_70%)] py-24 text-white flex items-center justify-center">
         <div className="rounded-3xl border border-rcl-red/30 bg-black/60 p-12 text-center max-w-md shadow-2xl backdrop-blur-md">
           <FaUserShield className="h-16 w-16 text-rcl-red mx-auto animate-bounce" />
           <h2 className="mt-6 font-display text-2xl font-black uppercase tracking-tight text-white">RESTRICTED SHIELD</h2>
