@@ -88,13 +88,13 @@ export default function RchBroadcastStudio() {
       .map((device, index) => ({ deviceId: device.deviceId, label: device.label || `Microphone ${index + 1}` })));
   }, []);
 
-  async function startPreview(preferredFacing: 'environment' | 'user' = facing) {
+  async function startPreview(preferredFacing: 'environment' | 'user' = facing, ignoreSelectedVideo = false) {
     if (!authorized || onAir) return;
     setBusy(true);setError('');setMessage('');
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser cannot access camera devices. Use HTTPS and a supported browser.');
       const next = await navigator.mediaDevices.getUserMedia({
-        video: videoId ? { deviceId: { ideal: videoId }, width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: preferredFacing } },
+        video: videoId && !ignoreSelectedVideo ? { deviceId: { ideal: videoId }, width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: preferredFacing } },
         audio: audioId ? { deviceId: { ideal: audioId }, echoCancellation: true } : { echoCancellation: true },
       });
       stream.current?.getTracks().forEach(track => track.stop());
@@ -123,7 +123,7 @@ export default function RchBroadcastStudio() {
     const nextFacing = facing === 'environment' ? 'user' : 'environment';
     setFacing(nextFacing);
     setVideoId('');
-    await startPreview(nextFacing);
+    await startPreview(nextFacing, true);
   }
 
   function stopPreview() {
