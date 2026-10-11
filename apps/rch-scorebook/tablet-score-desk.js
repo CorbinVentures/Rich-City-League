@@ -76,7 +76,8 @@ function mount(){
       hasVisitedGame=true;
       // First tablet session defaults to full stats: missed shots, turnovers
       // and defensive plays stay visible instead of hiding in Quick mode.
-      if(!localStorage.getItem('rch-sb-mode')){
+      if(localStorage.getItem('rch-scorebook-ipad-fullstats-init')!=='yes'){
+        localStorage.setItem('rch-scorebook-ipad-fullstats-init','yes');
         const pro=actions.querySelector('button[data-act="mode"][data-arg="pro"]');
         if(pro&&!pro.classList.contains('active')){
           pro.click();
