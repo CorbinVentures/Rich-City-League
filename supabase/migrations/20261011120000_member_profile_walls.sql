@@ -23,6 +23,9 @@ as $$
     );
 $$;
 
+-- The private schema is not Data API exposed; authenticated can only use this
+-- helper through the RLS policy, not as a public RPC.
+grant usage on schema private to authenticated;
 revoke all on function private.member_can_post_to_wall(uuid,uuid) from public, anon;
 grant execute on function private.member_can_post_to_wall(uuid,uuid) to authenticated;
 
