@@ -219,6 +219,7 @@ export default function RchTvAdminPage() {
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-2">
+        <Link href="/admin/rch-tv/earnings" className="flex items-center gap-4 rounded-xl border border-rcl-orange/30 bg-rcl-orange/5 p-5"><FaCircleCheck className="text-2xl text-rcl-orange"/><div><h2 className="font-bold">Creator compensation</h2><p className="mt-1 text-xs text-white/55">Review signed agreements, audited viewing and monthly payout records.</p></div><FaArrowRight className="ml-auto text-rcl-orange"/></Link>
         <Link href="/admin/rch-tv/acquisition" className="flex items-center gap-4 rounded-xl border border-white/15 bg-white/[.035] p-5"><FaFilm className="text-2xl text-rcl-blue"/><div><h2 className="font-bold">Rights acquisition pipeline</h2><p className="mt-1 text-xs text-white/55">Screen and license {acquisitions.length} tracked prospects before publication.</p></div><FaArrowRight className="ml-auto text-rcl-blue"/></Link>
         <Link href="/admin/basketball-os" className="flex items-center gap-4 rounded-xl border border-white/15 bg-white/[.035] p-5"><FaCircleCheck className="text-2xl text-rcl-blue"/><div><h2 className="font-bold">Highlight moderation</h2><p className="mt-1 text-xs text-white/55">Review and approve member-submitted basketball highlights.</p></div><FaArrowRight className="ml-auto text-rcl-blue"/></Link>
       </section>

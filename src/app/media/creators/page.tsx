@@ -41,7 +41,7 @@ export default function RchTvCreatorsPage(){
       accent="Curated, not crowded."
       description="RCH TV is building a statewide creator network for original basketball content—from 30-second Reels to documentaries, podcasts, photo stories and recurring shows. The goal is to make RCH the destination for Virginia hoops even when Rich City League is not playing."
       assetKey="media.cover"
-      actions={<><Link href="/media/creators/apply" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black text-white">Apply to create <FaArrowRight/></Link><Link href="/media" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/25 px-4 text-xs font-black text-rcl-blue"><FaArrowLeft/>RCH TV</Link></>}
+      actions={<><Link href="/media/creators/apply" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black text-white">Apply to create <FaArrowRight/></Link><Link href="/media/creators/dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/25 px-4 text-xs font-black text-rcl-blue">My creator earnings</Link><Link href="/media" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/25 px-4 text-xs font-black text-rcl-blue"><FaArrowLeft/>RCH TV</Link></>}
     />
 
     <Container maxWidth="xl" className="py-10 sm:py-12">
