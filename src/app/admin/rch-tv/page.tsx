@@ -8,7 +8,7 @@ import type { IconType } from 'react-icons';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type MediaRecord = {
-  id: string; title: string; media_type: string; status: string;
+  id: string; title: string; media_type: string; status: string; rch_tv_category: string;
   storage_path: string; description: string | null; created_at: string;
 };
 type CreatorApplication = {
@@ -20,6 +20,13 @@ type Acquisition = { id: string; status: string };
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const ALLOWED_TYPES = ['video/mp4','video/webm','image/jpeg','image/png','image/webp','audio/mpeg','audio/mp4','audio/wav'];
 const CREATOR_STAGES = ['new','in_review','contacted','selected','declined'] as const;
+const TV_CATEGORIES = [
+  { value:'live_games', label:'Live Games & Replays' },
+  { value:'the_pulse', label:'The Pulse — TV Show / Podcast' },
+  { value:'movies', label:'Movies' },
+  { value:'original_content', label:'Original Content' },
+] as const;
+const TV_CATEGORY_OPTIONS = [{ value:'general', label:'Uncategorized — not shown on RCH TV' },...TV_CATEGORIES];
 
 export default function RchTvAdminPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -37,12 +44,14 @@ export default function RchTvAdminPage() {
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [publishNow, setPublishNow] = useState(false);
+  const [category, setCategory] = useState<(typeof TV_CATEGORIES)[number]['value']>('original_content');
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
 
   const load = useCallback(async () => {
     if (!authorized || !db) return;
     setLoading(true); setError('');
     const [m,a,c] = await Promise.all([
-      db.from('media').select('id,title,media_type,status,storage_path,description,created_at')
+      db.from('media').select('id,title,media_type,status,storage_path,description,created_at,rch_tv_category')
         .order('created_at',{ascending:false}).limit(60),
       db.from('network_partner_inquiries')
         .select('id,organization_name,contact_name,contact_email,city,region,website_url,instagram_url,goals,status,created_at')
@@ -70,6 +79,7 @@ export default function RchTvAdminPage() {
     if (!ALLOWED_TYPES.includes(file.type) || file.size > MAX_UPLOAD_BYTES || file.size < 1) {
       return setError('Use an MP4, WebM, JPEG, PNG, WebP, MP3, M4A or WAV file up to 50 MB.');
     }
+    if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
     setBusy('upload'); setError(''); setNotice('');
     const safeExt = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
     const path = `${user.id}/rch-tv/${crypto.randomUUID()}.${safeExt}`;
@@ -81,7 +91,7 @@ export default function RchTvAdminPage() {
       : file.type.startsWith('audio/') ? 'audio' : 'image';
     const inserted = await db.from('media').insert({
       uploader_id:user.id,title:title.trim(),description:description.trim()||null,
-      storage_path:stored.data?.path || path,media_type:mediaType,
+      storage_path:stored.data?.path || path,media_type:mediaType,rch_tv_category:category,
       status:publishNow ? 'published' : 'draft',
     });
     if (inserted.error) {
@@ -90,7 +100,7 @@ export default function RchTvAdminPage() {
       setError(inserted.error.message);
     } else {
       setNotice(publishNow ? 'Media published to RCH TV. Allow up to 60 seconds for the public archive to refresh.' : 'Media uploaded as a draft. Publish it from the library below.');
-      setFile(null); setTitle(''); setDescription(''); setPublishNow(false);
+      setFile(null); setTitle(''); setDescription(''); setPublishNow(false); setRightsConfirmed(false); setCategory('original_content');
       await load();
     }
     setBusy('');
@@ -102,6 +112,15 @@ export default function RchTvAdminPage() {
     const r = await db.from('media').update({status}).eq('id',id);
     if (r.error) setError(r.error.message);
     else { setNotice(`Media ${status}.`); await load(); }
+    setBusy('');
+  }
+
+  async function changeCategory(id: string, category: string) {
+    if (!db || !TV_CATEGORY_OPTIONS.some(item=>item.value===category)) return;
+    setBusy(id); setError(''); setNotice('');
+    const result = await db.from('media').update({rch_tv_category:category}).eq('id',id);
+    if (result.error) setError(result.error.message);
+    else { setNotice('Editorial category updated. Only published items appear on the corresponding RCH TV section.'); await load(); }
     setBusy('');
   }
 
@@ -131,7 +150,7 @@ export default function RchTvAdminPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="text-xs font-bold uppercase tracking-[.2em] text-rcl-blue">Media operations</p>
           <h1 className="mt-2 text-3xl font-bold sm:text-4xl">RCH TV Studio</h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/60">Review founding creators, prepare the video library, and move licensed programs into a deliberate publishing workflow.</p>
+          <p className="mt-2 max-w-2xl text-sm text-white/60">Organize Live Games, The Pulse, Movies and Original Content; prepare licensed media and review founding creators.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={()=>void load()} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-bold"><FaRotate/>Refresh</button>
@@ -152,6 +171,8 @@ export default function RchTvAdminPage() {
             <label className="block text-xs font-bold text-white/70">Title<input required value={title} maxLength={180} onChange={e=>setTitle(e.target.value)} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Show, interview or highlight title"/></label>
             <label className="block text-xs font-bold text-white/70">Description<textarea value={description} maxLength={2000} onChange={e=>setDescription(e.target.value)} rows={3} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Tell viewers what this piece is about."/></label>
             <label className="block text-xs font-bold text-white/70">Media file<input type="file" accept="video/mp4,video/webm,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/wav" onChange={e=>setFile(e.target.files?.[0]||null)} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] p-3 text-sm text-white"/></label>
+            <label className="block text-xs font-bold text-white/70">RCH TV section<select value={category} onChange={e=>setCategory(e.target.value as (typeof TV_CATEGORIES)[number]['value'])} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white">{TV_CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+            <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I own this production or have permission to distribute it on RCH TV, including its audio and footage.</span></label>
             <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)}/>Publish immediately instead of saving as draft</label>
             <button disabled={busy==='upload'} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading…':publishNow?'Upload & publish':'Upload as draft'}</button>
           </form>
@@ -164,10 +185,10 @@ export default function RchTvAdminPage() {
             {!media.length&&<p className="rounded-xl border border-dashed border-white/20 p-5 text-sm text-white/60">No RCH TV media records yet. Upload your first licensed clip above.</p>}
             {media.map(item=><article key={item.id} className="rounded-xl border border-white/15 bg-black/15 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
+                <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
                 <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={supabase?.storage.from('media').getPublicUrl(item.storage_path).data.publicUrl}>Open file ↗</a>
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2"><label htmlFor={`rch-tv-category-${item.id}`} className="text-xs text-white/60">Section</label><select id={`rch-tv-category-${item.id}`} disabled={busy===item.id} value={TV_CATEGORY_OPTIONS.some(option=>option.value===item.rch_tv_category)?item.rch_tv_category:'general'} onChange={e=>void changeCategory(item.id,e.target.value)} className="min-h-9 max-w-full rounded-lg border border-white/20 bg-[#0b1724] px-2 text-xs text-white">{TV_CATEGORY_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>
                 {(['draft','published','archived'] as const).filter(status=>status!==item.status).map(status=><button key={status} type="button" disabled={busy===item.id} onClick={()=>void changeMediaStatus(item.id,status)} className="min-h-9 rounded-lg border border-white/20 px-3 text-xs font-semibold capitalize text-white/80 disabled:opacity-50">{status==='published'?'Publish':status==='draft'?'Unpublish':'Archive'}</button>)}
               </div>
             </article>)}
