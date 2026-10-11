@@ -8,10 +8,13 @@ const admin = (path: string) => readFileSync(join(root, 'src/app/admin', path), 
 describe('RCH administration frontend parity', () => {
   it('wraps every admin page in the same shared shell', () => {
     const layout = admin('layout.tsx');
-    expect(layout).toContain('<AdminWorkspace />');
-    expect(layout).toContain('<AdminTopbar />');
-    expect(layout).toContain('className="rch-admin-area"');
+    const frame = readFileSync(join(root, 'src/components/AdminRouteFrame.tsx'), 'utf8');
+    expect(layout).toContain('<AdminRouteFrame>{children}</AdminRouteFrame>');
     expect(layout).toContain("import './admin-theme.css'");
+    expect(frame).toContain('<AdminWorkspace />');
+    expect(frame).toContain('<AdminTopbar />');
+    expect(frame).toContain('className="rch-admin-area"');
+    expect(frame).toContain("pathname === '/admin/rch-tv/studio'");
   });
 
   it('loads the executive RCH visual system with responsive navigation', () => {

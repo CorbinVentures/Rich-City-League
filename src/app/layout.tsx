@@ -29,6 +29,8 @@ import './rcl-pwa-contrast.css';
 import './rch-app-download.css';
 // Runs intentionally uses an immersive dark scene; load its scoped overrides after the sitewide light system.
 import './rch-runs-visual-lock.css';
+// Loaded last to preserve live-camera and overlay contrast against global light-theme rules.
+import './rch-tv-production-lock.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
