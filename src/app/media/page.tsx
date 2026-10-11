@@ -7,6 +7,7 @@ import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsored
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
+import { resolveRchMediaUrl } from '@/lib/rch-tv-media';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -25,7 +26,14 @@ export default async function MediaPage() {
     client.from('media').select('*').eq('status','published').order('created_at',{ascending:false}).limit(60),
     db.from('player_highlights').select('id,player_id,game_id,title,category,clip_url,thumbnail_url,featured,created_at,player:players(first_name,last_name)').eq('status','published').order('featured',{ascending:false}).order('created_at',{ascending:false}).limit(30),
   ]):[{data:[]},{data:[]}];
-  const items = ((mediaResult.data ?? []) as Media[]).map((item) => ({ id: item.id, title: item.title, description: item.description, type: item.media_type, url: item.storage_path, createdAt: item.created_at }));
+  const items = ((mediaResult.data ?? []) as Media[]).map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    type: item.media_type,
+    url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl),
+    createdAt: item.created_at,
+  })).filter((item) => item.url !== null) as Array<{ id: string; title: string; description: string | null; type: string; url: string; createdAt: string }>;
   const highlights=(highlightResult.data??[]) as Highlight[];
   const now = Date.now();
   const nextGame = [...games].filter((game) => !['completed', 'cancelled'].includes(game.status) && new Date(game.scheduled_at).getTime() >= now).sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
