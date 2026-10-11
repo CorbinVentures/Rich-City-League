@@ -5,18 +5,20 @@ Separate Scorebook PWA: `https://rch-scorebook.vercel.app/`.
 
 ## Supported behavior
 
-- Android Chrome WebAPK: plain external HTTPS links allow the operating system to dispatch the link to the installed Scorebook PWA when applicable. The Scorebook manifest also declares `launch_handler.client_mode = navigate-existing` for supported Chromium browsers (deployed independently).
-- iOS/iPadOS: Safari Home Screen PWAs **cannot reliably identify or automatically route to another installed web app via ordinary HTTPS**. No user agent detection can confirm installation. The default is the normal HTTPS Scorebook URL.
-- Experimental iOS workaround: the undocumented `webapp://rch-scorebook.vercel.app/` URL may open a Home Screen web app on some iOS devices, but may fail or open a **different installed web app**. It is explicitly opt-in on the Game IQ page and must be confirmed by the person after a successful device test. No auto-fallback or installed detection is claimed.
-- Upon confirmation, RCH stores a per-origin local preference in its own Home Screen app's localStorage. The unified `ScorebookAppLink` component uses that preference for RCH Scorebook entries; users can revoke it on the Game IQ page.
-- Never attempt this scheme automatically for visitors who have not confirmed it. Do not claim deep links into specific games work through the undocumented iOS scheme.
-- A deterministic iOS app-to-app transition requires distributing a genuine native iOS package with Universal Links and an associated-domain setup, not merely an installed Safari PWA.
+- **Android Chromium / installed WebAPK:** use a normal external HTTPS Scorebook URL; Android may hand off to an installed PWA when supported and configured by the operating system. The Scorebook manifest declares `launch_handler.client_mode = navigate-existing` for browsers that support it, but this does not guarantee link handling in every Android browser.
+- **iOS / iPadOS Home Screen PWAs:** links outside the PWA's scope open in a browser view. Ordinary HTTPS links do not automatically open another installed Home Screen PWA. Apple does not provide a supported installed-PWA detection and cross-app launch API.
+- **Verified failure:** an experiment using the undocumented `webapp://` scheme produced the alert “Safari cannot open the page because the address is invalid” on a real iPhone with both RCH and Scorebook installed (2026-10-11).
+- **Fix:** `ScorebookAppLink` only emits valid `https://rch-scorebook.vercel.app/` URLs. When tapped inside an installed RCH iPhone app, it explains that the user must switch to the separate Scorebook Home Screen icon to get its installed full-screen experience, or can open the valid website in a Safari view. It removes prior experimental launch-preference keys.
+- Never reintroduce the unverified custom URL scheme or a misleading “Open installed PWA” button. Do not confuse `launch_handler` (handling within a launched web app on supported browsers) with a universal app-to-app launcher.
+- **True iOS one-tap app handoff:** requires a native iOS app or wrapper that implements Universal Links and associated domains. The separate Safari Home Screen PWA alone cannot deliver that behavior.
 
 ## Release checks
 
 - RCH Application Quality and Vercel checks green.
-- Scorebook manifest deployment ready before RCH switch.
-- On a real iPhone with **both** PWAs installed, test the opt-in `webapp://` button and whether it opens the **correct** app. If it fails, explicitly choose the normal-HTTPS option.
+- Regression: all Scorebook button anchors use the valid HTTPS origin; the failed custom scheme is not rendered in the UI.
+- Test iPhone in installed RCH PWA: Scorebook link shows accurate launch guidance; website button opens valid link; close button dismisses it without navigating.
 - Test Android with Scorebook installed and not installed.
 - Check Game IQ, League Center, Operations, and League Setup links.
-- Existing backend scorebook access controls and data remain unchanged.
+- Existing backend scorebook access controls and official data remain unchanged.
+
+Official Apple reference: https://developer.apple.com/videos/play/wwdc2023/10120/
