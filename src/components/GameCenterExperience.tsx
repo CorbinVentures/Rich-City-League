@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
+import { useOfficialGamesSync } from '@/hooks/useOfficialGamesSync';
 import type { Game, Season, Standing, Team, Venue } from '@/types/database';
 import { formatDate, formatTime } from '@/utils/helpers';
 import { FaArrowRight, FaBasketball, FaLocationDot } from 'react-icons/fa6';
@@ -11,6 +12,7 @@ type View = 'schedule' | 'live' | 'results' | 'standings';
 type Timeframe = 'all' | 'today' | 'this-week' | 'next-week';
 
 export function GameCenterExperience({ games, teams, seasons, standings, venues }: { games: Game[]; teams: Team[]; seasons: Season[]; standings: Standing[]; venues: Venue[] }) {
+  const { games: officialGames, standings: officialStandings } = useOfficialGamesSync(games, standings);
   const [view, setView] = useState<View>('schedule');
   const [seasonId, setSeasonId] = useState(seasons[0]?.id ?? '');
   const [timeframe, setTimeframe] = useState<Timeframe>('all');
@@ -19,7 +21,7 @@ export function GameCenterExperience({ games, teams, seasons, standings, venues 
   const teamById = useMemo(() => new Map(teams.map((team) => [team.id, team])), [teams]);
   const venueById = useMemo(() => new Map(venues.map((venue) => [venue.id, venue])), [venues]);
 
-  const seasonGames = games.filter((game) => !seasonId || game.season_id === seasonId);
+  const seasonGames = officialGames.filter((game) => !seasonId || game.season_id === seasonId);
   const filteredGames = seasonGames.filter((game) => {
     const date = new Date(game.scheduled_at);
     const now = new Date();
@@ -33,7 +35,7 @@ export function GameCenterExperience({ games, teams, seasons, standings, venues 
   const liveGames = filteredGames.filter((game) => game.status === 'live');
   const results = filteredGames.filter((game) => game.status === 'completed').sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at));
   const upcoming = filteredGames.filter((game) => !['completed', 'cancelled'].includes(game.status)).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
-  const selectedStandings = standings.filter((standing) => !seasonId || standing.season_id === seasonId).sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
+  const selectedStandings = officialStandings.filter((standing) => !seasonId || standing.season_id === seasonId).sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
   const todayGames = seasonGames.filter((game) => new Date(game.scheduled_at).toDateString() === new Date().toDateString());
 
   return <main className="rcl-mock-page rcl-games-page min-h-screen bg-rcl-black pb-24 text-white">
