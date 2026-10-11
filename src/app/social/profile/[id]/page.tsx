@@ -10,7 +10,7 @@ import { AchievementShareCard } from '@/components/AchievementShareCard';
 import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { ProfileViewInsights } from '@/components/ProfileViewInsights';
-import { ProfileWallFeed } from '@/components/social/ProfileWallFeed';
+import { ProfileWallFeed, type WallPost } from '@/components/social/ProfileWallFeed';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
 
 export const revalidate = 30;
@@ -267,7 +267,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
       </nav>
 
       <section className="px-4 py-6">
-        {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:authorMap.get(post.author_id) ?? null}))} />}
+        {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {activeTab==='highlights'&&<ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." />}
         {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
