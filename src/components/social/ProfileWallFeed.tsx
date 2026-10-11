@@ -149,8 +149,11 @@ export function ProfileWallFeed({
       return <article key={post.id} id={'wall-post-' + post.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#08111b]/90">
         <div className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3"><div className="min-w-0">
-            <SocialIdentity author={post.author ?? undefined} compact />
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/40"><span>{new Date(post.created_at).toLocaleString()}</span>{guestPost && <span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-rcl-orange">Posted on {profileName}&apos;s wall</span>}{post.is_automated && <span className="text-rcl-blue">Official activity</span>}</div>
+            <div className="flex items-center gap-3"><SocialIdentity author={post.author ?? undefined} compact />
+              <div className="min-w-0"><Link href={'/social/profile/' + post.author_id} className="block truncate text-sm font-black text-white hover:text-rcl-orange">{post.author?.display_name || post.author?.username || 'RCH Member'}</Link>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/40"><span>{new Date(post.created_at).toLocaleString()}</span>{guestPost && <span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-rcl-orange">Posted on {profileName}&apos;s wall</span>}{post.is_automated && <span className="text-rcl-blue">Official activity</span>}</div>
+              </div>
+            </div>
           </div>
           {ownPage && guestPost && !post.is_automated && <button type="button" title="Remove post from my wall" aria-label="Remove visitor post" onClick={() => void removeFromWall(post)} disabled={saving === 'delete-' + post.id} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/10 text-white/35 hover:text-red-300 disabled:opacity-40"><FaTrash /></button>}
           </div>
