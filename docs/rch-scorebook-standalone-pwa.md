@@ -19,3 +19,5 @@ Dedicated app: https://rch-scorebook.vercel.app/
 
 ## Release gate
 Do not finalize a production contest to test. Use a test game and validate score reconciliation, duplicate prevention, multiple scorers, and role policy before retiring the original editor.
+
+- **Source-control gate:** The initial standalone Vite build was deployed from Vercel API-uploaded source. Before production cutover, commit the full standalone application source to GitHub and connect the scorebook Vercel project to that source directory. Do not treat a deployment-only bundle as the final maintainable production arrangement.
