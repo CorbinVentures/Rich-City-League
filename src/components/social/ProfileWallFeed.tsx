@@ -131,7 +131,7 @@ export function ProfileWallFeed({
   return <section aria-label={profileName + ' profile wall'} className="space-y-4">
     {allowVisitorPosts && !ownPage && <div id="profile-wall-composer" className="scroll-mt-40 rounded-3xl border border-rcl-blue/20 bg-[linear-gradient(140deg,#0b1e2d,#07111b)] p-4 sm:p-5">
       <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The Wall · RCH Community</p>
-      <h2 className="mt-1 font-display text-xl font-black uppercase">Post on {profileName}'s wall</h2>
+      <h2 className="mt-1 font-display text-xl font-black uppercase">Post on {profileName}&apos;s wall</h2>
       <p className="mt-1 text-xs leading-5 text-white/45">Show love, drop a shoutout, or start a basketball conversation.</p>
       {user ? <>
         <textarea aria-label={'Post on ' + profileName + ' wall'} maxLength={2000} rows={3} value={draft} onChange={event => setDraft(event.target.value)} placeholder={'Say something to ' + profileName + '…'} className="mt-4 min-h-24 w-full resize-y rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-rcl-blue/50" />
@@ -150,7 +150,7 @@ export function ProfileWallFeed({
         <div className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3"><div className="min-w-0">
             <SocialIdentity author={post.author ?? undefined} compact />
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/40"><span>{new Date(post.created_at).toLocaleString()}</span>{guestPost && <span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-rcl-orange">Posted on {profileName}'s wall</span>}{post.is_automated && <span className="text-rcl-blue">Official activity</span>}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/40"><span>{new Date(post.created_at).toLocaleString()}</span>{guestPost && <span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-rcl-orange">Posted on {profileName}&apos;s wall</span>}{post.is_automated && <span className="text-rcl-blue">Official activity</span>}</div>
           </div>
           {ownPage && guestPost && !post.is_automated && <button type="button" title="Remove post from my wall" aria-label="Remove visitor post" onClick={() => void removeFromWall(post)} disabled={saving === 'delete-' + post.id} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/10 text-white/35 hover:text-red-300 disabled:opacity-40"><FaTrash /></button>}
           </div>
