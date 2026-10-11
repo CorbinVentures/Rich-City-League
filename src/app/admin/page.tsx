@@ -434,12 +434,12 @@ export default function AdminDashboardPage() {
     return (<main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(230,57,70,0.25),transparent_70%)] py-24 text-white flex items-center justify-center">
         <div className="rounded-3xl border border-rcl-red/30 bg-black/60 p-12 text-center max-w-md shadow-2xl backdrop-blur-md">
           <FaUserShield className="h-16 w-16 text-rcl-red mx-auto animate-bounce" />
-          <h2 className="mt-6 font-display text-2xl font-black uppercase tracking-tight text-white">RESTRICTED SHIELD</h2>
+          <h2 className="mt-6 font-display text-2xl font-black uppercase tracking-tight text-white">Administrator access required</h2>
           <p className="mt-4 text-sm leading-relaxed text-gray-400">
-            Unauthorized access detected. This console is restricted exclusively to Rich City League system administrators.
+            This workspace is available only to authorized Rich City Hoops administrators.
           </p>
           <Link href="/" className="mt-8 inline-block rounded-xl bg-white px-6 py-2.5 text-xs font-black text-black uppercase tracking-widest hover:bg-rcl-gold">
-            RETURN TO COURT
+            Back to RCH
           </Link>
         </div>
       </main>
@@ -448,15 +448,15 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="min-h-screen bg-rcl-black bg-[radial-gradient(ellipse_at_top,rgba(29,53,87,0.3),transparent_70%)] pb-24 text-white font-display">
-      <section className="border-b border-white/10 py-12">
+      <section className="rch-admin-dashboard-hero border-b border-white/10 py-9 sm:py-11">
         <Container maxWidth="xl">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <span className="rounded-full bg-rcl-gold/10 border border-rcl-gold/20 px-3 py-0.5 text-xs font-black tracking-widest text-rcl-gold uppercase flex items-center gap-1.5 w-fit">
-                <FaUserShield /> SYSTEM CONTROL CENTER
+                <FaUserShield /> ADMINISTRATION · RCH
               </span>
               <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-white">
-                RCL <span className="text-rcl-gold">COMMAND CENTER</span>
+                Platform <span className="text-rcl-gold">Overview</span>
               </h1>
             </div>
 
@@ -465,7 +465,7 @@ export default function AdminDashboardPage() {
                 onClick={loadDashboardData} 
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black uppercase tracking-widest hover:text-rcl-gold"
               >
-                REFRESH DATA
+                Refresh data
               </button>
             </div>
           </div>
@@ -474,16 +474,21 @@ export default function AdminDashboardPage() {
 
       {/* Tabs */}
       <Container maxWidth="xl" className="mt-8">
-        <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">
+        <div className="rch-admin-section-tabs flex gap-2 border-b border-white/10 pb-4" role="tablist" aria-label="Dashboard workspace sections">
           {[
-            { id: 'analytics', label: 'ANALYTICS & AUDIT LOGS', icon: <FaChartLine /> },
-            { id: 'users', label: 'USER ROLES', icon: <FaUsers /> },
-            { id: 'roster', label: 'ROSTERS', icon: <FaBasketball /> },
-            { id: 'games', label: 'GAME STATS ENTRY', icon: <FaCheck /> },
-            { id: 'social', label: 'SOCIAL MODERATION', icon: <FaComment /> },
+            { id: 'analytics', label: 'Overview & audit', icon: <FaChartLine /> },
+            { id: 'users', label: 'User roles', icon: <FaUsers /> },
+            { id: 'roster', label: 'Rosters', icon: <FaBasketball /> },
+            { id: 'games', label: 'Game stats', icon: <FaCheck /> },
+            { id: 'social', label: 'Moderation', icon: <FaComment /> },
           ].map((tab) => (
             <button
               key={tab.id}
+              id={`rch-admin-tab-${tab.id}`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls="rch-admin-dashboard-panel"
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition ${
                 activeTab === tab.id 
@@ -497,7 +502,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tab Contents */}
-        <div className="mt-8">
+        <div id="rch-admin-dashboard-panel" role="tabpanel" aria-labelledby={`rch-admin-tab-${activeTab}`} className="mt-8">
           {dataLoading ? (
             <div className="h-48 animate-pulse rounded-2xl bg-white/5 border border-white/10" />
           ) : (
@@ -505,13 +510,13 @@ export default function AdminDashboardPage() {
               {/* Tab 1: Analytics & Audit Logs */}
               {activeTab === 'analytics' && (
                 <div className="space-y-8">
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
                     {[
-                      { label: 'TOTAL PLAYERS', value: analytics.players },
-                      { label: 'TOTAL TEAMS', value: analytics.teams },
-                      { label: 'TOTAL COACHES', value: analytics.coaches },
-                      { label: 'GAMES PLAYED', value: analytics.games },
-                      { label: 'TIMELINE POSTS', value: analytics.posts },
+                      { label: 'Players', value: analytics.players, foot: 'Registered league athletes' },
+                      { label: 'Teams', value: analytics.teams, foot: 'League team records' },
+                      { label: 'Coaches', value: analytics.coaches, foot: 'Coaching assignments' },
+                      { label: 'Games', value: analytics.games, foot: 'Scheduled & completed' },
+                      { label: 'Posts', value: analytics.posts, foot: 'Social activity' },
                     ].map((stat, i) => (
                       <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.01] p-5 shadow-lg text-center">
                         <span className="block text-xs font-black tracking-widest text-gray-500 uppercase">{stat.label}</span>
@@ -523,7 +528,7 @@ export default function AdminDashboardPage() {
                   {/* Audit logs */}
                   <div className="rounded-2xl border border-white/10 bg-white/[0.01] p-6 shadow-xl">
                     <h3 className="font-display text-sm font-black tracking-widest text-rcl-gold uppercase flex items-center gap-2">
-                      <FaClock /> ACTIVE ADMINISTRATIVE AUDIT LOG
+                      <FaClock /> Recent administrative activity
                     </h3>
                     <div className="mt-6 overflow-x-auto">
                       <table className="w-full text-left text-xs min-w-[500px]">
