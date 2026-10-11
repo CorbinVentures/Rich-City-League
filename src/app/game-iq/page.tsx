@@ -11,7 +11,7 @@ export default async function GameIQPublicPage() {
   const { teams, games, standings } = await getLeagueSnapshot();
   const supabase = await getServerSupabaseClient();
   const { data: { user } } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
-  const scorebookHref = user ? '/portal/scorebook' : '/auth/sign-in?next=%2Fportal%2Fscorebook';
+  const scorebookHref = 'https://rch-scorebook.vercel.app/';
   const completed = games.filter((game) => game.status === 'completed').slice(0, 12);
   const upcoming = getUpcomingGames(games).slice(0, 6);
 
