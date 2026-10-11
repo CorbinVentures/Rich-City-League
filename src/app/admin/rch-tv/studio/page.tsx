@@ -93,6 +93,11 @@ export default function RchBroadcastStudio() {
     setBusy(true);setError('');setMessage('');
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser cannot access camera devices. Use HTTPS and a supported browser.');
+      // iOS Safari can refuse a second camera while the first capture remains live.
+      stream.current?.getTracks().forEach(track => track.stop());
+      stream.current = null;
+      if (preview.current) preview.current.srcObject = null;
+      setReady(false);
       const next = await navigator.mediaDevices.getUserMedia({
         video: videoId && !ignoreSelectedVideo ? { deviceId: { ideal: videoId }, width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: preferredFacing } },
         audio: audioId ? { deviceId: { ideal: audioId }, echoCancellation: true } : { echoCancellation: true },
