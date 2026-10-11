@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import type { IconType } from 'react-icons';
 import {
   FaArrowUpRightFromSquare,
   FaBasketball,
@@ -20,7 +21,12 @@ import {
   FaTrophy,
 } from 'react-icons/fa6';
 
-const groups = [
+type AdminNavGroup = {
+  label: string;
+  items: Array<{ label: string; href: string; icon: IconType; description: string }>;
+};
+
+const groups: AdminNavGroup[] = [
   {
     label: 'COMMAND',
     items: [
@@ -47,7 +53,7 @@ const groups = [
       { label: 'Seasonal Themes', href: '/admin/seasonal-themes', icon: FaCalendarDays, description: 'Holiday themes and visual effects' },
     ],
   },
-] as const;
+];
 
 export function AdminWorkspace() {
   const pathname = usePathname();
