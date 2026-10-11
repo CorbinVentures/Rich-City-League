@@ -10,7 +10,6 @@ import {
   FaListOl,
   FaShieldHalved,
 } from 'react-icons/fa6';
-import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -138,15 +137,15 @@ export default function DraftSettingsPage() {
   }
 
   if (authLoading || loading) {
-    return <main className="min-h-screen bg-[#03070d] text-white"><AdminWorkspace /><Container maxWidth="xl" className="py-14"><div className="h-80 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
+    return <main className="min-h-screen bg-[#03070d] text-white"><Container maxWidth="xl" className="py-14"><div className="h-80 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
   }
 
   if (profile?.role !== 'admin') {
-    return <main className="min-h-screen bg-[#03070d] text-white"><AdminWorkspace /><Container maxWidth="lg" className="py-20 text-center"><FaShieldHalved className="mx-auto text-4xl text-rcl-orange"/><h1 className="mt-5 font-display text-4xl font-black uppercase">Admin access required</h1><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/45">Draft Night configuration is restricted to league administration.</p><Link href="/league" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">League Center <FaArrowRight/></Link></Container></main>;
+    return <main className="min-h-screen bg-[#03070d] text-white"><Container maxWidth="lg" className="py-20 text-center"><FaShieldHalved className="mx-auto text-4xl text-rcl-orange"/><h1 className="mt-5 font-display text-4xl font-black uppercase">Admin access required</h1><p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/45">Draft Night configuration is restricted to league administration.</p><Link href="/league" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">League Center <FaArrowRight/></Link></Container></main>;
   }
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <AdminWorkspace />
+    
     <section className="border-b border-white/10 bg-[radial-gradient(circle_at_82%_20%,rgba(59,130,246,.16),transparent_28%),radial-gradient(circle_at_18%_70%,rgba(21,159,255,.14),transparent_32%),#071522]">
       <Container maxWidth="xl" className="py-10 sm:py-14">
         <p className="text-xs font-black uppercase tracking-[.25em] text-rcl-orange">League administration · Draft Night</p>

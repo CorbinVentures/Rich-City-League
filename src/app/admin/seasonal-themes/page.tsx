@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FaArrowLeft, FaCalendarDays, FaCheck, FaCircleExclamation, FaGear } from 'react-icons/fa6';
-import { AdminWorkspace } from '@/components/AdminWorkspace';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -143,7 +142,7 @@ export default function SeasonalThemesAdminPage() {
   return (
     <main className="min-h-screen bg-[#03070d] pb-28 text-white">
       <Container maxWidth="xl" className="py-8 sm:py-10">
-        <AdminWorkspace />
+        
 
         <div className="mt-8 flex flex-col gap-5 border-b border-white/10 pb-7 lg:flex-row lg:items-end lg:justify-between">
           <div>
