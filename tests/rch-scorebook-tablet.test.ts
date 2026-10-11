@@ -35,7 +35,7 @@ describe('RCH Scorebook iPad command desk', () => {
   });
   it('supports full-stat first-time preference without blocking quick mode later', () => {
     expect(js).toContain("rch-scorebook-ipad-fullstats-init");
-    expect(js).toContain("rch-sb-mode");
+    expect(js).toContain("data-act=\"mode\"");
     expect(js).toContain('hasVisitedGame=true');
   });
 });
