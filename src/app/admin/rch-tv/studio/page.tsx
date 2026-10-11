@@ -102,7 +102,6 @@ export default function RchBroadcastStudio() {
         video: videoId && !ignoreSelectedVideo ? { deviceId: { ideal: videoId }, width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: preferredFacing } },
         audio: audioId ? { deviceId: { ideal: audioId }, echoCancellation: true } : { echoCancellation: true },
       });
-      stream.current?.getTracks().forEach(track => track.stop());
       stream.current = next;
       if (preview.current) {
         preview.current.srcObject = next;
