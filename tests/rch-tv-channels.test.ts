@@ -7,7 +7,7 @@ const read = (path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 describe('RCH TV — four editorial destinations', () => {
   const hub = read('src/app/media/page.tsx');
   const studio = read('src/app/admin/rch-tv/page.tsx');
-  const migration = read('supabase/migrations/20261010233000_rch_tv_four_channel_categories.sql');
+  const migration = read('supabase/migrations/20261011034423_rch_tv_four_channel_categories.sql');
 
   it('has exactly the four specified channel destinations', () => {
     for (const id of ['live-games','the-pulse','movies','original-content']) {
