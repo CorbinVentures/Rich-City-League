@@ -163,6 +163,14 @@ export default function RchTvAdminPage() {
         {stats.map(({label,value,Icon})=><div key={label} className="rounded-xl border border-white/15 bg-white/[.035] p-5"><Icon className="text-rcl-blue" aria-hidden="true"/><p className="mt-3 text-xs text-white/60">{label}</p><strong className="mt-1 block text-3xl tabular-nums">{value}</strong></div>)}
       </section>
 
+      <section className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-rcl-blue/25 bg-[linear-gradient(125deg,rgba(80,166,211,.17),rgba(7,21,34,.75))] p-5 sm:p-6">
+        <div><p className="text-[10px] font-black uppercase tracking-widest text-rcl-blue">Production console</p>
+          <h2 className="mt-2 text-xl font-bold">Broadcast Live Games & The Pulse</h2>
+          <p className="mt-2 max-w-xl text-sm text-white/55">Choose an iPad or Canon capture input, preview your shot, design scoreboards and podcast overlays, and control the live player.</p>
+        </div>
+        <Link href="/admin/rch-tv/studio" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-black text-black">Open Broadcast Studio <FaArrowRight aria-hidden="true" /></Link>
+      </section>
+
       <div className="mt-8 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
         <section className="rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
           <h2 className="text-xl font-bold">Upload RCH TV media</h2>
