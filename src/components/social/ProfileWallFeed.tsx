@@ -28,7 +28,7 @@ export function ProfileWallFeed({
 }: {
   profileId: string; profileName: string; initialPosts: WallPost[]; allowVisitorPosts?: boolean;
 }) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const db = useMemo(() => getSupabaseClient() as any, []);
   const router = useRouter();
   const [posts, setPosts] = useState<WallPost[]>(initialPosts);
