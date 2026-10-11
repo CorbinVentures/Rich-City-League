@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import type { AnchorHTMLAttributes, PropsWithChildren } from 'react';
 
 const SCOREBOOK_URL = 'https://rch-scorebook.vercel.app/';
@@ -33,24 +34,166 @@ type ScorebookAppLinkProps = PropsWithChildren<
  * on their own device that it opens the correct installed app.
  * iOS does not provide an install-detection API for separate Home Screen PWAs.
  */
-export function ScorebookAppLink({ children, ...props }: ScorebookAppLinkProps) {
+
+/**
+ * Show the installed-app trial at the point of intent, on EVERY RCH Scorebook
+ * launch button, not buried below the public Game IQ page.
+ *
+ * On iOS, HTTPS cross-origin links cannot reliably open a different installed
+ * Home Screen PWA. This modal tells the truth, allows an explicit scheme trial,
+ * and never auto-enables a scheme that might open the wrong installed app.
+ */
+export function ScorebookAppLink({ children, onClick, ...props }: ScorebookAppLinkProps) {
+  const [eligible, setEligible] = useState(false);
+  const [ready, setReady] = useState(false);
   const [useInstalled, setUseInstalled] = useState(false);
+  const [opened, setOpened] = useState(false);
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
-    const syncPreference = () => setUseInstalled(confirmedPreference());
+    const syncPreference = () => {
+      setEligible(iosDevice());
+      setUseInstalled(confirmedPreference());
+    };
+    setReady(true);
     syncPreference();
     window.addEventListener(PREFERENCE_EVENT, syncPreference);
     return () => window.removeEventListener(PREFERENCE_EVENT, syncPreference);
   }, []);
 
+  useEffect(() => {
+    if (!opened) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpened(false);
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [opened]);
+
+  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+    onClick?.(event);
+    if (event.defaultPrevented) return;
+    if (eligible && !useInstalled) {
+      event.preventDefault();
+      setTried(false);
+      setOpened(true);
+    }
+  }
+
+  function tryInstalled() {
+    setTried(true);
+    try { window.localStorage.setItem(TRIAL_KEY, 'yes'); } catch { /* optional */ }
+  }
+
+  function setVerifiedPreference(enabled: boolean) {
+    try {
+      if (enabled) window.localStorage.setItem(PREFERENCE_KEY, 'yes');
+      else window.localStorage.removeItem(PREFERENCE_KEY);
+      window.localStorage.removeItem(TRIAL_KEY);
+    } catch { /* future taps fall back to HTTPS */ }
+    const confirmed = confirmedPreference();
+    setUseInstalled(confirmed);
+    setOpened(false);
+    window.dispatchEvent(new Event(PREFERENCE_EVENT));
+  }
+
   return (
-    <a
-      {...props}
-      href={useInstalled ? EXPERIMENTAL_IOS_SCHEME : SCOREBOOK_URL}
-      data-scorebook-launch={useInstalled ? 'ios-opted-in' : 'https'}
-    >
-      {children}
-    </a>
+    <>
+      <a
+        {...props}
+        href={useInstalled ? EXPERIMENTAL_IOS_SCHEME : SCOREBOOK_URL}
+        onClick={handleClick}
+        data-scorebook-launch={useInstalled ? 'ios-opted-in' : 'https-with-optional-iphone-handoff'}
+      >
+        {children}
+      </a>
+      {ready && eligible && opened && createPortal(
+        <div
+          role="presentation"
+          onClick={(event) => { if (event.target === event.currentTarget) setOpened(false); }}
+          className="fixed inset-0 flex items-center justify-center bg-[#071326]/80 px-4 py-6"
+          style={{ zIndex: 2147482000 }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rch-scorebook-launch-heading"
+            aria-describedby="rch-scorebook-launch-description"
+            className="w-full max-w-md overflow-y-auto rounded-3xl border border-[#D9E4EF] bg-white p-5 text-[#0F2547] shadow-2xl sm:p-6"
+            style={{ maxHeight: 'calc(100dvh - 44px)', WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#2563EB]">RICH CITY HOOPS</p>
+                <h2 id="rch-scorebook-launch-heading" className="mt-1 text-2xl font-black tracking-tight text-[#0F2547]">
+                  Open RCH Scorebook
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close Scorebook launcher"
+                onClick={() => setOpened(false)}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D9E4EF] bg-[#F6F9FC] text-xl text-[#0F2547]"
+              >
+                ×
+              </button>
+            </div>
+            <p id="rch-scorebook-launch-description" className="mt-3 text-sm leading-6 text-[#64748B]">
+              Already installed the separate Scorebook app? iPhone doesn’t reliably
+              hand off an ordinary website link to its Home Screen PWA. You can
+              test an experimental installed-app link once, or continue in the browser.
+            </p>
+            <a
+              href={EXPERIMENTAL_IOS_SCHEME}
+              onClick={tryInstalled}
+              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-[#3B82F6] px-4 py-3 text-center text-sm font-black text-white"
+              style={{ color: '#fff' }}
+            >
+              Try opening installed Scorebook ↗
+            </a>
+            <a
+              href={SCOREBOOK_URL}
+              className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#D9E4EF] bg-[#F6F9FC] px-4 py-3 text-center text-sm font-bold text-[#0F2547]"
+              style={{ color: '#0F2547' }}
+            >
+              Open Scorebook website
+            </a>
+            {tried && (
+              <div className="mt-4 rounded-2xl border border-[#D9E4EF] bg-[#EDF4FA] p-4">
+                <p className="text-sm font-bold text-[#0F2547]">
+                  Did the first button launch the actual Scorebook Home Screen app?
+                </p>
+                <p className="mt-2 text-xs leading-5 text-[#64748B]">
+                  If it opened Safari, another app, or showed an error, choose No.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setVerifiedPreference(true)}
+                    className="min-h-11 rounded-xl bg-[#3B82F6] px-4 py-3 text-xs font-bold text-white"
+                  >
+                    Yes, use it next time
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVerifiedPreference(false)}
+                    className="min-h-11 rounded-xl border border-[#D9E4EF] bg-white px-4 py-3 text-xs font-bold text-[#0F2547]"
+                  >
+                    No, use website
+                  </button>
+                </div>
+              </div>
+            )}
+            <p className="mt-4 text-xs leading-5 text-[#64748B]">
+              The first option uses an undocumented iOS method and may fail or
+              open the wrong web app. RCH never enables it permanently without
+              your explicit confirmation.
+            </p>
+          </section>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 

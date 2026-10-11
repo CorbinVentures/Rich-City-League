@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { ScorebookAppLink } from '@/components/ScorebookAppLink';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 
 export default async function ScorebookLayout({ children }: { children: React.ReactNode }) {
@@ -21,5 +22,18 @@ export default async function ScorebookLayout({ children }: { children: React.Re
     );
   }
 
-  return children;
+  return (
+    <>
+      <div className="mx-auto mt-4 flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#D9E4EF] bg-white p-4 text-[#0F2547]">
+        <div>
+          <p className="text-xs font-black text-[#2563EB]">RCH SCOREBOOK · STANDALONE APP</p>
+          <p className="mt-1 text-xs text-[#64748B]">Launch the dedicated Scorebook app. The original scoring screen remains below as a backup.</p>
+        </div>
+        <ScorebookAppLink className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#3B82F6] px-4 py-3 text-center text-sm font-bold text-white">
+          Open standalone Scorebook ↗
+        </ScorebookAppLink>
+      </div>
+      {children}
+    </>
+  );
 }
