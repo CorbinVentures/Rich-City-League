@@ -330,7 +330,7 @@ export default function RchBroadcastStudio() {
                   <input maxLength={12} value={config.clock} onChange={e => edit({ clock: e.target.value })} className={cssInput} placeholder="10:00" />
                 </label>
               </div>
-              <p className="mt-3 text-xs leading-5 text-slate-400">The game clock is manually operated; it's not yet synchronized with the official scorebook.</p>
+              <p className="mt-3 text-xs leading-5 text-slate-400">The game clock is manually operated; it is not yet synchronized with the official scorebook.</p>
             </> : <>
               <h2 className="text-lg font-extrabold text-white">The Pulse · Episode</h2>
               <p className="mb-4 mt-1 text-xs text-slate-300">Prepare the topic and guest cards for the show.</p>
@@ -348,7 +348,7 @@ export default function RchBroadcastStudio() {
           <section className="rch-studio-card rounded-xl p-4 sm:p-5" data-panel="graphics" data-active={activePanel === 'graphics'}
             id="rch-studio-panel-graphics" role="tabpanel" aria-labelledby="rch-studio-tab-graphics">
             <h2 className="text-lg font-extrabold text-white">Overlay Designer</h2>
-            <p className="mb-4 mt-1 text-xs text-slate-300">Preview changes immediately. Publish them when you're satisfied with the design.</p>
+            <p className="mb-4 mt-1 text-xs text-slate-300">Preview changes immediately. Publish them when you are satisfied with the design.</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className={cssLabel}>Overlay Preset
                 <select value={config.preset} onChange={e => edit({ preset: e.target.value as RchTvBroadcast['preset'] })} className={cssInput}>
