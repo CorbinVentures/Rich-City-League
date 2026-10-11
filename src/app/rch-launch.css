@@ -29,6 +29,8 @@ html body .rch-launch-video {
   max-width: 100%; max-height: 100%;
   /* Keep the R, Richmond skyline, and complete Rich City Hoops title visible. */
   object-fit: contain; object-position: center center;
+  /* Autoplay is programmatic; native playback controls must never cover RCH. */
+  pointer-events: none;
   opacity: 0; transition: opacity .16s ease-in;
 }
 html body .rch-launch-video.is-ready { opacity: 1; }
