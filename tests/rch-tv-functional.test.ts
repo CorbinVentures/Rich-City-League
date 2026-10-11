@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { rchMediaKind, resolveRchMediaUrl } from '@/lib/rch-tv-media';
+import { rchMediaKind, resolveRchMediaUrl } from '../src/lib/rch-tv-media';
 
 const source=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 
