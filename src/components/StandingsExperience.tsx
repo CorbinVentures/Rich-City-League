@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { useOfficialGamesSync } from '@/hooks/useOfficialGamesSync';
 import type { Division, Game, Season, Standing, Team, TeamSeason, Venue } from '@/types/database';
 import { formatDate } from '@/utils/helpers';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function StandingsExperience({ seasons, divisions, teams, teamSeasons, standings, games, venues }: Props) {
+  const { games: officialGamesSync, standings: officialStandings } = useOfficialGamesSync(games, standings);
   const [seasonId, setSeasonId] = useState(seasons[0]?.id ?? '');
   const [divisionId, setDivisionId] = useState('all');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -26,10 +28,10 @@ export function StandingsExperience({ seasons, divisions, teams, teamSeasons, st
   const teamById = useMemo(() => new Map(teams.map((team) => [team.id, team])), [teams]);
   const divisionById = useMemo(() => new Map(divisions.map((division) => [division.id, division])), [divisions]);
   const seasonDivisions = divisions.filter((division) => division.season_id === seasonId);
-  const seasonStandings = standings
+  const seasonStandings = officialStandings
     .filter((standing) => standing.season_id === seasonId && (divisionId === 'all' || standing.division_id === divisionId))
     .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999) || b.wins - a.wins || b.points_for - b.points_against - (a.points_for - a.points_against) || a.team_id.localeCompare(b.team_id));
-  const officialGames = games.filter((game) => game.season_id === seasonId && game.status === 'completed');
+  const officialGames = officialGamesSync.filter((game) => game.season_id === seasonId && game.status === 'completed');
   const recentGames = [...officialGames].sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at)).slice(0, 5);
   const stats = seasonStandings.map((standing) => ({ standing, team: teamById.get(standing.team_id), currentStreak: currentStreak(standing.team_id, officialGames) })).filter((item) => item.team);
   const topOffense = [...stats].sort((a, b) => b.standing.points_for - a.standing.points_for)[0];
