@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
+import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS, startRchLaunchAutoplay } from '../src/lib/pwa-launch';
 
 function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1 }: {
   path?: string;
@@ -54,6 +54,26 @@ describe('page launch intro', () => {
     expect(canDismissLaunch(true, false, false, true)).toBe(true);
     expect(canDismissLaunch(true, false, false, false)).toBe(false);
     expect(RCH_LAUNCH_FALLBACK_MS).toBe(4000);
+  });
+  it('forces muted, inline autoplay before requesting play', async () => {
+    const video = {
+      autoplay: false, muted: false, defaultMuted: false, playsInline: false,
+      play() {
+        expect(this.autoplay).toBe(true);
+        expect(this.muted).toBe(true);
+        expect(this.defaultMuted).toBe(true);
+        expect(this.playsInline).toBe(true);
+        return Promise.resolve();
+      },
+    };
+    await expect(startRchLaunchAutoplay(video)).resolves.toBe(true);
+  });
+  it('reports blocked autoplay rather than requiring a tap', async () => {
+    const video = {
+      autoplay: false, muted: false, defaultMuted: false, playsInline: false,
+      play: () => Promise.reject(new Error('NotAllowedError: iOS policy blocked autoplay')),
+    };
+    await expect(startRchLaunchAutoplay(video)).resolves.toBe(false);
   });
   it('waits for main content and feed readiness, not photos or unrelated widgets', () => {
     function documentState(main: boolean, pending: boolean) {
