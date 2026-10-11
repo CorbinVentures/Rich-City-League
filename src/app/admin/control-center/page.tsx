@@ -251,7 +251,7 @@ export default function AdminControlCenterPage() {
   }
 
   if (authLoading) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white">Verifying administrator access…</main>;
-  if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white"><h1 className="font-display text-3xl uppercase">Admin access required</h1><Link href="/admin" className="mt-5 inline-block text-rcl-gold">Return to Command Center</Link></main>;
+  if (!isAdmin) return <main className="min-h-screen bg-rcl-black p-20 text-center text-white"><h1 className="font-display text-3xl uppercase">Administrator access required</h1><Link href="/admin" className="mt-5 inline-block text-rcl-gold">Return to Overview</Link></main>;
 
   const tabs = [
     ['overview', 'OVERVIEW', FaChartLine], ['users', 'USERS & ROLES', FaUsersGear], ['governance', 'GOVERNANCE', FaShieldHalved], ['moderation', 'MODERATION', FaComments], ['reports', 'REPORT CENTER', FaFileShield], ['league', 'LEAGUE CONTROL', FaLayerGroup], ['content', 'CONTENT', FaNewspaper], ['settings', 'SITE SETTINGS', FaGear],
@@ -259,9 +259,9 @@ export default function AdminControlCenterPage() {
 
   return (<main className="min-h-screen bg-rcl-black pb-24 text-white font-display">
       <Container maxWidth="xl" className="py-8">
-        <Link href="/admin" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-gold"><FaArrowLeft /> Command Center</Link>
+        <Link href="/admin" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-gold"><FaArrowLeft /> Overview</Link>
         <div className="mt-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div><p className="text-xs font-black uppercase tracking-[0.3em] text-rcl-orange">SYSTEM ADMINISTRATION</p><h1 className="mt-2 text-4xl font-black uppercase">RCL <span className="text-rcl-orange">CONTROL CENTER</span></h1><p className="mt-2 max-w-2xl text-sm text-gray-400">Full administrative control over users, league operations, community safety, publishing, notifications, and platform configuration.</p></div>
+          <div><p className="text-xs font-black uppercase tracking-[0.3em] text-rcl-orange">PLATFORM OPERATIONS</p><h1 className="mt-2 text-4xl font-black uppercase">RCH <span className="text-rcl-orange">Control Center</span></h1><p className="mt-2 max-w-2xl text-sm text-gray-400">Coordinate users, basketball operations, creator content, community safety, and platform publishing from the RCH workspace.</p></div>
           <div className="flex gap-2"><button onClick={() => void load()} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-widest"><FaRotate className="inline mr-2" /> Refresh</button><button onClick={() => void broadcast()} className="rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase tracking-widest text-black"><FaBullhorn className="inline mr-2" /> Broadcast</button></div>
         </div>
         {message && <div className="mt-5 rounded-xl border border-rcl-gold/20 bg-rcl-gold/5 p-3 text-xs text-rcl-gold">{message}</div>}
