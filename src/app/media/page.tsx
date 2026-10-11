@@ -87,6 +87,39 @@ export default async function MediaPage() {
         className="mt-8"
       />
 
+      <section id="the-pulse" aria-labelledby="rch-tv-pulse-title" className="mt-10 scroll-mt-24 overflow-hidden rounded-3xl border border-rcl-orange/20 bg-[linear-gradient(135deg,rgba(236,139,40,.11),rgba(7,21,34,.9)_52%,#040a11)] p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rcl-orange"><FaMicrophone aria-hidden="true"/>RCH TV weekly show + podcast</span>
+            <h2 id="rch-tv-pulse-title" className="mt-5 font-display text-4xl font-black uppercase tracking-tight sm:text-6xl">The <span className="text-rcl-orange">Pulse</span></h2>
+            <p className="mt-3 text-lg font-semibold text-white/80">The conversation behind Virginia basketball.</p>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/55">Weekly discussion, news, culture, interviews, and the stories beyond the scoreboard. Watch the episodes right here on RCH TV when the series launches.</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-wider">
+              {['Weekly show','Podcast','Interviews','Basketball culture'].map(label=><span key={label} className="rounded-full border border-white/15 px-3 py-2 text-white/60">{label}</span>)}
+            </div>
+          </div>
+          <div className="flex min-h-44 w-full max-w-xs flex-col items-center justify-center rounded-2xl border border-rcl-orange/20 bg-[#070e17] p-6 text-center shadow-xl">
+            <FaMicrophone className="text-4xl text-rcl-orange" aria-hidden="true"/>
+            <p className="mt-4 font-display text-3xl font-black uppercase tracking-widest">THE PULSE</p>
+            <p className="mt-2 text-[10px] font-black uppercase tracking-[.25em] text-white/45">An RCH TV Production</p>
+            <p className="mt-5 border-t border-white/10 pt-4 text-xs text-rcl-orange">Premiere to be announced</p>
+          </div>
+        </div>
+        {pulseEpisodes.length>0?<div className="mt-8"><h3 className="mb-5 font-display text-2xl font-black uppercase">Watch The Pulse</h3><MediaDirectory items={pulseEpisodes}/></div>:<div className="mt-7 rounded-xl border border-white/10 bg-black/20 p-5 text-sm text-white/55">Episodes will appear here when published. The show has not announced its first air date.</div>}
+      </section>
+
+      <section id="movies" aria-labelledby="rch-tv-movies-title" className="mt-10 scroll-mt-24 overflow-hidden rounded-3xl border border-rcl-blue/20 bg-[#071522]/65 p-6 sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-5">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-rcl-blue"><FaFilm aria-hidden="true"/>RCH TV cinema</span>
+            <h2 id="rch-tv-movies-title" className="mt-3 font-display text-3xl font-black uppercase sm:text-4xl">Movies</h2>
+            <p className="mt-3 text-sm leading-7 text-white/55">Full-length basketball films, independent features, and selected documentaries. Every movie needs distribution rights cleared before it appears in the library.</p>
+          </div>
+          <Link href="/media/creators" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-xs font-black uppercase tracking-wider text-white/80">For filmmakers <FaArrowRight/></Link>
+        </div>
+        {movies.length>0?<div className="mt-7"><MediaDirectory items={movies}/></div>:<div className="mt-7 rounded-xl border border-dashed border-white/15 bg-black/20 p-6 text-sm text-white/55"><p className="font-semibold text-white">The cinema library is being curated.</p><p className="mt-2">Licensed films will appear here once distribution is approved. No films are available yet.</p></div>}
+      </section>
+
       <section id="original-content" aria-labelledby="rch-tv-originals-title" className="mt-10 scroll-mt-24 rounded-3xl border border-rcl-orange/20 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,.14),transparent_34%),#071018] p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-5"><div className="max-w-3xl"><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange"><FaCrown className="mr-2 inline"/>RCH Originals</p><h2 id="rch-tv-originals-title" className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Original Content</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">The plan is not to flood RCH TV with filler. Originals should earn their place: strong Richmond basketball stories, personalities and access that members cannot get from a box score.</p></div><Link href="/membership" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 px-4 text-xs font-black uppercase tracking-wider text-rcl-orange">Membership <FaArrowRight/></Link></div>
         <div className="mt-7 grid gap-4 md:grid-cols-3">
@@ -104,7 +137,6 @@ export default async function MediaPage() {
 
       <section className="mt-10"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange"><FaFilm className="mr-1 inline"/>Public highlights</p><h2 className="mt-1 font-display text-3xl font-black uppercase">Top Plays & player tape</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">Highlights remain public and shareable. Tagged clips attach to a player’s Basketball Passport and, when available, the official game.</p></div><Link href="/media/submit" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Add a clip <FaArrowRight/></Link></div>{highlights.length?<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{highlights.map(h=><a key={h.id} href={h.clip_url??(h.game_id?`/games/${h.game_id}`:`/players/${h.player_id}/passport`)} className="group rounded-2xl border border-white/10 bg-[#071018] p-4 transition hover:border-rcl-blue/35"><div className="relative grid aspect-video place-items-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_center,rgba(26,155,220,.16),transparent_55%),#020408]">{h.thumbnail_url?<img src={h.thumbnail_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-80"/>:null}<span className="relative z-10 grid h-11 w-11 place-items-center rounded-full bg-black/60 text-rcl-blue backdrop-blur"><FaPlay/></span>{h.featured&&<span className="absolute left-2 top-2 rounded-full bg-rcl-orange px-2 py-1 text-[8px] font-black uppercase tracking-wider text-black">Featured</span>}</div><p className="mt-3 text-[9px] font-black uppercase tracking-wider text-rcl-orange">{h.category.replace(/_/g,' ')}</p><h3 className="mt-1 line-clamp-2 font-black">{h.title}</h3><p className="mt-2 text-xs text-white/35">{h.player?`${h.player.first_name??''} ${h.player.last_name??''}`.trim():'RCL Player'}</p></a>)}</div>:<div className="mt-6 rounded-2xl border border-dashed border-white/10 p-9 text-center"><FaFilm className="mx-auto text-3xl text-rcl-blue"/><h3 className="mt-3 font-display text-xl font-black uppercase">The player-tagged tape starts here</h3><p className="mt-2 text-sm text-white/35">Submit highlights and connect them to an RCL player and game.</p></div>}</section>
 
-      <section className="mt-12"><div className="mb-6"><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">RCH TV archive</p><h2 className="mt-1 font-display text-3xl font-black uppercase">Photos, interviews & media</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">Browse published Rich City Hoops and Rich City League media without leaving the platform.</p></div><MediaDirectory items={items} /></section>
     </Container>
   </main>;
 }
