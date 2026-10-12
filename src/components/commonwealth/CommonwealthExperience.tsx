@@ -292,7 +292,7 @@ export default function CommonwealthExperience(){
         </div>
         {selectedCourt&&<button className="rch-cw-text-link" onClick={()=>setSelectedCourt('')}>Show crews from all pilot courts <FaArrowRight/></button>}
         {captainCrew&&requests.filter(r=>r.crew_id===captainCrew.id&&r.status==='pending').length>0&&
-          <div className="rch-cw-inbox"><h3><FaUserPlus/> Captain's roster requests</h3>
+          <div className="rch-cw-inbox"><h3><FaUserPlus/> Captain&apos;s roster requests</h3>
             {requests.filter(r=>r.crew_id===captainCrew.id&&r.status==='pending').map(r=><div key={r.id} className="rch-cw-request-row"><span>{r.display_name}</span><div><button disabled={!!busy} onClick={()=>void rpc('commonwealth_review_join',{p_request:r.id,p_approve:true},'Player added to your crew.')}><FaCheck/> Approve</button><button disabled={!!busy} onClick={()=>void rpc('commonwealth_review_join',{p_request:r.id,p_approve:false},'Roster request declined.')}><FaXmark/> Decline</button></div></div>)}
           </div>}
       </section>
@@ -337,7 +337,7 @@ export default function CommonwealthExperience(){
               {staff&&ch.status==='review'&&<div className="rch-cw-review"><span>Staff review: {ch.challenger_score} – {ch.defender_score}. Confirm independently before verifying.</span><button disabled={!!busy} onClick={()=>void rpc('commonwealth_review_result',{p_challenge:ch.id,p_approve:true},'Result independently verified. Standings updated.')}>Verify</button><button disabled={!!busy} onClick={()=>void rpc('commonwealth_review_result',{p_challenge:ch.id,p_approve:false},'Result rejected for correction.')}>Reject</button></div>}
               {ch.run_id&&<Link className="rch-cw-text-link" href={'/runs/'+encodeURIComponent(ch.run_id)}>Open connected Run <FaArrowRight/></Link>}
             </article>;
-          }):<div className="rch-cw-empty small"><FaClock/><strong>All rivalries start somewhere.</strong><p>No challenges have been submitted. When crews join, this becomes Virginia's real match board.</p></div>}
+          }):<div className="rch-cw-empty small"><FaClock/><strong>All rivalries start somewhere.</strong><p>No challenges have been submitted. When crews join, this becomes Virginia&apos;s real match board.</p></div>}
         </div>
       </section>
 
