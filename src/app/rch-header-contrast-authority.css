@@ -71,7 +71,7 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root
 }
 /* Native field and placeholder contrast must also survive dynamic theme styles. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root
-  :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="file"]){
+  :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):not([type="hidden"]){
   background-color:#0b263e!important;
   border-color:#507b9f!important;
   color:#f5f9ff!important;
