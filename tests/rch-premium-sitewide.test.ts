@@ -8,6 +8,7 @@ const foundation=file('src/app/rch-premium-foundation.css');
 const chrome=file('src/app/rch-premium-navigation.css');
 const components=file('src/app/rch-premium-components.css');
 const discover=file('src/app/rch-premium-discover.css');
+const editorial=file('src/app/rch-premium-editorial.css');
 const world=file('src/components/discover/VirginiaWorld.tsx');
 const atlas=file('src/components/discover/VirginiaInteractiveAtlas.tsx');
 
@@ -22,7 +23,7 @@ const contrast=(a:string,b:string)=>{
 };
 describe('RCH premium sitewide design contract',()=>{
   it('loads after legacy theme rules, for every route rather than one page',()=>{
-    for(const path of ['foundation','navigation','components','discover']){
+    for(const path of ['foundation','navigation','components','editorial','discover']){
       expect(layout).toContain(`import './rch-premium-${path}.css'`);
     }
     expect(layout.indexOf("import './rch-premium-foundation.css'"))
@@ -48,6 +49,9 @@ describe('RCH premium sitewide design contract',()=>{
     expect(chrome).toContain('.rcl-mobile-create');
     expect(chrome).toContain('.rcl-navigation-panel');
     expect(chrome).toContain('.rch-admin-area');
+    expect(editorial).toContain('.rcl-social-landing-hero');
+    expect(editorial).toContain('.rcl-feed-intro');
+    expect(editorial).toContain('.rcl-inbox-workspace');
   });
   it('standardizes reusable cards, forms, rankings, status and keyboard focus',()=>{
     expect(components).toContain('.rcl-panel');
