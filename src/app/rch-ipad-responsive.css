@@ -87,6 +87,30 @@
   }
 }
 
+/* Larger iPad landscape: show contextual activity alongside the primary feed,
+   but never the second navigation column. */
+@media (min-width: 1250px) and (max-width: 1399px) and (orientation: landscape) and (pointer: coarse) {
+  .rcl-social-world .rcl-feed-intro,
+  .rcl-social-world .rcl-network-feed-grid {
+    max-width: 1200px;
+  }
+
+  .rcl-social-world .rcl-network-feed-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 290px) !important;
+    gap: 18px;
+    align-items: start;
+  }
+
+  .rcl-social-world .rcl-network-feed-grid > .rcl-network-left-rail {
+    display: none !important;
+  }
+
+  .rcl-social-world .rcl-network-feed-grid > .rcl-network-right-rail {
+    display: block !important;
+    min-width: 0;
+  }
+}
+
 /* Account and install gateway pages have no SiteHeader and must not reserve
    its sidebar or topbar space even when opened at desktop-like iPad widths. */
 .rcl-platform-root.rch-isolated-page,
