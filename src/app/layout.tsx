@@ -43,6 +43,8 @@ import './rch-premium-discover.css';
 import './rch-visual-qa-finish.css';
 // Last: keep legacy light headers from reappearing in member and admin views.
 import './rch-header-contrast-authority.css';
+// Public browser routes inherit the installed-app palette; final layer owns public contrast.
+import './rch-public-theme.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
