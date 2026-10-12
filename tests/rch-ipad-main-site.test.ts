@@ -18,6 +18,8 @@ describe('RCH main-site iPad orientation and responsive layout', () => {
 
     expect(navigation).toContain('@media (max-width: 1199px)');
     expect(finalShell).toContain('(max-width: 1199px)');
+    expect(navigation).toContain('(max-width: 1399px) and (pointer: coarse)');
+    expect(finalShell).toContain('(max-width: 1399px) and (pointer: coarse)');
     expect(finalShell).toContain('.rcl-universal-sidebar');
     expect(finalShell).toContain('display: none !important');
     expect(finalShell).toContain('.rcl-universal-bottom');
@@ -34,6 +36,12 @@ describe('RCH main-site iPad orientation and responsive layout', () => {
     expect(feed).toContain('2xl:grid-cols-[170px_minmax(0,1fr)_270px]');
     expect(feed).not.toContain('lg:grid-cols-[190px_minmax(0,680px)_minmax(250px,1fr)]');
     expect(feed).toContain('hidden 2xl:block');
+    expect(feed).toContain('rcl-network-left-rail');
+    expect(feed).toContain('rcl-network-right-rail');
+    expect(css).toContain('(min-width: 1250px) and (max-width: 1399px) and (orientation: landscape)');
+    expect(css).toContain('grid-template-columns: minmax(0, 1fr) minmax(260px, 290px) !important');
+    expect(css).toContain('> .rcl-network-left-rail');
+    expect(css).toContain('> .rcl-network-right-rail');
     expect(css).toContain('max-width: 1535px');
     expect(css).toContain('grid-template-columns: minmax(0, 1fr) !important');
   });
