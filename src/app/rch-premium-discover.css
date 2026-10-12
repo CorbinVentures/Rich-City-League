@@ -1,0 +1,169 @@
+/* Finishing passes that reproduce the approved Discover concept, not a pasted mockup. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-world-page{
+  background:radial-gradient(ellipse at 88% 1%,rgba(37,110,205,.19),transparent 33rem),
+    linear-gradient(180deg,#071c31,#061628 60%,#041222)!important;
+  color:#f5faff!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-head{padding-top:3px}
+body.rch-premium-app .rch-world-page .rch-world-head h1{
+  font-size:clamp(34px,4vw,61px)!important;
+  font-weight:900!important;
+  letter-spacing:-.05em!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-head h1 span{color:#4b9cff!important}
+body.rch-premium-app .rch-world-page .rch-world-subtitle{color:#bed2e5!important}
+body.rch-premium-app .rch-world-page .rch-world-head h1 small{
+  color:#b8d9f9!important;
+  border:1px solid #528bc6!important;
+  background:#12395f!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page a.rch-commonwealth-banner{
+  display:flex!important;
+  align-items:center!important;
+  gap:15px!important;
+  width:100%!important;
+  max-width:1600px!important;
+  min-height:94px!important;
+  border:1px solid #448eec!important;
+  border-radius:17px!important;
+  padding:17px 22px!important;
+  color:#f5faff!important;
+  background:radial-gradient(circle at 93% 55%,#1956a66e,transparent 36%),
+    linear-gradient(110deg,#173f79 0%,#0d2b56 54%,#102a5d 100%)!important;
+  box-shadow:0 13px 32px #0006,inset 0 1px 0 #ffffff22!important;
+}
+body.rch-premium-app .rch-commonwealth-banner :where(strong,b){
+  color:#fff!important;
+  font-size:clamp(14px,1.5vw,19px)!important;
+  font-weight:900!important;
+  letter-spacing:.025em!important;
+}
+body.rch-premium-app .rch-commonwealth-banner :where(small){
+  display:block!important;
+  color:#d8e9ff!important;
+  font-size:clamp(11px,1.1vw,13px)!important;
+  line-height:1.5!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rch-commonwealth-banner svg{color:#9ad4ff!important;filter:drop-shadow(0 0 10px #379fff6a)}
+body.rch-premium-app .rch-world-page .rch-world-tools label.rch-world-search,
+body.rch-premium-app .rch-world-page .rch-world-tools label.rch-world-search input[type="search"]{
+  background:#08233a!important;
+  color:#f5faff!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-filters button{font-weight:850!important}
+body.rch-premium-app .rch-world-page .rch-world-filters button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#3f9cff,#1c65cb)!important;
+  border-color:#9bd1ff!important;
+  box-shadow:0 0 0 3px #247fd02e,0 0 17px #379eff4b!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-map-shell-v2{
+  background:radial-gradient(ellipse at 54% 46%,#0b3a5b,#05172b 76%)!important;
+  border:1px solid #4693ea!important;
+  box-shadow:0 16px 43px #0009,0 0 0 1px #499aff1d!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2{
+  background:radial-gradient(ellipse at 51% 51%,#0b3a5b,#04192c 76%)!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-image{
+  filter:saturate(1.35) brightness(.97) contrast(1.15)!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-vignette{
+  background:linear-gradient(180deg,#05172972,transparent 32%,transparent 72%,#05152578),
+    radial-gradient(ellipse at 50% 50%,transparent 45%,#0617284d 91%)!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-city-dot{
+  width:31px!important;
+  height:31px!important;
+  font-size:13px!important;
+  border-radius:11px!important;
+  background:linear-gradient(150deg,#348ce4,#144e82)!important;
+  box-shadow:0 0 0 3px #52a6fa21,0 6px 18px #0009!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-city-label{
+  border-color:#4c82b6!important;
+  border-radius:7px!important;
+  background:#061a2de8!important;
+  color:white!important;
+  font-size:10px!important;
+  padding:5px 7px!important;
+  box-shadow:0 5px 12px #0009!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-city.active .rch-live-atlas-city-dot{
+  border-color:white!important;
+  background:#4da7ff!important;
+  box-shadow:0 0 0 5px #378dff42,0 0 25px #59b3ff81!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-cluster{
+  border-color:#94d4ff!important;
+  border-radius:50%!important;
+  min-width:45px!important;
+  min-height:45px!important;
+  padding:6px!important;
+  background:radial-gradient(circle at 26% 18%,#448feb,#104a85)!important;
+  box-shadow:0 0 0 5px #4a9dfb38,0 0 25px #359aff52,0 7px 22px #000a!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-cluster span{
+  font-size:6px!important;letter-spacing:0!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-point{
+  width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;
+  font-size:11px!important;
+  border-radius:50%!important;
+  box-shadow:0 0 0 4px #53a3f745,0 5px 13px #000a!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-toolbar{
+  top:128px!important;
+  background:#071d33f2!important;
+  border:1px solid #4c83b3!important;
+  box-shadow:0 10px 23px #0009!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-toolbar button{
+  border-radius:10px!important;
+  color:#f3faff!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-tactical-strip{
+  background:#071f38e7!important;border-color:#4679a4!important;
+  box-shadow:0 9px 28px #0008!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-tactical-strip > span{
+  color:#fff!important;
+}
+body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-tactical-strip small{
+  color:#b5d0e9!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-panel{
+  border-color:#38678e!important;
+  background:linear-gradient(160deg,#0d304e,#071c31 65%)!important;
+  box-shadow:0 16px 38px #0005!important;
+}
+body.rch-premium-app .rch-world-page .rch-world-panel :where(h2,h3,strong){color:white!important}
+body.rch-premium-app .rch-world-page .rch-world-list>button{color:#eaf5ff!important}
+body.rch-premium-app .rch-world-page .rch-world-list>button.selected{
+  background:#215985!important;border-color:#4b9ce6!important;
+}
+@media(max-width:700px){
+  body.rch-premium-app .rch-world-page .rch-world-head h1{
+    font-size:clamp(32px,7vw,44px)!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page a.rch-commonwealth-banner{
+    min-height:89px!important;gap:10px!important;padding:14px!important;border-radius:14px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-tactical-strip{
+    top:67px!important;left:8px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-toolbar{
+    top:125px!important;right:9px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-city-label{
+    font-size:9px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-live-atlas-v2 .rch-live-atlas-selection{
+    bottom:82px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-world-map-hud{
+    font-size:10px!important;
+  }
+  body.rch-premium-app .rch-world-page .rch-world-map-hud em{display:none!important}
+}
