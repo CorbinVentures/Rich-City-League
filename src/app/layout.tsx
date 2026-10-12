@@ -31,6 +31,8 @@ import './rch-app-download.css';
 import './rch-runs-visual-lock.css';
 // Loaded last to preserve live-camera and overlay contrast against global light-theme rules.
 import './rch-tv-production-lock.css';
+// Tablet-only shell fit after all legacy chrome rules, without touching the standalone scorebook.
+import './rch-ipad-responsive.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
