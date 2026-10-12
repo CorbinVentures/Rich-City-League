@@ -1,0 +1,100 @@
+/*
+ * RCH header contrast authority, Oct 2026.
+ * Historical light themes and injected <style> tags used to leave white
+ * header cards beneath the current light-colored typography.
+ * Scope this fix to the named shared headers and explicitly white utility
+ * headers. Do not rewrite image/video backgrounds, printable documents,
+ * scorebook diagrams, broadcasts, or arbitrary content cards.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero),
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main
+  :is(header[class*="bg-white"],header[class*="bg-[#F"],header[class*="bg-[#f"]) {
+  background:radial-gradient(ellipse at 85% 9%,rgba(65,133,204,.22),transparent 38%),
+    linear-gradient(140deg,#153653 0%,#071b2e 100%)!important;
+  background-color:#102943!important;
+  border-color:#3b668b!important;
+  color:#f5f9ff!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  :is(h1,h2,h3,h4,header,strong){
+  color:#fff!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  :where(p,small,dd,dt,[class*="text-[#64748B"],[class*="text-gray-"],[class*="text-slate-"]){
+  color:#c5d9ed!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  :where(.text-rcl-orange,.text-rcl-blue,.rcl-eyebrow,.rcl-kicker) {
+  color:#99d0ff!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  > div.pointer-events-none.absolute.inset-0 {
+  background:radial-gradient(circle at 88% 0%,rgba(62,142,218,.16),transparent 36%)!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  :is(div,section,article,aside)[class*="bg-white"] {
+  background:#123450!important;
+  border-color:#406989!important;
+  color:#eaf5ff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero)
+  :is(button,a)[class*="bg-white"]{
+  background:#194668!important;
+  color:#f5faff!important;
+  border-color:#578ab2!important;
+}
+/* Some legacy page headers are inline white-utility headers rather than
+ * reusable heroes. Bring only those literal white surfaces into the system. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main
+  :is(header[class*="bg-white"],header[class*="bg-[#F"],header[class*="bg-[#f"]) 
+  :is(h1,h2,h3,h4) {color:#fff!important;opacity:1!important;}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main
+  :is(header[class*="bg-white"],header[class*="bg-[#F"],header[class*="bg-[#f"])
+  :where(p,small,span:not([class*="bg-"])) {color:#c3d7e9!important;opacity:1!important;}
+/* Never make a status chip illegible while adjusting its surrounding header. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rcl-client-page-hero,.rcl-corporate-page-hero) [title="RCL VIP verified member"]{
+  border-color:#cfaa62!important;background:#3f321c!important;color:#f1d38a!important;
+}
+/* Native field and placeholder contrast must also survive dynamic theme styles. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="file"]){
+  background-color:#0b263e!important;
+  border-color:#507b9f!important;
+  color:#f5f9ff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(input,textarea)::placeholder{color:#b8cde0!important;opacity:1!important;}
+/* All accessible active inputs maintain a real outline, not only a blue blur. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(button,a,input,textarea,select):focus-visible{
+  outline:2px solid #a9ddff!important;outline-offset:3px!important;
+}
+@media(max-width:767px){
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root
+    :is(.rcl-client-page-hero,.rcl-corporate-page-hero,.rch-shared-page-hero){
+    border-bottom-color:#3a6991!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root
+    :is(.rcl-client-page-hero,.rcl-corporate-page-hero) .container{
+    min-width:0!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root
+    :is(.rcl-client-page-hero,.rcl-corporate-page-hero) :is(h1,h2){
+    overflow-wrap:anywhere;
+    text-wrap:pretty;
+  }
+}
