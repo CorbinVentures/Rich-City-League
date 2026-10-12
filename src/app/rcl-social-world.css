@@ -836,7 +836,7 @@ body { color:var(--rcl-social-text)!important; }
 .rcl-social-secondary > section:first-child,
 .rcl-social-secondary .rcl-client-page-hero {
   border-color:var(--rcl-social-border)!important;
-  background:linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important;
+  background:linear-gradient(140deg,#153653 0%,#071b2e 100%)!important;
   color:var(--rcl-social-text)!important;
 }
 .rcl-social-secondary .rcl-client-page-hero > div.pointer-events-none.absolute.inset-0,
@@ -845,7 +845,7 @@ body { color:var(--rcl-social-text)!important; }
   background:
     radial-gradient(circle at 86% 10%,rgba(59,130,246,.09),transparent 30%),
     radial-gradient(circle at 8% 82%,rgba(83,120,154,.07),transparent 34%),
-    linear-gradient(180deg,rgba(255,255,255,.18),rgba(243,246,249,.40))!important;
+    linear-gradient(180deg,rgba(11,37,59,.18),rgba(8,28,47,.26))!important;
 }
 .rcl-social-secondary :is(a,button)[class*="bg-rcl-orange"],
 .rcl-social-secondary [class*="bg-rcl-orange"] {

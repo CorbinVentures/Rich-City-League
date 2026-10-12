@@ -2,29 +2,29 @@
 
 /**
  * Safe global foundation for the social-first RCL brand.
- * The shell and social surfaces are light; competition/media pages may
+ * The shell and social surfaces use the premium dark palette; competition/media pages may
  * deliberately keep dark presentation until they are migrated individually.
  */
 export function RCLVisualSystem(){
   return <style jsx global>{`
     :root {
-      --rcl-canvas:#F6F9FC;
-      --rcl-surface:#FFFFFF;
-      --rcl-surface-2:#EDF4FA;
-      --rcl-line:#D9E4EF;
-      --rcl-text:#0F2547;
-      --rcl-text-2:#64748B;
-      --rcl-muted:#8190A1;
+      --rcl-canvas:#07172a;
+      --rcl-surface:#102841;
+      --rcl-surface-2:#153451;
+      --rcl-line:#315b80;
+      --rcl-text:#f5f9ff;
+      --rcl-text-2:#bdcfe4;
+      --rcl-muted:#9bb6d1;
       --rcl-orange:#3B82F6;
       --rcl-gold:#3B82F6;
       --rcl-blue:#3B82F6;
       --rcl-success:#2E8B70;
       --rcl-danger:#C65361;
-      --rcl-charcoal:#0F2547;
-      --rcl-cream:#F6F9FC;
+      --rcl-charcoal:#061222;
+      --rcl-cream:#e6f2ff;
     }
 
-    html { background:var(--rcl-canvas); color-scheme:light; scroll-behavior:smooth; }
+    html { background:var(--rcl-canvas); color-scheme:dark; scroll-behavior:smooth; }
     body { background:var(--rcl-canvas)!important; color:var(--rcl-text)!important; }
     body::before { display:none!important; }
     main { position:relative; isolation:isolate; }
@@ -153,12 +153,12 @@ export function RCLVisualSystem(){
     .rcl-navigation-panel input,
     .rcl-navigation-panel textarea,
     .rcl-navigation-panel select {
-      background:#fff!important;
-      border-color:var(--rcl-line)!important;
-      color:var(--rcl-text)!important;
+      background:#071e34!important;
+      border-color:#426e92!important;
+      color:#f5f9ff!important;
       box-shadow:none!important;
     }
-    .rcl-social-world input::placeholder,.rcl-social-world textarea::placeholder { color:#9A9DA2!important; }
+    .rcl-social-world input::placeholder,.rcl-social-world textarea::placeholder { color:#b1c8de!important; }
 
     .rcl-dark-media,.rcl-dark-media * { color:#fff; }
     .rcl-dark-media [class*="text-white/"] { color:rgba(255,255,255,.65)!important; }

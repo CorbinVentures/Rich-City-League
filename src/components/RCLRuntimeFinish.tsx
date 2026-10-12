@@ -18,7 +18,7 @@ export function RCLRuntimeFinish(){
       --rcl-vip-gold-deep:#7A5C20!important;
     }
 
-    html body { background:#F6F9FC!important; color:#0F2547!important; }
+    html body { background:#07172a!important; color:#f5f9ff!important; }
     body main::before,body main::after { display:none!important; }
 
     body [class*="text-orange-"],
