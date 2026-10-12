@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isBrowserAccountRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
+import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
 
 describe('RCH mobile app experience gate', () => {
   it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile'])(
@@ -10,6 +10,16 @@ describe('RCH mobile app experience gate', () => {
   it.each(['/', '/social', '/messages', '/runs', '/league', '/admin', '/discover', '/today', '/notifications', '/profile/some-user'])(
     'keeps the full platform behind mobile PWA mode: %s',
     path => expect(isBrowserAccountRoute(path)).toBe(false),
+  );
+
+  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/membership', '/register'])(
+    'renders public information on the open web: %s',
+    path => expect(isBrowserPublicRoute(path)).toBe(true),
+  );
+
+  it.each(['/app', '/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/teams/new', '/teams/warriors/edit', '/search'])(
+    'keeps member tools and app-only pages outside the public browser allowlist: %s',
+    path => expect(isBrowserPublicRoute(path)).toBe(false),
   );
 
   it('allows installed iOS and Android PWAs but not their browser tabs', () => {
