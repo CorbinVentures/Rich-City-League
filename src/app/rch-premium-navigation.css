@@ -59,7 +59,7 @@ body.rch-premium-app .rcl-universal-nav a.active svg,
 body.rch-premium-app .rcl-universal-nav a[aria-current="page"] svg{color:#b4ddff!important}
 body.rch-premium-app .rcl-universal-nav a.rcl-primary-create{
   border:1px solid #4b9af0!important;
-  background:linear-gradient(135deg,#318eec,#206dc0)!important;
+  background:linear-gradient(135deg,#2774c6,#1756a1)!important;
   color:white!important;
   box-shadow:0 8px 24px #2a85ee45!important;
 }
@@ -131,7 +131,7 @@ body.rch-premium-app .rcl-universal-bottom a[aria-current="page"]{
   background:#21518a65!important;
 }
 body.rch-premium-app .rcl-universal-bottom a.rcl-mobile-create{
-  background:linear-gradient(150deg,#4ca6ff,#1768e8)!important;
+  background:linear-gradient(150deg,#2876ce,#1253b3)!important;
   color:white!important;
   border:2px solid #8dcbff!important;
   box-shadow:0 7px 28px #318cff66,0 0 0 4px #2052a55e!important;
