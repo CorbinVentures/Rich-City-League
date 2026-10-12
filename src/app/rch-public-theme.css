@@ -55,7 +55,7 @@ body.rch-premium-app .rch-public-web #rch-public-content :is(h1,h2,h3,h4,h5,h6) 
   opacity:1!important;
 }
 body.rch-premium-app .rch-public-web #rch-public-content
-  :is(.text-slate-900,.text-slate-800,.text-gray-900,.text-gray-800,.text-[#0F2547]) {
+  :is(.text-slate-900,.text-slate-800,.text-gray-900,.text-gray-800) {
   color:var(--rch-ink)!important;
 }
 body.rch-premium-app .rch-public-web #rch-public-content
