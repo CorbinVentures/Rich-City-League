@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isBrowserAccountRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
+import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
 
 describe('RCH mobile app experience gate', () => {
   it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile'])(
@@ -11,6 +11,23 @@ describe('RCH mobile app experience gate', () => {
     'keeps the full platform behind mobile PWA mode: %s',
     path => expect(isBrowserAccountRoute(path)).toBe(false),
   );
+
+  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/membership', '/register'])(
+    'renders public information on the open web: %s',
+    path => expect(isBrowserPublicRoute(path)).toBe(true),
+  );
+
+  it.each(['/app', '/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/teams/new', '/teams/warriors/edit', '/search'])(
+    'keeps member tools and app-only pages outside the public browser allowlist: %s',
+    path => expect(isBrowserPublicRoute(path)).toBe(false),
+  );
+
+  it('normalizes trailing slashes without opening app-only routes', () => {
+    expect(isBrowserPublicRoute('/teams/warriors/')).toBe(true);
+    expect(isBrowserPublicRoute('/')).toBe(true);
+    expect(isBrowserPublicRoute('/admin/')).toBe(false);
+    expect(isBrowserPublicRoute('/organizations/manage/')).toBe(false);
+  });
 
   it('allows installed iOS and Android PWAs but not their browser tabs', () => {
     const iphone = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', platform: 'iPhone' };

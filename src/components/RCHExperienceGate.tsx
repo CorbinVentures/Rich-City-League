@@ -3,11 +3,12 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHAppDownload } from '@/components/RCHAppDownload';
-import { isBrowserAccountRoute, isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
+import { RCHPublicWebShell } from '@/components/RCHPublicWebShell';
+import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 
 type Mode = 'checking' | 'mobile-app' | 'browser';
 
-export function RCHExperienceGate({ children, apkUrl }: { children: ReactNode; apkUrl: string | null }) {
+export function RCHExperienceGate({ children, publicContent, apkUrl }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
   const pathname = usePathname();
   const [mode, setMode] = useState<Mode>('checking');
   const browserAccountRoute = isBrowserAccountRoute(pathname);
@@ -23,8 +24,14 @@ export function RCHExperienceGate({ children, apkUrl }: { children: ReactNode; a
     }) ? 'mobile-app' : 'browser');
   }, []);
 
+  // Public pages are server-rendered in normal browsers, without mounting member
+  // app chrome or background social/notification effects. PWA mode is unchanged.
+  if (isBrowserPublicRoute(pathname) && mode !== 'mobile-app') {
+    return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
+  }
+
   // Account registration, profile setup, recovery and legal policies remain available
-  // in normal browsers; PWA functionality stays inside installed mobile mode.
+  // in normal browsers; member PWA functionality stays in installed mobile mode.
   if (browserAccountRoute || mode === 'mobile-app') return <>{children}</>;
 
   if (mode === 'checking') {
