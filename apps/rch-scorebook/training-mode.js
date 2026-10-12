@@ -1,6 +1,6 @@
 /* RCH SCOREBOOK ACADEMY
  * Launchable from the separate Scorebook PWA, even at sign-in.
- * 100% device-local, deliberately no supabase, fetch, or server writes.
+ * Device-local actions only; official game data cannot be modified here.
  */
 (function(){
 'use strict';
