@@ -1,4 +1,4 @@
-import { atlasXY } from '@/lib/virginia-atlas-camera';
+import { atlasXY } from './virginia-atlas-camera';
 
 export const COMMONWEALTH_SEASON_SLUG='richmond-founding-2026';
 export const COMMONWEALTH_PILOT_COURTS=['pine-camp','battery-park','chimborazo','broad-rock-sports','randolph'] as const;
