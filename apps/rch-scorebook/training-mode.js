@@ -178,14 +178,16 @@ function createEntry(){
  if(!document.getElementById('rch-training-entry')){
   const button=document.createElement('button');button.id='rch-training-entry';button.type='button';button.textContent='✦ TEST / TRAINING';button.className='tr-entry';
   button.addEventListener('click',launch);
-  const header=document.querySelector('.header .nav')||document.querySelector('.header');
+  const nav=document.querySelector('.header .nav');
+  const header=(nav&&getComputedStyle(nav).display!=='none'?nav:null)||document.querySelector('.header');
   const auth=document.querySelector('.authbox');
   const target=header||auth;
   if(target)target.append(button);
   else document.body.append(button);
  }
  const currentButton=document.getElementById('rch-training-entry');
- const header=document.querySelector('.header .nav')||document.querySelector('.header');
+ const nav=document.querySelector('.header .nav');
+ const header=(nav&&getComputedStyle(nav).display!=='none'?nav:null)||document.querySelector('.header');
  const auth=document.querySelector('.authbox');
  const desired=header||auth||document.body;
  if(currentButton?.parentElement!==desired)desired.append(currentButton);
