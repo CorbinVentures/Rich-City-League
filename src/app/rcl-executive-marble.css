@@ -643,15 +643,11 @@ select {
   transform: none !important;
 }
 
-@media (min-width: 700px) {
-  body:has(.rcl-universal-sidebar) main:not(.rcl-mock-home) {
-    margin-left: 228px !important;
-  }
-
-  .rcl-universal-topbar {
-    margin-left: 228px !important;
-  }
-}
+/* Geometry is owned by the universal shell in rcl-social-world.css.
+   Never offset descendant <main> elements: the PWA's #rcl-content wrapper
+   already accounts for the sidebar, and a second 228px offset pushes the
+   social feed outside an iPad's landscape viewport.
+   The fixed topbar already uses an inset matching the desktop rail. */
 
 @media (max-width: 900px) {
   .rcl-world .rcl-hero h1.rcl-display {
