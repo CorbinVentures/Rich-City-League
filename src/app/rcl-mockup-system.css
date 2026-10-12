@@ -274,15 +274,15 @@ body [class*="border-[#f5921e"] {
   color:var(--rcl-v3-slate)!important;
 }
 
-/* Shared page heroes: editorial white/blue instead of old dark blocks. */
+/* Shared page heroes: consistent premium dark/blue contrast. */
 .rcl-corporate-page-hero,
 .rcl-client-page-hero,
 .rcl-social-secondary > section:first-child {
   border-color:var(--rcl-v3-border)!important;
   background:
     radial-gradient(circle at 90% 0%,rgba(59,130,246,.10),transparent 34%),
-    linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important;
-  color:var(--rcl-v3-ink)!important;
+    linear-gradient(140deg,#153653 0%,#071b2e 100%)!important;
+  color:#f5f9ff!important;
   box-shadow:none!important;
 }
 
