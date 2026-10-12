@@ -1,0 +1,149 @@
+/*
+ * RCH public web / installed PWA visual parity.
+ * The browser-only shell deliberately has no member-app chrome, but it must
+ * share the same midnight-navy / blue tokens, contrast, and typography.
+ *
+ * Scoped to the browser shell: this does not affect scorebook, streams,
+ * PWA-specific controls, printable views, or staff/admin workspaces.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web {
+  background:var(--rch-canvas)!important;
+  color:var(--rch-ink)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content {
+  min-width:0;
+  background:var(--rch-canvas)!important;
+  color:var(--rch-ink)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-header {
+  background:#071727f5!important;
+  border-color:var(--rch-line-soft)!important;
+  color:var(--rch-ink)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-nav a {
+  color:var(--rch-copy)!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-nav a:hover,
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-nav a:focus-visible {
+  color:var(--rch-ink)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-app-cta {
+  background:linear-gradient(135deg,#286fbd,#17559e)!important;
+  border:1px solid #80bdf7!important;
+  color:#fff!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-app-cta:hover {
+  background:linear-gradient(135deg,#307acb,#185ca9)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer {
+  background:#061426!important;
+  border-color:var(--rch-line-soft)!important;
+  color:var(--rch-copy)!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer a {
+  color:#c3def5!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer a:hover {
+  color:#fff!important;
+}
+
+/* Shared headings and utility text must stay legible on every public page. */
+body.rch-premium-app .rch-public-web #rch-public-content :is(h1,h2,h3,h4,h5,h6) {
+  color:var(--rch-ink)!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.text-slate-900,.text-slate-800,.text-gray-900,.text-gray-800,.text-[#0F2547]) {
+  color:var(--rch-ink)!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.text-slate-700,.text-slate-600,.text-gray-700,.text-gray-600,.text-slate-500,.text-gray-500) {
+  color:var(--rch-copy)!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.text-slate-400,.text-slate-300,.text-gray-400,.text-gray-300) {
+  color:var(--rch-muted)!important;
+}
+/* Legacy light cards rendered as links are outside old section/div selectors.
+ * Convert their surface AND text together to avoid the white-on-white bug.
+ */
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a) {
+  border:1px solid var(--rch-line)!important;
+  background:linear-gradient(150deg,#153553,#0b243c)!important;
+  color:var(--rch-ink)!important;
+  box-shadow:0 12px 32px rgba(0,5,18,.27)!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a):hover {
+  border-color:#6daef0!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a)
+  :is(h3,b,strong) {
+  color:var(--rch-ink)!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a)
+  :is(p,small) {
+  color:var(--rch-copy)!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-editorial-row > a)
+  :is(em,b:last-child) {
+  color:#8cc9ff!important;
+}
+/* Player placeholders / story avatars are intentional dark, not blank white. */
+body.rch-premium-app .rch-public-web .rcl-person-card > div,
+body.rch-premium-app .rch-public-web .rcl-landing-story-row > span {
+  background:#204361!important;
+  color:#9ed0ff!important;
+  border-color:#4e82ae!important;
+}
+body.rch-premium-app .rch-public-web .rcl-lifestyle-card > span,
+body.rch-premium-app .rch-public-web .rcl-pulse-grid > a > span {
+  background:#1b4a74!important;
+  color:#a2d6ff!important;
+}
+/* Stable primary and secondary CTA contrast on the hero and league sections. */
+html.rch-premium-root body.rch-premium-app .rch-public-web .rcl-landing-primary {
+  background:linear-gradient(135deg,#286fbd,#17559e)!important;
+  border:1px solid #80bdf7!important;
+  color:#fff!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rcl-landing-secondary {
+  background:#123452!important;
+  border:1px solid #4a789d!important;
+  color:#e2f2ff!important;
+  opacity:1!important;
+}
+/* Remaining light utility link cards across public detail routes. */
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  a[class*="bg-white"][class*="rounded"],
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  a[class*="bg-[#F"][class*="rounded"] {
+  background:var(--rch-card)!important;
+  border-color:var(--rch-line)!important;
+  color:var(--rch-ink)!important;
+}
+/* The white brand tile is intentional: dark R against white remains readable. */
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-brand-mark {
+  background:#fff!important;
+  color:#07121e!important;
+}
+/* Keep mobile text and cards within the screen, not clipped horizontally. */
+@media(max-width:767px) {
+  body.rch-premium-app .rch-public-web #rch-public-content :is(h1,h2,h3,p) {
+    overflow-wrap:break-word;
+  }
+  body.rch-premium-app .rch-public-web #rch-public-content
+    :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-editorial-row > a) {
+    min-width:0;
+  }
+}
