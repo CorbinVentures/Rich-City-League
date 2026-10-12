@@ -10,6 +10,7 @@ import { ATLAS_OVERVIEW,atlasCityCamera,atlasVenueCamera,atlasXY,clampAtlasZoom,
 import { clusterAtlasPoints } from '@/lib/virginia-atlas-clusters';
 import { VIRGINIA_CITIES,milesBetween,virginiaCoordinates,type GeoPosition,type VirginiaCity } from '@/lib/virginia-world';
 import './virginia-interactive-atlas.css';
+import './virginia-interactive-atlas-v2.css';
 
 export type AtlasPlace={
   id:string;title:string;city:string;kind:'run'|'event'|'court';
