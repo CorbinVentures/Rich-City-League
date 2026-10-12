@@ -743,7 +743,7 @@ export default function NetworkHome() {
             {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
           </div>
         </section>
-        <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[190px_minmax(0,720px)_300px]">
+        <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
               {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
