@@ -1,0 +1,29 @@
+{
+  "name": "RCH Scorebook | Game IQ",
+  "short_name": "RCH Scorebook",
+  "description": "Rich City Hoops official live basketball scorekeeping",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F6F9FC",
+  "theme_color": "#F6F9FC",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "/icon.svg?v=scorebook-2",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg?v=scorebook-2",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
