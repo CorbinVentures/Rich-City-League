@@ -2,7 +2,8 @@
    Keeps scorebook's standalone tablet command desk untouched.
    All breakpoints use the current CSS viewport so Split View and rotation reflow. */
 
-@media (min-width: 700px) and (max-width: 1199px) {
+@media (min-width: 700px) and (max-width: 1199px),
+       (min-width: 1200px) and (max-width: 1399px) and (pointer: coarse) {
   /* A portrait iPad or landscape tablet should not inherit a desktop rail. */
   .rcl-universal-sidebar {
     display: none !important;
