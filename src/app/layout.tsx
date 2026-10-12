@@ -41,6 +41,8 @@ import './rch-premium-editorial.css';
 import './rch-premium-discover.css';
 // Screenshot-driven fit-and-finish guard; keep last to resolve legacy contrast collisions.
 import './rch-visual-qa-finish.css';
+// Last: keep legacy light headers from reappearing in member and admin views.
+import './rch-header-contrast-authority.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
