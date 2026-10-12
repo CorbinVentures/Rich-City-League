@@ -39,16 +39,13 @@ const core = [
   ['/shop',.7,'weekly'],
   ['/faq',.7,'monthly'],
   ['/register',.95,'weekly'],
-  ['/join',.7,'monthly'],
 ] as const;
 
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
   const entries: MetadataRoute.Sitemap = core.map(([path, priority, changeFrequency]) => ({
     url: `${SITE}${path}`,
-    lastModified: now,
     priority,
     changeFrequency,
   }));
@@ -61,10 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
 
     for (const team of teams) {
-      if (team.slug) entries.push({ url: `${SITE}/teams/${team.slug}`, lastModified: now, changeFrequency: 'weekly', priority: .7 });
+      if (team.slug) entries.push({ url: `${SITE}/teams/${team.slug}`, changeFrequency: 'weekly', priority: .7 });
     }
     for (const item of news) {
-      if (item.slug) entries.push({ url: `${SITE}/news/${item.slug}`, lastModified: item.published_at ? new Date(item.published_at) : now, changeFrequency: 'monthly', priority: .75 });
+      if (item.slug) entries.push({ url: `${SITE}/news/${item.slug}`, lastModified: item.published_at ? new Date(item.published_at) : undefined, changeFrequency: 'monthly', priority: .75 });
     }
 
     const client: any = publicClient;
@@ -75,9 +72,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         client.from('network_events').select('slug,starts_at').eq('status', 'published').limit(2000),
       ]);
 
-      for (const player of players ?? []) entries.push({ url: `${SITE}/players/${player.id}`, lastModified: now, changeFrequency: 'weekly', priority: .65 });
-      for (const organization of organizations ?? []) if (organization.slug) entries.push({ url: `${SITE}/organizations/${organization.slug}`, lastModified: organization.updated_at ? new Date(organization.updated_at) : now, changeFrequency: 'weekly', priority: .75 });
-      for (const event of events ?? []) if (event.slug) entries.push({ url: `${SITE}/network/events/${event.slug}`, lastModified: event.starts_at ? new Date(event.starts_at) : now, changeFrequency: 'daily', priority: .7 });
+      for (const player of players ?? []) entries.push({ url: `${SITE}/players/${player.id}`, changeFrequency: 'weekly', priority: .65 });
+      for (const organization of organizations ?? []) if (organization.slug) entries.push({ url: `${SITE}/organizations/${organization.slug}`, lastModified: organization.updated_at ? new Date(organization.updated_at) : undefined, changeFrequency: 'weekly', priority: .75 });
+      for (const event of events ?? []) if (event.slug) entries.push({ url: `${SITE}/network/events/${event.slug}`, changeFrequency: 'daily', priority: .7 });
     }
   } catch {
     // Core launch URLs remain available even if a dynamic data source is degraded.
