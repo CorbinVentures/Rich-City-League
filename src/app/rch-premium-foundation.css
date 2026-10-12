@@ -1,0 +1,174 @@
+/*
+ * RCH ARENA / 2026 — sitewide premium basketball interface contract.
+ * Imported after every legacy stylesheet. Every regular RCH route inherits
+ * one midnight-navy / electric-blue hierarchy while retaining real behavior.
+ * Scope presentation only. Live video, scorebook canvases and installed-app
+ * overlays keep their own controls and functional geometry.
+ */
+html.rch-premium-root {
+  --rch-night:#061222;
+  --rch-deep:#041020;
+  --rch-canvas:#07172a;
+  --rch-card:#102841;
+  --rch-card-raised:#153451;
+  --rch-card-deep:#091d31;
+  --rch-line:#315b80;
+  --rch-line-soft:#254763;
+  --rch-ink:#f5f9ff;
+  --rch-copy:#bdcfe4;
+  --rch-muted:#9bb6d1;
+  --rch-blue:#348ffc;
+  --rch-blue-bright:#61adff;
+  --rch-blue-glow:rgba(46,146,255,.24);
+  --rch-green:#70e0bf;
+  --rch-gold:#e3bf71;
+  --rch-danger:#ff899d;
+  --rch-radius:16px;
+  --rch-radius-card:20px;
+  --rch-shadow:0 18px 48px rgba(0,5,18,.37);
+  color-scheme:dark!important;
+  background:#061222!important;
+  scroll-behavior:smooth;
+  /* Existing page modules refer to multiple historic variable families. */
+  --rcl-canvas:#07172a!important;
+  --rcl-bg:#07172a!important;
+  --rcl-surface:#102841!important;
+  --rcl-surface-2:#153451!important;
+  --rcl-line:#315b80!important;
+  --rcl-text:#f5f9ff!important;
+  --rcl-text-2:#bdcfe4!important;
+  --rcl-muted:#9bb6d1!important;
+  --rcl-charcoal:#061222!important;
+  --rcl-cream:#e6f2ff!important;
+  --rcl-orange:#348ffc!important;
+  --rcl-gold:#348ffc!important;
+  --rcl-blue:#61adff!important;
+  --rcl-social-canvas:#07172a!important;
+  --rcl-social-surface:#102841!important;
+  --rcl-social-soft:#153451!important;
+  --rcl-social-border:#315b80!important;
+  --rcl-social-text:#f5f9ff!important;
+  --rcl-social-text-2:#bdcfe4!important;
+  --rcl-social-muted:#9bb6d1!important;
+  --rcl-social-primary:#348ffc!important;
+  --rcl-social-clay:#348ffc!important;
+  --rcl-social-primary-deep:#2876dd!important;
+  --rcl-v3-canvas:#07172a!important;
+  --rcl-v3-surface:#102841!important;
+  --rcl-v3-soft:#153451!important;
+  --rcl-v3-border:#315b80!important;
+  --rcl-v3-ink:#f5f9ff!important;
+  --rcl-v3-copy:#bdcfe4!important;
+  --rcl-v3-muted:#9bb6d1!important;
+  --rcl-v3-primary:#348ffc!important;
+  --rcl-v3-primary-soft:#153451!important;
+  --rcl-uniform-canvas:#07172a!important;
+  --rcl-uniform-surface:#102841!important;
+  --rcl-uniform-soft:#153451!important;
+  --rcl-uniform-border:#315b80!important;
+  --rcl-uniform-text:#f5f9ff!important;
+  --rcl-uniform-text-2:#bdcfe4!important;
+  --rcl-uniform-primary:#348ffc!important;
+  --rcl-prof-bg:#061222!important;
+  --rcl-prof-surface:#102841!important;
+  --rcl-prof-surface-2:#153451!important;
+  --rcl-prof-border:#315b80!important;
+  --rcl-prof-ice:#d6eaff!important;
+  --rcl-prof-ice-strong:#8cc9ff!important;
+  --rcl-psych-bg:#07172a!important;
+  --rcl-psych-bg-deep:#061222!important;
+  --rcl-psych-surface:#102841!important;
+  --rcl-psych-text:#f5f9ff!important;
+  --rcl-psych-muted:#bdcfe4!important;
+}
+html.rch-premium-root body.rch-premium-app {
+  min-height:100dvh;
+  background:radial-gradient(ellipse at 78% -12%,#15416c 0%,transparent 40rem),linear-gradient(180deg,#071b31,#07172a 40%,#041020 100%)!important;
+  background-attachment:fixed;
+  color:var(--rch-ink)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  overflow-x:clip;
+}
+html.rch-premium-root body.rch-premium-app::before{display:none!important}
+html.rch-premium-root body.rch-premium-app ::selection{background:#387dda;color:white}
+body.rch-premium-app :is(.rcl-platform-root,.rch-isolated-page) {
+  --rcl-canvas:var(--rch-canvas)!important;
+  --rcl-surface:var(--rch-card)!important;
+  --rcl-surface-2:var(--rch-card-raised)!important;
+  --rcl-line:var(--rch-line)!important;
+  --rcl-text:var(--rch-ink)!important;
+  --rcl-text-2:var(--rch-copy)!important;
+  --rcl-muted:var(--rch-muted)!important;
+  --rcl-social-canvas:var(--rch-canvas)!important;
+  --rcl-social-surface:var(--rch-card)!important;
+  --rcl-social-soft:var(--rch-card-raised)!important;
+  --rcl-social-border:var(--rch-line)!important;
+  --rcl-social-text:var(--rch-ink)!important;
+  --rcl-social-text-2:var(--rch-copy)!important;
+  --rcl-v3-canvas:var(--rch-canvas)!important;
+  --rcl-v3-surface:var(--rch-card)!important;
+  --rcl-v3-soft:var(--rch-card-raised)!important;
+  --rcl-v3-border:var(--rch-line)!important;
+  --rcl-v3-ink:var(--rch-ink)!important;
+  --rcl-v3-copy:var(--rch-copy)!important;
+  --rcl-uniform-canvas:var(--rch-canvas)!important;
+  --rcl-uniform-surface:var(--rch-card)!important;
+  --rcl-uniform-border:var(--rch-line)!important;
+  --rcl-uniform-text:var(--rch-ink)!important;
+  --rcl-uniform-text-2:var(--rch-copy)!important;
+  --rcl-social-primary:var(--rch-blue)!important;
+  --rcl-orange:var(--rch-blue)!important;
+  --rcl-blue:var(--rch-blue-bright)!important;
+  --rcl-v3-primary:var(--rch-blue)!important;
+  --rcl-psych-text:var(--rch-ink)!important;
+  --rcl-psych-muted:var(--rch-copy)!important;
+  --rcl-psych-surface:var(--rch-card)!important;
+  --rcl-psych-bg:var(--rch-canvas)!important;
+  color:var(--rch-ink)!important;
+  background-color:var(--rch-canvas)!important;
+  min-width:0;
+}
+body.rch-premium-app .rcl-platform-root:not(.rch-isolated-page):not(.rch-browser-only){
+  background:radial-gradient(ellipse at 84% -9%,rgba(52,143,252,.15),transparent 34rem),var(--rch-canvas)!important;
+  color:var(--rch-ink)!important;
+}
+body.rch-premium-app .rcl-platform-root > main:not(.rch-world-page):not(.rch-arena-shell):not(.rch-cw):not(.rch-broadcast-stage):not(.rch-tv-stage) {
+  background-color:transparent!important;
+  color:var(--rch-ink)!important;
+}
+body.rch-premium-app .rcl-platform-root :where(h1,h2,h3,h4,h5,h6){
+  color:var(--rch-ink)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-weight:850!important;
+  letter-spacing:-.034em!important;
+  text-shadow:none!important;
+  text-wrap:balance;
+}
+body.rch-premium-app .rcl-platform-root :where(h1){letter-spacing:-.049em!important}
+body.rch-premium-app .rcl-platform-root :where(p,li,dd,dt,figcaption){
+  color:var(--rch-copy);
+  line-height:1.62;
+  text-wrap:pretty;
+}
+body.rch-premium-app .rcl-platform-root :where(small,time,caption){color:var(--rch-muted)}
+body.rch-premium-app .rcl-platform-root :where(strong,b){color:inherit}
+body.rch-premium-app .rcl-platform-root [class~="text-white"],
+body.rch-premium-app .rcl-platform-root [class~="text-gray-100"],
+body.rch-premium-app .rcl-platform-root [class~="text-slate-100"]{color:var(--rch-ink)!important}
+body.rch-premium-app .rcl-platform-root [class*="text-white/"],
+body.rch-premium-app .rcl-platform-root :is(.text-gray-300,.text-gray-400,.text-gray-500,.text-slate-300,.text-slate-400,.text-slate-500),
+body.rch-premium-app .rcl-platform-root [class*="text-[#64748B"],
+body.rch-premium-app .rcl-platform-root [class*="text-[#94A3B8"]{color:var(--rch-copy)!important}
+body.rch-premium-app .rcl-platform-root [class*="text-rcl-blue"],
+body.rch-premium-app .rcl-platform-root [class*="text-rcl-orange"],
+body.rch-premium-app .rcl-platform-root [class*="text-blue-"]{color:var(--rch-blue-bright)!important}
+body.rch-premium-app .rcl-platform-root [class*="text-red-"]{color:var(--rch-danger)!important}
+body.rch-premium-app .rcl-platform-root :is(a,button,input,textarea,select):focus-visible{
+  outline:2px solid #a2d7ff!important;outline-offset:3px!important;
+}
+body.rch-premium-app .rcl-platform-root :where(button,a){-webkit-tap-highlight-color:transparent}
+body.rch-premium-app .rcl-platform-root :where(img,video,canvas,iframe){max-width:100%}
+body.rch-premium-app .rcl-platform-root :where(.grid,.flex)>*{min-width:0}
+body.rch-premium-app .rcl-platform-root :where(table){border-collapse:separate;border-spacing:0}
+body.rch-premium-app .rcl-platform-root :where(hr){border-color:var(--rch-line-soft)!important}
+@media(prefers-reduced-motion:reduce){html.rch-premium-root{scroll-behavior:auto!important}}
