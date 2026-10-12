@@ -12,6 +12,7 @@ import {
   FaMagnifyingGlass,
   FaPeopleGroup,
   FaPlus,
+  FaPlay,
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
@@ -77,6 +78,7 @@ type FeedMode = 'for-you' | 'following' | 'trending';
 const leftNav = [
   { href: '/social', label: 'Home', icon: FaHouse },
   { href: '/discover', label: 'Discover', icon: FaCompass },
+  { href: '/clips', label: 'RCH Clips', icon: FaPlay },
   { href: '/create', label: 'Create', icon: FaPlus },
   { href: '/runs', label: 'Runs', icon: FaBasketball },
   { href: '/league', label: 'League', icon: FaBasketball },
@@ -734,7 +736,7 @@ export default function NetworkHome() {
       <Container maxWidth="xl" className="py-5 sm:py-7">
         <section className="rcl-feed-intro">
           <div><p>Home</p><h1>Your basketball world</h1><span>People, runs, highlights and competition around you.</span></div>
-          <div className="rcl-feed-intro-actions">
+          <div className="rcl-feed-intro-actions"><Link href="/clips" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white"><FaPlay/> RCH Clips</Link>
             <div className="rcl-feed-search" role="search">
               <FaMagnifyingGlass className="rcl-feed-search-icon"/>
               <input aria-label="Search posts, people and topics in this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search the feed"/>
