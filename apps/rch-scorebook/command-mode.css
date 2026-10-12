@@ -1,0 +1,301 @@
+/* RCH SCOREBOOK COMMAND MODE 1.0 — PREMIUM GAME-DAY IDENTITY
+ * Dedicated iPad experience: navy broadcast hero, white high-legibility
+ * operators' surface, authoritative blue, semantic make/miss signals.
+ * All information is rendered from existing Scorebook game events.
+ */
+@media (min-width:740px) {
+ body.rch-score-tablet {
+  --cmd-ink:#0b1930;--cmd-blue:#387ff1;--cmd-line:#d8e5f3;
+  background:radial-gradient(circle at 17% 9%,#d7e8fd 0,transparent 34rem),
+             linear-gradient(180deg,#e6eff8 0,#f4f8fc 26rem,#eef4fa 100%)!important;
+  color:#10294c!important;
+ }
+ body.rch-score-tablet .shell{max-width:1720px!important}
+ body.rch-score-tablet .wrap{padding:13px clamp(12px,1.6vw,28px) 70px!important}
+ body.rch-score-tablet .header{
+  background:rgba(8,23,45,.98)!important;border-bottom:1px solid #294b71!important;
+  box-shadow:0 3px 20px rgba(2,17,40,.26)!important;min-height:66px!important;
+ }
+ body.rch-score-tablet .header .brand{color:white!important;letter-spacing:-.05em!important}
+ body.rch-score-tablet .header .brand i{color:#8bbaff!important}
+ body.rch-score-tablet .header .small{color:#8198b5!important}
+ body.rch-score-tablet .header .logo{background:white!important;border:1px solid #b3c6dc!important}
+ body.rch-score-tablet .header .nav button{color:#aac2de!important}
+ body.rch-score-tablet .header .nav button.active{
+  background:linear-gradient(115deg,#315c9e,#1f416b)!important;
+  color:white!important;border:1px solid #5684ba!important
+ }
+ body.rch-score-tablet .header .topaction{
+  background:#132d4e!important;color:#f2f7ff!important;border-color:#466383!important
+ }
+ body.rch-score-tablet .gamenav{margin:5px 0 12px!important}
+ body.rch-score-tablet .gamenav .smallbtn{
+  background:white!important;border:1px solid #b9cde4!important;
+  border-radius:10px!important;min-height:43px
+ }
+ body.rch-score-tablet .gamenav select{
+  background:white!important;border:1px solid #b9cde4!important;
+  min-height:43px;box-shadow:0 3px 9px rgba(18,47,87,.045)
+ }
+ /* Broadcast identity is created from, and sits within, the actual scoreboard. */
+ body.rch-score-tablet .scorebar.rch-command-scorebar{
+  background:linear-gradient(116deg,#061225,#0d2949 35%,#061a32 72%,#081326)!important;
+  border:1px solid #264c76!important;color:#f7fbff!important;
+  border-radius:22px!important;box-shadow:0 17px 37px rgba(4,24,53,.24)!important;
+  padding:0 16px 13px!important;top:67px!important;position:sticky!important;
+  grid-template-columns:1fr minmax(170px,240px) 1fr;gap:9px;
+  overflow:hidden;isolation:isolate
+ }
+ body.rch-score-tablet .scorebar.rch-command-scorebar::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 9% 38%,rgba(60,134,250,.16),transparent 38%),
+             radial-gradient(ellipse at 85% 55%,rgba(34,106,199,.14),transparent 41%);
+  z-index:-1
+ }
+ .rch-command-scorebar .rch-broadcast-top{
+  grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:38px;padding:7px 5px 3px;border-bottom:1px solid #ffffff24;
+  color:#a6c5ed;font-size:10px;font-weight:900;letter-spacing:.14em
+ }
+ .rch-broadcast-kicker{display:flex;align-items:center;gap:10px}
+ .rch-broadcast-kicker .rhombus{width:8px;height:8px;background:#74aaff;transform:rotate(45deg);box-shadow:0 0 10px #539cff}
+ .rch-broadcast-state{display:flex;gap:8px;align-items:center;color:#c3dcf8}
+ .rch-broadcast-state .node{width:7px;height:7px;border-radius:50%;background:#6bd8a3;box-shadow:0 0 0 3px rgba(107,216,163,.12)}
+ .rch-broadcast-state.offline .node{background:#f4a96b;box-shadow:none}
+ .rch-command-scorebar .teamscore{
+  min-height:135px!important;border-radius:15px!important;padding:18px 12px!important;
+  background:linear-gradient(125deg,#ffffff0b,#ffffff04)!important;
+  border:1px solid #ffffff1d!important;
+  transition:background .2s ease,border-color .2s ease
+ }
+ .rch-command-scorebar .teamscore.active{
+  background:linear-gradient(115deg,#285c9944,#3d89eb17)!important;
+  border-color:#7bb6f599!important;box-shadow:inset 0 0 30px #548ce914!important
+ }
+ .rch-command-scorebar .teamscore small{
+  color:#afc7e3!important;font-size:clamp(11px,1vw,14px)!important;
+  letter-spacing:.06em!important;font-weight:900!important;white-space:normal!important
+ }
+ .rch-command-scorebar .teamscore b{
+  color:#fff!important;font-weight:1000!important;font-variant-numeric:tabular-nums!important;
+  font-size:clamp(53px,7vw,93px)!important;line-height:1.12!important;
+  text-shadow:0 4px 20px #0004!important;letter-spacing:-.085em!important
+ }
+ .rch-command-scorebar .centertime{padding:8px 0}
+ .rch-command-scorebar .centertime input{
+  background:transparent!important;border:0!important;color:#fff!important;
+  font-size:clamp(32px,4.6vw,64px)!important;font-weight:1000!important;
+  font-variant-numeric:tabular-nums!important;letter-spacing:-.07em;
+  text-shadow:0 0 27px #6bafff45
+ }
+ .rch-command-scorebar .periods{gap:5px}
+ .rch-command-scorebar .periods button{
+  background:#142f52!important;color:#c3d8f3!important;border-color:#375779!important;
+  min-width:33px!important;min-height:31px!important;font-size:12px!important
+ }
+ .rch-command-scorebar .periods button.selected{
+  background:#74aaff!important;color:#06182c!important;border-color:#a9d1ff!important;
+  box-shadow:0 1px 12px #4c95ff55
+ }
+ .rch-command-scorebar .centertime .smallbtn{
+  color:#d6e8ff!important;border-color:#45688e!important;background:#1b3d63!important;
+  border-radius:8px!important
+ }
+ .rch-command-scorebar .centertime .micro{color:#99b8db!important}
+ .rch-command-scorebar .rch-broadcast-bottom{
+  grid-column:1/-1;display:flex;gap:10px;justify-content:space-between;align-items:center;
+  border-top:1px solid #ffffff24;padding:10px 5px 0;color:#b3cde8;
+  font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase
+ }
+ .rch-broadcast-bottom strong{color:#e7f4ff}
+ .rch-broadcast-divider{display:inline-block;height:4px;width:4px;background:#7cadf2;border-radius:50%;margin:0 4px;vertical-align:middle}
+ @keyframes rchScoreBurst{
+   0%{transform:scale(1);filter:none}
+   28%{transform:scale(1.13);filter:drop-shadow(0 0 10px #98d3ff)}
+   100%{transform:scale(1);filter:none}
+ }
+ .rch-command-scorebar .rch-score-burst{animation:rchScoreBurst .55s ease-out 1}
+ /* Game-day cockpit, not a stack of cards */
+ .rch-ipad-desk.rch-command-desk{gap:12px!important;align-items:start!important}
+ .rch-command-desk .controlpanel,.rch-command-desk .rch-ipad-live>.panel{
+  background:rgba(255,255,255,.97)!important;border:1px solid #d4e1ef!important;
+  box-shadow:0 10px 28px rgba(18,48,85,.075)!important;border-radius:20px!important;
+  overflow:hidden
+ }
+ .rch-command-desk .controlpanel>.row .eyebrow,
+ .rch-command-desk .minihead,
+ .rch-command-desk .panel h3{color:#2866ad!important;letter-spacing:.09em!important}
+ .rch-command-desk .controlpanel>.row{padding-bottom:12px;border-bottom:1px solid #e6eef7}
+ .rch-command-desk .controlpanel h2{font-weight:950!important;font-size:19px!important;letter-spacing:-.035em}
+ .rch-command-desk .controlpanel .chips .chip{
+  min-height:42px!important;font-size:12px!important;font-weight:900!important;
+  border-radius:10px!important;padding:10px!important
+ }
+ .rch-command-desk .controlpanel .chips .chip.active{
+  background:#163c68!important;border-color:#163c68!important;
+  color:#fff!important;box-shadow:0 4px 12px #173e651f!important
+ }
+ .rch-command-desk .playergrid{gap:8px!important}
+ .rch-command-desk .player{
+  padding:13px 11px!important;min-height:98px!important;border-radius:13px!important;
+  border:1px solid #d7e3f0!important;background:#f6f9fd!important;
+  box-shadow:0 2px 0 #e2eaf3!important;transition:background .15s,border .15s,transform .14s
+ }
+ .rch-command-desk .player .id{
+  color:#206bc7!important;font-weight:1000!important;font-size:13px!important;letter-spacing:.06em!important
+ }
+ .rch-command-desk .player b{font-size:14px!important;color:#132b4d!important}
+ .rch-command-desk .player .mini{font-size:11px!important;color:#617b99!important}
+ .rch-command-desk .player.sel{
+  background:linear-gradient(135deg,#d9eaff,#f0f7ff)!important;
+  border:2px solid #347de7!important;box-shadow:0 5px 15px #2b77e41b!important
+ }
+ .rch-command-desk .player.sel .id{color:#074999!important}
+ .rch-command-desk .player:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+ /* The selected scorer is the second most important datum after score. */
+ .rch-command-desk .rch-tablet-context{
+  position:relative;margin:14px 0 12px!important;padding:17px 17px 16px!important;
+  color:#fff!important;border-radius:16px!important;border:1px solid #2d5b8a!important;
+  background:linear-gradient(116deg,#0b2241,#12416e 75%,#0b294e)!important;
+  box-shadow:0 7px 19px #0d2a4d30!important;overflow:hidden
+ }
+ .rch-command-desk .rch-tablet-context::after{
+  content:"R";position:absolute;right:8px;top:-35px;font-size:150px;line-height:1;
+  font-weight:1000;font-family:Arial,sans-serif;color:#ffffff0b;pointer-events:none
+ }
+ .rch-command-desk .rch-tablet-context .label{color:#9acaff!important;position:relative;z-index:1}
+ .rch-command-desk .rch-tablet-context .selection{
+  color:#fff!important;font-size:clamp(22px,2vw,31px)!important;line-height:1.08!important;
+  margin:9px 0 6px!important;font-weight:1000!important;position:relative;z-index:1
+ }
+ .rch-command-desk .rch-tablet-context .hint{
+  color:#bdd4ed!important;font-size:12px!important;position:relative;z-index:1
+ }
+ .rch-command-desk .rch-tablet-context .rch-ipad-controls{position:relative;z-index:1;margin-top:15px!important}
+ .rch-command-desk .rch-tablet-context .rch-ipad-controls button{
+  background:#ffffff12!important;color:#f0f8ff!important;border-color:#89b4e566!important;
+  border-radius:9px!important;font-weight:900!important
+ }
+ .rch-command-desk .rch-tablet-context .rch-ipad-controls button[data-act="undo"]{
+  background:#ffe0e31c!important;color:#ffd8df!important;border-color:#ffb5c455!important
+ }
+ .rch-command-desk .rch-command-caption{
+  display:flex;align-items:center;gap:8px;margin:12px 0 10px;
+  color:#557392;font-size:11px;font-weight:850;letter-spacing:.11em;text-transform:uppercase
+ }
+ .rch-command-caption::before{content:"";width:22px;height:3px;background:#3b82f6;border-radius:5px}
+ /* Category grouping keeps all shots and defensive plays visible in Pro mode. */
+ .rch-command-desk .actiongrid.rch-stat-groups{
+  display:flex!important;flex-direction:column!important;gap:11px!important;margin:0!important
+ }
+ .rch-command-desk .rch-stat-group{
+  display:block;background:#f6f9fd;border:1px solid #e0e9f3;
+  padding:12px;border-radius:15px
+ }
+ .rch-stat-group .rch-stat-label{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:0 2px 9px;color:#385e86;font-size:10px;font-weight:1000;
+  letter-spacing:.17em;text-transform:uppercase
+ }
+ .rch-stat-group .rch-stat-count{color:#9aadc0;font-weight:950;font-size:11px;letter-spacing:.08em}
+ .rch-command-desk .rch-stat-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px
+ }
+ .rch-command-desk .rch-stat-group .act{
+  position:relative;min-height:82px!important;padding:10px 8px!important;
+  border-radius:11px!important;border-width:1.5px!important;line-height:1.14!important;
+  background:linear-gradient(180deg,#fff,#f4f8fd)!important;
+  box-shadow:0 2px 0 #dae4f2!important;color:#12365d!important;
+  font-size:clamp(13px,1.22vw,18px)!important;font-weight:1000!important;
+  letter-spacing:-.025em!important;transition:transform .10s,border-color .12s,box-shadow .12s
+ }
+ .rch-command-desk .rch-stat-group .act small{
+  color:#6a83a1!important;font-size:10px!important;font-weight:800!important
+ }
+ .rch-command-desk .rch-stat-group .act.good{background:linear-gradient(140deg,#daffed,#ecfbf4)!important;color:#075f42!important;border-color:#72cba5!important;box-shadow:0 2px 0 #a2dbc1!important}
+ .rch-command-desk .rch-stat-group .act[data-arg="3make"]{background:linear-gradient(140deg,#dcecff,#edf5ff)!important;border-color:#83b7f4!important;color:#1453a8!important;box-shadow:0 2px 0 #aacded!important}
+ .rch-command-desk .rch-stat-group .act[data-arg="ftmake"]{background:linear-gradient(140deg,#e7eaff,#f4f6ff)!important;border-color:#abb9f0!important;color:#344ca2!important}
+ .rch-command-desk .rch-stat-group .act.miss{background:linear-gradient(145deg,#fff0f1,#fff7f7)!important;color:#a34251!important;border-color:#edb5bb!important;box-shadow:0 2px 0 #f2cfd3!important}
+ .rch-command-desk .rch-stat-group .act:active{transform:scale(.94)!important;box-shadow:0 0 0 transparent!important}
+ .rch-command-desk .rch-stat-group .act:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+ .rch-command-desk .rch-stat-group .act:disabled{opacity:.52}
+ /* Live intelligence: status directly from recorded event feed; never synthetic. */
+ .rch-command-desk .rch-ipad-live>.tabs{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important;
+  padding:8px!important;background:#e9f0f8!important;border:1px solid #cfdfef!important;
+  border-radius:14px!important
+ }
+ .rch-command-desk .rch-ipad-live>.tabs button{
+  border-radius:10px!important;font-weight:950!important;color:#58728f!important
+ }
+ .rch-command-desk .rch-ipad-live>.tabs button.selected{
+  color:#fff!important;background:#173e69!important;box-shadow:0 3px 9px #0c376227!important
+ }
+ .rch-command-desk .rch-ipad-live>.panel{padding:14px!important}
+ .rch-command-desk .rch-ipad-live>.panel h3{font-weight:1000!important;font-size:17px!important}
+ .rch-command-desk .rch-ipad-live .timeline{padding-left:6px!important}
+ .rch-command-desk .rch-ipad-live .play{
+  position:relative;border-bottom:1px solid #e2eaf2!important;
+  padding:13px 5px 13px 14px!important
+ }
+ .rch-command-desk .rch-ipad-live .play::before{
+  content:"";position:absolute;left:0;top:23px;width:7px;height:7px;
+  border-radius:50%;background:#7d9cbe;box-shadow:0 0 0 3px #e2ebf5
+ }
+ .rch-command-desk .rch-ipad-live .play.rch-play-made::before{background:#24a575;box-shadow:0 0 0 3px #d9f4e8}
+ .rch-command-desk .rch-ipad-live .play.rch-play-miss::before{background:#d8777e;box-shadow:0 0 0 3px #fae8ea}
+ .rch-command-desk .rch-ipad-live .play b{color:#163150!important}
+ .rch-command-desk .rch-ipad-live .play strong.orange{color:#2577cb!important}
+ .rch-command-desk .rch-command-event-summary{
+  background:linear-gradient(135deg,#102949,#164778)!important;color:#fff!important;
+  border-radius:14px!important;padding:14px!important;margin-bottom:12px!important;
+  border:1px solid #316091
+ }
+ .rch-command-event-summary .overline{font-size:10px;font-weight:1000;color:#a1c9f4;letter-spacing:.13em;text-transform:uppercase}
+ .rch-command-event-summary .headline{margin:7px 0 3px;color:#fff;font-size:14px;font-weight:950;line-height:1.35}
+ .rch-command-event-summary .detail{font-size:11px;color:#b5cee9}
+ .rch-command-event-summary.empty{background:#eff4f9!important;border-color:#dbe5ef!important;color:#45627f!important}
+ .rch-command-event-summary.empty .headline{color:#173251!important}
+ .rch-command-event-summary.empty .overline,.rch-command-event-summary.empty .detail{color:#6985a1!important}
+ .rch-command-desk .rch-play-meter{
+  display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:5px 0 15px;
+  border-radius:10px;background:#f1f5fa;padding:10px;border:1px solid #e0e9f3
+ }
+ .rch-play-meter .meter-title{font-weight:900;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:#617c98;width:100%;margin-bottom:5px
+ }
+ .rch-play-meter .meter-dot{flex:1 1 auto;max-width:35px;height:8px;border-radius:10px;background:#b6c9dc}
+ .rch-play-meter .meter-dot.scored{background:#3b82f6}
+ .rch-play-meter .meter-dot.missed{background:#e3a9b0}
+ /* Home screen matches the premium courtside identity. */
+ body.rch-score-tablet .banner{background:linear-gradient(126deg,#0b1b33,#113e69 75%,#0b2e51)!important;
+  border:1px solid #28517d!important;box-shadow:0 14px 27px #102f5340!important}
+ body.rch-score-tablet .banner .viewtitle h1{color:#fff!important}
+ body.rch-score-tablet .banner .viewtitle p{color:#c5d9ef!important}
+ body.rch-score-tablet .banner .viewtitle .orange{color:#8cb9ff!important}
+ body.rch-score-tablet .banner .eyebrow{color:#9dc5f9!important}
+ body.rch-score-tablet .tile{border-radius:15px!important;box-shadow:0 5px 18px #1b3f650a!important}
+ body.rch-score-tablet .game{border-radius:18px!important}
+ body.rch-score-tablet .game .versus{font-size:17px!important}
+ body.rch-score-tablet .game .state.live{background:#e3f5e9!important;color:#186a44!important}
+ @media (max-width:1050px) {
+   .rch-command-scorebar .teamscore{min-height:100px!important;padding:12px 7px!important}
+   .rch-command-scorebar .teamscore b{font-size:clamp(42px,6vw,66px)!important}
+   .rch-command-desk .rch-stat-grid{gap:6px}
+   .rch-command-desk .rch-stat-group{padding:9px}
+   .rch-command-desk .rch-stat-group .act{min-height:73px!important;padding:8px 4px!important}
+ }
+ @media (max-width:850px) {
+   body.rch-score-tablet .scorebar.rch-command-scorebar{grid-template-columns:1fr minmax(112px,147px) 1fr;top:58px!important;padding:0 9px 10px!important}
+   .rch-command-scorebar .rch-broadcast-top{font-size:9px}
+   .rch-command-scorebar .teamscore small{font-size:10px!important}
+   .rch-command-scorebar .teamscore b{font-size:clamp(38px,6vw,52px)!important}
+   .rch-command-scorebar .centertime input{font-size:28px!important}
+   .rch-command-desk .rch-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+   .rch-command-desk .rch-tablet-context .rch-ipad-controls button{font-size:10px!important;padding:8px!important}
+ }
+ @media (prefers-reduced-motion:reduce) {
+   .rch-command-desk .act,.rch-command-desk .player{transition:none!important}
+   .rch-command-scorebar .rch-score-burst{animation:none!important}
+ }
+}
