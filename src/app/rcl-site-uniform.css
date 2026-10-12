@@ -183,8 +183,8 @@ html body,
   background:
     radial-gradient(circle at 88% 0%,rgba(59,130,246,.10),transparent 30%),
     radial-gradient(circle at 8% 100%,rgba(83,120,154,.08),transparent 34%),
-    linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important;
-  color:var(--rcl-uniform-text)!important;
+    linear-gradient(140deg,#153653 0%,#071b2e 100%)!important;
+  color:#f5f9ff!important;
 }
 .rcl-corporate-page-hero [class*="text-white/"],
 .rcl-client-page-hero [class*="text-white/"] {
