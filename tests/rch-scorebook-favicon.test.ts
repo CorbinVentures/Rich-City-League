@@ -15,6 +15,13 @@ describe('RCH Scorebook branded favicon',()=>{
   expect(svg).toContain('M236 103V422');
   expect(svg).toContain('#397DF0');
  });
+ it('ships a real 180px PNG for iPad and iPhone Home Screen installation',()=>{
+  const encoded=readFileSync(resolve(base,'apple-touch-icon.png.base64'),'utf8').trim();
+  const data=Buffer.from(encoded,'base64');
+  expect(data.subarray(0,8)).toEqual(Buffer.from('89504e470d0a1a0a','hex'));
+  expect(data.readUInt32BE(16)).toBe(180);
+  expect(data.readUInt32BE(20)).toBe(180);
+ });
  it('updates the dedicated Scorebook PWA identity without modifying RCH core',()=>{
   expect(manifest.name).toContain('RCH Scorebook');
   expect(manifest.id).toBe('/');
