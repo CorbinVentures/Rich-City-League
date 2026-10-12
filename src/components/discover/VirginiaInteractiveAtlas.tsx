@@ -31,8 +31,8 @@ type Props={
 type XY={x:number;y:number};
 function pointerDistance(a:XY,b:XY){return Math.hypot(a.x-b.x,a.y-b.y);}
 function midPoint(a:XY,b:XY):XY{return {x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
-const GATEWAYS=['bristol','roanoke','lynchburg','richmond','petersburg','charlottesville',
-  'fredericksburg','alexandria','winchester','norfolk','newport-news','virginia-beach'];
+// Major geography anchors only at statewide zoom; individual cities stay searchable.
+const GATEWAYS=['bristol','roanoke','richmond','winchester','alexandria','virginia-beach'];
 
 export default function VirginiaInteractiveAtlas({
   city,points,selectedId,userLocation,mode,streetReady=false,searchActive=false,onCitySelect,onPlaceSelect,onOverview
@@ -44,7 +44,7 @@ export default function VirginiaInteractiveAtlas({
 
   const relevant=useMemo(()=>city?points.filter(point=>milesBetween(point,city)<30):points,[city,points]);
   const clusters=useMemo(()=>clusterAtlasPoints(relevant,camera.zoom,selectedId),[relevant,camera.zoom,selectedId]);
-  const visibleCities=useMemo(()=>city?[city]:VIRGINIA_CITIES.filter(c=>GATEWAYS.includes(c.id)),[city]);
+  const visibleCities=useMemo(()=>city?[city]:(camera.zoom>2||searchActive)?[]:VIRGINIA_CITIES.filter(c=>GATEWAYS.includes(c.id)),[city,camera.zoom,searchActive]);
   const courtCount=relevant.filter(point=>point.kind==='court').length;
   const activeCount=relevant.filter(point=>point.kind!=='court').length;
   const isStreetLoading=mode==='3d'&&!streetReady;
@@ -123,7 +123,7 @@ export default function VirginiaInteractiveAtlas({
     ['--rch-counter-zoom' as string]:(1/zoom).toFixed(5)
   };
 
-  return <div className={'rch-live-atlas rch-live-atlas-v2'+(isStreetLoading?' perspective':'')+(streetReady?' street-ready':'')}
+  return <div className={'rch-live-atlas rch-live-atlas-v2'+(city?' city-mode':'')+(isStreetLoading?' perspective':'')+(streetReady?' street-ready':'')}
     role="region" aria-label="Interactive Virginia basketball atlas, use drag or pinch to explore"
     aria-hidden={streetReady}
     tabIndex={streetReady?-1:0}
@@ -152,7 +152,7 @@ export default function VirginiaInteractiveAtlas({
         return <button key={item.id} type="button" className={'rch-live-atlas-city'+(city?.id===item.id?' active':'')}
           style={{left:(xy.x*100)+'%',top:(xy.y*100)+'%'}}
           onClick={()=>selectCity(item)}
-          aria-label={'Explore '+item.name}>
+          data-city={item.id} aria-label={'Explore '+item.name}>
           <span className="rch-live-atlas-city-dot" aria-hidden="true"><FaBasketball/></span>
           <span className="rch-live-atlas-city-label">{item.name}</span>
         </button>;
