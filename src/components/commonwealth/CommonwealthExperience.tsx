@@ -153,7 +153,6 @@ export default function CommonwealthExperience(){
   const foundCrew=(event:FormEvent)=>{
     event.preventDefault();
     void rpc('commonwealth_found_crew',{p_name:crewName.trim(),p_court_slug:courtChoice,p_motto:motto.trim()},'Your crew is founded. Invite players to request a roster spot.');
-    setFoundingOpen(false);
   };
   const issueChallenge=(event:FormEvent)=>{
     event.preventDefault();
@@ -284,7 +283,7 @@ export default function CommonwealthExperience(){
               <div className="rch-cw-crew-symbol"><FaBasketball/></div>
               <div className="rch-cw-crew-top"><small>{courtBySlug.get(crew.home_court_slug)?.name||crew.city}</small>{mine&&<span>YOUR CREW</span>}</div>
               <h3>{crew.name}</h3><p>{crew.motto||'Founding crew · Ready to make history.'}</p>
-              <div className="rch-cw-crew-stats"><span>{rosterCount.get(crew.id)||0} / 12 PLAYERS</span><span>{standing?competitionRecord(standing):'0-0'} RECORD</span></div>
+              <div className="rch-cw-crew-stats"><span>{user?(rosterCount.get(crew.id)||0)+' / 12 PLAYERS':'ROSTER · MEMBERS ONLY'}</span><span>{standing?competitionRecord(standing):'0-0'} RECORD</span></div>
               {!myCrew&&user&&<button disabled={!!busy||asked} onClick={()=>void rpc('commonwealth_request_to_join',{p_crew:crew.id},'Roster request sent to the crew captain.')} className="rch-cw-small-cta">{asked?'Request pending':'Request roster spot'} <FaArrowRight/></button>}
               {captainCrew&&crew.id!==captainCrew.id&&<button className="rch-cw-small-cta" onClick={()=>{setOpponent(crew.id);setChallengeCourt(crew.home_court_slug);document.getElementById('rch-cw-challenge-form')?.scrollIntoView({behavior:'smooth'});}}>Challenge this crew <FaArrowRight/></button>}
             </article>;
