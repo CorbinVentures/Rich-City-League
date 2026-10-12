@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="RCH Scorebook logo: large black R over a basketball scorebook">
+  <rect width="512" height="512" rx="100" fill="#FFFFFF"/>
+  <g transform="rotate(-7 261 254)">
+    <rect x="104" y="83" width="329" height="365" rx="24" fill="#B9D8F6" opacity=".63"/>
+    <rect x="100" y="79" width="320" height="365" rx="21" fill="#F3F8FF" stroke="#2A70B8" stroke-width="12"/>
+    <rect x="110" y="83" width="40" height="357" rx="16" fill="#2563A9"/>
+    <g stroke="#D7E8F8" stroke-width="6" stroke-linecap="round">
+      <path d="M152 128H398M152 189H398M152 250H398M152 311H398M152 372H398"/>
+      <path d="M236 103V422M320 103V422"/>
+    </g>
+    <g fill="#B6D6F2" stroke="#2A70B8" stroke-width="6">
+      <circle cx="130" cy="134" r="10"/><circle cx="130" cy="217" r="10"/><circle cx="130" cy="300" r="10"/><circle cx="130" cy="383" r="10"/>
+    </g>
+    <rect x="173" y="101" width="194" height="25" rx="10" fill="#DDECFB"/>
+    <rect x="173" y="389" width="195" height="19" rx="9" fill="#D0E6FA"/>
+  </g>
+  <text x="263" y="386" text-anchor="middle" font-family="Arial Black,DejaVu Sans,Helvetica,sans-serif" font-size="380" font-weight="1000" fill="#07182E" stroke="#FFFFFF" stroke-width="14" paint-order="stroke">R</text>
+  <text x="263" y="386" text-anchor="middle" font-family="Arial Black,DejaVu Sans,Helvetica,sans-serif" font-size="380" font-weight="1000" fill="#07182E">R</text>
+  <rect x="96" y="438" width="322" height="13" rx="6.5" fill="#397DF0"/>
+</svg>
