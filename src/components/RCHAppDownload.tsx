@@ -144,7 +144,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
               <Link href="/auth/sign-up">Create your free profile <FaArrowRight aria-hidden="true" /></Link>
               <Link href="/auth/sign-in">Already a member? Sign in</Link>
             </div>
-            <p className="rch-download-browser-note">Browser access is for registration and profile setup. The basketball platform opens in the installed mobile app.</p>
+            <p className="rch-download-browser-note">You can explore public basketball pages in your browser. Install RCH to unlock social features, messaging and the full mobile experience.</p>
           </div>
           <div className="rch-download-device-art" aria-hidden="true">
             <div className="rch-download-device-top"><b>RCH</b><span>RICHMOND, VA · 804</span></div>
