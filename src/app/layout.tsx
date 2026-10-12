@@ -37,6 +37,7 @@ import './rch-ipad-responsive.css';
 import './rch-premium-foundation.css';
 import './rch-premium-navigation.css';
 import './rch-premium-components.css';
+import './rch-premium-discover.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
