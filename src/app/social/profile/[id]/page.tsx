@@ -258,7 +258,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           {PROFILE_TABS.map((tab)=>{
             const active=activeTab===tab;
             const href=tab==='wall'?profileHref:`${profileHref}?tab=${tab}`;
-            return <Link key={tab} href={href} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
+            return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
               {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
               {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
             </Link>;
