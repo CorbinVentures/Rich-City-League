@@ -33,6 +33,10 @@ import './rch-runs-visual-lock.css';
 import './rch-tv-production-lock.css';
 // Tablet-only shell fit after all legacy chrome rules, without touching the standalone scorebook.
 import './rch-ipad-responsive.css';
+// One visual authority for every RCH route after the legacy theme layers.
+import './rch-premium-foundation.css';
+import './rch-premium-navigation.css';
+import './rch-premium-components.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
@@ -85,8 +89,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#F6F9FC',
-  colorScheme: 'light',
+  themeColor: '#07172a',
+  colorScheme: 'dark',
 };
 
 function getSupabaseOrigin() {
@@ -101,5 +105,5 @@ function getSupabaseOrigin() {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabaseOrigin = getSupabaseOrigin();
-  return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: PWA_LAUNCH_BOOTSTRAP }} />{supabaseOrigin ? <><link rel="preconnect" href={supabaseOrigin} crossOrigin="" /><link rel="dns-prefetch" href={supabaseOrigin} /></> : null}</head><body><AuthRecoveryRedirect /><RCHExperienceGate apkUrl={verifiedRCHApkUrl(process.env.RCH_ANDROID_APK_URL)}><PWALaunchIntro /><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><PWANotificationBridge /><PWAAppAlertsOnboarding /><SeasonalTheme /><DraftChime /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><MessageCallManager /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@graph':[{ '@type':'WebSite','@id':'https://richcityhoops.com/#website',url:'https://richcityhoops.com',name:'Rich City Hoops',alternateName:'RCH',description:'Virginia basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.',publisher:{'@id':'https://richcityhoops.com/#platform'}},{ '@type':'Organization','@id':'https://richcityhoops.com/#platform',name:'Rich City Hoops',alternateName:'RCH',url:'https://www.richcityhoops.com',description:'A basketball social platform connecting players, runs, highlights, organizations and community across Virginia.',areaServed:{'@type':'State',name:'Virginia'}},{ '@type':'SportsOrganization','@id':'https://richcityhoops.com/#rich-city-league',name:'Rich City League',alternateName:'RCL League',url:'https://richcityhoops.com/league',foundingDate:'2011',sport:'Basketball',description:'The flagship basketball competition property inside Rich City Hoops.',parentOrganization:{'@id':'https://richcityhoops.com/#platform'},areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'}}] }) }} /></RCHExperienceGate></body></html>;
+  return <html lang="en" className="rch-premium-root" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: PWA_LAUNCH_BOOTSTRAP }} />{supabaseOrigin ? <><link rel="preconnect" href={supabaseOrigin} crossOrigin="" /><link rel="dns-prefetch" href={supabaseOrigin} /></> : null}</head><body className="rch-premium-app"><AuthRecoveryRedirect /><RCHExperienceGate apkUrl={verifiedRCHApkUrl(process.env.RCH_ANDROID_APK_URL)}><PWALaunchIntro /><RCLVisualSystem /><RCLRuntimeFinish /><PWAInstallExperience /><PWANotificationBridge /><PWAAppAlertsOnboarding /><SeasonalTheme /><DraftChime /><Suspense fallback={null}><SocialCreateIntent /></Suspense><MessageIntent /><MessageCallManager /><BadgeUnlockCutscene /><PlatformChrome>{children}</PlatformChrome><NetworkActivation /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context':'https://schema.org','@graph':[{ '@type':'WebSite','@id':'https://richcityhoops.com/#website',url:'https://richcityhoops.com',name:'Rich City Hoops',alternateName:'RCH',description:'Virginia basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.',publisher:{'@id':'https://richcityhoops.com/#platform'}},{ '@type':'Organization','@id':'https://richcityhoops.com/#platform',name:'Rich City Hoops',alternateName:'RCH',url:'https://www.richcityhoops.com',description:'A basketball social platform connecting players, runs, highlights, organizations and community across Virginia.',areaServed:{'@type':'State',name:'Virginia'}},{ '@type':'SportsOrganization','@id':'https://richcityhoops.com/#rich-city-league',name:'Rich City League',alternateName:'RCL League',url:'https://richcityhoops.com/league',foundingDate:'2011',sport:'Basketball',description:'The flagship basketball competition property inside Rich City Hoops.',parentOrganization:{'@id':'https://richcityhoops.com/#platform'},areaServed:{'@type':'City',name:'Richmond, Virginia'},address:{'@type':'PostalAddress',addressLocality:'Richmond',addressRegion:'VA',addressCountry:'US'}}] }) }} /></RCHExperienceGate></body></html>;
 }
