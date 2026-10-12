@@ -65,7 +65,7 @@ describe('RCH premium sitewide design contract',()=>{
   it('fixes the screen-shotted CTA and keeps map controls and real venue data',()=>{
     expect(world).toContain('className="rch-commonwealth-banner');
     expect(discover).toContain('a.rch-commonwealth-banner');
-    expect(atlas).toContain("const GATEWAYS=['bristol','roanoke','richmond','winchester','alexandria','virginia-beach']");
+    expect(atlas).toContain("const GATEWAYS=['bristol','roanoke','richmond','winchester','norfolk']");
     expect(atlas).toContain('onClick={()=>selectCity(item)}');
     expect(atlas).toContain('clusterAtlasPoints(relevant,camera.zoom,selectedId)');
     expect(world).toContain('search_basketball_locations');
