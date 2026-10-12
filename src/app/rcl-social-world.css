@@ -674,7 +674,7 @@ body { color:var(--rcl-social-text)!important; }
 /* ---------- Mobile: same mental model, smaller chrome ---------- */
 .rcl-universal-bottom { display:none!important; }
 
-@media (max-width: 959px) {
+@media (max-width: 1199px) {
   .rcl-universal-sidebar { display:none!important; }
   .rcl-universal-topbar {
     inset:0 0 auto 0!important;
