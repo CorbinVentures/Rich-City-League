@@ -32,7 +32,7 @@ type XY={x:number;y:number};
 function pointerDistance(a:XY,b:XY){return Math.hypot(a.x-b.x,a.y-b.y);}
 function midPoint(a:XY,b:XY):XY{return {x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
 // Major geography anchors only at statewide zoom; individual cities stay searchable.
-const GATEWAYS=['bristol','roanoke','richmond','winchester','alexandria','virginia-beach'];
+const GATEWAYS=['bristol','roanoke','richmond','winchester','norfolk'];
 
 export default function VirginiaInteractiveAtlas({
   city,points,selectedId,userLocation,mode,streetReady=false,searchActive=false,onCitySelect,onPlaceSelect,onOverview
