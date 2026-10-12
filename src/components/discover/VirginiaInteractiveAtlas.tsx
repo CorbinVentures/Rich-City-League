@@ -22,6 +22,7 @@ type Props={
   userLocation:GeoPosition|null;
   mode:'atlas'|'3d';
   streetReady?:boolean;
+  searchActive?:boolean;
   onCitySelect:(city:VirginiaCity)=>void;
   onPlaceSelect:(id:string)=>void;
   onOverview:()=>void;
@@ -33,14 +34,14 @@ const GATEWAYS=['bristol','roanoke','lynchburg','richmond','petersburg','charlot
   'fredericksburg','alexandria','winchester','norfolk','newport-news','virginia-beach'];
 
 export default function VirginiaInteractiveAtlas({
-  city,points,selectedId,userLocation,mode,streetReady=false,onCitySelect,onPlaceSelect,onOverview
+  city,points,selectedId,userLocation,mode,streetReady=false,searchActive=false,onCitySelect,onPlaceSelect,onOverview
 }:Props){
   const [camera,setCamera]=useState<AtlasCamera>(ATLAS_OVERVIEW);
   const activePointers=useRef(new Map<number,XY>());
   const pinchRef=useRef<{distance:number;mid:XY}|null>(null);
   const selected=useMemo(()=>points.find(p=>p.id===selectedId)??null,[points,selectedId]);
 
-  const relevant=useMemo(()=>city?points.filter(point=>milesBetween(point,city)<30):points.filter(point=>point.kind!=='court'),[city,points]);
+  const relevant=useMemo(()=>city?points.filter(point=>milesBetween(point,city)<30):points.filter(point=>searchActive||point.kind!=='court'||point.id===selectedId),[city,points,searchActive,selectedId]);
   const clusters=useMemo(()=>clusterAtlasPoints(relevant,camera.zoom,selectedId),[relevant,camera.zoom,selectedId]);
   const visibleCities=useMemo(()=>city?[city]:VIRGINIA_CITIES.filter(c=>GATEWAYS.includes(c.id)),[city]);
   const courtCount=relevant.filter(point=>point.kind==='court').length;
