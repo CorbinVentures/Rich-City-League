@@ -60,6 +60,21 @@
   }
 }
 
+/* Home's separate landing shell intentionally has no global topbar.
+   Never leave 64px of tablet nav spacing where that chrome is hidden. */
+@media (min-width: 700px) and (max-width: 1199px),
+       (min-width: 1200px) and (max-width: 1399px) and (pointer: coarse) {
+  body:has(.rcl-mock-home) .rcl-platform-root {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:has(.rcl-mock-home) .rcl-home-main {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
+
 /* Feed columns only fit once BOTH the global rail and a full social
    three-column layout have room. On tablets use the primary feed as the focus. */
 @media (min-width: 700px) and (max-width: 1535px) {
