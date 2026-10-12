@@ -8,10 +8,11 @@ import { isVirginiaBasemapRenderable } from '@/lib/virginia-map-readiness';
 import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates, type GeoPosition, type VirginiaCity } from '@/lib/virginia-world';
 import {
   FaArrowLeft, FaArrowRight, FaCalendarDays, FaCompass,
-  FaCrosshairs, FaFilter, FaLayerGroup, FaLocationDot, FaMagnifyingGlass,
+  FaCompress, FaCrosshairs, FaExpand, FaFilter, FaLayerGroup, FaLocationDot, FaMagnifyingGlass,
   FaRotate, FaTrophy, FaXmark
 } from 'react-icons/fa6';
 import './virginia-world.css';
+import './virginia-world-v2.css';
 
 type Kind = 'run'|'event'|'court';
 type Filter = 'all'|'events'|'runs'|'training'|'courts';
@@ -165,6 +166,7 @@ export default function VirginiaWorld() {
   const [mapReady,setMapReady]=useState(false);
   const [tilesReady,setTilesReady]=useState(false);
   const [mapMode,setMapMode]=useState<'atlas'|'3d'>('atlas');
+  const [isExpanded,setIsExpanded]=useState(false);
   const [mapFailure,setMapFailure]=useState(false);
   const [mapError,setMapError]=useState('');
   const [dataError,setDataError]=useState('');
@@ -479,6 +481,20 @@ export default function VirginiaWorld() {
     return()=>{cancelled=true;window.clearTimeout(timer);};
   },[mapReady,view.lat,view.lon,view.zoom,courtLimit,cityId]);
 
+  useEffect(()=>{
+    if(!isExpanded)return;
+    const previous=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setIsExpanded(false);};
+    document.addEventListener('keydown',escape);
+    return()=>{document.body.style.overflow=previous;document.removeEventListener('keydown',escape);};
+  },[isExpanded]);
+  useEffect(()=>{
+    if(mapMode!=='3d'||!mapReady)return;
+    const frame=window.requestAnimationFrame(()=>mapRef.current?.resize());
+    return()=>window.cancelAnimationFrame(frame);
+  },[mapMode,mapReady,isExpanded]);
+
   // 3D always starts with a visible, tilted local Atlas; live street geometry
   // replaces that illustration only after verified rendered features appear.
   const toggle3d=()=>{
@@ -509,8 +525,8 @@ export default function VirginiaWorld() {
       <div>
         <Link href="/" className="rch-world-back"><FaArrowLeft/> Home</Link>
         <p className="rch-world-eyebrow">RICH CITY HOOPS / VIRGINIA WORLD</p>
-        <h1>Discover <span>Basketball</span></h1>
-        <p className="rch-world-subtitle">Explore Virginia basketball. Find real courts, open runs and upcoming events.</p>
+        <h1>Discover <span>Basketball</span><small>VIRGINIA WORLD / 2.0</small></h1>
+        <p className="rch-world-subtitle">Explore Virginia through real court locations, upcoming runs, and local basketball culture. Tap a city, zoom into its courts, and find your next game.</p>
       </div>
       <button className="rch-world-overview" type="button" onClick={overview}><FaRotate/> Virginia overview</button>
     </div>
@@ -532,22 +548,29 @@ export default function VirginiaWorld() {
     </div>
 
     <div className="rch-world-layout">
-      <div className="rch-world-map-shell">
+      <div className={'rch-world-map-shell rch-world-map-shell-v2'+(isExpanded?' is-expanded':'')}>
         <div className="rch-world-map" ref={hostRef} role="region" aria-label="3D street map of Virginia" style={{opacity:mapShown?1:0,pointerEvents:mapShown?'auto':'none'}}/>
         <VirginiaInteractiveAtlas
           city={city} points={shown} selectedId={selectedId} userLocation={userLocation}
-          mode={mapMode} onCitySelect={moveCity} onOverview={overview}
+          mode={mapMode} streetReady={mapShown} searchActive={query.trim().length>=2} onCitySelect={moveCity} onOverview={overview}
           onPlaceSelect={id=>{const point=allPoints.find(item=>item.id===id);if(point)openPoint(point);}}
         />
-        <div className="rch-world-map-hud"><span className="rch-world-online-dot"/> {city?.name||'Virginia'} <span>·</span> {city?'City explorer':'Explore the state'}</div>
+        <div className="rch-world-map-hud"><FaCompass/><span>{city?.name||'Commonwealth of Virginia'}</span><em>{city?'CITY EXPLORER':'STATEWIDE ATLAS'}</em></div>
         <div className="rch-world-map-controls">
-          <button type="button" className="rch-world-mode-switch" aria-pressed={mapMode==='3d'}
-            onClick={toggle3d} title="Switch between geographic Atlas and optional 3D streets">
-            {mapMode==='3d'?'Atlas':'3D streets'}
+          <div className="rch-world-view-toggle" role="group" aria-label="Map display mode">
+            <button type="button" aria-pressed={mapMode==='atlas'}
+              onClick={()=>{if(mapMode!=='atlas')toggle3d();}}>Atlas</button>
+            <button type="button" aria-pressed={mapMode==='3d'}
+              onClick={()=>{if(mapMode!=='3d')toggle3d();}}>3D Streets</button>
+          </div>
+          <button type="button" className="rch-world-expand" onClick={()=>setIsExpanded(v=>!v)}
+            title={isExpanded?'Exit expanded map':'Expand map'} aria-label={isExpanded?'Close expanded map':'Expand map'}>
+            {isExpanded?<FaCompress/>:<FaExpand/>}
           </button>
         </div>
-        {mapMode==='3d'&&!mapShown&&!mapError&&<div className="rch-world-3d-status" role="status">3D Atlas active · loading street detail</div>}
-        <div className="rch-world-layer-note"><FaLayerGroup/> Drag to move · pinch or use +/− to zoom</div>
+        {mapMode==='3d'&&!mapShown&&!mapError&&<div className="rch-world-3d-status" role="status">Loading street detail · Atlas stays available</div>}
+        <div className="rch-world-layer-note"><FaLayerGroup/> Drag · Pinch · Tap markers</div>
+        {mapShown&&<div className="rch-world-street-legend"><span>● Courts</span><span>● Runs</span><span>● Events</span></div>}
         {mapError&&mapMode==='3d'&&<div className="rch-world-map-error" role="status">{mapError}</div>}
         <div className="rch-world-map-credit">Court data © OpenStreetMap contributors · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">ODbL</a></div>
       </div>
@@ -601,7 +624,7 @@ export default function VirginiaWorld() {
         </div>
         {moreCourts&&Boolean(cityId)&&<button type="button" className="rch-world-more" disabled={loadingCourts}
           onClick={()=>setCourtLimit(v=>v+300)}>Load more mapped courts</button>}
-        <p className="rch-world-data-note">Only published events and upcoming runs are displayed. Unverified court listings do not guarantee public access.</p>
+        <p className="rch-world-data-note">Map markers represent loaded, published listings—not real-time occupancy. Check venue hours and access before traveling.</p>
         <div className="rch-world-shortcuts"><Link href="/runs">Open Runs <FaArrowRight/></Link><Link href="/network">VA Network <FaArrowRight/></Link><Link href="/discover/community">People & REP <FaArrowRight/></Link></div>
       </aside>
     </div>
