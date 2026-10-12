@@ -15,7 +15,8 @@ describe('Discover Basketball map upgrade',()=>{
   });
   it('keeps matching court searches visible on statewide map',()=>{
     expect(world).toContain('searchActive={query.trim().length>=2}');
-    expect(atlas).toContain("searchActive||point.kind!=='court'||point.id===selectedId");
+    expect(atlas).toContain("if(match)setCamera(atlasVenueCamera(match))");
+    expect(atlas).toContain('city?points.filter(point=>milesBetween(point,city)<30):points');
   });
   it('provides usable map controls and a reversible expanded view',()=>{
     expect(world).toContain('setIsExpanded(v=>!v)');
