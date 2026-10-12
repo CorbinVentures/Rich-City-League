@@ -42,7 +42,7 @@ export default function VirginiaInteractiveAtlas({
   const pinchRef=useRef<{distance:number;mid:XY}|null>(null);
   const selected=useMemo(()=>points.find(p=>p.id===selectedId)??null,[points,selectedId]);
 
-  const relevant=useMemo(()=>city?points.filter(point=>milesBetween(point,city)<30):points.filter(point=>searchActive||point.kind!=='court'||point.id===selectedId),[city,points,searchActive,selectedId]);
+  const relevant=useMemo(()=>city?points.filter(point=>milesBetween(point,city)<30):points,[city,points]);
   const clusters=useMemo(()=>clusterAtlasPoints(relevant,camera.zoom,selectedId),[relevant,camera.zoom,selectedId]);
   const visibleCities=useMemo(()=>city?[city]:VIRGINIA_CITIES.filter(c=>GATEWAYS.includes(c.id)),[city]);
   const courtCount=relevant.filter(point=>point.kind==='court').length;
@@ -55,6 +55,14 @@ export default function VirginiaInteractiveAtlas({
     const point=points.find(p=>p.id===selectedId);
     if(point)setCamera(atlasVenueCamera(point));
   },[selectedId,points]);
+
+  useEffect(()=>{
+    // Search should reveal the actual matching court on the map, without
+    // requiring a second city selection or assuming an invented GPS position.
+    if(city||!searchActive||selectedId)return;
+    const match=points.find(point=>point.kind==='court')||points[0];
+    if(match)setCamera(atlasVenueCamera(match));
+  },[searchActive,city?.id,selectedId,points]);
 
   const zoomIn=useCallback(()=>setCamera(c=>({...c,zoom:clampAtlasZoom(c.zoom*1.45)})),[]);
   const zoomOut=useCallback(()=>setCamera(c=>({...c,zoom:clampAtlasZoom(c.zoom/1.45)})),[]);
