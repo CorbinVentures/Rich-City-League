@@ -1,0 +1,140 @@
+/* RCH arena editorial stage: the same visual discipline on home, feed and media. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rcl-social-landing,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rcl-social-world,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rcl-social-secondary{
+  background:radial-gradient(ellipse at 76% -2%,#184b7a50,transparent 36rem),#07172a!important;
+  color:#f4f9ff!important;
+}
+body.rch-premium-app .rcl-platform-root .rcl-social-landing-hero{
+  border:1px solid #355f88!important;
+  background:radial-gradient(ellipse at 86% 30%,#2b7ebc5a,transparent 37%),
+    linear-gradient(120deg,#133757,#081e33 74%)!important;
+  border-radius:clamp(16px,2.3vw,26px)!important;
+  box-shadow:0 22px 56px #0008!important;
+}
+body.rch-premium-app .rcl-social-landing-hero :is(h1,h2),
+body.rch-premium-app .rcl-landing-section-head h2{
+  color:#f5faff!important;font-weight:900!important;
+}
+body.rch-premium-app .rcl-social-landing-hero h1 span{
+  color:#61adff!important;
+}
+body.rch-premium-app .rcl-landing-kicker,
+body.rch-premium-app .rcl-landing-section-head > div > p{
+  color:#8ec8ff!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+}
+body.rch-premium-app .rcl-landing-lede,
+body.rch-premium-app .rcl-social-landing-hero p:not(.rcl-landing-kicker),
+body.rch-premium-app .rcl-league-copy > p{
+  color:#c1d6ec!important;
+  line-height:1.65!important;
+}
+body.rch-premium-app .rcl-platform-root .rcl-landing-section{
+  background:transparent!important;color:#f3faff!important;
+  border-color:#315979!important;
+}
+body.rch-premium-app .rcl-platform-root .rcl-world-card{
+  border:1px solid #37678e!important;
+  border-radius:18px!important;
+  background:linear-gradient(150deg,#173c60,#0b253f 83%)!important;
+  color:white!important;
+  box-shadow:0 14px 36px #0005!important;
+}
+body.rch-premium-app .rcl-world-card h3,
+body.rch-premium-app .rcl-world-card b{
+  color:#fff!important;
+}
+body.rch-premium-app .rcl-world-card p{color:#c1d5e6!important}
+body.rch-premium-app .rcl-world-card > span{
+  border-color:#609bdd!important;
+  background:#1e5488!important;
+  color:#a9dfff!important;
+}
+body.rch-premium-app .rcl-world-card:hover{
+  transform:translateY(-2px);
+  border-color:#87bdff!important;
+  box-shadow:0 18px 40px #0008,0 0 0 1px #4795df2c!important;
+}
+body.rch-premium-app .rcl-landing-phone,
+body.rch-premium-app .rcl-landing-preview-post,
+body.rch-premium-app .rcl-league-scoreboard,
+body.rch-premium-app .rcl-league-feature{
+  border-color:#39698b!important;
+  background:linear-gradient(145deg,#143958,#071e32)!important;
+  color:#f5faff!important;
+  box-shadow:0 14px 37px #0006!important;
+}
+body.rch-premium-app .rcl-landing-phone-top,
+body.rch-premium-app .rcl-landing-preview-post > div:first-child{
+  border-color:#335e82!important;
+  background:#102d4a!important;
+}
+body.rch-premium-app .rcl-landing-phone :is(h2,h3,b,strong),
+body.rch-premium-app .rcl-landing-preview-post :is(h2,h3,b,strong){
+  color:#fff!important;
+}
+body.rch-premium-app .rcl-landing-phone :is(p,small),
+body.rch-premium-app .rcl-landing-preview-post :is(p,small){
+  color:#bed2e6!important;
+}
+body.rch-premium-app .rcl-landing-proof span{
+  border:1px solid #3d6a92!important;
+  background:#133a5b!important;
+  color:#b9dbfa!important;
+  border-radius:8px!important;
+}
+body.rch-premium-app .rcl-landing-section-head > a{
+  color:#8ec5fc!important;
+}
+body.rch-premium-app .rcl-social-world .rcl-feed-intro{
+  border-color:#3b6385!important;
+  background:linear-gradient(130deg,#123a5e,#09243c)!important;
+  box-shadow:0 12px 36px #0005!important;
+}
+body.rch-premium-app .rcl-social-world .rcl-feed-intro :is(h1,h2,h3){
+  color:#fff!important;
+}
+body.rch-premium-app .rcl-social-world .rcl-feed-intro p{
+  color:#b9d3e9!important;
+}
+body.rch-premium-app .rcl-social-world :is(.rcl-feed-post,.rcl-feed-composer,.rcl-network-left-rail,.rcl-network-right-rail){
+  border-color:#3a6587!important;
+  background:linear-gradient(145deg,#123251,#0a2238)!important;
+  color:#f3faff!important;
+  box-shadow:0 12px 32px #0004!important;
+}
+body.rch-premium-app .rcl-social-world :is(.rcl-feed-mode-tabs,.rcl-feed-search){
+  background:#0b2843!important;
+  border-color:#436f92!important;
+  color:#dceaf9!important;
+}
+body.rch-premium-app .rcl-social-world :is(.rcl-feed-left-link,.rcl-network-right-rail a){
+  color:#c4d9ed!important;
+}
+body.rch-premium-app .rcl-social-world :is(.rcl-feed-left-link,.rcl-network-right-rail a):hover{
+  color:#fff!important;background:#1b5076!important;
+}
+body.rch-premium-app .rcl-platform-root :where(.rcl-messages-shell,.rcl-inbox-workspace,.rcl-inbox-main,.rcl-inbox-sidebar){
+  border-color:#345c80!important;
+  background:linear-gradient(150deg,#123250,#081f34)!important;
+  color:#eef7ff!important;
+}
+body.rch-premium-app .rcl-platform-root :where(.rcl-inbox-hero,.rcl-inbox-toolbar){
+  background:#102f4d!important;
+  border-color:#365d7e!important;
+  color:#f4faff!important;
+}
+body.rch-premium-app .rcl-platform-root :where(.rcl-inbox-title,.rcl-inbox-hero) :is(h1,h2,h3){
+  color:#fff!important;
+}
+@media(max-width:767px){
+  body.rch-premium-app .rcl-social-landing-hero{
+    border-radius:16px!important;
+    padding:clamp(22px,4.3vw,35px)!important;
+  }
+  body.rch-premium-app .rcl-platform-root .rcl-world-card{
+    border-radius:15px!important;
+  }
+}

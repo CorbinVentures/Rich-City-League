@@ -1,0 +1,223 @@
+/*
+ * RCH ARENA / 2026 — shared navigation, site-wide surface architecture.
+ * No layout positioning is changed for sidebar, PWA safe areas or standalone tools.
+ * The premium shell wraps all ordinary platform routes and the admin console.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-universal-sidebar{
+  border-right:1px solid #2c567c!important;
+  background:linear-gradient(174deg,#102f50 0%,#06182a 48%,#041020 100%)!important;
+  box-shadow:16px 0 48px rgba(0,5,17,.22)!important;
+  color:#f5f9ff!important;
+}
+body.rch-premium-app .rcl-universal-brand{
+  border-bottom:1px solid #355e80!important;
+  color:#f5f9ff!important;
+}
+body.rch-premium-app .rcl-universal-brand b,
+body.rch-premium-app .rcl-universal-wordmark b{color:#f5f9ff!important}
+body.rch-premium-app .rcl-universal-brand small,
+body.rch-premium-app .rcl-social-brand-note span,
+body.rch-premium-app .rcl-social-brand-note small{color:#a8bfd8!important}
+body.rch-premium-app .rcl-universal-mark,
+body.rch-premium-app .rcl-universal-wordmark>span {
+  display:grid!important;place-items:center!important;
+  border:1px solid #74b6fb!important;
+  border-radius:13px!important;
+  background:linear-gradient(145deg,#2b80d9,#12477a)!important;
+  color:#fff!important;
+  box-shadow:0 0 0 3px #2e8efe21,0 10px 27px #061323a6!important;
+  font-family:Inter,system-ui,sans-serif!important;font-weight:950!important;
+}
+body.rch-premium-app .rcl-universal-nav a,
+body.rch-premium-app .rcl-universal-more,
+body.rch-premium-app .rcl-universal-account-link {
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:#b7cbe0!important;
+  box-shadow:none!important;
+  font-weight:760!important;
+}
+body.rch-premium-app .rcl-universal-nav a svg,
+body.rch-premium-app .rcl-universal-more svg,
+body.rch-premium-app .rcl-universal-account-link svg{color:#92b4d1!important}
+body.rch-premium-app .rcl-universal-nav a:hover,
+body.rch-premium-app .rcl-universal-more:hover,
+body.rch-premium-app .rcl-universal-account-link:hover {
+  border-color:#38658c!important;
+  background:#193f64b3!important;
+  color:white!important;
+}
+body.rch-premium-app .rcl-universal-nav a.active,
+body.rch-premium-app .rcl-universal-nav a[aria-current="page"] {
+  border:1px solid #4382bc!important;
+  background:linear-gradient(110deg,#205a95,#123553)!important;
+  color:white!important;
+  box-shadow:inset 3px 0 0 #73c0ff,0 7px 22px #020f2050!important;
+}
+body.rch-premium-app .rcl-universal-nav a.active svg,
+body.rch-premium-app .rcl-universal-nav a[aria-current="page"] svg{color:#b4ddff!important}
+body.rch-premium-app .rcl-universal-nav a.rcl-primary-create{
+  border:1px solid #4b9af0!important;
+  background:linear-gradient(135deg,#318eec,#206dc0)!important;
+  color:white!important;
+  box-shadow:0 8px 24px #2a85ee45!important;
+}
+body.rch-premium-app .rcl-universal-nav a.rcl-primary-create svg{color:white!important}
+body.rch-premium-app .rcl-universal-account{
+  border-top:1px solid #315979!important;
+}
+body.rch-premium-app .rcl-universal-profile{color:#f5f9ff!important}
+body.rch-premium-app .rcl-universal-avatar{
+  border:1px solid #568ebf!important;
+  background:#193d60!important;color:#b8dfff!important;
+}
+body.rch-premium-app .rcl-social-brand-note{
+  border-top-color:#30587b!important;color:#8db7d8!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-universal-topbar {
+  border-bottom:1px solid #315d80!important;
+  background:#071c31ed!important;
+  box-shadow:0 9px 28px #0007!important;
+  backdrop-filter:blur(23px) saturate(1.4)!important;
+  color:#f5f9ff!important;
+}
+body.rch-premium-app .rcl-universal-wordmark{color:#f5f9ff!important}
+body.rch-premium-app .rcl-universal-wordmark i{color:#8ebff1!important}
+body.rch-premium-app .rcl-global-search {
+  border:1px solid #406b90!important;
+  background:#0d2843!important;
+  border-radius:12px!important;
+  color:#abc8e2!important;
+  box-shadow:inset 0 1px 0 #ffffff08,0 6px 20px #0002!important;
+}
+body.rch-premium-app .rcl-global-search:hover{
+  border-color:#81bdf4!important;background:#12385d!important;color:#eaf6ff!important;
+}
+body.rch-premium-app .rcl-global-search kbd{border-color:#486b8a!important;background:#183e5a!important;color:#a8d0f5!important}
+body.rch-premium-app .rcl-universal-tools>a:not(.rcl-topbar-signin),
+body.rch-premium-app .rcl-universal-tools>button{
+  border:1px solid #39668a!important;
+  border-radius:12px!important;
+  background:#122f4c!important;
+  color:#dfedff!important;
+}
+body.rch-premium-app .rcl-universal-tools>a:hover,
+body.rch-premium-app .rcl-universal-tools>button:hover {
+  background:#1b4973!important;
+  border-color:#7ab5f0!important;
+  color:white!important;
+}
+body.rch-premium-app .rcl-topbar-signin{
+  border-radius:10px!important;background:#2d87e9!important;color:white!important;
+  border:1px solid #84bdfa!important;box-shadow:0 8px 20px #237add32!important;
+}
+body.rch-premium-app .rcl-notification-button em{
+  background:#347deb!important;color:white!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-universal-bottom{
+  border-top:1px solid #44789d!important;
+  background:linear-gradient(170deg,#102d4bee,#071a31fa)!important;
+  box-shadow:0 -11px 30px #0006!important;
+  backdrop-filter:blur(24px) saturate(1.4)!important;
+}
+body.rch-premium-app .rcl-universal-bottom a{
+  border-radius:13px!important;color:#9fb8d5!important;
+}
+body.rch-premium-app .rcl-universal-bottom a svg{color:inherit!important}
+body.rch-premium-app .rcl-universal-bottom a.active,
+body.rch-premium-app .rcl-universal-bottom a[aria-current="page"]{
+  color:#7ec1ff!important;
+  background:#21518a65!important;
+}
+body.rch-premium-app .rcl-universal-bottom a.rcl-mobile-create{
+  background:linear-gradient(150deg,#4ca6ff,#1768e8)!important;
+  color:white!important;
+  border:2px solid #8dcbff!important;
+  box-shadow:0 7px 28px #318cff66,0 0 0 4px #2052a55e!important;
+}
+body.rch-premium-app .rcl-universal-bottom a.rcl-mobile-create svg{color:#fff!important}
+body.rch-premium-app .rcl-navigation-dialog::backdrop{
+  background:#020b18c2!important;
+  backdrop-filter:blur(6px)!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-navigation-panel{
+  border-left:1px solid #48779e!important;
+  background:radial-gradient(ellipse at 75% 0%,#153f64,transparent 45%),#081b2e!important;
+  color:#f4faff!important;
+  box-shadow:-25px 0 75px #000b!important;
+}
+body.rch-premium-app .rcl-navigation-heading{border-color:#2f5474!important}
+body.rch-premium-app .rcl-navigation-heading h2{color:#fff!important}
+body.rch-premium-app .rcl-navigation-heading p:not(.rcl-nav-eyebrow){color:#bed1e5!important}
+body.rch-premium-app .rcl-nav-eyebrow{color:#8cc7ff!important}
+body.rch-premium-app .rcl-navigation-heading button{
+  border:1px solid #487ca6!important;background:#143654!important;color:#fff!important;
+}
+body.rch-premium-app .rcl-navigation-group,
+body.rch-premium-app .rcl-navigation-utility{
+  border-color:#2f5879!important;background:#0d2740!important;color:#ecf6ff!important;
+}
+body.rch-premium-app .rcl-navigation-group-heading,
+body.rch-premium-app .rcl-navigation-group-heading *{color:#88bdf0!important}
+body.rch-premium-app .rcl-navigation-group-links a,
+body.rch-premium-app .rcl-navigation-utility a{color:#c1d9ed!important}
+body.rch-premium-app .rcl-navigation-group-links a:hover{
+  background:#174166!important;color:white!important;
+}
+body.rch-premium-app .rcl-legal-footer{
+  border-top:1px solid #315779!important;
+  background:#061426!important;
+  color:#acc7e0!important;
+}
+body.rch-premium-app .rcl-legal-footer :is(a,b){color:#d8e8f8!important}
+body.rch-premium-app .rcl-legal-footer p{color:#abc1d6!important}
+
+/* Admin is the same product, with denser executive controls. */
+html.rch-premium-root body.rch-premium-app .rch-admin-area{
+  --rch-admin-canvas:#061426;
+  --rch-admin-surface:#102841;
+  --rch-admin-surface-strong:#153451;
+  --rch-admin-line:#315b80;
+  --rch-admin-ice:#8fc6ff;
+  --rch-admin-text:#f5f9ff;
+  --rch-admin-muted:#b4c9df;
+  background:radial-gradient(ellipse at 80% 0%,#143e65,transparent 33rem),#061426!important;
+  color:#f5f9ff!important;
+}
+body.rch-premium-app .rch-admin-rail{background:linear-gradient(165deg,#0e2c4a,#061426 75%)!important;border-color:#315b80!important}
+body.rch-premium-app .rch-admin-topbar{background:#0b2843ef!important;border-color:#315b80!important}
+body.rch-premium-app .rch-admin-nav-item.is-active,
+body.rch-premium-app .rch-admin-nav-item[aria-current="page"]{
+  border-color:#4389c7!important;
+  background:#1d5486!important;
+  box-shadow:inset 3px 0 0 #7ac5ff!important;
+}
+body.rch-premium-app .rch-admin-brand-mark{
+  border:1px solid #73b9f6!important;
+  background:linear-gradient(135deg,#277dd4,#103a61)!important;
+  color:white!important;
+  box-shadow:0 8px 28px #2e9aff30!important;
+}
+
+/* Legal and auth should follow the palette but preserve standalone flow. */
+body.rch-premium-app .rch-isolated-page{
+  min-height:100dvh;color:#f5f9ff!important;background:#07172a!important;
+}
+body.rch-premium-app .rch-isolated-page :where(h1,h2,h3){color:#f5f9ff!important}
+@media(max-width:767px){
+  html.rch-premium-root body.rch-premium-app .rcl-universal-bottom{
+    min-height:70px!important;
+    padding-bottom:max(7px,env(safe-area-inset-bottom))!important;
+  }
+  body.rch-premium-app .rcl-universal-bottom a:not(.rcl-mobile-create){min-height:53px!important}
+  body.rch-premium-app .rcl-universal-bottom a.rcl-mobile-create{
+    width:53px!important;min-width:53px!important;height:53px!important;min-height:53px!important;
+  }
+  body.rch-premium-app .rcl-universal-tools>a:not(.rcl-topbar-signin),
+  body.rch-premium-app .rcl-universal-tools>button{border-radius:11px!important}
+}
+@media(min-width:700px) and (max-width:1399px) and (pointer:coarse){
+  body.rch-premium-app .rcl-universal-topbar{min-width:0!important;}
+  body.rch-premium-app .rcl-universal-bottom{border-top-color:#457fa6!important;}
+}
