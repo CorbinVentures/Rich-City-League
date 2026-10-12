@@ -9,7 +9,7 @@ import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates, type G
 import {
   FaArrowLeft, FaArrowRight, FaCalendarDays, FaCompass,
   FaCrosshairs, FaFilter, FaLayerGroup, FaLocationDot, FaMagnifyingGlass,
-  FaRotate, FaXmark
+  FaRotate, FaTrophy, FaXmark
 } from 'react-icons/fa6';
 import './virginia-world.css';
 
@@ -514,6 +514,8 @@ export default function VirginiaWorld() {
       </div>
       <button className="rch-world-overview" type="button" onClick={overview}><FaRotate/> Virginia overview</button>
     </div>
+
+    <Link href="/commonwealth" className="mx-auto mb-5 flex w-[calc(100%-32px)] max-w-[1400px] items-center justify-between gap-4 rounded-2xl border border-[#3f8bcd] bg-[linear-gradient(110deg,#0a2d50,#11539b)] px-5 py-4 text-white shadow-xl sm:px-7"><span className="flex min-w-0 items-center gap-3"><FaTrophy className="shrink-0 text-2xl text-[#a8d6ff]"/><span className="min-w-0"><strong className="block text-sm font-black text-white sm:text-base">THE COMMONWEALTH CUP</strong><small className="mt-1 block text-[11px] leading-5 text-[#d6eaff]">Form a crew · Defend a court · Build a verified Virginia basketball legacy</small></span></span><FaArrowRight className="shrink-0"/></Link>
 
     <div className="rch-world-tools">
       <label className="rch-world-search"><FaMagnifyingGlass/><span className="sr-only">Search basketball locations and events</span>
