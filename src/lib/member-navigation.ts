@@ -88,14 +88,15 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
   },
 ];
 
-const SOCIAL=['/social'];
 const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const PROFILE=['/social/profile','/profile'];
 const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isMemberNavigationActive(pathname:string,href:string){
-  const family=href==='/social'?SOCIAL:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  // A profile is a /social/* route, but only Profile should appear selected there.
+  if(href==='/social')return pathname==='/social'||pathname==='/social/feed';
+  const family=href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
   if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   const clean=href.split('?')[0];
   return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));

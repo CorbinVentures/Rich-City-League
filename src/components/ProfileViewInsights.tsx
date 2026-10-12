@@ -45,15 +45,15 @@ export function ProfileViewInsights({ profileId }: { profileId: string }) {
     ? Math.round((delta / summary.views_prev_7d) * 100)
     : summary.views_7d > 0 ? 100 : 0;
 
-  return <section className="mt-5 grid gap-2 sm:grid-cols-[1fr_auto]">
-    <div className="rounded-2xl border border-rcl-blue/20 bg-rcl-blue/[.055] p-4">
+  return <section className="rcl-profile-attention mt-5 grid gap-3 sm:grid-cols-[1fr_auto]" aria-label="Profile attention statistics">
+    <div className="rcl-profile-attention-primary rounded-2xl border border-rcl-blue/20 bg-rcl-blue/[.055] p-4">
       <div className="flex items-center gap-2 text-rcl-blue"><FaEye/><span className="text-[10px] font-black uppercase tracking-[.18em]">Profile attention</span></div>
-      <div className="mt-2 flex items-end gap-2"><strong className="font-display text-3xl font-black">{summary.views_7d}</strong><span className="pb-1 text-xs font-bold text-white/45">views this week</span></div>
-      <p className="mt-1 text-xs text-white/35">{summary.unique_viewers_30d} unique signed-in members viewed your profile in the last 30 days.</p>
+      <div className="mt-2 flex items-end gap-2"><strong className="font-display text-3xl font-black">{summary.views_7d}</strong><span className="rcl-profile-attention-label pb-1 text-xs font-bold text-white/70">views this week</span></div>
+      <p className="rcl-profile-attention-caption mt-1 text-xs text-white/75">{summary.unique_viewers_30d} unique signed-in members viewed your profile in the last 30 days.</p>
     </div>
-    <div className="flex min-w-36 items-center gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4">
+    <div className="rcl-profile-attention-delta flex min-w-36 items-center gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4">
       <FaArrowTrendUp className={delta >= 0 ? 'text-rcl-blue' : 'rotate-90 text-white/35'} />
-      <span><strong className="block text-sm">{percent > 0 ? '+' : ''}{percent}%</strong><small className="text-[10px] font-black uppercase tracking-wider text-white/30">vs prior week</small></span>
+      <span><strong className="block text-sm">{percent > 0 ? '+' : ''}{percent}%</strong><small className="rcl-profile-attention-label text-[10px] font-black uppercase tracking-wider text-white/70">vs prior week</small></span>
     </div>
   </section>;
 }

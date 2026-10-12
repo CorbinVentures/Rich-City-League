@@ -39,6 +39,8 @@ import './rch-premium-navigation.css';
 import './rch-premium-components.css';
 import './rch-premium-editorial.css';
 import './rch-premium-discover.css';
+// Screenshot-driven fit-and-finish guard; keep last to resolve legacy contrast collisions.
+import './rch-visual-qa-finish.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';

@@ -1,0 +1,338 @@
+/*
+ * RCH Fit-and-Finish QA: actionable contrast and rhythm fixes found on
+ * real iPhone PWA captures. Scoped to working app so media/video overlays,
+ * scorebook canvases, and printable documents retain intended styles.
+ */
+html.rch-premium-root body.rch-premium-app {
+  --rch-interactive-blue:#286fbd;
+  --rch-interactive-blue-deep:#17559e;
+  --rch-readable-muted:#b9cfe5;
+  --rch-control-line:#487295;
+}
+body.rch-premium-app .rcl-platform-root :is(a,button):disabled,
+body.rch-premium-app .rcl-platform-root :is(a,button)[aria-disabled="true"]{
+  opacity:.72!important;
+}
+/* Profile: undo the legacy light-theme layers causing invisible blue actions
+   and white cards inside a midnight-navy identity surface. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-profile-finish {
+  background:radial-gradient(ellipse at 72% -6%,#1949714d,transparent 32rem),#071a2e!important;
+  color:#f5faff!important;
+  max-width:100%;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-hero {
+  border:1px solid #345f82!important;
+  border-bottom:1px solid #46749c!important;
+  border-radius:0 0 20px 20px!important;
+  background:#102941!important;
+  overflow:hidden;
+  box-shadow:0 16px 38px #0004!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-cover {
+  width:100%;
+  background:#07182b!important;
+  border-bottom:1px solid #2f5877;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-cover img {
+  display:block;width:100%;height:100%;object-fit:cover;object-position:center;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-identity {
+  padding-top:0;padding-bottom:24px;
+  background:linear-gradient(180deg,#102941,#0c2339)!important;
+  color:#f5faff!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-ring{
+  box-shadow:0 9px 28px #0009,0 0 0 3px #72baff18!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-ring em{
+  border:2px solid #e8f6ff!important;
+  background:#305e88!important;color:#fff!important;
+  font-weight:900!important;
+  box-shadow:0 3px 10px #0007!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-home-link {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;min-width:76px;gap:7px;
+  border:1px solid #477ba4!important;
+  border-radius:11px!important;
+  background:#153d5e!important;
+  color:#e4f2ff!important;
+  box-shadow:none!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-home-link:hover{
+  border-color:#8cc9f8!important;background:#1e507b!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish h1{
+  color:#fff!important;
+  font-size:clamp(30px,6.7vw,47px)!important;
+  line-height:1.08!important;
+  letter-spacing:-.035em!important;
+  overflow-wrap:anywhere;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row,
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row span {
+  color:#c3d6e9!important;opacity:1!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row > span:first-child{
+  border:1px solid #426b8c!important;
+  border-radius:999px!important;
+  background:#213f5d!important;
+  color:#dbeafb!important;
+  padding:7px 12px!important;
+  line-height:1.2!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-identity > p{
+  color:#c4d8eb!important;opacity:1!important;
+}
+/* Semantic, intentionally distinct action states: white-on-blue (>=4.5:1)
+   rather than inherited white-on-ice from old light themes. */
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-edit-action,
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-message-action{
+  display:inline-flex!important;
+  justify-content:center!important;align-items:center!important;
+  min-height:44px!important;
+  padding:11px 17px!important;
+  border:1px solid #74b6f1!important;
+  border-radius:11px!important;
+  background:linear-gradient(135deg,#286fbd,#17559e)!important;
+  color:#fff!important;
+  box-shadow:0 7px 19px #154c9c57!important;
+  opacity:1!important;
+  font-weight:850!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-edit-action:hover,
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-message-action:hover{
+  background:linear-gradient(135deg,#3079c8,#1d60af)!important;
+  border-color:#a2d8ff!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-edit-action svg,
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-message-action svg {
+  color:#fff!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-follow-action,
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-wall-action{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:44px!important;
+  padding:10px 16px!important;
+  background:#12395a!important;
+  color:#e9f5ff!important;
+  border:1px solid #527fa7!important;
+  border-radius:11px!important;
+  box-shadow:none!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-follow-action.is-following {
+  background:#194c45!important;
+  color:#b6f7de!important;
+  border-color:#499986!important;
+}
+/* Keep achievements and stats dark even though an old stylesheet forces white. */
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish
+  :is(.rcl-profile-status-banner,.rcl-profile-rep-ledger,.rcl-profile-rep-badges,.rcl-rep-badge-grid article){
+  background:#11304b!important;
+  color:#f4faff!important;
+  border:1px solid #3d6c8d!important;
+  border-radius:15px!important;
+  box-shadow:0 8px 24px #0003!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-status-banner :where(small,span) {
+  color:#bdd7ee!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-status-banner strong {
+  color:#fff!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics {
+  background:#0e2942!important;
+  color:#eef7ff!important;
+  border:1px solid #376286!important;
+  border-radius:15px!important;
+  overflow:hidden;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics :is(b,strong) {
+  color:#f3faff!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics :is(small,span){
+  color:#b3cfe9!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-progress {
+  background:#244666!important;
+  border-radius:999px!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-progress i {
+  background:linear-gradient(90deg,#2b85e8,#6db9ff)!important;
+}
+/* Profile attention: two matching metric cards with truly legible support copy. */
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention {
+  min-width:0;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish
+  :is(.rcl-profile-attention-primary,.rcl-profile-attention-delta) {
+  min-width:0;
+  padding:17px!important;
+  border:1px solid #427198!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#133858,#0d283f)!important;
+  color:#eff8ff!important;
+  box-shadow:0 9px 25px #0003!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention :is(strong,b) {
+  color:#fff!important;opacity:1!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish
+  :is(.rcl-profile-attention-label,.rcl-profile-attention-caption) {
+  color:#bed5eb!important;
+  opacity:1!important;
+  line-height:1.55!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention svg {
+  color:#82c3ff!important;opacity:1!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs {
+  background:#081c31f7!important;
+  border-color:#356087!important;
+  backdrop-filter:blur(16px);
+  box-shadow:0 6px 18px #0005;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a {
+  color:#c0d7eb!important;opacity:1!important;
+  white-space:nowrap!important;
+  min-height:48px!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a[aria-current="page"]{
+  color:#fff!important;background:#19466e85!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a:hover {
+  color:#fff!important;background:#17405f9c!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a span:not(.absolute) {
+  color:#9bcfff!important;
+}
+/* VIP gold remains visually distinguished, but never sacrifices legibility. */
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish [title="RCL VIP verified member"]{
+  border:1px solid #d8b779!important;
+  background:#403118!important;
+  color:#f6d992!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish [title="RCL VIP verified member"] span{
+  background:#f3cd63!important;color:#182230!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-official-chip{
+  border:1px solid #5686b2!important;
+  background:#204867!important;
+  color:#c5e5ff!important;
+}
+
+/* Discover screenshot repair: keep overview control whole, make the map HUD
+   short enough not to crowd Atlas/3D buttons and preserve a clear edge rhythm. */
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-head {
+  display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-head>div {
+  flex:1 1 400px;min-width:0;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview {
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  align-self:flex-start!important;
+  width:auto!important;min-width:0!important;
+  min-height:44px!important;
+  flex:0 0 auto!important;
+  padding:10px 15px!important;
+  gap:9px!important;
+  white-space:nowrap!important;
+  border:1px solid #4a7ca5!important;
+  border-radius:11px!important;
+  background:#173d5e!important;
+  color:#e6f3ff!important;
+  font-size:12px!important;font-weight:850!important;
+  box-shadow:none!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview svg{
+  width:15px;height:15px;flex:0 0 auto;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-commonwealth-banner small {
+  color:#e0eeff!important;
+  opacity:1!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-hud-name {
+  display:block;min-width:0;max-width:100%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-controls{
+  max-width:calc(100% - 30px)!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-view-toggle button {
+  letter-spacing:0!important;
+  text-align:center!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-map-hud {
+  max-width:calc(100% - 245px);
+  min-width:0;
+}
+body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-map-hud svg {
+  flex-shrink:0;
+}
+/* One control border family, not overlapping double outlines. */
+body.rch-premium-app .rcl-platform-root :is(.rch-world-map-controls,.rch-live-atlas-toolbar,.rch-world-filters)
+  :is(button,a):focus-visible {
+  outline:2px solid #a7daff!important;
+  outline-offset:2px!important;
+}
+@media(max-width:767px) {
+  body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-identity {
+    padding-left:17px!important;padding-right:17px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs{
+    top:60px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-head>div {
+    flex:1 1 100%;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview {
+    width:auto!important;max-width:100%!important;
+    padding:9px 13px!important;
+    white-space:nowrap!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-map-hud {
+    max-width:calc(100% - 205px)!important;
+    gap:5px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-hud-name{
+    font-size:10px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-view-toggle button{
+    min-height:37px!important;
+    padding-inline:8px!important;
+    white-space:nowrap!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-live-atlas-tactical-strip {
+    top:65px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-live-atlas-toolbar{
+    top:132px!important;
+  }
+  body.rch-premium-app .rcl-universal-bottom a.active,
+  body.rch-premium-app .rcl-universal-bottom a[aria-current="page"]{
+    border:1px solid #33608a!important;
+    border-radius:12px!important;
+    background:#17416d70!important;
+  }
+}
+@media(max-width:375px){
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-map-hud {
+    max-width:calc(100% - 190px)!important;
+    padding-inline:7px!important;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell-v2 .rch-world-view-toggle button{
+    padding-inline:6px!important;font-size:9px!important;
+  }
+}
+@media(min-width:768px) and (max-width:1200px){
+  body.rch-premium-app .rcl-platform-root main.rch-profile-finish > div{
+    width:100%;max-width:1000px;
+  }
+  body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview{
+    margin:0!important;
+  }
+}

@@ -198,25 +198,25 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     media:mediaRows.length,
   };
 
-  return <main className={'rcl-social-secondary rcl-social-profile min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
+  return <main className={'rcl-social-secondary rcl-social-profile rch-profile-finish min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
     <div className="mx-auto max-w-5xl">
-      <section className="relative border-b border-white/10 bg-[#09111a]">
-        <div className="h-44 overflow-hidden bg-[radial-gradient(circle_at_80%_15%,rgba(21,159,255,.2),transparent_35%),linear-gradient(135deg,#0a1b2a,#03070d)] sm:h-64">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
-        <div className="px-5 pb-6">
+      <section className="rch-profile-hero relative border-b border-white/10 bg-[#09111a]">
+        <div className="rch-profile-cover h-44 overflow-hidden bg-[radial-gradient(circle_at_80%_15%,rgba(21,159,255,.2),transparent_35%),linear-gradient(135deg,#0a1b2a,#03070d)] sm:h-64">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
+        <div className="rch-profile-identity px-5 pb-6">
           <div className="-mt-14 flex items-end justify-between gap-4">
             <div className="rcl-profile-rep-ring" style={{'--profile-progress':progress+'%'} as React.CSSProperties}>
               <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-white"><ProfileAvatarMedia src={profile.avatar_url} alt={name} className="h-full w-full object-cover" /></div><em>{socialLevel}</em>
             </div>
-            <Link href="/social" className="mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Home</Link>
+            <Link href="/social" className="rch-profile-home-link mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Home</Link>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <h1 className="font-display text-3xl font-black uppercase sm:text-4xl">{name}</h1>
             {profile.is_vip&&<span title="RCL VIP verified member" className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-gradient-to-r from-amber-400/20 to-orange-500/20 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-amber-300"><span className="grid h-4 w-4 place-items-center rounded-full bg-amber-300 text-xs text-black">✓</span>{profile.vip_label||'VIP'}</span>}
-            {profile.is_system_account&&<span className="rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-rcl-blue">RCL Official</span>}
+            {profile.is_system_account&&<span className="rch-profile-official-chip rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-rcl-blue">RCL Official</span>}
           </div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/35"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
+          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
@@ -253,12 +253,12 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         </div>
       </section>}
 
-      <nav className="sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
+      <nav className="rch-profile-tabs sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
         <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {PROFILE_TABS.map((tab)=>{
             const active=activeTab===tab;
             const href=tab==='wall'?profileHref:`${profileHref}?tab=${tab}`;
-            return <Link key={tab} href={href} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
+            return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
               {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
               {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
             </Link>;

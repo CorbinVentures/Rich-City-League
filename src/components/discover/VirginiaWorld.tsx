@@ -555,7 +555,7 @@ export default function VirginiaWorld() {
           mode={mapMode} streetReady={mapShown} searchActive={query.trim().length>=2} onCitySelect={moveCity} onOverview={overview}
           onPlaceSelect={id=>{const point=allPoints.find(item=>item.id===id);if(point)openPoint(point);}}
         />
-        <div className="rch-world-map-hud"><FaCompass/><span>{city?.name||'Commonwealth of Virginia'}</span><em>{city?'CITY EXPLORER':'STATEWIDE ATLAS'}</em></div>
+        <div className="rch-world-map-hud"><FaCompass/><span className="rch-world-map-hud-name">{city?.name||'Virginia'}</span><em>{city?'CITY EXPLORER':'STATEWIDE ATLAS'}</em></div>
         <div className="rch-world-map-controls">
           <div className="rch-world-view-toggle" role="group" aria-label="Map display mode">
             <button type="button" aria-pressed={mapMode==='atlas'}

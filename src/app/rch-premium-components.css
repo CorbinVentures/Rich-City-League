@@ -66,7 +66,7 @@ body.rch-premium-app .rcl-platform-root :where(
  .rcl-message-primary-button,.rcl-create-submit,.rcl-admin-primary,
  .rch-arena-cta,.rch-cw-primary
 ){
-  background:linear-gradient(135deg,#4b9dff,#2477dc)!important;
+  background:linear-gradient(135deg,#286fbd,#17559e)!important;
   color:#fff!important;
   border:1px solid #7bbbfa!important;
   border-radius:12px!important;
@@ -75,7 +75,7 @@ body.rch-premium-app .rcl-platform-root :where(
   letter-spacing:0!important;
 }
 body.rch-premium-app .rcl-platform-root :where(.rcl-button,.rcl-primary-action,.rcl-draft-primary,.rcl-landing-primary):hover:not(:disabled){
-  background:linear-gradient(135deg,#60aaff,#368bf2)!important;
+  background:linear-gradient(135deg,#307acb,#185ca9)!important;
   box-shadow:0 12px 26px #167cff57!important;
   transform:translateY(-1px);
 }
@@ -90,7 +90,7 @@ body.rch-premium-app .rcl-platform-root :where(button,a)[class*="bg-rcl-orange"]
 body.rch-premium-app .rcl-platform-root :where(button,a)[class*="bg-rcl-gold"],
 body.rch-premium-app .rcl-platform-root :where(button,a)[class*="bg-blue-600"],
 body.rch-premium-app .rcl-platform-root :where(button,a)[class*="bg-[#3B82F6"]{
-  background:linear-gradient(135deg,#4c9eff,#2779df)!important;
+  background:linear-gradient(135deg,#286fbd,#17559e)!important;
   color:#fff!important;
   border-color:#80bdf7!important;
   border-radius:11px!important;
@@ -124,7 +124,7 @@ body.rch-premium-app .rcl-platform-root .rcl-filter-row button{
 body.rch-premium-app .rcl-platform-root .rcl-filter-row button.active,
 body.rch-premium-app .rcl-platform-root .rcl-filter-row button[aria-pressed="true"]{
   border-color:#7cbaff!important;
-  background:#2b78c4!important;
+  background:#236bbd!important;
   color:white!important;
   box-shadow:0 4px 16px #358efe4b!important;
 }
