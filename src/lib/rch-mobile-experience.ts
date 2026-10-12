@@ -25,7 +25,7 @@ const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'or
 const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin']);
 
 export function isBrowserPublicRoute(pathname: string): boolean {
-  const normalized = pathname.length > 1 ? pathname.replace(/\\/+$/, '') : pathname;
+  const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   if (PUBLIC_BROWSER_PAGES.has(normalized)) return true;
 
   const parts = normalized.split('/').filter(Boolean);
