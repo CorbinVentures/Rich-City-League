@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/social?source=pwa',
     scope: '/',
     display: 'standalone',
-    orientation: 'portrait-primary',
+    orientation: 'any',
     background_color: '#FFFEFA',
     theme_color: '#F6F9FC',
     categories: ['sports','social','entertainment'],
