@@ -22,6 +22,13 @@ describe('RCH mobile app experience gate', () => {
     path => expect(isBrowserPublicRoute(path)).toBe(false),
   );
 
+  it('normalizes trailing slashes without opening app-only routes', () => {
+    expect(isBrowserPublicRoute('/teams/warriors/')).toBe(true);
+    expect(isBrowserPublicRoute('/')).toBe(true);
+    expect(isBrowserPublicRoute('/admin/')).toBe(false);
+    expect(isBrowserPublicRoute('/organizations/manage/')).toBe(false);
+  });
+
   it('allows installed iOS and Android PWAs but not their browser tabs', () => {
     const iphone = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', platform: 'iPhone' };
     const android = { userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 9)', platform: 'Linux armv8l' };
