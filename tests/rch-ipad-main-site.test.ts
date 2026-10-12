@@ -28,6 +28,20 @@ describe('RCH main-site iPad orientation and responsive layout', () => {
     expect(finalShell).toContain('(orientation: landscape)');
   });
 
+  it('never double-offsets the content after the universal shell handles its rail', () => {
+    const executive = source('src/app/rcl-executive-marble.css');
+    const social = source('src/app/rcl-social-world.css');
+    const ipad = source('src/app/rch-ipad-responsive.css');
+
+    // A global main margin made the feed start 228px to the right on landscape iPad.
+    expect(executive).not.toMatch(/body:has\(\.rcl-universal-sidebar\)\s+main/);
+    expect(executive).not.toMatch(/\.rcl-universal-topbar\s*\{\s*margin-left:\s*228px/);
+    expect(social).toContain('.rcl-platform-root > main');
+    expect(social).toContain('margin-left:0!important;');
+    expect(ipad).toContain('margin-left: 0 !important;');
+    expect(ipad).toContain('max-width: 960px;');
+  });
+
   it('does not place an oversized three-column feed into the iPad viewport', () => {
     const feed = source('src/components/social/NetworkHome.tsx');
     const css = source('src/app/rch-ipad-responsive.css');
