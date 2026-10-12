@@ -637,7 +637,7 @@ a[aria-label="Open administrator control center"] {
   color:var(--rcl-v3-ink)!important;
 }
 
-@media (max-width:1199px) {
+@media (max-width:1199px), (min-width:1200px) and (max-width:1399px) and (pointer:coarse) {
   .rcl-universal-topbar {
     height:64px!important;
     padding:0 16px!important;
