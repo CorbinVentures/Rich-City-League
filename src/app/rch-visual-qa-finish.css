@@ -198,7 +198,10 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tab
   white-space:nowrap!important;
   min-height:48px!important;
 }
-body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a[aria-current="page"]{\n  color:#fff!important;background:#19466e85!important;\n}\nbody.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a:hover {
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a[aria-current="page"]{
+  color:#fff!important;background:#19466e85!important;
+}
+body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a:hover {
   color:#fff!important;background:#17405f9c!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a span:not(.absolute) {
