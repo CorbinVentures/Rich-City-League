@@ -744,7 +744,7 @@ export default function NetworkHome() {
           </div>
         </section>
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
-          <aside className="hidden 2xl:block">
+          <aside className="rcl-network-left-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
               {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
               <div className="my-3 border-t border-white/10"/>
@@ -795,7 +795,7 @@ export default function NetworkHome() {
             </div>) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
           </div>
 
-          <aside className="hidden 2xl:block">
+          <aside className="rcl-network-right-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-4">
               <SideCard title="People to know" href="/friends">
                 <div className="space-y-2">{suggestedProfiles.slice(0, 4).map((profile) => <div key={profile.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.03]"><SocialIdentity author={profile} compact/><Link href={`/social/profile/${profile.id}`} className="min-w-0 flex-1"><b className="block truncate text-xs">{profile.display_name || profile.username || 'RCL Member'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">{formatRep(profile.rep ?? 0)} REP</small></Link>{profile.id && profile.id !== user?.id && <button onClick={() => void toggleFollow(profile.id!)} className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${following.includes(profile.id) ? 'text-rcl-blue' : 'border border-white/10 text-white/45'}`}>{following.includes(profile.id) ? 'Following' : 'Follow'}</button>}</div>)}</div>
