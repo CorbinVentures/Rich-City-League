@@ -5,7 +5,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {gameTaskRules} from '@/lib/command/templates';
 import {FaArrowRight,FaBasketball,FaCalendarCheck,FaCheck,FaCircleExclamation,FaClipboardCheck,FaClock,FaLocationDot,FaTriangleExclamation} from 'react-icons/fa6';
 
-type Row=Record<string,any>&{id:string};
+type Row=Record<string,any>;
 const asDate=(v:string)=>new Date(v).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'});
 const getStage=(hours:number,status:string)=>{
  if(['final','completed','finished'].includes(status)||hours<0)return 'POSTGAME';
