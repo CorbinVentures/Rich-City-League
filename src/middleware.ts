@@ -14,6 +14,7 @@ const MEMBER_ROUTE_PREFIXES = [
   '/my-hoops',
   '/portal',
   '/admin',
+  '/command',
   '/account',
   '/profile',
   '/messages',
@@ -62,6 +63,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPath = requiresMemberAccess(pathname);
 
+  if (pathname === '/command/icon.svg' || pathname === '/command/icon.png' || pathname === '/command/apple-icon.png' || pathname === '/command/manifest.webmanifest') return NextResponse.next();
   if (!protectedPath) return NextResponse.next();
 
   const config = getSupabaseConfig();
@@ -110,7 +112,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/league', request.url));
   }
 
-  if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
+  if ((pathname.startsWith('/admin') || pathname === '/command' || pathname.startsWith('/command/')) && profile?.role !== 'admin') {
     return NextResponse.redirect(new URL('/league', request.url));
   }
 

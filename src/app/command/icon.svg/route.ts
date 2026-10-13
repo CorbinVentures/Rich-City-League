@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server';
+export function GET() { return new NextResponse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#f52235"/><path d="M134 96h139c94 0 144 46 144 119 0 49-27 84-74 102l82 99H308l-71-87h-9v87h-94V96zm94 85v68h43c32 0 48-12 48-34s-16-34-48-34h-43z" fill="#fff"/></svg>`, {headers:{'Content-Type':'image/svg+xml','Cache-Control':'public, max-age=3600'}}); }

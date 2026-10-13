@@ -12,7 +12,7 @@ import {
   startRchLaunchAutoplay,
 } from '@/lib/pwa-launch';
 
-const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname);
+const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname) || pathname === '/command' || pathname.startsWith('/command/');
 
 /**
  * Installed-app boot: play the entire four-second RCH film once, then

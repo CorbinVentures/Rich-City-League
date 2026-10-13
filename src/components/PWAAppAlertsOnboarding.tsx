@@ -16,7 +16,8 @@ const DISMISS_PREFIX = 'rch:push-opt-in-dismissed-until:';
 const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
 
 function isExcludedPath(pathname: string) {
-  return pathname === '/app'
+  return pathname === '/command' || pathname.startsWith('/command/')
+    || pathname === '/app'
     || pathname === '/access'
     || pathname === '/member-access'
     || pathname.startsWith('/auth/')
