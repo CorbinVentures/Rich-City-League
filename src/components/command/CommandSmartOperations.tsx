@@ -33,7 +33,7 @@ export function CommandSmartOperations(){
   const [g,t,b,c,r,i,l]=await Promise.all([
    db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,venue_id,scorebook_status,home_score,away_score').order('scheduled_at',{ascending:true}).limit(600),
    db.from('teams').select('id,name').limit(200),
-   db.from('rcl_command_bookings').select('game_id,status,starts_at,ends_at,venue_id').limit(1000),
+   db.from('rcl_command_bookings').select('game_id,team_id,status,starts_at,ends_at,venue_id').limit(1000),
    db.from('rcl_command_game_checks').select('*').limit(1500),
    db.from('rcl_command_game_reports').select('game_id,paid_attendance,complimentary_attendance').limit(1000),
    db.from('rcl_command_inventory').select('id,name,stock_count,reorder_at,active').limit(1000),
@@ -55,7 +55,10 @@ export function CommandSmartOperations(){
  const until=game?(new Date(game.scheduled_at).getTime()-now)/3600000:0;
  const stage=game?getStage(until,String(game.status)):'—';
  const past=stage==='POSTGAME';
- const confirmed=bookings.some(b=>b.game_id===selected&&b.status==='confirmed');
+ const isBookedFor=(b:Row,g:Row)=>b.status==='confirmed'&&(b.game_id===g.id
+  ||(b.team_id===g.home_team_id&&new Date(b.starts_at).getTime()<=new Date(g.scheduled_at).getTime()
+   &&new Date(b.ends_at).getTime()>new Date(g.scheduled_at).getTime()));
+ const confirmed=Boolean(game&&bookings.some(b=>isBookedFor(b,game)));
  const bothTeams=Boolean(game?.home_team_id&&game?.away_team_id&&teams.some(t=>t.id===game.home_team_id)&&teams.some(t=>t.id===game.away_team_id));
  const final=Boolean(game&&['completed','final','finished'].includes(String(game.status)));
  const report=gateReports.find(r=>r.game_id===selected);
@@ -91,7 +94,7 @@ export function CommandSmartOperations(){
    <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">OFFICIAL GAME QUEUE</p><h3>Upcoming game operations</h3></div><FaBasketball color="#ff6979"/></div>
     {!gameRows.length?<div className="cmd-empty">No upcoming official games within the operations window.</div>:<div className="cmd-ops-game-list">{gameRows.map(g=>{
      const selectedRow=selected===g.id;
-     const confirmedForGame=bookings.some(b=>b.game_id===g.id&&b.status==='confirmed');
+     const confirmedForGame=bookings.some(b=>isBookedFor(b,g));
      const hours=(new Date(g.scheduled_at).getTime()-now)/3600000;
      return <button type="button" key={g.id} className={'cmd-ops-game '+(selectedRow?'selected':'')} onClick={()=>{setSelected(g.id);setNotice('');setError('')}}>
       <div><b>{display(g)}</b><small>{asDate(g.scheduled_at)} · {getStage(hours,String(g.status))}</small></div>
