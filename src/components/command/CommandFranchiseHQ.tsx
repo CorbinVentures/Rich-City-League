@@ -5,7 +5,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {labelFor} from '@/lib/command/templates';
 import {FaArrowTrendUp,FaBasketball,FaBuilding,FaChartColumn,FaCircleExclamation,FaPeopleGroup,FaScaleBalanced} from 'react-icons/fa6';
 
-type Row=Record<string,any>&{id:string};
+type Row=Record<string,any>;
 const dollars=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
 const number=(n:any)=>Number(n||0);
 const date=(s:string)=>new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
