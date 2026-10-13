@@ -25,7 +25,7 @@ export function verifiedPublicProductPrice(html:string,expectedName:string,expec
     if(!isProduct)continue;
     const item=obj as StructuredProduct;
     if(!item.name||!matchesProduct(expectedName,item.name))continue;
-    if(expectedPackQuantity && !new RegExp('\\\\b'+expectedPackQuantity+'\\\\b').test(item.name))continue;
+    if(expectedPackQuantity && !new RegExp('\\b'+expectedPackQuantity+'\\b').test(item.name))continue;
     const offers=Array.isArray(item.offers)?item.offers:[item.offers];
     for(const offer of offers){
      if(!offer||typeof offer!=='object')continue;
