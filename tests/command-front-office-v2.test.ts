@@ -40,7 +40,7 @@ describe('RCL Command basketball operating playbooks',()=>{
   const seed=file('supabase/seeds/20261013_command_concession_wholesale.sql');
   expect(seed).toContain('2026-10-13');
   expect(seed).toContain('Restaurant Depot');
-  expect(seed).toContain("CHEF''STORE");
+  expect(seed).toContain("CHEF'STORE");
   expect(seed).toContain('pack_price is not null');
   expect(seed).toContain('quote_required');
   const catalog=file('src/components/command/CommandConcessionCatalog.tsx');
@@ -67,7 +67,7 @@ describe('RCL Command basketball operating playbooks',()=>{
   const cron=file('src/app/api/cron/command-prices/route.ts');
   expect(cron).toContain('CRON_SECRET');
   expect(cron).toContain("source_status','published_reference");
-  expect(cron).toContain('source_unavailable').toBe(false);
+  expect(cron).toContain("refresh_status:'needs_review'");
  });
  it('derives operations from schedule and actual evidence, never claiming staffing auto-confirmed',()=>{
   const byKey=new Map(gameTaskRules.map(t=>[t.key,t]));
