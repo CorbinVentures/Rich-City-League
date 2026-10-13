@@ -1,7 +1,8 @@
-import type { MetadataRoute } from 'next';
+import { NextResponse } from 'next/server';
+export const dynamic = 'force-static';
 
-export default function manifest(): MetadataRoute.Manifest {
-  return {
+export function GET() {
+  const manifest = {
     id: '/',
     name: 'Rich City Hoops',
     short_name: 'RCH',
@@ -26,4 +27,5 @@ export default function manifest(): MetadataRoute.Manifest {
       { src:'/icon?v=black-r-1', sizes:'512x512', type:'image/png', purpose:'maskable' },
     ],
   };
+  return NextResponse.json(manifest, { headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
 }

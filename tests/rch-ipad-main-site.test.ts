@@ -7,9 +7,22 @@ const source = (path: string) => readFileSync(join(root, path), 'utf8');
 
 describe('RCH main-site iPad orientation and responsive layout', () => {
   it('allows an installed PWA to respond to portrait and landscape rotation', () => {
-    const manifest = source('src/app/manifest.ts');
+    const manifest = source('src/app/manifest.webmanifest/route.ts');
     expect(manifest).toContain("orientation: 'any'");
     expect(manifest).not.toContain("orientation: 'portrait-primary'");
+  });
+
+  it('keeps separate install identities for RCH and the private RCL Command PWA', () => {
+    const rchManifest = source('src/app/manifest.webmanifest/route.ts');
+    const commandManifest = source('src/app/command/manifest.webmanifest/route.ts');
+    const commandLayout = source('src/app/command/layout.tsx');
+
+    expect(rchManifest).toContain("name: 'Rich City Hoops'");
+    expect(rchManifest).toContain("start_url: '/social?source=pwa'");
+    expect(commandManifest).toContain("name:'RCL Command Center'");
+    expect(commandManifest).toContain("start_url:'/command'");
+    expect(commandManifest).toContain("scope:'/command'");
+    expect(commandLayout).toContain("manifest:'/command/manifest.webmanifest'");
   });
 
   it('puts shared navigation into tablet mode through 1199px', () => {
