@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { fetchLeagueAppsBatch, fetchLeagueAppsLocations, fetchLeagueAppsProgramSchedule, fetchLeagueAppsProgramTeams, fetchLeagueAppsSitePrograms, getLeagueAppsConfigStatus, getLeagueAppsPublicConfigStatus, type LeagueAppsResource } from '@/lib/leagueapps';
@@ -162,6 +163,10 @@ export async function GET(request: Request) {
           if (seasonError) throw new Error(seasonError.message);
           if (!season?.id) { errors.push(`${programId}: no RCL season mapping`); continue; }
           teamsSeen += publicTeams.length;
+          if (!publicTeams.length) {
+            errors.push(`${programId}: no teams returned from LeagueApps; retaining the existing team directory`);
+            continue;
+          }
 
           // Materialize teams/team-seasons from the Public API itself. This is essential
           // for upcoming programs that legitimately have zero registrations.
@@ -359,13 +364,31 @@ export async function GET(request: Request) {
         }
       }
 
-      // Only teams belonging to the selected upcoming LeagueApps program(s) are active
-      // on current RCL public surfaces. Historical teams remain stored for history.
+      // Activate the teams seen in this run without ever blanking the entire directory.
+      // If LeagueApps partially fails, preserve previously active teams until a complete
+      // successful reconciliation can determine which teams really disappeared.
       if (currentTeamIds.size) {
-        const { error: deactivateError } = await db.from('teams').update({ is_active: false, updated_at: new Date().toISOString() }).eq('league_id', league.id);
-        if (deactivateError) errors.push(`team activation: ${deactivateError.message}`);
-        const { error: activateError } = await db.from('teams').update({ is_active: true, updated_at: new Date().toISOString() }).in('id', [...currentTeamIds]);
+        const { error: activateError } = await db.from('teams')
+          .update({ is_active: true, updated_at: new Date().toISOString() })
+          .in('id', [...currentTeamIds])
+          .eq('is_active', false);
         if (activateError) errors.push(`team activation: ${activateError.message}`);
+
+        if (!errors.length) {
+          const { data: activeTeams, error: activeLookupError } = await db.from('teams')
+            .select('id').eq('league_id', league.id).eq('is_active', true);
+          if (activeLookupError) errors.push(`team reconciliation: ${activeLookupError.message}`);
+          else {
+            const staleIds = (activeTeams ?? []).map((team: { id: string }) => team.id)
+              .filter((id: string) => !currentTeamIds.has(id));
+            if (staleIds.length) {
+              const { error: deactivateError } = await db.from('teams')
+                .update({ is_active: false, updated_at: new Date().toISOString() })
+                .in('id', staleIds);
+              if (deactivateError) errors.push(`team deactivation: ${deactivateError.message}`);
+            }
+          }
+        }
       }
 
       // Standings are RCL-derived from the official completed LeagueApps results.
@@ -389,10 +412,26 @@ export async function GET(request: Request) {
         }
       }
 
+      // Persist competition health beside member and registration sync status.
+      const { error: syncStateError } = await db.from('leagueapps_sync_state').upsert({
+        resource: 'competition',
+        last_synced_at: new Date().toISOString(),
+        records_synced: teamsSeen,
+        status: errors.length ? 'partial' : 'success',
+        last_error: errors.length ? errors.slice(0, 3).join(' · ').slice(0, 500) : null,
+      });
+      if (syncStateError) errors.push(`sync health: ${syncStateError.message}`);
+      if (currentTeamIds.size) revalidatePath('/teams');
       if (errors.length) console.warn('[LeagueApps competition sync]', { programs: scope?.map((p: any) => p.program_id), teamsSeen, gamesUpserted, warnings: errors.slice(0, 50) });
       return NextResponse.json({ ok: errors.length === 0, programs: scope?.length ?? 0, locations: locations.length, teamsSeen, gamesUpserted, warnings: errors.slice(0, 50) }, { status: errors.length ? 207 : 200 });
     } catch (error) {
-      return NextResponse.json({ error: error instanceof Error ? error.message : 'Competition sync failed.' }, { status: 502 });
+      const message = error instanceof Error ? error.message : 'Competition sync failed.';
+      const { error: statusError } = await db.from('leagueapps_sync_state').upsert({
+        resource: 'competition', last_synced_at: new Date().toISOString(),
+        records_synced: 0, status: 'error', last_error: message.slice(0, 500),
+      });
+      if (statusError) console.error('[LeagueApps competition status]', statusError.message);
+      return NextResponse.json({ error: message }, { status: 502 });
     }
   }
 
