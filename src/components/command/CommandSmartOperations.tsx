@@ -85,7 +85,7 @@ export function CommandSmartOperations(){
  const gameRows=displayGames.slice(0,40);
  const daysUntil=game?Math.ceil(until/24):0;
  return <div className="cmd-game-operations">
-  <section className="cmd-hero cmd-game-ops-hero"><div><p className="cmd-eyebrow">INTELLIGENT LEAGUE OPERATIONS</p><h2>The game plan.<br/><em>Already in motion.</em></h2><p>Checklists appear automatically from RCH's official game schedule. Court reservations, game states and gate reports resolve the corresponding requirements without staff typing duplicate records.</p></div><div className="cmd-hero-mark">R</div></section>
+  <section className="cmd-hero cmd-game-ops-hero"><div><p className="cmd-eyebrow">INTELLIGENT LEAGUE OPERATIONS</p><h2>The game plan.<br/><em>Already in motion.</em></h2><p>Checklists appear automatically from RCH&apos;s official game schedule. Court reservations, game states and gate reports resolve the corresponding requirements without staff typing duplicate records.</p></div><div className="cmd-hero-mark">R</div></section>
   <div className="cmd-info"><strong>Smart, not imaginary:</strong> RCH knows official schedules and game status. It does not automatically know whether a referee accepted, cameras are physically ready, or a venue granted exclusive use. Those operational confirmations stay employee-completed and audit logged.</div>
   <div className="cmd-columns">
    <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">OFFICIAL GAME QUEUE</p><h3>Upcoming game operations</h3></div><FaBasketball color="#ff6979"/></div>
