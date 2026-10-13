@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import Link from 'next/link';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
+import { CommandVenueDirectory } from './CommandVenueDirectory';
 import { FaArrowRight, FaBasketball, FaBuilding, FaCalendarDays, FaChartLine, FaClock, FaCreditCard, FaFileLines, FaPeopleGroup, FaUserShield } from 'react-icons/fa6';
 
 type Row = Record<string, any> & { id: string };
@@ -48,7 +49,13 @@ const schemas: Record<Exclude<Kind,'audit'>,Field[]> = {
  ],
  venues:[
   {name:'name',label:'Gym or venue',required:true},{name:'city',label:'City / area',required:true},
-  {name:'address',label:'Street address'},{name:'hourly_rate',label:'Quoted hourly cost ($)',type:'number'},
+  {name:'address',label:'Street address'},{name:'hourly_rate',label:'Published / quoted BASE gym rate ($/hr)',type:'number'},
+  {name:'rate_basis',label:'Price evidence',options:['unknown','published','quoted'],hint:'Published fee and private quote are different levels of evidence.'},
+  {name:'effective_hourly_rate',label:'Known total hourly rate after extra charges ($)',type:'number'},
+  {name:'rate_details',label:'Pricing terms, residency, deposits and minimums',type:'textarea'},
+  {name:'availability_details',label:'Availability research (not guaranteed bookings)',type:'textarea'},
+  {name:'phone',label:'Facility phone'},{name:'email',label:'Facility email'},
+  {name:'source_url',label:'Official facility / rental source URL'},
   {name:'capacity',label:'Spectator capacity',type:'number'},
   {name:'contact',label:'Contact / phone / email'},
   {name:'state',label:'Rental status',options:['researching','contacted','available','contracted','unavailable'],required:true},
@@ -176,6 +183,16 @@ export function CommandDashboard(){
    else if(field.type==='datetime-local'){const d=new Date(value);if(Number.isNaN(d.getTime())){setNotice({message:'Invalid date.',error:true});return}payload[field.name]=d.toISOString();}
    else payload[field.name]=value;
   }
+  if(kind==='venues'){
+    const rawRate=payload.hourly_rate;
+    if(rawRate!==undefined){
+      if(!payload.rate_basis || payload.rate_basis==='unknown'){setNotice({message:'Choose Published or Quoted for the hourly gym rental rate.',error:true});return;}
+      const basic=Number(rawRate);const allIn=payload.effective_hourly_rate===undefined?null:Number(payload.effective_hourly_rate);
+      const conditions=String(payload.rate_details||'');
+      payload.budget_status=(/resident|minimum|staff|additional|peak|weekend|ticket|eligib|package|off-peak/i.test(conditions))?'conditional':((allIn??basic)<=75?'within_limit':'over_limit');
+    }
+    payload.source_verification='manual';
+  }
   if(kind==='bookings' && String(payload.ends_at)<=String(payload.starts_at)){setNotice({message:'Booking end must be after start.',error:true});return;}
   if(kind==='trades'&&payload.sending_team_id===payload.receiving_team_id){setNotice({message:'Choose two different teams.',error:true});return;}
   setWorking(true);setNotice(null);
@@ -225,9 +242,13 @@ export function CommandDashboard(){
  const finance=<>{cards([{label:'OPERATING BUDGET',value:money(budgetTotal),detail:records.budgets.length+' budget lines'},{label:'ACTUAL INCOME',value:money(income),detail:'Recorded and reconciled only'},{label:'ACTUAL EXPENSES',value:money(expenses),detail:'Recorded and reconciled only'},{label:'LEDGER NET',value:money(income-expenses),detail:'Excludes concession inventory and sales'}])}
  {frame('budgets',rows('budgets',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{r.category} · {labelTeam(r.team_id)} · {seasons.find(s=>s.id===r.season_id)?.name||'All seasons'}</small></div><div className="cmd-record-right"><b>{money(amount(r.planned_amount))}</b><small>{r.notes||'Budget allocation'}</small></div></>),'PLANNING & ALLOCATIONS')}
  {frame('ledger',<><p className="cmd-fine cmd-spacing">Projected transactions do not count as actual cash. Reconcile against supporting receipts before reporting finalized totals. Enter concession sales through the Concessions module, not twice.</p>{rows('ledger',r=><><div className="cmd-record-main"><strong>{r.description}</strong><small>{r.category} · {dateOnly(r.occurred_on)} · {labelGame(r.game_id)}</small></div><div className="cmd-record-right"><b className={r.direction==='income'?'cmd-positive':'cmd-negative'}>{r.direction==='income'?'+':'−'}{money(amount(r.amount))}</b>{status(r,'ledger','state',['projected','recorded','reconciled','void'])}</div></>)}</>,'VERIFIED TRANSACTION LEDGER')}</>;
- const venues=<>{cards([{label:'GYMS IN PIPELINE',value:String(records.venues.length),detail:'Research through contracted'},{label:'UNDER $75/HR',value:String(records.venues.filter(v=>v.hourly_rate!==null&&v.hourly_rate!==undefined&&amount(v.hourly_rate)<=75).length),detail:'Quoted rate only, not availability'},{label:'ACTIVE BOOKING ESTIMATE',value:money(venueExposure),detail:'Tentative + confirmed reservations'},{label:'CONFIRMED RESERVATIONS',value:String(records.bookings.filter(b=>b.status==='confirmed').length),detail:'Venue date + time collision guarded'}])}
- {frame('venues',rows('venues',r=><><div className="cmd-record-main"><strong>{r.name} <span className={'cmd-dot '+(amount(r.hourly_rate)>75?'warning':'')}/></strong><small>{r.city} · {labelTeam(r.home_team_id)} · {r.contact||'No rental contact on file'}</small><small>{r.notes}</small></div><div className="cmd-record-right"><b>{r.hourly_rate===null?'Rate needed':money(amount(r.hourly_rate))+'/hr'}</b>{status(r,'venues','state',['researching','contacted','available','contracted','unavailable'])}</div></>),'VIRGINIA FACILITY INTELLIGENCE')}
- {frame('bookings',rows('bookings',r=><><div className="cmd-record-main"><strong>{labelVenue(r.venue_id)}</strong><small>{labelTeam(r.team_id)} · {labelGame(r.game_id)}</small><small>{stamp(r.starts_at)} — {stamp(r.ends_at)}</small></div><div className="cmd-record-right"><b>{money(Math.max(0,(new Date(r.ends_at).getTime()-new Date(r.starts_at).getTime())/3600000)*amount(r.hourly_rate))}</b>{status(r,'bookings','status',['tentative','confirmed','cancelled'])}</div></>),'RECURRING HOME COURTS & GAME DAYS')}</>;
+ const venues=<>
+ {cards([{label:'GYMS INDEXED',value:String(records.venues.length),detail:'Statewide research leads, not confirmed rentals'},
+ {label:'POTENTIAL ≤ $75/HR',value:String(records.venues.filter(v=>['within_limit','conditional'].includes(v.budget_status)).length),detail:'Includes conditional eligibility and off-peak prices'},
+ {label:'PUBLISHED / QUOTED RATES',value:String(records.venues.filter(v=>v.hourly_rate!==null && v.hourly_rate!==undefined).length),detail:'Review each location’s rental conditions'},
+ {label:'CONFIRMED BOOKING RECORDS',value:String(records.bookings.filter(b=>b.status==='confirmed').length),detail:'RCL staff bookings, not external live inventory'}])}
+ {frame('venues',<CommandVenueDirectory/>,'VIRGINIA FACILITY INTELLIGENCE · VERIFIED SOURCE LINKS')}
+ {frame('bookings',<><p className="cmd-fine cmd-spacing">A gym listing is not a court reservation. Contact venues directly to confirm your date, insurance, filming, spectators and approval before setting a booking to confirmed.</p>{rows('bookings',r=><><div className="cmd-record-main"><strong>{labelVenue(r.venue_id)}</strong><small>{labelTeam(r.team_id)} · {labelGame(r.game_id)}</small><small>{stamp(r.starts_at)} — {stamp(r.ends_at)}</small></div><div className="cmd-record-right"><b>{money(Math.max(0,(new Date(r.ends_at).getTime()-new Date(r.starts_at).getTime())/3600000)*amount(r.hourly_rate))}</b>{status(r,'bookings','status',['tentative','confirmed','cancelled'])}</div></>)}</>,'HOME COURTS · GAME-DAY RESERVATIONS')}</>;
  const concessions=<>{cards([{label:'SALES REVENUE',value:money(grossSales),detail:'Recorded sale transactions'},{label:'SOLD UNIT COST',value:money(concessionCost),detail:'Cost at time of sale'},{label:'GROSS PROFIT',value:money(grossSales-concessionCost),detail:'Before staffing / rental overhead'},{label:'LOW STOCK ITEMS',value:String(records.inventory.filter(i=>i.active&&amount(i.stock_count)<=amount(i.reorder_at)).length),detail:'At or below reorder point'}])}
  {frame('inventory',rows('inventory',r=><><div className="cmd-record-main"><strong>{r.name} {amount(r.stock_count)<=amount(r.reorder_at)?<span className="cmd-warning-text">LOW STOCK</span>:null}</strong><small>Unit cost {money(amount(r.unit_cost))} · Sale price {money(amount(r.sale_price))}</small></div><div className="cmd-record-right"><b>{r.stock_count} units</b><div className="cmd-quick-actions">{adjusting===r.id?<form className="cmd-stock-editor" onSubmit={e=>{e.preventDefault();const n=Number(stockValue);if(!Number.isSafeInteger(n)||n<0){setNotice({message:'Enter a valid whole number.',error:true});return;}void update('inventory',r.id,{stock_count:n});setAdjusting(null)}}><label><span className="cmd-sr-only">Updated inventory units</span><input autoFocus type="number" min="0" step="1" value={stockValue} onChange={e=>setStockValue(e.target.value)}/></label><button type="submit" disabled={working}>Save stock</button><button type="button" onClick={()=>setAdjusting(null)}>Cancel</button></form>:<button type="button" disabled={working} onClick={()=>{setAdjusting(r.id);setStockValue(String(r.stock_count))}}>Adjust stock</button>}</div></div></>),'STOCK ON HAND')}
  {frame('concession_sales',<><p className="cmd-fine cmd-spacing">Submitting a sale atomically reduces inventory and records the sale price and cost at the time of purchase. Sales are append-only.</p>{rows('concession_sales',r=><><div className="cmd-record-main"><strong>{records.inventory.find(i=>i.id===r.item_id)?.name||'Item'}</strong><small>{r.quantity} sold · {labelGame(r.game_id)} · {stamp(r.recorded_at)}</small></div><div className="cmd-record-right"><b className="cmd-positive">+{money(amount(r.quantity)*amount(r.unit_price))}</b><small>Gross {money(amount(r.quantity)*(amount(r.unit_price)-amount(r.unit_cost)))}</small></div></>)}</>,'POINT OF SALE RECORDS')}</>;
