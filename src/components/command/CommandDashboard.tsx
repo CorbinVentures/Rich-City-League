@@ -128,7 +128,7 @@ export function CommandDashboard(){
   setBusy(true);
   try{
    const [all,teamQ,gameQ,seasonQ,playerQ]=await Promise.all([
-    Promise.all(kinds.map(async kind=>({kind, result:await db.from(tables[kind]).select('*').order('created_at'===('audit'===kind?'created_at':'created_at')?'created_at':'created_at',{ascending:false}).limit(kind==='audit'?120:400)}))),
+    Promise.all(kinds.map(async kind=>({kind, result:await db.from(tables[kind]).select('*').order(kind==='concession_sales'?'recorded_at':'created_at',{ascending:false}).limit(kind==='audit'?120:400)}))),
     db.from('teams').select('id,name,city,logo_url,is_active').eq('is_active',true).order('name').limit(200),
     db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,home_score,away_score').order('scheduled_at',{ascending:false}).limit(250),
     db.from('seasons').select('id,name,start_date,status').order('start_date',{ascending:false}).limit(40),
