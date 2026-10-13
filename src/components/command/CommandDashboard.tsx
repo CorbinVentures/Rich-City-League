@@ -38,7 +38,9 @@ const nav: {id:Area;name:string;group:string;icon:React.ComponentType<{size?:num
 const schemas: Record<Exclude<Kind,'audit'>,Field[]> = {
  budgets:[
   {name:'category',label:'Standard basketball operating budget category',options:budgetTemplates.map(t=>t.code),required:true},
-  {name:'planned_amount',label:'Planned category allocation ($)',type:'number',required:true},
+  {name:'units',label:'Quantity / rental hours / games (optional)',type:'number',hint:'Examples: 18 jerseys, 20 gym hours, 10 games.'},
+  {name:'unit_price',label:'Cost per unit / hour ($, optional)',type:'number',hint:'Leave both quantities blank for a fixed dollar allocation.'},
+  {name:'planned_amount',label:'Flat budget allocation ($) if no quantity/rate',type:'number'},
   {name:'season_id',label:'Season',lookup:'seasons'},{name:'team_id',label:'Franchise',lookup:'teams'},
   {name:'notes',label:'Budget notes',type:'textarea'},
  ],
@@ -198,6 +200,10 @@ export function CommandDashboard(){
   if(kind==='budgets'){
     if(!budgetTemplates.some(t=>t.code===payload.category)){setNotice({message:'Select a recognized basketball season budget category.',error:true});return;}
     payload.title=labelFor(String(payload.category));
+    const qty=payload.units,price=payload.unit_price;
+    if((qty===undefined)!==(price===undefined)){setNotice({message:'Enter both quantity and unit cost, or leave both blank for a flat budget.',error:true});return;}
+    if(qty!==undefined&&price!==undefined)payload.planned_amount=Math.round(Number(qty)*Number(price)*100)/100;
+    if(payload.planned_amount===undefined){setNotice({message:'Enter a flat budget amount or quantity and unit cost.',error:true});return;}
   }
   if(kind==='ledger'){
     if(!templatesFor(payload.direction==='income'?'income':'expense').some(t=>t.code===payload.category)){
@@ -247,6 +253,8 @@ export function CommandDashboard(){
     (field.options||field.lookup)?<select required={field.required} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}><option value="">Select {field.label.toLowerCase()}</option>{options(field).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
     <input required={field.required} type={field.type||'text'} step={field.type==='number'?(field.name==='stock_count'||field.name==='quantity'||field.name==='capacity'||field.name==='reorder_at'?'1':'0.01'):undefined} min={field.type==='number'?'0':undefined} maxLength={field.type==='number'?undefined:200} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}/>}
     {field.hint&&<small>{field.hint}</small>}</label>)}
+   {kind==='budgets' && form.units!==undefined && form.unit_price!==undefined && form.units!=='' && form.unit_price!==''?
+    <div className="cmd-budget-auto-preview cmd-wide"><span>AUTOMATIC CATEGORY BUDGET</span><strong>{money(Math.round(Number(form.units)*Number(form.unit_price)*100)/100)}</strong><small>{form.units} units × {money(Number(form.unit_price))} each · This becomes the approved allocation instead of the flat amount.</small></div>:null}
    <div className="cmd-form-actions"><button className="cmd-button" type="submit" disabled={working}>{working?'Saving…':'Save record'} <FaArrowRight size={12}/></button><button type="button" className="cmd-text-button" onClick={()=>reset(null)}>Cancel</button></div>
   </form></section>;
  }
@@ -263,7 +271,7 @@ export function CommandDashboard(){
  <div className="cmd-columns"><section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUE SNAPSHOT</p><h3>Front Office Briefing</h3></div></div><div className="cmd-brief-grid"><div><span>Approved budget lines</span><strong>{money(budgetTotal)}</strong></div><div><span>Venue commitment estimate</span><strong>{money(venueExposure)}</strong></div><div><span>Projected ledger net</span><strong>{money(projected)}</strong></div><div><span>Concession gross margin</span><strong>{money(grossSales-concessionCost)}</strong></div><div><span>Active franchises</span><strong>{teams.length}</strong></div><div><span>Scouted gym leads</span><strong>{venueStats.total}</strong></div></div><p className="cmd-fine">Ledger totals and concession sales are deliberately separate to prevent accidental double counting. Venue commitments are estimates, not confirmed expenses.</p></section>
  <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUEAPPS + SCOREBOOK</p><h3>Upcoming Matchups</h3></div></div>{upcoming.length?upcoming.map(g=><div className="cmd-mini" key={g.id}><strong>{labelGame(g.id)}</strong><span>{stamp(g.scheduled_at)}</span></div>):emptyState('upcoming games')}<p className="cmd-fine">Official game details are read from the existing RCH database. Command does not overwrite game results.</p></section></div></>;
  const finance=<><section className="cmd-info"><strong>Guided finance templates:</strong> Select the standardized basketball cost or income category and enter only the amount, season, team and supporting evidence. Category names are controlled to protect reporting consistency. Game-specific tickets and sponsorships can also be entered directly in Game Revenue; concession sales belong in the Concessions POS.</section>{cards([{label:'OPERATING BUDGET',value:money(budgetTotal),detail:records.budgets.length+' budget lines'},{label:'ACTUAL INCOME',value:money(income),detail:'Recorded and reconciled only'},{label:'ACTUAL EXPENSES',value:money(expenses),detail:'Recorded and reconciled only'},{label:'LEDGER NET',value:money(income-expenses),detail:'Excludes concession inventory and sales'}])}
- {frame('budgets',rows('budgets',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{labelFor(r.category)} · {labelTeam(r.team_id)} · {seasons.find(s=>s.id===r.season_id)?.name||'All seasons'}</small></div><div className="cmd-record-right"><b>{money(amount(r.planned_amount))}</b><small>{r.notes||'Budget allocation'}</small></div></>),'PLANNING & ALLOCATIONS')}
+ {frame('budgets',rows('budgets',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{labelFor(r.category)} · {labelTeam(r.team_id)} · {seasons.find(s=>s.id===r.season_id)?.name||'All seasons'}</small>{r.units!==null&&r.unit_price!==null?<small>{Number(r.units).toLocaleString('en-US')} units × {money(amount(r.unit_price))} each</small>:null}</div><div className="cmd-record-right"><b>{money(amount(r.planned_amount))}</b><small>{r.notes||'Budget allocation'}</small></div></>),'PLANNING & ALLOCATIONS')}
  {frame('ledger',<><p className="cmd-fine cmd-spacing">Projected transactions do not count as actual cash. Reconcile against supporting receipts before reporting finalized totals. Enter concession sales through the Concessions module, not twice.</p>{rows('ledger',r=><><div className="cmd-record-main"><strong>{r.description}</strong><small>{labelFor(r.category)} · {dateOnly(r.occurred_on)} · {labelGame(r.game_id)}</small></div><div className="cmd-record-right"><b className={r.direction==='income'?'cmd-positive':'cmd-negative'}>{r.direction==='income'?'+':'−'}{money(amount(r.amount))}</b>{status(r,'ledger','state',['projected','recorded','reconciled','void'])}</div></>)}</>,'VERIFIED TRANSACTION LEDGER')}</>;
  const venues=<>
  {cards([{label:'GYM LEADS INDEXED',value:String(venueStats.total),detail:'Statewide research leads, not confirmed rentals'},
