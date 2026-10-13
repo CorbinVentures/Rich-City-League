@@ -1,8 +1,8 @@
 import { LeagueCenterExperience } from '@/components/LeagueCenterExperience';
 
 export const metadata = {
-  title: 'League Center',
-  description: 'Your role-aware Rich City League competition hub for schedules, stats, rankings, teams, fantasy, Draft Night, Scorebook and open runs.',
+  title: 'Rich City League | A New Era of Virginia Basketball',
+  description: 'Explore Rich City League’s vision for professional basketball across Virginia: city identities, cinematic storytelling, team sites, official competition and fan connection.',
 };
 
 export default function LeagueCenterPage() {
