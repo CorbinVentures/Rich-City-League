@@ -62,3 +62,20 @@ update public.rcl_command_venues set rental_allowed=false,budget_status='not_ren
  rate_details='No verified exclusive basketball gym at this facility. Existing rental offer concerns multipurpose rooms, not a full-size basketball court.'
 where city='North Chesterfield' and name in ('Stonebridge Recreation Center','Bensley Recreation Center')
  and source_key like 'rcl-research:%';
+
+-- Source accuracy: availability windows are not simply published off-peak rates.
+update public.rcl_command_venues set availability_status='inquiry_required',
+ availability_details='Rates vary by off-peak/peak time, but no real rental openings are published. Bookings are first-come/first-served and seasonal; 4+ hours or staff/food support require special-event coordination with sales@beachfieldhouse.com.'
+where name='Virginia Beach Field House' and city='Virginia Beach' and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set availability_status='inquiry_required',
+ availability_details='City accepts facility rental agreements but does not list specific open gym rental windows. Park programs get priority and independently organized competing leagues may not be permitted.'
+where name='Gypsy Hill Park Gymnasium' and city='Staunton' and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set availability_details='Official community-center posting: weekday evenings 6–10pm and Saturdays 9am–10pm; Sunday is not listed for Greenwood Mill. Dates require approval at least 14 days ahead, two-hour minimum.'
+where name='Greenwood Mill Elementary School Community Center' and city='Winchester'
+ and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set email='info@commonsrva.com',
+ availability_details='Current operator reports weekday 1–6pm or after 9pm generally open, weekday 6–9pm limited, Saturdays generally open; accepting court rental inquiries through summer 2027. Specific dates still require approval and paid reservation.'
+where name='Commons RVA' and city='Richmond' and source_key like 'rcl-research:%';
