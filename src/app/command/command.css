@@ -121,3 +121,21 @@
 @media(max-width:790px){.cmd-menu-toggle{display:block}.cmd-sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:14px 0 40px #0006;width:min(300px,90vw);height:100dvh}.cmd-sidebar-open{transform:translateX(0)}.cmd-topbar{padding:0 17px;min-height:63px}.cmd-content{padding:25px 17px}.cmd-access{display:none}.cmd-route{font-size:9px}.cmd-refresh{padding:9px 11px}.cmd-hero{min-height:255px}.cmd-hero-mark{right:10px;opacity:.08}.cmd-timestamp{display:none}}
 @media(max-width:560px){.cmd-metrics{gap:10px}.cmd-metric{min-height:130px;padding:17px 15px}.cmd-metric p{font-size:9px!important}.cmd-metric strong{font-size:25px}.cmd-section-heading h1{font-size:27px}.cmd-hero h2{letter-spacing:-1.8px}.cmd-hero{padding:30px 24px}.cmd-panel-heading{padding:18px;align-items:flex-start}.cmd-record{padding:16px 18px;align-items:flex-start;flex-direction:column}.cmd-record-right{width:100%;max-width:none;flex-direction:row;align-items:center;justify-content:space-between;text-align:left;flex-wrap:wrap}.cmd-form-grid{grid-template-columns:1fr}.cmd-create{margin:10px;padding:17px}.cmd-brief-grid strong{font-size:18px}.cmd-brief-grid>div{padding:18px}.cmd-footer{display:block}.cmd-footer span{display:block;margin-top:7px}.cmd-route{max-width:44vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cmd-refresh span{display:none}}
 @media(prefers-reduced-motion:reduce){.command-app *{animation:none!important;transition:none!important}}
+
+/* Settlements, installation and inventory control */
+.cmd-install{border-color:#b54758!important;background:#301e2a!important;color:#ffd9de!important}
+.cmd-stock-editor{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.cmd-stock-editor input{width:72px!important;min-height:32px!important;border:1px solid #525c6b!important;border-radius:7px!important;background:#10151c!important;color:white!important;padding:5px 8px!important;font-size:12px!important}
+.cmd-stock-editor button{min-height:32px}
+.cmd-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.cmd-export-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cmd-export-controls select{background:#222833;border:1px solid #3c4654;border-radius:8px;color:white;font-size:11px;padding:10px;min-height:41px;max-width:350px}
+.cmd-report-table{overflow-x:auto}
+.cmd-report-row{min-width:740px;display:grid;grid-template-columns:minmax(190px,2.5fr) repeat(4,minmax(100px,1fr));gap:18px;align-items:center;padding:18px 24px;border-bottom:1px solid #2c3340;font-variant-numeric:tabular-nums}
+.cmd-report-row:last-child{border-bottom:0}
+.cmd-report-row>span{display:flex;flex-direction:column;gap:5px}
+.cmd-report-row>span strong{font-size:12px;color:#f6f7fa}
+.cmd-report-row>span small{font-size:10px;color:#9da8b7}
+.cmd-report-row>b{font-size:14px}
+.cmd-report-head{background:#232a35;color:#adbac8;font-size:9px;font-weight:850;letter-spacing:1px}
+@media(max-width:560px){.cmd-install{font-size:9px;padding:8px!important}.cmd-refresh{letter-spacing:0}.cmd-export-controls{width:100%}.cmd-export-controls select{max-width:100%;width:100%}}
