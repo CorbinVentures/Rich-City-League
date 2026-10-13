@@ -16,7 +16,7 @@ const tables:Record<Kind,string> = {
  trades:'rcl_command_trades',stories:'rcl_command_stories',tasks:'rcl_command_tasks',audit:'rcl_command_audit'
 };
 const kinds = Object.keys(tables) as Kind[];
-const empty = ():Record<Kind,Row[]> => Object.fromEntries(kinds.map(k=>[k,[]])) as Record<Kind,Row[]>;
+const empty = ():Record<Kind,Row[]> => Object.fromEntries(kinds.map(k=>[k,[]])) as unknown as Record<Kind,Row[]>;
 const nav: {id:Area;name:string;group:string;icon:React.ComponentType<{size?:number}>}[] = [
  {id:'overview',name:'Executive Overview',group:'COMMAND',icon:FaChartLine},
  {id:'finance',name:'Financial Office',group:'BUSINESS',icon:FaCreditCard},
@@ -142,7 +142,7 @@ export function CommandDashboard(){
    const failed=all.find(x=>x.result.error);
    const error=failed?.result.error || teamQ.error || gameQ.error || seasonQ.error || playerQ.error;
    if(error) throw new Error(error.message);
-   setRecords(Object.fromEntries(all.map(({kind,result})=>[kind,result.data??[]])) as Record<Kind,Row[]>);
+   setRecords(Object.fromEntries(all.map(({kind,result})=>[kind,result.data??[]])) as unknown as Record<Kind,Row[]>);
    setTeams(teamQ.data??[]);setGames(gameQ.data??[]);setSeasons(seasonQ.data??[]);setPlayers(playerQ.data??[]);
   }catch(error){setNotice({message:error instanceof Error?error.message:'Could not load Command Center records.',error:true});}
   finally{setBusy(false);}
