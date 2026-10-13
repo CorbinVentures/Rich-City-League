@@ -24,6 +24,10 @@
     {
       "path": "/api/cron/sports-wire",
       "schedule": "40 * * * *"
+    },
+    {
+      "path": "/api/cron/command-prices",
+      "schedule": "15 10 * * *"
     }
   ]
 }
