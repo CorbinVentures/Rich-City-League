@@ -10,6 +10,7 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const isAccessGateway = pathname === '/access';
   const isStandalonePage = pathname === '/app' || pathname === '/profile' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/');
   const isImmersiveScorebook = pathname === '/portal/scorebook';
+  const isCommand = pathname === '/command' || pathname.startsWith('/command/');
 
   if (pathname === '/clips') {
     return <div className="rch-clips-immersive"><a className="rcl-skip-link" href="#rcl-content">Skip to clips</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
@@ -26,6 +27,8 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
   if (isAccessGateway) {
     return <div className="rcl-access-gateway"><a className="rcl-skip-link" href="#rcl-content">Skip to content</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
   }
+
+  if (isCommand) return <div className="rcl-command-immersive">{children}</div>;
 
   if (isImmersiveScorebook) {
     return <div className="rcl-scorebook-immersive min-h-svh bg-[#03070d]"><a className="rcl-skip-link" href="#rcl-content">Skip to scorebook</a><div id="rcl-content" tabIndex={-1}>{children}</div></div>;
