@@ -55,6 +55,7 @@ export default function LeagueAppsAdminHub() {
   const [filter, setFilter] = useState<'all' | Area['state']>('all');
   const [syncState, setSyncState] = useState<SyncState[]>([]);
   const [configured, setConfigured] = useState(false);
+  const [publicConfigured, setPublicConfigured] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState('');
   const isAdmin = profile?.role === 'admin';
@@ -80,10 +81,11 @@ export default function LeagueAppsAdminHub() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to load the LeagueApps connection.');
       setConfigured(Boolean(data.configured?.configured));
+      setPublicConfigured(Boolean(data.publicConfigured?.configured));
       setSyncState(data.state ?? []);
-      setSyncMessage('');
     } catch (error) {
       setConfigured(false);
+      setPublicConfigured(false);
       setSyncMessage(error instanceof Error ? error.message : 'Unable to load the LeagueApps connection.');
     }
   }
@@ -113,7 +115,7 @@ export default function LeagueAppsAdminHub() {
       const response = await fetch('/api/admin/leagueapps?action=sync-competition', { method: 'GET', cache: 'no-store', headers });
       const data = await response.json();
       if (!response.ok && response.status !== 207) throw new Error(data.error || 'Competition sync failed.');
-      const summary = `Schedule sync: ${data.gamesUpserted ?? 0} game(s), ${data.teamsSeen ?? 0} team record(s), ${data.locations ?? 0} location(s).`;
+      const summary = `Competition sync: ${data.teamsSeen ?? 0} team record(s), ${data.gamesUpserted ?? 0} game(s), ${data.locations ?? 0} location(s).`;
       setSyncMessage(data.warnings?.length ? `${summary} ${data.warnings.length} warning(s): ${data.warnings.slice(0, 3).join(' · ')}` : summary);
       await loadIntegrationStatus();
     } catch (error) {
@@ -162,17 +164,18 @@ export default function LeagueAppsAdminHub() {
           <div className="flex flex-wrap gap-2">
             <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runSync('members-2')} className="rcl-admin-chip disabled:opacity-30"><FaPeopleGroup /> {syncing === 'members-2' ? 'Syncing…' : 'Sync Members'}</button>
             <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runSync('registrations-2')} className="rcl-admin-chip disabled:opacity-30"><FaRotate /> {syncing === 'registrations-2' ? 'Syncing…' : 'Sync Registrations'}</button>
-            <button type="button" disabled={!configured || Boolean(syncing)} onClick={() => void runCompetitionSync()} className="rcl-admin-chip disabled:opacity-30"><FaCalendarDays /> {syncing === 'competition' ? 'Syncing…' : 'Sync Schedule & Results'}</button>
+            <button type="button" disabled={!publicConfigured || Boolean(syncing)} onClick={() => void runCompetitionSync()} className="rcl-admin-chip disabled:opacity-30"><FaCalendarDays /> {syncing === 'competition' ? 'Syncing…' : 'Sync Teams, Schedule & Results'}</button>
           </div>
         </div>
         {syncMessage && <p className="mt-4 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3 text-xs text-white/65">{syncMessage}</p>}
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {(['members-2', 'registrations-2'] as const).map((resource) => {
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {(['members-2', 'registrations-2', 'competition'] as const).map((resource) => {
             const row = syncState.find(item => item.resource === resource);
             return <div key={resource} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">{resource === 'members-2' ? 'MEMBERS' : 'REGISTRATIONS'}</p>
+              <p className="text-xs font-black uppercase tracking-[.18em] text-white/35">{resource === 'members-2' ? 'MEMBERS' : resource === 'registrations-2' ? 'REGISTRATIONS' : 'TEAMS & GAMES'}</p>
               <p className="mt-2 font-display text-2xl font-black">{row?.records_synced ?? 0}</p>
               <p className="text-xs uppercase tracking-wider text-rcl-orange/70">{row?.status ?? 'never synced'}</p>
+              <p className="mt-2 text-[11px] text-white/40">{row?.last_synced_at ? `Last checked ${new Date(row.last_synced_at).toLocaleString()}` : 'Awaiting first sync'}</p>
               {row?.last_error && <p className="mt-2 text-xs text-red-300/70">{row.last_error}</p>}
             </div>;
           })}
