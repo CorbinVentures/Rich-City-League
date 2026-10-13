@@ -22,6 +22,9 @@ describe('RCL Command basketball operating playbooks',()=>{
  });
  it('keeps attendance separate from box-office receipts and franchise assumptions',()=>{
   const migration=file('supabase/migrations/20261013223803_command_front_office_v2.sql');
+  const quantities=file('supabase/migrations/20261013225310_command_budget_unit_calculations.sql');
+  expect(quantities).toContain('planned_amount = round(units * unit_price,2)');
+  expect(file('src/components/command/CommandDashboard.tsx')).toContain('cmd-budget-auto-preview');
   expect(migration).toContain('rcl_command_game_reports');
   expect(migration).toContain('paid_attendance');
   expect(migration).toContain('tickets_sold');
@@ -58,7 +61,8 @@ describe('RCL Command basketball operating playbooks',()=>{
   const good='<script type="application/ld+json">'+JSON.stringify({
     '@type':'Product',name:"Member's Mark Purified Water 40 pk",offers:{price:'4.28',priceCurrency:'USD'}
   })+'</script>';
-  expect(verifiedPublicProductPrice(good,"Bottled water — Member's Mark 16.9oz")).toBe(4.28);
+  expect(verifiedPublicProductPrice(good,"Bottled water — Member's Mark 16.9oz",40)).toBe(4.28);
+  expect(verifiedPublicProductPrice(good,"Bottled water — Member's Mark 16.9oz",35)).toBeNull();
   const misleading='<script type="application/ld+json">'+JSON.stringify({
     '@type':'Product',name:'Unrelated popcorn 50ct',offers:{price:'4.28',priceCurrency:'USD'}
   })+'</script>';
