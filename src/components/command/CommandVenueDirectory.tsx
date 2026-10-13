@@ -108,10 +108,14 @@ export function CommandVenueDirectory(){
   setSaving(true);setError('');
   // Any conditional fee or unknown extras should never be classified as an
   // unconditional $75 fit just because the published BASE price is small.
+  const knownCost=full??price;
+  const conditionalTerms=/peak|resident|minimum|package|additional|approval|staff|special event|insurance|discount|nonprofit/i.test(draft.rate_details);
+  // Never label a >$75 hourly rental as a potential budget fit, even if
+  // the fee has exceptions. Price must first meet the ceiling.
   const budgetStatus=selected.rental_allowed===false?'not_rentable':
-    price===null?'needs_quote':
-    (selected.budget_status==='conditional'||(draft.rate_details.match(/peak|resident|minimum|package|addit|approval|staff/i)))?'conditional':
-    (full??price)<=75?'within_limit':'over_limit';
+    price===null?(selected.budget_status==='conditional'?'conditional':'needs_quote'):
+    knownCost!==null&&knownCost>75?'over_limit':
+    conditionalTerms?'conditional':'within_limit';
   const values={
    phone:draft.phone.trim()||null,email:draft.email.trim()||null,
    hourly_rate:price,effective_hourly_rate:full,
@@ -156,6 +160,7 @@ export function CommandVenueDirectory(){
   {count>PAGE_SIZE&&<div className="cmd-dir-pagination"><span>Showing {Math.min(page*PAGE_SIZE+1,count)}–{Math.min((page+1)*PAGE_SIZE,count)} of {count}</span><div><button type="button" onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0||loading}><FaChevronLeft/> Previous</button><b>Page {page+1} of {Math.ceil(count/PAGE_SIZE)}</b><button type="button" onClick={()=>setPage(p=>p+1)} disabled={(page+1)*PAGE_SIZE>=count||loading}>Next <FaChevronRight/></button></div></div>}
   {selected&&<div className="cmd-gym-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget){setSelected(null);setEditing(false)}}} role="presentation"><section className="cmd-gym-detail" role="dialog" aria-modal="true" aria-labelledby="cmd-gym-detail-heading"><header><div><p className="cmd-eyebrow">RCL COMMAND · GYM INTELLIGENCE</p><h3 id="cmd-gym-detail-heading">{selected.name}</h3><span>{selected.city}, Virginia · {regionLabel(selected.region_group)}</span></div><button type="button" onClick={()=>{setSelected(null);setEditing(false)}} aria-label="Close venue details"><FaXmark/></button></header>
    {editing&&draft?<form className="cmd-gym-edit" onSubmit={e=>void save(e)}>
+    {error&&<div className="cmd-directory-error" role="alert"><FaCircleExclamation/>{error}</div>}
     <p>Update only verified information. Staff-confirmed availability must be based on a real venue conversation; this does not create a confirmed booking.</p>
     <div className="cmd-gym-edit-grid"><label>Rental base $/hr<input type="number" min="0" step=".01" value={draft.hourly_rate} onChange={e=>setDraft(x=>x?{...x,hourly_rate:e.target.value}:x)}/></label><label>Effective all-in $/hr<input type="number" min="0" step=".01" value={draft.effective_hourly_rate} onChange={e=>setDraft(x=>x?{...x,effective_hourly_rate:e.target.value}:x)}/></label>
     <label>Price evidence<select value={draft.rate_basis} onChange={e=>setDraft(x=>x?{...x,rate_basis:e.target.value}:x)}><option value="unknown">Unknown</option><option value="published">Published by venue</option><option value="quoted">Staff received a quote</option></select></label><label>Availability evidence<select value={draft.availability_status} onChange={e=>setDraft(x=>x?{...x,availability_status:e.target.value}:x)}><option value="unverified">Unverified</option><option value="inquiry_required">Call to check</option><option value="published_windows">Published rental windows</option><option value="staff_confirmed">Staff-confirmed inquiry</option><option value="not_rentable">Not rentable</option></select></label>
