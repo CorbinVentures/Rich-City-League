@@ -38,10 +38,10 @@ export async function GET(request:Request){
    if(Number.isFinite(previous)&&previous>0&&Math.abs(sampled.price-previous)/previous>0.4){
     // Extreme price changes are more likely to represent an offer mismatch,
     // case-size switch, or source error; preserve the last verified reference.
-    const review=await db.from('rcl_command_concession_catalog').update({
+    const reviewed=await db.from('rcl_command_concession_catalog').update({
      refresh_attempted_at:now,refresh_status:'needs_review',
     }).eq('id',p.id);
-    if(review.error)errors++;else review++;
+    if(reviewed.error)errors++;else review++;
     return;
    }
    verified++;
