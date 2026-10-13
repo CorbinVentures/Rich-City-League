@@ -1,6 +1,7 @@
 /** Full member/social tools remain in the installed mobile PWA. */
 export function isBrowserAccountRoute(pathname: string): boolean {
   return pathname === '/command' || pathname.startsWith('/command/')
+    || pathname === '/member-access'
     || pathname === '/app'
     || pathname === '/profile'
     || pathname.startsWith('/auth/')
