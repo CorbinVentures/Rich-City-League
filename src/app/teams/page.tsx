@@ -6,7 +6,7 @@ import { TeamsDirectory } from '@/components/PublicDirectory';
 
 export const metadata: Metadata = { title:{ absolute:'Virginia Basketball Teams | Rich City League' }, description:'Explore Rich City League teams, rosters, records and divisions and follow the teams shaping the league’s next chapter in Virginia.', alternates:{canonical:'/teams'} };
 
-export const revalidate = 60;
+export const revalidate = 15;
 
 export default async function TeamsPage() {
   const { teams, teamSeasons, seasons, divisions, standings } = await getLeagueSnapshot();
