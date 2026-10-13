@@ -14,7 +14,7 @@ function matchesProduct(label:string,source:string):boolean{
  let overlap=0;for(const word of a)if(b.has(word))overlap++;
  return overlap>=2 || (overlap===1 && a.size===1);
 }
-export function verifiedPublicProductPrice(html:string,expectedName:string):number|null{
+export function verifiedPublicProductPrice(html:string,expectedName:string,expectedPackQuantity?:number):number|null{
  const matches=[...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
  for(const raw of matches){
   try{
@@ -25,6 +25,7 @@ export function verifiedPublicProductPrice(html:string,expectedName:string):numb
     if(!isProduct)continue;
     const item=obj as StructuredProduct;
     if(!item.name||!matchesProduct(expectedName,item.name))continue;
+    if(expectedPackQuantity && !new RegExp('\\\\b'+expectedPackQuantity+'\\\\b').test(item.name))continue;
     const offers=Array.isArray(item.offers)?item.offers:[item.offers];
     for(const offer of offers){
      if(!offer||typeof offer!=='object')continue;
@@ -45,7 +46,7 @@ export function allowedSupplierUrl(value:string,supplier:string):URL|null{
   return u;
  }catch{return null}
 }
-export async function observeSupplierPrice(sourceUrl:string,productName:string,supplier:string):
+export async function observeSupplierPrice(sourceUrl:string,productName:string,supplier:string,packQuantity?:number):
  Promise<{price:number|null;status:'found'|'unavailable'}>{
  const url=allowedSupplierUrl(sourceUrl,supplier);
  if(!url)return {price:null,status:'unavailable'};
@@ -57,7 +58,7 @@ export async function observeSupplierPrice(sourceUrl:string,productName:string,s
   const contentType=response.headers.get('content-type')||'';
   if(!contentType.includes('text/html'))return {price:null,status:'unavailable'};
   const html=(await response.text()).slice(0,2500000);
-  const price=verifiedPublicProductPrice(html,productName);
+  const price=verifiedPublicProductPrice(html,productName,packQuantity);
   return {price,status:price===null?'unavailable':'found'};
  }catch{return {price:null,status:'unavailable'}}
 }
