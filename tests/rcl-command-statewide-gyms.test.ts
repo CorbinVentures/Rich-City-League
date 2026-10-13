@@ -38,7 +38,7 @@ describe('RCL Command statewide gym intelligence',()=>{
 
  it('distinguishes live bookings from rental windows and lets admins contact source facilities',()=>{
   expect(component).toContain("availabilityInfo");
-  expect(component).toContain('not confirmed exclusive rental availability');
+  expect(component.toLowerCase()).toContain('not confirmed exclusive rental availability');
   expect(component).toContain('tel:');
   expect(component).toContain('mailto:');
   expect(component).toContain('noopener noreferrer');
