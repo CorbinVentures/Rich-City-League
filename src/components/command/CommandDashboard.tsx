@@ -5,6 +5,11 @@ import Link from 'next/link';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
 import { CommandVenueDirectory } from './CommandVenueDirectory';
+import { CommandGameRevenue } from './CommandGameRevenue';
+import { CommandConcessionCatalog } from './CommandConcessionCatalog';
+import { CommandFranchiseHQ } from './CommandFranchiseHQ';
+import { CommandSmartOperations } from './CommandSmartOperations';
+import { budgetTemplates, incomeTemplates, expenseTemplates, templatesFor, labelFor } from '@/lib/command/templates';
 import { FaArrowRight, FaBasketball, FaBuilding, FaCalendarDays, FaChartLine, FaClock, FaCreditCard, FaFileLines, FaPeopleGroup, FaUserShield } from 'react-icons/fa6';
 
 type Row = Record<string, any> & { id: string };
@@ -32,15 +37,14 @@ const nav: {id:Area;name:string;group:string;icon:React.ComponentType<{size?:num
 ];
 const schemas: Record<Exclude<Kind,'audit'>,Field[]> = {
  budgets:[
-  {name:'title',label:'Budget line',required:true},{name:'category',label:'Cost category',required:true},
-  {name:'planned_amount',label:'Approved / planned allocation ($)',type:'number',required:true},
+  {name:'category',label:'Standard basketball operating budget category',options:budgetTemplates.map(t=>t.code),required:true},
+  {name:'planned_amount',label:'Planned category allocation ($)',type:'number',required:true},
   {name:'season_id',label:'Season',lookup:'seasons'},{name:'team_id',label:'Franchise',lookup:'teams'},
   {name:'notes',label:'Budget notes',type:'textarea'},
  ],
  ledger:[
-  {name:'direction',label:'Flow',options:['income','expense'],required:true},
-  {name:'description',label:'Transaction description',required:true},
-  {name:'category',label:'Category',required:true},
+  {name:'direction',label:'Record type',options:['income','expense'],required:true},
+  {name:'category',label:'RCL standard income / expense template',options:[...incomeTemplates,...expenseTemplates].map(t=>t.code),required:true},
   {name:'amount',label:'Amount ($)',type:'number',required:true},
   {name:'state',label:'Verification',options:['projected','recorded','reconciled'],required:true,hint:'Projected money is excluded from actual totals.'},
   {name:'occurred_on',label:'Date',type:'date',required:true},
@@ -134,8 +138,7 @@ export function CommandDashboard(){
  const [menuOpen,setMenuOpen]=useState(false);
  const [adjusting,setAdjusting]=useState<string|null>(null);
  const [stockValue,setStockValue]=useState('');
- const [gameFilter,setGameFilter]=useState('');
- const [installPrompt,setInstallPrompt]=useState<{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>}|null>(null);
+  const [installPrompt,setInstallPrompt]=useState<{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>}|null>(null);
  const load=useCallback(async()=>{
   if(!db) {setNotice({message:'Supabase connection unavailable.',error:true});setBusy(false);return;}
   setBusy(true);
@@ -167,6 +170,8 @@ export function CommandDashboard(){
  const labelVenue=(id?:string)=>records.venues.find(v=>v.id===id)?.name||'Unassigned venue';
  const labelGame=(id?:string)=>{if(!id)return 'All games';const g=games.find(x=>x.id===id);return g?labelTeam(g.home_team_id)+' vs '+labelTeam(g.away_team_id):'Game record'};
  const options=(f:Field)=>{
+  if(f.name==='category'&&editing==='budgets')return budgetTemplates.map(t=>({value:t.code,label:t.group+' / '+t.label}));
+  if(f.name==='category'&&editing==='ledger')return templatesFor(form.direction==='income'?'income':'expense').map(t=>({value:t.code,label:t.group+' / '+t.label}));
   if(f.options)return f.options.map(v=>({value:v,label:pretty(v)}));
   switch(f.lookup){
    case 'teams':return teams.map(v=>({value:v.id,label:v.name}));
@@ -178,7 +183,7 @@ export function CommandDashboard(){
    default:return [];
   }
  };
- const reset=(kind:Kind|null)=>{setEditing(kind);setForm({});setNotice(null)};
+ const reset=(kind:Kind|null)=>{setEditing(kind);setForm(kind==='ledger'?{direction:'expense',category:expenseTemplates[0].code,state:'projected',occurred_on:new Date().toISOString().slice(0,10)}:kind==='budgets'?{category:budgetTemplates[0].code}:{});setNotice(null)};
  async function create(event:FormEvent<HTMLFormElement>,kind:Exclude<Kind,'audit'>){
   event.preventDefault();if(!db||working)return;
   const payload:Record<string,unknown>={};
@@ -189,6 +194,17 @@ export function CommandDashboard(){
    if(field.type==='number') { const n=Number(value);if(!Number.isFinite(n)||n<0){setNotice({message:'Invalid number: '+field.label,error:true});return} payload[field.name]=n; }
    else if(field.type==='datetime-local'){const d=new Date(value);if(Number.isNaN(d.getTime())){setNotice({message:'Invalid date.',error:true});return}payload[field.name]=d.toISOString();}
    else payload[field.name]=value;
+  }
+  if(kind==='budgets'){
+    if(!budgetTemplates.some(t=>t.code===payload.category)){setNotice({message:'Select a recognized basketball season budget category.',error:true});return;}
+    payload.title=labelFor(String(payload.category));
+  }
+  if(kind==='ledger'){
+    if(!templatesFor(payload.direction==='income'?'income':'expense').some(t=>t.code===payload.category)){
+      setNotice({message:'Select an approved income or expense template.',error:true});return;
+    }
+    if(payload.state!=='projected'&&!payload.reference){setNotice({message:'Actual receipts and payments require an invoice, deposit or settlement reference.',error:true});return;}
+    payload.description=labelFor(String(payload.category));
   }
   if(kind==='venues'){
     const rawRate=payload.hourly_rate;
@@ -227,7 +243,7 @@ export function CommandDashboard(){
  function renderForm(kind:Exclude<Kind,'audit'>){
   return <section className="cmd-create"><div className="cmd-form-head"><div><div className="cmd-eyebrow">NEW RECORD</div><h3>{titles[kind]}</h3></div><button type="button" className="cmd-close" onClick={()=>reset(null)} aria-label="Close form">×</button></div><form onSubmit={e=>void create(e,kind)} className="cmd-form-grid">
    {schemas[kind].map(field=><label key={field.name} className={'cmd-field '+(field.type==='textarea'?'cmd-wide':'')}><span>{field.label}{field.required?' *':''}</span>
-    {field.type==='textarea'?<textarea rows={3} maxLength={5000} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))} required={field.required}/>:
+    {field.type==='textarea'?<textarea rows={3} maxLength={5000} value={form[field.name]??''} onChange={e=>setForm(x=>field.name==='direction'?({...x,direction:e.target.value,category:e.target.value==='income'?incomeTemplates[0].code:expenseTemplates[0].code}):({...x,[field.name]:e.target.value}))} required={field.required}/>:
     (field.options||field.lookup)?<select required={field.required} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}><option value="">Select {field.label.toLowerCase()}</option>{options(field).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
     <input required={field.required} type={field.type||'text'} step={field.type==='number'?(field.name==='stock_count'||field.name==='quantity'||field.name==='capacity'||field.name==='reorder_at'?'1':'0.01'):undefined} min={field.type==='number'?'0':undefined} maxLength={field.type==='number'?undefined:200} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}/>}
     {field.hint&&<small>{field.hint}</small>}</label>)}
@@ -246,9 +262,9 @@ export function CommandDashboard(){
  {cards([{label:'RECORDED LEDGER INCOME',value:money(income),detail:'Recorded + reconciled; no projections'},{label:'RECORDED LEDGER EXPENSE',value:money(expenses),detail:'Recorded + reconciled'},{label:'CONCESSION GROSS SALES',value:money(grossSales),detail:'Tracked independently from ledger'},{label:'OUTSTANDING OPERATIONS',value:String(outstanding).padStart(2,'0'),detail:'Open and active action items'}])}
  <div className="cmd-columns"><section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUE SNAPSHOT</p><h3>Front Office Briefing</h3></div></div><div className="cmd-brief-grid"><div><span>Approved budget lines</span><strong>{money(budgetTotal)}</strong></div><div><span>Venue commitment estimate</span><strong>{money(venueExposure)}</strong></div><div><span>Projected ledger net</span><strong>{money(projected)}</strong></div><div><span>Concession gross margin</span><strong>{money(grossSales-concessionCost)}</strong></div><div><span>Active franchises</span><strong>{teams.length}</strong></div><div><span>Scouted gym leads</span><strong>{venueStats.total}</strong></div></div><p className="cmd-fine">Ledger totals and concession sales are deliberately separate to prevent accidental double counting. Venue commitments are estimates, not confirmed expenses.</p></section>
  <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUEAPPS + SCOREBOOK</p><h3>Upcoming Matchups</h3></div></div>{upcoming.length?upcoming.map(g=><div className="cmd-mini" key={g.id}><strong>{labelGame(g.id)}</strong><span>{stamp(g.scheduled_at)}</span></div>):emptyState('upcoming games')}<p className="cmd-fine">Official game details are read from the existing RCH database. Command does not overwrite game results.</p></section></div></>;
- const finance=<>{cards([{label:'OPERATING BUDGET',value:money(budgetTotal),detail:records.budgets.length+' budget lines'},{label:'ACTUAL INCOME',value:money(income),detail:'Recorded and reconciled only'},{label:'ACTUAL EXPENSES',value:money(expenses),detail:'Recorded and reconciled only'},{label:'LEDGER NET',value:money(income-expenses),detail:'Excludes concession inventory and sales'}])}
- {frame('budgets',rows('budgets',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{r.category} · {labelTeam(r.team_id)} · {seasons.find(s=>s.id===r.season_id)?.name||'All seasons'}</small></div><div className="cmd-record-right"><b>{money(amount(r.planned_amount))}</b><small>{r.notes||'Budget allocation'}</small></div></>),'PLANNING & ALLOCATIONS')}
- {frame('ledger',<><p className="cmd-fine cmd-spacing">Projected transactions do not count as actual cash. Reconcile against supporting receipts before reporting finalized totals. Enter concession sales through the Concessions module, not twice.</p>{rows('ledger',r=><><div className="cmd-record-main"><strong>{r.description}</strong><small>{r.category} · {dateOnly(r.occurred_on)} · {labelGame(r.game_id)}</small></div><div className="cmd-record-right"><b className={r.direction==='income'?'cmd-positive':'cmd-negative'}>{r.direction==='income'?'+':'−'}{money(amount(r.amount))}</b>{status(r,'ledger','state',['projected','recorded','reconciled','void'])}</div></>)}</>,'VERIFIED TRANSACTION LEDGER')}</>;
+ const finance=<><section className="cmd-info"><strong>Guided finance templates:</strong> Select the standardized basketball cost or income category and enter only the amount, season, team and supporting evidence. Category names are controlled to protect reporting consistency. Game-specific tickets and sponsorships can also be entered directly in Game Revenue; concession sales belong in the Concessions POS.</section>{cards([{label:'OPERATING BUDGET',value:money(budgetTotal),detail:records.budgets.length+' budget lines'},{label:'ACTUAL INCOME',value:money(income),detail:'Recorded and reconciled only'},{label:'ACTUAL EXPENSES',value:money(expenses),detail:'Recorded and reconciled only'},{label:'LEDGER NET',value:money(income-expenses),detail:'Excludes concession inventory and sales'}])}
+ {frame('budgets',rows('budgets',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{labelFor(r.category)} · {labelTeam(r.team_id)} · {seasons.find(s=>s.id===r.season_id)?.name||'All seasons'}</small></div><div className="cmd-record-right"><b>{money(amount(r.planned_amount))}</b><small>{r.notes||'Budget allocation'}</small></div></>),'PLANNING & ALLOCATIONS')}
+ {frame('ledger',<><p className="cmd-fine cmd-spacing">Projected transactions do not count as actual cash. Reconcile against supporting receipts before reporting finalized totals. Enter concession sales through the Concessions module, not twice.</p>{rows('ledger',r=><><div className="cmd-record-main"><strong>{r.description}</strong><small>{labelFor(r.category)} · {dateOnly(r.occurred_on)} · {labelGame(r.game_id)}</small></div><div className="cmd-record-right"><b className={r.direction==='income'?'cmd-positive':'cmd-negative'}>{r.direction==='income'?'+':'−'}{money(amount(r.amount))}</b>{status(r,'ledger','state',['projected','recorded','reconciled','void'])}</div></>)}</>,'VERIFIED TRANSACTION LEDGER')}</>;
  const venues=<>
  {cards([{label:'GYM LEADS INDEXED',value:String(venueStats.total),detail:'Statewide research leads, not confirmed rentals'},
  {label:'POTENTIAL ≤ $75/HR',value:String(venueStats.potential),detail:'Includes conditional eligibility and off-peak prices'},
@@ -256,24 +272,14 @@ export function CommandDashboard(){
  {label:'CONFIRMED BOOKING RECORDS',value:String(records.bookings.filter(b=>b.status==='confirmed').length),detail:'RCL staff bookings, not external live inventory'}])}
  {frame('venues',<CommandVenueDirectory/>,'VIRGINIA FACILITY INTELLIGENCE · VERIFIED SOURCE LINKS')}
  {frame('bookings',<><p className="cmd-fine cmd-spacing">A gym listing is not a court reservation. Contact venues directly to confirm your date, insurance, filming, spectators and approval before setting a booking to confirmed.</p>{rows('bookings',r=><><div className="cmd-record-main"><strong>{labelVenue(r.venue_id)}</strong><small>{labelTeam(r.team_id)} · {labelGame(r.game_id)}</small><small>{stamp(r.starts_at)} — {stamp(r.ends_at)}</small></div><div className="cmd-record-right"><b>{money(Math.max(0,(new Date(r.ends_at).getTime()-new Date(r.starts_at).getTime())/3600000)*amount(r.hourly_rate))}</b>{status(r,'bookings','status',['tentative','confirmed','cancelled'])}</div></>)}</>,'HOME COURTS · GAME-DAY RESERVATIONS')}</>;
- const concessions=<>{cards([{label:'SALES REVENUE',value:money(grossSales),detail:'Recorded sale transactions'},{label:'SOLD UNIT COST',value:money(concessionCost),detail:'Cost at time of sale'},{label:'GROSS PROFIT',value:money(grossSales-concessionCost),detail:'Before staffing / rental overhead'},{label:'LOW STOCK ITEMS',value:String(records.inventory.filter(i=>i.active&&amount(i.stock_count)<=amount(i.reorder_at)).length),detail:'At or below reorder point'}])}
+ const concessions=<><CommandConcessionCatalog onActivated={load}/>{cards([{label:'SALES REVENUE',value:money(grossSales),detail:'Recorded sale transactions'},{label:'SOLD UNIT COST',value:money(concessionCost),detail:'Cost at time of sale'},{label:'GROSS PROFIT',value:money(grossSales-concessionCost),detail:'Before staffing / rental overhead'},{label:'LOW STOCK ITEMS',value:String(records.inventory.filter(i=>i.active&&amount(i.stock_count)<=amount(i.reorder_at)).length),detail:'At or below reorder point'}])}
  {frame('inventory',rows('inventory',r=><><div className="cmd-record-main"><strong>{r.name} {amount(r.stock_count)<=amount(r.reorder_at)?<span className="cmd-warning-text">LOW STOCK</span>:null}</strong><small>Unit cost {money(amount(r.unit_cost))} · Sale price {money(amount(r.sale_price))}</small></div><div className="cmd-record-right"><b>{r.stock_count} units</b><div className="cmd-quick-actions">{adjusting===r.id?<form className="cmd-stock-editor" onSubmit={e=>{e.preventDefault();const n=Number(stockValue);if(!Number.isSafeInteger(n)||n<0){setNotice({message:'Enter a valid whole number.',error:true});return;}void update('inventory',r.id,{stock_count:n});setAdjusting(null)}}><label><span className="cmd-sr-only">Updated inventory units</span><input autoFocus type="number" min="0" step="1" value={stockValue} onChange={e=>setStockValue(e.target.value)}/></label><button type="submit" disabled={working}>Save stock</button><button type="button" onClick={()=>setAdjusting(null)}>Cancel</button></form>:<button type="button" disabled={working} onClick={()=>{setAdjusting(r.id);setStockValue(String(r.stock_count))}}>Adjust stock</button>}</div></div></>),'STOCK ON HAND')}
  {frame('concession_sales',<><p className="cmd-fine cmd-spacing">Submitting a sale atomically reduces inventory and records the sale price and cost at the time of purchase. Sales are append-only.</p>{rows('concession_sales',r=><><div className="cmd-record-main"><strong>{records.inventory.find(i=>i.id===r.item_id)?.name||'Item'}</strong><small>{r.quantity} sold · {labelGame(r.game_id)} · {stamp(r.recorded_at)}</small></div><div className="cmd-record-right"><b className="cmd-positive">+{money(amount(r.quantity)*amount(r.unit_price))}</b><small>Gross {money(amount(r.quantity)*(amount(r.unit_price)-amount(r.unit_cost)))}</small></div></>)}</>,'POINT OF SALE RECORDS')}</>;
- const gameRevenue=<>
- <section className="cmd-info"><strong>Financial control:</strong> Only recorded and reconciled entries count toward game revenue. Concession transactions are tracked separately. This report excludes projected income and any unassigned receipts.</section>
- <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">GAME-DAY PERFORMANCE</p><h3>Revenue & Settlement Reports</h3></div><div className="cmd-export-controls"><select aria-label="Filter by game" value={gameFilter} onChange={e=>setGameFilter(e.target.value)}><option value="">All games with transactions</option>{games.map(g=><option key={g.id} value={g.id}>{labelGame(g.id)} · {stamp(g.scheduled_at)}</option>)}</select><button type="button" className="cmd-add" onClick={()=>{setActive('finance');reset('ledger')}}>+ Record revenue</button></div></div>
- <div className="cmd-report-table"><div className="cmd-report-row cmd-report-head"><span>MATCHUP / GAME DATE</span><span>REVENUE</span><span>EXPENSES</span><span>CONCESSIONS</span><span>NET INDICATOR</span></div>
- {games.filter(g=>gameFilter?g.id===gameFilter:ledActual.some(t=>t.game_id===g.id)||records.concession_sales.some(s=>s.game_id===g.id)).map(g=>{
- const tx=ledActual.filter(t=>t.game_id===g.id);const gain=tx.filter(t=>t.direction==='income').reduce((n,t)=>n+amount(t.amount),0);const cost=tx.filter(t=>t.direction==='expense').reduce((n,t)=>n+amount(t.amount),0);
- const sales=records.concession_sales.filter(s=>s.game_id===g.id);const gross=sales.reduce((n,s)=>n+amount(s.quantity)*amount(s.unit_price),0);const cogs=sales.reduce((n,s)=>n+amount(s.quantity)*amount(s.unit_cost),0);
- const net=gain-cost+gross-cogs;
- return <div key={g.id} className="cmd-report-row"><span><strong>{labelGame(g.id)}</strong><small>{stamp(g.scheduled_at)} · {pretty(g.status)}</small></span><b className="cmd-positive">{money(gain)}</b><b className="cmd-negative">{money(cost)}</b><b>{money(gross)}</b><b className={net>=0?'cmd-positive':'cmd-negative'}>{money(net)}</b></div>})}
- {!gameFilter&&!games.some(g=>ledActual.some(t=>t.game_id===g.id)||records.concession_sales.some(s=>s.game_id===g.id))?emptyState('game-linked transactions'):null}
- </div><p className="cmd-fine">Net indicator = ledger income − ledger expenses + concession gross sales − concession cost of goods sold. This is an operations estimate, not an audited profit-and-loss statement. Do not duplicate concession revenues or merchandise inventory costs in the ledger.</p></section></>;
- const franchises=<><div className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUEAPPS SYNCED FRANCHISES</p><h3>Statewide Franchise Network</h3></div><Link className="cmd-secondary-link" href="/admin/leagueapps">LeagueApps administration →</Link></div><div className="cmd-franchise-grid">{teams.map(team=><div key={team.id} className="cmd-franchise"><div className="cmd-franchise-icon">{team.name.slice(0,1)}</div><div><strong>{team.name}</strong><small>{team.city||'Virginia'} · {records.venues.find(v=>v.home_team_id===team.id)?.name||'Home court not assigned'}</small></div></div>)}</div>{!teams.length&&emptyState('active franchises')}<p className="cmd-fine">Official teams and game records are managed by LeagueApps / RCH. Command Center assigns the business plan and home-court scouting information; it does not duplicate rosters.</p></div></>;
+ const gameRevenue=<CommandGameRevenue/>;
+ const franchises=<CommandFranchiseHQ/>;
  const trades=<><section className="cmd-info"><strong>Roster safety:</strong> Approval here documents a proposed transaction only. It does not automatically transfer a player in LeagueApps or RCH. Official roster changes require a separately verified workflow.</section>{frame('trades',rows('trades',r=><><div className="cmd-record-main"><strong>{labelTeam(r.sending_team_id)} → {labelTeam(r.receiving_team_id)}</strong><small>{r.proposal}</small><small>{stamp(r.created_at)}</small></div><div className="cmd-record-right">{status(r,'trades','status',['proposed','under_review','approved','rejected','cancelled'])}</div></>),'FRONT OFFICE TRANSACTIONS')}</>;
  const stories=<><section className="cmd-info"><strong>Editorial integrity:</strong> Storyline plans are creative production notes. They cannot alter official games, standings or results. Publishing to RCH TV requires a separate editorial action.</section>{frame('stories',rows('stories',r=><><div className="cmd-record-main"><strong>{r.title}</strong><small>{pretty(r.format)} · {labelTeam(r.team_id)} · Target {dateOnly(r.scheduled_for)}</small><p className="cmd-snippet">{r.narrative}</p></div><div className="cmd-record-right">{status(r,'stories','status',['draft','review','approved','released'])}</div></>),'RCL CINEMATIC UNIVERSE')}</>;
- const operations=<>{cards([{label:'OPEN TASKS',value:String(records.tasks.filter(r=>r.status==='open').length),detail:'Waiting for assignment'},{label:'IN PROGRESS',value:String(records.tasks.filter(r=>r.status==='in_progress').length),detail:'Active on game-day'},{label:'COMPLETED',value:String(records.tasks.filter(r=>r.status==='done').length),detail:'Tracked to completion'},{label:'URGENT',value:String(records.tasks.filter(r=>r.status!=='done'&&r.priority==='urgent').length),detail:'Require priority attention'}])}
+ const operations=<><CommandSmartOperations/>{cards([{label:'OPEN TASKS',value:String(records.tasks.filter(r=>r.status==='open').length),detail:'Waiting for assignment'},{label:'IN PROGRESS',value:String(records.tasks.filter(r=>r.status==='in_progress').length),detail:'Active on game-day'},{label:'COMPLETED',value:String(records.tasks.filter(r=>r.status==='done').length),detail:'Tracked to completion'},{label:'URGENT',value:String(records.tasks.filter(r=>r.status!=='done'&&r.priority==='urgent').length),detail:'Require priority attention'}])}
  {frame('tasks',rows('tasks',r=><><div className="cmd-record-main"><strong>{r.title} {r.priority==='urgent'?<span className="cmd-warning-text">URGENT</span>:null}</strong><small>{pretty(r.category)} · {labelTeam(r.team_id)} · Due {dateOnly(r.due_on)}</small><small>{r.notes}</small></div><div className="cmd-record-right">{status(r,'tasks','status',['open','in_progress','done'])}</div></>),'GAME DAY · STAFFING · DELIVERABLES')}</>;
  const audit=<div className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">READ-ONLY SECURITY RECORD</p><h3>Administrative Change History</h3></div></div>{rows('audit',r=><><div className="cmd-record-main"><strong>{pretty(r.operation)} · {pretty(r.table_name).replace('rcl command ','')}</strong><small>Record {r.record_id} · Actor {r.actor_id||'system'}</small></div><div className="cmd-record-right"><small>{stamp(r.created_at)}</small></div></>)}<p className="cmd-fine">Most operational record changes are logged with before and after snapshots. Audit history cannot be edited or deleted from the application.</p></div>;
  const screens:Record<Area,React.ReactNode>={overview,finance,revenue:gameRevenue,venues,concessions,franchises,trades,stories,operations,audit};
