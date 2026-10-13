@@ -30,6 +30,7 @@ type SyncState = {
 const leagueAppsAdminUrl = 'https://manager.leagueapps.com/console/sites/2294';
 
 const areas: Area[] = [
+  { title: 'RCL Command Center', eyebrow: 'LEAGUE OPERATIONS', description: 'Open the private installable front-office app for budgets, game revenue, gym rentals, concessions, trades and production.', icon: FaUserShield, href: '/command', state: 'rcl' },
   { title: 'Registrations', eyebrow: 'MEMBERS', description: 'Open programs, registration status, waitlists, waivers, participant records and registration workflows.', icon: FaFileLines, href: leagueAppsAdminUrl, state: 'leagueapps' },
   { title: 'Members & Families', eyebrow: 'PEOPLE', description: 'Search participants, profiles, guardians, contact information, eligibility and account status.', icon: FaPeopleGroup, href: '/admin/operations', state: 'bridge' },
   { title: 'Teams & Rosters', eyebrow: 'ROSTER', description: 'Build teams, assign players and coaches, manage roster movement and season assignments.', icon: FaBasketball, href: '/admin/operations', state: 'bridge' },
