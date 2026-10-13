@@ -1,0 +1,81 @@
+-- Second sourced enrichment wave: only facility names listed by official operator.
+-- No public operating schedule is a real-time reservation confirmation.
+with administrator as (
+ select id from public.profiles where role::text='admin' and coalesce(is_active,true) order by id limit 1
+), candidates as (
+ select * from jsonb_to_recordset($rcl_additions$[{"name":"Green Ridge Recreation Center","city":"Roanoke","address":"7415 Wood Haven Road","source_url":"https://roanokecountyparks.com/175/Gymnasium","hourly_rate":50,"phone":"540-777-6306","email":"greenridgerentals@roanokecountyva.gov","region_group":"Southside & Southwest","venue_kind":"recreation_center","rate_basis":"published","rate_details":"Basketball gym rental pricing STARTS at $50/hour. This is a starting rate, not a guaranteed game-day or exclusive two-court rate; ask about attendance, staffing and weekend premium.","availability_details":"Two full high-school regulation basketball courts. Request date/time from rental coordinator; not a live reservation.","court_count":2},{"name":"Montpelier Recreation Center and Library","city":"Montpelier","address":"15302 Clazemont Road","source_url":"https://www.hanovercounty.gov/1208/Montpelier-Recreation-Center-And-Library","hourly_rate":null,"phone":"804-883-5161","email":null,"region_group":"Richmond Metro","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official Hanover County confirms full-size indoor gym with basketball lines; NO gym rental rate published. Montpelier Park community-center room fee is NOT a basketball-gym rental price.","availability_details":"Published gym hours are open play and programming; organized league events require separate permission.","court_count":1},{"name":"William Ramsay Recreation Center","city":"Alexandria","address":"5650 Sanger Avenue","source_url":"https://www.alexandriava.gov/recreation-centers/william-ramsay-recreation-center","hourly_rate":null,"phone":"703-746-5558","email":null,"region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official City of Alexandria confirms full-size gymnasium. Exclusive court rental price not published.","availability_details":"Operating hours do not establish rental openings. Contact center for dates and insurance.","court_count":1},{"name":"Gunston Community Center","city":"Arlington","address":"2700 South Lang Street","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Locations/Indoor-Facilities/Gunston-Community-Center","hourly_rate":null,"phone":"703-228-6980","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"County confirms indoor gymnasium and basketball; county FY27 published $300 nonresident gym rental applies SPECIFICALLY to Arlington Mill and Walter Reed; do not assume Gunston rentable or same tariff.","availability_details":"Gym runs scheduled public activities. Contact Arlington facilities scheduling to determine exclusive access.","court_count":1},{"name":"Carver Community Center","city":"Arlington","address":"","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Rentals/Basketball-Courts","hourly_rate":null,"phone":"703-228-4747","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Listed as indoor basketball court by Arlington County, but no exclusive rental tariff published for this specific venue.","availability_details":"Gym might be programmed for residents; event permits and rental eligibility unknown.","court_count":1},{"name":"Charles Drew Community Center","city":"Arlington","address":"","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Rentals/Basketball-Courts","hourly_rate":null,"phone":"703-228-4747","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official Arlington indoor basketball court; specific gym rental permit and fee unverified.","availability_details":"Operating/open gym schedule is not a reservable slot.","court_count":1},{"name":"Fairlington Community Center","city":"Arlington","address":"3308 South Stafford Street","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Rentals/Basketball-Courts","hourly_rate":null,"phone":"703-228-4747","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official county lists ELEMENTARY-SIZE indoor basketball court; not suitable for regulation professional-style RCL game until dimensions confirmed.","availability_details":"Ask county to confirm court size and whether public ticketed games allowed.","court_count":1},{"name":"Langston-Brown Community Center","city":"Arlington","address":"2121 North Culpeper Street","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Locations/Indoor-Facilities/Langston-Brown-Community-Center-and-Park","hourly_rate":null,"phone":"703-228-4747","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official Arlington basketball/gymnasium facility. No verified exclusive gym hourly rate.","availability_details":"Confirm regulation dimensions, spectator access and closed-out dates.","court_count":1},{"name":"Thomas Jefferson Community Center","city":"Arlington","address":"3501 South 2nd Street","source_url":"https://www.arlingtonva.us/Government/Departments/Parks-Recreation/Rentals/Basketball-Courts","hourly_rate":null,"phone":"703-228-4747","email":"facilitiesscheduling@arlingtonva.us","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"County lists indoor basketball courts; commercial events require specific permissions.","availability_details":"No live booking availability verified.","court_count":1},{"name":"Mount Vernon Recreation Center","city":"Alexandria","address":"2701 Commonwealth Avenue","source_url":"https://www.alexandriava.gov/recreation-centers/mount-vernon-recreation-center","hourly_rate":null,"phone":"703-746-5556","email":"elsie.akinbobola@alexandriava.gov","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official Alexandria indoor gymnasium; rental tariff needs quote.","availability_details":"The public center hours are not a private rental schedule.","court_count":1},{"name":"North Phoebus Community Center","city":"Hampton","address":"249 West Chamberlin Avenue","source_url":"https://www.hampton.gov/facilities/Facility/Details/18","hourly_rate":null,"phone":"757-727-1160","email":null,"region_group":"Hampton Roads","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Official Hampton center lists adult and youth basketball league programming. Verify full gymnasium and room size.","availability_details":"RCL events may require permit, especially spectator ticketing.","court_count":null},{"name":"South Run RECenter Field House","city":"Springfield","address":"","source_url":"https://www.fairfaxcounty.gov/parks/facility-rentals","hourly_rate":null,"phone":"703-324-8680","email":"FCPARECenters@fairfaxcounty.gov","region_group":"Northern Virginia","venue_kind":"fieldhouse","rate_basis":"unknown","rate_details":"Fairfax County lists South Run field house for rent but basketball configuration and price not confirmed.","availability_details":"Contact county rental coordinator; no date availability verified.","court_count":null},{"name":"Sully Community Center Gymnasium","city":"Chantilly","address":"","source_url":"https://www.fairfaxcounty.gov/parks/gymnasiums","hourly_rate":null,"phone":"703-324-8680","email":"FCPARECenters@fairfaxcounty.gov","region_group":"Northern Virginia","venue_kind":"recreation_center","rate_basis":"unknown","rate_details":"Fairfax County officially identifies Sully indoor gymnasium available for reservation; price not confirmed.","availability_details":"Submit gym rental request with date, time, participants, purpose.","court_count":1}]$rcl_additions$::jsonb)
+ as x(name text,city text,address text,source_url text,hourly_rate numeric,phone text,email text,region_group text,venue_kind text,rate_basis text,rate_details text,availability_details text,court_count integer)
+)
+insert into public.rcl_command_venues
+ (source_key,name,city,address,source_url,source_label,source_checked_on,hourly_rate,rate_basis,rate_details,
+ budget_status,availability_status,availability_details,phone,email,website,region_group,venue_kind,court_count,source_verification,created_by)
+select 'rcl-wave2:'||lower(regexp_replace(x.city||':'||x.name,'[^a-zA-Z0-9]+','-','g')),x.name,x.city,x.address,x.source_url,
+ 'Official city/county facility or gymnasium directory',date '2026-10-13',x.hourly_rate,x.rate_basis,x.rate_details,
+ case when x.hourly_rate is null then 'needs_quote' else 'conditional' end,
+ 'inquiry_required',x.availability_details,x.phone,x.email,x.source_url,x.region_group,x.venue_kind,x.court_count,'official',a.id
+from candidates x cross join administrator a
+where not exists(select 1 from public.rcl_command_venues v
+ where lower(v.name)=lower(x.name) and lower(v.city)=lower(x.city))
+on conflict do nothing;
+
+-- Correct conflicting addresses with current operator listings (no staff-created records touched).
+update public.rcl_command_venues set address='548 King Arthur Drive',
+ notes=concat_ws(' ',notes,'2026 Chesapeake Parks published gym location address is 548 King Arthur Drive.'),
+ updated_at=now()
+where name='Camelot Community Center' and city='Chesapeake' and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set address='1001 River Crest Parkway',updated_at=now()
+where name='River Crest Community Center' and city='Chesapeake' and source_key like 'rcl-research:%';
+
+-- Four-hour minimum / higher published base: these are NOT ≤$75/hr candidates.
+update public.rcl_command_venues set budget_status='over_limit'
+where city='Danville' and name in ('Coates Recreation Center','Glenwood Recreation Center','Camp Grove Recreation Center','Activ8 STEM Academy Gymnasium')
+ and source_key like 'rcl-research:%';
+
+-- The JMU rate was per sports forum, not a verified entire basketball gym court.
+update public.rcl_command_venues set hourly_rate=null,rate_basis='unknown',budget_status='needs_quote',
+ rate_details='Official university page advertises $45/hour per Sports Forum, NOT a confirmed regulation-size basketball gym. Verify court dimensions, full-court rental price, public spectators, and outside organization eligibility before booking.'
+where name='JMU University Recreation Center — Sports Forum' and source_key like 'rcl-research:%';
+
+-- Lynchburg armory: an additional-hour price is NOT the actual entry hourly cost.
+update public.rcl_command_venues set hourly_rate=null,rate_basis='unknown',budget_status='conditional',
+ rate_details='Full City Armory rental: $300 for a block of up to 8 hours (equivalent to $37.50/hr only if all 8 hours are used). Each additional hour costs $75. Other charges may apply. Contact venue specialist for dates and full event tariff.'
+where name='Lynchburg City Armory' and source_key like 'rcl-research:%';
+
+-- Existing RCH community-mapped venue should link to more authoritative operator evidence.
+update public.rcl_command_venues set
+ address='2701 Commonwealth Avenue',source_url='https://www.alexandriava.gov/recreation-centers/mount-vernon-recreation-center',
+ source_label='City of Alexandria — Mount Vernon Recreation Center',source_verification='official',
+ source_checked_on=date '2026-10-13',phone='703-746-5556',
+ email='elsie.akinbobola@alexandriava.gov',website='https://www.alexandriava.gov/recreation-centers/mount-vernon-recreation-center',
+ venue_kind='recreation_center',region_group='Northern Virginia',budget_status='needs_quote',
+ rate_details='Official City of Alexandria confirms indoor gymnasium. Full-court exclusive rental pricing is not published.',
+ availability_status='inquiry_required'
+where name='Mount Vernon Recreation Center' and city='Alexandria'
+ and (source_key like 'rcl-location:%' or source_key like 'rcl-wave2:%');
+
+-- Richmond Metro recreation rooms are sometimes mislabeled basketball gyms.
+-- These County pages list multipurpose/art/craft rooms but no indoor full basketball gym.
+update public.rcl_command_venues set rental_allowed=false,budget_status='not_rentable',
+ availability_status='not_rentable',
+ notes='Chesterfield operator page describes multipurpose rooms, not a verified regulation basketball gym. Do not use as RCL home court unless the county confirms an appropriate basketball gym.',
+ rate_details='No verified exclusive basketball gym at this facility. Existing rental offer concerns multipurpose rooms, not a full-size basketball court.'
+where city='North Chesterfield' and name in ('Stonebridge Recreation Center','Bensley Recreation Center')
+ and source_key like 'rcl-research:%';
+
+-- Source accuracy: availability windows are not simply published off-peak rates.
+update public.rcl_command_venues set availability_status='inquiry_required',
+ availability_details='Rates vary by off-peak/peak time, but no real rental openings are published. Bookings are first-come/first-served and seasonal; 4+ hours or staff/food support require special-event coordination with sales@beachfieldhouse.com.'
+where name='Virginia Beach Field House' and city='Virginia Beach' and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set availability_status='inquiry_required',
+ availability_details='City accepts facility rental agreements but does not list specific open gym rental windows. Park programs get priority and independently organized competing leagues may not be permitted.'
+where name='Gypsy Hill Park Gymnasium' and city='Staunton' and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set availability_details='Official community-center posting: weekday evenings 6–10pm and Saturdays 9am–10pm; Sunday is not listed for Greenwood Mill. Dates require approval at least 14 days ahead, two-hour minimum.'
+where name='Greenwood Mill Elementary School Community Center' and city='Winchester'
+ and source_key like 'rcl-research:%';
+
+update public.rcl_command_venues set email='info@commonsrva.com',
+ availability_details='Current operator reports weekday 1–6pm or after 9pm generally open, weekday 6–9pm limited, Saturdays generally open; accepting court rental inquiries through summer 2027. Specific dates still require approval and paid reservation.'
+where name='Commons RVA' and city='Richmond' and source_key like 'rcl-research:%';
