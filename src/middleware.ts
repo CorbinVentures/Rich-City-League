@@ -63,6 +63,9 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const protectedPath = requiresMemberAccess(pathname);
 
+  // Public entry to the private Command PWA: credentials are accepted here, but
+  // the actual workspace and all data remain protected by middleware + RLS.
+  if (pathname === '/command/access' || pathname === '/command/access/') return NextResponse.next();
   if (pathname === '/command/icon.svg' || pathname === '/command/icon.png' || pathname === '/command/apple-icon.png' || pathname === '/command/manifest.webmanifest') return NextResponse.next();
   if (!protectedPath) return NextResponse.next();
 
@@ -85,6 +88,9 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
+    if (matchesRoute(pathname, '/command')) {
+      return NextResponse.redirect(new URL('/command/access', request.url));
+    }
     return NextResponse.redirect(memberAccessUrl(request));
   }
 
@@ -96,14 +102,17 @@ export async function middleware(request: NextRequest) {
   const profile = profileData as AccessProfile | null;
 
   if (!profile && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
+    if (matchesRoute(pathname, '/command')) return NextResponse.redirect(new URL('/command/access?status=profile', request.url));
     return NextResponse.redirect(memberAccessUrl(request, { profile: true }));
   }
 
   if (profile?.onboarding_complete === false && pathname !== '/profile' && !pathname.startsWith('/auth/')) {
+    if (matchesRoute(pathname, '/command')) return NextResponse.redirect(new URL('/command/access?status=setup', request.url));
     return NextResponse.redirect(socialOnboardingUrl(request));
   }
 
   if (profile?.is_active === false && pathname !== '/member-access' && !pathname.startsWith('/auth/')) {
+    if (matchesRoute(pathname, '/command')) return NextResponse.redirect(new URL('/command/access?status=inactive', request.url));
     return NextResponse.redirect(memberAccessUrl(request, { inactive: true }));
   }
 
@@ -112,7 +121,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/league', request.url));
   }
 
-  if ((pathname.startsWith('/admin') || pathname === '/command' || pathname.startsWith('/command/')) && profile?.role !== 'admin') {
+  if (matchesRoute(pathname, '/command') && profile?.role !== 'admin') {
+    return NextResponse.redirect(new URL('/command/access?status=denied', request.url));
+  }
+
+  if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
     return NextResponse.redirect(new URL('/league', request.url));
   }
 
