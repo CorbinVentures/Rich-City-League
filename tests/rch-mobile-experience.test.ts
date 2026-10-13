@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
 
 describe('RCH mobile app experience gate', () => {
-  it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile'])(
+  it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile', '/member-access', '/command', '/command/access'])(
     'allows account setup and installation in a normal browser: %s',
     path => expect(isBrowserAccountRoute(path)).toBe(true),
   );
@@ -17,7 +17,7 @@ describe('RCH mobile app experience gate', () => {
     path => expect(isBrowserPublicRoute(path)).toBe(true),
   );
 
-  it.each(['/app', '/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/teams/new', '/teams/warriors/edit', '/search'])(
+  it.each(['/app', '/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/teams/new', '/teams/warriors/edit', '/search', '/command', '/command/access', '/member-access'])(
     'keeps member tools and app-only pages outside the public browser allowlist: %s',
     path => expect(isBrowserPublicRoute(path)).toBe(false),
   );
