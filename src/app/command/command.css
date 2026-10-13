@@ -394,3 +394,9 @@
 @media(max-width:980px){.cmd-ops-rule-grid{grid-template-columns:1fr}.cmd-wholesale-grid{grid-template-columns:repeat(auto-fill,minmax(255px,1fr))}}
 @media(max-width:560px){.cmd-inline-form{padding:17px}.cmd-game-selector{padding:17px 17px 0}.cmd-report-kpis{padding:17px 17px 0}.cmd-sourcing-disclaimer{margin:14px 15px!important}.cmd-wholesale-summary{padding:17px 15px}.cmd-wholesale-grid{padding:0 15px 20px;grid-template-columns:1fr}.cmd-supplier-filter{padding:0 15px 18px;flex-wrap:wrap}.cmd-supplier-filter>select{min-width:100%}.cmd-franchise-selector{padding:16px}.cmd-franchise-feature{padding:22px 16px;gap:13px}.cmd-franchise-monogram{flex-basis:55px;height:55px;width:55px;font-size:35px}.cmd-model-summary{padding:16px}.cmd-ops-game{padding:15px 13px}.cmd-ops-game>span{font-size:8px}.cmd-ops-rule-grid{padding:15px}.cmd-ops-rule{flex-wrap:wrap}.cmd-ops-check,.cmd-ops-uncheck{margin-left:auto}.cmd-catalog-dialog{padding:18px}.cmd-ops-status{padding:17px}}
 @media(prefers-reduced-motion:reduce){.cmd-wholesale-card,.cmd-ops-rule{transition:none!important}}
+
+/* Quantified game-season expense templates */
+.cmd-budget-auto-preview{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px;border:1px solid #945062;background:linear-gradient(90deg,#371c29,#23212a);border-radius:10px;margin:4px 0}
+.cmd-budget-auto-preview span{font-size:9px;font-weight:900;color:#f6a1af;letter-spacing:1.3px}
+.cmd-budget-auto-preview strong{font-size:23px;color:#fff;font-variant-numeric:tabular-nums}
+.cmd-budget-auto-preview small{font-size:11px;color:#abb8c6;flex-basis:100%}
