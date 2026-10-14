@@ -72,7 +72,7 @@ export function RoyalteeOperations(){
   event.preventDefault();if(busy||!db)return;
   const fee=Number(editor.fee),capacity=editor.capacity.trim()?Number(editor.capacity):null;
   const start=new Date(editor.starts_at),end=editor.ends_at?new Date(editor.ends_at):null;
-  if(!Number.isFinite(fee)||fee<0||fee>10000||Math.round(fee*100)!==fee*100){
+  if(!Number.isFinite(fee)||fee<0||fee>10000||Math.abs(Math.round(fee*100)-fee*100)>0.000001){
     setError('Enter a fee between $0 and $10,000, with no more than two decimal places.');return;
   }
   if(Number.isNaN(start.getTime())||(end&&(Number.isNaN(end.getTime())||end<start))){
