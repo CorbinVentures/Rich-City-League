@@ -88,8 +88,8 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
             <div className="flex items-center justify-center gap-6 rounded-3xl border border-white/10 bg-black/50 p-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur">
               <div className="text-center font-mono">
                 <span className="block text-xs font-black text-gray-400 uppercase tracking-widest">LEGACY GRADE</span>
-                <span className="block font-display text-5xl font-black text-rcl-gold mt-1">A+</span>
-                <span className="block text-xs font-bold text-gray-500 tracking-wider mt-1">CERTIFIED RCL SYSTEM</span>
+                <span className="block font-display text-5xl font-black text-rcl-gold mt-1">—</span>
+                <span className="block text-xs font-bold text-gray-500 tracking-wider mt-1">No grade assigned</span>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
               COACH LEGACY PROFILE
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-gray-300">
-              A verified tactician of the Rich City League. This card reflects all official wins, losses, playoff runs, and coach certifications earned.
+              Official Rich City League team assignment. Only recorded competition results and staff-issued coaching awards appear here.
             </p>
             <div className="mt-6 border-t border-white/10 pt-4 space-y-3 text-xs">
               <div className="flex justify-between"><span className="text-gray-500">ASSIGNMENT</span><span className="font-bold text-white">{team ? team.name : 'Free Agent'}</span></div>

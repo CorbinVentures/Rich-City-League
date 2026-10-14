@@ -12,6 +12,7 @@ import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { ProfileViewInsights } from '@/components/ProfileViewInsights';
 import { ProfileWallFeed, type WallPost } from '@/components/social/ProfileWallFeed';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
+import {coachMilestones,type RCHCoachIdentity} from '@/lib/rch-coach-identity';
 
 export const revalidate = 30;
 
@@ -29,9 +30,9 @@ type PlayerRow = {
 
 type StatRow = { game_id:string; points:number|null; rebounds:number|null; assists:number|null; steals:number|null; blocks:number|null; plus_minus:number|null };
 type ProfilePost = { id:string; author_id:string; body:string; media_urls:string[]; created_at:string; is_automated?:boolean; automation_type?:string|null; target_profile_id?:string|null };
-type ProfileTab = 'wall'|'posts'|'highlights'|'stats'|'career'|'badges'|'media';
+type ProfileTab = 'wall'|'posts'|'highlights'|'stats'|'career'|'badges'|'media'|'coach';
 
-const PROFILE_TABS: ProfileTab[] = ['wall','posts','highlights','stats','career','badges','media'];
+const PROFILE_TABS: ProfileTab[] = ['wall','posts','highlights','stats','career','badges','media','coach'];
 const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
   wall:'Wall',
   posts:'Posts',
@@ -40,6 +41,7 @@ const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
   career:'Career',
   badges:'Badges',
   media:'Media',
+  coach:'Coaching',
 };
 
 export default async function SocialPublicProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string|string[] }> }) {
@@ -66,6 +68,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     { data: earnedRepBadges },
     { data: playerRaw },
     { data: earnedCoachBadges },
+    { data: coachIdentityRaw },
   ] = await Promise.all([
     client.from('posts').select('id,author_id,body,media_urls,created_at,is_automated,automation_type,target_profile_id').or(`author_id.eq.${id},target_profile_id.eq.${id}`).eq('status', 'published').order('created_at', { ascending: false }).limit(60) as any,
     client.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', id) as any,
@@ -75,7 +78,9 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     client.from('fan_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier,category,requirement_type)').eq('profile_id', id).order('earned_at', { ascending: false }) as any,
     client.from('players').select('id,profile_id,first_name,last_name,jersey_number,position,height_inches,hometown,photo_url').eq('profile_id', id).eq('is_active', true).maybeSingle() as any,
     client.from('coach_badges').select('id,badge_id,earned_at,badge:badges(name,description,icon,tier,category,requirement_type)').eq('profile_id', id).order('earned_at', { ascending: false }) as any,
+    (client as any).from('rch_coach_identities').select('profile_id,headline,organization,city,years_experience,coaching_level,specialties,availability,published').eq('profile_id',id).eq('published',true).maybeSingle(),
   ]);
+  const coachIdentity=coachIdentityRaw as RCHCoachIdentity|null;
 
   const player = playerRaw as PlayerRow | null;
   let basketball: null | {
@@ -196,6 +201,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     career:careerRows.length,
     badges:allBadges.length,
     media:mediaRows.length,
+    coach:coachIdentity?coachMilestones(coachIdentity).length:0,
   };
 
   return <main className={'rcl-social-secondary rcl-social-profile rch-profile-finish min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
@@ -216,7 +222,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
             {profile.is_system_account&&<span className="rch-profile-official-chip rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-rcl-blue">RCL Official</span>}
           </div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
-          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
+          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
@@ -253,9 +259,17 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         </div>
       </section>}
 
+      {coachIdentity&&<section className="border-b border-[#38617f] bg-[#0b2840] px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#9bd1ff]">RCH COACHING IDENTITY · MEMBER PROFILE</p>
+            <p className="mt-1 text-sm font-bold text-white">{coachIdentity.headline||'Basketball coach'}{coachIdentity.city?' · '+coachIdentity.city:''}</p>
+            <p className="mt-1 text-xs text-[#c5d9e8]">Self-described background · Not an official RCL staff appointment</p></div>
+          <Link href={profileHref+'?tab=coach'} className="rounded-xl border border-[#75adce] bg-[#174e76] px-4 py-2.5 text-xs font-bold text-white">Coaching details →</Link>
+        </div>
+      </section>}
       <nav className="rch-profile-tabs sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
         <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {PROFILE_TABS.map((tab)=>{
+          {PROFILE_TABS.filter(tab=>tab!=='coach'||Boolean(coachIdentity)).map((tab)=>{
             const active=activeTab===tab;
             const href=tab==='wall'?profileHref:`${profileHref}?tab=${tab}`;
             return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
@@ -274,9 +288,41 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         {activeTab==='career'&&<CareerTab basketball={basketball} rows={careerRows} authorMap={authorMap} />}
         {activeTab==='badges'&&<BadgesTab name={name} username={profile.username} repLabel={repLabel} repStatus={repStatus.label} socialLevel={socialLevel} followers={followers ?? 0} latestAchievement={latestAchievement} allBadges={allBadges} repRows={repRows} nextLevelXp={nextLevelXp} rep={rep} />}
         {activeTab==='media'&&<MediaTab rows={mediaRows} />}
+        {activeTab==='coach'&&(coachIdentity?<CoachMemberTab identity={coachIdentity} awards={(earnedCoachBadges??[]) as any[]}/>:<EmptyTab title="Coaching details are not published" copy="Coach identity is optional and controlled by each member."/>)}
       </section>
     </div>
   </main>;
+}
+
+function CoachMemberTab({identity,awards}:{identity:RCHCoachIdentity;awards:any[]}){
+ const milestones=coachMilestones(identity);
+ return <div className="space-y-5">
+  <section className="overflow-hidden rounded-2xl border border-[#416b91] bg-[linear-gradient(135deg,#143e61,#071b2e)] p-5 sm:p-7">
+   <p className="text-xs font-black uppercase tracking-[.16em] text-[#9bd0ff]">RCH Coaches Network</p>
+   <h2 className="mt-3 text-2xl font-black text-white">{identity.headline||'Coaching identity'}</h2>
+   {identity.organization&&<p className="mt-2 text-sm text-[#d1e6f6]">{identity.organization} · Self-reported organization</p>}
+   <div className="mt-5 grid gap-3 sm:grid-cols-3">
+    {[
+      ['LOCATION',identity.city||'Not listed'],
+      ['COACHING LEVEL',identity.coaching_level||'Not listed'],
+      ['EXPERIENCE',identity.years_experience==null?'Not listed':identity.years_experience+' years (self-reported)'],
+    ].map(([label,value])=><div key={label} className="rounded-xl border border-[#396485] bg-[#0a2034] p-4"><small className="block text-[10px] font-black tracking-widest text-[#a9d1eb]">{label}</small><strong className="mt-2 block text-sm text-white">{value}</strong></div>)}
+   </div>
+   {identity.specialties.length>0&&<div className="mt-5"><h3 className="text-xs font-black uppercase tracking-wider text-[#acd9f8]">Coaching specialties</h3><div className="mt-3 flex flex-wrap gap-2">{identity.specialties.map(s=><span key={s} className="rounded-xl border border-[#5083a8] bg-[#173c5e] px-3 py-2 text-xs font-bold text-white">{s}</span>)}</div></div>}
+   {identity.availability==='open_to_opportunities'&&<p className="mt-5 rounded-lg border border-[#438f7e] bg-[#143f3a] p-3 text-xs font-bold text-[#b7f5dc]">Open to coaching opportunities · Contact through RCH messages</p>}
+   <p className="mt-5 text-xs leading-5 text-[#bcd1e2]">This is a regular member’s coaching background. Experience and affiliations are self-reported. RCH does not certify or appoint coaches through directory membership.</p>
+  </section>
+  <section className="rounded-2xl border border-[#456a8b] bg-[#0c243a] p-5 sm:p-7">
+   <h3 className="text-lg font-black text-white">Coaching milestones</h3>
+   <p className="mt-2 text-xs leading-5 text-[#bfdaec]">Earned for profile participation. These are not certifications or verified coaching achievements.</p>
+   <div className="mt-4 grid gap-3 sm:grid-cols-2">{milestones.map(item=><div key={item.id} className="flex items-start gap-3 rounded-xl border border-[#4e7ba0] bg-[#173e60] p-4"><span className="grid h-10 w-10 flex-none place-items-center rounded-full border border-[#80b4da] bg-[#225982] text-xl text-[#d7f2ff]">✦</span><span><strong className="block text-sm text-white">{item.name}</strong><small className="mt-1 block text-xs text-[#c5d9e8]">{item.description}</small></span></div>)}</div>
+  </section>
+  <section className="rounded-2xl border border-[#456a8b] bg-[#0c243a] p-5 sm:p-7">
+   <h3 className="text-lg font-black text-white">Official coaching badges</h3>
+   {awards.some(a=>a.badge)?<div className="mt-4 flex flex-wrap gap-4">{awards.filter(a=>a.badge).map((item:any)=><BadgeShowcaseCard key={item.id} badge={item.badge} earnedAt={item.earned_at} compact/>)}</div>:<p className="mt-3 text-sm leading-6 text-[#c1d6e7]">No awarded coaching badges yet. Official awards appear when issued by the league—not when a member enters their own history.</p>}
+  </section>
+  <div className="flex flex-wrap gap-3"><Link href="/coaches" className="inline-flex min-h-11 items-center rounded-xl border border-[#4e7da4] bg-[#123b5b] px-5 text-sm font-bold text-white">Explore RCH coaches</Link><Link href="/profile" className="inline-flex min-h-11 items-center rounded-xl border border-[#4e7da4] bg-[#123b5b] px-5 text-sm font-bold text-white">Edit my profile</Link></div>
+ </div>;
 }
 
 function MiniMetric({label,value}:{label:string;value:string|number}){

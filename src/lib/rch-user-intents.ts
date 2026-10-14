@@ -29,7 +29,7 @@ export const RCH_INTENTS:readonly RCHIntent[]=[
  ]},
  {id:'grow',label:'Build',subtitle:'Coaches, teams, organizations and the wider culture',actions:[
   {id:'my-organization',title:'Grow your organization',detail:'Get your program on the network',href:'/network/partners',keywords:'owner organization promote claim advertise team league'},
-  {id:'find-coaches',title:'Discover coaches',detail:'Connect with basketball leadership',href:'/coaches',keywords:'coach scouting recruiting development train'},
+  {id:'find-coaches',title:'Discover coaches',detail:'Meet RCH coaches on regular member profiles',href:'/coaches',keywords:'coach scouting recruiting development train'},
   {id:'virginia-network',title:'Explore Virginia basketball',detail:'Find organizations across the state',href:'/network',keywords:'virginia richmond tournaments events league club basketball'},
  ]}
 ] as const;
