@@ -241,6 +241,13 @@ export function CommandGrowthHQ({teamId,teamName,isAdmin=false}:Props){
      <div><small>RESEARCH COVERAGE</small><strong>{coveredFips.size} / {localities.length}</strong><p>Source-backed locality metric records. County income medians are not averaged.</p></div>
      <div><small>COURT-DIRECTORY SIGNAL</small><strong>{totalCourts.toLocaleString()}</strong><p>Only exact-name matched records in RCH’s court database; unverified facilities may be present.</p></div>
     </div>
+    <h4 className="rcl-growth-minihead">Broad audience strategy (not individual-level targeting)</h4>
+    <div className="rcl-growth-judgment">
+     <article><strong>Adult players · 18–34</strong><p>Open run activations, player spotlights, team identity and competitive storytelling.</p><small>Channels: permitted courts, creator collaborations, contextual social</small></article>
+     <article><strong>Families & hometown fans</strong><p>Local pride, family-friendly game-day entertainment, community partnerships and accessible event information.</p><small>Channels: community calendars, venue partners, organic referrals</small></article>
+     <article><strong>Neighborhood businesses</strong><p>Co-branded events, tangible in-venue exposure, RCH TV features and negotiated partner packages.</p><small>Channels: sourced B2B prospecting, chambers, local networking</small></article>
+     <article><strong>Local creators & supporters</strong><p>Documentary storytelling, talent opportunities, hometown storytelling and shareable behind-the-scenes footage.</p><small>Channels: creator directories, RCH TV, local news outreach</small></article>
+    </div>
     <div className="rcl-growth-next"><strong>Recommended first action</strong><p>{insights.find(i=>i.title==='Market facts')?.action}. Focus first on core markets with local event venues.</p></div>
     <div className="rcl-growth-rows">
      {localitiesOrder.map(l=>{
