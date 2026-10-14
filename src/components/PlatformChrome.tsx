@@ -9,7 +9,7 @@ import { RCHContinueJourney } from '@/components/RCHContinueJourney';
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAccessGateway = pathname === '/access';
-  const isStandalonePage = pathname === '/app' || pathname === '/profile' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/');
+  const isStandalonePage = pathname === '/app' || pathname === '/profile' || pathname === '/league/royaltee' || pathname.startsWith('/auth/') || pathname.startsWith('/legal/');
   const isImmersiveScorebook = pathname === '/portal/scorebook';
   const isCommand = pathname === '/command' || pathname.startsWith('/command/');
 
