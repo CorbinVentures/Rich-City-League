@@ -109,7 +109,7 @@ export function RoyalteeOperations(){
   setBusy(false);
  }
  const active=registrations.filter(r=>r.status!=='cancelled');
- const paid=active.filter(r=>r.payment_status==='paid'||r.payment_status==='waived');
+ const paid=active.filter(r=>r.fee_cents_snapshot===0||r.payment_status==='paid'||r.payment_status==='waived');
  return <section className="rounded-2xl border border-[#31658e] bg-[#0a2137] p-5 sm:p-7" id="royaltee-operations">
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div><p className="text-xs font-black uppercase tracking-[.17em] text-[#ffac70]">03 / Royaltee operations</p>
@@ -166,7 +166,7 @@ export function RoyalteeOperations(){
      <div className="mt-5 grid gap-3 sm:grid-cols-3">
       <div className="rounded-lg bg-[#12324b] p-4"><FaClipboardList className="text-[#a8d9ff]"/><p className="mt-2 text-2xl font-black">{active.length}</p><p className="text-xs text-[#b8d5e7]">Active registrations</p></div>
       <div className="rounded-lg bg-[#12324b] p-4"><FaUsers className="text-[#a8d9ff]"/><p className="mt-2 text-2xl font-black">{active.filter(r=>r.status==='checked_in').length}</p><p className="text-xs text-[#b8d5e7]">Checked in</p></div>
-      <div className="rounded-lg bg-[#12324b] p-4"><FaCoins className="text-[#a8d9ff]"/><p className="mt-2 text-2xl font-black">{paid.length}/{active.length}</p><p className="text-xs text-[#b8d5e7]">Paid or waived</p></div>
+      <div className="rounded-lg bg-[#12324b] p-4"><FaCoins className="text-[#a8d9ff]"/><p className="mt-2 text-2xl font-black">{paid.length}/{active.length}</p><p className="text-xs text-[#b8d5e7]">Paid, waived or free</p></div>
      </div>
      {!registrations.length?<p className="mt-5 rounded-lg border border-dashed border-[#446986] p-4 text-sm text-[#bbd8e8]">No registrations for this event yet.</p>:
       <div className="mt-5 space-y-3">{registrations.map(r=><article key={r.id} className="grid gap-3 rounded-xl border border-[#365d7e] p-4 md:grid-cols-[minmax(0,1fr)_150px_150px]">
