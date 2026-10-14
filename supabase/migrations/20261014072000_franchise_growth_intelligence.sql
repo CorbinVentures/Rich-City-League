@@ -141,7 +141,7 @@ drop policy if exists "Growth sourced facts read" on public.rcl_growth_market_fa
 create policy "Growth sourced facts read" on public.rcl_growth_market_facts
 for select to authenticated using (exists(
  select 1 from public.rcl_command_territory_localities l join public.rcl_command_territories t on t.id=l.territory_id
- where l.fips=fips and public.rcl_growth_team_access(t.team_id)
+ where l.fips=rcl_growth_market_facts.fips and public.rcl_growth_team_access(t.team_id)
 ));
 drop policy if exists "Growth sourced facts admin insert" on public.rcl_growth_market_facts;
 create policy "Growth sourced facts admin insert" on public.rcl_growth_market_facts
