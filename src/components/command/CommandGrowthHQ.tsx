@@ -14,7 +14,7 @@ const emptyCampaign=():CampaignForm=>({title:'',playbook:'founding_fans',channel
 const categories=[
  ['local_business','Local business'],['corporate','Corporate partner'],['health_wellness','Health & wellness'],['restaurants','Restaurant / food'],['automotive','Automotive'],
  ['education','Education'],['financial_services','Financial services'],['retail','Retail'],['media_creator','Media / creator'],['basketball_organization','Basketball organization'],['nonprofit','Nonprofit'],['other','Other']
-];
+] as const;
 const prospectStages=['research','qualified','contacted','meeting','proposal','negotiating','won','lost'];
 const playbooks=[
  {key:'founding_fans',name:'Founding Fan Section',channel:'social',audience:'Local basketball fans aged 18+, families and community groups',offer:'Become an original supporter of the hometown franchise',cta:'Follow the team and RSVP for the first home event',why:'Build a contactable fanbase before spending on conversion ads',kpi:'Verified event RSVPs and ticket sales'},
@@ -132,7 +132,7 @@ export function CommandGrowthHQ({teamId,teamName,isAdmin=false}:Props){
   setBusy(true);setError('');setNotice('');
   const payload={...leadForm,team_id:teamId,name:leadForm.name.trim(),website_url:leadForm.website_url.trim()||null,
    source_url:leadForm.source_url.trim()||null,est_ask:nullable(leadForm.est_ask),contracted_amount:nullable(leadForm.contracted_amount),
-   next_action_on:leadForm.next_action_on||null,source_checked_on:leadForm.source_url?new Date().toISOString().slice(0,10):null};
+   next_action_on:leadForm.next_action_on||null,source_checked_on:null};
   const result=leadEdit==='new'?await db.from('rcl_growth_prospects').insert(payload):
     await db.from('rcl_growth_prospects').update(payload).eq('id',leadEdit).eq('team_id',teamId);
   if(result.error)setError(result.error.message);
@@ -309,7 +309,7 @@ export function CommandGrowthHQ({teamId,teamName,isAdmin=false}:Props){
      </div>)}</div>:<p className="rcl-growth-empty">No new geographically matched research candidates in the existing network pipeline.</p>}
     </div>}
     {leadEdit!==null&&<form onSubmit={e=>void saveLead(e)} className="rcl-growth-editor">
-     <div className="rcl-growth-section-head"><h3>{leadEdit==='new'?'New verified opportunity':'Update partnership opportunity'}</h3><button type="button" onClick={()=>setLeadEdit(null)}>Close</button></div>
+     <div className="rcl-growth-section-head"><h3>{leadEdit==='new'?'New researched opportunity':'Update partnership opportunity'}</h3><button type="button" onClick={()=>setLeadEdit(null)}>Close</button></div>
      <div className="rcl-growth-formgrid">
       {field('Organization / business name',leadForm.name,v=>leadSet('name',v),{required:true,maxLength:170})}
       {options('Industry',leadForm.category,v=>leadSet('category',v),categories)}
