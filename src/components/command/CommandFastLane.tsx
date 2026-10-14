@@ -21,11 +21,11 @@ const gameKinds:CommandCaptureKind[]=['ledger','bookings','concession_sales','ta
 
 export function CommandFastLane({active,open,onOpenChange,onNavigate,onCapture,signals,games}:Props){
  const [search,setSearch]=useState('');
- const [selectedGame,setSelectedGame]=useState('auto');
+ const [selectedGame,setSelectedGame]=useState('');
  const [recent,setRecent]=useState<string[]>([]);
  const [cursor,setCursor]=useState(0);
  const inputRef=useRef<HTMLInputElement>(null);
- const gameId=selectedGame==='auto'?(games[0]?.id||''):selectedGame;
+ const gameId=selectedGame;
  const visible=useMemo(()=>{
   const found=findCommandActions(search);
   if(search.trim())return found;
