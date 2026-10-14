@@ -11,6 +11,7 @@ import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
 import { GrowthShareCard } from '@/components/GrowthShareCard';
 import { ProfileViewInsights } from '@/components/ProfileViewInsights';
 import { ProfileWallFeed, type WallPost } from '@/components/social/ProfileWallFeed';
+import { ProfileFollowDirectory } from '@/components/social/ProfileFollowDirectory';
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
 import {coachMilestones,type RCHCoachIdentity} from '@/lib/rch-coach-identity';
 
@@ -30,12 +31,14 @@ type PlayerRow = {
 
 type StatRow = { game_id:string; points:number|null; rebounds:number|null; assists:number|null; steals:number|null; blocks:number|null; plus_minus:number|null };
 type ProfilePost = { id:string; author_id:string; body:string; media_urls:string[]; created_at:string; is_automated?:boolean; automation_type?:string|null; target_profile_id?:string|null };
-type ProfileTab = 'wall'|'posts'|'highlights'|'stats'|'career'|'badges'|'media'|'coach';
+type ProfileTab = 'wall'|'posts'|'followers'|'following'|'highlights'|'stats'|'career'|'badges'|'media'|'coach';
 
-const PROFILE_TABS: ProfileTab[] = ['wall','posts','highlights','stats','career','badges','media','coach'];
+const PROFILE_TABS: ProfileTab[] = ['wall','posts','followers','following','highlights','stats','career','badges','media','coach'];
 const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
   wall:'Wall',
   posts:'Posts',
+  followers:'Followers',
+  following:'Following',
   highlights:'Highlights',
   stats:'Stats',
   career:'Career',
@@ -196,6 +199,8 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   const tabCounts:Record<ProfileTab,number> = {
     wall:postRows.length,
     posts:authoredPosts.length,
+    followers:followers ?? 0,
+    following:following ?? 0,
     highlights:highlightRows.length,
     stats:basketball?.games ?? 0,
     career:careerRows.length,
@@ -229,7 +234,12 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           {!profile.is_system_account && <ProfileViewInsights profileId={profile.id} />}
 
           <div className={`rcl-profile-status-banner status-${repStatus.key}`}><small>REPUTATION STATUS</small><strong>{repStatus.label}</strong><span>Level {socialLevel} · {repProgress.remaining} REP to Level {socialLevel+1}</span></div>
-          <div className="rcl-profile-metrics mt-5"><span><b>{repLabel}</b><small>REP</small></span><span><b>{followers ?? 0}</b><small>Followers</small></span><span><b>{following ?? 0}</b><small>Following</small></span><span><b>{profile.qualified_referral_count ?? 0}</b><small>Recruited</small></span></div>
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Profile statistics">
+            <div className="flex min-h-20 flex-col justify-center rounded-xl border border-white/10 bg-[#071522] px-4 py-3"><b className="text-xl font-black text-rcl-blue">{repLabel}</b><span className="mt-1 text-xs font-bold uppercase tracking-wider text-white/65">REP</span></div>
+            <Link href={profileHref+'?tab=followers'} aria-label={"View "+name+"\u0027s followers"} className="group flex min-h-20 flex-col justify-center rounded-xl border border-rcl-blue/25 bg-[#0b263c] px-4 py-3 transition hover:border-rcl-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-blue"><b className="text-xl font-black text-white group-hover:text-rcl-blue">{followers ?? 0}</b><span className="mt-1 text-xs font-bold uppercase tracking-wider text-white/70">Followers ↗</span></Link>
+            <Link href={profileHref+'?tab=following'} aria-label={"View "+name+"\u0027s following"} className="group flex min-h-20 flex-col justify-center rounded-xl border border-rcl-blue/25 bg-[#0b263c] px-4 py-3 transition hover:border-rcl-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-blue"><b className="text-xl font-black text-white group-hover:text-rcl-blue">{following ?? 0}</b><span className="mt-1 text-xs font-bold uppercase tracking-wider text-white/70">Following ↗</span></Link>
+            <div className="flex min-h-20 flex-col justify-center rounded-xl border border-white/10 bg-[#071522] px-4 py-3"><b className="text-xl font-black text-white">{profile.qualified_referral_count ?? 0}</b><span className="mt-1 text-xs font-bold uppercase tracking-wider text-white/65">Recruited</span></div>
+          </div>
           <div className="rcl-profile-rep-progress"><i style={{width:progress+'%'}}/><small>Level {socialLevel} · reputation progress</small></div>
           {allBadges.length > 0 && <div className="mt-5 rounded-2xl border border-rcl-blue/20 bg-[#071522]/80 p-3 sm:p-4">
             <div className="mb-2 flex items-center justify-between gap-2"><b className="text-xs font-black uppercase tracking-[.15em] text-white/80">Achievement showcase</b><Link href={profileHref+'?tab=badges'} className="text-[11px] font-black uppercase tracking-wider text-rcl-blue">View all {allBadges.length} →</Link></div>
@@ -283,6 +293,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
       <section className="px-4 py-6">
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
+        {(activeTab==='followers'||activeTab==='following')&&<ProfileFollowDirectory profileId={id} profileName={name} mode={activeTab} />}
         {activeTab==='highlights'&&<ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." />}
         {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
         {activeTab==='career'&&<CareerTab basketball={basketball} rows={careerRows} authorMap={authorMap} />}
