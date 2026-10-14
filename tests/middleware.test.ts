@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
@@ -211,5 +213,36 @@ describe('public launch middleware', () => {
 
   it('post-auth redirect helper preserves a trusted member path', () => {
     expect(getSafePostAuthPath('/messages?thread=123', '/today')).toBe('/messages?thread=123');
+  });
+});
+
+
+describe('share card image regression', () => {
+  const socialFiles = [
+    'src/app/layout.tsx',
+    'src/app/page.tsx',
+    'src/app/faq/page.tsx',
+    'src/app/draft/layout.tsx',
+    'src/app/news/[slug]/page.tsx',
+    'src/app/richmond-basketball-runs/page.tsx',
+    'src/app/games/[id]/page.tsx',
+    'src/app/teams/[slug]/page.tsx',
+    'src/app/players/[id]/page.tsx',
+    'src/app/richmond-basketball-league/page.tsx',
+  ];
+
+  it('points all social sharing fallbacks to the same canonical PNG endpoint', () => {
+    for (const file of socialFiles) {
+      const source = readFileSync(resolve(process.cwd(), file), 'utf8');
+      expect(source, file).toContain('https://www.richcityhoops.com/opengraph-image?v=20261014');
+      expect(source, file).not.toContain('rcl-share-20261002.png');
+    }
+  });
+
+  it('provides the image through a Next.js PNG response instead of the broken static file', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/app/opengraph-image.tsx'), 'utf8');
+    expect(source).toContain("import { ImageResponse } from 'next/og'");
+    expect(source).toContain("export const contentType = 'image/png'");
+    expect(source).toContain('new ImageResponse(');
   });
 });
