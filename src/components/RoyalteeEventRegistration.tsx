@@ -55,7 +55,7 @@ export function RoyalteeEventRegistration({event}:{event:EventSignup}){
   {error&&<p role="alert" className="mt-2 text-xs text-[#ffc1bb]">{error}</p>}
   {note&&<p role="status" className="mt-2 text-xs text-[#b8f5dc]">{note}</p>}
   {authLoading||loading?<p className="mt-3 text-xs text-[#aaccdf]">Checking registration…</p>:
-   active?<div className="mt-3 flex flex-wrap items-center gap-3"><span className="text-xs font-black text-[#b2f2de]">{registration!.status==='checked_in'?'Checked in':'You are registered'} · {registration!.payment_status==='unpaid'?'Payment not marked received':registration!.payment_status==='waived'?'Fee waived':'Paid'}</span>
+   active?<div className="mt-3 flex flex-wrap items-center gap-3"><span className="text-xs font-black text-[#b2f2de]">{registration!.status==='checked_in'?'Checked in':'You are registered'} · {registration!.fee_cents_snapshot===0?'No fee required':registration!.payment_status==='unpaid'?'Payment not marked received':registration!.payment_status==='waived'?'Fee waived':'Paid'}</span>
     {registration!.status==='registered'&&<button type="button" disabled={busy} onClick={()=>void run('withdraw')} className="rounded-lg border border-[#b68b83] px-3 py-2 text-xs font-black text-white disabled:opacity-50">Withdraw</button>}
    </div>:
    !event.registration_open?<p className="mt-3 text-xs font-bold text-[#cbd9e9]">Registration is currently closed.</p>:
