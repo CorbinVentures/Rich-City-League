@@ -17,6 +17,7 @@ import {
   FaUserPlus,
   FaTrophy,
 } from 'react-icons/fa6';
+import { RCHActionGuide } from '@/components/RCHActionGuide';
 import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
@@ -227,11 +228,7 @@ export function BasketballOSToday() {
       {notice && <div className="mb-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] px-5 py-4 text-sm font-semibold text-emerald-100">{notice}</div>}
       {error && <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-400/[.06] px-5 py-4 text-sm text-red-100">{error}</div>}
 
-      <section aria-label="Your next moves" className="mb-7 grid gap-3 sm:grid-cols-3">
-        <Link href="/social?compose=1" className="group rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-5 transition hover:bg-rcl-orange/10"><FaBasketball className="text-xl text-rcl-orange" /><h2 className="mt-3 text-lg font-black">Show the city your game</h2><p className="mt-1 text-xs leading-5 text-white/50">Share a clip, ask a hoops question or introduce yourself.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-rcl-orange">Create a post <FaArrowRight/></span></Link>
-        <Link href="/runs?create=1" className="group rounded-2xl border border-rcl-blue/25 bg-rcl-blue/[.055] p-5 transition hover:bg-rcl-blue/10"><FaLocationDot className="text-xl text-rcl-blue"/><h2 className="mt-3 text-lg font-black">Put together a real run</h2><p className="mt-1 text-xs leading-5 text-white/50">Pick a Richmond court, set the time, invite your group.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-rcl-blue">Set up a run <FaArrowRight/></span></Link>
-        <Link href="/referrals" className="group rounded-2xl border border-white/15 bg-white/[.025] p-5 transition hover:bg-white/[.05]"><FaUserPlus className="text-xl text-white/75"/><h2 className="mt-3 text-lg font-black">Bring your people</h2><p className="mt-1 text-xs leading-5 text-white/50">Invite your friends and unlock rewards when they participate.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/70">Share your link <FaArrowRight/></span></Link>
-      </section>
+      <RCHActionGuide variant="feed" />
 
       <section aria-label="Richmond community activity" className="mb-7 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
         <article className="rounded-3xl border border-rcl-blue/15 bg-[#071522]/65 p-5 sm:p-7">

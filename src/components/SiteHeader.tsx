@@ -83,6 +83,17 @@ export function SiteHeader(){
   const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
+  const sectionLabel=pathname.startsWith('/social/profile')?'Profile'
+    :pathname.startsWith('/social')?'Feed'
+    :pathname.startsWith('/discover')?'Discover'
+    :pathname.startsWith('/runs')?'Runs'
+    :pathname.startsWith('/media')?'RCH TV'
+    :pathname.startsWith('/league')||pathname.startsWith('/games')?'League'
+    :pathname.startsWith('/communities')?'Communities'
+    :pathname.startsWith('/create')?'Create'
+    :pathname.startsWith('/admin')?'Admin'
+    :pathname.startsWith('/today')?'Today'
+    :'Basketball';
 
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
@@ -104,7 +115,7 @@ export function SiteHeader(){
       </nav>
 
       <button type="button" className="rcl-universal-more" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}>
-        <FaBars/><span>More</span>
+        <FaBars/><span>Quick start</span>
       </button>
 
       <div className="rcl-universal-account">
@@ -128,7 +139,7 @@ export function SiteHeader(){
 
     <header className="rcl-universal-topbar rcl-social-world-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCH social home">
-        <span>RCH</span><b>RCH <i>Social</i></b>
+        <span>RCH</span><b>RCH <i>{sectionLabel}</i></b>
       </Link>
 
       <Link href="/search" className="rcl-global-search" aria-label="Search RCH">
@@ -141,7 +152,7 @@ export function SiteHeader(){
         {user&&<MessageQuickMenu userId={user.id} unreadCount={messageUnread}/>} 
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
-        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open RCL navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
+        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Find an action or browse RCH navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
       </div>
     </header>
 

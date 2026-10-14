@@ -16,6 +16,7 @@ import {
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
+import { RCHActionGuide } from '@/components/RCHActionGuide';
 import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
@@ -745,6 +746,7 @@ export default function NetworkHome() {
             {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
           </div>
         </section>
+        {!focusPostId&&<RCHActionGuide variant="feed"/>}
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="rcl-network-left-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
