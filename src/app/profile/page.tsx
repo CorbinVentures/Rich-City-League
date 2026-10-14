@@ -8,16 +8,18 @@ import { FaArrowLeft, FaBasketball, FaBullhorn, FaCamera, FaShieldHalved, FaUser
 import { Container } from '@/components/Container';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { ProfileMusicPicker } from '@/components/ProfileMusicPicker';
+import { RCHCoachFields } from '@/components/RCHCoachFields';
+import { emptyCoachIdentity,type CoachIdentityForm } from '@/lib/rch-coach-identity';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 const roleCards = [
   { id: 'player' as const, icon: FaBasketball, title: 'PLAYER', subtitle: 'Compete & build your stats', detail: 'Create your player identity, follow your career, rankings, badges and team activity.', accent: 'border-rcl-orange/40 bg-rcl-orange/10' },
-  { id: 'official' as const, icon: FaBullhorn, title: 'OFFICIAL', subtitle: 'Coach, referee or league staff', detail: 'Request an official role. League administrators verify access before protected tools unlock.', accent: 'border-rcl-blue/40 bg-rcl-blue/10' },
+  { id: 'coach' as const, icon: FaBullhorn, title: 'COACH', subtitle: 'Free basketball identity', detail: 'Showcase your coaching specialties on your normal RCH profile and join the coaches directory.', accent: 'border-rcl-blue/40 bg-rcl-blue/10' },
   { id: 'fan' as const, icon: FaUserGroup, title: 'FAN', subtitle: 'Follow the city', detail: 'Build your fan identity, collect badges, join fantasy and connect with the RCL community.', accent: 'border-rcl-orange/30 bg-rcl-orange/[.06]' },
 ];
-type SelectedRole = 'fan' | 'player' | 'official';
+type SelectedRole = 'fan' | 'player' | 'coach';
 
 export default function ProfilePage() {
   const { user, profile, signOut, loading: authLoading } = useAuth();
@@ -33,6 +35,7 @@ export default function ProfilePage() {
   const [profileSongUrl, setProfileSongUrl] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'friends' | 'private'>('public');
   const [role, setRole] = useState<SelectedRole>('fan');
+  const [coachIdentity,setCoachIdentity] = useState<CoachIdentityForm>(emptyCoachIdentity);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -45,9 +48,31 @@ export default function ProfilePage() {
     setCoverUrl(profile?.cover_url ?? '');
     setProfileSongUrl(profile?.profile_song_url ?? '');
     setVisibility(profile?.profile_visibility ?? 'public');
-    if (profile?.role === 'player' || profile?.role === 'coach' || profile?.role === 'fan') setRole(profile.role === 'coach' ? 'official' : profile.role);
+    if (profile?.role === 'player' || profile?.role === 'coach' || profile?.role === 'fan') setRole(profile.role === 'coach' ? 'coach' : profile.role);
   }, [profile]);
 
+  useEffect(()=>{
+    if(!supabase||!user)return;
+    let active=true;
+    const db=supabase as unknown as SupabaseClient;
+    void Promise.all([
+      db.from('rch_coach_identities').select('*').eq('profile_id',user.id).maybeSingle(),
+      db.from('profile_roles').select('role,status').eq('profile_id',user.id).eq('role','coach').maybeSingle(),
+    ]).then(([identity,roleResult])=>{
+      if(!active)return;
+      if(identity.data){
+        const row=identity.data as CoachIdentityForm;
+        setCoachIdentity({
+          headline:row.headline??'',organization:row.organization??'',city:row.city??'',
+          years_experience:row.years_experience??null,coaching_level:row.coaching_level??'',
+          specialties:Array.isArray(row.specialties)?row.specialties:[],
+          availability:row.availability??'not_listed',published:row.published??false
+        });
+        setRole('coach');
+      }else if(roleResult.data)setRole('coach');
+    }).catch(()=>{/* Existing member profiles work even when optional fields cannot load. */});
+    return()=>{active=false};
+  },[supabase,user]);
   const uploadProfileImage = async (kind: 'avatar'|'cover', file?: File) => {
     if (!file || !supabase || !user) return;
     setError('');
@@ -74,8 +99,12 @@ export default function ProfilePage() {
     const writeClient = supabase as unknown as SupabaseClient;
     const profileResult = await writeClient.from('profiles').update({ display_name: displayName.trim() || null, bio: bio.trim() || null, location: location.trim() || null, avatar_url: avatarUrl.trim() || null, cover_url: coverUrl.trim() || null, profile_song_url: profileSongUrl.trim() || null, profile_visibility: visibility }).eq('id', user.id);
     if (profileResult.error) { setError('Unable to save your profile details.'); setSaving(false); return; }
+    if(role==='coach'){
+      const coachSave=await writeClient.from('rch_coach_identities').upsert({profile_id:user.id,...coachIdentity},{onConflict:'profile_id'});
+      if(coachSave.error){setError(coachSave.error.message || 'Could not save coaching details.');setSaving(false);return;}
+    }
     if (isPrivileged) { setSaved(true); setSaving(false); return; }
-    const requestedRole = role === 'official' ? 'coach' : role;
+    const requestedRole = role;
     const existingRole = await writeClient.from('profile_roles').select('role,status').eq('profile_id', user.id).eq('role', requestedRole).maybeSingle();
     if (existingRole.error) { setError(existingRole.error.message || 'Unable to verify your role.'); setSaving(false); return; }
     if (!existingRole.data) {
@@ -95,7 +124,7 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
-  const statusMessage = error || (saved ? isPrivileged ? 'Profile saved. Your league authorization is unchanged.' : role === 'fan' ? 'Profile saved. Your fan identity is active.' : 'Profile saved. Your role request is pending league verification.' : '');
+  const statusMessage = error || (saved ? isPrivileged ? 'Profile saved. Your league authorization is unchanged.' : role === 'fan' ? 'Profile saved. Your fan identity is active.' : role === 'coach' ? 'RCH coach details saved to your regular member profile. League staff access is separate.' : 'Profile saved. Your basketball identity is updated.' : '');
 
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero
@@ -126,7 +155,7 @@ export default function ProfilePage() {
         </section>
 
         <section className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-5 sm:p-7">
-          <div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Identity type</p><h2 className="mt-1 font-display text-2xl font-black uppercase">How do you participate?</h2><p className="mt-2 text-sm leading-6 text-white/40">Player and official roles require league verification. Admin/staff authorization cannot be changed here.</p></div>
+          <div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Identity type</p><h2 className="mt-1 font-display text-2xl font-black uppercase">How do you participate?</h2><p className="mt-2 text-sm leading-6 text-white/40">Coach identity is free, and does not grant official RCL coaching or staff access. Admin/staff authorization cannot be changed here.</p></div>
           <div className={`mt-5 grid gap-3 md:grid-cols-3 ${isPrivileged ? 'pointer-events-none opacity-45' : ''}`}>{roleCards.map(({id,icon:Icon,title,subtitle,detail,accent}) => <button type="button" key={id} onClick={() => setRole(id)} className={`rounded-2xl border p-4 text-left transition ${role === id ? accent : 'border-white/10 bg-black/20 hover:border-rcl-blue/25'}`}><div className="flex items-center justify-between"><Icon className={role === id ? 'text-rcl-orange' : 'text-white/35'}/><span className={`h-2.5 w-2.5 rounded-full ${role === id ? 'bg-rcl-orange' : 'bg-white/10'}`}/></div><p className="mt-5 font-display text-lg font-black">{title}</p><p className="mt-1 text-xs font-semibold text-white/70">{subtitle}</p><p className="mt-3 text-xs leading-5 text-white/40">{detail}</p></button>)}</div>
           {isAdmin && <div className="mt-4 flex gap-3 rounded-2xl border border-rcl-blue/20 bg-rcl-blue/5 p-4 text-sm"><FaShieldHalved className="mt-1 shrink-0 text-rcl-blue"/><p><strong className="text-rcl-blue">ADMIN ACCESS</strong><br/><span className="text-white/50">Administrator permissions are controlled by league authorization and cannot be granted from this form.</span></p></div>}
         </section>
@@ -138,6 +167,7 @@ export default function ProfilePage() {
           <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Location<input value={location} onChange={e => setLocation(e.target.value)} maxLength={100} placeholder="Richmond, VA" className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label><label className="block text-xs font-black uppercase tracking-wider text-white/40">Profile visibility<select value={visibility} onChange={e => setVisibility(e.target.value as 'public'|'friends'|'private')} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></label></div>
         </section>
 
+        {role==='coach'&&<RCHCoachFields value={coachIdentity} onChange={setCoachIdentity} profileVisibility={visibility}/>}
         <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
           <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile music</p>
           <h2 className="mt-1 font-display text-2xl font-black uppercase">Choose your profile song</h2>
