@@ -41,6 +41,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Discover Basketball',href:'/discover',icon:FaCompass},
       {label:'The Commonwealth Cup',href:'/commonwealth',icon:FaTrophy},
       {label:'Players',href:'/players',icon:FaUser},
+      {label:'Coaches',href:'/coaches',icon:FaUser},
       {label:'Teams',href:'/teams',icon:FaUsers},
       {label:'Organizations',href:'/organizations',icon:FaPeopleGroup},
       {label:'Virginia Network',href:'/network',icon:FaGlobe},
@@ -88,7 +89,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
   },
 ];
 
-const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends'];
+const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends','/coaches'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const PROFILE=['/social/profile','/profile'];
 const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
