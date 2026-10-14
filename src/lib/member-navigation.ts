@@ -56,6 +56,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'The premier league and flagship competition property on RCL',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Games',href:'/games',icon:FaBasketball},
       {label:'Standings',href:'/standings',icon:FaChartSimple},
       {label:'Stats',href:'/stats',icon:FaChartSimple},
@@ -92,7 +93,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
 const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends','/coaches'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const PROFILE=['/social/profile','/profile'];
-const LEAGUE=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
+const LEAGUE=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isMemberNavigationActive(pathname:string,href:string){
   // A profile is a /social/* route, but only Profile should appear selected there.

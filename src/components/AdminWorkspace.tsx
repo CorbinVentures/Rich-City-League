@@ -20,6 +20,7 @@ import {
   FaScrewdriverWrench,
   FaTrophy,
   FaFilm,
+  FaUsers,
 } from 'react-icons/fa6';
 
 type AdminNavGroup = {
@@ -34,6 +35,7 @@ const groups: AdminNavGroup[] = [
       { label: 'Overview', href: '/admin', icon: FaGauge, description: 'Dashboard, users, rosters, game stats and moderation' },
       { label: 'Site Control', href: '/admin/control-center', icon: FaGear, description: 'Platform controls, publishing and notifications' },
       { label: 'Governance', href: '/admin/governance', icon: FaShieldHalved, description: 'Staff permissions and governance' },
+      { label: 'Staff Approvals', href: '/admin/staff', icon: FaUsers, description: 'Approve and revoke RCL staff and franchise roles' },
     ],
   },
   {

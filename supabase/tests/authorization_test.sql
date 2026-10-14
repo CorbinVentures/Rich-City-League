@@ -1,6 +1,6 @@
 begin;
 
-select plan(22);
+select plan(35);
 
 set role postgres;
 
@@ -74,8 +74,31 @@ select throws_ok($$
           null, 'Anonymous', 'Applicant', 'anonymous@example.test')
 $$, '42501', null, 'anonymous users cannot create registrations');
 
+select throws_ok($rolecheck$select * from public.rcl_staff_applications$rolecheck$,'42501',null,
+  'anonymous visitors cannot inspect staff applications');
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
+select lives_ok($rolecheck$
+  insert into public.rcl_staff_applications (profile_id,role_code,team_id,motivation)
+  values(auth.uid(),'franchise_owner','51111111-1111-1111-1111-111111111111','Test interest in franchise')
+$rolecheck$,'members can request a franchise without acquiring permission');
+select is((select count(*) from public.rcl_staff_applications where profile_id=auth.uid()),1::bigint,
+ 'members can read their own pending role application');
+select throws_ok($rolecheck$
+  select public.rcl_review_staff_application(
+   (select id from public.rcl_staff_applications where profile_id=auth.uid() and role_code='franchise_owner'),
+   'approved','not authorized')
+$rolecheck$,'P0001','Administrator approval required',
+ 'members cannot approve their own franchise applications');
+select throws_ok($rolecheck$
+  insert into public.rcl_staff_assignments(profile_id,role_code,team_id,approved_by)
+  values(auth.uid(),'franchise_owner','51111111-1111-1111-1111-111111111111',auth.uid())
+$rolecheck$,'42501',null,'ordinary members cannot self-assign franchise ownership');
+select is(public.rcl_has_staff_assignment('franchise_owner','51111111-1111-1111-1111-111111111111'::uuid),false,
+ 'an unapproved franchise application has zero owner access');
+select is(public.rcl_has_staff_assignment('franchise_owner'),false,
+ 'teamless franchise ownership checks are never authorized');
 select throws_ok($$
   update public.profiles set is_system_account=true where id=auth.uid()
 $$, '42501', 'Only staff can change system-account identity',
@@ -176,6 +199,31 @@ select lives_ok($$
   update public.profiles set role = 'coach'
   where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 $$, 'administrators can assign profile roles');
+
+select lives_ok($rolecheck$
+  select public.rcl_review_staff_application(
+   (select id from public.rcl_staff_applications where profile_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' and role_code='franchise_owner' and status='pending'),
+   'approved','Team approved')
+$rolecheck$,'administrators can activate a specific franchise assignment');
+select is((select count(*) from public.rcl_staff_assignments where profile_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' and role_code='franchise_owner' and active),1::bigint,
+ 'an approved franchise creates one active scoped owner assignment');
+
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
+select is(public.rcl_has_staff_assignment('franchise_owner','51111111-1111-1111-1111-111111111111'::uuid),true,
+ 'approved owner access is scoped to their exact team');
+select is(public.rcl_has_staff_assignment('franchise_owner'),false,
+ 'approved owner still has no global owner permission');
+
+select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select lives_ok($rolecheck$
+ select public.rcl_revoke_staff_assignment(
+  (select id from public.rcl_staff_assignments where profile_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' and role_code='franchise_owner' and active)
+ )
+$rolecheck$,'administrator can revoke an approved franchise role');
+
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
+select is(public.rcl_has_staff_assignment('franchise_owner','51111111-1111-1111-1111-111111111111'::uuid),false,
+ 'revocation immediately removes approved franchise access');
 
 select * from finish();
 rollback;

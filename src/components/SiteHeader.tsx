@@ -92,6 +92,7 @@ export function SiteHeader(){
     :pathname.startsWith('/communities')?'Communities'
     :pathname.startsWith('/create')?'Create'
     :pathname.startsWith('/admin')?'Admin'
+    :pathname.startsWith('/staff')?'Staff HQ'
     :pathname.startsWith('/today')?'Today'
     :'Basketball';
 
