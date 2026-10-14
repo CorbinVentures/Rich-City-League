@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {FaArrowRight,FaBasketball,FaCircleCheck,FaPeopleGroup} from 'react-icons/fa6';
 import { Container } from '@/components/Container';
-import { getCoachesList, getPublicClient } from '@/lib/public-data';
+import { getCoachesList, getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { CoachesDirectory } from '@/components/PublicDirectory';
 import { RCHCoachesNetwork,type RCHDirectoryCoach } from '@/components/RCHCoachesNetwork';
 
@@ -14,19 +14,21 @@ export const metadata={
 
 export default async function CoachesPage(){
  const client=getPublicClient();
- const [official,memberResult]=await Promise.all([
+ const [official,memberResult,snapshot]=await Promise.all([
    getCoachesList(),
    client
      ? (client as any).from('rch_coach_identities')
         .select('profile_id,headline,organization,city,years_experience,coaching_level,specialties,availability,published,profile:profiles!inner(id,display_name,username,avatar_url,location)')
         .eq('published',true).order('updated_at',{ascending:false}).limit(250)
      : Promise.resolve({data:[],error:null}),
+   getLeagueSnapshot(),
  ]);
  if(memberResult.error)console.error('RCH coach directory load failed:',memberResult.error.message);
  const coaches=(memberResult.data??[]) as RCHDirectoryCoach[];
  const officialItems=official.map((coach:any)=>{
   const profile=coach.profile;
-  return {id:coach.id,profileId:coach.profile_id,name:profile?.display_name??([profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL coach'),title:coach.title||'Coach',team:coach.team?.name??null,teamSlug:coach.team?.slug??null,wins:null,losses:null};
+  const record=snapshot.standings.find(standing=>standing.team_id===coach.team_id);
+  return {id:coach.id,profileId:coach.profile_id,name:profile?.display_name??([profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL coach'),title:coach.title||'Coach',team:coach.team?.name??null,teamSlug:coach.team?.slug??null,wins:record?.wins??null,losses:record?.losses??null};
  });
  return <main className="min-h-screen bg-[#071725] pb-28 text-white">
   <section className="border-b border-[#315a7b] bg-[radial-gradient(ellipse_at_88%_0%,#17466e_0%,transparent_57%),linear-gradient(140deg,#081b2e,#102f4d)]">
