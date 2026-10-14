@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {RCL_STAFF_ROLES,isRCLStaffRole,roleInfo} from '../src/lib/rcl-staff-roles';
 
-const sql=readFileSync(join(process.cwd(),'supabase/migrations/20261014030500_rcl_staff_assignments.sql'),'utf8');
+const sql=readFileSync(join(process.cwd(),'supabase/migrations/20261014020745_rcl_staff_assignments.sql'),'utf8');
 describe('Rich City League scoped staff roles',()=>{
  it('defines six differentiated roles including approval-required franchise owners',()=>{
   expect(RCL_STAFF_ROLES.map(r=>r.id)).toEqual([
