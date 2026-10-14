@@ -65,7 +65,7 @@ export default async function RoyalteePage() {
         </div>
         <div className="royaltee-hero-art">
           <div className="royaltee-art-orbit" aria-hidden="true"/>
-          <img src="/brand/royaltee-logo.webp" alt="Royaltee Steppas and Cheerleading official blue, silver and orange crown logo featuring adult cheer and step performers" width="640" height="640" className="royaltee-official-logo" fetchPriority="high"/>
+          <img src="/brand/royaltee-logo.avif" alt="Royaltee Steppas and Cheerleading official blue, silver and orange crown logo featuring adult cheer and step performers" width="640" height="640" className="royaltee-official-logo" fetchPriority="high"/>
           <div className="royaltee-art-label"><FaStar aria-hidden="true"/><span>CHEER &nbsp;•&nbsp; STEP &nbsp;•&nbsp; PERFORM</span><FaStar aria-hidden="true"/></div>
         </div>
       </div>
