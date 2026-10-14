@@ -7,6 +7,7 @@ import {FaArrowRight,FaCheck,FaClock,FaLock,FaShieldHalved,FaXmark} from 'react-
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 import {roleInfo,RCL_STAFF_ROLES} from '@/lib/rcl-staff-roles';
+import {StaffDirectAssign} from '@/components/StaffDirectAssign';
 type Application={id:string;profile_id:string;role_code:string;team_id:string|null;status:string;motivation:string;created_at:string;review_note:string};
 type Assignment={id:string;profile_id:string;role_code:string;team_id:string|null;active:boolean;assigned_at:string};
 type Person={id:string;display_name:string|null;username:string|null;email?:string};
@@ -86,6 +87,8 @@ export function StaffApprovalsDesk(){
     ['Waiting for review',pending.length],['Active roles',assignments.length],['Approved franchise owners',owners.length]
    ].map(([label,count])=><div className="rounded-2xl border border-[#426f92] bg-[#102e49] p-4" key={label}><p className="text-xs font-black uppercase tracking-wider text-[#c1dbf0]">{label}</p><strong className="mt-2 block text-3xl font-black">{count}</strong></div>)}</div>
    {(error||success)&&<div role={error?'alert':'status'} className={'rounded-xl border p-4 text-sm '+(error?'border-[#b56975] bg-[#402632] text-[#ffe0e5]':'border-[#589782] bg-[#163d32] text-[#b9f4d7]')}>{error||success}</div>}
+   {db&&user&&<StaffDirectAssign db={db} teams={teams} assignments={assignments} adminId={user.id} onAssigned={load}/>}
+
    <section className="rounded-2xl border border-[#456d90] bg-[#0d2842] p-5">
     <div className="flex flex-wrap items-center justify-between gap-4"><h2 className="text-xl font-black">Applications</h2>
      <div className="flex flex-wrap items-center gap-2">
