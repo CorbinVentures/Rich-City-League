@@ -1,3 +1,4 @@
+import {validateStoryboard,type StoryFrame} from './storyboard';
 /** Deterministic production templates: suggestions, never invented reporting. */
 export type StudioGame = {id:string; home_team_id:string; away_team_id:string; scheduled_at:string; status:string; home_score:number|null; away_score:number|null; season_id?:string|null; venue_id?:string|null};
 export type TaskStatus = 'planned'|'in_progress'|'review'|'approved'|'released'|'blocked'|'skipped';
@@ -5,7 +6,7 @@ export type StudioTask = {id:string; title:string; hours:number; objective:strin
 export type Story = {id:string; title:string; premise:string; evidence:string; role:'main'|'supporting'; scores:number[]};
 export type Talent = {id:string; name:string; kind:'player'|'team'; hook:string; background:string; signature:string; boundaries:string; permission:string; next_step:string};
 export type Cue = {id:string; label:string; timing:string; owner:string; asset:string; backup:string; ready:boolean};
-export type StudioDocument = {version:1; brief:{producer:string; objective:string; target:string; ticket_url:string; notes:string}; stories:Story[]; tasks:StudioTask[]; rundown:Cue[]; talent:Talent[]; branches:Record<'home_win'|'away_win'|'standout'|'postponed'|'sensitive',string>; impact:{tickets:string; follows:string; views:string; completed_views:string; merchandise:string; evidence:string; worked:string; improve:string; experiment:string}};
+export type StudioDocument = {version:1; storyboard?:StoryFrame[]; brief:{producer:string; objective:string; target:string; ticket_url:string; notes:string}; stories:Story[]; tasks:StudioTask[]; rundown:Cue[]; talent:Talent[]; branches:Record<'home_win'|'away_win'|'standout'|'postponed'|'sensitive',string>; impact:{tickets:string; follows:string; views:string; completed_views:string; merchandise:string; evidence:string; worked:string; improve:string; experiment:string}};
 export type Episode = {id:string;game_id:string;revision:number;document:StudioDocument;updated_at:string};
 export const scoreLabels=['Stakes','Fan connection','Evidence','Production access','Payoff'];
 export const taskStatuses:TaskStatus[]=['planned','in_progress','review','approved','released','blocked','skipped'];
@@ -19,7 +20,7 @@ const beats = [
  ['next','The next chapter',48,'Follow the next event','Explain what the result changes. Select the appropriate outcome branch, confirm the next fixture, and review campaign performance.'],
 ] as const;
 export function createStudioDocument():StudioDocument {
- return {version:1,brief:{producer:'',objective:'Build attendance and returning fans',target:'',ticket_url:'',notes:''},stories:[],talent:[],
+ return {version:1,storyboard:[],brief:{producer:'',objective:'Build attendance and returning fans',target:'',ticket_url:'',notes:''},stories:[],talent:[],
  tasks:beats.map(([id,title,hours,objective,instructions])=>({id,title,hours,objective,instructions,owner:'',status:'planned',asset:'',blocker:'',checks:{facts:false,permissions:false,captions:false,links:false},approved_by:'',approved_at:'',released_at:''})),
  rundown:[['recap','Previously in Rich City','Before warmups'],['intro','Team & player introductions','Before tip-off'],['half','Fan predictions & halftime feature','Halftime'],['reaction','Postgame interview & next event','After final buzzer']].map(([id,label,timing])=>({id,label,timing,owner:'',asset:'',backup:'Announcer reads the approved brief; omit unavailable media.',ready:false})),
  branches:{home_win:'Confirm the home result. Capture the turning point, winner reaction and next challenge.',away_win:'Confirm the away result. Capture the breakthrough, home response and next challenge.',standout:'Follow the actual standout, even if they were not the planned featured player.',postponed:'Pause game promotions. Confirm the new date and ticket guidance before updating fans.',sensitive:'Pause promotional framing. Verify facts and permissions with league leadership before coverage.'},
@@ -53,6 +54,7 @@ export function storySuggestions(game:StudioGame,history:StudioGame[],names:Reco
  {title:'Meet the people behind the jersey',premise:'Introduce an available player and the goal they are working toward.',evidence:''}];
 }
 export function validateStudio(doc:StudioDocument){
+ const boardProblem=validateStoryboard(doc.storyboard||[],doc);if(boardProblem)return boardProblem;
  if(doc.stories.filter(s=>s.role==='main').length>1||doc.stories.filter(s=>s.role==='supporting').length>2)return 'Choose one main story and at most two supporting stories.';
  for(const s of doc.stories)if(!s.title.trim()||!s.premise.trim())return 'Every story needs a title and premise.';
  for(const t of doc.tasks){if(t.status==='blocked'&&!t.blocker.trim())return 'Explain blocked assignments.';if(t.status==='skipped'&&!t.blocker.trim())return 'Explain why an assignment was skipped.';if(['approved','released'].includes(t.status)&&approvalProblems(t,doc).length)return `${t.title}: ${approvalProblems(t,doc).join('. ')}.`;}
