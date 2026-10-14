@@ -95,7 +95,7 @@ export function AdminWorkspace() {
             <div className="rch-admin-nav-heading">{group.label}</div>
             <div className="rch-admin-nav-links">
               {group.items.map(({ label, href, icon: Icon, description }) => {
-                const active = href === '/admin'
+                const active = href === '/admin' || href === '/admin/staff'
                   ? pathname === href
                   : pathname === href || pathname.startsWith(href + '/');
                 return (
