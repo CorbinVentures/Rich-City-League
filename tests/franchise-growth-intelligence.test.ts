@@ -32,7 +32,7 @@ describe('Franchise Growth Intelligence',()=>{
   expect(migration).toContain("stage <> 'won'");
   expect(migration).toContain('signed_reference');
   expect(migration).toContain('length(trim(evidence_reference))>=6');
-  expect(growth).toContain('not automatically ad metrics');
+  expect(growth).toContain('not automatic ad metrics');
   expect(growth).toContain('No messages were sent');
  });
  it('embeds growth center into the existing admin and franchise owner workspaces',()=>{
