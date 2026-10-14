@@ -5,6 +5,7 @@ import type {SupabaseClient} from '@supabase/supabase-js';
 import {FaArrowRight,FaBasketball,FaBuilding,FaCalendarDays,FaLock} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import {CommandGrowthHQ} from '@/components/command/CommandGrowthHQ';
 type Assignment={id:string;team_id:string|null;role_code:string;active:boolean};
 type Team={id:string;name:string;city:string|null;slug:string|null;logo_url:string|null;description:string|null};
 type Game={id:string;home_team_id:string;away_team_id:string;scheduled_at:string;status:string};
@@ -105,6 +106,7 @@ export function StaffFranchiseOffice({initialTeamId=''}:{initialTeamId?:string})
        <span><strong className="block text-sm">{gameName(g)}</strong><small className="mt-1 block text-xs text-[#c0d7e9]">{new Date(g.scheduled_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</small></span><FaArrowRight className="text-[#a8d8fa]"/>
       </Link>)}</div>:<p className="mt-4 text-sm text-[#c0d3e5]">No scheduled upcoming games are published for this team yet.</p>}
      </section>
+     <CommandGrowthHQ teamId={team.id} teamName={team.name} isAdmin={isAdmin}/>
      <section className="rounded-xl border border-[#456785] bg-[#0b253b] p-5">
       <p className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#a1d5ff]"><FaLock/> Financial controls</p>
       <p className="mt-2 text-sm leading-6 text-[#caddeb]">{isAdmin?'Your administrator account can access verified franchise financial information in the Command Center. This inspection does not create an owner assignment.':'Financial statements, valuation assumptions and sensitive operations remain in the administrator-controlled Command Center until separate team-scoped permissions are implemented. Approval does not grant global accounting or admin access.'}</p>

@@ -4,6 +4,7 @@ import type {SupabaseClient} from '@supabase/supabase-js';
 import {getSupabaseClient} from '@/lib/supabase';
 import {labelFor} from '@/lib/command/templates';
 import {CommandTerritories} from './CommandTerritories';
+import {CommandGrowthHQ} from './CommandGrowthHQ';
 import {FaArrowTrendUp,FaBasketball,FaBuilding,FaChartColumn,FaCircleExclamation,FaPeopleGroup,FaScaleBalanced} from 'react-icons/fa6';
 
 type Row=Record<string,any>;
@@ -100,6 +101,7 @@ export function CommandFranchiseHQ(){
  return <div className="cmd-franchise-intelligence">
   <section className="cmd-info"><strong>Franchise intelligence is grounded in recorded transactions and game reports.</strong> RCL teams share a platform, but event money and franchise-owned money are not always the same. The value calculator is a documented planning scenario, <b>not</b> an independently verified market appraisal.</section>
   <CommandTerritories selectedTeamId={selected} onSelectTeam={setSelected}/>
+  {team&&<CommandGrowthHQ teamId={selected} teamName={team.name} isAdmin/>}
   <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">COMMONWEALTH FRANCHISE INTELLIGENCE</p><h3>League Franchise Portfolio</h3></div><span className="cmd-count">{teams.length} active franchises</span></div>
   <div className="cmd-franchise-selector"><label>FIND OR SELECT A FRANCHISE<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Filter team or city…" type="search"/></label><select aria-label="Choose a franchise" value={selected} onChange={e=>{setSelected(e.target.value);setEditing(false);setError('');setNotice('')}}>{top.map(t=><option key={t.id} value={t.id}>{t.name} · {t.city||'Virginia'}</option>)}</select></div>
   </section>
