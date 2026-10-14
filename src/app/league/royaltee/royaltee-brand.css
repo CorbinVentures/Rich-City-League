@@ -1,0 +1,178 @@
+/* Royaltee partner world — intentionally isolated from RCH's global brand. */
+.royaltee-site { --rt-blue:#139bff; --rt-orange:#ff801e; --rt-ice:#e5f5ff; --rt-silver:#aebcd0; position:relative; isolation:isolate; min-height:100vh; overflow:hidden; background:#02060e; color:#f8fbff; font-family:Arial,Helvetica,sans-serif; }
+.royaltee-site * { box-sizing:border-box; }
+.royaltee-site a { text-decoration:none; }
+.royaltee-wrap { width:min(100% - 40px,1320px); margin-inline:auto; }
+.royaltee-site a:focus-visible { outline:3px solid #a3dcff; outline-offset:4px; }
+.royaltee-nav-shell { position:relative; z-index:10; background:#02050b; border-bottom:1px solid rgba(30,163,255,.5); box-shadow:0 3px 22px rgba(0,138,255,.18); }
+.royaltee-nav { min-height:74px; display:flex; align-items:center; justify-content:space-between; gap:22px; }
+.royaltee-brand { display:inline-flex; align-items:center; gap:11px; color:white; flex-shrink:0; }
+.royaltee-brand-crown { width:43px; height:43px; display:grid; place-items:center; font-size:25px; color:var(--rt-orange); border:1px solid rgba(255,130,36,.45); border-radius:12px; background:radial-gradient(circle at top,#243e60,#0a111e 80%); box-shadow:0 0 16px rgba(255,107,10,.22); }
+.royaltee-brand strong { display:block; font-size:18px; line-height:1.02; letter-spacing:.1em; font-weight:1000; color:#d7f3ff; text-shadow:1px 2px 0 #1f73aa; }
+.royaltee-brand small { display:block; margin-top:5px; color:#ffb27b; font-size:8px; letter-spacing:.13em; font-weight:900; }
+.royaltee-nav-links { display:flex; gap:clamp(12px,2vw,27px); align-items:center; flex-wrap:wrap; justify-content:center; }
+.royaltee-nav-links a { color:#d3e1f2; font-weight:900; font-size:11px; text-transform:uppercase; letter-spacing:.1em; transition:color .2s; white-space:nowrap; }
+.royaltee-nav-links a:hover { color:#ffae72; }
+.royaltee-rcl-link { border:1px solid #e47b31; display:flex; gap:9px; padding:9px 14px; align-items:center; color:#ffbd80; border-radius:8px; font-weight:900; font-size:11px; letter-spacing:.05em; white-space:nowrap; }
+.royaltee-rcl-link svg { font-size:19px; }
+.royaltee-rcl-link small { display:block; text-align:center; font-size:8px; margin-top:2px; letter-spacing:.14em; color:#8bceff; }
+.royaltee-hero { position:relative; min-height:650px; background:radial-gradient(ellipse at 75% 42%,#123c70 0,transparent 42%),radial-gradient(ellipse at 18% 15%,rgba(20,143,242,.19),transparent 34%),linear-gradient(125deg,#02050b 15%,#061426 65%,#07060c); border-bottom:2px solid #0e91eb; overflow:hidden; }
+.royaltee-hero:before,.royaltee-hero:after { content:''; position:absolute; pointer-events:none; width:65%; height:2px; opacity:.8; box-shadow:0 0 20px currentColor; }
+.royaltee-hero:before { top:55px; left:-10%; transform:rotate(-16deg); background:linear-gradient(90deg,transparent,#009dfd,transparent); color:#009dfd; }
+.royaltee-hero:after { bottom:18%; right:-25%; transform:rotate(-17deg); background:linear-gradient(90deg,transparent,#ff711c,transparent); color:#ff711c; }
+.royaltee-hero-glow { position:absolute; inset:0; pointer-events:none; opacity:.64; background:radial-gradient(circle at 49% 13%,#fff 0,rgba(60,173,255,.7) 1px,transparent 4px),radial-gradient(circle at 93% 32%,#fff 0,rgba(250,118,34,.7) 2px,transparent 5px),radial-gradient(circle at 20% 72%,#fff 0,rgba(44,169,255,.7) 2px,transparent 5px),radial-gradient(circle at 78% 90%,#fff 0,rgba(44,169,255,.7) 1px,transparent 4px); }
+.royaltee-hero-layout { position:relative; display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); align-items:center; min-height:600px; gap:5px; padding-block:50px 70px; }
+.royaltee-hero-copy { position:relative; z-index:2; max-width:650px; }
+.royaltee-kicker { display:inline-flex; align-items:center; gap:10px; color:#ffac70; font-size:11px; line-height:1.5; font-weight:900; letter-spacing:.19em; text-transform:uppercase; }
+.royaltee-kicker svg { color:#ffa452; }
+.royaltee-hero h1 { margin:26px 0 0; font-size:clamp(45px,5.3vw,83px); font-weight:1000; line-height:.95; letter-spacing:-.075em; font-stretch:condensed; text-transform:uppercase; color:#f5f9ff; text-shadow:0 3px 15px rgba(0,0,0,.85); }
+.royaltee-hero h1 span { display:block; margin-top:7px; color:#ff862d; text-shadow:2px 3px 0 #713406,0 0 31px rgba(251,106,30,.2); }
+.royaltee-hero-strap { margin:26px 0 0; color:#b4deff; font-size:clamp(19px,2.2vw,29px); font-weight:900; }
+.royaltee-hero-description { color:#bdd3e9; font-size:15px; line-height:1.85; margin:17px 0 0; max-width:590px; }
+.royaltee-actions { display:flex; gap:12px; margin-top:27px; flex-wrap:wrap; }
+.royaltee-cta { display:inline-flex; min-height:48px; justify-content:center; align-items:center; gap:12px; border-radius:8px; padding:12px 22px; letter-spacing:.08em; font-weight:950; font-size:11px; line-height:1.25; text-align:center; transition:transform .2s,box-shadow .2s,border-color .2s; }
+.royaltee-cta:hover { transform:translateY(-2px); }
+.royaltee-cta-primary { color:#140901; background:linear-gradient(180deg,#ffc071,#ff861d 65%,#db5406); border:1px solid #ffc078; box-shadow:0 5px 17px rgba(255,105,7,.26),inset 0 1px 0 rgba(255,255,255,.64); }
+.royaltee-cta-outline { color:#f0f8ff; border:1px solid #77caff; background:linear-gradient(145deg,rgba(19,91,153,.27),rgba(0,0,0,.47)); box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+.royaltee-cta-outline:hover { border-color:#ffae72; }
+.royaltee-age-tag { display:flex; gap:8px; align-items:center; font-size:11px; font-weight:700; color:#a7c8dd; margin:17px 0 0; }
+.royaltee-hero-art { position:relative; display:grid; place-items:center; min-width:0; }
+.royaltee-art-orbit { position:absolute; inset:8% 4%; border:2px solid rgba(30,157,255,.2); border-radius:50%; box-shadow:0 0 65px rgba(18,145,254,.17),inset 0 0 75px rgba(255,115,24,.1); }
+.royaltee-official-logo { position:relative; z-index:1; width:min(100%,680px); height:auto; object-fit:contain; filter:drop-shadow(0 8px 35px rgba(0,165,255,.25)); -webkit-mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); }
+.royaltee-art-label { position:absolute; bottom:13%; left:10%; right:10%; display:flex; justify-content:center; align-items:center; gap:14px; font-size:11px; font-weight:900; letter-spacing:.15em; color:#cdeeff; text-shadow:0 0 12px #000; z-index:2; }
+.royaltee-art-label svg { color:#ff9747; }
+.royaltee-hero-ticker { position:relative; z-index:3; min-height:50px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:clamp(11px,2.4vw,35px); padding:13px 20px; color:#e9f8ff; background:linear-gradient(90deg,#0b2d53,#050c16 40%,#1b2b42 75%,#0a2948); border-top:1px solid rgba(16,158,255,.5); font-size:10px; font-weight:1000; letter-spacing:.17em; }
+.royaltee-hero-ticker svg { color:#ff832c; font-size:8px; }
+.royaltee-section { position:relative; padding:84px 0; }
+.royaltee-about { background:radial-gradient(ellipse at 20% 30%,rgba(5,89,174,.2),transparent 44%),#030910; }
+.royaltee-about-layout { display:grid; gap:55px; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); align-items:center; }
+.royaltee-display { margin:12px 0 0; font-size:clamp(35px,4vw,61px); line-height:1.01; letter-spacing:-.045em; font-weight:1000; text-transform:uppercase; color:#f6f8fb; text-shadow:0 3px 11px rgba(0,0,0,.58); }
+.royaltee-display span { color:#ff8c32; display:block; }
+.royaltee-body { max-width:620px; margin:25px 0; font-size:15px; line-height:1.85; color:#bcd3e7; }
+.royaltee-values { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.royaltee-values article { border:1px solid #205b92; background:linear-gradient(165deg,#0c2b4a,#05101e); border-radius:13px; text-align:center; padding:28px 13px; min-height:230px; box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 15px 30px rgba(0,0,0,.2); }
+.royaltee-values svg { color:#8fcfff; font-size:40px; filter:drop-shadow(0 3px 6px rgba(19,134,241,.35)); }
+.royaltee-values article:nth-child(2) svg { color:#ff9c5c; }
+.royaltee-values h3 { margin:23px 0 0; font-weight:1000; font-size:13px; }
+.royaltee-values p { color:#abc5db; font-size:12px; line-height:1.6; }
+.royaltee-programs-section { background:linear-gradient(175deg,#02060c,#071b31 48%,#030910); border-block:1px solid #144576; }
+.royaltee-section-heading { display:flex; justify-content:space-between; gap:25px; align-items:end; margin-bottom:32px; }
+.royaltee-section-heading>p { max-width:350px; color:#a7c4dd; font-size:13px; line-height:1.8; }
+.royaltee-program-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.royaltee-program-card { overflow:hidden; border-radius:16px; border:1px solid rgba(51,168,248,.65); background:linear-gradient(140deg,#071d33,#030914); box-shadow:0 20px 50px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1); }
+.royaltee-step-card { border-color:rgba(250,132,47,.67); }
+.royaltee-program-visual { position:relative; height:260px; overflow:hidden; background:radial-gradient(ellipse at 50% 95%,rgba(20,136,245,.5),transparent 70%),#02070e; }
+.royaltee-step-card .royaltee-program-visual { background:radial-gradient(ellipse at 50% 95%,rgba(255,109,24,.35),transparent 70%),#0a090d; }
+.royaltee-program-visual:after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom,transparent 25%,#071525 100%); pointer-events:none; }
+.royaltee-program-art { position:absolute; inset:-70px 0 -230px; background-image:url('/brand/royaltee-logo.avif'); background-repeat:no-repeat; background-size:auto 660px; filter:saturate(1.15); }
+.royaltee-program-art-cheer { background-position:24% top; }
+.royaltee-program-art-step { background-position:80% top; }
+.royaltee-program-number { position:absolute; top:15px; left:18px; z-index:1; color:#f7faff; font-weight:1000; font-size:11px; letter-spacing:.15em; background:#0009; padding:8px 12px; border:1px solid #ffffff33; border-radius:7px; }
+.royaltee-program-content { padding:30px; position:relative; }
+.royaltee-program-content>span { color:#ffad77; font-size:10px; font-weight:950; letter-spacing:.17em; }
+.royaltee-program-content h3 { margin:10px 0 0; font-size:clamp(28px,3vw,43px); font-weight:1000; line-height:1; letter-spacing:-.04em; text-shadow:1px 3px 0 #15609a; }
+.royaltee-step-card .royaltee-program-content h3 { text-shadow:1px 3px 0 #974e1a; }
+.royaltee-program-content p { color:#b9d2e8; max-width:530px; margin:17px 0 24px; line-height:1.7; font-size:14px; }
+.royaltee-mini-link { display:inline-flex; color:#ffb17e; font-size:11px; font-weight:1000; letter-spacing:.11em; align-items:center; gap:10px; border-bottom:1px solid rgba(255,149,84,.55); padding-bottom:7px; }
+.royaltee-join-band { padding:45px 0; background:radial-gradient(ellipse at 48% 50%,rgba(255,128,30,.3),transparent 47%),linear-gradient(105deg,#09325c,#040811 47%,#153d62); border-block:2px solid #1c95ed; box-shadow:inset 0 0 30px rgba(0,0,0,.4); }
+.royaltee-join-layout { display:flex; justify-content:space-between; align-items:center; gap:30px; }
+.royaltee-join-layout h2 { margin:8px 0; line-height:1; color:#e8f5ff; font-size:clamp(36px,5.5vw,75px); font-weight:1000; letter-spacing:-.04em; text-shadow:0 3px 4px #003c79; }
+.royaltee-join-layout h2 span { color:#ff862a; }
+.royaltee-join-layout p { margin:12px 0 0; color:#cbe5f6; font-weight:800; }
+.royaltee-roster-section { background:#050d18; }
+.royaltee-roster { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:17px; }
+.royaltee-person { display:block; overflow:hidden; border:1px solid #2873a8; border-radius:12px; background:linear-gradient(145deg,#0a2947,#030b17); transition:transform .2s; color:#f5faff; }
+.royaltee-person:hover { transform:translateY(-4px); border-color:#ff953e; }
+.royaltee-person-photo { height:210px; display:grid; place-items:center; background:radial-gradient(circle at 50% 45%,#1e6899,#061628 80%); }
+.royaltee-person-photo img { width:100%; height:100%; object-fit:cover; }
+.royaltee-person-photo span { font-size:53px; color:#89cfff; }
+.royaltee-person-info { padding:18px; border-top:2px solid #f58439; }
+.royaltee-person-info h3 { margin:0; font-size:17px; font-weight:950; }
+.royaltee-person-info p { margin:8px 0; color:#ffaf7e; font-size:10px; font-weight:900; letter-spacing:.14em; }
+.royaltee-person-info small { color:#bbd4e8; font-size:12px; line-height:1.5; }
+.royaltee-empty-roster { display:flex; flex-wrap:wrap; align-items:center; gap:24px; background:linear-gradient(135deg,#0a2945,#051121); border:1px dashed #2776a9; padding:35px; border-radius:15px; }
+.royaltee-empty-icon { width:100px; height:100px; display:grid; place-items:center; background:#0c3d67; border-radius:20px; border:1px solid #3999e8; color:#ffae70; font-size:45px; }
+.royaltee-empty-roster>div:nth-child(2) { flex:1; min-width:240px; }
+.royaltee-empty-roster h3,.royaltee-empty-events h3 { margin:0; font-size:20px; font-weight:1000; }
+.royaltee-empty-roster p,.royaltee-empty-events p { color:#b6d0e6; font-size:13px; line-height:1.75; max-width:700px; }
+.royaltee-events-section { background:linear-gradient(165deg,#051629,#040810); border-top:1px solid rgba(37,138,222,.4); }
+.royaltee-event-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.royaltee-event-card { display:flex; align-items:flex-start; gap:15px; border:1px solid #2b7db3; border-radius:12px; padding:19px; background:linear-gradient(120deg,#082644,#040b16); }
+.royaltee-datebox { display:flex; flex:0 0 60px; flex-direction:column; align-items:center; padding:10px 7px; border-radius:9px; border:1px solid #ff994d; background:#1a1210; }
+.royaltee-datebox strong { color:#ffac6f; font-size:12px; }
+.royaltee-datebox span { font-size:27px; font-weight:1000; line-height:1.2; }
+.royaltee-event-kind { color:#ffae77; font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+.royaltee-event-card h3 { font-size:17px; font-weight:950; margin:7px 0; }
+.royaltee-event-card p { color:#b8d7ed; font-size:12px; display:flex; align-items:center; gap:7px; }
+.royaltee-event-card small { color:#bfd3e1; line-height:1.6; font-size:12px; }
+.royaltee-empty-events { display:flex; align-items:center; gap:23px; padding:30px; border:1px dashed #387db2; background:#091d30; border-radius:13px; }
+.royaltee-empty-events>svg { flex:none; font-size:43px; color:#f69d59; }
+.royaltee-partner-strip { background:linear-gradient(105deg,#0a2c52,#06101e 60%,#2a1a13); border-top:2px solid #ffa051; border-bottom:1px solid #139bff; padding:35px 0; }
+.royaltee-partner-layout { display:flex; align-items:center; gap:25px; flex-wrap:wrap; }
+.royaltee-partner-layout>svg { font-size:48px; color:#ff9f55; }
+.royaltee-partner-layout>div { flex:1; }
+.royaltee-partner-layout span { color:#c1dffd; font-size:10px; font-weight:950; letter-spacing:.15em; }
+.royaltee-partner-layout h2 { color:#ff903e; margin:5px 0; font-size:clamp(25px,3.2vw,45px); line-height:1.1; font-weight:1000; }
+.royaltee-partner-layout p { color:#bdd4e7; font-size:13px; margin:0; }
+.royaltee-footer { padding:48px 0 24px; background:#020409; }
+.royaltee-footer-layout { display:grid; grid-template-columns:1fr 1.2fr .6fr; gap:32px; }
+.royaltee-footer-name { display:flex; gap:9px; align-items:center; font-size:22px; font-weight:1000; color:#d5f1ff; margin:0; }
+.royaltee-footer-name svg { color:#ff972e; }
+.royaltee-footer-layout>div>p:nth-child(2) { color:#ffa366; font-size:10px; font-weight:900; letter-spacing:.14em; }
+.royaltee-footer-layout small { color:#8cb5d0; font-size:11px; }
+.royaltee-footer-contact { display:flex; flex-direction:column; gap:12px; }
+.royaltee-footer-contact a { display:flex; align-items:center; gap:12px; color:#d1eafd; font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+.royaltee-footer-contact span { color:#adc8db; font-size:12px; line-height:1.6; }
+.royaltee-footer-buttons { display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+.royaltee-footer-buttons a { display:flex; gap:9px; align-items:center; color:#ffb781; font-size:11px; letter-spacing:.1em; font-weight:900; }
+.royaltee-footer-base { display:flex; justify-content:space-between; flex-wrap:wrap; gap:15px; color:#6887a0; font-size:11px; margin-top:34px; border-top:1px solid #1b3246; padding-top:20px; }
+.royaltee-footer-base a { color:#95bcd6; }
+@media (max-width:1100px) {
+ .royaltee-nav { flex-wrap:wrap; padding-block:12px; justify-content:center; }
+ .royaltee-nav-links { order:3; width:100%; }
+ .royaltee-hero h1 { font-size:clamp(41px,5vw,65px); }
+ .royaltee-about-layout { grid-template-columns:1fr; }
+}
+@media (max-width:780px) {
+ .royaltee-wrap { width:min(100% - 30px,650px); }
+ .royaltee-nav-links { gap:15px; }
+ .royaltee-nav-links a { font-size:10px; }
+ .royaltee-rcl-link { padding:8px 9px; }
+ .royaltee-hero-layout { grid-template-columns:1fr; padding-block:43px 55px; min-height:auto; }
+ .royaltee-hero h1 { font-size:clamp(41px,9vw,69px); }
+ .royaltee-hero-art { margin:18px auto 0; width:min(100%,570px); }
+ .royaltee-art-label { bottom:9%; }
+ .royaltee-section { padding:56px 0; }
+ .royaltee-values { gap:9px; }
+ .royaltee-values article { min-height:190px; padding:23px 9px; }
+ .royaltee-values svg { font-size:31px; }
+ .royaltee-values h3 { font-size:11px; }
+ .royaltee-section-heading { align-items:start; flex-direction:column; gap:8px; }
+ .royaltee-section-heading>p { max-width:600px; }
+ .royaltee-program-grid { grid-template-columns:1fr; }
+ .royaltee-join-layout { align-items:start; flex-direction:column; }
+ .royaltee-footer-layout { grid-template-columns:1fr 1fr; }
+ .royaltee-footer-buttons { grid-column:1/-1; }
+}
+@media (max-width:460px) {
+ .royaltee-nav { justify-content:space-between; }
+ .royaltee-brand strong { font-size:15px; }
+ .royaltee-brand-crown { width:36px; height:36px; }
+ .royaltee-rcl-link { font-size:9px; }
+ .royaltee-hero h1 { font-size:40px; }
+ .royaltee-hero-strap { font-size:20px; }
+ .royaltee-actions .royaltee-cta { width:100%; }
+ .royaltee-hero-ticker { gap:11px; font-size:8px; }
+ .royaltee-values { grid-template-columns:1fr; }
+ .royaltee-values article { min-height:auto; padding:20px; }
+ .royaltee-values h3 { margin-top:12px; }
+ .royaltee-join-layout h2 { font-size:39px; }
+ .royaltee-roster { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+ .royaltee-person-photo { height:145px; }
+ .royaltee-person-info { padding:12px; }
+ .royaltee-person-info h3 { font-size:14px; }
+ .royaltee-empty-roster { padding:22px; }
+ .royaltee-footer-layout { grid-template-columns:1fr; }
+ .royaltee-footer-buttons { grid-column:auto; }
+}
+@media (prefers-reduced-motion:reduce) { .royaltee-site *, .royaltee-site *:before, .royaltee-site *:after { scroll-behavior:auto!important; transition-duration:.01ms!important; animation:none!important; } }
