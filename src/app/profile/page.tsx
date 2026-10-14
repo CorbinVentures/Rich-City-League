@@ -133,7 +133,7 @@ export default function ProfilePage() {
       accent="How you show up"
       description="Control your public identity, images, role request, location, bio, and visibility without changing your official league history."
       assetKey="social.cover"
-      meta={profile ? <div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Account role</p><p className="mt-1 font-display text-xl font-black uppercase">{profile.role ?? 'member'}</p><p className="mt-2 text-xs text-rcl-blue">{visibility} profile</p></div> : null}
+      meta={profile ? <div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Member identity</p><p className="mt-1 font-display text-xl font-black uppercase">{isPrivileged ? profile.role : role}</p><p className="mt-2 text-xs text-rcl-blue">{visibility} profile</p></div> : null}
     />
 
     <Container maxWidth="lg" className="py-8 sm:py-12">
