@@ -435,10 +435,13 @@ export async function GET(request: Request) {
     }
   }
 
+  // Do not resurrect old teams from the historical registrations export.
+  // The retired materializer used *every* program, including completed seasons.
+  // All structural team imports must use the upcoming-program competition sync.
   if (action === 'materialize-structure') {
-    const { data, error } = await db.rpc('materialize_leagueapps_structure');
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true, result: data });
+    return NextResponse.json({
+      error: 'Historical LeagueApps structure sync has been retired. Use the current competition sync.',
+    }, { status: 410 });
   }
 
   if (action !== 'sync') {

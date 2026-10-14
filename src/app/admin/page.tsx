@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
         { count: postsCount },
       ] = await Promise.all([
         supabase.from('players').select('*', { count: 'exact', head: true }),
-        supabase.from('teams').select('*', { count: 'exact', head: true }),
+        supabase.from('teams').select('*', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('team_coaches').select('*', { count: 'exact', head: true }),
         supabase.from('games').select('*', { count: 'exact', head: true }),
         supabase.from('posts').select('*', { count: 'exact', head: true }),
@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
       ] = await Promise.all([
         supabase.from('leagues').select('id, name').eq('is_active', true).order('name'),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('teams').select('*').order('name', { ascending: true }),
+        supabase.from('teams').select('*').eq('is_active', true).order('name', { ascending: true }),
         supabase.from('players').select('*, profile:profiles(*)'),
         supabase.from('team_coaches').select('*, profile:profiles(*)'),
         supabase.from('games').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)').order('scheduled_at', { ascending: false }),

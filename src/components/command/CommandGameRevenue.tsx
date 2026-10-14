@@ -39,7 +39,7 @@ export function CommandGameRevenue(){
   if(!db){setError('Secure database connection required.');setLoading(false);return}
   const [g,t,l,s,r]=await Promise.all([
    db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,home_score,away_score').order('scheduled_at',{ascending:false}).limit(400),
-   db.from('teams').select('id,name').limit(200),
+   db.from('teams').select('id,name').eq('is_active',true).limit(200),
    db.from('rcl_command_ledger').select('*').order('created_at',{ascending:false}).limit(1500),
    db.from('rcl_command_concession_sales').select('*').order('recorded_at',{ascending:false}).limit(1500),
    db.from('rcl_command_game_reports').select('*').limit(500),
