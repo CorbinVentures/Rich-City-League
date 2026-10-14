@@ -7,7 +7,7 @@ import {RCL_STAFF_ROLES,type RCLStaffRole} from '@/lib/rcl-staff-roles';
 
 type Member={id:string;display_name:string|null;username:string|null;first_name:string|null;last_name:string|null;role:string};
 type Team={id:string;name:string;city:string|null};
-type Existing={profile_id:string;role_code:string;team_id:string|null;active:boolean};
+type Existing={id:string;profile_id:string;role_code:string;team_id:string|null;active:boolean};
 type Props={
  db:SupabaseClient<any>;
  teams:Team[];
@@ -47,7 +47,19 @@ export function StaffDirectAssign({db,teams,assignments,adminId,onAssigned}:Prop
   },250);
   return()=>{active=false;clearTimeout(t);};
  },[db,term,selected,adminId]);
- const duplicate=selected?assignments.some(a=>a.active&&a.profile_id===selected.id&&a.role_code===role&&a.team_id===(teamId||null)):false;
+ const currentRoles=selected?assignments.filter(a=>a.active&&a.profile_id===selected.id):[];
+ const duplicate=currentRoles.some(a=>a.role_code===role&&a.team_id===(teamId||null));
+ const removeExisting=async(assignment:Existing)=>{
+  if(!selected||working)return;
+  const name=displayName(selected);
+  const title=RCL_STAFF_ROLES.find(r=>r.id===assignment.role_code)?.title??assignment.role_code;
+  if(!window.confirm('Remove '+title+' from '+name+'? Staff access for this role will stop immediately.'))return;
+  setWorking(true);setFeedback('');setError(false);
+  const {error:revokeError}=await db.rpc('rcl_revoke_staff_assignment',{p_assignment_id:assignment.id});
+  if(revokeError){setFeedback(revokeError.message);setError(true);}
+  else{await onAssigned();setFeedback(title+' was removed from '+name+'.');}
+  setWorking(false);
+ };
  const teamMissing=chosen.teamRequired&&!teamId;
  const assign=async(e:FormEvent)=>{
   e.preventDefault();
@@ -102,6 +114,13 @@ export function StaffDirectAssign({db,teams,assignments,adminId,onAssigned}:Prop
      {teams.map(t=><option key={t.id} value={t.id}>{t.name}{t.city?' · '+t.city:''}</option>)}
     </select>
    </div>
+   {selected&&<div className="rounded-xl border border-[#4d7795] bg-[#0a2136] p-4">
+    <h3 className="text-xs font-black uppercase tracking-wider text-[#b8dafa]">Current RCL staff roles for {displayName(selected)}</h3>
+    {currentRoles.length?<div className="mt-3 space-y-2">{currentRoles.map(a=><div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#436e88] bg-[#102e47] p-3">
+     <span className="text-xs font-bold text-[#e4f2fc]">{RCL_STAFF_ROLES.find(r=>r.id===a.role_code)?.title??a.role_code} · {a.team_id?teams.find(t=>t.id===a.team_id)?.name??'Assigned team':'League-wide'}</span>
+     <button type="button" disabled={working} onClick={()=>void removeExisting(a)} className="min-h-9 rounded-lg border border-[#a8737e] px-3 text-xs font-bold text-[#ffd7de] disabled:opacity-50">Remove role</button>
+    </div>)}</div>:<p className="mt-2 text-xs text-[#bacfe0]">No assigned staff roles yet. Select a role above to activate one.</p>}
+   </div>}
    {duplicate&&<p className="rounded-lg border border-[#9c8456] bg-[#3b3020] p-3 text-xs text-[#f6dfac]">This member already holds that active role for the selected team. To change it, revoke their assignment below.</p>}
    {feedback&&<p role={error?'alert':'status'} className={'rounded-xl border p-3 text-sm '+(error?'border-[#bd7380] bg-[#48242d] text-[#ffe3e7]':'border-[#6aab89] bg-[#113e35] text-[#c6ffe0]')}>{feedback}</p>}
    <button type="submit" disabled={!selected||teamMissing||duplicate||working} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#a8d9fb] bg-[#2776b0] px-6 text-sm font-black text-white hover:bg-[#3588c2] disabled:cursor-not-allowed disabled:opacity-45">
