@@ -32,7 +32,7 @@ export function CommandSmartOperations(){
   if(!db){setError('Secure operations data is unavailable.');setLoading(false);return}
   const [g,t,b,c,r,i,l]=await Promise.all([
    db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,venue_id,scorebook_status,home_score,away_score').order('scheduled_at',{ascending:true}).limit(600),
-   db.from('teams').select('id,name').limit(200),
+   db.from('teams').select('id,name').eq('is_active',true).limit(200),
    db.from('rcl_command_bookings').select('game_id,team_id,status,starts_at,ends_at,venue_id').limit(1000),
    db.from('rcl_command_game_checks').select('*').limit(1500),
    db.from('rcl_command_game_reports').select('game_id,paid_attendance,complimentary_attendance').limit(1000),
