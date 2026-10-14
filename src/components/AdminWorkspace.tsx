@@ -127,7 +127,7 @@ export function AdminWorkspace() {
 
 export function AdminTopbar() {
   const pathname = usePathname();
-  const section = groups.flatMap((group) => group.items).find((item) =>
+  const section = groups.flatMap((group) => group.items).sort((a,b)=>b.href.length-a.href.length).find((item) =>
     item.href === '/admin'
       ? pathname === '/admin'
       : pathname === item.href || pathname.startsWith(item.href + '/')
