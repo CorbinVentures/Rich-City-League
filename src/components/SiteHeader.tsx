@@ -104,7 +104,7 @@ export function SiteHeader(){
       </nav>
 
       <button type="button" className="rcl-universal-more" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}>
-        <FaBars/><span>More</span>
+        <FaBars/><span>Quick start</span>
       </button>
 
       <div className="rcl-universal-account">
@@ -141,7 +141,7 @@ export function SiteHeader(){
         {user&&<MessageQuickMenu userId={user.id} unreadCount={messageUnread}/>} 
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
-        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open RCL navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
+        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Find an action or browse RCH navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
       </div>
     </header>
 
