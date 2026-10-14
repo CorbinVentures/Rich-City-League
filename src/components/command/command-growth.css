@@ -94,3 +94,14 @@
 @media(max-width:1100px){.rcl-growth-playgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.rcl-growth-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.rcl-growth-two{grid-template-columns:1fr}}
 @media(max-width:700px){.rcl-growth{margin:12px 0;border-radius:14px}.rcl-growth-hero{padding:24px 17px;min-height:200px}.rcl-growth-hero-mark{right:-28px;font-size:200px}.rcl-growth-hero h2{font-size:29px}.rcl-growth-hero p:not(.cmd-eyebrow){font-size:12px}.rcl-growth-kpis{gap:1px}.rcl-growth-kpi{padding:14px 13px}.rcl-growth-kpi strong{font-size:26px}.rcl-growth-kpi small{font-size:9px;min-height:40px}.rcl-growth-tabs{padding:9px 10px 0}.rcl-growth-tabs button{padding:11px 12px;font-size:11px}.rcl-growth-body{padding:15px}.rcl-growth-summary,.rcl-growth-recommendations{grid-template-columns:1fr}.rcl-growth-summary>div{padding:14px}.rcl-growth-summary strong{font-size:26px}.rcl-growth-playgrid{grid-template-columns:1fr}.rcl-growth-playgrid article{min-height:160px}.rcl-growth-formgrid,.rcl-growth-toolbar{grid-template-columns:1fr}.rcl-growth-locality,.rcl-growth-prospect{flex-direction:column;align-items:stretch}.rcl-growth-fact{text-align:left;align-items:flex-start}.rcl-growth-prospect-actions{align-items:flex-start;max-width:none}.rcl-growth-section-head{align-items:flex-start}.rcl-growth-hero-mark{opacity:.16}}
 @media(prefers-reduced-motion:reduce){.rcl-growth *{scroll-behavior:auto!important}}
+
+.rcl-growth .cmd-eyebrow{display:block;color:#ff8498!important;font-size:10px!important;letter-spacing:1.6px!important;font-weight:900!important;line-height:1.5!important}
+.rcl-growth input[type=number],.rcl-growth input[type=date]{color-scheme:dark}
+.rcl-growth a:focus-visible,.rcl-growth button:focus-visible{outline:2px solid #b1ddff;outline-offset:2px}
+.rcl-growth-judgment{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:22px 0}
+.rcl-growth-judgment article{border:1px solid #3d5570;border-radius:12px;background:#1a293d;padding:15px}
+.rcl-growth-judgment strong{display:block;color:#fff;font-size:12px;margin-bottom:8px}
+.rcl-growth-judgment p{color:#c7d9e8!important;font-size:11px!important;line-height:1.5}
+.rcl-growth-judgment small{display:block;color:#ff9aaf;font-size:10px;margin-top:9px}
+@media(max-width:950px){.rcl-growth-judgment{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.rcl-growth-judgment{grid-template-columns:1fr}}
