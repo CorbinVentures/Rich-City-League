@@ -26,7 +26,7 @@ export const RCL_STAFF_ROLES:readonly RCLStaffRoleInfo[]=[
   actions:[{title:'Game schedule',href:'/games',note:'Plan assignments'},{title:'League center',href:'/league',note:'View competition information'}]},
  {id:'franchise_owner',title:'Franchise Owner',department:'Franchise Leadership',teamRequired:true,
   description:'Request ownership access for a specific RCL franchise. No owner permissions activate before administrator approval.',
-  actions:[{title:'My franchise',href:'/staff',note:'Your assigned team and verified status'},{title:'League teams',href:'/teams',note:'Review team information'},{title:'Game schedule',href:'/games',note:'Follow franchise matchups'}]}
+  actions:[{title:'My franchise',href:'/staff/franchise',note:'Team-scoped approved franchise office'},{title:'League teams',href:'/teams',note:'Review team information'},{title:'Game schedule',href:'/games',note:'Follow franchise matchups'}]}
 ] as const;
 export const roleInfo=(id:string)=>RCL_STAFF_ROLES.find(r=>r.id===id);
 export const isRCLStaffRole=(id:string):id is RCLStaffRole=>RCL_STAFF_ROLES.some(r=>r.id===id);
