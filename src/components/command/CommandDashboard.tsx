@@ -1,17 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 const CommandEntertainment = dynamic(() => import('./CommandEntertainment').then(m=>m.CommandEntertainment), {loading:()=> <p className="cmd-empty">Loading entertainment desk…</p>});
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
-import { CommandVenueDirectory } from './CommandVenueDirectory';
-import { CommandGameRevenue } from './CommandGameRevenue';
-import { CommandConcessionCatalog } from './CommandConcessionCatalog';
-import { CommandFranchiseHQ } from './CommandFranchiseHQ';
-import { CommandStorylineStudio } from './CommandStorylineStudio';
-import { CommandSmartOperations } from './CommandSmartOperations';
+import { CommandFastLane, type CommandWorkSignal } from './CommandFastLane';
+import type { CommandCaptureKind } from '@/lib/command/fastlane';
+const CommandVenueDirectory = dynamic(() => import('./CommandVenueDirectory').then(m=>m.CommandVenueDirectory), {loading:()=> <p className="cmd-empty">Opening facility directory…</p>});
+const CommandGameRevenue = dynamic(() => import('./CommandGameRevenue').then(m=>m.CommandGameRevenue), {loading:()=> <p className="cmd-empty">Opening game finance…</p>});
+const CommandConcessionCatalog = dynamic(() => import('./CommandConcessionCatalog').then(m=>m.CommandConcessionCatalog), {loading:()=> <p className="cmd-empty">Opening concessions…</p>});
+const CommandFranchiseHQ = dynamic(() => import('./CommandFranchiseHQ').then(m=>m.CommandFranchiseHQ), {loading:()=> <p className="cmd-empty">Opening franchise headquarters…</p>});
+const CommandStorylineStudio = dynamic(() => import('./CommandStorylineStudio').then(m=>m.CommandStorylineStudio), {loading:()=> <p className="cmd-empty">Opening Storyline Studio…</p>});
+const CommandSmartOperations = dynamic(() => import('./CommandSmartOperations').then(m=>m.CommandSmartOperations), {loading:()=> <p className="cmd-empty">Opening game-day operations…</p>});
 import { budgetTemplates, incomeTemplates, expenseTemplates, templatesFor, labelFor } from '@/lib/command/templates';
 import { FaArrowRight, FaBasketball, FaBuilding, FaCalendarDays, FaChartLine, FaClock, FaCreditCard, FaFileLines, FaPeopleGroup, FaUserShield } from 'react-icons/fa6';
 
@@ -130,6 +132,9 @@ const dateOnly=(s?:string)=>s?new Date(s+'T12:00:00').toLocaleDateString('en-US'
 export function CommandDashboard(){
  const db = useMemo(()=>getSupabaseClient() as unknown as SupabaseClient<any> | null,[]);
  const [active,setActive]=useState<Area>('overview');
+ const [fastOpen,setFastOpen]=useState(false);
+ const [refreshing,setRefreshing]=useState(false);
+ const hasLoaded=useRef(false);
  const [studioDirty,setStudioDirty]=useState(false);
  const [records,setRecords]=useState<Record<Kind,Row[]>>(empty);
  const [venueStats,setVenueStats]=useState({total:0,priced:0,potential:0});
@@ -148,7 +153,7 @@ export function CommandDashboard(){
   const [installPrompt,setInstallPrompt]=useState<{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>}|null>(null);
  const load=useCallback(async()=>{
   if(!db) {setNotice({message:'Supabase connection unavailable.',error:true});setBusy(false);return;}
-  setBusy(true);
+  if(hasLoaded.current)setRefreshing(true);else setBusy(true);
   try{
    const [all,teamQ,gameQ,seasonQ,playerQ,venueStatQ]=await Promise.all([
     Promise.all(kinds.map(async kind=>({kind, result:await db.from(tables[kind]).select('*').order(kind==='concession_sales'?'recorded_at':'created_at',{ascending:false}).limit(kind==='audit'?120:400)}))),
@@ -169,7 +174,7 @@ export function CommandDashboard(){
    setVenueStats({total:venueStatQ[0].count??0,priced:venueStatQ[1].count??0,potential:venueStatQ[2].count??0});
    setTeams(teamQ.data??[]);setGames(gameQ.data??[]);setSeasons(seasonQ.data??[]);setPlayers(playerQ.data??[]);
   }catch(error){setNotice({message:error instanceof Error?error.message:'Could not load Command Center records.',error:true});}
-  finally{setBusy(false);}
+  finally{hasLoaded.current=true;setBusy(false);setRefreshing(false);}
  },[db]);
  useEffect(()=>{void load()},[load]);
  useEffect(()=>{const fromHash=()=>{const target=window.location.hash.slice(1);if(nav.some(n=>n.id===target))setActive(target as Area)};fromHash();window.addEventListener('hashchange',fromHash);return()=>window.removeEventListener('hashchange',fromHash)},[]);
@@ -191,7 +196,26 @@ export function CommandDashboard(){
    default:return [];
   }
  };
- const reset=(kind:Kind|null)=>{setEditing(kind);setForm(kind==='ledger'?{direction:'expense',category:expenseTemplates[0].code,state:'projected',occurred_on:new Date().toISOString().slice(0,10)}:kind==='budgets'?{category:budgetTemplates[0].code}:{});setNotice(null)};
+ const reset=(kind:Kind|null,defaults:Record<string,string>={})=>{
+  const direction=defaults.direction==='income'?'income':'expense';
+  const initial:Record<string,string>=kind==='ledger'?{direction,category:direction==='income'?incomeTemplates[0].code:expenseTemplates[0].code,state:'projected',occurred_on:new Date().toISOString().slice(0,10)}:kind==='budgets'?{category:budgetTemplates[0].code}:kind==='venues'?{state:'researching',rate_basis:'unknown'}:kind==='bookings'?{status:'tentative'}:kind==='concession_sales'?{quantity:'1'}:kind==='tasks'?{category:'game_day',priority:'normal'}:{};
+  setEditing(kind);setForm({...initial,...defaults});setNotice(null);
+ };
+ const navigate=(dest:Area):boolean=>{
+  if(dest!==active&&(studioDirty||editing!==null)&&!window.confirm('Discard unsaved workspace changes and switch desks?'))return false;
+  if(dest!==active){setStudioDirty(false);reset(null);setActive(dest);window.location.hash=dest;window.scrollTo(0,0);}
+  setMenuOpen(false);return true;
+ };
+ const capture=(kind:CommandCaptureKind,defaults:Record<string,string>):boolean=>{
+  if(editing&&!window.confirm('Replace the open draft form with a new entry?'))return false;
+  reset(kind,defaults);return true;
+ };
+ useEffect(()=>{
+  if(!editing)return;
+  const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!working&&!fastOpen){setEditing(null);setForm({});}};
+  window.addEventListener('keydown',escape);
+  return()=>window.removeEventListener('keydown',escape);
+ },[editing,working,fastOpen]);
  async function create(event:FormEvent<HTMLFormElement>,kind:Exclude<Kind,'audit'>){
   event.preventDefault();if(!db||working)return;
   const payload:Record<string,unknown>={};
@@ -254,10 +278,10 @@ export function CommandDashboard(){
  const upcoming=[...games].filter(g=>new Date(g.scheduled_at).getTime()>Date.now()).sort((a,b)=>String(a.scheduled_at).localeCompare(String(b.scheduled_at))).slice(0,5);
  function renderForm(kind:Exclude<Kind,'audit'>){
   return <section className="cmd-create"><div className="cmd-form-head"><div><div className="cmd-eyebrow">NEW RECORD</div><h3>{titles[kind]}</h3></div><button type="button" className="cmd-close" onClick={()=>reset(null)} aria-label="Close form">×</button></div><form onSubmit={e=>void create(e,kind)} className="cmd-form-grid">
-   {schemas[kind].map(field=><label key={field.name} className={'cmd-field '+(field.type==='textarea'?'cmd-wide':'')}><span>{field.label}{field.required?' *':''}</span>
+   {schemas[kind].map((field,index)=><label key={field.name} className={'cmd-field '+(field.type==='textarea'?'cmd-wide':'')}><span>{field.label}{field.required?' *':''}</span>
     {field.type==='textarea'?<textarea rows={3} maxLength={5000} value={form[field.name]??''} onChange={e=>setForm(x=>field.name==='direction'?({...x,direction:e.target.value,category:e.target.value==='income'?incomeTemplates[0].code:expenseTemplates[0].code}):({...x,[field.name]:e.target.value}))} required={field.required}/>:
-    (field.options||field.lookup)?<select required={field.required} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}><option value="">Select {field.label.toLowerCase()}</option>{options(field).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
-    <input required={field.required} type={field.type||'text'} step={field.type==='number'?(field.name==='stock_count'||field.name==='quantity'||field.name==='capacity'||field.name==='reorder_at'?'1':'0.01'):undefined} min={field.type==='number'?'0':undefined} maxLength={field.type==='number'?undefined:200} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}/>}
+    (field.options||field.lookup)?<select autoFocus={index===0} required={field.required} value={form[field.name]??''} onChange={e=>setForm(x=>field.name==='direction'?({...x,direction:e.target.value,category:e.target.value==='income'?incomeTemplates[0].code:expenseTemplates[0].code}):({...x,[field.name]:e.target.value}))}><option value="">Select {field.label.toLowerCase()}</option>{options(field).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
+    <input autoFocus={index===0} required={field.required} type={field.type||'text'} step={field.type==='number'?(field.name==='stock_count'||field.name==='quantity'||field.name==='capacity'||field.name==='reorder_at'?'1':'0.01'):undefined} min={field.type==='number'?'0':undefined} maxLength={field.type==='number'?undefined:200} value={form[field.name]??''} onChange={e=>setForm(x=>({...x,[field.name]:e.target.value}))}/>}
     {field.hint&&<small>{field.hint}</small>}</label>)}
    {kind==='budgets' && form.units!==undefined && form.unit_price!==undefined && form.units!=='' && form.unit_price!==''?
     <div className="cmd-budget-auto-preview cmd-wide"><span>AUTOMATIC CATEGORY BUDGET</span><strong>{money(Math.round(Number(form.units)*Number(form.unit_price)*100)/100)}</strong><small>{form.units} units × {money(Number(form.unit_price))} each · This becomes the approved allocation instead of the flat amount.</small></div>:null}
@@ -267,12 +291,25 @@ export function CommandDashboard(){
  function add(kind:Exclude<Kind,'audit'>){return <button className="cmd-add" type="button" onClick={()=>reset(kind)}>+ New {kind==='concession_sales'?'sale':kind==='bookings'?'booking':kind==='ledger'?'transaction':kind==='budgets'?'budget':kind==='inventory'?'item':kind==='venues'?'gym':kind==='trades'?'proposal':kind==='stories'?'storyline':'task'}</button>;}
  function status(row:Row,kind:Exclude<Kind,'audit'>,key:string,values:string[]){return <select className="cmd-status" disabled={working} aria-label={'Update '+key} value={row[key]||''} onChange={e=>void update(kind,row.id,{[key]:e.target.value})}>{values.map(s=><option key={s} value={s}>{pretty(s)}</option>)}</select>}
  function frame(kind:Exclude<Kind,'audit'>,children:React.ReactNode,sub:string){
-  return <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">{sub}</p><h3>{titles[kind]} <span className="cmd-count">{records[kind].length}</span></h3></div>{add(kind)}</div>{editing===kind?renderForm(kind):null}{children}</section>;
+  return <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">{sub}</p><h3>{titles[kind]} <span className="cmd-count">{records[kind].length}</span></h3></div>{add(kind)}</div>{children}</section>;
  }
  const emptyState=(label:string)=> <div className="cmd-empty"><span className="cmd-empty-glyph">R</span><p>No {label} recorded yet.</p><small>Add the first entry to activate this workspace.</small></div>;
  const rows=(kind:Kind,render:(r:Row)=>React.ReactNode)=>records[kind].length?<div className="cmd-records">{records[kind].map(r=><div key={r.id} className="cmd-record">{render(r)}</div>)}</div>:emptyState(titles[kind as Exclude<Kind,'audit'>]||'audit activity');
  const cards=(arr:{label:string;value:string;detail:string;className?:string}[])=><div className="cmd-metrics">{arr.map(x=><article className={'cmd-metric '+(x.className||'')} key={x.label}><p>{x.label}</p><strong>{x.value}</strong><small>{x.detail}</small></article>)}</div>;
- const overview=<><section className="cmd-hero"><div><div className="cmd-eyebrow">EXECUTIVE INTELLIGENCE · RCL INTERNAL</div><h2>Run the league.<br/><em>Own the operation.</em></h2><p>Your private control room for league financials, game-day operations and statewide franchise development.</p></div><div className="cmd-hero-mark" aria-hidden="true">R</div></section>
+ const now=new Date();
+ const localToday=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+ const lateTasks=records.tasks.filter(t=>t.status!=='done'&&typeof t.due_on==='string'&&t.due_on<localToday);
+ const urgentTasks=records.tasks.filter(t=>t.status!=='done'&&t.priority==='urgent');
+ const lowStock=records.inventory.filter(i=>i.active&&amount(i.stock_count)<=amount(i.reorder_at));
+ const fastSignals:CommandWorkSignal[]=[
+  ...(urgentTasks.length?[{id:'urgent',title:urgentTasks.length+' urgent assignment'+(urgentTasks.length===1?'':'s'),detail:'Open staff tasks need attention',area:'operations' as const,tone:'urgent' as const}]:[]),
+  ...(lateTasks.length?[{id:'overdue',title:lateTasks.length+' overdue assignment'+(lateTasks.length===1?'':'s'),detail:'Check due dates and completion status',area:'operations' as const,tone:'urgent' as const}]:[]),
+  ...(lowStock.length?[{id:'stock',title:lowStock.length+' concession item'+(lowStock.length===1?'':'s')+' low on stock',detail:'Review stock before the next game',area:'concessions' as const,tone:'warning' as const}]:[]),
+  ...(upcoming.length?[{id:'next-game',title:'Next game: '+labelGame(upcoming[0].id),detail:stamp(upcoming[0].scheduled_at),area:'operations' as const,tone:'info' as const}]:[]),
+  ...(venueStats.total>venueStats.priced?[{id:'venues',title:(venueStats.total-venueStats.priced)+' gym leads missing price evidence',detail:'Verify published rate or request a quote',area:'venues' as const,tone:'info' as const}]:[])
+ ];
+ const fastGames=upcoming.map(g=>({id:g.id,label:labelGame(g.id),when:stamp(g.scheduled_at)}));
+ const overview=<><section className="cmd-hero cmd-hero-compact"><div><div className="cmd-eyebrow">EXECUTIVE INTELLIGENCE · RCL INTERNAL</div><h2>Run the league.<br/><em>Own the operation.</em></h2><p>Your private control room for league financials, game-day operations and statewide franchise development.</p></div><div className="cmd-hero-mark" aria-hidden="true">R</div></section>
  {cards([{label:'RECORDED LEDGER INCOME',value:money(income),detail:'Recorded + reconciled; no projections'},{label:'RECORDED LEDGER EXPENSE',value:money(expenses),detail:'Recorded + reconciled'},{label:'CONCESSION GROSS SALES',value:money(grossSales),detail:'Tracked independently from ledger'},{label:'OUTSTANDING OPERATIONS',value:String(outstanding).padStart(2,'0'),detail:'Open and active action items'}])}
  <div className="cmd-columns"><section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUE SNAPSHOT</p><h3>Front Office Briefing</h3></div></div><div className="cmd-brief-grid"><div><span>Approved budget lines</span><strong>{money(budgetTotal)}</strong></div><div><span>Venue commitment estimate</span><strong>{money(venueExposure)}</strong></div><div><span>Projected ledger net</span><strong>{money(projected)}</strong></div><div><span>Concession gross margin</span><strong>{money(grossSales-concessionCost)}</strong></div><div><span>Active franchises</span><strong>{teams.length}</strong></div><div><span>Scouted gym leads</span><strong>{venueStats.total}</strong></div></div><p className="cmd-fine">Ledger totals and concession sales are deliberately separate to prevent accidental double counting. Venue commitments are estimates, not confirmed expenses.</p></section>
  <section className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">LEAGUEAPPS + SCOREBOOK</p><h3>Upcoming Matchups</h3></div></div>{upcoming.length?upcoming.map(g=><div className="cmd-mini" key={g.id}><strong>{labelGame(g.id)}</strong><span>{stamp(g.scheduled_at)}</span></div>):emptyState('upcoming games')}<p className="cmd-fine">Official game details are read from the existing RCH database. Command does not overwrite game results.</p></section></div></>;
@@ -297,5 +334,5 @@ export function CommandDashboard(){
  {frame('tasks',rows('tasks',r=><><div className="cmd-record-main"><strong>{r.title} {r.priority==='urgent'?<span className="cmd-warning-text">URGENT</span>:null}</strong><small>{pretty(r.category)} · {labelTeam(r.team_id)} · Due {dateOnly(r.due_on)}</small><small>{r.notes}</small></div><div className="cmd-record-right">{status(r,'tasks','status',['open','in_progress','done'])}</div></>),'GAME DAY · STAFFING · DELIVERABLES')}</>;
  const audit=<div className="cmd-panel"><div className="cmd-panel-heading"><div><p className="cmd-eyebrow">READ-ONLY SECURITY RECORD</p><h3>Administrative Change History</h3></div></div>{rows('audit',r=><><div className="cmd-record-main"><strong>{pretty(r.operation)} · {pretty(r.table_name).replace('rcl command ','')}</strong><small>Record {r.record_id} · Actor {r.actor_id||'system'}</small></div><div className="cmd-record-right"><small>{stamp(r.created_at)}</small></div></>)}<p className="cmd-fine">Most operational record changes are logged with before and after snapshots. Audit history cannot be edited or deleted from the application.</p></div>;
  const screens:Record<Area,React.ReactNode>={overview,finance,revenue:gameRevenue,venues,concessions,franchises,trades,stories,entertainment:<CommandEntertainment onDirtyChange={setStudioDirty}/>,operations,audit};
- return <div className="command-app"><aside className={'cmd-sidebar '+(menuOpen?'cmd-sidebar-open':'')}><div className="cmd-brand"><div className="cmd-brand-r">R</div><div><b>RCL COMMAND</b><span>LEAGUE OPERATIONS</span></div></div><div className="cmd-side-tag"><span className="cmd-live-dot"/>PRIVATE OPERATIONS NETWORK</div><nav aria-label="Command Center modules">{nav.map((n,i)=><div key={n.id}>{i===0||nav[i-1].group!==n.group?<p className="cmd-nav-group">{n.group}</p>:null}<button className={'cmd-nav-item '+(active===n.id?'active':'')} onClick={()=>{if(studioDirty&&n.id!==active&&!window.confirm('Discard unsaved workspace changes?'))return;setActive(n.id);setMenuOpen(false);reset(null)}} type="button"><n.icon size={15}/><span>{n.name}</span>{active===n.id?<span className="cmd-active-line"/>:null}</button></div>)}</nav><div className="cmd-side-footer"><Link href="/admin">← RCH Admin</Link><small>RCL COMMAND CENTER · SECURE</small></div></aside><div className="cmd-workspace"><header className="cmd-topbar"><div className="cmd-top-left"><button type="button" className="cmd-menu-toggle" onClick={()=>setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><span className="cmd-route">RICH CITY LEAGUE <span>/</span> {nav.find(n=>n.id===active)?.name.toUpperCase()}</span></div><div className="cmd-top-actions"><span className="cmd-access"><FaUserShield size={12}/> ADMIN SECURE</span><button type="button" className="cmd-refresh cmd-install" onClick={async()=>{if(installPrompt){await installPrompt.prompt();await installPrompt.userChoice;setInstallPrompt(null);}else setNotice({message:'To install: open this page in Safari, select Share, then Add to Home Screen. On desktop Chrome use Install App in the browser menu.',error:false})}}>↓ INSTALL</button><button type="button" onClick={()=>{if(!studioDirty||window.confirm('Discard unsaved workspace changes and sync?'))void load()}} className="cmd-refresh" disabled={busy}>↻ <span>SYNC VIEW</span></button></div></header><main className="cmd-content" id="command-main"><div className="cmd-section-heading"><div><p className="cmd-eyebrow">COMMAND DIVISION {iconMap[active]} / 11</p><h1>{nav.find(n=>n.id===active)?.name}</h1></div><div className="cmd-timestamp"><FaClock size={13}/> LIVE RCH DATA</div></div>{notice?<div role="status" className={'cmd-notice '+(notice.error?'error':'')}><span>{notice.message}</span><button type="button" onClick={()=>setNotice(null)} aria-label="Dismiss message">×</button></div>:null}{busy?<div className="cmd-loading" role="status"><span className="cmd-loading-r">R</span><p>Synchronizing league operations…</p></div>:screens[active]}<footer className="cmd-footer">RICH CITY LEAGUE · LEAGUE COMMAND SYSTEM <span>OPERATIONS ARE RESTRICTED TO AUTHORIZED ADMINISTRATORS</span></footer></main></div></div>;
+ return <div className="command-app"><aside className={'cmd-sidebar '+(menuOpen?'cmd-sidebar-open':'')}><div className="cmd-brand"><div className="cmd-brand-r">R</div><div><b>RCL COMMAND</b><span>LEAGUE OPERATIONS</span></div></div><div className="cmd-side-tag"><span className="cmd-live-dot"/>PRIVATE OPERATIONS NETWORK</div><nav aria-label="Command Center modules">{nav.map((n,i)=><div key={n.id}>{i===0||nav[i-1].group!==n.group?<p className="cmd-nav-group">{n.group}</p>:null}<button className={'cmd-nav-item '+(active===n.id?'active':'')} onClick={()=>{navigate(n.id)}} type="button"><n.icon size={15}/><span>{n.name}</span>{active===n.id?<span className="cmd-active-line"/>:null}</button></div>)}</nav><div className="cmd-side-footer"><Link href="/admin">← RCH Admin</Link><small>RCL COMMAND CENTER · SECURE</small></div></aside><div className="cmd-workspace"><header className="cmd-topbar"><div className="cmd-top-left"><button type="button" className="cmd-menu-toggle" onClick={()=>setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><span className="cmd-route">RICH CITY LEAGUE <span>/</span> {nav.find(n=>n.id===active)?.name.toUpperCase()}</span></div><div className="cmd-top-actions"><span className="cmd-access"><FaUserShield size={12}/> ADMIN SECURE</span><button type="button" className="cmd-fast-top-trigger" onClick={()=>setFastOpen(true)} aria-label="Search actions and commands"><span aria-hidden="true">⚡</span><span className="cmd-fast-trigger-label">QUICK FIND</span><kbd>⌘/Ctrl K</kbd></button><button type="button" className="cmd-refresh cmd-install" onClick={async()=>{if(installPrompt){await installPrompt.prompt();await installPrompt.userChoice;setInstallPrompt(null);}else setNotice({message:'To install: open this page in Safari, select Share, then Add to Home Screen. On desktop Chrome use Install App in the browser menu.',error:false})}}>↓ INSTALL</button><button type="button" onClick={()=>{if(!studioDirty||window.confirm('Discard unsaved workspace changes and sync?'))void load()}} className="cmd-refresh" disabled={busy||refreshing}>↻ <span>{refreshing?'SYNCING…':'SYNC VIEW'}</span></button></div></header><main className="cmd-content" id="command-main"><div className="cmd-section-heading"><div><p className="cmd-eyebrow">COMMAND DIVISION {iconMap[active]} / 11</p><h1>{nav.find(n=>n.id===active)?.name}</h1></div><div className="cmd-timestamp"><FaClock size={13}/> LIVE RCH DATA</div></div>{!busy?<CommandFastLane active={active} open={fastOpen} onOpenChange={setFastOpen} onNavigate={navigate} onCapture={capture} signals={fastSignals} games={fastGames}/>:null}{notice?<div role="status" className={'cmd-notice '+(notice.error?'error':'')}><span>{notice.message}</span><button type="button" onClick={()=>setNotice(null)} aria-label="Dismiss message">×</button></div>:null}{busy?<div className="cmd-loading" role="status"><span className="cmd-loading-r">R</span><p>Synchronizing league operations…</p></div>:screens[active]}{editing&&editing!=='audit'?<div className="cmd-fast-shade cmd-capture-shade" onMouseDown={e=>{if(e.target===e.currentTarget&&!working)reset(null)}}><div className="cmd-capture-dialog" role="dialog" aria-modal="true" aria-label={'Quick capture: '+titles[editing as Exclude<Kind,'audit'>]}>{notice?<div className={'cmd-notice '+(notice.error?'error':'')} role={notice.error?'alert':'status'}>{notice.message}</div>:null}{renderForm(editing as Exclude<Kind,'audit'>)}</div></div>:null}<footer className="cmd-footer">RICH CITY LEAGUE · LEAGUE COMMAND SYSTEM <span>OPERATIONS ARE RESTRICTED TO AUTHORIZED ADMINISTRATORS</span></footer></main></div></div>;
 }
