@@ -470,3 +470,11 @@
 @media(max-width:790px){.cmd-fast-top-trigger{font-size:10px;min-height:36px;padding:8px}.cmd-fastlane{padding:16px}.cmd-fast-heading{align-items:stretch;flex-direction:column}.cmd-fast-game{max-width:none}.cmd-fast-dialog{max-height:84dvh}.cmd-fast-shade{padding:7vh 10px 12px}}
 @media(max-width:560px){.cmd-fast-top-trigger{font-size:0;gap:0}.cmd-fast-top-trigger::first-letter{font-size:15px}.cmd-fast-action,.cmd-fast-all{flex:1 1 44%;min-width:135px}.cmd-fast-results-label{padding:12px 12px 8px}.cmd-fast-result-right{font-size:0}.cmd-fast-result-right svg{font-size:13px}.cmd-fast-help{gap:10px}.cmd-capture-shade{padding:6px}.cmd-capture-dialog{max-height:calc(100dvh - 12px)}}
 @media(prefers-reduced-motion:reduce){.cmd-fast-shade{backdrop-filter:none}}
+
+/* Preserve meaningful content above the fold: league metrics should not sit below a decorative hero. */
+.cmd-hero-compact{min-height:143px;padding:22px 30px}
+.cmd-hero-compact h2{font-size:clamp(27px,3vw,41px);letter-spacing:-1.8px;margin:7px 0}
+.cmd-hero-compact p:not(.cmd-eyebrow){font-size:12px;line-height:1.45}
+.cmd-hero-compact .cmd-hero-mark{font-size:140px;bottom:-52px}
+.cmd-fast-top-trigger kbd{color:#d1d6de}
+@media(max-width:560px){.cmd-fast-top-trigger{font-size:14px;padding:8px 10px}.cmd-fast-trigger-label{display:none}.cmd-fast-top-trigger kbd{display:none}.cmd-hero-compact{padding:22px 18px;min-height:130px}}
