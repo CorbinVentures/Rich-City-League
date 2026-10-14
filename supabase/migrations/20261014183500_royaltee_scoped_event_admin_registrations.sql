@@ -25,7 +25,7 @@ set search_path = public, pg_temp as $$
   );
 $$;
 revoke all on function public.can_manage_royaltee() from public;
-grant execute on function public.can_manage_royaltee() to authenticated;
+grant execute on function public.can_manage_royaltee() to anon,authenticated;
 
 alter table public.rcl_royaltee_events
   add column if not exists registration_fee_cents integer not null default 0
