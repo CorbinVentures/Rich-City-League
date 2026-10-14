@@ -3,7 +3,7 @@ import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
-export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Richmond Basketball Community' }, description: 'Join Rich City Hoops free. Connect with Richmond players, find pickup runs, share highlights and follow Rich City League competition.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://richcityhoops.com/rcl-share-20261002.png',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Richmond Basketball Community',description:'Richmond basketball connected: players, runs, highlights, and Rich City League.'} };
+export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Richmond Basketball Community' }, description: 'Join Rich City Hoops free. Connect with Richmond players, find pickup runs, share highlights and follow Rich City League competition.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Richmond Basketball Community',description:'Richmond basketball connected: players, runs, highlights, and Rich City League.'} };
 
 export const revalidate = 60;
 
