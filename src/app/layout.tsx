@@ -90,8 +90,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
   },
   formatDetection: { telephone: false },
-  openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City Hoops', title: 'Rich City Hoops | Virginia Basketball Community', description: 'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.', url: 'https://www.richcityhoops.com', images: [{ url: 'https://www.richcityhoops.com/rcl-share-20261002.png', width: 1200, height: 630, alt: 'Rich City Hoops — Virginia basketball community' }] },
-  twitter: { card: 'summary_large_image', title: 'Rich City Hoops | Virginia Basketball Community', description: 'People, runs, highlights and Rich City League competition in one basketball social world.', images: ['https://www.richcityhoops.com/rcl-share-20261002.png'] },
+  openGraph: { type: 'website', locale: 'en_US', siteName: 'Rich City Hoops', title: 'Rich City Hoops | Virginia Basketball Community', description: 'Richmond basketball connected: people, runs, highlights, discovery and Rich City League competition in one social platform.', url: 'https://www.richcityhoops.com', images: [{ url: 'https://www.richcityhoops.com/opengraph-image?v=20261014', width: 1200, height: 630, alt: 'Rich City Hoops — Virginia basketball community' }] },
+  twitter: { card: 'summary_large_image', title: 'Rich City Hoops | Virginia Basketball Community', description: 'People, runs, highlights and Rich City League competition in one basketball social world.', images: ['https://www.richcityhoops.com/opengraph-image?v=20261014'] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
