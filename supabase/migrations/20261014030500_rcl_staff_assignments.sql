@@ -141,7 +141,9 @@ select auth.uid() is not null and exists(
  select 1 from public.rcl_staff_assignments a
  join public.profiles p on p.id=a.profile_id
  where a.profile_id=auth.uid() and p.is_active=true and a.active=true
- and a.role_code=p_role_code and (p_team_id is null or a.team_id=p_team_id)
+ and a.role_code=p_role_code
+ and ((p_team_id is not null and a.team_id=p_team_id)
+      or (p_team_id is null and p_role_code not in ('franchise_owner','league_coach')))
 );$function$;
 
 revoke all on function public.rcl_review_staff_application(uuid,text,text) from public,anon;
