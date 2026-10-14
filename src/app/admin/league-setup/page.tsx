@@ -25,6 +25,7 @@ export default function LeagueSetupPage() {
   const [error,setError]=useState<string|null>(null);
   const [message,setMessage]=useState<string|null>(null);
   const [leagueAppsSyncing,setLeagueAppsSyncing]=useState(false);
+  const [archivedTeamCount,setArchivedTeamCount]=useState(0);
   const [logoUploading,setLogoUploading]=useState<string|null>(null);
 
   const [league,setLeague]=useState({name:'Rich City League',slug:'rich-city-league',description:''});
@@ -53,12 +54,16 @@ export default function LeagueSetupPage() {
     if (firstError) setError(firstError.message);
     else {
       const ls=(l.data??[]) as League[], ss=(s.data??[]) as Season[], ds=(d.data??[]) as Division[], ts1=(t.data??[]) as Team[], tss=(ts.data??[]) as TeamSeason[];
-      setLeagues(ls); setSeasons(ss); setDivisions(ds); setTeams(ts1); setTeamSeasons(tss);
-      setCounts({leagues:ls.length,seasons:ss.length,divisions:ds.length,teams:ts1.length,teamSeasons:tss.length,players:p.count??0,rosters:r.count??0,games:(g.data??[]).length});
+      // Preserve historical teams in storage, but never present them as active
+      // franchises or options when creating assignments and upcoming games.
+      const activeTeams=ts1.filter(t=>t.is_active);
+      setLeagues(ls); setSeasons(ss); setDivisions(ds); setTeams(activeTeams); setTeamSeasons(tss);
+      setArchivedTeamCount(ts1.length-activeTeams.length);
+      setCounts({leagues:ls.length,seasons:ss.length,divisions:ds.length,teams:activeTeams.length,teamSeasons:tss.length,players:p.count??0,rosters:r.count??0,games:(g.data??[]).length});
       setSeason(x=>({...x,leagueId:x.leagueId||ls[0]?.id||''}));
       setTeam(x=>({...x,leagueId:x.leagueId||ls[0]?.id||''}));
       setDivision(x=>({...x,seasonId:x.seasonId||ss[0]?.id||''}));
-      setTeamSeason(x=>({...x,seasonId:x.seasonId||ss[0]?.id||'',teamId:x.teamId||ts1[0]?.id||''}));
+      setTeamSeason(x=>({...x,seasonId:x.seasonId||ss[0]?.id||'',teamId:activeTeams.some(t=>t.id===x.teamId)?x.teamId:(activeTeams[0]?.id||'')}));
       setGame(x=>({...x,seasonId:x.seasonId||ss[0]?.id||'',divisionId:x.divisionId||ds[0]?.id||''}));
     }
     setBusy(false);
@@ -84,16 +89,16 @@ export default function LeagueSetupPage() {
       if (!token) throw new Error('Your admin session is unavailable. Please sign in again.');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const registrationResponse = await fetch('/api/admin/leagueapps?action=sync&resource=registrations-2', { cache:'no-store', headers });
-      const registrationData = await registrationResponse.json();
-      if (!registrationResponse.ok) throw new Error(registrationData.error || 'LeagueApps registration sync failed.');
-
-      const structureResponse = await fetch('/api/admin/leagueapps?action=materialize-structure', { cache:'no-store', headers });
-      const structureData = await structureResponse.json();
-      if (!structureResponse.ok) throw new Error(structureData.error || 'LeagueApps structure sync failed.');
-
-      const result = structureData.result ?? {};
-      setMessage(`LeagueApps synced: ${result.seasons ?? 0} season(s), ${result.teams ?? 0} team(s), ${result.teamSeasons ?? 0} team assignment(s) reconciled.`);
+      // Import only teams attached to approved, upcoming LeagueApps programs.
+      // Historical registrations are still available for player records but
+      // must never recreate or reactivate past franchises.
+      const response = await fetch('/api/admin/leagueapps?action=sync-competition', { cache:'no-store', headers });
+      const result = await response.json();
+      if (!response.ok || result.ok === false) {
+        const warnings = Array.isArray(result.warnings) ? result.warnings.slice(0, 3).join(' · ') : '';
+        throw new Error(result.error || warnings || 'Current competition sync did not complete successfully.');
+      }
+      setMessage(`LeagueApps synced: ${result.programs ?? 0} upcoming program(s), ${result.teamsSeen ?? 0} current team(s), ${result.gamesUpserted ?? 0} game(s). Historical teams remain archived.`);
       await load();
     } catch (syncError) {
       setError(syncError instanceof Error ? syncError.message : 'LeagueApps structure sync failed.');
@@ -140,8 +145,8 @@ export default function LeagueSetupPage() {
     <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">RCL DATA FOUNDATION</p><h1 className="mt-2 font-display text-4xl font-black uppercase">League setup</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/50">Build the real competition hierarchy in order: league → season → division → teams → team seasons → games. This does not seed demo production records.</p></div><ScorebookAppLink className="rounded-xl border border-white/10 bg-white/[.04] px-4 py-3 text-xs font-black uppercase tracking-widest">Open Scorebook</ScorebookAppLink></div>
     <section className="mt-8 rounded-3xl border border-rcl-orange/25 bg-rcl-orange/[.04] p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">LEAGUEAPPS SOURCE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Sync league structure</h2><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Pull the latest LeagueApps registration structure into RCL and reconcile seasons, teams, divisions and team-season assignments. Existing LeagueApps-linked records update instead of duplicating.</p></div>
-        <button type="button" onClick={() => void syncLeagueAppsStructure()} disabled={leagueAppsSyncing} className={button}>{leagueAppsSyncing?'Syncing LeagueApps…':'Sync from LeagueApps'}</button>
+        <div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">LEAGUEAPPS SOURCE</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Sync league structure</h2><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Sync approved upcoming LeagueApps competitions and their current teams, divisions and schedules. Historical registration teams are not imported or reactivated.</p></div>
+        {profile?.role==='admin'&&<button type="button" onClick={() => void syncLeagueAppsStructure()} disabled={leagueAppsSyncing} className={button}>{leagueAppsSyncing?'Syncing LeagueApps…':'Sync current season'}</button>}
       </div>
     </section>
     {(message||error)&&<div className={`mt-6 rounded-2xl border p-4 text-sm \${error?'border-red-400/20 bg-red-400/10 text-red-200':'border-emerald-400/20 bg-emerald-400/10 text-emerald-200'}`}>{error??message}</div>}
@@ -152,6 +157,7 @@ export default function LeagueSetupPage() {
         <div className="min-w-0 flex-1"><p className="truncate text-sm font-black">{team.name}</p><label className="mt-2 inline-flex cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-xs font-black uppercase tracking-widest hover:border-rcl-orange/50">{logoUploading===team.id?'Uploading…':team.logo_url?'Replace logo':'Upload logo'}<input type="file" accept="image/*" className="sr-only" disabled={logoUploading!==null} onChange={e=>{const file=e.target.files?.[0];if(file)void uploadTeamLogo(team.id,file);e.currentTarget.value='';}}/></label></div>
       </div>)}</div>
     </section>}
+    <p className="mt-4 text-xs text-white/40">Showing active franchises only. {archivedTeamCount} historical team(s) are retained in the archive and excluded from new team assignments.</p>
     <section className="mt-8 grid gap-3 sm:grid-cols-4 lg:grid-cols-8">{Object.entries(counts).map(([label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/[.025] p-4"><p className="text-xs font-black uppercase tracking-widest text-white/35">{label.replace(/([A-Z])/g,' $1')}</p><p className="mt-2 font-display text-2xl font-black">{value}</p></div>)}</section>
 
     <div className="mt-8 grid gap-6 lg:grid-cols-2">
