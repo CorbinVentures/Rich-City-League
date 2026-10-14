@@ -1,6 +1,6 @@
 begin;
 
-select plan(35);
+select plan(46);
 
 set role postgres;
 
@@ -224,6 +224,56 @@ $rolecheck$,'administrator can revoke an approved franchise role');
 select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
 select is(public.rcl_has_staff_assignment('franchise_owner','51111111-1111-1111-1111-111111111111'::uuid),false,
  'revocation immediately removes approved franchise access');
+
+-- Direct administrator assignment to an existing member (no application).
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);
+select throws_ok($directrole$
+ select public.rcl_admin_assign_staff_role('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid,'accountant',null)
+$directrole$,'P0001','Administrator authorization required',
+ 'ordinary members cannot directly grant accounting roles');
+
+select set_config('request.jwt.claim.sub', 'cccccccc-cccc-cccc-cccc-cccccccccccc', true);
+select throws_ok($directrole$
+ select public.rcl_admin_assign_staff_role('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid,'accountant',null)
+$directrole$,'P0001','Administrator authorization required',
+ 'non-admin staff cannot directly assign accountant roles');
+
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
+select lives_ok($directrole$
+ insert into public.rcl_staff_applications(profile_id,role_code,motivation)
+ values(auth.uid(),'accountant','Ready to help reconcile')
+$directrole$,'a member can have a pending accountant request');
+
+select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select lives_ok($directrole$
+ select public.rcl_admin_assign_staff_role('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid,'accountant',null)
+$directrole$,'admin directly assigns accountant to an existing RCH member');
+
+select is((select count(*) from public.rcl_staff_assignments
+ where profile_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' and role_code='accountant' and active),1::bigint,
+ 'direct assignment creates exactly one active role');
+select is((select status from public.rcl_staff_applications
+ where profile_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' and role_code='accountant'), 'approved'::text,
+ 'direct assignment resolves a preexisting matching application');
+select is((select role::text from public.profiles
+ where id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 'coach',
+ 'accounting staff assignment does not change the normal member profile role');
+select throws_ok($directrole$
+ select public.rcl_admin_assign_staff_role('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid,'accountant',null)
+$directrole$,'P0001','Member already holds this active assignment',
+ 'admin cannot assign the same active role twice');
+
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
+select is(public.rcl_has_staff_assignment('accountant'),true,
+ 'member sees approved accounting assignment');
+select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select lives_ok($directrole$
+ select public.rcl_revoke_staff_assignment((select id from public.rcl_staff_assignments
+ where profile_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' and role_code='accountant' and active))
+$directrole$,'admin can revoke a directly assigned accounting role');
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true);
+select is(public.rcl_has_staff_assignment('accountant'),false,
+ 'direct assignment revocation immediately removes accounting access');
 
 select * from finish();
 rollback;
