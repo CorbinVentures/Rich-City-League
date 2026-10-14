@@ -20,6 +20,7 @@ export function RoyalteeJoinForm(){
   const [ageReady,setAgeReady]=useState(false);
   const [eligible,setEligible]=useState(false);
   const [application,setApplication]=useState<Application>(empty);
+  const [hasApplication,setHasApplication]=useState(false);
   const [loading,setLoading]=useState(true);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
@@ -37,7 +38,7 @@ export function RoyalteeJoinForm(){
       const cutoff=new Date();cutoff.setUTCHours(0,0,0,0);cutoff.setUTCFullYear(cutoff.getUTCFullYear()-18);
       setEligible(Boolean(dob&&dob<=cutoff.toISOString().slice(0,10)));
       setAgeReady(true);
-      if(identityResult.data)setApplication({...empty,...identityResult.data});
+      if(identityResult.data){setApplication({...empty,...identityResult.data});setHasApplication(true);}
       setLoading(false);
     }).catch(()=>{if(active){setAgeReady(true);setError('Unable to verify adult eligibility. Try again.');setLoading(false);}});
     return()=>{active=false;};
@@ -47,7 +48,6 @@ export function RoyalteeJoinForm(){
     if(!user||!db||!eligible||busy)return;
     setBusy(true);
     const payload={
-      profile_id:user.id,
       headline:application.headline.trim(),
       discipline:application.discipline,
       years_experience:application.years_experience,
@@ -55,9 +55,11 @@ export function RoyalteeJoinForm(){
       published:application.published,
       updated_at:new Date().toISOString()
     };
-    const {error:saveError}=await db.from('rcl_royaltee_cheer_profiles').upsert(payload,{onConflict:'profile_id'});
+    const {error:saveError}=hasApplication
+      ? await db.from('rcl_royaltee_cheer_profiles').update(payload).eq('profile_id',user.id)
+      : await db.from('rcl_royaltee_cheer_profiles').insert({profile_id:user.id,...payload});
     if(saveError)setError(saveError.message||'Unable to save your application.');
-    else setSuccess(application.status==='approved'?'Your public performer details were saved.':'Your adult performer application has been saved for Royaltee review.');
+    else {setHasApplication(true);setSuccess(application.status==='approved'?'Your public performer details were saved.':'Your adult performer application has been saved for Royaltee review.');}
     setBusy(false);
   }
   return <main className="min-h-screen bg-[#050c16] pb-24 text-white">
