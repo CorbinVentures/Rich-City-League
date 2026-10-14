@@ -111,3 +111,26 @@
  .rch-move-link{transform:none!important}
  .rch-nav-group-summary svg{transition:none!important}
 }
+
+/* Two low-friction cross-feature next steps after a task is complete. */
+.rch-next-journey{
+ max-width:1160px;margin:24px auto 40px;padding:18px 22px;display:flex;align-items:center;
+ justify-content:space-between;gap:22px;flex-wrap:wrap;
+ border:1px solid #335b7e;border-radius:16px;color:#f3faff!important;
+ background:linear-gradient(115deg,#123654,#091d32);
+ box-shadow:0 12px 28px rgba(0,10,26,.16);
+}
+.rch-next-journey-copy{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 260px}
+.rch-next-journey-copy p{display:flex;align-items:center;gap:7px;font-size:10px!important;font-weight:850!important;letter-spacing:1.4px!important;color:#91caff!important;margin:0!important}
+.rch-next-journey-copy h2{font-size:19px!important;line-height:1.25!important;font-weight:850!important;color:#fff!important;margin:0!important}
+.rch-next-journey-copy span{font-size:12px!important;color:#c3d7e8!important;line-height:1.5}
+.rch-next-journey-links{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.rch-next-journey-links a{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;padding:9px 13px;border-radius:9px;border:1px solid #4e88b9;background:#173e60;color:#f0f8ff!important;font-weight:780;font-size:12px!important;text-decoration:none!important}
+.rch-next-journey-links a:first-child{background:#216a9f;border-color:#81bcec}
+.rch-next-journey-links a:hover,.rch-next-journey-links a:focus-visible{border-color:#b4e1ff;background:#2f6f9b;outline-offset:2px}
+.rch-next-journey-links svg{color:#a9ddff}
+@media(max-width:767px){
+ .rch-next-journey{margin:14px 15px 94px;padding:16px}
+ .rch-next-journey-links{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .rch-next-journey-links a{min-width:0;padding:9px 10px;font-size:11px!important;line-height:1.35}
+}
