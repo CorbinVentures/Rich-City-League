@@ -79,6 +79,7 @@ export function StaffApprovalsDesk(){
   <div className="mx-auto max-w-6xl space-y-6">
    <div><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#8bc7f4]"><FaShieldHalved/> RCL GOVERNANCE · SECURE</p>
     <h1 className="mt-2 text-3xl font-black">Staff roles and approvals</h1>
+    <Link href="/admin/staff/workspaces" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#95cdeb] bg-[#215b84] px-4 text-xs font-black text-white">Open all role workspaces <FaArrowRight/></Link>
     <p className="mt-2 text-sm leading-6 text-[#c5dbec]">Review applicants, approve official league appointments and revoke access. Members cannot approve themselves or grant themselves franchise ownership.</p>
    </div>
    <div className="grid gap-3 sm:grid-cols-3">{[

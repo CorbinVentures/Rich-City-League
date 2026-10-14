@@ -7,13 +7,15 @@ import {FaArrowRight,FaBasketball,FaBriefcase,FaCheck,FaClock,FaLock,FaPeopleGro
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {RCL_STAFF_ROLES,roleInfo,type RCLStaffRole} from '@/lib/rcl-staff-roles';
+import {staffDeskHref} from '@/lib/rcl-staff-admin-tools';
 
 type Team={id:string;name:string;city:string|null;is_active:boolean};
 type Application={id:string;profile_id:string;role_code:string;team_id:string|null;motivation:string;status:string;review_note:string;created_at:string};
 type Assignment={id:string;profile_id:string;role_code:string;team_id:string|null;active:boolean;assigned_at:string};
 const inputClass='w-full min-h-12 rounded-xl border border-[#507b9d] bg-[#091e31] px-4 py-3 text-sm text-white outline-none focus:border-[#9ad3ff]';
 export function StaffRolePortal(){
- const {user,loading:authLoading}=useAuth();
+ const {user,profile,loading:authLoading}=useAuth();
+ const isAdmin=Boolean(user&&profile?.role==='admin');
  const db=useMemo(()=>getSupabaseClient() as unknown as SupabaseClient<any>|null,[]);
  const [applications,setApplications]=useState<Application[]>([]);
  const [assignments,setAssignments]=useState<Assignment[]>([]);
@@ -77,7 +79,7 @@ export function StaffRolePortal(){
      {assignments.length?<div className="mt-4 grid gap-3 md:grid-cols-2">
       {assignments.map(a=>{const info=roleInfo(a.role_code);return <div key={a.id} className="rounded-xl border border-[#45876f] bg-[#103632] p-4">
        <div className="flex gap-2 text-xs font-black uppercase tracking-wider text-[#a4f6d1]"><FaCheck aria-hidden="true"/> Approved assignment</div>
-       <h3 className="mt-2 text-lg font-black">{info?.title??a.role_code}</h3><p className="mt-1 text-xs text-[#c4e6dc]">{teamName(a.team_id)} · Assigned {new Date(a.assigned_at).toLocaleDateString()}</p>
+       <h3 className="mt-2 text-lg font-black">{info?.title??a.role_code}</h3><Link href={staffDeskHref(a.role_code as RCLStaffRole,a.team_id)} className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#72bda9] bg-[#184d42] px-3 py-2.5 text-xs font-black text-white">Open my role workspace <FaArrowRight/></Link><p className="mt-1 text-xs text-[#c4e6dc]">{teamName(a.team_id)} · Assigned {new Date(a.assigned_at).toLocaleDateString()}</p>
        {a.role_code==='franchise_owner'&&<p className="mt-3 rounded-lg border border-[#4a8a83] bg-[#092b2b] p-3 text-xs leading-5 text-[#ccede7]">Franchise assignment confirmed for <strong>{teamName(a.team_id)}</strong>. This does not unlock the league-wide financial command center or any other franchise.</p>}
        <div className="mt-4 flex flex-wrap gap-2">{(info?.actions??[]).map(action=><Link key={action.href} href={action.href} title={action.note} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#4f8f90] bg-[#164b4a] px-3 text-xs font-bold text-white">{action.title}<FaArrowRight aria-hidden="true"/></Link>)}</div>
       </div>})}
@@ -90,7 +92,18 @@ export function StaffRolePortal(){
       <span className={'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-black uppercase '+(a.status==='approved'?'border-[#43856e] text-[#9af0c5]':a.status==='rejected'?'border-[#965363] text-[#f4b2bd]':'border-[#a98648] text-[#f3d38e]')}>{a.status==='pending'&&<FaClock/>}{a.status}</span>
      </div>)}</div>
     </section>}
-    <section className="rounded-2xl border border-[#416b8d] bg-[#0c2942] p-5 sm:p-7">
+    {isAdmin&&<section className="rounded-2xl border border-[#5490b0] bg-[linear-gradient(130deg,#0d3355,#09223a)] p-5 sm:p-7" aria-label="Administrator staff role switcher">
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#a6d8fc]">ADMINISTRATOR ROLE ACCESS</p>
+       <h2 className="mt-2 text-2xl font-black">Open any RCL role workspace</h2>
+       <p className="mt-2 max-w-xl text-sm leading-6 text-[#c7deef]">You already have administrative authority. Inspect each position without requesting approval or making yourself a franchise owner.</p></div>
+       <Link href="/admin/staff" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9dd0f4] bg-[#215b85] px-4 text-xs font-black text-white">Manage staff approvals <FaArrowRight/></Link></div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{RCL_STAFF_ROLES.map(item=><Link href={staffDeskHref(item.id)} key={item.id} className="group flex min-h-36 flex-col justify-between gap-3 rounded-xl border border-[#4c82a5] bg-[#0a2942] p-4 text-white hover:border-[#a7dcff] hover:bg-[#1b496c]">
+        <span><small className="text-[10px] font-black uppercase tracking-[.12em] text-[#add8f7]">{item.department}</small><strong className="mt-2 block text-base font-black">{item.title}</strong><span className="mt-2 block text-xs leading-5 text-[#c5ddef]">{item.description}</span></span>
+        <span className="inline-flex items-center justify-between text-xs font-black text-[#a8dafe]">Open workspace <FaArrowRight className="group-hover:translate-x-1"/></span>
+       </Link>)}</div>
+      <p className="mt-4 text-xs leading-5 text-[#b7d3e7]">Viewing a role as an administrator never grants or fabricates employee approvals. Franchise owner approval for ordinary member accounts is still mandatory.</p>
+     </section>}
+    {!isAdmin&&(    <section className="rounded-2xl border border-[#416b8d] bg-[#0c2942] p-5 sm:p-7">
      <div className="mb-5"><h2 className="text-2xl font-black">Request a staff role</h2><p className="mt-2 text-sm leading-6 text-[#c6deef]">Choose your position and tell us a little about your experience. Requests are reviewed by RCL administration; submission alone does not grant a position.</p></div>
      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="group" aria-label="Select staff position">{RCL_STAFF_ROLES.map(item=><button key={item.id} type="button" aria-pressed={role===item.id} onClick={()=>{setRole(item.id);setTeamId('');setMessage('');}} className={'min-h-32 rounded-xl border p-4 text-left transition '+(role===item.id?'border-[#a8deff] bg-[#235781] shadow-[inset_0_2px_0_#b6e4ff]':'border-[#487397] bg-[#0b233a] hover:border-[#a1cced]')}>
       <small className="text-[10px] font-black uppercase tracking-wider text-[#9ccffa]">{item.department}</small>
@@ -117,7 +130,7 @@ export function StaffRolePortal(){
       {message&&<div role={isError?'alert':'status'} className={'rounded-xl border p-3 text-sm '+(isError?'border-[#a65c68] bg-[#3f202c] text-[#ffd9dd]':'border-[#468a70] bg-[#113c31] text-[#b9f1dc]')}>{message}</div>}
       <button type="submit" disabled={saving||(selected.teamRequired&&!teamId)} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#a1d7fc] bg-[#2676b3] px-6 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-45">{saving?'Submitting…':'Submit request'}<FaArrowRight aria-hidden="true"/></button>
      </form>
-    </section>
+    </section>)}
    </>}
   </div>
  </main>;
