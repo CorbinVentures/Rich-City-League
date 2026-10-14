@@ -45,6 +45,8 @@ import './rch-visual-qa-finish.css';
 import './rch-header-contrast-authority.css';
 // Public browser routes inherit the installed-app palette; final layer owns public contrast.
 import './rch-public-theme.css';
+// Final, scoped action-first member navigation layer; does not override public pages.
+import './rch-intent-navigation.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
