@@ -52,3 +52,23 @@ export function searchRCHActions(query:string):RCHAction[]{
  }
  return [...unique.values()];
 }
+
+export type RCHNextStep={heading:string;detail:string;links:readonly {label:string;href:string}[]};
+const steps:{prefix:string;value:RCHNextStep}[]=[
+ {prefix:'/runs',value:{heading:'Keep the run going',detail:'Bring the court into your RCH world.',links:[{label:'Share your highlights',href:'/create/social?mode=clip'},{label:'Find your people',href:'/communities'}]}},
+ {prefix:'/games',value:{heading:'More than the final score',detail:'Follow the game, then watch the next chapter.',links:[{label:'Watch RCH TV',href:'/media'},{label:'League standings',href:'/standings'}]}},
+ {prefix:'/media',value:{heading:'Keep watching',detail:'Explore highlights or see the next matchup.',links:[{label:'Short clips',href:'/clips'},{label:'Game night',href:'/games'}]}},
+ {prefix:'/players',value:{heading:'See the players in action',detail:'Basketball gets better when you meet the network.',links:[{label:'Find an open run',href:'/runs'},{label:'Compare players',href:'/players/compare'}]}},
+ {prefix:'/teams',value:{heading:'Follow the competition',detail:'See who is playing and where teams stand.',links:[{label:'Upcoming games',href:'/games'},{label:'Standings',href:'/standings'}]}},
+ {prefix:'/league',value:{heading:'Be part of the league',detail:'The games are the start of the story.',links:[{label:'Game center',href:'/games'},{label:'RCH TV',href:'/media'}]}},
+ {prefix:'/communities',value:{heading:'Take the conversation to the court',detail:'Connect through real games and shared moments.',links:[{label:'Open runs',href:'/runs'},{label:'Community feed',href:'/social'}]}},
+ {prefix:'/create',value:{heading:'Your moment is only the start',detail:'Keep building your basketball identity.',links:[{label:'See the feed',href:'/social'},{label:'My profile',href:'/social/profile/me'}]}},
+ {prefix:'/organizations',value:{heading:'Grow the network',detail:'Connect teams, events and organizations statewide.',links:[{label:'Partner with RCH',href:'/network/partners'},{label:'Virginia network',href:'/network'}]}},
+ {prefix:'/news',value:{heading:'Follow the full story',detail:'Stay connected to the game and the people behind it.',links:[{label:'RCH TV',href:'/media'},{label:'Game center',href:'/games'}]}}
+];
+export function nextRCHStep(pathname:string):RCHNextStep|null{
+ // Respect standalone editing, broadcast and creator workspaces.
+ if(pathname.startsWith('/media/creators')||pathname.startsWith('/create/social'))return null;
+ const match=steps.find(item=>pathname===item.prefix||pathname.startsWith(item.prefix+'/'));
+ return match?.value??null;
+}
