@@ -22,7 +22,7 @@ export function RoyalteeEventRegistration({event}:{event:EventSignup}){
 
  useEffect(()=>{
   if(authLoading)return;
-  if(!user||!db){setLoading(false);return;}
+  if(!user||!db){setRegistration(null);setLoading(false);return;}
   let active=true;
   void db.from('rcl_royaltee_event_registrations').select('id,status,payment_status,fee_cents_snapshot')
    .eq('event_id',event.id).eq('profile_id',user.id).maybeSingle()
