@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { RoyalteeEventRegistration } from '@/components/RoyalteeEventRegistration';
 import type { Metadata } from 'next';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaCalendarDays, FaCheck, FaCrown, FaEnvelope, FaHeart, FaLocationDot, FaPeopleGroup, FaPhone, FaShieldHalved, FaStar } from 'react-icons/fa6';
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 
 type Program = { headline:string; about:string; registration_note:string; contact_email:string; contact_phone:string; registration_open:boolean };
 type Cheerleader = { profile_id:string; headline:string; discipline:'cheer'|'step'|'both'; profile:{ id:string; display_name:string|null; username:string|null; avatar_url:string|null; location:string|null }|null };
-type Event = { id:string; title:string; description:string; event_type:string; starts_at:string; location:string; status:string };
+type Event = { id:string; title:string; description:string; event_type:string; starts_at:string; location:string; status:string; registration_fee_cents:number; registration_open:boolean; capacity:number|null };
 const fallback:Program = {
   headline:'Bring the energy. Own the floor.',
   about:'Royaltee Steppas & Cheerleading is the official Rich City League cheer and step partner. Its adult performers help create a game-day experience beyond the basketball court.',
@@ -30,7 +31,7 @@ export default async function RoyalteePage() {
   const [p,m,e]=await Promise.all([
     client ? client.from('rcl_royaltee_program').select('headline,about,registration_note,contact_email,contact_phone,registration_open').eq('slug','royaltee-steppas').maybeSingle() : Promise.resolve({data:null}),
     client ? client.from('rcl_royaltee_cheer_profiles').select('profile_id,headline,discipline,profile:profiles!rcl_royaltee_cheer_profiles_profile_id_fkey!inner(id,display_name,username,avatar_url,location)').eq('status','approved').eq('published',true).order('created_at',{ascending:false}).limit(24) : Promise.resolve({data:[]}),
-    client ? client.from('rcl_royaltee_events').select('id,title,description,event_type,starts_at,location,status').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(12) : Promise.resolve({data:[]})
+    client ? client.from('rcl_royaltee_events').select('id,title,description,event_type,starts_at,location,status,registration_fee_cents,registration_open,capacity').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(12) : Promise.resolve({data:[]})
   ]);
   const program={...fallback,...((p.data??{}) as Partial<Program>)};
   const people=((m.data??[]) as Array<Cheerleader&{profile:any}>).map(person=>({...person,profile:Array.isArray(person.profile)?person.profile[0]:person.profile})).filter(person=>Boolean(person.profile));
@@ -112,7 +113,7 @@ export default async function RoyalteePage() {
     <section className="royaltee-section royaltee-events-section" id="events">
       <div className="royaltee-wrap">
         <div className="royaltee-section-heading"><div><span className="royaltee-kicker">SEE THE MOVEMENT LIVE</span><h2 className="royaltee-display">UPCOMING <span>EVENTS.</span></h2></div><p>Adult performances, rehearsals, auditions and game-day appearances. Only confirmed, published 18+ events appear here.</p></div>
-        {events.length?<div className="royaltee-event-grid">{events.map(event=><article className="royaltee-event-card" key={event.id}><div className="royaltee-datebox"><strong>{new Intl.DateTimeFormat('en-US',{month:'short',timeZone:'America/New_York'}).format(new Date(event.starts_at)).toUpperCase()}</strong><span>{new Intl.DateTimeFormat('en-US',{day:'2-digit',timeZone:'America/New_York'}).format(new Date(event.starts_at))}</span></div><div><span className="royaltee-event-kind">{readable(event.event_type)} · 18+</span><h3>{event.title}</h3><p><FaCalendarDays aria-hidden="true"/> {new Intl.DateTimeFormat('en-US',{dateStyle:'full',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(event.starts_at))}</p>{event.location&&<p><FaLocationDot aria-hidden="true"/>{event.location}</p>}{event.description&&<small>{event.description}</small>}</div></article>)}</div>:<div className="royaltee-empty-events"><FaCalendarDays aria-hidden="true"/><div><h3>MORE ROYALTEE MOMENTS AHEAD.</h3><p>Upcoming adult performances and tryouts will appear here after Royaltee confirms and publishes them.</p></div></div>}
+        {events.length?<div className="royaltee-event-grid">{events.map(event=><article className="royaltee-event-card" key={event.id}><div className="royaltee-datebox"><strong>{new Intl.DateTimeFormat('en-US',{month:'short',timeZone:'America/New_York'}).format(new Date(event.starts_at)).toUpperCase()}</strong><span>{new Intl.DateTimeFormat('en-US',{day:'2-digit',timeZone:'America/New_York'}).format(new Date(event.starts_at))}</span></div><div><span className="royaltee-event-kind">{readable(event.event_type)} · 18+</span><h3>{event.title}</h3><p><FaCalendarDays aria-hidden="true"/> {new Intl.DateTimeFormat('en-US',{dateStyle:'full',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(event.starts_at))}</p>{event.location&&<p><FaLocationDot aria-hidden="true"/>{event.location}</p>}{event.description&&<small>{event.description}</small>}<RoyalteeEventRegistration event={event}/></div></article>)}</div>:<div className="royaltee-empty-events"><FaCalendarDays aria-hidden="true"/><div><h3>MORE ROYALTEE MOMENTS AHEAD.</h3><p>Upcoming adult performances and tryouts will appear here after Royaltee confirms and publishes them.</p></div></div>}
       </div>
     </section>
 
