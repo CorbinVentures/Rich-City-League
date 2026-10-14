@@ -38,7 +38,7 @@
 .royaltee-age-tag { display:flex; gap:8px; align-items:center; font-size:11px; font-weight:700; color:#a7c8dd; margin:17px 0 0; }
 .royaltee-hero-art { position:relative; display:grid; place-items:center; min-width:0; }
 .royaltee-art-orbit { position:absolute; inset:8% 4%; border:2px solid rgba(30,157,255,.2); border-radius:50%; box-shadow:0 0 65px rgba(18,145,254,.17),inset 0 0 75px rgba(255,115,24,.1); }
-.royaltee-official-logo { position:relative; z-index:1; width:min(100%,680px); height:auto; object-fit:contain; filter:drop-shadow(0 8px 35px rgba(0,165,255,.25)); -webkit-mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); }
+.royaltee-official-logo { position:relative; z-index:1; width:min(100%,580px); height:auto; object-fit:contain; image-rendering:auto; filter:drop-shadow(0 8px 35px rgba(0,165,255,.25)); -webkit-mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); mask-image:radial-gradient(ellipse,#000 56%,rgba(0,0,0,.98) 68%,transparent 87%); }
 .royaltee-art-label { position:absolute; bottom:13%; left:10%; right:10%; display:flex; justify-content:center; align-items:center; gap:14px; font-size:11px; font-weight:900; letter-spacing:.15em; color:#cdeeff; text-shadow:0 0 12px #000; z-index:2; }
 .royaltee-art-label svg { color:#ff9747; }
 .royaltee-hero-ticker { position:relative; z-index:3; min-height:50px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:clamp(11px,2.4vw,35px); padding:13px 20px; color:#e9f8ff; background:linear-gradient(90deg,#0b2d53,#050c16 40%,#1b2b42 75%,#0a2948); border-top:1px solid rgba(16,158,255,.5); font-size:10px; font-weight:1000; letter-spacing:.17em; }
@@ -63,10 +63,10 @@
 .royaltee-step-card { border-color:rgba(250,132,47,.67); }
 .royaltee-program-visual { position:relative; height:260px; overflow:hidden; background:radial-gradient(ellipse at 50% 95%,rgba(20,136,245,.5),transparent 70%),#02070e; }
 .royaltee-step-card .royaltee-program-visual { background:radial-gradient(ellipse at 50% 95%,rgba(255,109,24,.35),transparent 70%),#0a090d; }
-.royaltee-program-visual:after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom,transparent 25%,#071525 100%); pointer-events:none; }
-.royaltee-program-art { position:absolute; inset:-70px 0 -230px; background-image:url('/brand/royaltee-logo.avif'); background-repeat:no-repeat; background-size:auto 660px; filter:saturate(1.15); }
-.royaltee-program-art-cheer { background-position:24% top; }
-.royaltee-program-art-step { background-position:80% top; }
+.royaltee-program-visual:after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(2,8,18,.2),transparent 46%,rgba(2,8,18,.2)),linear-gradient(to bottom,rgba(2,8,18,.03) 20%,#071525 100%); pointer-events:none; }
+/* Do not blow a small compressed composite up to 660px and crop it by 300px.\n   A tighter, responsive crop reduces visible compression until the supplied HD\n   Royaltee art replaces the legacy image. */\n.royaltee-program-art { position:absolute; inset:0; background-image:url('/brand/royaltee-logo.avif'); background-repeat:no-repeat; background-size:auto clamp(360px,38vw,510px); filter:saturate(1.08); opacity:.84; }
+.royaltee-program-art-cheer { background-position:10% 13%; }
+.royaltee-program-art-step { background-position:90% 13%; }
 .royaltee-program-number { position:absolute; top:15px; left:18px; z-index:1; color:#f7faff; font-weight:1000; font-size:11px; letter-spacing:.15em; background:#0009; padding:8px 12px; border:1px solid #ffffff33; border-radius:7px; }
 .royaltee-program-content { padding:30px; position:relative; }
 .royaltee-program-content>span { color:#ffad77; font-size:10px; font-weight:950; letter-spacing:.17em; }
@@ -140,7 +140,7 @@
  .royaltee-rcl-link { padding:8px 9px; }
  .royaltee-hero-layout { grid-template-columns:1fr; padding-block:43px 55px; min-height:auto; }
  .royaltee-hero h1 { font-size:clamp(41px,9vw,69px); }
- .royaltee-hero-art { margin:18px auto 0; width:min(100%,570px); }
+ .royaltee-hero-art { margin:18px auto 0; width:min(100%,510px); }\n .royaltee-program-art { background-size:auto 410px; }
  .royaltee-art-label { bottom:9%; }
  .royaltee-section { padding:56px 0; }
  .royaltee-values { gap:9px; }
@@ -159,7 +159,7 @@
  .royaltee-brand strong { font-size:15px; }
  .royaltee-brand-crown { width:36px; height:36px; }
  .royaltee-rcl-link { font-size:9px; }
- .royaltee-hero h1 { font-size:40px; }
+ .royaltee-hero h1 { font-size:40px; }\n .royaltee-hero-art { width:min(100%,370px); }\n .royaltee-program-art { background-size:auto 395px; }
  .royaltee-hero-strap { font-size:20px; }
  .royaltee-actions .royaltee-cta { width:100%; }
  .royaltee-hero-ticker { gap:11px; font-size:8px; }
