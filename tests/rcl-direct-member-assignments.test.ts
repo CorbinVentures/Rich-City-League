@@ -1,7 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-const sql=readFileSync(join(process.cwd(),'supabase/migrations/20261014033500_direct_staff_member_assignment.sql'),'utf8');
+const sql=readFileSync(join(process.cwd(),'supabase/migrations/20261014024430_direct_staff_member_assignment.sql'),'utf8');
 const component=readFileSync(join(process.cwd(),'src/components/StaffDirectAssign.tsx'),'utf8');
 const approvals=readFileSync(join(process.cwd(),'src/components/StaffApprovalsDesk.tsx'),'utf8');
 describe('admin direct member staff assignments',()=>{
