@@ -83,6 +83,17 @@ export function SiteHeader(){
   const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
+  const sectionLabel=pathname.startsWith('/social/profile')?'Profile'
+    :pathname.startsWith('/social')?'Feed'
+    :pathname.startsWith('/discover')?'Discover'
+    :pathname.startsWith('/runs')?'Runs'
+    :pathname.startsWith('/media')?'RCH TV'
+    :pathname.startsWith('/league')||pathname.startsWith('/games')?'League'
+    :pathname.startsWith('/communities')?'Communities'
+    :pathname.startsWith('/create')?'Create'
+    :pathname.startsWith('/admin')?'Admin'
+    :pathname.startsWith('/today')?'Today'
+    :'Basketball';
 
   return <>
     <aside className="rcl-universal-sidebar rcl-social-world-sidebar">
@@ -128,7 +139,7 @@ export function SiteHeader(){
 
     <header className="rcl-universal-topbar rcl-social-world-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCH social home">
-        <span>RCH</span><b>RCH <i>Social</i></b>
+        <span>RCH</span><b>RCH <i>{sectionLabel}</i></b>
       </Link>
 
       <Link href="/search" className="rcl-global-search" aria-label="Search RCH">
