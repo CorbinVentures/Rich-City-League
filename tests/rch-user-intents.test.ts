@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {getRCHIntent,isRCHIntent,RCH_INTENTS,RCH_INTENT_IDS,searchRCHActions} from '../src/lib/rch-user-intents';
+import {getRCHIntent,isRCHIntent,RCH_INTENTS,RCH_INTENT_IDS,searchRCHActions,nextRCHStep} from '../src/lib/rch-user-intents';
 
 describe('RCH user-first navigation',()=>{
  it('offers distinct goals instead of a long unordered menu',()=>{
@@ -20,6 +20,14 @@ describe('RCH user-first navigation',()=>{
   expect(searchRCHActions('creator filmmaker').some(a=>a.href==='/media/creators')).toBe(true);
   expect(searchRCHActions('organization promote').some(a=>a.href==='/network/partners')).toBe(true);
   expect(searchRCHActions('veryunlikelysearchxxxx')).toEqual([]);
+ });
+ it('suggests related destinations without altering core pages',()=>{
+  expect(nextRCHStep('/runs')?.links[0].href).toBe('/create/social?mode=clip');
+  expect(nextRCHStep('/games/example')?.links[0].href).toBe('/media');
+  expect(nextRCHStep('/players/example')?.links[0].href).toBe('/runs');
+  expect(nextRCHStep('/media/creators/dashboard')).toBeNull();
+  expect(nextRCHStep('/command')).toBeNull();
+  expect(nextRCHStep('/social')).toBeNull();
  });
  it('never treats an unknown preference as a valid account role',()=>{
   expect(isRCHIntent('watch')).toBe(true);
