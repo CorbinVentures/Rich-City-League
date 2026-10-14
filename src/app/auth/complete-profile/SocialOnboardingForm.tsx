@@ -20,7 +20,7 @@ type OnboardingProfile = {
 
 const roles = [
   { id: 'player' as const, icon: FaBasketball, title: 'Player', copy: 'Build your basketball identity, stats, REP and badges.' },
-  { id: 'coach' as const, icon: FaBullhorn, title: 'Coach', copy: 'Build your coaching identity. Coach tools require league approval.' },
+  { id: 'coach' as const, icon: FaBullhorn, title: 'Coach', copy: 'Join RCH as a coach for free. Build your regular profile and choose whether to appear in the coaches directory. RCL staff tools are separate.' },
   { id: 'fan' as const, icon: FaUserGroup, title: 'Fan', copy: 'Follow RCL, join the community, fantasy and open runs.' },
 ];
 
