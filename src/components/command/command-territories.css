@@ -1,0 +1,53 @@
+/* Private RCL Franchise HQ - territory atlas and jurisdiction controls */
+.cmd-territories{color:#f5f7fa}
+.cmd-territory-sub{color:#9ba9b9;font-size:12px;margin-top:7px!important}
+.cmd-territory-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#313947;border-bottom:1px solid #313947}
+.cmd-territory-kpis>div{padding:19px 22px;background:#161e2a;display:flex;flex-direction:column;gap:5px;min-width:0}
+.cmd-territory-kpis b{font-weight:900;font-size:clamp(19px,2vw,27px);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmd-territory-kpis span{font-size:9px;font-weight:850;letter-spacing:1.1px;color:#adbccd}
+.cmd-territory-guidance{margin:18px 22px!important;padding:14px 17px;border:1px solid #73503b;background:#31261f;border-radius:10px;color:#f5d6b3!important;font-size:12px!important;line-height:1.6}
+.cmd-territory-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:16px;padding:0 22px 22px}
+.cmd-territory-atlas{overflow:hidden;border-radius:15px;border:1px solid #3a4d5e;background:#081723}
+.cmd-territory-map-stage{position:relative;aspect-ratio:1000/620;width:100%}
+.cmd-territory-map-stage img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.cmd-territory-atlas>p{font-size:10px;color:#97b4cb;padding:12px 15px;line-height:1.6}
+.cmd-territory-pin{position:absolute;z-index:2;transform:translate(-50%,-50%);display:grid;place-items:center;border:2px solid #b9d6e9;background:#141f2c;color:white;border-radius:50%;height:clamp(24px,2.7vw,34px);width:clamp(24px,2.7vw,34px);box-shadow:0 3px 12px #000b;font-size:10px;font-weight:900}
+.cmd-territory-pin:hover,.cmd-territory-pin:focus-visible{background:#852537;border-color:#ff9aaa;z-index:5;outline:2px solid #fff;outline-offset:2px}
+.cmd-territory-pin.is-selected{background:#f52235;border-color:#fff;box-shadow:0 0 0 5px #ef405a44,0 7px 15px #000b;z-index:4}
+.cmd-territory-sidebar{border:1px solid #36424f;border-radius:14px;padding:14px;background:#121b25;min-height:0}
+.cmd-territory-division{margin-top:12px;padding:10px 0 0;border-top:1px solid #343d49}
+.cmd-territory-division>strong{font-size:11px;display:block;margin:0 0 8px;letter-spacing:.7px}
+.cmd-territory-division>button{border:1px solid transparent;background:transparent;color:#e6eff7;width:100%;border-radius:8px;text-align:left;padding:8px 10px;display:flex;justify-content:space-between;gap:8px;align-items:center;min-height:36px}
+.cmd-territory-division>button span{font-size:11px;font-weight:800}
+.cmd-territory-division>button small{color:#99b3c6;font-size:10px;text-align:right}
+.cmd-territory-division>button:hover,.cmd-territory-division>button.is-selected{border-color:#815269;background:#3e2431;color:white}
+.cmd-territory-detail{margin:0 22px 22px;padding:20px;border:1px solid #354758;border-radius:16px;background:#111b25}
+.cmd-territory-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.cmd-territory-detail-head h4{font-size:clamp(20px,3vw,30px);line-height:1.15;margin:4px 0 4px;font-weight:900;letter-spacing:-.7px}
+.cmd-territory-detail-head p:not(.cmd-eyebrow){color:#bfd1e0;font-size:12px}
+.cmd-territory-status{display:flex;align-items:flex-end;flex-direction:column;gap:9px}
+.cmd-territory-status span{font-size:10px;background:#293446;color:#e7effa;border:1px solid #536276;padding:6px 10px;border-radius:7px}
+.cmd-territory-status button{padding:9px 13px;border:1px solid #a64b60;background:#521f2d;color:white;border-radius:8px;font-size:11px;font-weight:800}
+.cmd-territory-detail-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}
+.cmd-territory-detail-stats>div{background:#1c2935;border:1px solid #304254;border-radius:10px;padding:13px}
+.cmd-territory-detail-stats strong{display:block;font-size:22px;font-weight:900}
+.cmd-territory-detail-stats span{display:block;color:#9ab0c2;font-size:10px;margin-top:3px}
+.cmd-territory-filter{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:12px;margin-bottom:12px}
+.cmd-territory-filter label,.cmd-territory-protection label,.cmd-territory-controls label{display:flex;flex-direction:column;gap:6px;font-size:10px;font-weight:800;color:#c8d9e9}
+.cmd-territory-filter input,.cmd-territory-filter select,.cmd-territory-controls select,.cmd-territory-protection input,.cmd-territory-protection select{width:100%;min-width:0;background:#0d1620;border:1px solid #526277;color:#fff;border-radius:7px;padding:9px;font-size:12px;min-height:41px}
+.cmd-territory-locality{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #304050}
+.cmd-territory-locality>div:first-child{min-width:190px}
+.cmd-territory-locality strong{display:block;font-size:12px}
+.cmd-territory-locality small{display:block;font-size:10px;color:#a0b2c4;margin-top:5px}
+.cmd-territory-controls{display:flex;align-items:center;gap:9px;min-width:0}
+.cmd-territory-controls label:first-child{width:128px}
+.cmd-territory-controls label:last-child{width:210px}
+.cmd-territory-protection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0;padding:17px;background:#211d29;border:1px solid #855263;border-radius:12px}
+.cmd-territory-protection h4,.cmd-territory-protection>p,.cmd-territory-check{grid-column:1/-1}
+.cmd-territory-protection h4{font-size:16px}
+.cmd-territory-protection>p{font-size:11px;color:#ffc3cb!important}
+.cmd-territory-protection .cmd-territory-check{flex-direction:row;gap:12px;align-items:center;font-size:12px}
+.cmd-territory-check input{width:17px;height:17px;min-height:0;accent-color:#ef384e}
+.cmd-territory-error{color:#ffcbd4;padding:12px;background:#542733;border-radius:8px}
+@media(max-width:1120px){.cmd-territory-layout{grid-template-columns:1fr}.cmd-territory-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.cmd-territory-sidebar>.cmd-eyebrow{grid-column:1/-1}}
+@media(max-width:700px){.cmd-territory-kpis,.cmd-territory-detail-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cmd-territory-layout{padding:0 12px 13px}.cmd-territory-guidance{margin:12px!important}.cmd-territory-detail{margin:0 12px 12px;padding:13px}.cmd-territory-sidebar{grid-template-columns:1fr}.cmd-territory-filter{grid-template-columns:1fr}.cmd-territory-locality{align-items:stretch;flex-direction:column}.cmd-territory-controls label{flex:1!important;width:auto!important}.cmd-territory-protection{grid-template-columns:1fr}.cmd-territory-status{align-items:flex-start}.cmd-territory-kpis>div{padding:15px}.cmd-territory-pin{font-size:9px}}
