@@ -198,7 +198,7 @@ export function CommandDashboard(){
  };
  const reset=(kind:Kind|null,defaults:Record<string,string>={})=>{
   const direction=defaults.direction==='income'?'income':'expense';
-  const initial=kind==='ledger'?{direction,category:direction==='income'?incomeTemplates[0].code:expenseTemplates[0].code,state:'projected',occurred_on:new Date().toISOString().slice(0,10)}:kind==='budgets'?{category:budgetTemplates[0].code}:kind==='venues'?{state:'researching',rate_basis:'unknown'}:kind==='bookings'?{status:'tentative'}:kind==='concession_sales'?{quantity:'1'}:kind==='tasks'?{category:'game_day',priority:'normal'}:{};
+  const initial:Record<string,string>=kind==='ledger'?{direction,category:direction==='income'?incomeTemplates[0].code:expenseTemplates[0].code,state:'projected',occurred_on:new Date().toISOString().slice(0,10)}:kind==='budgets'?{category:budgetTemplates[0].code}:kind==='venues'?{state:'researching',rate_basis:'unknown'}:kind==='bookings'?{status:'tentative'}:kind==='concession_sales'?{quantity:'1'}:kind==='tasks'?{category:'game_day',priority:'normal'}:{};
   setEditing(kind);setForm({...initial,...defaults});setNotice(null);
  };
  const navigate=(dest:Area):boolean=>{
