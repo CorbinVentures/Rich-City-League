@@ -18,7 +18,7 @@ const SOCIAL_FAMILY=['/social'];
 const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends','/coaches'];
 const CREATE_FAMILY=['/create'];
 const RUNS_FAMILY=['/runs','/richmond-basketball-runs'];
-const LEAGUE_FAMILY=['/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
+const LEAGUE_FAMILY=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
 
 export function isPrimaryNavigationActive(pathname:string,href:string){
   if(href==='/social') return SOCIAL_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
@@ -70,6 +70,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'The flagship competition property inside the RCL basketball world',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Schedule',href:'/schedule',icon:FaCalendarDays},
       {label:'Game Night',href:'/games',icon:FaBasketball},
       {label:'Standings',href:'/standings',icon:FaListOl},
