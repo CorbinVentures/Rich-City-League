@@ -84,6 +84,9 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     (client as any).from('rch_coach_identities').select('profile_id,headline,organization,city,years_experience,coaching_level,specialties,availability,published').eq('profile_id',id).eq('published',true).maybeSingle(),
   ]);
   const coachIdentity=coachIdentityRaw as RCHCoachIdentity|null;
+  // An adult Royaltee affiliation decorates the same social profile; it never changes the account role.
+  const {data:royalteeIdentityRaw}=await (client as any).from('rcl_royaltee_cheer_profiles').select('discipline,status,published').eq('profile_id',id).eq('status','approved').eq('published',true).maybeSingle();
+  const royalteeIdentity=royalteeIdentityRaw as {discipline:string}|null;
 
   const player = playerRaw as PlayerRow | null;
   let basketball: null | {
@@ -227,7 +230,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
             {profile.is_system_account&&<span className="rch-profile-official-chip rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-rcl-blue">RCL Official</span>}
           </div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
-          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
+          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{royalteeIdentity&&<Link href="/league/royaltee" className="rounded-full border border-[#ec8e4d]/60 bg-[#c7682b]/15 px-3 py-1 font-black text-[#ffb586]">Royaltee · Official 18+ Cheer + Step</Link>}{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}

@@ -99,7 +99,7 @@ with check (
 );
 revoke all on public.rcl_royaltee_cheer_profiles from anon,authenticated;
 grant select on public.rcl_royaltee_cheer_profiles to anon,authenticated;
-grant insert(profile_id,headline,discipline,years_experience,availability,published)
+grant insert(profile_id,headline,discipline,years_experience,availability,published,updated_at)
   on public.rcl_royaltee_cheer_profiles to authenticated;
 grant update(headline,discipline,years_experience,availability,published,updated_at)
   on public.rcl_royaltee_cheer_profiles to authenticated;

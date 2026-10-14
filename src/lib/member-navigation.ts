@@ -1,7 +1,7 @@
 import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaChartSimple,
   FaCompass, FaCrown, FaDownload, FaGlobe, FaHandshake, FaHouse, FaLocationDot, FaMedal, FaNewspaper,
-  FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaTrophy, FaUser, FaUserPlus, FaUsers
+  FaPeopleGroup, FaPlay, FaPlus, FaShirt, FaStar, FaTrophy, FaUser, FaUserPlus, FaUsers
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 import type { RCLNavGroup } from '@/lib/rcl-navigation';
@@ -56,6 +56,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'The premier league and flagship competition property on RCL',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Games',href:'/games',icon:FaBasketball},
       {label:'Standings',href:'/standings',icon:FaChartSimple},

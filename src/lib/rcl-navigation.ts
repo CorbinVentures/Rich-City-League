@@ -2,7 +2,7 @@ import {
   FaBasketball, FaBell, FaBolt, FaBullhorn, FaCalendarDays, FaChartSimple,
   FaCompass, FaCrown, FaDownload, FaFilm, FaGear, FaGlobe, FaHandshake, FaHouse, FaListOl,
   FaLocationDot, FaMedal, FaNewspaper, FaPeopleGroup, FaPlay, FaPlus,
-  FaShirt, FaTrophy, FaUser, FaUsers
+  FaShirt, FaStar, FaTrophy, FaUser, FaUsers
 } from 'react-icons/fa6';
 import type { IconType } from 'react-icons';
 
@@ -70,6 +70,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'The flagship competition property inside the RCL basketball world',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Schedule',href:'/schedule',icon:FaCalendarDays},
       {label:'Game Night',href:'/games',icon:FaBasketball},
