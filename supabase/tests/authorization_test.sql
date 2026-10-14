@@ -1,6 +1,6 @@
 begin;
 
-select plan(34);
+select plan(35);
 
 set role postgres;
 
