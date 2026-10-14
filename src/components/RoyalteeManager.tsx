@@ -38,7 +38,7 @@ export function RoyalteeManager(){
     if(!db)return;
     const [programResult,applicationsResult,eventsResult]=await Promise.all([
       db.from('rcl_royaltee_program').select('*').eq('slug','royaltee-steppas').maybeSingle(),
-      db.from('rcl_royaltee_cheer_profiles').select('profile_id,headline,discipline,status,published,created_at,profile:profiles!inner(display_name,username)').order('created_at',{ascending:false}).limit(100),
+      db.from('rcl_royaltee_cheer_profiles').select('profile_id,headline,discipline,status,published,created_at,profile:profiles!rcl_royaltee_cheer_profiles_profile_id_fkey!inner(display_name,username)').order('created_at',{ascending:false}).limit(100),
       db.from('rcl_royaltee_events').select('id,title,description,event_type,starts_at,location,status').order('starts_at',{ascending:false}).limit(100)
     ]);
     if(programResult.data)setProgram({...emptyProgram,...programResult.data});

@@ -32,7 +32,7 @@ export default async function RoyalteePage(){
   const client=getPublicClient() as any;
   const [programResult,memberResult,eventResult]=await Promise.all([
     client?client.from('rcl_royaltee_program').select('headline,about,registration_note,contact_email,contact_phone,registration_open').eq('slug','royaltee-steppas').maybeSingle():Promise.resolve({data:null}),
-    client?client.from('rcl_royaltee_cheer_profiles').select('profile_id,headline,discipline,years_experience,profile:profiles!inner(id,display_name,username,avatar_url,location)').eq('status','approved').eq('published',true).order('created_at',{ascending:false}).limit(24):Promise.resolve({data:[]}),
+    client?client.from('rcl_royaltee_cheer_profiles').select('profile_id,headline,discipline,years_experience,profile:profiles!rcl_royaltee_cheer_profiles_profile_id_fkey!inner(id,display_name,username,avatar_url,location)').eq('status','approved').eq('published',true).order('created_at',{ascending:false}).limit(24):Promise.resolve({data:[]}),
     client?client.from('rcl_royaltee_events').select('id,title,description,event_type,starts_at,location,status').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(12):Promise.resolve({data:[]})
   ]);
   const program={...fallback,...((programResult.data??{}) as Partial<Program>)};
