@@ -13,6 +13,7 @@ as $function$
 declare
  v_actor uuid:=auth.uid();
  v_id uuid;
+ v_app_id uuid;
  v_created_coach boolean:=false;
 begin
  if v_actor is null or not public.is_admin() then
@@ -39,6 +40,18 @@ begin
   where a.profile_id=p_profile_id and a.role_code=p_role_code
   and a.team_id is not distinct from p_team_id and a.active=true
  ) then raise exception 'Member already holds this active assignment'; end if;
+ -- If this member had already applied for this exact role and team,
+ -- resolve that application as approved instead of leaving a stale pending request.
+ select id into v_app_id from public.rcl_staff_applications
+ where profile_id=p_profile_id and role_code=p_role_code
+ and team_id is not distinct from p_team_id and status='pending'
+ for update;
+ if v_app_id is not null then
+  update public.rcl_staff_applications
+  set status='approved',reviewed_by=v_actor,reviewed_at=now(),
+      review_note='Assigned directly by RCL administration',updated_at=now()
+  where id=v_app_id;
+ end if;
  if p_role_code='league_coach' then
   insert into public.team_coaches(team_id,profile_id,title)
   values(p_team_id,p_profile_id,'RCL Coach')
@@ -48,7 +61,7 @@ begin
  insert into public.rcl_staff_assignments(
   application_id,profile_id,role_code,team_id,approved_by,managed_team_coach
  ) values(
-  null,p_profile_id,p_role_code,p_team_id,v_actor,v_created_coach
+  v_app_id,p_profile_id,p_role_code,p_team_id,v_actor,v_created_coach
  ) returning id into v_id;
  return v_id;
 end;
