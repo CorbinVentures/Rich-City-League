@@ -1,7 +1,7 @@
 -- RCL statewide franchise marketing / development territories.
 -- Each of Virginia's 95 counties + 38 independent cities is a single, unique jurisdiction.
 -- Approved home markets are internal planning assignments, NOT property or exclusive player rights.
-create table public.rcl_command_territories (
+create table if not exists public.rcl_command_territories (
  id uuid primary key default gen_random_uuid(),
  team_id uuid not null unique references public.teams(id) on delete restrict,
  home_market text not null check(length(trim(home_market)) between 3 and 120),
@@ -19,7 +19,7 @@ create table public.rcl_command_territories (
   (length(trim(signed_agreement_reference)) >= 6 and protection_effective_on is not null)
  )
 );
-create table public.rcl_command_territory_localities (
+create table if not exists public.rcl_command_territory_localities (
  id uuid primary key default gen_random_uuid(),
  fips text not null unique check (fips ~ '^51[0-9]{3}$'),
  name text not null check(length(trim(name)) > 1),
@@ -29,12 +29,20 @@ create table public.rcl_command_territory_localities (
  created_at timestamptz not null default now(),
  updated_at timestamptz not null default now()
 );
-create index rcl_territory_localities_team_idx on public.rcl_command_territory_localities(territory_id,scope);
+create index if not exists rcl_territory_localities_team_idx on public.rcl_command_territory_localities(territory_id,scope);
 
 alter table public.rcl_command_territories enable row level security;
 alter table public.rcl_command_territory_localities enable row level security;
 revoke all on public.rcl_command_territories,public.rcl_command_territory_localities from anon;
 grant select,insert,update on public.rcl_command_territories,public.rcl_command_territory_localities to authenticated;
+drop policy if exists "RCL admin territories read" on public.rcl_command_territories;
+drop policy if exists "RCL admin territories insert" on public.rcl_command_territories;
+drop policy if exists "RCL admin territories update" on public.rcl_command_territories;
+drop policy if exists "RCL admin localities read" on public.rcl_command_territory_localities;
+drop policy if exists "RCL admin localities insert" on public.rcl_command_territory_localities;
+drop policy if exists "RCL admin localities update" on public.rcl_command_territory_localities;
+drop trigger if exists command_audit_rcl_command_territories on public.rcl_command_territories;
+drop trigger if exists command_audit_rcl_command_territory_localities on public.rcl_command_territory_localities;
 create policy "RCL admin territories read" on public.rcl_command_territories for select to authenticated using (public.rcl_command_is_admin());
 create policy "RCL admin territories insert" on public.rcl_command_territories for insert to authenticated with check(public.rcl_command_is_admin());
 create policy "RCL admin territories update" on public.rcl_command_territories for update to authenticated using(public.rcl_command_is_admin()) with check(public.rcl_command_is_admin());
