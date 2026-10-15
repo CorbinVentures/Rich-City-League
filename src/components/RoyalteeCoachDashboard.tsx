@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { RoyalteeShowProduction } from '@/components/RoyalteeShowProduction';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaArrowLeft, FaArrowRight, FaCalendarDays, FaChartLine, FaCircleCheck, FaClipboardList, FaCrown, FaGear, FaPeopleGroup, FaShieldHalved } from 'react-icons/fa6';
+import { FaArrowLeft, FaArrowRight, FaCalendarDays, FaChartLine, FaCircleCheck, FaClipboardList, FaCrown, FaGear, FaPeopleGroup, FaShieldHalved, FaClapperboard } from 'react-icons/fa6';
 
 type EventRow = {
   id: string; title: string; description: string; event_type: string;
@@ -43,7 +44,7 @@ export function RoyalteeCoachDashboard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [tab, setTab] = useState<'overview'|'events'|'registrations'>('overview');
+  const [tab, setTab] = useState<'production'|'overview'|'events'|'registrations'>('production');
   const [events, setEvents] = useState<EventRow[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [selectedEvent, setSelectedEvent] = useState('');
@@ -63,7 +64,7 @@ export function RoyalteeCoachDashboard() {
     }
     setEvents(eventResult.data || []);
     setRegistrations(registrationResult.data || []);
-    setSelectedEvent(current => current || eventResult.data?.[0]?.id || '');
+    setSelectedEvent(current => (eventResult.data??[]).some((e:EventRow)=>e.id===current&&e.status!=='cancelled') ? current : (eventResult.data??[]).find((e:EventRow)=>e.status!=='cancelled')?.id || '');
   },[db]);
 
   useEffect(() => {
@@ -159,7 +160,7 @@ export function RoyalteeCoachDashboard() {
         <div className="mt-7 flex flex-wrap items-end justify-between gap-6">
           <div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-[#ffb17d]"><FaCrown/> Royaltee Steppas & Cheerleading · Authorized Staff</p>
             <h1 className="mt-3 font-display text-4xl font-black uppercase tracking-tight sm:text-6xl">Cheerleading <span className="text-[#ff954c]">Command HQ</span></h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#c0d9ef]">Your dedicated administration workspace for adult (18+) Royaltee programs, events, prices and registration operations.</p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#c0d9ef]">Build the next RCL show from first rehearsal to final highlight: event readiness, cheerleader storylines, media production, registrations and adult-only performer approvals.</p>
           </div>
           <span className="inline-flex items-center gap-2 rounded-full border border-[#568bb4] bg-[#103454] px-4 py-2 text-xs font-black text-[#c8edff]"><FaShieldHalved/> Organization-scoped admin</span>
         </div>
@@ -181,11 +182,12 @@ export function RoyalteeCoachDashboard() {
           ].map(stat => <section key={stat.label} className="rounded-2xl border border-[#2b5579] bg-[linear-gradient(150deg,#123757,#08192e)] p-5"><div className="flex items-center justify-between gap-3 text-sm text-[#9bd5ff]"><span className="text-xs font-black uppercase tracking-wider">{stat.label}</span>{stat.icon}</div><p className="mt-5 text-3xl font-black tabular-nums">{stat.value}</p><p className="mt-2 text-xs text-[#b5cee3]">{stat.detail}</p></section>)}
         </div>
         <nav aria-label="Cheerleading dashboard areas" className="flex flex-wrap gap-2 rounded-2xl border border-[#2a5274] bg-[#0a2139] p-2">
-          {([{key:'overview',label:'Overview',icon:<FaChartLine/>},{key:'events',label:'Events & fees',icon:<FaCalendarDays/>},{key:'registrations',label:'Registration desk',icon:<FaClipboardList/>}] as const).map(item =>
+          {([{key:'production',label:'Show Prep + Content',icon:<FaClapperboard/>},{key:'overview',label:'Overview',icon:<FaChartLine/>},{key:'events',label:'Events & fees',icon:<FaCalendarDays/>},{key:'registrations',label:'Registration desk',icon:<FaClipboardList/>}] as const).map(item =>
           <button key={item.key} type="button" onClick={() => setTab(item.key)} aria-current={tab===item.key?'page':undefined} className={'inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-black transition '+(tab===item.key?'bg-[#ff9b51] text-[#160d06]':'text-[#c4ddec] hover:bg-[#174167]')}>{item.icon}{item.label}</button>)}
           <Link href="/league/royaltee/manage" className="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-black text-[#c4ddec] hover:bg-[#174167]"><FaGear/> Site content & performer approvals <FaArrowRight/></Link>
         </nav>
 
+        {tab==='production' && <RoyalteeShowProduction events={events.filter(e=>e.status!=='cancelled')} selectedEventId={selectedEvent} onSelect={setSelectedEvent} onCreateEvent={()=>{clearEdit();setTab('events');}} />}
         {tab==='overview' && <div className="grid gap-6 lg:grid-cols-[1.25fr_.75fr]">
           <section className="rounded-2xl border border-[#305b80] bg-[#0b263d] p-6"><div className="flex items-start justify-between gap-5"><div><p className="text-xs font-black uppercase tracking-widest text-[#ffae72]">Operations timeline</p><h2 className="mt-2 text-2xl font-black">Upcoming Royaltee Events</h2></div><button type="button" onClick={()=>{clearEdit();setTab('events');}} className="rounded-lg bg-[#ff9b51] px-4 py-2 text-xs font-black text-[#160d06]">New event</button></div>
             <div className="mt-5 space-y-3">{events.filter(e => e.status!=='cancelled').sort((a,b)=>a.starts_at.localeCompare(b.starts_at)).slice(0,8).map(item=><article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#2b5374] bg-[#061b2e] p-4"><div><h3 className="font-black">{item.title}</h3><p className="mt-1 text-xs text-[#b9d8ee]">{displayDate(item.starts_at)} · {item.status} · {formatMoney(item.registration_fee_cents)}</p></div><div className="flex items-center gap-3"><span className="text-xs text-[#bcd8eb]">{registrationCount(item.id)} registrations</span><button type="button" onClick={()=>startEdit(item)} className="rounded-lg border border-[#649ac2] px-3 py-2 text-xs font-black">Manage</button></div></article>)}{!events.length&&<p className="rounded-xl border border-dashed border-[#39688c] p-6 text-[#c2daea]">No events yet. Create your first adult cheer or step program event.</p>}</div>
