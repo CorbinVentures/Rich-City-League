@@ -14,7 +14,7 @@ describe('Royaltee coach tools discovery', () => {
     expect(shortcut).toContain('href="/league/royaltee/manage"');
     expect(publicSite).toContain('<RoyalteeStaffShortcut variant="royaltee" />');
     expect(staff).toContain('<RoyalteeStaffShortcut variant="staff" />');
-    expect(menu).toContain('<RoyalteeStaffShortcut variant="drawer" />');
+    expect(menu).toContain('<RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />');
   });
 
   it('only renders for the signed-in account after Royaltee-specific approval', () => {
