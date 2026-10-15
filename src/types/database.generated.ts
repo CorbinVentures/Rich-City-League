@@ -5548,6 +5548,14 @@ export type Database = {
       }
     }
     Functions: {
+      get_neighborhood_profiles: {
+        Args: { p_limit?: number }
+        Returns: { id: string; display_name: string | null; username: string | null; avatar_url: string | null }[]
+      }
+      follow_neighborhood_profile: {
+        Args: { p_target: string }
+        Returns: undefined
+      }
       adjust_shop_inventory: {
         Args: {
           adjustment_reason: string
