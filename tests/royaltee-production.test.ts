@@ -7,7 +7,7 @@ import type { RoyalteeWorkItem } from '../src/lib/royaltee-production';
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 const studio=read('src/components/RoyalteeShowProduction.tsx');
 const dashboard=read('src/components/RoyalteeCoachDashboard.tsx');
-const schema=read('supabase/migrations/20261015205000_royaltee_event_show_production.sql');
+const schema=read('supabase/migrations/20261015191643_royaltee_event_show_production.sql');
 
 describe('Royaltee game-day workflow',()=>{
   it('has a consistent pregame-to-postgame checklist for every adult event',()=>{
