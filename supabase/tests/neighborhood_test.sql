@@ -7,8 +7,9 @@ select ('a5150000-0000-0000-0000-'||lpad(n::text,12,'0'))::uuid,
 from generate_series(1,35) n;
 delete from public.profiles where id::text like 'a5150000-%';
 insert into public.profiles(id,role,is_active,onboarding_complete,profile_visibility,is_system_account,created_at)
-select id,'fan',true,true,'public',false,now()+interval '1 day'
+select id,case when id='a5150000-0000-0000-0000-000000000035' then 'admin'::public.app_role else 'fan'::public.app_role end,true,true,'public',false,now()+interval '1 day'
 from auth.users where id::text like 'a5150000-%';
+select set_config('request.jwt.claim.sub','a5150000-0000-0000-0000-000000000035',true);
 update public.profiles set profile_visibility='private' where id='a5150000-0000-0000-0000-000000000003';
 update public.profiles set profile_visibility='friends' where id='a5150000-0000-0000-0000-000000000004';
 update public.profiles set is_active=false where id='a5150000-0000-0000-0000-000000000005';
@@ -40,8 +41,10 @@ select lives_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-
 select is((select count(*)::int from public.follows where follower_id='a5150000-0000-0000-0000-000000000001' and following_id='a5150000-0000-0000-0000-000000000002'),1,'one relationship persisted');
 select ok(not exists(select 1 from public.get_neighborhood_profiles(24) where id='a5150000-0000-0000-0000-000000000002'),'followed suggestion disappears');
 set role postgres;
+select set_config('request.jwt.claim.sub','a5150000-0000-0000-0000-000000000035',true);
 update public.profiles set is_active=false where id='a5150000-0000-0000-0000-000000000001';
 set role authenticated;
+select set_config('request.jwt.claim.sub','a5150000-0000-0000-0000-000000000001',true);
 select is((select count(*)::int from public.get_neighborhood_profiles()),0,'inactive viewer gets no suggestions');
 select throws_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000010')$$,'42501',null,'inactive viewer cannot follow');
 select * from finish();
