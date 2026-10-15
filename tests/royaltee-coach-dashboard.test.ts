@@ -7,10 +7,10 @@ const admin=read('src/components/RoyalteeCoachDashboard.tsx');
 const signup=read('src/components/RoyalteeEventRegistration.tsx');
 const publicSite=read('src/app/league/royaltee/page.tsx');
 const authority=read('supabase/migrations/20261014224102_royaltee_scoped_event_admin_registrations.sql');
-const writeRpc=read('supabase/migrations/20261015000000_royaltee_registration_management_rpc.sql');
+const writeRpc=read('supabase/migrations/20261015013332_royaltee_registration_management_rpc.sql');
 const staffTools=read('src/lib/rcl-staff-admin-tools.ts');
 const staffRoles=read('src/lib/rcl-staff-roles.ts');
-const scope=read('supabase/migrations/20261015001000_royaltee_partner_admin_scope.sql');
+const scope=read('supabase/migrations/20261015013334_royaltee_partner_admin_scope.sql');
 
 describe('Royaltee 18+ coach dashboard',()=>{
  it('requires explicitly approved Royaltee organization management, not a global cheerleading role',()=>{
