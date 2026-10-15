@@ -115,14 +115,15 @@ export function RoyalteeCoachDashboard() {
   function clearEdit() { setEditingId(null); setDraft(cleanDraft); }
 
   async function act(operation:()=>Promise<{error:any}>,success:string) {
-    if (!db || busy) return;
+    if (!db || busy) return false;
     setBusy(true); setError(''); setNotice('');
     try {
       const result = await operation();
       if (result.error) throw result.error;
       await refresh();
       setNotice(success);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Action could not be completed.'); }
+      return true;
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Action could not be completed.'); return false; }
     finally { setBusy(false); }
   }
 
@@ -135,10 +136,10 @@ export function RoyalteeCoachDashboard() {
     if (capacity !== null && (!Number.isInteger(capacity) || capacity < 1)) { setError('Capacity must be a whole number of at least one.'); return; }
     if (Number.isNaN(starts.getTime())) { setError('Enter a valid date and time.'); return; }
     const payload = {title:draft.title.trim(),description:draft.description.trim(),event_type:draft.event_type,starts_at:starts.toISOString(),location:draft.location.trim(),status:draft.status,min_age:18,registration_fee_cents:Math.round(dollars*100),registration_open:draft.registration_open,capacity,updated_at:new Date().toISOString()};
-    await act(() => editingId
+    const saved = await act(() => editingId
       ? db.from('rcl_royaltee_events').update(payload).eq('id',editingId)
       : db.from('rcl_royaltee_events').insert({...payload,created_by:user?.id}), editingId ? 'Event updated.' : 'Adult-only event created.');
-    // Retain form values on failed save; clear on successful refresh is handled manually below.
+    if (saved) clearEdit();
   }
 
   async function updateRegistration(item:RosterRow,change:'status'|'payment_status',value:string) {
