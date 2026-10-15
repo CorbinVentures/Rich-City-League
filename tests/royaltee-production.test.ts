@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROYALTEE_WORK_TEMPLATES, forRoyalteeEvent, dueDateForEvent, daysUntilDue, readiness } from '@/lib/royaltee-production';
-import type { RoyalteeWorkItem } from '@/lib/royaltee-production';
+import { ROYALTEE_WORK_TEMPLATES, forRoyalteeEvent, dueDateForEvent, daysUntilDue, readiness } from '../src/lib/royaltee-production';
+import type { RoyalteeWorkItem } from '../src/lib/royaltee-production';
 
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 const studio=read('src/components/RoyalteeShowProduction.tsx');
