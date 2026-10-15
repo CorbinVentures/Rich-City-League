@@ -1,3 +1,4 @@
+import { Neighborhood } from '@/components/social/Neighborhood';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicClient } from '@/lib/public-data';
@@ -294,6 +295,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
       </nav>
 
       <section className="px-4 py-6">
+        {activeTab==='wall' && <div className="mb-6"><Neighborhood excludeProfileId={id} /></div>}
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {(activeTab==='followers'||activeTab==='following')&&<ProfileFollowDirectory profileId={id} profileName={name} mode={activeTab} />}

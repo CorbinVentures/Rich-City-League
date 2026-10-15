@@ -16,6 +16,7 @@ import {
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
+import { Neighborhood } from '@/components/social/Neighborhood';
 import { RCHActionGuide } from '@/components/RCHActionGuide';
 import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
@@ -94,7 +95,6 @@ export default function NetworkHome() {
   const [reposts, setReposts] = useState<NetworkRepost[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const [currentProfile, setCurrentProfile] = useState<NetworkAuthor | null>(null);
-  const [suggestedProfiles, setSuggestedProfiles] = useState<NetworkAuthor[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [following, setFollowing] = useState<string[]>([]);
@@ -332,7 +332,7 @@ export default function NetworkHome() {
 
       void (async () => {
         try {
-          const [commentsResult, reactionsResult, suggestedResult, communitiesResult, runPlayersResult] = await Promise.all([
+          const [commentsResult, reactionsResult, communitiesResult, runPlayersResult] = await Promise.all([
             postIds.length
               ? db.from('comments')
                   .select('id,post_id,author_id,body,created_at')
@@ -346,13 +346,6 @@ export default function NetworkHome() {
                   .in('post_id', postIds)
                   .limit(400)
               : Promise.resolve({ data: [], error: null }),
-            db.from('profiles')
-              .select('id,display_name,username,avatar_url,role,is_vip,vip_label,is_system_account,system_account_key')
-              .eq('is_active', true)
-              .eq('profile_visibility', 'public')
-              .eq('is_system_account', false)
-              .order('created_at', { ascending: false })
-              .limit(8),
             db.from('communities')
               .select('id,name,slug,description,community_type')
               .eq('privacy', 'public')
@@ -368,10 +361,8 @@ export default function NetworkHome() {
           const comments = ((commentsResult.data ?? []) as NetworkComment[])
             .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
           const reactions = (reactionsResult.data ?? []) as NetworkReaction[];
-          const suggestionRows = (suggestedResult.data ?? []) as Array<NetworkAuthor & { id: string }>;
           const secondaryIdentityIds = [...new Set([
             ...comments.map((entry) => entry.author_id),
-            ...suggestionRows.map((entry) => entry.id),
           ])];
 
           const [secondaryProfilesResult, secondaryLevelsResult] = secondaryIdentityIds.length
@@ -419,12 +410,6 @@ export default function NetworkHome() {
             reactions: reactionsByPost.get(post.id) ?? post.reactions ?? [],
           })));
 
-          setSuggestedProfiles(
-            suggestionRows
-              .map((profile) => secondaryAuthorMap.get(profile.id) ?? profile)
-              .filter((profile) => profile.id !== user?.id)
-              .slice(0, 6),
-          );
           setCommunities((communitiesResult.data ?? []) as Community[]);
 
           const runPlayerMap = new Map<string, string[]>();
@@ -781,6 +766,8 @@ export default function NetworkHome() {
               </section>
             )}
 
+            {!focusPostId && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
+
             {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-3"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton></div>}
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
@@ -801,10 +788,6 @@ export default function NetworkHome() {
 
           <aside className="rcl-network-right-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-4">
-              <SideCard title="People to know" href="/friends">
-                <div className="space-y-2">{suggestedProfiles.slice(0, 4).map((profile) => <div key={profile.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-white/[.03]"><SocialIdentity author={profile} compact/><Link href={`/social/profile/${profile.id}`} className="min-w-0 flex-1"><b className="block truncate text-xs">{profile.display_name || profile.username || 'RCL Member'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">{formatRep(profile.rep ?? 0)} REP</small></Link>{profile.id && profile.id !== user?.id && <button onClick={() => void toggleFollow(profile.id!)} className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${following.includes(profile.id) ? 'text-rcl-blue' : 'border border-white/10 text-white/45'}`}>{following.includes(profile.id) ? 'Following' : 'Follow'}</button>}</div>)}</div>
-              </SideCard>
-
               {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0, 3).map((run) => {
                 const joined = Boolean(user?.id && run.players?.includes(user.id));
                 const count = run.players?.length ?? 0;
