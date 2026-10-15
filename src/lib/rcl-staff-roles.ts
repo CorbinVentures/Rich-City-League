@@ -20,7 +20,7 @@ export const RCL_STAFF_ROLES:readonly RCLStaffRoleInfo[]=[
   actions:[{title:'RCH TV',href:'/media',note:'Browse productions'},{title:'Game schedule',href:'/games',note:'Plan filming coverage'},{title:'Creator program',href:'/media/creators',note:'Explore production opportunities'}]},
  {id:'cheerleading_coach',title:'Cheerleading Coach',department:'Entertainment',teamRequired:false,
   description:'Lead cheer teams, rehearsals, halftime routines and game-day entertainment.',
-  actions:[{title:'Royaltee partner center',href:'/league/royaltee',note:'Official RCL cheer and step partner'},{title:'Royaltee HQ',href:'/league/royaltee/manage',note:'Manage adult performances with approved partner access'},{title:'Game schedule',href:'/games',note:'Coordinate performances'}]},
+  actions:[{title:'Royaltee partner center',href:'/league/royaltee',note:'Official RCL cheer and step partner'},{title:'Cheerleading Admin Dashboard',href:'/league/royaltee/dashboard',note:'Control Royaltee events, registration fees, signups and attendance'},{title:'Game schedule',href:'/games',note:'Coordinate performances'}]},
  {id:'referee',title:'Referee',department:'Game Officials',teamRequired:false,
   description:'Officiate assigned games, follow league rules and coordinate game-day availability.',
   actions:[{title:'Game schedule',href:'/games',note:'Plan assignments'},{title:'League center',href:'/league',note:'View competition information'}]},
