@@ -36,6 +36,7 @@ select ok(not exists(select 1 from public.get_neighborhood_profiles(24) where id
 select throws_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000009')$$,'42501',null,'blocked follow rejected');
 select throws_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000003')$$,'42501',null,'private profile follow rejected');
 select throws_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000001')$$,'42501',null,'self follow rejected');
+select throws_ok($$insert into public.follows(follower_id,following_id) values ('a5150000-0000-0000-0000-000000000002','a5150000-0000-0000-0000-000000000010')$$,'42501',null,'cannot follow on behalf of another member');
 select lives_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000002')$$,'eligible follow succeeds');
 select lives_ok($$select public.follow_neighborhood_profile('a5150000-0000-0000-0000-000000000002')$$,'repeat follow idempotent');
 select is((select count(*)::int from public.follows where follower_id='a5150000-0000-0000-0000-000000000001' and following_id='a5150000-0000-0000-0000-000000000002'),1,'one relationship persisted');
