@@ -11,11 +11,6 @@ returns boolean language sql stable security definer set search_path=public,pg_t
    where o.slug='royaltee-steppas' and m.profile_id=(select auth.uid())
     and m.status='active' and m.member_role in ('owner','manager')
   )
-  or exists (
-   select 1 from public.rcl_staff_assignments s
-   where s.profile_id=(select auth.uid()) and s.role_code='cheerleading_coach'
-    and s.active=true and s.revoked_at is null and s.approved_by is not null
-  )
  );
 $$;
 revoke all on function public.can_manage_royaltee() from public;
