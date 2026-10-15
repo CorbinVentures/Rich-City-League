@@ -76,10 +76,10 @@ function NeighborhoodSession({ excludeProfileId, followingIds = [], onFollow }: 
     {notice && <p role="status" className="mb-3 text-sm font-semibold text-[#1768ac]">{notice}</p>}
     {error && <p role="alert" className="mb-3 text-sm text-red-700">{error} <button type="button" onClick={() => setAttempt(value => value + 1)} className="min-h-11 underline">Refresh suggestions</button></p>}
     {loading ? <p role="status" className="flex items-center gap-2 py-5 text-sm text-[#52657b]"><FaSpinner className="animate-spin" aria-hidden="true" /> Finding your Neighborhood…</p>
-      : visible.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      : visible.length ? <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3">
         {visible.map(member => {
           const name = member.display_name || member.username || 'RCH Member';
-          return <article key={member.id} className="relative min-w-0 rounded-xl border border-[#d9e4ef] bg-[#f5f9fc] px-3 pb-3 pt-5 text-center">
+          return <article key={member.id} className="relative w-40 shrink-0 snap-start rounded-xl sm:w-auto sm:min-w-0 border border-[#d9e4ef] bg-[#f5f9fc] px-3 pb-3 pt-5 text-center">
             <button type="button" aria-label={`Hide suggestion for ${name}`} disabled={busy === member.id} onClick={() => setHidden(current => [...current, member.id])} className="absolute right-0 top-0 grid h-11 w-11 place-items-center rounded-xl text-[#52657b] hover:bg-[#e7eff6]"><FaXmark aria-hidden="true" /></button>
             <Link href={`/social/profile/${member.id}`} className="block">
               <span className="mx-auto mb-3 block h-16 w-16 overflow-hidden rounded-full border-2 border-white bg-[#e7eff6]"><ProfileAvatarMedia src={member.avatar_url} alt="" className="h-full w-full object-cover" /></span>
