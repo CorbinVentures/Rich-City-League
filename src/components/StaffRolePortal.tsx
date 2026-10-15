@@ -8,6 +8,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {RCL_STAFF_ROLES,roleInfo,type RCLStaffRole} from '@/lib/rcl-staff-roles';
 import {staffDeskHref} from '@/lib/rcl-staff-admin-tools';
+import { RoyalteeStaffShortcut } from '@/components/RoyalteeStaffShortcut';
 
 type Team={id:string;name:string;city:string|null;is_active:boolean};
 type Application={id:string;profile_id:string;role_code:string;team_id:string|null;motivation:string;status:string;review_note:string;created_at:string};
@@ -68,6 +69,7 @@ export function StaffRolePortal(){
    </div>
   </section>
   <div className="mx-auto max-w-6xl space-y-7 px-4 py-7 sm:px-8">
+   <RoyalteeStaffShortcut variant="staff" />
    {authLoading||loading?<div className="rounded-2xl border border-[#476f91] bg-[#0b2841] p-8 text-sm">Loading your staff workspace…</div>:
     !user?<div className="rounded-2xl border border-[#476f91] bg-[#0b2841] p-8">
      <h2 className="text-2xl font-black">Sign in to RCH to apply.</h2>
