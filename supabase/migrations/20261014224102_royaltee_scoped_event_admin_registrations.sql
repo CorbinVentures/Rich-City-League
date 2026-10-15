@@ -19,7 +19,7 @@ returns boolean language sql stable security definer set search_path=public,pg_t
  );
 $$;
 revoke all on function public.can_manage_royaltee() from public;
-grant execute on function public.can_manage_royaltee() to authenticated;
+grant execute on function public.can_manage_royaltee() to anon,authenticated;
 
 alter table public.rcl_royaltee_events
  add column if not exists registration_fee_cents integer not null default 0,
