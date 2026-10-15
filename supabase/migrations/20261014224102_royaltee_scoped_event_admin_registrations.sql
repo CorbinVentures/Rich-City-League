@@ -41,6 +41,9 @@ create index if not exists royaltee_registrations_by_event on public.rcl_royalte
 create index if not exists royaltee_registrations_by_member on public.rcl_royaltee_event_registrations(profile_id,created_at desc);
 alter table public.rcl_royaltee_event_registrations enable row level security;
 
+-- The earlier PR migration may already have installed these identical policies.
+drop policy if exists "royaltee registration self or manager read" on public.rcl_royaltee_event_registrations;
+drop policy if exists "royaltee manager registration update" on public.rcl_royaltee_event_registrations;
 create policy "royaltee registration self or manager read"
 on public.rcl_royaltee_event_registrations for select to authenticated
 using (profile_id=(select auth.uid()) or public.can_manage_royaltee());

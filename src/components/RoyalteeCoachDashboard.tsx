@@ -68,6 +68,7 @@ export function RoyalteeCoachDashboard() {
 
   useEffect(() => {
     if (authLoading) return;
+    setAuthorized(false); setLoading(true); setRoster([]);
     if (!db || !user) { setLoading(false); setAuthorized(false); return; }
     let live = true;
     void (async () => {
@@ -167,7 +168,7 @@ export function RoyalteeCoachDashboard() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-7">
       {authLoading || loading ? <p className="rounded-2xl border border-[#335c81] bg-[#0b2741] p-6">Checking staff authorization…</p>
       : !user ? <section className="rounded-2xl border border-[#315c85] bg-[#0b263f] p-7"><h2 className="text-2xl font-black">Sign in to open Royaltee HQ</h2><p className="mt-3 text-[#c0d9ef]">This dashboard is restricted to approved Royaltee leadership and RCH administrators.</p><Link href="/auth/sign-in?next=/league/royaltee/dashboard" className="mt-5 inline-flex rounded-xl bg-[#ff9b55] px-5 py-3 font-black text-[#130d08]">Sign in</Link></section>
-      : !authorized ? <section className="rounded-2xl border border-[#8b653d] bg-[#281c15] p-7"><FaShieldHalved className="text-3xl text-[#ffbc83]"/><h2 className="mt-3 text-2xl font-black">Royaltee admin access required</h2><p className="mt-3 text-[#efc6a7]">An active approved Cheerleading Coach assignment or approved Royaltee owner/manager membership is required. This permission never grants league-wide admin access.</p><Link href="/staff" className="mt-5 inline-block rounded-xl border border-[#c99160] px-5 py-3 font-bold">View staff status</Link></section>
+      : !authorized ? <section className="rounded-2xl border border-[#8b653d] bg-[#281c15] p-7"><FaShieldHalved className="text-3xl text-[#ffbc83]"/><h2 className="mt-3 text-2xl font-black">Royaltee admin access required</h2><p className="mt-3 text-[#efc6a7]">An active profile with approved Royaltee owner/manager membership or existing RCH administrator access is required. This permission never grants league-wide admin access.</p><Link href="/staff" className="mt-5 inline-block rounded-xl border border-[#c99160] px-5 py-3 font-bold">View staff status</Link></section>
       : <div className="space-y-7">
         {error && <p role="alert" className="rounded-xl border border-red-400/50 bg-red-950/40 px-5 py-4 text-sm text-red-100">{error}</p>}
         {notice && <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-5 py-4 text-sm text-emerald-100"><FaCircleCheck/>{notice}</p>}

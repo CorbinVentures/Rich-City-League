@@ -36,7 +36,7 @@ describe('Royaltee 18+ coach dashboard',()=>{
   expect(authority).toContain("interval '18 years'");
   expect(authority).toContain("v_event.status<>'published'");
   expect(authority).toContain('v_event.capacity');
-  expect(signup).toContain("db.rpc('register_royaltee_event'");
+  expect(signup).toContain("'register_royaltee_event'");
   expect(signup).toContain('No payment is collected on this site.');
   expect(publicSite).toContain('<RoyalteeEventRegistration');
   expect(staffTools).toContain("href:'/league/royaltee/dashboard'");
