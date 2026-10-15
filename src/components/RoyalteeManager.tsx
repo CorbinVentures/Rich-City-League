@@ -43,6 +43,7 @@ export function RoyalteeManager(){
   },[db]);
   useEffect(()=>{
     if(authLoading)return;
+    setAllowed(false);setLoading(true);setApplications([]);
     if(!db||!user){setLoading(false);return;}
     let active=true;
     void db.rpc('can_manage_royaltee').then(async({data,error:accessError}:any)=>{
@@ -66,7 +67,7 @@ export function RoyalteeManager(){
     registration_open:program.registration_open,updated_at:new Date().toISOString()
   }).eq('slug','royaltee-steppas'),'Royaltee program details updated.');};
   return <main className="min-h-screen bg-[#050c16] pb-24 text-white">
-    <section className="border-b border-[#365f87] bg-[linear-gradient(135deg,#092744,#070d18)]"><Container maxWidth="xl" className="py-11"><Link href="/league/royaltee" className="inline-flex gap-2 text-xs font-black uppercase tracking-widest text-[#afdfff]"><FaArrowLeft/> Royaltee Home</Link><p className="mt-6 text-xs font-black uppercase tracking-[.2em] text-[#ffa66d]">Rich City League · Partner Administration</p><h1 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Royaltee Organization HQ</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-[#bed7e9]">Independent partner control for adult cheer and step profiles, recruitment and performances. No access is granted to league-wide administration.</p></Container></section>
+    <section className="border-b border-[#365f87] bg-[linear-gradient(135deg,#092744,#070d18)]"><Container maxWidth="xl" className="py-11"><Link href="/league/royaltee" className="inline-flex gap-2 text-xs font-black uppercase tracking-widest text-[#afdfff]"><FaArrowLeft/> Royaltee Home</Link><Link href="/league/royaltee/dashboard" className="ml-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#ffad74]">Cheerleading Dashboard <FaArrowRight/></Link><p className="mt-6 text-xs font-black uppercase tracking-[.2em] text-[#ffa66d]">Rich City League · Partner Administration</p><h1 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Royaltee Organization HQ</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-[#bed7e9]">Independent partner control for adult cheer and step profiles, recruitment and performances. No access is granted to league-wide administration.</p></Container></section>
     <Container maxWidth="xl" className="py-9">
       {authLoading||loading?<p className="text-sm text-[#bdd7ea]">Verifying organization access…</p>:
       !user?<section className="rounded-2xl border border-[#315d85] bg-[#0c243a] p-7"><h2 className="text-2xl font-black">Sign in first.</h2><p className="mt-3 text-sm text-[#c2daea]">Royaltee HQ is restricted to approved organization owners and managers and RCH administrators.</p><Link href="/auth/sign-in?next=/league/royaltee/manage" className="mt-5 inline-flex rounded-xl bg-[#ff913f] px-5 py-3 text-sm font-black text-black">Sign in</Link></section>:

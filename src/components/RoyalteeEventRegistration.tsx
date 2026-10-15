@@ -21,6 +21,7 @@ export function RoyalteeEventRegistration({event}:{event:EventSignup}){
  const [note,setNote]=useState('');
 
  useEffect(()=>{
+  setRegistration(null);setLoading(true);setError('');setNote('');
   if(authLoading)return;
   if(!user||!db){setRegistration(null);setLoading(false);return;}
   let active=true;
@@ -51,7 +52,7 @@ export function RoyalteeEventRegistration({event}:{event:EventSignup}){
  const active=registration&&['registered','checked_in'].includes(registration.status);
  return <div className="mt-4 rounded-xl border border-[#527494] bg-[#071b2c] p-4">
   <p className="text-xs font-black uppercase tracking-wide text-[#ffb686]">{event.registration_fee_cents?dollars(event.registration_fee_cents)+' registration fee':'Free registration'}</p>
-  <p className="mt-1 text-xs leading-5 text-[#bed6e7]">Age 18+ only · {event.capacity?'Limited to '+event.capacity+' registrants':'Open capacity'} · No online payment on RCH</p>
+  <p className="mt-1 text-xs leading-5 text-[#bed6e7]">Age 18+ only · {event.capacity?'Limited to '+event.capacity+' registrants':'Open capacity'} · No payment is collected on this site.</p>
   {error&&<p role="alert" className="mt-2 text-xs text-[#ffc1bb]">{error}</p>}
   {note&&<p role="status" className="mt-2 text-xs text-[#b8f5dc]">{note}</p>}
   {authLoading||loading?<p className="mt-3 text-xs text-[#aaccdf]">Checking registration…</p>:

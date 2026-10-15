@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { RoyalteeEventRegistration } from '@/components/RoyalteeEventRegistration';
 import type { Metadata } from 'next';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaCalendarDays, FaCheck, FaCrown, FaEnvelope, FaHeart, FaLocationDot, FaPeopleGroup, FaPhone, FaShieldHalved, FaStar } from 'react-icons/fa6';
 import './royaltee-brand.css';
+import { RoyalteeEventRegistration } from '@/components/RoyalteeEventRegistration';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -118,6 +118,6 @@ export default async function RoyalteePage() {
     </section>
 
     <section className="royaltee-partner-strip"><div className="royaltee-wrap royaltee-partner-layout"><FaCrown aria-hidden="true"/><div><span>PROUD OFFICIAL PARTNER OF</span><h2>RICH CITY LEAGUE</h2><p>Two organizations. One unforgettable game-night experience.</p></div><Link href="/league" className="royaltee-cta royaltee-cta-outline">VISIT RCL <FaArrowRight aria-hidden="true"/></Link></div></section>
-    <footer className="royaltee-footer" id="contact"><div className="royaltee-wrap royaltee-footer-layout"><div><p className="royaltee-footer-name"><FaCrown aria-hidden="true"/> ROYALTEE</p><p>STEPPAS &amp; CHEERLEADING</p><small>Represent. Perform. Empower. 18+ RCH division.</small></div><div className="royaltee-footer-contact"><a href={contactMail}><FaEnvelope aria-hidden="true"/> {program.contact_email}</a><a href={'tel:'+program.contact_phone.replace(/[^\d+]/g,'')}><FaPhone aria-hidden="true"/> {program.contact_phone}</a><span>{program.registration_note}</span></div><div className="royaltee-footer-buttons"><Link href="/league/royaltee/manage">ROYALTEE HQ <FaArrowRight aria-hidden="true"/></Link><Link href="/league">RICH CITY LEAGUE <FaArrowRight aria-hidden="true"/></Link></div></div><div className="royaltee-wrap royaltee-footer-base"><span>© {new Date().getFullYear()} Royaltee Steppas &amp; Cheerleading · Partner of Rich City League</span><Link href="#royaltee-top">BACK TO TOP ↑</Link></div></footer>
+    <footer className="royaltee-footer" id="contact"><div className="royaltee-wrap royaltee-footer-layout"><div><p className="royaltee-footer-name"><FaCrown aria-hidden="true"/> ROYALTEE</p><p>STEPPAS &amp; CHEERLEADING</p><small>Represent. Perform. Empower. 18+ RCH division.</small></div><div className="royaltee-footer-contact"><a href={contactMail}><FaEnvelope aria-hidden="true"/> {program.contact_email}</a><a href={'tel:'+program.contact_phone.replace(/[^\d+]/g,'')}><FaPhone aria-hidden="true"/> {program.contact_phone}</a><span>{program.registration_note}</span></div><div className="royaltee-footer-buttons"><Link href="/league/royaltee/dashboard">ROYALTEE HQ <FaArrowRight aria-hidden="true"/></Link><Link href="/league">RICH CITY LEAGUE <FaArrowRight aria-hidden="true"/></Link></div></div><div className="royaltee-wrap royaltee-footer-base"><span>© {new Date().getFullYear()} Royaltee Steppas &amp; Cheerleading · Partner of Rich City League</span><Link href="#royaltee-top">BACK TO TOP ↑</Link></div></footer>
   </main>;
 }

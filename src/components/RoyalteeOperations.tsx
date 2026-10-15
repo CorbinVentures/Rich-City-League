@@ -100,11 +100,10 @@ export function RoyalteeOperations(){
  async function changeRegistration(r:Registration,patch:Partial<Registration>){
   if(!db||busy||!selected)return;
   setBusy(true);setError('');setMessage('');
-  const changes:any={...patch,updated_at:new Date().toISOString()};
-  if(patch.status==='checked_in')changes.checked_in_at=new Date().toISOString();
-  if(patch.status==='registered')changes.checked_in_at=null;
-  const {error,data}=await db.from('rcl_royaltee_event_registrations').update(changes).eq('id',r.id).select('id').single();
-  if(error||!data)setError(error?.message||'Registration could not be updated.');
+  const {error}=await db.rpc('manage_royaltee_event_registration',{
+   p_registration_id:r.id,p_status:patch.status??null,p_payment_status:patch.payment_status??null
+  });
+  if(error)setError(error?.message||'Registration could not be updated.');
   else{setMessage('Registration updated.');await loadRoster(selected);}
   setBusy(false);
  }
@@ -151,7 +150,7 @@ export function RoyalteeOperations(){
      <label className="flex items-center gap-3 rounded-xl border border-[#355b7b] p-4 text-sm font-bold sm:col-span-2"><input type="checkbox" className="h-5 w-5 accent-[#ff9d61]" checked={editor.registration_open} onChange={e=>setEditor({...editor,registration_open:e.target.checked})}/> Accept event registrations</label>
      <label className="text-xs font-bold text-[#c2d9e8] sm:col-span-2">Description<textarea className={field+' min-h-24'} maxLength={1500} value={editor.description} onChange={e=>setEditor({...editor,description:e.target.value})}/></label>
     </div>
-    <p className="mt-4 text-xs leading-5 text-[#9ec2db]">All Royaltee events on RCH must be adult-only (18+). Changing the price affects new signups; existing registrants retain the fee quoted when they joined.</p>
+    <p className="mt-4 text-xs leading-5 text-[#9ec2db]">All Royaltee events on RCH must be adult-only (18+). Changing the price affects new signups; active registrants retain their quoted fee. Unpaid members who withdraw and re-register receive the current price; paid or waived registrations retain their previous fee.</p>
     <button disabled={busy} className="mt-5 min-h-11 w-full rounded-xl bg-[#ff9959] px-5 text-sm font-black text-[#1d110a] disabled:opacity-50">{busy?'Saving…':editor.id?'Save event changes':'Create adult event'}</button>
    </form>
   </div>

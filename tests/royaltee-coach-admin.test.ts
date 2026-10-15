@@ -9,7 +9,7 @@ const signup=readFileSync(join(process.cwd(),'src/components/RoyalteeEventRegist
 const publicPage=readFileSync(join(process.cwd(),'src/app/league/royaltee/page.tsx'),'utf8');
 
 describe('Royaltee coach-scoped administration',()=>{
- it('requires an active administrator-approved cheerleading assignment or Royaltee leadership',()=>{
+ it('retains the historical migration without granting global roles',()=>{
   expect(migration).toContain("s.role_code = 'cheerleading_coach'");
   expect(migration).toContain('s.active = true and s.revoked_at is null');
   expect(migration).toContain('s.approved_by is not null');

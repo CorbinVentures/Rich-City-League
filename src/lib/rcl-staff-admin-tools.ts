@@ -22,9 +22,9 @@ export const ADMIN_STAFF_TOOLS:Record<RCLStaffRole,readonly StaffAction[]>={
   {title:'Storyline Studio',detail:'Editorial stories, scenes and visual storyboard',href:'/command#stories'}
  ],
  cheerleading_coach:[
-  {title:'Entertainment management',detail:'Halftime performers, rehearsals and show coordination',href:'/command#entertainment'},
-  {title:'Game-day Operations',detail:'Plan performers, staff and transitions',href:'/command#operations'},
-  {title:'Game schedule',detail:'See upcoming games and performances',href:'/games'}
+  {title:'Royaltee Cheerleading HQ',detail:'Organization-scoped events, registration fees and attendance',href:'/league/royaltee/dashboard'},
+  {title:'Royaltee Website Manager',detail:'Adult performer approvals and public program information',href:'/league/royaltee/manage'},
+  {title:'Game schedule',detail:'Review league events and performance opportunities',href:'/games'}
  ],
  referee:[
   {title:'Game-day Operations',detail:'Assign game staff and monitor readiness',href:'/command#operations'},

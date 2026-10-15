@@ -316,9 +316,9 @@
   align-content: center;
   justify-items: start;
   gap: 5px;
-  border: 1px dashed #BCD3EE !important;
+  border: 1px dashed rgba(128, 187, 245, .72) !important;
   border-radius: 15px !important;
-  background: linear-gradient(145deg,#F7FAFD,#F1F6FC) !important;
+  background: linear-gradient(145deg, #194166 0%, #0d2c49 100%) !important;
   padding: 14px !important;
   text-align: left;
   box-shadow: none !important;
@@ -331,20 +331,30 @@
   height: 28px;
   place-items: center;
   border-radius: 9px;
-  background: var(--rcl-v3-primary-soft);
-  color: var(--rcl-v3-primary) !important;
+  background: #092641 !important;
+  color: #69b1ff !important;
 }
 
 .rcl-platform-root .rcl-story-empty-card strong {
-  color: var(--rcl-v3-ink) !important;
+  color: #f5f9ff !important;
   font-size: 11px;
   font-weight: 850;
 }
 
 .rcl-platform-root .rcl-story-empty-card small {
-  color: var(--rcl-v3-copy) !important;
+  color: #d0e0f0 !important;
   font-size: 9px;
   line-height: 1.4;
+}
+
+.rcl-platform-root .rcl-story-empty-card:hover {
+  border-color: #92c8ff !important;
+  background: linear-gradient(145deg, #205078 0%, #123657 100%) !important;
+}
+
+.rcl-platform-root .rcl-story-empty-card:focus-visible {
+  outline: 3px solid #6cb5ff;
+  outline-offset: 3px;
 }
 
 /* ---------- Global topbar search ---------- */
