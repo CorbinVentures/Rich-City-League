@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaCalendarDays, FaCheck, FaCrown, FaEnvelope, FaHeart, FaLocationDot, FaPeopleGroup, FaPhone, FaShieldHalved, FaStar } from 'react-icons/fa6';
 import './royaltee-brand.css';
+import { RoyalteeStaffShortcut } from '@/components/RoyalteeStaffShortcut';
 import { RoyalteeEventRegistration } from '@/components/RoyalteeEventRegistration';
 
 export const revalidate = 60;
@@ -50,6 +51,7 @@ export default async function RoyalteePage() {
       </div>
     </header>
 
+    <RoyalteeStaffShortcut variant="royaltee" />
     <section className="royaltee-hero" aria-labelledby="royaltee-hero-title">
       <div className="royaltee-hero-glow" aria-hidden="true"/>
       <div className="royaltee-wrap royaltee-hero-layout">

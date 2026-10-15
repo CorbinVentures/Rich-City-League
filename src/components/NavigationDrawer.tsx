@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useId, useRef } from 'react';
 import { FaArrowRight, FaChevronDown, FaXmark } from 'react-icons/fa6';
 import { RCHActionGuide } from '@/components/RCHActionGuide';
+import { RoyalteeStaffShortcut } from '@/components/RoyalteeStaffShortcut';
 import { isNavigationActive, type RCLNavGroup } from '@/lib/rcl-navigation';
 
 export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;onClose:()=>void;groups:RCLNavGroup[];pathname:string}) {
@@ -38,6 +39,7 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
         </div>
         <button ref={closeRef} type="button" onClick={onClose} aria-label="Close navigation"><FaXmark aria-hidden="true"/></button>
       </div>
+      <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
       <RCHActionGuide variant="drawer" onNavigate={onClose}/>
       <div className="rch-nav-directory" aria-label="All RCH features">
         <div className="rch-nav-directory-head"><b>All features</b><span>More places to explore when you need them</span></div>
