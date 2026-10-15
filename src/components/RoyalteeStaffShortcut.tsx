@@ -19,7 +19,7 @@ export function RoyalteeStaffShortcut({ variant }: { variant: Variant }) {
 }
 
 function RoyalteeStaffShortcutForAccount({ variant }: { variant: Variant }) {
-  const db = useMemo(() => getSupabaseClient(), []);
+  const db = useMemo(() => getSupabaseClient() as any, []);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
