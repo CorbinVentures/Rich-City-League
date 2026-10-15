@@ -13,19 +13,19 @@ type Variant = 'royaltee' | 'drawer' | 'staff';
  * policies, and can_manage_royaltee RPCs. Never infer manager rights from the
  * user's generic RCH staff/cheerleading assignment.
  */
-export function RoyalteeStaffShortcut({ variant }: { variant: Variant }) {
+export function RoyalteeStaffShortcut({ variant, onNavigate }: { variant: Variant; onNavigate?: () => void }) {
   const { user } = useAuth();
-  return user ? <RoyalteeStaffShortcutForAccount key={user.id} variant={variant} /> : null;
+  return user ? <RoyalteeStaffShortcutForAccount key={user.id} variant={variant} onNavigate={onNavigate} /> : null;
 }
 
-function RoyalteeStaffShortcutForAccount({ variant }: { variant: Variant }) {
+function RoyalteeStaffShortcutForAccount({ variant, onNavigate }: { variant: Variant; onNavigate?: () => void }) {
   const db = useMemo(() => getSupabaseClient() as any, []);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     if (!db) return;
     let active = true;
-    void db.rpc('can_manage_royaltee').then(({ data, error }) => {
+    void db.rpc('can_manage_royaltee').then(({ data, error }: { data: boolean | null; error: unknown }) => {
       if (active) setAllowed(!error && data === true);
     }).catch(() => { if (active) setAllowed(false); });
     return () => { active = false; };
@@ -48,10 +48,10 @@ function RoyalteeStaffShortcutForAccount({ variant }: { variant: Variant }) {
         <p className="mt-1 text-sm leading-6 text-[#cee6f5]">Events, fees, registration desk, performers and website management.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Link href="/league/royaltee/dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#ff9c52] px-4 py-2 text-xs font-black text-[#160c04] hover:bg-[#ffbb85]">
+        <Link href="/league/royaltee/dashboard" onClick={onNavigate} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#ff9c52] px-4 py-2 text-xs font-black text-[#160c04] hover:bg-[#ffbb85]">
           <FaCalendarDays aria-hidden="true" /> Open Coach Dashboard <FaArrowRight aria-hidden="true" />
         </Link>
-        <Link href="/league/royaltee/manage" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#89c9f0] bg-[#113b5e] px-4 py-2 text-xs font-black text-white hover:bg-[#18527e]">
+        <Link href="/league/royaltee/manage" onClick={onNavigate} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#89c9f0] bg-[#113b5e] px-4 py-2 text-xs font-black text-white hover:bg-[#18527e]">
           <FaCrown aria-hidden="true" /> Manage Royaltee Site <FaArrowRight aria-hidden="true" />
         </Link>
       </div>
