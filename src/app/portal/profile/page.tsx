@@ -16,16 +16,32 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (profile) {
-      setForm({
-        first_name: profile.first_name ?? '',
-        last_name: profile.last_name ?? '',
-        display_name: profile.display_name ?? '',
-        phone: profile.phone ?? '',
-        bio: profile.bio ?? '',
-      });
+    if (!profile || !user) {
+      setForm({ first_name: '', last_name: '', display_name: '', phone: '', bio: '' });
+      return;
     }
-  }, [profile]);
+    let active = true;
+    setForm({
+      first_name: profile.first_name ?? '',
+      last_name: profile.last_name ?? '',
+      display_name: profile.display_name ?? '',
+      phone: '',
+      bio: profile.bio ?? '',
+    });
+
+    // Only the authenticated owner may retrieve their contact phone.
+    const client = getSupabaseClient();
+    if (client) {
+      void (client.rpc as any)('get_my_private_profile').then(
+        ({ data, error }: { data?: Array<{phone:string|null}> | null; error?: {message?:string}|null }) => {
+          if (!active) return;
+          if (error) setError('Unable to load your private contact details.');
+          else setForm(current => ({ ...current, phone: data?.[0]?.phone ?? '' }));
+        },
+      );
+    }
+    return () => { active = false; };
+  }, [profile, user?.id]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
