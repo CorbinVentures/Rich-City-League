@@ -58,6 +58,11 @@ create policy rch_ops_operator_read on public.rch_run_operators for select to au
     or exists(select 1 from public.runs r where r.id=run_id and r.host_id=(select auth.uid()))
     or coalesce(public.is_staff_or_admin(),false));
 
+-- Let appointed officials see pending game evidence without granting global access.
+create policy rch_ranked_appointed_official_read on public.run_ranked_matches for select to authenticated
+  using (exists(select 1 from public.rch_run_operators o where o.run_id=run_ranked_matches.run_id
+    and o.profile_id=(select auth.uid()) and o.role='official'));
+
 create policy rch_ops_task_read on public.rch_run_operations for select to authenticated
   using (exists(select 1 from public.runs r where r.id=run_id and r.host_id=(select auth.uid()))
     or exists(select 1 from public.rch_run_operators o where o.run_id=rch_run_operations.run_id and o.profile_id=(select auth.uid()))
