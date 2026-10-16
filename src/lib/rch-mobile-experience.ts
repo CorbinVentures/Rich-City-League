@@ -18,7 +18,10 @@ export function isBrowserAccountRoute(pathname: string): boolean {
  * simply because their prefix happens to match a public section.
  */
 const PUBLIC_BROWSER_PAGES = new Set([
-  '/', '/about', '/league', '/richmond-basketball-league',
+  '/', '/about', '/app', '/legal', '/legal/privacy', '/legal/terms',
+  '/legal/cookies', '/legal/safety', '/legal/community-guidelines',
+  '/legal/dmca', '/legal/take-it-down',
+  '/league', '/richmond-basketball-league',
   '/richmond-basketball-runs', '/network', '/community', '/sponsors',
   '/sponsors/start', '/organizations', '/network/partners',
   '/network/partners/apply', '/membership', '/news', '/players',
