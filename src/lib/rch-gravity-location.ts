@@ -5,7 +5,7 @@
  * transmit or log exact coordinates from browser geolocation. Location is a
  * relevance preference, not authorization or proof of attendance.
  */
-import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates } from '@/lib/virginia-world';
+import { VIRGINIA_CITIES, cityForText, milesBetween, virginiaCoordinates } from './virginia-world';
 
 export const GRAVITY_LOCATION_KEY = 'rch-gravity-location-v1';
 export const GRAVITY_LOCATION_EVENT = 'rch:gravity-location-changed';
