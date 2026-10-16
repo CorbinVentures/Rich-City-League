@@ -95,7 +95,7 @@ const BROWSER_MEMBER_PREFIXES = [
 ] as const;
 
 export function isBrowserMemberRoute(pathname: string): boolean {
-  const normalized = pathname.length > 1 ? pathname.replace(/\\/+$/, '') : pathname;
+  const normalized = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
   return BROWSER_MEMBER_PREFIXES.some(prefix =>
     normalized === prefix || normalized.startsWith(prefix + '/'),
   );
