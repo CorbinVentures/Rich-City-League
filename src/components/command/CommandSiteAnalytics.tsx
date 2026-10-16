@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+const CommandLiveAnalytics = dynamic(() => import('./CommandLiveAnalytics').then(m => m.CommandLiveAnalytics), {loading:()=> <p className="rounded-xl border border-[#355777] bg-[#0c2035] p-5">Connecting live Command Center analytics…</p>});
 import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaArrowTrendUp, FaArrowUpRightFromSquare, FaBasketball, FaChartLine,
@@ -10,7 +12,7 @@ import {
 } from 'react-icons/fa6';
 
 type Period = 7 | 30 | 90 | 365;
-type Section = 'overview' | 'audience' | 'social' | 'basketball' | 'business';
+type Section = 'live' | 'overview' | 'audience' | 'social' | 'basketball' | 'business';
 type NumericSummary = Record<string, number>;
 type DailyRow = {day: string; members: number; visits: number; sessions: number; posts: number; content_views: number};
 type TrafficRow = {section: string; visits: number; sessions: number; members: number};
@@ -28,6 +30,7 @@ type ExecutiveAnalytics = {
 };
 
 const reports: {id: Section; title: string}[] = [
+  {id:'live',title:'Live Command'},
   {id:'overview',title:'Executive overview'},
   {id:'audience',title:'Audience & reach'},
   {id:'social',title:'Social & content'},
@@ -107,7 +110,7 @@ function downloadReport(data: ExecutiveAnalytics) {
 export function CommandSiteAnalytics() {
   const db=useMemo(()=>getSupabaseClient() as any,[]);
   const [period,setPeriod]=useState<Period>(30);
-  const [section,setSection]=useState<Section>('overview');
+  const [section,setSection]=useState<Section>('live');
   const [data,setData]=useState<ExecutiveAnalytics|null>(null);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
@@ -137,7 +140,7 @@ export function CommandSiteAnalytics() {
     <header className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-[#2a4e70] pb-6">
       <div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-[#81c3fb]"><FaChartLine/> RCH intelligence / Executive Command</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Sitewide <span className="text-[#82c6fc]">Analytics</span></h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-[#c3d7e7]">One view of the entire Rich City Hoops ecosystem: audience, discovery, creator activity, competitions, growth, and recorded business results.</p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-[#c3d7e7]">One view of the entire Rich City Hoops ecosystem: live activity, audience, discovery, creator engagement, competitions, growth, and recorded business results.</p>
       </div>
       <div className="flex flex-wrap gap-2"><button type="button" onClick={reload} disabled={loading} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#4c7395] px-4 text-sm font-semibold text-white disabled:opacity-50"><FaRotate/> Refresh</button>
         <button type="button" disabled={!data||loading} onClick={()=>{if(data)downloadReport(data)}} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#8ccdfc] px-4 text-sm font-black text-[#071c30] disabled:opacity-50"><FaDownload/> Export CSV</button></div>
@@ -153,7 +156,7 @@ export function CommandSiteAnalytics() {
     <nav className="mb-5 flex gap-2 overflow-x-auto pb-2" aria-label="Analytics reports">{reports.map(tab=><button key={tab.id} type="button" onClick={()=>setSection(tab.id)} aria-pressed={section===tab.id}
       className={`min-h-11 shrink-0 rounded-xl px-4 text-xs font-bold ${section===tab.id?'border border-[#86caff] bg-[#153c60] text-white':'border border-[#2d516f] text-[#bfd9ed]'}`}>{tab.title}</button>)}</nav>
 
-    {loading?<section role="status" className={panel}>Loading verified sitewide analytics…</section>:
+    {section==='live'?<CommandLiveAnalytics/>:loading?<section role="status" className={panel}>Loading verified sitewide analytics…</section>:
       error?<section role="alert" className={panel}><div className="flex items-center gap-2 text-lg font-bold text-white"><FaCircleExclamation/> Report unavailable</div><p className="mt-2 text-sm text-[#d0dfef]">{error}</p><button type="button" onClick={reload} className="mt-4 rounded-lg bg-[#84c7f8] px-5 py-3 text-sm font-bold text-[#0a1b2a]">Retry report</button></section>:
       data?<div className="space-y-6">
         {!trafficReady&&<aside className="rounded-xl border border-[#426c92] bg-[#12304d] p-4 text-sm leading-6 text-[#e1f0fb]">Traffic history begins when the new screen-visit measurement starts receiving activity. We do not backfill or estimate past visitors. Other historical figures come from existing platform records.</aside>}
