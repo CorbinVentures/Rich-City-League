@@ -766,9 +766,9 @@ export default function NetworkHome() {
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
               <NetworkPostCard item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
-              {!focusPostId && index === 1 && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
-              {!focusPostId && index === 2 && {!focusPostId && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}}
-              {!focusPostId && index === 3 && {!focusPostId && <TodayPanel
+              {!focusPostId && index === Math.min(1, feedItems.length - 1) && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
+              {!focusPostId && index === Math.min(2, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
+              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <TodayPanel
               postsToday={todaySnapshot.postsToday}
               activeStories={todaySnapshot.activeStories}
               rep={todaySnapshot.rep}
@@ -778,7 +778,7 @@ export default function NetworkHome() {
               userId={user?.id}
               busyRunId={runBusy}
               onRunToggle={(run) => void toggleRunParticipation(run)}
-            />}}
+            />}
               {!focusPostId && (index === 4 || (index > 4 && (index - 4) % 14 === 0)) && <NetworkSponsoredPlacement
                 placement="social-feed"
                 surface={`social-feed-inline-${index}`}
