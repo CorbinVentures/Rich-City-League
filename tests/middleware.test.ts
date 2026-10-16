@@ -5,11 +5,15 @@ import { NextRequest } from 'next/server';
 
 let sessionUser: { id:string } | null = null;
 let sessionProfile: { role:string; is_active:boolean; onboarding_complete?:boolean } | null = null;
+let mfaAssurance: { currentLevel: 'aal1' | 'aal2'; nextLevel: 'aal1' | 'aal2' } = { currentLevel: 'aal1', nextLevel: 'aal1' };
 
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
     auth: {
       getUser: async () => ({ data: { user: sessionUser } }),
+      mfa: {
+        getAuthenticatorAssuranceLevel: async () => ({ data: mfaAssurance, error: null }),
+      },
     },
     from: (table:string) => {
       if (table !== 'profiles') throw new Error(`Unexpected table in middleware test: ${table}`);
@@ -31,6 +35,7 @@ describe('public launch middleware', () => {
   beforeEach(() => {
     sessionUser = null;
     sessionProfile = null;
+    mfaAssurance = { currentLevel: 'aal1', nextLevel: 'aal1' };
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
   });
@@ -86,7 +91,7 @@ describe('public launch middleware', () => {
   });
 
   it('keeps authentication and onboarding pages public', async () => {
-    for (const pathname of ['/auth/sign-in', '/auth/sign-up', '/auth/forgot-password', '/auth/complete-profile', '/legal/privacy', '/member-access', '/access']) {
+    for (const pathname of ['/auth/sign-in', '/auth/sign-up', '/auth/forgot-password', '/auth/complete-profile', '/auth/mfa', '/legal/privacy', '/member-access', '/access']) {
       const response = await middleware(new NextRequest(`http://localhost${pathname}`));
       expect(response.status).toBe(200);
       expect(response.headers.get('location')).toBeNull();
@@ -157,10 +162,49 @@ describe('public launch middleware', () => {
     expect(new URL(response.headers.get('location')!).pathname).toBe('/league');
   });
 
-  it('allows an admin into admin routes', async () => {
+  it('allows an admin with AAL2 into admin routes', async () => {
     sessionUser = { id: 'admin-user' };
     sessionProfile = { role: 'admin', is_active: true, onboarding_complete: true };
+    mfaAssurance = { currentLevel: 'aal2', nextLevel: 'aal2' };
     const response = await middleware(new NextRequest('http://localhost/admin/network/acquisition'));
+    expect(response.status).toBe(200);
+  });
+
+  it('prompts an unenrolled administrator to set up MFA instead of entering the command center', async () => {
+    sessionUser = { id: 'admin-user' };
+    sessionProfile = { role: 'admin', is_active: true, onboarding_complete: true };
+    const response = await middleware(new NextRequest('http://localhost/command/finance?tab=staff'));
+    expect(response.status).toBe(307);
+    const location = new URL(response.headers.get('location')!);
+    expect(location.pathname).toBe('/account/security');
+    expect(location.searchParams.get('next')).toBe('/command/finance?tab=staff');
+  });
+
+  it('requires the second factor for administrators even with an enrolled authenticator', async () => {
+    sessionUser = { id: 'admin-user' };
+    sessionProfile = { role: 'admin', is_active: true, onboarding_complete: true };
+    mfaAssurance = { currentLevel: 'aal1', nextLevel: 'aal2' };
+    const response = await middleware(new NextRequest('http://localhost/admin/roles'));
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get('location')!).pathname).toBe('/auth/mfa');
+  });
+
+  it('requires MFA for opted-in members accessing messages through a direct link', async () => {
+    sessionUser = { id: 'fan-user' };
+    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: true };
+    mfaAssurance = { currentLevel: 'aal1', nextLevel: 'aal2' };
+    const response = await middleware(new NextRequest('http://localhost/messages?thread=abc'));
+    expect(response.status).toBe(307);
+    const location = new URL(response.headers.get('location')!);
+    expect(location.pathname).toBe('/auth/mfa');
+    expect(location.searchParams.get('next')).toBe('/messages?thread=abc');
+  });
+
+  it('allows a verified MFA member to return to the requested page', async () => {
+    sessionUser = { id: 'fan-user' };
+    sessionProfile = { role: 'fan', is_active: true, onboarding_complete: true };
+    mfaAssurance = { currentLevel: 'aal2', nextLevel: 'aal2' };
+    const response = await middleware(new NextRequest('http://localhost/messages'));
     expect(response.status).toBe(200);
   });
 
