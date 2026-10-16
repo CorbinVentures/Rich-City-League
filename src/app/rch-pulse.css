@@ -1,0 +1,141 @@
+/*
+ * RCH PULSE / editorial social timeline.
+ * Scoped to /social so league operations, public marketing, profile pages,
+ * and the standalone scorebook retain their established presentation.
+ */
+html.rch-premium-root body.rch-premium-app main.rch-pulse-page {
+  --pulse-canvas:#061322;
+  --pulse-panel:#0d2237;
+  --pulse-raised:#13314d;
+  --pulse-border:#315573;
+  --pulse-text:#f5f9ff;
+  --pulse-muted:#c0d2e5;
+  --pulse-blue:#55a8ff;
+  background:radial-gradient(ellipse at 63% 0%,rgba(24,95,167,.20),transparent 34rem),var(--pulse-canvas)!important;
+  color:var(--pulse-text)!important;
+  isolation:isolate;
+}
+main.rch-pulse-page :is(a,button,input) { -webkit-tap-highlight-color:transparent; }
+main.rch-pulse-page :is(button,a):focus-visible {outline:2px solid #a2d6ff!important;outline-offset:3px;}
+main.rch-pulse-page .rcl-feed-intro {
+  border:1px solid var(--pulse-border)!important;
+  border-radius:23px!important;
+  background:linear-gradient(118deg,#143450,#091e33 74%)!important;
+  padding:clamp(17px,3vw,28px)!important;
+  box-shadow:0 15px 42px rgba(0,5,18,.28)!important;
+}
+main.rch-pulse-page .rcl-feed-intro h1 {font-size:clamp(32px,4.2vw,53px)!important;color:#fff!important;letter-spacing:-.045em!important;}
+main.rch-pulse-page .rcl-feed-intro h1 span {color:#6ab4ff!important;font-style:italic;}
+main.rch-pulse-page .rcl-feed-intro p {color:#95cbff!important;letter-spacing:.17em!important;}
+main.rch-pulse-page .rcl-feed-intro div > span {color:#c1d5e9!important;}
+main.rch-pulse-page .rcl-feed-search {background:#0b243d!important;border:1px solid #486b89!important;}
+main.rch-pulse-page .rcl-feed-search input {color:#f5f9ff!important;background:transparent!important;}
+main.rch-pulse-page .rcl-feed-search input::placeholder {color:#aec5dc!important;}
+/* Feature: prominent multimedia slot + editorial copy without inventing activity. */
+main.rch-pulse-page .rch-pulse-hero {
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  min-width:0;overflow:hidden;border:1px solid #386188;border-radius:25px;
+  background:radial-gradient(ellipse at 0% 0%,#20476d 0,transparent 60%),linear-gradient(135deg,#112c46,#07182a 80%);
+  box-shadow:0 19px 48px #0005;
+}
+main.rch-pulse-page .rch-pulse-hero-copy {min-width:0;padding:clamp(20px,3vw,34px);align-self:center;}
+main.rch-pulse-page .rch-pulse-eyebrow {display:inline-flex;align-items:center;gap:7px;color:#9bd2ff!important;font-size:10px;font-weight:900;letter-spacing:.17em;}
+main.rch-pulse-page .rch-pulse-hero h2 {margin:16px 0 12px;color:#fff!important;font-size:clamp(23px,3.2vw,43px);font-weight:950;letter-spacing:-.045em;line-height:1.12;}
+main.rch-pulse-page .rch-pulse-hero h2 span {color:#78bdff!important;}
+main.rch-pulse-page .rch-pulse-hero-copy p {max-width:46ch;margin:0;color:#c0d5e8!important;font-size:13px;line-height:1.65;}
+main.rch-pulse-page .rch-pulse-hero-actions {display:flex;flex-wrap:wrap;gap:9px;margin-top:20px;}
+main.rch-pulse-page .rch-pulse-hero-actions button {display:inline-flex;min-height:43px;align-items:center;justify-content:center;gap:8px;border:1px solid #619ad1;border-radius:11px;background:#2377cd;color:#fff!important;padding:10px 12px;font-size:11px;font-weight:850;}
+main.rch-pulse-page .rch-pulse-hero-actions button+button {background:#153955;border-color:#426c90;}
+main.rch-pulse-page .rch-pulse-hero-actions button:hover {filter:brightness(1.15);}
+main.rch-pulse-page .rch-pulse-feature {position:relative;display:flex;min-height:250px;overflow:hidden;flex-direction:column;justify-content:flex-end;background:linear-gradient(145deg,#1d5180,#0b243d);color:#fff!important;}
+main.rch-pulse-page .rch-pulse-feature>img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.76;transition:transform .35s ease;}
+main.rch-pulse-page .rch-pulse-feature:hover>img {transform:scale(1.03);}
+main.rch-pulse-page .rch-pulse-feature::after {content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,12,24,.97),rgba(4,23,42,.10) 88%);}
+main.rch-pulse-page .rch-pulse-feature-art {position:absolute;inset:0;display:grid;place-items:center;color:#93cfff;font-size:88px;background:radial-gradient(circle,#236cb2,transparent 68%);}
+main.rch-pulse-page .rch-pulse-feature-info {position:relative;z-index:1;display:grid;gap:9px;padding:24px;}
+main.rch-pulse-page .rch-pulse-feature-info span {display:flex;align-items:center;gap:7px;color:#a7d8ff!important;font-size:10px;font-weight:900;letter-spacing:.13em;}
+main.rch-pulse-page .rch-pulse-feature-info strong {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;color:#fff!important;font-size:clamp(16px,2vw,23px);line-height:1.35;overflow-wrap:anywhere;}
+main.rch-pulse-page .rch-pulse-feature-info small {display:flex;align-items:center;gap:6px;color:#c3dffe!important;font-size:11px;font-weight:800;}
+/* Timeline navigation stays operable on narrow phone screens. */
+main.rch-pulse-page .rcl-feed-mode-tabs {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;padding:5px;border:1px solid #345a7b;border-radius:15px;
+  background:#0d243b!important;box-shadow:0 7px 24px #0002;
+}
+main.rch-pulse-page .rcl-feed-mode-tabs button {min-width:0;min-height:45px;border-radius:10px;color:#c5d9e9!important;font-size:clamp(10px,1.2vw,12px);font-weight:850;}
+main.rch-pulse-page .rcl-feed-mode-tabs button.active {background:#287bcf!important;color:#fff!important;box-shadow:0 6px 18px #0004;}
+main.rch-pulse-page .rcl-feed-mode-tabs button:not(.active):hover {background:#193853!important;}
+/* Four distinct treatments, with all existing reaction/comment/repost behavior intact. */
+main.rch-pulse-page .rch-pulse-post {
+  min-width:0;border:1px solid #335777!important;border-radius:21px!important;
+  background:linear-gradient(155deg,#112c45,#0c2035)!important;color:#f4f9ff!important;
+  box-shadow:0 12px 34px rgba(0,5,18,.22)!important;
+}
+main.rch-pulse-page .rch-pulse-post--featured {border-color:#65a5e0!important;box-shadow:0 20px 52px #0006,0 0 0 1px #368ce240!important;}
+main.rch-pulse-page .rch-pulse-post--quick-take {
+  border-left:3px solid #69b9ff!important;
+  background:linear-gradient(110deg,#153b5b,#0c243a)!important;
+}
+main.rch-pulse-page .rch-pulse-post--discussion {border-left:3px solid #7698bd!important;}
+main.rch-pulse-page .rch-pulse-post--visual .rcl-dark-media,
+main.rch-pulse-page .rch-pulse-post--video .rcl-dark-media {background:#06111e!important;}
+main.rch-pulse-page .rch-pulse-post--featured .rcl-dark-media img {max-height:640px;object-fit:contain;}
+main.rch-pulse-page .rch-pulse-post-kicker {display:flex;align-items:center;gap:7px;border-bottom:1px solid #315575;background:#173754;padding:9px 18px;color:#a8d9ff!important;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;}
+main.rch-pulse-page .rch-pulse-post--quick-take .rcl-feed-post-body {font-size:18px;}
+main.rch-pulse-page .rch-pulse-post :is(.text-white\/20,.text-white\/25,.text-white\/30,.text-white\/35,.text-white\/40,.text-white\/45) {color:#b9cde1!important;}
+main.rch-pulse-page .rch-pulse-post :is(.text-white\/50,.text-white\/60) {color:#d0dfec!important;}
+main.rch-pulse-page .rch-pulse-post .rcl-reaction-popover {background:#183b58!important;color:#f6faff!important;border-color:#5d86a9!important;}
+/* Genuine moments use existing run and public post data; no fake live labels. */
+main.rch-pulse-page .rch-pulse-moments {padding:clamp(15px,2.4vw,23px);border:1px solid #40678a;border-radius:21px;background:radial-gradient(ellipse at 85% 0,#1b4264,transparent 72%),#0d243a;}
+main.rch-pulse-page .rch-pulse-moments-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+main.rch-pulse-page .rch-pulse-moments-heading h2 {margin:7px 0 4px;color:#fff!important;font-size:clamp(21px,2.5vw,29px);font-weight:900;letter-spacing:-.03em;}
+main.rch-pulse-page .rch-pulse-moments-heading p {font-size:12px;color:#c1d4e8!important;}
+main.rch-pulse-page .rch-pulse-moments-heading>a {display:flex;flex-shrink:0;align-items:center;gap:6px;color:#9ad1ff!important;font-size:11px;font-weight:850;}
+main.rch-pulse-page .rch-pulse-moment-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:17px;}
+main.rch-pulse-page .rch-pulse-moment-tile {display:flex;min-width:0;min-height:159px;flex-direction:column;gap:9px;padding:16px;border:1px solid #487393;border-radius:15px;background:linear-gradient(140deg,#1a4263,#102a45);color:#eef8ff!important;transition:border-color .18s,transform .18s;}
+main.rch-pulse-page .rch-pulse-moment-tile:hover {border-color:#94ccff;transform:translateY(-2px);}
+main.rch-pulse-page .rch-pulse-moment-tag {display:flex;align-items:center;gap:7px;color:#a7d8ff!important;font-size:9px;font-weight:900;letter-spacing:.12em;}
+main.rch-pulse-page .rch-pulse-moment-tile strong {display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#fff!important;font-size:16px;line-height:1.3;overflow-wrap:anywhere;}
+main.rch-pulse-page .rch-pulse-moment-tile small {color:#c0d7ea!important;font-size:11px;line-height:1.4;}
+main.rch-pulse-page .rch-pulse-moment-bottom {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;color:#a8d9ff!important;font-size:11px;font-weight:850;}
+main.rch-pulse-page .rch-pulse-moment-conversation {background:linear-gradient(145deg,#182f4e,#102037);}
+/* Move discovery into the rhythm of the feed; keep existing authenticated RPC. */
+main.rch-pulse-page .rch-neighborhood {border:1px solid #345e83!important;background:linear-gradient(145deg,#14314b,#0b2035)!important;color:#eff8ff!important;box-shadow:0 12px 32px #0004!important;}
+main.rch-pulse-page .rch-neighborhood :is(h2,strong) {color:#fff!important;}
+main.rch-pulse-page .rch-neighborhood :is(p,span) {color:#bdd2e6!important;}
+main.rch-pulse-page .rch-neighborhood article {border:1px solid #355e7e!important;background:#122b45!important;color:#f3f8ff!important;}
+main.rch-pulse-page .rch-neighborhood article a span:nth-child(2) {color:#f3f8ff!important;}
+main.rch-pulse-page .rch-neighborhood article button {color:#fff!important;}
+main.rch-pulse-page .rcl-feed-composer {border:1px solid #365f80!important;background:#112a42!important;color:#f7faff!important;}
+main.rch-pulse-page .rcl-composer-prompt {border:1px solid #456a89!important;background:#10253a!important;color:#bfd3e7!important;}
+main.rch-pulse-page .rcl-composer-action {color:#e3f0ff!important;}
+main.rch-pulse-page .rcl-composer-action.primary {background:#246db3!important;color:#fff!important;}
+/* The activity panel is now an inline editorial module rather than a light card above every post. */
+main.rch-pulse-page .rch-pulse-today {border:1px solid #355d7b!important;background:#102840!important;color:#eff8ff!important;}
+main.rch-pulse-page .rch-pulse-today [class*="bg-white"],
+main.rch-pulse-page .rch-pulse-today [class*="bg-[#F7FAFD]"] {background:#183750!important;}
+main.rch-pulse-page .rch-pulse-today [class*="border-[#"] {border-color:#355c7e!important;}
+main.rch-pulse-page .rch-pulse-today [class*="text-[#0F2547]"] {color:#f5f9ff!important;}
+main.rch-pulse-page .rch-pulse-today [class*="text-[#60738D]"],
+main.rch-pulse-page .rch-pulse-today [class*="text-[#71839A]"] {color:#bdd4e9!important;}
+main.rch-pulse-page .rcl-network-right-rail section {border-color:#355d7b!important;background:#102840!important;color:#eff8ff!important;}
+main.rch-pulse-page .rcl-network-right-rail small {color:#bbd1e5!important;}
+main.rch-pulse-page .rch-pulse-trend-number {display:grid;flex:0 0 29px;width:29px;height:29px;place-items:center;border-radius:50%;background:#285b83;color:#e9f7ff;font-size:12px;font-weight:900;}
+@media (min-width:900px) {
+  main.rch-pulse-page .rch-pulse-post--quick-take {width:87%;margin-left:auto;}
+  main.rch-pulse-page .rch-pulse-post--discussion {width:94%;}
+}
+@media (max-width:700px) {
+  main.rch-pulse-page .rch-pulse-hero {grid-template-columns:1fr;}
+  main.rch-pulse-page .rch-pulse-feature {min-height:205px;}
+  main.rch-pulse-page .rch-pulse-moment-grid {grid-template-columns:1fr;}
+  main.rch-pulse-page .rch-pulse-moment-tile {min-height:130px;}
+  main.rch-pulse-page .rch-pulse-moments-heading {align-items:center;}
+  main.rch-pulse-page .rcl-feed-intro {padding:16px!important;}
+}
+@media (prefers-reduced-motion:reduce) {
+  main.rch-pulse-page .rch-pulse-feature>img,
+  main.rch-pulse-page .rch-pulse-moment-tile {transition:none;}
+  main.rch-pulse-page .rch-pulse-feature:hover>img {transform:none;}
+  main.rch-pulse-page .rch-pulse-moment-tile:hover {transform:none;}
+}
