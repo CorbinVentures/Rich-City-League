@@ -24,8 +24,8 @@ export default async function HomePage() {
     ? await Promise.all([
         client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
         client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
-        client.from('network_events').select('id,slug,title,starts_at,city,state,event_type').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
-        client.from('runs').select('id,title,starts_at,location,game_format').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
+        (client as any).from('network_events').select('id,slug,title,starts_at,city,state,event_type').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
+        (client as any).from('runs').select('id,title,starts_at,location,game_format').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
