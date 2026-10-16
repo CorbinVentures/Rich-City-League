@@ -1,5 +1,5 @@
-import { gravityApproxCityMiles, gravityLocalRelevance } from '@/lib/rch-gravity-location';
-import { cityForText } from '@/lib/virginia-world';
+import { gravityApproxCityMiles, gravityLocalRelevance } from './rch-gravity-location';
+import { cityForText } from './virginia-world';
 
 /**
  * RCH Gravity — a shared, explainable relevance engine.
