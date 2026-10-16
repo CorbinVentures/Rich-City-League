@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FaCircleCheck, FaTriangleExclamation } from 'react-icons/fa6';
-import { getSafePostAuthPath } from '@/lib/auth-redirect';
+import { getBrowserPostAuthPath, getSafePostAuthPath } from '@/lib/auth-redirect';
+import { isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type CallbackProfile = {
@@ -67,7 +68,17 @@ export default function OAuthCallbackClient() {
 
         const { data: rawProfile } = await client.from('profiles').select('id,username,first_name,last_name,display_name,avatar_url,bio,role,is_active,created_at,updated_at,cover_url,position,jersey_number,location,profile_visibility,friend_request_policy,message_policy,is_vip,vip_label,is_system_account,system_account_key,onboarding_complete,qualified_referral_count,profile_song_url').eq('id', user.id).maybeSingle();
         const profile = rawProfile as unknown as CallbackProfile | null;
-        const next = getSafePostAuthPath(params.get('next') ?? '/social', '/today');
+        const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+        const mobileApp = isMobileStandaloneExperience({
+          standalone: window.matchMedia('(display-mode: standalone)').matches || navigatorWithStandalone.standalone === true,
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          maxTouchPoints: navigator.maxTouchPoints,
+        });
+        const requestedNext = params.get('next') ?? params.get('redirect');
+        const next = mobileApp
+          ? getSafePostAuthPath(requestedNext ?? '/social', '/today')
+          : getBrowserPostAuthPath(requestedNext, '/');
 
         // Social sign-in must not bypass a verified authenticator. The MFA
         // page resumes the original destination after verification.
@@ -88,7 +99,7 @@ export default function OAuthCallbackClient() {
         await claimPendingReferral();
 
         if (!cancelled) {
-          if (!params.get('next') && profile?.is_active === true && (profile.role === 'admin' || profile.role === 'coach')) {
+          if (mobileApp && !requestedNext && profile?.is_active === true && (profile.role === 'admin' || profile.role === 'coach')) {
             window.location.replace('/portal/scorebook');
           } else {
             window.location.replace(next);
