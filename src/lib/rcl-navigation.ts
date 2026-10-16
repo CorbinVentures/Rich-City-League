@@ -110,6 +110,7 @@ export const RCL_NAV_ITEMS:RCLNavItem[]=[...RCL_PRIMARY_NAV_ITEMS,...RCL_NAV_GRO
   .filter((item,index,items)=>items.findIndex(candidate=>candidate.href===item.href)===index);
 
 export const RCL_ADMIN_NAV_ITEM:RCLNavItem={label:'Admin',href:'/admin',icon:FaGear};
+export const RCL_COMMAND_NAV_ITEM:RCLNavItem={label:'RCL Command Center',href:'/command',icon:FaChartSimple};
 export const RCL_NETWORK_ADMIN_ITEM:RCLNavItem={label:'Network Operations',href:'/admin/network',icon:FaBullhorn};
 export const RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM:RCLNavItem={label:'Campaign Control',href:'/admin/network/campaigns',icon:FaChartSimple};
 export const RCH_SPONSORS_ADMIN_ITEM:RCLNavItem={label:'Sponsorship Center',href:'/admin/sponsors',icon:FaHandshake};
@@ -120,5 +121,5 @@ export const RCH_TV_ACQUISITION_ADMIN_ITEM:RCLNavItem={label:'RCH TV Acquisition
 export const RCL_ADMIN_NAV_GROUP:RCLNavGroup={
   label:'Operations',
   description:'Staff, league, revenue and Network administration',
-  items:[RCL_ADMIN_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCH_SPONSORS_ADMIN_ITEM,RCH_TV_ACQUISITION_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM,RCL_NETWORK_EDITORIAL_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM],
+  items:[RCL_ADMIN_NAV_ITEM,RCL_COMMAND_NAV_ITEM,RCL_REVENUE_ADMIN_ITEM,RCH_SPONSORS_ADMIN_ITEM,RCH_TV_ACQUISITION_ADMIN_ITEM,RCL_NETWORK_ADMIN_ITEM,RCL_NETWORK_CAMPAIGNS_ADMIN_ITEM,RCL_NETWORK_EDITORIAL_ADMIN_ITEM,RCL_NETWORK_ACQUISITION_ADMIN_ITEM],
 };

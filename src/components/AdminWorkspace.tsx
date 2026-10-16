@@ -33,6 +33,7 @@ const groups: AdminNavGroup[] = [
     label: 'COMMAND',
     items: [
       { label: 'Overview', href: '/admin', icon: FaGauge, description: 'Dashboard, users, rosters, game stats and moderation' },
+      { label: 'RCL Command Center', href: '/command', icon: FaChartLine, description: 'Open private Rich City League executive operations, finances, venues and game-day planning' },
       { label: 'Site Control', href: '/admin/control-center', icon: FaGear, description: 'Platform controls, publishing and notifications' },
       { label: 'Governance', href: '/admin/governance', icon: FaShieldHalved, description: 'Staff permissions and governance' },
       { label: 'Staff Approvals', href: '/admin/staff', icon: FaUsers, description: 'Approve and revoke RCL staff and franchise roles' },
