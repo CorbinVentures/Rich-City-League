@@ -30,13 +30,12 @@ export function RoyalteeJoinForm(){
     if(!db||!user){setLoading(false);return;}
     let active=true;
     void Promise.all([
-      db.from('profiles').select('date_of_birth,profile_visibility').eq('id',user.id).maybeSingle(),
+      db.rpc('is_my_profile_adult'),
       db.from('rcl_royaltee_cheer_profiles').select('headline,discipline,years_experience,availability,published,status').eq('profile_id',user.id).maybeSingle()
     ]).then(([profileResult,identityResult]:any[])=>{
       if(!active)return;
-      const dob=profileResult.data?.date_of_birth as string|undefined;
-      const cutoff=new Date();cutoff.setUTCHours(0,0,0,0);cutoff.setUTCFullYear(cutoff.getUTCFullYear()-18);
-      setEligible(Boolean(dob&&dob<=cutoff.toISOString().slice(0,10)));
+      if(profileResult.error){setError('Unable to verify adult eligibility. Try again.');setEligible(false);}
+      else setEligible(profileResult.data===true);
       setAgeReady(true);
       if(identityResult.data){setApplication({...empty,...identityResult.data});setHasApplication(true);}
       setLoading(false);
