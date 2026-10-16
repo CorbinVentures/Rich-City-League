@@ -12,6 +12,7 @@ import { MessageQuickMenu } from '@/components/messaging/MessageQuickMenu';
 import {
   isPrimaryNavigationActive,
   RCL_ADMIN_NAV_GROUP,
+  RCL_COMMAND_NAV_ITEM,
   RCL_NAV_GROUPS,
   RCL_PRIMARY_NAV_ITEMS,
 } from '@/lib/rcl-navigation';
@@ -76,7 +77,7 @@ export function SiteHeader(){
   const isAdmin=profile?.role==='admin'||profile?.role==='staff';
   const memberMode=Boolean(user);
   const groups=memberMode?RCL_MEMBER_NAV_GROUPS:RCL_NAV_GROUPS;
-  const drawerGroups=isAdmin?[...groups,RCL_ADMIN_NAV_GROUP]:groups;
+  const drawerGroups=isAdmin?[...groups,profile?.role==='admin'?RCL_ADMIN_NAV_GROUP:{...RCL_ADMIN_NAV_GROUP,items:RCL_ADMIN_NAV_GROUP.items.filter(item=>item.href!==RCL_COMMAND_NAV_ITEM.href)}]:groups;
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
   const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_PRIMARY_NAV_ITEMS;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
