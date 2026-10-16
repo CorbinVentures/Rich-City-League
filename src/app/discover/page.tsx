@@ -1,11 +1,11 @@
-import VirginiaWorld from '@/components/discover/VirginiaWorld';
+import DiscoverScene from '@/components/discover/DiscoverScene';
 
 export const metadata = {
-  title: 'Discover Basketball | Virginia World | Rich City Hoops',
-  description: 'Explore a 3D Virginia basketball map. Find courts, open runs, published events and city basketball communities.',
+  title: 'Discover Basketball in Virginia | The Scene | Rich City Hoops',
+  description: 'Find basketball runs, tournaments, training, leagues, AAU and pro tryouts across Virginia. Explore the next opportunity in your basketball journey.',
   alternates: { canonical: '/discover' },
 };
 
 export default function DiscoverBasketballPage() {
-  return <VirginiaWorld />;
+  return <DiscoverScene />;
 }
