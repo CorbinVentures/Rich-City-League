@@ -94,6 +94,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(memberAccessUrl(request));
   }
 
+  // An enrolled member must finish MFA on every protected route, not just
+  // immediately after a password login. This also covers OAuth, refreshed
+  // browser sessions, deep links and the installed PWA.
+  const { data: assurance, error: assuranceError } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assuranceError || !assurance) {
+    return NextResponse.json({ error: 'Unable to verify the current session security level.' }, { status: 503 });
+  }
+
+  const requestedPath = `${pathname}${request.nextUrl.search}`;
+  if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+    const challenge = new URL('/auth/mfa', request.url);
+    challenge.searchParams.set('next', requestedPath);
+    return NextResponse.redirect(challenge);
+  }
+
   const { data: profileData } = await supabase
     .from('profiles')
     .select('role,is_active,onboarding_complete')
@@ -114,22 +130,6 @@ export async function middleware(request: NextRequest) {
   if (profile?.is_active === false && pathname !== '/member-access' && !pathname.startsWith('/auth/')) {
     if (matchesRoute(pathname, '/command')) return NextResponse.redirect(new URL('/command/access?status=inactive', request.url));
     return NextResponse.redirect(memberAccessUrl(request, { inactive: true }));
-  }
-
-  // An enrolled member must finish MFA on every protected route, not just
-  // immediately after a password login. This also covers OAuth, refreshed
-  // browser sessions, deep links and the installed PWA.
-  const { data: assurance, error: assuranceError } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assuranceError || !assurance) {
-    return NextResponse.json({ error: 'Unable to verify the current session security level.' }, { status: 503 });
-  }
-
-  const requestedPath = `${pathname}${request.nextUrl.search}`;
-  if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
-    const challenge = new URL('/auth/mfa', request.url);
-    challenge.searchParams.set('next', requestedPath);
-    return NextResponse.redirect(challenge);
   }
 
   // Administrators must enroll and verify TOTP before opening either
