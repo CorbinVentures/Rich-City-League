@@ -162,6 +162,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
         </div>
       </div>
     </div>}
+    {user && pathname === '/' && <div className="rch-browser-signed-in" role="status"><span><strong>WELCOME BACK.</strong> You are signed in to Rich City Hoops.</span><Link href="/profile">My Profile <FaArrowRight aria-hidden="true"/></Link></div>}
     {signOutError && <p role="alert" className="rch-browser-auth-error">{signOutError}</p>}
     <RCHPublicRouteGuide />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
