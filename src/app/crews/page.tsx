@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
+import { CompetitiveCircuit } from '@/components/circuit/CompetitiveCircuit';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type Crew = { id:string; name:string; motto:string; city:string; captain_id:string; logo_path:string|null; home_court_slug:string; season_id:string };
@@ -126,6 +127,7 @@ function CrewsView(){
         <div className="mt-6 flex flex-wrap gap-3"><Link href="/commonwealth#rch-cw-my-crew" className="rounded-xl bg-[#63b5fa] px-5 py-3 text-sm font-black text-[#051321]">{myCrew?'View Cup roster':'Found or join a crew'}</Link><Link href="/runs" className="rounded-xl border border-[#4a79a1] px-5 py-3 text-sm font-bold">Explore runs <FaArrowRight className="ml-1 inline"/></Link></div>
       </header>
 
+      <CompetitiveCircuit variant="crews" />
       {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/40 bg-red-950/30 p-4 text-sm text-red-100">{error}</p>}
       {notice&&<p role="status" className="mt-5 rounded-xl border border-[#39739c] bg-[#103451] p-4 text-sm text-[#d8f1ff]">{notice}</p>}
 
