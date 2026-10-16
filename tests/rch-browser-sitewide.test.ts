@@ -48,7 +48,8 @@ describe('RCH public browser visual authority and route isolation', () => {
   });
 
   it.each([
-    '/', '/discover', '/runs', '/runs/unique-id', '/league', '/league/royaltee',
+    '/', '/app', '/legal', '/legal/privacy', '/legal/terms', '/legal/cookies',
+    '/discover', '/runs', '/runs/unique-id', '/league', '/league/royaltee',
     '/league/royaltee/join', '/news', '/news/story-id', '/search', '/pulse',
     '/players', '/players/player-id', '/players/player-id/passport', '/players/compare',
     '/coaches', '/coaches/coach-id', '/teams/team-id', '/seasons',
@@ -61,7 +62,7 @@ describe('RCH public browser visual authority and route isolation', () => {
   });
 
   it.each([
-    '/social', '/social/profile/private-id', '/messages', '/notifications',
+    '/social', '/legal/account', '/social/profile/private-id', '/messages', '/notifications',
     '/admin', '/admin/operations', '/command', '/dashboard', '/today',
     '/professional', '/account', '/settings/privacy', '/profile/admin',
     '/communities/members-only', '/media/creators/dashboard',
