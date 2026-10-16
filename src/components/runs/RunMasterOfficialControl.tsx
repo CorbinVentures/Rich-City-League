@@ -57,7 +57,7 @@ export function RunMasterOfficialControl({runId}:{runId:string}){
  return <section aria-label="Court Master official certification" className="mt-6 rounded-3xl border border-[#9e864c] bg-[#2a291f] p-5 text-white sm:p-7">
   <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#f3d78e]"><FaShieldHalved/> Independent Official · Court Crown</p>
   <h2 className="mt-2 flex items-center gap-2 text-xl font-black uppercase"><FaCrown/> Master Title Certification</h2>
-  <p className="mt-2 text-sm leading-6 text-[#e6d9bb]">Verify the exact contender, champion and final score independently before a confirmed title game changes the court's Master.</p>
+  <p className="mt-2 text-sm leading-6 text-[#e6d9bb]">Verify the exact contender, champion and final score independently before a confirmed title game changes the court&apos;s Master.</p>
   {message&&<p role="status" className="mt-3 rounded-lg border border-[#988258] p-3 text-xs">{message}</p>}
   <div className="mt-4 space-y-3">{relevant.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#8b774f] p-3">
     <div><p className="text-xs font-black">{m.home_score} – {m.away_score}</p><p className="mt-1 text-[11px] text-[#dfd1b3]">Pending independently certified championship result</p></div>
