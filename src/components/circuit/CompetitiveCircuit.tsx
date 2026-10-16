@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect,useMemo,useState } from 'react';
 import { FaArrowRight,FaBasketball,FaCalendarDays,FaCrown,FaPeopleGroup,FaShieldHalved,FaTrophy } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getCircuitClock } from '@/lib/circuit-calendar';
 
 type Division='1v1'|'2v2'|'3v3'|'4v4'|'5v5';
 const divisions:Division[]=['1v1','2v2','3v3','4v4','5v5'];
@@ -15,17 +16,6 @@ type Row={
 type Title={cycle_year:number;division:Division;winner_profile_id:string|null;winner_crew_id:string|null};
 type Variant='runs'|'crews'|'cup';
 
-export function getCircuitClock(now:Date=new Date()){
-  const parts=new Intl.DateTimeFormat('en-US',{
-    timeZone:'America/New_York',year:'numeric',month:'numeric',day:'numeric'
-  }).formatToParts(now);
-  const value=(key:'year'|'month'|'day')=>Number(parts.find(item=>item.type===key)?.value||0);
-  const year=value('year'),month=value('month'),day=value('day');
-  const cycle=Math.max(2026,month===1&&day===1?year-1:year);
-  const phase=month===1&&day===1?'cup':month===11||(month===12&&day<=20)?'qualifying':
-    month===12&&day>=21?'review':'open';
-  return {cycle,phase,cupYear:cycle+1};
-}
 const phaseLabels={
   open:'OPEN RUNS · PRESEASON',
   qualifying:'QUALIFIERS LIVE · NOV 1 – DEC 20',
