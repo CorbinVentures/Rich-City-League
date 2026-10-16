@@ -12,6 +12,10 @@ import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/comp
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
+import { rankGravityCandidates } from '@/lib/rch-gravity';
+import { cityForText } from '@/lib/virginia-world';
 import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
 import {
   FaArrowUpRightFromSquare,
@@ -92,6 +96,7 @@ const emptyForm = {
 };
 
 export default function RunsPage() {
+  const { location:gravityLocation } = useGravityLocation();
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
@@ -337,14 +342,35 @@ export default function RunsPage() {
     setBusy(null);
   };
 
-  const visibleRuns = runs.filter((run) => {
-    const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
-    const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
-    const courtMatch = !courtParam || run.location_slug === courtParam;
-    const words = runSearch.trim().toLowerCase();
-    const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
-    return skillMatch && typeMatch && courtMatch && searchMatch;
-  });
+  const visibleRuns = useMemo(() => {
+    const matching = runs.filter((run) => {
+      const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
+      const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
+      const courtMatch = !courtParam || run.location_slug === courtParam;
+      const words = runSearch.trim().toLowerCase();
+      const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
+      return skillMatch && typeMatch && courtMatch && searchMatch;
+    });
+    if (!gravityLocation.cityId) return matching; // Statewide remains chronological.
+    const locationBySlug = new Map(courts.map(court => [court.slug,court.locality]));
+    const candidates = matching.map(run => ({
+      id:run.id, category:run.run_type === 'training' ? 'training' as const : 'run' as const,
+      title:run.title, keywords:run.description ?? '',
+      city:locationBySlug.get(run.location_slug ?? '') || cityForText(run.location)?.name || null,
+      // Full runs stay visible (not silently removed), after available ones.
+      createdAt:null, startsAt:null,
+      ownerId:run.host_id, isSaved:false,
+    }));
+    const priorities = rankGravityCandidates(candidates,{
+      cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles,userId:user?.id,
+    });
+    const order = new Map(priorities.map((candidate,index)=>[candidate.id,index]));
+    return matching.sort((a,b)=>{
+      const capacityA=a.status === 'full' || (a.players?.length ?? 0) >= a.max_players ? 1 : 0;
+      const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
+      return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
+    });
+  },[runs,courts,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
@@ -366,6 +392,7 @@ export default function RunsPage() {
           </button>
         </div>
         {view === 'runs' && <RunArenaLeaderboard />}
+        {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
           <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your schedule is live</p><p className="mt-1 text-sm text-white/60">Every date has its own RSVP and invitation.</p></div><button type="button" onClick={() => setCreatedRuns([])} aria-label="Dismiss new runs" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
