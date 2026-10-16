@@ -1,6 +1,9 @@
 /** Full member/social tools remain in the installed mobile PWA. */
 export function isBrowserAccountRoute(pathname: string): boolean {
-  return pathname === '/command' || pathname.startsWith('/command/')
+  // Command administrators must be able to enroll and verify MFA in Safari.
+  // This only lifts the client presentation gate; middleware still requires sign-in.
+  return pathname === '/account/security' || pathname === '/account/security/'
+    || pathname === '/command' || pathname.startsWith('/command/')
     || pathname === '/member-access'
     || pathname === '/app'
     || pathname === '/profile'
