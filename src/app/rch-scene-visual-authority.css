@@ -89,7 +89,7 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   line-height:1.35!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-search-input input::placeholder {
-  color:#687e92!important;
+  color:#526b83!important;
   opacity:1!important;
 }
 /* No horizontal collision at narrow screen sizes. */
@@ -266,6 +266,16 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   color:#245175!important;
   border-color:transparent!important;
   min-height:43px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button.rch-scene-city-more {
+  border-top:1px solid #e2ecf5!important;
+  border-radius:0!important;
+  color:#1d64b7!important;
+  font-size:12px;
+  font-weight:850!important;
+  justify-content:space-between;
+  margin-top:4px;
+  padding-top:13px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button:hover {
   background:#edf5fe!important;
