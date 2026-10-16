@@ -30,6 +30,12 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
     return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
   }
 
+  // Middleware's guest redirect ends at /member-access. Keep that landing
+  // browser-native; the original member workspace remains untouched in PWA.
+  if (mode === 'browser' && pathname === '/member-access') {
+    return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
+  }
+
   // Browser-only auth screens share the public brand; installed-PWA auth is unchanged.
   // Security/MFA and Command Center exceptions retain their original protected flow.
   if (mode === 'browser' && (pathname === '/auth' || pathname.startsWith('/auth/'))) {
