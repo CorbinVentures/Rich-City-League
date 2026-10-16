@@ -138,7 +138,7 @@ export default function ProfilePage() {
 
     <Container maxWidth="lg" className="py-8 sm:py-12">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link>
+        <div className="flex flex-wrap gap-3"><Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link><Link href="/crews" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#367dad] bg-[#102f4a] px-4 text-xs font-black uppercase tracking-wider text-[#9ed8ff]">My Crew · Top Five →</Link></div>
         <div className="flex gap-2">{isAdmin && <Link href="/admin" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/5 px-4 text-xs font-black uppercase tracking-wider text-rcl-blue"><FaShieldHalved/> Admin</Link>}{user && <button type="button" onClick={() => void signOut()} className="min-h-11 rounded-xl border border-white/10 px-4 text-xs font-black uppercase tracking-wider text-white/45 transition hover:border-white/25 hover:text-white">Sign out</button>}</div>
       </div>
 
