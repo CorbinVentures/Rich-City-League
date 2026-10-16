@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
+import { useAuth } from '@/hooks/useAuth';
+import { getSupabaseClient } from '@/lib/supabase';
 import type { ReactNode } from 'react';
 import {
   FaArrowRight, FaBars, FaXmark, FaMagnifyingGlass,
@@ -23,6 +25,9 @@ const nav = [
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
+  const { user, profile } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState('');
   // Browser menu lives in a viewport-level overlay, not in the tiny header
   // <details> box. Safari constrained that descendant to the trigger width.
   const [openOnPath, setOpenOnPath] = useState<string | null>(null);
@@ -64,6 +69,26 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     };
   }, [menuOpen]);
 
+  async function handleBrowserSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError('');
+    const client = getSupabaseClient();
+    if (!client) {
+      setSignOutError('Sign out is temporarily unavailable.');
+      setSigningOut(false);
+      return;
+    }
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      window.location.assign('/');
+    } catch {
+      setSignOutError('Could not sign out. Please try again.');
+      setSigningOut(false);
+    }
+  }
+
   const closeAndRestore = () => {
     closeMenu();
     menuButtonRef.current?.focus();
@@ -78,8 +103,13 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="rch-public-header-actions">
           <Link href="/search" className="rch-public-search" aria-label="Search players, teams, runs and events"><FaMagnifyingGlass/><span>Search basketball...</span></Link>
-          <Link href="/auth/sign-in" className="rch-public-signin">Sign in</Link>
-          <Link href="/auth/sign-up" className="rch-public-join">Join Free <FaArrowRight/></Link>
+          {user ? <>
+            <Link href="/profile" className="rch-public-signin" aria-label="My RCH profile">My Profile</Link>
+            <button type="button" className="rch-public-signin" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
+          </> : <>
+            <Link href="/auth/sign-in" className="rch-public-signin">Sign in</Link>
+            <Link href="/auth/sign-up" className="rch-public-join">Join Free <FaArrowRight/></Link>
+          </>}
         </div>
         <button
           ref={menuButtonRef}
@@ -122,11 +152,17 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/app" onClick={closeMenu}><span><FaBasketball aria-hidden="true"/> Get the RCH App</span><FaArrowRight aria-hidden="true"/></Link>
         </nav>
         <div className="rch-public-mobile-drawer-actions">
-          <Link href="/auth/sign-up" onClick={closeMenu}>Join Free <FaArrowRight aria-hidden="true"/></Link>
-          <Link href="/auth/sign-in" onClick={closeMenu}>Sign in</Link>
+          {user ? <>
+            <Link href="/profile" onClick={closeMenu}>My Profile <FaArrowRight aria-hidden="true"/></Link>
+            <button type="button" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
+          </> : <>
+            <Link href="/auth/sign-up" onClick={closeMenu}>Join Free <FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/auth/sign-in" onClick={closeMenu}>Sign in</Link>
+          </>}
         </div>
       </div>
     </div>}
+    {signOutError && <p role="alert" className="rch-browser-auth-error">{signOutError}</p>}
     <RCHPublicRouteGuide />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
     <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>Browse freely on the web. Create your free profile to save, connect and compete.</span></div><Link href="/app">Explore the app <FaArrowRight aria-hidden="true"/></Link></aside>
