@@ -30,7 +30,7 @@ export default async function NewsPage() {
     excerpt: item.excerpt,
     category: categoryLabel(item.category),
     publishedAt: item.published_at,
-    coverImageUrl: item.cover_image_url,
+    coverImageUrl: item.cover_image_url || `/api/news-cover/${encodeURIComponent(item.slug)}`,
   }));
 
   const automatedCount = news.filter(item => item.is_automated).length;
