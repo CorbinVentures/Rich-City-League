@@ -219,7 +219,7 @@ create trigger rch_revoke_modified_verified_run after update on public.runs
 
 -- Temporary suspension revokes every still-issued Run verification.
 create or replace function public.rch_suspend_verified_run_host(p_host uuid,p_reason text)
-returns void language plpgsql security definer set search_path='' as $
+returns void language plpgsql security definer set search_path='' as $$
 declare v_actor uuid:=auth.uid();
 begin
  if v_actor is null or not coalesce(public.is_staff_or_admin(),false) then
@@ -236,7 +236,7 @@ begin
    review_note=left('Host suspended: '||trim(p_reason),500)
  where v.verification_status='verified'
    and exists(select 1 from public.runs r where r.id=v.run_id and r.host_id=p_host);
-end $;
+end $$;
 
 -- Authenticated queue participants now receive genuine realtime Next Up events.
 do $$ begin
