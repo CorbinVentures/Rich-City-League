@@ -47,8 +47,8 @@ export function VisualArea({
   const values=rows.map(row=>numeric(Number(row[active.key])));
   const maxValue=Math.max(1,...values);
   const plot={left:52,right:730,top:23,bottom:209};
-  const y=value=>plot.bottom-value/maxValue*(plot.bottom-plot.top);
-  const x=index=>plot.left+index/Math.max(1,rows.length-1)*(plot.right-plot.left);
+  const y=(value:number)=>plot.bottom-value/maxValue*(plot.bottom-plot.top);
+  const x=(index:number)=>plot.left+index/Math.max(1,rows.length-1)*(plot.right-plot.left);
   const line=values.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
   const fill=values.length?`${line} L${x(values.length-1)} ${plot.bottom} L${plot.left} ${plot.bottom} Z`:'';
   const latest=values.at(-1)??0;
@@ -89,7 +89,7 @@ export function VisualDonut({title,detail,items,centerLabel='Total',format='numb
   const valid=items.map(item=>({...item,value:numeric(Number(item.value))}));
   const total=valid.reduce((sum,item)=>sum+item.value,0);
   let offset=0;
-  const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
+  const money=(value:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
   return <section className="rch-viz-panel rch-viz-donut" aria-label={title}>
     <VizTitle eyebrow="Composition analysis" title={title} detail={detail} icon={<FaLayerGroup aria-hidden="true"/>}/>
     <div className="rch-viz-donut-content">
