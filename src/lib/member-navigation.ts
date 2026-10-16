@@ -27,6 +27,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
       {label:'My Profile',href:'/social/profile/me',icon:FaUser},
+      {label:'Professional Dashboard',href:'/professional',icon:FaChartSimple},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
       {label:'Notifications',href:'/notifications',icon:FaBell},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},
