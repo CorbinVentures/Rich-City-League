@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect,useMemo,useState} from 'react';
+import {useMemo,useState} from 'react';
 import {FaArrowRotateLeft,FaBasketball,FaCheck,FaCloudArrowUp,FaPaintbrush,FaWandMagicSparkles} from 'react-icons/fa6';
 import {createCrewLogoSvg,initialLogoDesign,logoPresets,type CrewLogoDesign,type LogoSymbol} from '@/lib/crew-logo-design';
 
