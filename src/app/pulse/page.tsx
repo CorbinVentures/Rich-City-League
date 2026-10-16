@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
-import { FaArrowRight, FaBasketball, FaCircleUser, FaComments, FaPeopleGroup } from 'react-icons/fa6';
+import { RCHPulseMemberRedirect } from '@/components/RCHPulseMemberRedirect';
+import { FaBasketball, FaCircleUser, FaComments, FaPeopleGroup } from 'react-icons/fa6';
 import { getPublicClient } from '@/lib/public-data';
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default async function PulsePublicPage() {
   const posts = (data ?? []) as PublicPost[];
 
   return <main className="rch-browser-pulse">
+    <RCHPulseMemberRedirect />
     <section className="rch-browser-pulse-hero">
       <div className="rch-browser-pulse-inner">
         <span>RCH PULSE · VIRGINIA BASKETBALL</span>
