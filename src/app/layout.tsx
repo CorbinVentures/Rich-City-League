@@ -49,6 +49,8 @@ import './rch-public-theme.css';
 import './rch-intent-navigation.css';
 // RCH Pulse is isolated to the social home and intentionally wins legacy theme conflicts.
 import './rch-pulse.css';
+// Discover's PWA-specific contrast authority must be last: global !important styles otherwise wash out its cards.
+import './rch-scene-visual-authority.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
