@@ -96,7 +96,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('*')
+    .select('role,is_active,onboarding_complete')
     .eq('id', user.id)
     .maybeSingle();
   const profile = profileData as AccessProfile | null;
