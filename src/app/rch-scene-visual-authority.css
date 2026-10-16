@@ -1,0 +1,358 @@
+/*
+ * Discover / The Scene — final visual authority.
+ * This file is intentionally imported last in app/layout.tsx.
+ * The global arena skin uses !important declarations for headings, inputs
+ * and pressed buttons; scoped selectors below preserve readable pairs.
+ * Do NOT change global site tokens or other routes to fix Discover.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page {
+  --scene-ink:#112d4c;
+  --scene-muted:#526d87;
+  --scene-blue:#286ed5;
+  --scene-blue-soft:#e9f3ff;
+  --scene-edge:#cfdeec;
+  background:radial-gradient(ellipse at 93% 1%,rgba(22,93,166,.23),transparent 36rem),#071b31!important;
+  background-color:#071b31!important;
+  color:#eaf4ff!important;
+  color-scheme:light;
+  padding-top:clamp(16px,2vw,25px);
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page > .rch-scene-container {
+  max-width:1320px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero {
+  color:#f5faff!important;
+  background:radial-gradient(ellipse at 91% 13%,rgba(101,177,251,.17),transparent 45%),
+    linear-gradient(115deg,#092038,#10395f 57%,#14568c)!important;
+  border:1px solid #315b83!important;
+  box-shadow:0 15px 36px #020c1b6b!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1 *,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero .rch-scene-eyebrow {
+  color:#f6faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1 em {
+  color:#90c8ff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-copy > p:not(.rch-scene-eyebrow) {
+  color:#d6e8f9!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-action {
+  background:#fff!important;
+  color:#0b3766!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-radar {
+  background:rgba(15,48,81,.67)!important;
+  border-color:#83aacf!important;
+  color:#eef8ff!important;
+}
+/* Clear white-on-navy section headings. Cards themselves have navy-on-white text. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) h2 {
+  color:#f6fbff!important;
+  text-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) > p {
+  color:#c1d5e9!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) .rch-scene-kicker {
+  color:#79b9fc!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar {
+  gap:11px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-search-input,.rch-scene-location-input) {
+  background:#fff!important;
+  border:1px solid #b9d2e8!important;
+  color:#2469aa!important;
+  box-shadow:0 8px 24px #0013274d!important;
+  min-width:0;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-search-input input,.rch-scene-location-input select) {
+  color-scheme:light!important;
+  -webkit-appearance:none;
+  appearance:none;
+  display:block;
+  width:100%;
+  min-height:45px!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  outline:none!important;
+  color:#102e4f!important;
+  caret-color:#2563eb!important;
+  font-size:16px!important;
+  line-height:1.35!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-search-input input::placeholder {
+  color:#687e92!important;
+  opacity:1!important;
+}
+/* No horizontal collision at narrow screen sizes. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-category,.rch-scene-card,.rch-scene-rail-card,.rch-scene-path,.rch-scene-empty) {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category {
+  background:#fff!important;
+  border:1px solid var(--scene-edge)!important;
+  color:var(--scene-ink)!important;
+  box-shadow:0 9px 20px #00102024!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category[aria-pressed="true"] {
+  background:#e4f1ff!important;
+  border:2px solid #4591e9!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category :is(strong) {
+  color:#112e50!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category small {
+  color:#4e667f!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category-icon {
+  background:#e8f2ff!important;
+  color:#2872c4!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category-arrow {
+  color:#2679da!important;
+}
+/* My Path: explicitly reset global pale text on pale-blue cards. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path {
+  background:linear-gradient(120deg,#eaf4ff,#dcecfb)!important;
+  border:1px solid #bdD9f1!important;
+  color:#133350!important;
+  box-shadow:0 10px 28px #03152929!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path-head strong {
+  color:#133453!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path-head p {
+  color:#3e5f80!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path .rch-scene-kicker,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) .rch-scene-kicker {
+  color:#2568bc!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals button {
+  background:#fff!important;
+  color:#17476c!important;
+  border:1px solid #b3cce4!important;
+  min-height:43px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals button[aria-pressed="true"] {
+  background:#256cdf!important;
+  border-color:#256cdf!important;
+  color:#fff!important;
+  box-shadow:0 5px 12px #256cdf33!important;
+}
+/* Filters: selected states must have white text on deep blue — never white on icy blue. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-when,.rch-scene-toolbar-secondary) button {
+  color:#194464!important;
+  background:#fff!important;
+  border:1px solid #c3d6e8!important;
+  min-height:42px;
+  box-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-when,.rch-scene-toolbar-secondary) button[aria-pressed="true"] {
+  background:#256cdf!important;
+  border-color:#3988f6!important;
+  color:#fff!important;
+  box-shadow:0 4px 14px #256cdf36!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-active-filter {
+  color:#d5e8fa!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-active-filter button {
+  color:#92c9ff!important;
+}
+/* Opportunity feed, zero-result state and VA Pulse each get a coherent light surface. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-card,.rch-scene-empty,.rch-scene-message,.rch-scene-rail-card:not(.rch-scene-spotlight)) {
+  background:#fff!important;
+  background-color:#fff!important;
+  border:1px solid #d1e1ed!important;
+  color:#183b5e!important;
+  box-shadow:0 10px 26px #010e1c30!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-empty,.rch-scene-card,.rch-scene-rail-card:not(.rch-scene-spotlight)) :is(h2,h3,strong) {
+  color:#153554!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-empty,.rch-scene-card,.rch-scene-rail-card:not(.rch-scene-spotlight)) :is(p,small,li) {
+  color:#46627d!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty {
+  background:radial-gradient(ellipse at 96% 0%,#e7f3ff,transparent 55%),#fff!important;
+  padding:30px 24px!important;
+  min-height:0!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty h3 {
+  color:#133858!important;
+  font-size:clamp(20px,3vw,26px)!important;
+  line-height:1.2;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty p {
+  max-width:440px;
+  color:#4a6680!important;
+  font-size:13px!important;
+  margin:8px auto 14px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty .rch-scene-empty-actions {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:15px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty :is(button,a) {
+  background:#256cdf!important;
+  color:#fff!important;
+  border:1px solid #256cdf!important;
+  border-radius:11px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:43px;
+  padding:11px 15px;
+  font-size:12px;
+  font-weight:800;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty a.rch-scene-empty-secondary {
+  color:#174d8a!important;
+  background:#e9f4ff!important;
+  border:1px solid #bed9f0!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-footnote {
+  color:#c1d6e9!important;
+  font-size:12px;
+  line-height:1.6;
+}
+/* Rails: avoid blank white-on-white headings inherited from the global heading authority. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) h2 {
+  color:#153653!important;
+  font-size:21px!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) .rch-scene-rail-empty {
+  color:#4c6983!important;
+  line-height:1.5;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-pulse li a {
+  color:#1e527d!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-pulse li small {
+  color:#53728f!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight {
+  background:linear-gradient(140deg,#0d3558,#155887)!important;
+  border-color:#467eab!important;
+  color:#eef8ff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight h2 {
+  color:#fff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight p {
+  color:#d1e7fc!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button {
+  background:transparent!important;
+  color:#245175!important;
+  border-color:transparent!important;
+  min-height:43px;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button:hover {
+  background:#edf5fe!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-radar-card {
+  background:#e5f2ff!important;
+  color:#145589!important;
+  border-color:#accfeb!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-radar-card :is(strong,small) {
+  color:#145589!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-create,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-create strong {
+  color:#a6d2fb!important;
+}
+/* Focus and motion: gestures work even with the PWA's dark root theme. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(button,a,input,select):focus-visible {
+  outline:3px solid #80c3ff!important;
+  outline-offset:3px!important;
+}
+@media(max-width:780px) {
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page {
+    padding:14px 12px calc(114px + env(safe-area-inset-bottom));
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero {
+    border-radius:22px!important;
+    min-height:0;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1 {
+    font-size:clamp(31px,7.5vw,49px)!important;
+    line-height:1.07;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category {
+    min-height:118px;
+    padding:14px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail {
+    gap:12px;
+  }
+}
+@media(max-width:520px) {
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-copy {
+    padding:24px 18px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-links {
+    gap:9px;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-links a {
+    flex:1 1 auto;
+    font-size:12px!important;
+    white-space:normal;
+    min-width:0;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-search-input,
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-location-input {
+    min-height:52px;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-categories {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category small {
+    font-size:11px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path {
+    padding:19px 17px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals {
+    gap:8px;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals button {
+    font-size:12px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty {
+    padding:27px 19px!important;
+  }
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card {
+    padding:19px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page *,
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page *::before,
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page *::after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
