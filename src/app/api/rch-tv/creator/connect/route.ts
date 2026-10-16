@@ -11,6 +11,10 @@ async function creator(){
   if(!client)return null;
   const {data:{user}}=await client.auth.getUser();
   if(!user)return null;
+  // A verified creator with MFA enabled must finish the second factor before
+  // the service-role Stripe/creator-account path can act for this account.
+  const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(assuranceError||!assurance||(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'))return null;
   const db=client as any;
   const {data:account}=await db.from('rch_creator_accounts').select('profile_id,status,terms_accepted_at,stripe_connect_account_id').eq('profile_id',user.id).maybeSingle();
   return {user,client,account:account as AccountRecord|null};
