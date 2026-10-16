@@ -39,6 +39,10 @@ export async function GET(request: Request) {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) return unauthorized('Your admin session was not recognized by the server. Please sign in again.');
+    // Explicitly authenticate the security level for browser-triggered syncs;
+    // the independent cron-secret path remains restricted to competition sync.
+    const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assuranceError || assurance?.currentLevel !== 'aal2') return unauthorized('Authenticator verification required for administrator API access.');
 
     db = supabase as any;
     const { data: profile, error: profileError } = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
