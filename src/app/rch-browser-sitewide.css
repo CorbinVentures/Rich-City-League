@@ -393,3 +393,70 @@ html.rch-premium-root body.rch-premium-app .rch-public-web main.rch-arena-shell 
 @media(prefers-reduced-motion:reduce){
   .rch-public-web #rch-public-content :is(a,button){transition:none!important}
 }
+
+
+/* Installation and policy pages are public web destinations too, not PWA chrome. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web main.rch-download-page {
+  background:#020b17!important;
+  color:#f5faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-hero {
+  background:radial-gradient(ellipse at 80% 15%,#276dbe70,transparent 44%),
+    linear-gradient(115deg,#06162b,#0c355f 63%,#06152b)!important;
+  border-bottom:1px solid #316da5!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-content {
+  color:#f5faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-content-heading h2 {
+  color:#f5faff!important;
+  font-size:clamp(30px,3.5vw,48px)!important;
+  font-weight:950!important;
+  letter-spacing:-.04em!important;
+  text-transform:uppercase!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-content-heading p {
+  color:#c5d9eb!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-choice button {
+  color:#cbe5ff!important;
+  background:#0c2a49!important;
+  border-color:#426c91!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-choice button.selected {
+  color:#fff!important;
+  background:#166acc!important;
+  border-color:#6cb4ff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-download-content
+  :is(article,section,div)[class*="rounded"] {
+  border-color:#3a628b!important;
+}
+/* The phone illustration is intentionally light, like a physical device screen. */
+.rch-public-web .rch-download-device-art,
+.rch-public-web .rch-download-device-art :is(div,span,b,strong,small) {
+  color:#102647;
+}
+.rch-public-web #rch-public-content main :is(.prose,.prose-invert) {
+  --tw-prose-body:#c9dbed;
+  --tw-prose-headings:#f5faff;
+  --tw-prose-lead:#d4e5f7;
+  --tw-prose-links:#91cdff;
+  --tw-prose-bold:#f5faff;
+  --tw-prose-counters:#b9d4e9;
+  --tw-prose-bullets:#75b8f9;
+  --tw-prose-hr:#315a80;
+  --tw-prose-quotes:#edf7ff;
+  --tw-prose-captions:#b9d4e9;
+  --tw-prose-code:#d8ecff;
+}
+.rch-public-web #rch-public-content main .prose a {
+  color:#99d5ff!important;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+/* The standalone Royaltee partner artwork and brand remain distinct inside the RCH browser shell. */
+html.rch-premium-root body.rch-premium-app .rch-public-web .royaltee-site {
+  background:#020b17!important;
+  color:#f5faff!important;
+}
