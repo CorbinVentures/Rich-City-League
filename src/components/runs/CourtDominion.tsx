@@ -18,6 +18,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
  const {user}=useAuth();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [courts,setCourts]=useState<Court[]>([]);
+ const [selectedCourt,setSelectedCourt]=useState<Court|null>(null);
  const [court,setCourt]=useState(initialCourt);
  const [search,setSearch]=useState('');
  const [masters,setMasters]=useState<Master[]>([]);
@@ -37,20 +38,37 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
   if(!db)return;
   let active=true;
   void (async()=>{
-   const [a,b,c,d,e]=await Promise.all([
-    db.from('basketball_locations').select('slug,name,locality').eq('is_active',true).order('name').limit(800),
+   const [b,c,d,e]=await Promise.all([
     db.rpc('get_rch_run_rep_board',{p_limit:8}),
     user?db.from('commonwealth_crews').select('id,name').eq('captain_id',user.id).limit(1):Promise.resolve({data:[]}),
     user?db.from('rch_run_badge_awards').select('badge_code').eq('profile_id',user.id):Promise.resolve({data:[]}),
     user?db.from('rch_run_stat_badges').select('badge_code').eq('profile_id',user.id):Promise.resolve({data:[]})
    ]);
    if(!active)return;
-   setCourts((a.data||[]) as Court[]);setRepBoard((b.data||[]) as Rep[]);
+   setRepBoard((b.data||[]) as Rep[]);
    setMine(((c.data||[]) as Mine[])[0]||null);
    setBadges([...((d.data||[]) as {badge_code:string}[]),...((e.data||[]) as {badge_code:string}[])].map(x=>x.badge_code));
   })();
   return ()=>{active=false;};
  },[db,user?.id,version]);
+ useEffect(()=>{
+  if(!db)return;
+  let alive=true;
+  const timer=setTimeout(()=>{
+   const clean=search.trim().replace(/[^a-zA-Z0-9 _.'-]/g,'').slice(0,60);
+   let request=db.from('basketball_locations').select('slug,name,locality').eq('is_active',true).order('name').limit(120);
+   if(clean)request=request.or('name.ilike.%'+clean+'%,locality.ilike.%'+clean+'%');
+   void request.then(({data}: {data:Court[]|null})=>{if(alive)setCourts(data||[]);});
+  },250);
+  return()=>{alive=false;clearTimeout(timer);};
+ },[db,search]);
+ useEffect(()=>{
+  if(!db||!court){setSelectedCourt(null);return;}
+  let alive=true;
+  void db.from('basketball_locations').select('slug,name,locality').eq('slug',court).maybeSingle()
+    .then(({data}: {data:Court|null})=>{if(alive)setSelectedCourt(data||null);});
+  return()=>{alive=false;};
+ },[db,court]);
  useEffect(()=>{
   if(!db||!court){setMasters([]);setCrewBoard([]);setChallenges([]);setRuns([]);return;}
   let active=true;setLoading(true);setError('');
@@ -75,8 +93,8 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
   })();
   return ()=>{active=false;};
  },[db,court,version]);
- const venues=useMemo(()=>courts.filter(c=>(c.name+' '+c.locality).toLowerCase().includes(search.toLowerCase())).slice(0,150),[courts,search]);
- const selected=courts.find(x=>x.slug===court);
+ const venues=courts;
+ const selected=selectedCourt||courts.find(x=>x.slug===court);
  const owner=crewBoard.find(x=>x.is_controller);
  const active=challenges[0];
  const name=(id:string)=>crewBoard.find(c=>c.crew_id===id)?.crew_name||'Registered crew';
