@@ -92,6 +92,76 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   color:#526b83!important;
   opacity:1!important;
 }
+/*
+ * Native Discover controls opt out of the global dark form skin.
+ * Style the ACTUAL input and select, not merely their white parent labels.
+ * This prevents the double-surface white-outline/dark-inset seen in iOS PWA.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label {
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-height:54px!important;
+  padding:0 16px!important;
+  border:1px solid #bad5ed!important;
+  border-radius:14px!important;
+  background:#ffffff!important;
+  background-color:#ffffff!important;
+  color:#2469aa!important;
+  overflow:hidden;
+  box-shadow:0 8px 24px #00132736!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > input.rch-scene-native-control,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > select.rch-scene-native-control {
+  display:block!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:52px!important;
+  height:52px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  color:#153450!important;
+  -webkit-text-fill-color:#153450!important;
+  caret-color:#2563eb!important;
+  color-scheme:light!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  font-family:inherit!important;
+  font-size:16px!important;
+  line-height:1.25!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > input.rch-scene-native-control::placeholder {
+  color:#587087!important;
+  -webkit-text-fill-color:#587087!important;
+  opacity:1!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > .rch-scene-location-caret {
+  color:#2869ad!important;
+  width:15px;
+  height:15px;
+  flex:0 0 15px;
+  pointer-events:none;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > svg:first-child {
+  flex:0 0 20px;
+  width:20px;
+  height:20px;
+  color:#2869ad!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label:focus-within {
+  outline:2px solid #7dbfff!important;
+  outline-offset:2px!important;
+  border-color:#3e8de0!important;
+}
+
 /* No horizontal collision at narrow screen sizes. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-category,.rch-scene-card,.rch-scene-rail-card,.rch-scene-path,.rch-scene-empty) {
   min-width:0;

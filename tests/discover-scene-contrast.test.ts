@@ -42,6 +42,22 @@ describe('Discover / The Scene mobile contrast guard', () => {
     expect(ratio('#ffffff','#256cdf')).toBeGreaterThanOrEqual(4.5);
     expect(ratio('#3e5f80','#eaf4ff')).toBeGreaterThanOrEqual(4.5);
   });
+
+  it('keeps the search and location fields outside the dark global input skin', () => {
+    const headerCss = readFileSync(path.join(process.cwd(), 'src/app/rch-header-contrast-authority.css'), 'utf8');
+    const formCss = readFileSync(path.join(process.cwd(), 'src/app/rch-premium-components.css'), 'utf8');
+    // Both inherited resets used !important and previously overrode Discover.
+    expect(headerCss).toContain(':not(.rch-scene-native-control)');
+    expect(formCss).toContain(':not(.rch-scene-native-control)');
+    expect(scene).toContain('className="rch-scene-native-control" type="search"');
+    expect(scene).toContain('className="rch-scene-native-control" value={city}');
+    expect(scene).toContain('rch-scene-location-caret');
+    expect(css).toContain('> input.rch-scene-native-control');
+    expect(css).toContain('> select.rch-scene-native-control');
+    expect(css).toContain('background:transparent!important');
+    expect(css).toContain('-webkit-text-fill-color:#153450!important');
+    expect(css).toContain('color-scheme:light!important');
+  });
   it('does not present empty publication data as invented events', () => {
     expect(scene).toContain("items.length===0?'Your next play is waiting.'");
     expect(scene).toContain('There are no upcoming published listings yet.');
