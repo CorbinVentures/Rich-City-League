@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaBookmark,
   FaBolt,
@@ -105,6 +104,7 @@ export function NetworkPostCard({
   onFollow,
   onToggleRepost,
   onDelete,
+  onCountView,
   featured = false,
 }: {
   item: NetworkFeedItem;
@@ -123,6 +123,7 @@ export function NetworkPostCard({
   onFollow: () => void;
   onToggleRepost: () => void;
   onDelete?: () => void;
+  onCountView?: (postId:string) => void;
   featured?: boolean;
 }) {
   const { post, repost } = item;
@@ -130,31 +131,30 @@ export function NetworkPostCard({
   // Only a genuinely visible post records reach. The database deduplicates
   // by authenticated viewer, post and UTC day; scrolling cannot inflate it.
   useEffect(() => {
-    if (!userId || userId === post.author_id || !postElement.current || typeof IntersectionObserver === 'undefined') return;
+    if (!userId || userId === post.author_id || !postElement.current || !onCountView || typeof IntersectionObserver === 'undefined') return;
     let sent = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const observer = new IntersectionObserver((entries) => {
-      const visible = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25);
+      const visible = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.15);
       if (visible && document.visibilityState === 'visible' && !sent && timer === null) {
         timer = setTimeout(() => {
           timer = null;
           if (document.visibilityState !== 'visible') return;
           sent = true;
           observer.disconnect();
-          const db = getSupabaseClient() as any;
-          void db?.rpc('record_professional_post_view', { p_post_id: post.id });
+          onCountView(post.id);
         }, 850);
       } else if (!visible && timer !== null) {
         clearTimeout(timer);
         timer = null;
       }
-    }, { threshold: [0, 0.25, 0.5] });
+    }, { threshold: [0, 0.15, 0.5] });
     observer.observe(postElement.current);
     return () => {
       observer.disconnect();
       if (timer !== null) clearTimeout(timer);
     };
-  }, [post.author_id, post.id, userId]);
+  }, [onCountView,post.author_id, post.id, userId]);
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   const mine = post.reactions?.find((reaction) => reaction.user_id === userId);
   const myRepost = post.reposts?.some((entry) => entry.profile_id === userId) ?? false;
