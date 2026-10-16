@@ -35,7 +35,9 @@ export default async function PulsePublicPage() {
   const publicDb = getPublicClient();
   const { data, error } = publicDb
     ? await (publicDb as any).from('posts')
-        .select('id,body,created_at,author:profiles(display_name,username,first_name,last_name)')
+        .select('id,body,created_at,author:profiles!inner(display_name,username,first_name,last_name)')
+        .eq('author.profile_visibility', 'public')
+        .eq('author.is_active', true)
         .eq('status', 'published')
         .is('target_profile_id', null)
         .order('created_at', { ascending: false })
