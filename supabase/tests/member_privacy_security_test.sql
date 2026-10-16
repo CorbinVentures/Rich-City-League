@@ -36,6 +36,12 @@ values
  ('b1600000-0000-0000-0000-000000000004','Blocked story','public');
 
 set role anon;
+select ok(not has_column_privilege('anon','public.profiles','phone','SELECT'),'anonymous member phone SELECT denied');
+select ok(not has_column_privilege('anon','public.profiles','date_of_birth','SELECT'),'anonymous birthday SELECT denied');
+select ok(not has_column_privilege('authenticated','public.profiles','phone','SELECT'),'signed-in cross-member phone SELECT denied');
+select ok(not has_column_privilege('authenticated','public.profiles','date_of_birth','SELECT'),'signed-in cross-member birthday SELECT denied');
+select throws_ok($select phone from public.profiles limit 1$,'42501',null,'wildcard/private phone read rejected even for visible rows');
+select throws_ok($select * from public.get_my_private_profile()$,'42501',null,'anonymous callers cannot use private profile RPC');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000002'),'anon cannot see connections-only profile');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'anon cannot see private profile');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000004'),'anon can see otherwise-public profile');
@@ -61,6 +67,8 @@ select set_config('request.jwt.claim.sub','b1600000-0000-0000-0000-000000000006'
 select lives_ok($$update public.friendships set status='accepted' where requester_id='b1600000-0000-0000-0000-000000000001' and addressee_id='b1600000-0000-0000-0000-000000000006'$$,'recipient may accept pending invitation');
 
 select set_config('request.jwt.claim.sub','b1600000-0000-0000-0000-000000000003',true);
+select is((select count(*)::integer from public.get_my_private_profile()),1,'owner-only private RPC returns exactly one private row');
+select ok(not public.is_my_profile_adult(),'missing DOB is not adult-eligible');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'private owner can read own profile');
 
 select * from finish();
