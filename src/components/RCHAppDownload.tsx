@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
 import { useEffect, useState } from 'react';
 import { isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 import {
@@ -33,6 +35,7 @@ function isInstalled() {
 }
 
 export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
+  const { user, loading: authLoading } = useAuth();
   const [device, setDevice] = useState<Device>('other');
   const [installed, setInstalled] = useState(false);
   const [prompt, setPrompt] = useState<InstallEvent | null>(null);
@@ -141,10 +144,10 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
               </span>
             </div>
             <div className="rch-download-account-links">
-              <Link href="/auth/sign-up">Create your free profile <FaArrowRight aria-hidden="true" /></Link>
-              <Link href="/auth/sign-in">Already a member? Sign in</Link>
+              <RCHBrowserAccountLink memberHref="/profile" guestLabel="Create your free profile" memberLabel="My RCH profile" />
+              {authLoading ? <span>Checking account…</span> : <Link href={user ? '/social' : '/auth/sign-in'}>{user ? 'Open Social' : 'Already a member? Sign in'}</Link>}
             </div>
-            <p className="rch-download-browser-note">You can explore public basketball pages in your browser. Install RCH to unlock social features, messaging and the full mobile experience.</p>
+            <p className="rch-download-browser-note">Explore basketball and use your signed-in social and messaging tools on the website, or install the app for its dedicated mobile experience.</p>
           </div>
           <div className="rch-download-device-art" aria-hidden="true">
             <div className="rch-download-device-top"><b>RCH</b><span>RICHMOND, VA · 804</span></div>
@@ -217,7 +220,7 @@ export function RCHAppDownload({ apkUrl }: { apkUrl: string | null }) {
           <FaShieldHalved aria-hidden="true"/>
           <p><b>Official Rich City Hoops installation page.</b> Avoid third-party app download sites and unknown configuration profiles. Your account and basketball community stay at richcityhoops.com.</p>
         </div>
-        <p className="rch-download-return"><Link href="/auth/sign-up">Create your free RCH profile <FaArrowRight aria-hidden="true"/></Link> <Link href="/auth/sign-in">Sign in</Link></p>
+        <p className="rch-download-return"><RCHBrowserAccountLink memberHref="/profile" guestLabel="Create your free RCH profile" memberLabel="My RCH profile"/> {authLoading ? <span>Checking account…</span> : <Link href={user ? '/social' : '/auth/sign-in'}>{user ? 'Open Social' : 'Sign in'}</Link>}</p>
         <footer className="rch-download-legal" aria-label="Rich City Hoops legal information">
           <span>© {new Date().getFullYear()} Rich City Hoops · Richmond, VA</span>
           <nav aria-label="Legal"><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/community-guidelines">Guidelines</Link></nav>

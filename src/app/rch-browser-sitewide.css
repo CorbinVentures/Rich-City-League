@@ -652,3 +652,21 @@ html.rch-premium-root body.rch-premium-app .rch-public-web .royaltee-site {
   display:inline-flex;align-items:center;gap:8px;color:#dcefff!important;
   font-weight:900;text-decoration:underline;text-underline-offset:3px;
 }
+
+/* Signed-in member pages use the website's blue design authority, not PWA chrome. */
+.rch-public-web .rch-browser-member-workspace {
+  min-width:0;min-height:60vh;background:#020b17;color:#f4faff;
+}
+.rch-public-web .rch-browser-member-workspace-label {
+  padding:12px max(18px,calc((100vw - 1320px)/2));
+  background:#0a213a;border-bottom:1px solid #31587e;
+  color:#a9cfff;font-size:10px;letter-spacing:.18em;font-weight:900;
+}
+.rch-public-web .rch-browser-member-workspace-label span {color:#5ab0ff;padding:0 8px}
+.rch-public-web .rch-browser-member-workspace :is(.rch-pulse-page,.rcl-social-secondary) {
+  background-color:#020b17!important;color:#f4faff;
+}
+.rch-public-web .rch-browser-member-workspace a:focus-visible,
+.rch-public-web .rch-browser-member-workspace button:focus-visible {
+  outline:2px solid #9bd0ff;outline-offset:3px;
+}

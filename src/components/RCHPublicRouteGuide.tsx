@@ -16,7 +16,7 @@ const items = [
 /** Contextual browser navigation. Never mounted in installed-PWA chrome. */
 export function RCHPublicRouteGuide() {
   const pathname = usePathname() || '/';
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   if (pathname === '/' || pathname === '/pulse') return null;
 
   const sections: Record<string, { label: string; note: string }> = {
@@ -50,6 +50,19 @@ export function RCHPublicRouteGuide() {
     register: { label: 'Registration', note: 'Your next basketball chapter' },
     about: { label: 'About RCH', note: 'Built for Virginia hoops' },
     profile: { label: 'My RCH Profile', note: 'Manage your basketball identity' },
+    social: { label: 'RCH Social', note: 'Your basketball conversations and connections' },
+    messages: { label: 'Messages', note: 'Your private RCH conversations' },
+    notifications: { label: 'Notifications', note: 'Activity and updates for you' },
+    dashboard: { label: 'Member Dashboard', note: 'Your basketball headquarters' },
+    'my-hoops': { label: 'My Hoops', note: 'Your saves, opportunities and basketball life' },
+    professional: { label: 'Professional Dashboard', note: 'Your audience and content insights' },
+    settings: { label: 'Account Settings', note: 'Your preferences and privacy' },
+    friends: { label: 'Connections', note: 'Your basketball network' },
+    fantasy: { label: 'Fantasy', note: 'Your basketball competition' },
+    portal: { label: 'League Tools', note: 'Your approved organization workspace' },
+    admin: { label: 'Admin Tools', note: 'Manage Rich City Hoops' },
+    clips: { label: 'RCH Clips', note: 'Highlights and basketball moments' },
+    staff: { label: 'Staff Tools', note: 'Your assigned role and operations' },
     account: { label: 'Account security', note: 'Protect your account' },
     app: { label: 'RCH App', note: 'Add the community to your home screen' },
     legal: { label: 'Legal & Safety', note: 'Your rights and our community standards' },
@@ -66,11 +79,12 @@ export function RCHPublicRouteGuide() {
       </div>
       <nav aria-label="More Virginia basketball" className="rch-browser-route-guide-links">
         {items.map(({ href,label,Icon }) => {
-          const selected = pathname === href || pathname.startsWith(href + '/');
-          return <Link key={href} href={href} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
+          const resolvedHref = user && href === '/pulse' ? '/social' : href;
+          const selected = pathname === resolvedHref || pathname.startsWith(resolvedHref + '/');
+          return <Link key={href} href={resolvedHref} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
         })}
       </nav>
-      <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>
+      {loading ? <span className="rch-browser-route-guide-join" role="status">Checking account…</span> : <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>}
     </div>
   </div>;
 }

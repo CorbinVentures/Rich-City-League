@@ -4,9 +4,25 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHBrowserMemberNotice } from '@/components/RCHBrowserMemberNotice';
 import { RCHPublicWebShell } from '@/components/RCHPublicWebShell';
-import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
+import { isBrowserAccountRoute, isBrowserPublicRoute, isBrowserMemberRoute, isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
+import { useAuth } from '@/hooks/useAuth';
 
 type Mode = 'checking' | 'mobile-app' | 'browser';
+
+function BrowserMemberContent({ pathname, children }: { pathname: string; children: ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return <main className="rch-browser-loading" role="status" aria-live="polite">
+      <span className="rch-browser-loading-mark">RCH</span>
+      <span>Checking your member session…</span>
+    </main>;
+  }
+  if (!user) return <RCHBrowserMemberNotice pathname={pathname}/>;
+  return <div className="rch-browser-member-workspace">
+    <div className="rch-browser-member-workspace-label">RCH MEMBER WORKSPACE <span>·</span> SIGNED IN</div>
+    {children}
+  </div>;
+}
 
 export function RCHExperienceGate({ children, publicContent }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
   const pathname = usePathname();
@@ -33,7 +49,7 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
   // Middleware's guest redirect ends at /member-access. Keep that landing
   // browser-native; the original member workspace remains untouched in PWA.
   if (mode === 'browser' && pathname === '/member-access') {
-    return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
+    return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
   }
 
   // Profile setup and MFA security remain functional in a browser, but get the
@@ -46,6 +62,13 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
   // Security/MFA and Command Center exceptions retain their original protected flow.
   if (mode === 'browser' && (pathname === '/auth' || pathname.startsWith('/auth/'))) {
     return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
+  }
+
+  // Authenticated browser members can use actual member pages in the website
+  // shell (not PlatformChrome). Middleware/RLS still gate privileged routes.
+  // Do not render private children while the browser session is unresolved.
+  if (mode === 'browser' && isBrowserMemberRoute(pathname)) {
+    return <RCHPublicWebShell><BrowserMemberContent pathname={pathname}>{publicContent}</BrowserMemberContent></RCHPublicWebShell>;
   }
 
   // Account registration, profile setup, recovery and legal policies remain available

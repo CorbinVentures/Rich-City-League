@@ -12,13 +12,17 @@ describe('RCH browser sign-in handoff regression', () => {
     expect(getBrowserPostAuthPath('/discover?area=richmond')).toBe('/discover?area=richmond');
   });
 
-  it('keeps private app routes inside a browser-native handoff, not another sign-in loop', () => {
-    expect(getBrowserPostAuthPath('/dashboard')).toBe('/member-access?next=%2Fdashboard');
-    expect(getBrowserPostAuthPath('/today')).toBe('/member-access?next=%2Ftoday');
+  it('opens real member pages in the signed-in browser instead of app-only notices', () => {
+    expect(getBrowserPostAuthPath('/dashboard')).toBe('/dashboard');
+    expect(getBrowserPostAuthPath('/today')).toBe('/today');
     expect(getBrowserPostAuthPath('/social?tab=following'))
-      .toBe('/member-access?next=%2Fsocial%3Ftab%3Dfollowing');
+      .toBe('/social?tab=following');
     expect(getBrowserPostAuthPath('/portal/scorebook'))
-      .toBe('/member-access?next=%2Fportal%2Fscorebook');
+      .toBe('/portal/scorebook');
+  });
+
+  it('keeps unknown private routes at a safe informational page', () => {
+    expect(getBrowserPostAuthPath('/unrecognized-private-route')).toBe('/member-access?next=%2Funrecognized-private-route');
   });
 
   it('preserves verified browser account, profile and command routes', () => {
@@ -48,7 +52,7 @@ describe('RCH browser sign-in handoff regression', () => {
     const shell = read('src/components/RCHPublicWebShell.tsx');
     const notice = read('src/components/RCHBrowserMemberNotice.tsx');
     const css = read('src/app/rch-browser-sitewide.css');
-    expect(shell).toContain('const { user } = useAuth();');
+    expect(shell).toContain('const { user, profile, loading: authLoading } = useAuth();');
     expect(shell).toContain('handleBrowserSignOut');
     expect(shell).toContain('My Profile');
     expect(shell).toContain('Sign out');

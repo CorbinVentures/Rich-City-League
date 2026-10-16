@@ -23,9 +23,13 @@ const nav = [
   { name: 'RCH TV', href: '/media' },
 ];
 
+function browserNavHref(href: string, signedIn: boolean) {
+  return signedIn && href === '/pulse' ? '/social' : href;
+}
+
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
-  const { user } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   // Browser menu lives in a viewport-level overlay, not in the tiny header
@@ -99,11 +103,14 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
       <div className="rch-public-header-inner">
         <Link href="/" className="rch-public-logo" aria-label="Rich City Hoops home"><span>RCH</span></Link>
         <nav aria-label="Public basketball navigation" className="rch-public-nav">
-          {nav.map(item => <Link key={item.href} href={item.href} aria-current={pathname===item.href || (item.href!=='/' && pathname.startsWith(item.href+'/'))?'page':undefined}>{item.name}</Link>)}
+          {nav.map(item => {
+            const href = browserNavHref(item.href, Boolean(user));
+            return <Link key={item.href} href={href} aria-current={pathname===href || (href!=='/' && pathname.startsWith(href+'/'))?'page':undefined}>{item.name}</Link>;
+          })}
         </nav>
         <div className="rch-public-header-actions">
           <Link href="/search" className="rch-public-search" aria-label="Search players, teams, runs and events"><FaMagnifyingGlass/><span>Search basketball...</span></Link>
-          {user ? <>
+          {authLoading ? <span className="rch-public-signin" role="status">Checking account…</span> : user ? <>
             <Link href="/profile" className="rch-public-signin" aria-label="My RCH profile">My Profile</Link>
             <button type="button" className="rch-public-signin" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
@@ -145,14 +152,24 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           </button>
         </div>
         <nav aria-label="Mobile public navigation" className="rch-public-mobile-drawer-links">
-          {nav.map(item => <Link key={item.href} href={item.href} aria-current={pathname===item.href?'page':undefined} onClick={closeMenu}>
+          {nav.map(item => <Link key={item.href} href={browserNavHref(item.href, Boolean(user))} aria-current={pathname===browserNavHref(item.href, Boolean(user))?'page':undefined} onClick={closeMenu}>
             <span>{item.name}</span><FaArrowRight aria-hidden="true"/>
           </Link>)}
           <Link href="/search" onClick={closeMenu}><span><FaMagnifyingGlass aria-hidden="true"/> Search basketball</span><FaArrowRight aria-hidden="true"/></Link>
+          {user && <>
+            <Link href="/my-hoops" onClick={closeMenu}><span>My Hoops</span><FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/messages" onClick={closeMenu}><span>Messages</span><FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/notifications" onClick={closeMenu}><span>Notifications</span><FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/professional" onClick={closeMenu}><span>Professional Dashboard</span><FaArrowRight aria-hidden="true"/></Link>
+            {profile?.role === 'admin' && <>
+              <Link href="/admin" onClick={closeMenu}><span>Admin Tools</span><FaArrowRight aria-hidden="true"/></Link>
+              <Link href="/command" onClick={closeMenu}><span>Command Center</span><FaArrowRight aria-hidden="true"/></Link>
+            </>}
+          </>}
           <Link href="/app" onClick={closeMenu}><span><FaBasketball aria-hidden="true"/> Get the RCH App</span><FaArrowRight aria-hidden="true"/></Link>
         </nav>
         <div className="rch-public-mobile-drawer-actions">
-          {user ? <>
+          {authLoading ? <span role="status" className="rch-browser-auth-loading">Checking account…</span> : user ? <>
             <Link href="/profile" onClick={closeMenu}>My Profile <FaArrowRight aria-hidden="true"/></Link>
             <button type="button" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
@@ -166,7 +183,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     {signOutError && <p role="alert" className="rch-browser-auth-error">{signOutError}</p>}
     <RCHPublicRouteGuide />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
-    <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>Browse freely on the web. Create your free profile to save, connect and compete.</span></div><Link href="/app">Explore the app <FaArrowRight aria-hidden="true"/></Link></aside>
+    <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>{user ? 'Your RCH account is active. Keep exploring the website or install the app for the standalone experience.' : 'Browse freely on the web. Create your free profile to save, connect and compete.'}</span></div><Link href={user ? '/my-hoops' : '/app'}>{user ? 'Open My Hoops' : 'Explore the app'} <FaArrowRight aria-hidden="true"/></Link></aside>
     <footer className="rch-public-footer">
       <div className="rch-public-footer-inner">
         <div><Link href="/" className="rch-public-footer-brand">RCH</Link><p>Rich City Hoops · Virginia basketball, connected.</p></div>
@@ -174,8 +191,9 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/discover"><FaCompass/> Discover</Link>
           <Link href="/runs">Runs</Link>
           <Link href="/league">Rich City League</Link>
-          <Link href="/pulse">Social</Link>
+          <Link href={user ? '/social' : '/pulse'}>Social</Link>
           <Link href="/news">News</Link>
+          {user && <Link href="/messages">Messages</Link>}
           <Link href="/app">Get the PWA</Link>
           <Link href="/legal/privacy">Privacy</Link>
         </nav>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
 import {FaArrowRight,FaBasketball,FaCircleCheck,FaPeopleGroup} from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { getCoachesList, getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
@@ -39,7 +40,7 @@ export default async function CoachesPage(){
       <p className="mt-4 max-w-2xl text-sm leading-7 text-[#d3e4f3] sm:text-base">Find coaches and skills trainers across Virginia. A coach is a regular RCH member with a coaching identity—not an automatically appointed RCL staff member.</p>
       <div className="mt-5 flex flex-wrap gap-3">
        <Link href="/profile" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#a7d7ff] bg-[#2878b9] px-5 text-sm font-black text-white">Add coaching to my profile <FaArrowRight aria-hidden="true"/></Link>
-       <Link href="/auth/sign-up?next=/profile" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#5e8bb0] bg-[#0a243c] px-5 text-sm font-black text-white">Join RCH free</Link>
+       <RCHBrowserAccountLink guestHref="/auth/sign-up?next=/profile" memberHref="/profile" guestLabel="Join RCH free" memberLabel="Manage my coach identity" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#5e8bb0] bg-[#0a243c] px-5 text-sm font-black text-white" />
       </div>
      </div>
      <div className="flex gap-3">
