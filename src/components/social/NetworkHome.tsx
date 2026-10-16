@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   FaArrowLeft,
@@ -90,6 +90,7 @@ export default function NetworkHome() {
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
+  const onCountView = useCallback((postId:string) => { void db?.rpc('record_professional_post_view',{p_post_id:postId}); },[db]);
 
   const [posts, setPosts] = useState<NetworkPost[]>([]);
   const [reposts, setReposts] = useState<NetworkRepost[]>([]);
@@ -766,7 +767,7 @@ export default function NetworkHome() {
 
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
-              <NetworkPostCard item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
+              <NetworkPostCard onCountView={onCountView} item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
               {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
               {!focusPostId && index === Math.min(5, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
               {!focusPostId && index === Math.min(7, feedItems.length - 1) && <TodayPanel
