@@ -114,27 +114,27 @@ begin
     ),
     'daily',(
       select coalesce(jsonb_agg(jsonb_build_object(
-        'day',d.day,'members',coalesce(m.c,0),
+        'day',d.report_day,'members',coalesce(m.c,0),
         'visits',coalesce(v.c,0),'sessions',coalesce(v.sessions,0),
         'posts',coalesce(p.c,0),'content_views',coalesce(w.c,0)
-      ) order by d.day),'[]'::jsonb)
-      from generate_series(v_since,(now() at time zone 'UTC')::date,interval '1 day') d(day)
+      ) order by d.report_day),'[]'::jsonb)
+      from generate_series(v_since,(now() at time zone 'UTC')::date,interval '1 day') as d(report_day)
       left join (
-        select (created_at at time zone 'UTC')::date day,count(*) c
+        select (created_at at time zone 'UTC')::date as report_day,count(*) c
         from public.profiles where created_at>=v_start and is_system_account is distinct from true group by 1
-      ) m on m.day=d.day::date
+      ) m on m.report_day=d.report_day::date
       left join (
-        select (bucket_at at time zone 'UTC')::date day,count(*) c,count(distinct session_id) sessions
+        select (bucket_at at time zone 'UTC')::date as report_day,count(*) c,count(distinct session_id) sessions
         from public.rch_site_section_visits where bucket_at>=v_start group by 1
-      ) v on v.day=d.day::date
+      ) v on v.report_day=d.report_day::date
       left join (
-        select (created_at at time zone 'UTC')::date day,count(*) c
+        select (created_at at time zone 'UTC')::date as report_day,count(*) c
         from public.posts where created_at>=v_start and status::text='published' group by 1
-      ) p on p.day=d.day::date
+      ) p on p.report_day=d.report_day::date
       left join (
-        select (viewed_at at time zone 'UTC')::date day,count(*) c
+        select (viewed_at at time zone 'UTC')::date as report_day,count(*) c
         from public.professional_post_views where viewed_at>=v_start group by 1
-      ) w on w.day=d.day::date
+      ) w on w.report_day=d.report_day::date
     ),
     'sections',(
       select coalesce(jsonb_agg(jsonb_build_object(
