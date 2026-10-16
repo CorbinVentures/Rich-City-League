@@ -742,7 +742,7 @@ export default function NetworkHome() {
             <div className="sticky top-24 space-y-1">
               {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
               <div className="my-3 border-t border-white/10"/>
-              {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCL</Link>}
+              {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCH</Link>}
               <p className="px-3 pt-4 text-[10px] font-black uppercase leading-5 tracking-[.18em] text-white/20">Your city · Your court · Your rep</p>
             </div>
           </aside>
@@ -848,19 +848,19 @@ function TodayPanel({
   const full = Boolean(nextRun && playerCount >= nextRun.max_players);
   const spotsLeft = nextRun ? Math.max(0, nextRun.max_players - playerCount) : 0;
 
-  return <section className="overflow-hidden rounded-2xl border border-[#D9E4EF] bg-white shadow-[0_8px_28px_rgba(15,37,71,.07)]">
+  return <section className="rch-pulse-today overflow-hidden rounded-2xl border border-[#D9E4EF] bg-white shadow-[0_8px_28px_rgba(15,37,71,.07)]">
     <div className="flex items-start justify-between gap-4 border-b border-[#E7EEF6] px-4 py-4 sm:px-5">
       <div>
-        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">Today in RCH</p>
-        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">Richmond basketball, right now.</h2>
+        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">THE PULSE · TODAY</p>
+        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">What's moving in the community.</h2>
         <p className="mt-1 text-xs leading-5 text-[#60738D]">Fresh activity, your next court and the conversation moving around you.</p>
       </div>
       <Link href="/discover" className="shrink-0 rounded-lg border border-[#D9E4EF] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore</Link>
     </div>
 
     <div className="grid grid-cols-3 border-b border-[#E7EEF6]">
-      <div className="px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{postsToday}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Posts today</span></div>
-      <div className="border-x border-[#E7EEF6] px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{activeStories}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Live stories</span></div>
+      <div className="px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{postsToday}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Recent posts today</span></div>
+      <div className="border-x border-[#E7EEF6] px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{activeStories}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Active stories</span></div>
       <Link href="/social/profile/me" className="px-3 py-3 text-center transition hover:bg-[#F7FAFD]"><strong className="block text-lg font-black text-[#0F2547]">{formatRep(rep)}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">REP · LVL {level}</span></Link>
     </div>
 
