@@ -56,14 +56,14 @@ describe('RCH public browser visual authority and route isolation', () => {
     '/coaches', '/coaches/coach-id', '/teams/team-id', '/seasons',
     '/seasons/season-id', '/divisions', '/standings', '/stats', '/games',
     '/media', '/media/creators', '/media/creators/apply', '/commonwealth',
-    '/crews', '/communities', '/city', '/legacy', '/fans/member-name',
+    '/crews', '/communities', '/communities/public-hoops', '/city', '/legacy', '/fans/member-name',
     '/shop', '/shop/product-id', '/network/events/event-id', '/organizations/org-id',
   ])('keeps read-only or guest-action basketball navigation public: %s', path => {
     expect(isBrowserPublicRoute(path)).toBe(true);
   });
 
   it.each([
-    '/social', '/legal/account', '/social/profile/private-id', '/messages', '/notifications',
+    '/social', '/communities/manage', '/communities/new', '/legal/account', '/social/profile/private-id', '/messages', '/notifications',
     '/admin', '/admin/operations', '/command', '/dashboard', '/today',
     '/professional', '/account', '/settings/privacy', '/profile/admin',
     '/communities/members-only', '/media/creators/dashboard',
