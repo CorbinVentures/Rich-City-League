@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -16,7 +16,7 @@ type Favorite = {member_id:string;position:number};
 const bucket='rch-crew-logos';
 const formatDate=(date:string)=>new Date(date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
 
-export default function CrewsPage(){
+function CrewsView(){
   const {user,loading:authLoading}=useAuth();
   const params=useSearchParams();
   const selectedId=params.get('crew');
@@ -138,7 +138,7 @@ export default function CrewsPage(){
         <div className="flex flex-wrap items-center gap-5">
           <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border border-[#478ab8] bg-[#113552]">{logo(selected)?<img src={logo(selected)||''} alt={selected.name+' logo'} className="h-full w-full object-contain"/>:<FaBasketball className="text-4xl text-[#86c8ff]"/>}</div>
           <div className="min-w-0 flex-1"><p className="text-xs font-black tracking-[.16em] text-[#7cb7e7]">{selected.city.toUpperCase()} · {selected.home_court_slug.replace(/-/g,' ').toUpperCase()}</p><h2 className="mt-1 font-display text-3xl font-black uppercase">{selected.name}</h2><p className="mt-1 text-sm text-[#b3d0e6]">{selected.motto||'Building our legacy on Virginia courts.'}</p><p className="mt-2 text-xs font-bold text-[#88b9e1]">{selectedMembers.length} / 12 members · {mine?'Your crew':'RCH crew'}</p></div>
-          <button onClick={()=>void share(selected)} className="inline-flex items-center gap-2 rounded-xl border border-[#497fac] px-4 py-3 text-xs font-black"><FaShareNodes/> Invite friends</button>
+          <div className="flex flex-wrap gap-2">{!myCrew&&user&&<button disabled={!!busy} onClick={()=>void execute('commonwealth_request_to_join',{p_crew:selected.id},'Roster request sent to the captain.')} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Request to join</button>}{!user&&!authLoading&&<Link href={'/auth/sign-up?redirect='+encodeURIComponent('/crews?crew='+selected.id)} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Sign up free to join</Link>}<button onClick={()=>void share(selected)} className="inline-flex items-center gap-2 rounded-xl border border-[#497fac] px-4 py-3 text-xs font-black"><FaShareNodes/> Invite friends</button></div>
         </div>
         {captain&&mine&&<label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#456e95] px-4 py-3 text-xs font-black"><FaImage/> {busy==='logo'?'Uploading…':'Upload crew logo'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={!!busy} className="sr-only" onChange={e=>void upload(e.target.files?.[0])}/></label>}
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectedMembers.map(member=><Link href={'/social/profile/'+member.profile_id} key={member.profile_id} className="flex items-center gap-3 rounded-xl border border-[#244e74] bg-[#0c2845] p-3 hover:border-[#83beee]">
@@ -179,4 +179,9 @@ export default function CrewsPage(){
       </section>
     </div>
   </main>;
+}
+
+
+export default function CrewsPage(){
+  return <Suspense fallback={<main className="grid min-h-screen place-items-center bg-[#061322] text-[#b9daee]">Loading Crews…</main>}><CrewsView/></Suspense>;
 }
