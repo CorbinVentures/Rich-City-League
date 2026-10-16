@@ -8,6 +8,8 @@ import {
 } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cityForText } from '@/lib/virginia-world';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
 import {
   classifySceneOpportunity, sceneMatchesWhen,
   type SceneCategory, type SceneGoal, type SceneWhen
@@ -73,6 +75,7 @@ function cityMatches(actual: string, chosen: string) {
 }
 
 export default function DiscoverScene() {
+  const {location} = useGravityLocation();
   const [items, setItems] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -187,11 +190,11 @@ export default function DiscoverScene() {
       title:item.title, keywords:item.description,
       city:item.city, startsAt:item.startsAt,
       unavailable:item.full, isSaved:savedIds.includes(item.id), isVerified:item.verified
-    })), {intent:sharedIntent,goal,city:city==='all'?null:city});
+    })), {intent:sharedIntent,goal,cityId:location.cityId,radiusMiles:location.radiusMiles});
     const order = new Map(priority.map((item,index) => [item.id,index]));
     return filtered.filter(item => order.has(item.id))
       .sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
-  }, [items,category,city,when,query,goal,sharedIntent,sortPersonalized,savedOnly,savedIds]);
+  }, [items,category,city,when,query,goal,sharedIntent,sortPersonalized,savedOnly,savedIds,location.cityId,location.radiusMiles]);
 
   const pulse = useMemo(() => [...items].filter(item => sceneMatchesWhen(item.startsAt,'any'))
     .sort((a,b) => a.startsAt.localeCompare(b.startsAt)).slice(0,3),[items]);
@@ -257,6 +260,7 @@ export default function DiscoverScene() {
         </label>
       </section>
 
+      <GravityLocationPicker className="mb-5" />
       <section id="scene-categories" className="rch-scene-section">
         <div className="rch-scene-section-title">
           <div><span className="rch-scene-kicker">YOUR NEXT MOVE</span><h2>What brings you to the court?</h2></div>
