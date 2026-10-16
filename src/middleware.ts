@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 import { getSupabaseConfig } from './lib/supabase-config';
+import { isBrowserPublicRoute } from './lib/rch-mobile-experience';
 
 type AccessProfile = {
   role: string | null;
@@ -61,6 +62,11 @@ function socialOnboardingUrl(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  // Anonymous browsing of PUBLIC community directories and details is permitted.
+  // RLS on communities, community_posts, and profiles limits what may be read.
+  // Protected writes and member-only community operations still require auth.
+  if (matchesRoute(pathname, '/communities') && isBrowserPublicRoute(pathname)) return NextResponse.next();
+
   const protectedPath = requiresMemberAccess(pathname);
 
   // Public entry to the private Command PWA: credentials are accepted here, but
