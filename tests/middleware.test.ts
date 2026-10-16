@@ -44,7 +44,7 @@ describe('public launch middleware', () => {
     '/', '/league', '/players', '/teams', '/schedule', '/games', '/standings', '/stats', '/rankings',
     '/news', '/media', '/about', '/network', '/community', '/organizations', '/organizations/region/central-virginia', '/organizations/region/tri-cities',
     '/organizations/rich-city-league', '/organizations/example/claim', '/network/partners', '/network/partners/apply',
-    '/network/events/example-event', '/sponsors', '/sponsors/start', '/runs', '/shop',
+    '/network/events/example-event', '/sponsors', '/sponsors/start', '/runs', '/shop', '/communities', '/communities/public-hoops',
   ])('keeps public launch route %s reachable anonymously', async (pathname) => {
     const response = await middleware(new NextRequest(`http://localhost${pathname}`));
     expect(response.status).toBe(200);
@@ -54,7 +54,7 @@ describe('public launch middleware', () => {
   it.each([
     '/dashboard', '/portal/profile', '/portal/operations', '/portal/team', '/portal/scorebook', '/admin',
     '/account', '/profile', '/messages', '/notifications', '/settings/notifications', '/orders',
-    '/network/dashboard', '/network/dashboard/profile', '/friends', '/connections', '/social', '/communities',
+    '/network/dashboard', '/network/dashboard/profile', '/friends', '/connections', '/social', '/communities/manage', '/communities/new',
     '/missions', '/fantasy', '/pickem',
   ])('sends anonymous private route %s to member access', async (pathname) => {
     const response = await middleware(new NextRequest(`http://localhost${pathname}`));
@@ -88,6 +88,14 @@ describe('public launch middleware', () => {
     expect(response.status).toBe(307);
     expect(location.pathname).toBe('/auth/complete-profile');
     expect(location.searchParams.get('next')).toBe('/social?tab=network');
+  });
+
+  it('does not gate community discovery when auth services are temporarily unavailable', async () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    for (const path of ['/communities', '/communities/public-hoops']) {
+      const response = await middleware(new NextRequest(`http://localhost${path}`));
+      expect(response.status).toBe(200);
+    }
   });
 
   it('keeps authentication and onboarding pages public', async () => {
