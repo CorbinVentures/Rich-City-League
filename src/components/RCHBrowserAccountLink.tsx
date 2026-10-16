@@ -24,7 +24,8 @@ export function RCHBrowserAccountLink({
   className?: string;
   icon?: ReactNode;
 }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return <span className={className} role="status" aria-live="polite">Checking account…</span>;
   const href = user ? memberHref : guestHref;
   return <Link href={href} className={className}>
     {icon}{user ? memberLabel : guestLabel}<FaArrowRight aria-hidden="true"/>
