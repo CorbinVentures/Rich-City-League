@@ -103,7 +103,7 @@ begin
           and r.starts_at>=make_timestamptz(p_cycle,11,1,0,0,0,'America/New_York')
           and r.starts_at<make_timestamptz(p_cycle,12,21,0,0,0,'America/New_York')
           and m.verified_at<make_timestamptz(p_cycle+1,1,1,0,0,0,'America/New_York')
-      ), aggregate as (
+      ), totals as (
         select id,count(*)::bigint as played,
           count(*) filter(where won)::bigint as victorious,
           count(distinct run_id)::bigint as sessions
@@ -115,7 +115,7 @@ begin
           p.avatar_url as image,
           a.played,a.victorious,a.sessions,
           (a.played>=3 and a.sessions>=2) as qualified
-        from aggregate a join public.profiles p on p.id=a.id
+        from totals a join public.profiles p on p.id=a.id
         where p.is_active and not coalesce(p.is_system_account,false)
           and coalesce(p.profile_visibility,'public') not in ('private','only_me')
       )
@@ -148,7 +148,7 @@ begin
         select home_crew as id,away_crew as opponent,run_id,home_score>away_score as won from matches
         union all
         select away_crew as id,home_crew as opponent,run_id,away_score>home_score as won from matches
-      ), aggregate as (
+      ), totals as (
         select s.id,count(*)::bigint as played,
           count(*) filter(where s.won)::bigint as victorious,
           count(distinct s.run_id)::bigint as sessions,
@@ -158,7 +158,7 @@ begin
         select a.id,c.name,c.city as locality,c.logo_path as image,
           a.played,a.victorious,a.sessions,
           (a.played>=3 and a.sessions>=2 and a.opponents>=2) as qualified
-        from aggregate a join public.commonwealth_crews c on c.id=a.id
+        from totals a join public.commonwealth_crews c on c.id=a.id
       )
       select e.id,e.name,e.locality,e.image,e.played,e.victorious,
         e.played-e.victorious,(3*e.victorious)::bigint,e.sessions,e.qualified,
