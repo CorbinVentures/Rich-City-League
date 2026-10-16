@@ -1,7 +1,7 @@
 // Task-first routing for the authenticated RCL Command Center.
 // Every shortcut maps to an existing module or to its validated record form.
 export type CommandArea =
- 'overview'|'revenue'|'finance'|'venues'|'concessions'|'trades'|
+ 'overview'|'analytics'|'revenue'|'finance'|'venues'|'concessions'|'trades'|
  'stories'|'entertainment'|'operations'|'franchises'|'audit';
 export type CommandCaptureKind =
  'budgets'|'ledger'|'venues'|'bookings'|'inventory'|'concession_sales'|'trades'|'tasks';
@@ -15,6 +15,7 @@ export type CommandAction = {
  defaults?:Record<string,string>;
 };
 export const commandActions:CommandAction[]=[
+ {id:'site-analytics',title:'Analyze the RCH platform',description:'Explore executive sitewide audience, social, basketball and revenue intelligence',area:'analytics',keywords:'metrics data audience visitors analytics engagement conversions growth runs users traffic chart sitewide'},
  {id:'game-plan',title:'Prepare game day',description:'Open the automatic game readiness desk',area:'operations',keywords:'game schedule checklist readiness scorebook referee staff production run of show'},
  {id:'storyboard',title:'Make a trailer or player feature',description:'Go to Storyline Studio and its visual storyboard',area:'stories',keywords:'storyline story board camera video clip promo rivalry player feature film make trailer creative'},
  {id:'show',title:'Plan halftime entertainment',description:'Manage performances, timeouts and show cues',area:'entertainment',keywords:'cheerleader dance timeout halftime podcast concert singer performer entertainment show'},
@@ -34,7 +35,8 @@ export const commandActions:CommandAction[]=[
  {id:'audit',title:'Review activity history',description:'Inspect the read-only operational audit trail',area:'audit',keywords:'audit activity changed security history log'}
 ];
 export const areaSuggestions:Record<CommandArea,string[]>={
- overview:['game-plan','expense','storyboard','sale'],
+ overview:['site-analytics','game-plan','expense','storyboard','sale'],
+ analytics:['site-analytics','game-plan'],
  finance:['expense','income','budget'],
  revenue:['game-revenue','income'],
  venues:['gym-search','book-gym','new-gym'],
