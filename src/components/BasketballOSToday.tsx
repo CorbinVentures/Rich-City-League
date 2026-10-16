@@ -22,6 +22,9 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
+import { cityForText } from '@/lib/virginia-world';
 import { isGravityGoal, isGravityIntent, rankGravityCandidates, type GravityGoal, type GravityIntent } from '@/lib/rch-gravity';
 
 type Mission = {
@@ -113,6 +116,7 @@ function prettyDate(value: string) {
 }
 
 export function BasketballOSToday() {
+  const {location:gravityLocation,city:gravityCity} = useGravityLocation();
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(true), []);
   const db = supabase as any;
@@ -227,7 +231,18 @@ export function BasketballOSToday() {
     return [...missions].sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
   }, [missions,progressByMission,gravityIntent,gravityGoal,user?.id]);
   const nextGame = games[0];
-  const nextRun = runs[0];
+  const nearbyRuns = useMemo(() => {
+    if (!gravityLocation.cityId) return runs;
+    const ordered = rankGravityCandidates(runs.map(run => ({
+      id:run.id, category:'run' as const, title:run.title,
+      city:cityForText([run.location,run.court_name].join(' '))?.name || null,
+      // Source query already requires a future noncancelled run.
+      startsAt:run.starts_at,
+    })), {cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles});
+    const order = new Map(ordered.map((item,index)=>[item.id,index]));
+    return [...runs].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity));
+  },[runs,gravityLocation.cityId,gravityLocation.radiusMiles]);
+  const nextRun = nearbyRuns[0];
   const completed = missions.filter((mission) => (progressByMission.get(mission.id)?.progress ?? 0) >= mission.target_count).length;
 
   const claimMission = async (mission: Mission) => {
@@ -245,7 +260,9 @@ export function BasketballOSToday() {
       eyebrow="Rich City Hoops · Daily"
       title="RCH Today"
       accent={rep ? `${rep.status_label} · Level ${rep.level}` : 'Your basketball world'}
-      description="Your daily home for real Richmond basketball: players, court activity, new conversations, RCL games and opportunities to get involved."
+      description={gravityCity
+        ? `Your basketball world around ${gravityCity.name}: local opportunities, people, game nights and the wider Virginia scene.`
+        : 'Your daily home for Virginia basketball: court activity, conversations, league games and opportunities.'}
       assetKey="social.cover"
       actions={<div className="flex flex-wrap gap-2"><Link href="/social?compose=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black">Post an update <FaArrowRight /></Link><Link href="/runs?create=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider">Host a run</Link></div>}
       meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5 shadow-xl backdrop-blur"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Your REP</p><p className="mt-1 font-display text-4xl font-black">{rep?.total_xp ?? 0}</p><p className="mt-2 text-xs text-white/40">{user ? `${completed}/${missions.length || 6} weekly missions complete` : 'Sign in to activate your REP board'}</p></div>}
@@ -255,6 +272,7 @@ export function BasketballOSToday() {
       {notice && <div className="mb-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] px-5 py-4 text-sm font-semibold text-emerald-100">{notice}</div>}
       {error && <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-400/[.06] px-5 py-4 text-sm text-red-100">{error}</div>}
 
+      <GravityLocationPicker compact className="mb-5" />
       <RCHActionGuide variant="feed" />
 
       <section aria-label="Richmond community activity" className="mb-7 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
