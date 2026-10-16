@@ -29,7 +29,7 @@ function browserNavHref(href: string, signedIn: boolean) {
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   // Browser menu lives in a viewport-level overlay, not in the tiny header
@@ -161,6 +161,10 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
             <Link href="/messages" onClick={closeMenu}><span>Messages</span><FaArrowRight aria-hidden="true"/></Link>
             <Link href="/notifications" onClick={closeMenu}><span>Notifications</span><FaArrowRight aria-hidden="true"/></Link>
             <Link href="/professional" onClick={closeMenu}><span>Professional Dashboard</span><FaArrowRight aria-hidden="true"/></Link>
+            {profile?.role === 'admin' && <>
+              <Link href="/admin" onClick={closeMenu}><span>Admin Tools</span><FaArrowRight aria-hidden="true"/></Link>
+              <Link href="/command" onClick={closeMenu}><span>Command Center</span><FaArrowRight aria-hidden="true"/></Link>
+            </>}
           </>}
           <Link href="/app" onClick={closeMenu}><span><FaBasketball aria-hidden="true"/> Get the RCH App</span><FaArrowRight aria-hidden="true"/></Link>
         </nav>
