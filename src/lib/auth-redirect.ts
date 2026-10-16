@@ -38,3 +38,19 @@ export function getSafePostAuthPath(
 
   return destination;
 }
+
+/**
+ * The open website is intentionally distinct from the installed member PWA.
+ * Never send browser sign-ins straight to the installed-app-only dashboard:
+ * the website experience gate would replace it with a guest notice.
+ *
+ * Keep public destinations and the browser-accessible security, profile and
+ * Command Center routes intact. Other member destinations get a browser-native
+ * handoff with a verified signed-in state rather than another login loop.
+ */
+export function getBrowserPostAuthPath(value: string | null | undefined, fallback = '/'): string {
+  const path = getSafePostAuthPath(value, fallback);
+  const pathname = new URL(path, INTERNAL_URL_BASE).pathname;
+  if (isBrowserPublicRoute(pathname) || isBrowserAccountRoute(pathname)) return path;
+  return `/member-access?next=${encodeURIComponent(path)}`;
+}
