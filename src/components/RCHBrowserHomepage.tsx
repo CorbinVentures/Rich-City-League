@@ -29,7 +29,7 @@ const cards = [
   { title: 'Leagues', label: 'The next era of hoops', detail: 'Virginia competition, teams and standings.', href: '/league', icon: FaTrophy, variant: 'leagues' },
   { title: 'Discover', label: 'Your basketball world', detail: 'Training, tryouts and opportunities.', href: '/discover', icon: FaCompass, variant: 'discover' },
   { title: 'RCH TV', label: 'Every story matters', detail: 'Games, highlights and original content.', href: '/media', icon: FaVideo, variant: 'media' },
-  { title: 'Community', label: 'Stay connected', detail: 'Players, coaches and basketball culture.', href: '/community', icon: FaUsers, variant: 'social' },
+  { title: 'Social', label: 'Stay connected', detail: 'Players, coaches and basketball culture.', href: '/pulse', icon: FaUsers, variant: 'social' },
 ] as const;
 
 function dateParts(value: string) {
@@ -74,7 +74,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
           <Link href="/runs"><FaLocationDot/><span><b>FIND RUNS</b><small>See where Virginia hoops</small></span><FaArrowRight/></Link>
           <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Virginia&apos;s premier league vision</small></span><FaArrowRight/></Link>
           <Link href="/players"><FaUsers/><span><b>FIND PLAYERS</b><small>Meet the basketball community</small></span><FaArrowRight/></Link>
-          <Link href="/community"><FaUserGroup/><span><b>CONNECT</b><small>Culture, creators and fans</small></span><FaArrowRight/></Link>
+          <Link href="/pulse"><FaUserGroup/><span><b>CONNECT</b><small>Culture, creators and fans</small></span><FaArrowRight/></Link>
         </div>
       </div>
       <div className="rch-browser-hero-corner" aria-hidden="true">MORE THAN<br/>A GAME</div>
