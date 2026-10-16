@@ -1,6 +1,10 @@
 begin;
 select no_plan();
 set role postgres;
+-- Grant only inside rollback-only tests: production leaves these role/setting
+-- tables inaccessible to authenticated clients by table privilege.
+-- This isolates and verifies RLS and MFA behavior if grants are added later.
+grant select,insert,update,delete on public.profile_roles,public.staff,public.site_settings to authenticated;
 
 -- All fixtures are rolled back. No real users or their factors are read.
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
