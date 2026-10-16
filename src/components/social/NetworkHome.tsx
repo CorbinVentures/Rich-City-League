@@ -26,7 +26,15 @@ import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsored
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
+import { cityForText } from '@/lib/virginia-world';
+import { rankGravityCandidates } from '@/lib/rch-gravity';
 import { scoreSocialPost } from '@/lib/social-feed';
+import {
+  isGravityGoal, isGravityIntent, scoreGravityCandidate,
+  type GravityGoal, type GravityIntent
+} from '@/lib/rch-gravity';
 import {
   readMediaPreview,
   safeMediaPreviewUrl,
@@ -87,6 +95,7 @@ const leftNav = [
 ];
 
 export default function NetworkHome() {
+  const {location:gravityLocation} = useGravityLocation();
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -106,6 +115,8 @@ export default function NetworkHome() {
   const [runBusy, setRunBusy] = useState<string | null>(null);
 
   const [mode, setMode] = useState<FeedMode>('for-you');
+  const [gravityIntent, setGravityIntent] = useState<GravityIntent|null>(null);
+  const [gravityGoal, setGravityGoal] = useState<GravityGoal|null>(null);
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
@@ -133,6 +144,22 @@ export default function NetworkHome() {
   const feedHydratedRef = useRef(false);
   const loadRequestRef = useRef(0);
   const liveRefreshTimerRef = useRef<number | null>(null);
+
+  // Explicit preferences are shared with Today and The Scene on this device.
+  // A signed-in, cross-device preference store belongs to the next release.
+  useEffect(() => {
+    const read = () => {
+      try {
+        const intent = window.localStorage.getItem('rch-next-move-intent-v1');
+        const goal = window.localStorage.getItem('rch-scene-goal-v1');
+        setGravityIntent(isGravityIntent(intent) ? intent : null);
+        setGravityGoal(isGravityGoal(goal) ? goal : null);
+      } catch { /* Public feed remains available when storage is disabled. */ }
+    };
+    read();
+    window.addEventListener('storage', read);
+    return () => window.removeEventListener('storage', read);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -679,10 +706,27 @@ export default function NetworkHome() {
     } else if (mode === 'following') {
       candidates.sort((a, b) => new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime());
     } else {
-      candidates.sort((a, b) => {
-        const score = (item: NetworkFeedItem) => scoreSocialPost({ ...item.post, created_at: item.feed_at }, { userId: user?.id, following }) + (item.repost && following.includes(item.repost.profile_id) ? 0.3 : item.repost ? 0.06 : 0);
-        return score(b) - score(a) || new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime();
-      });
+      const rankingNow = Date.now();
+      const score = (item: NetworkFeedItem) => {
+        const post = item.post;
+        const nativeScore = scoreSocialPost(
+          {...post,created_at:item.feed_at},
+          {userId:user?.id,following,now:rankingNow}
+        );
+        const gravity = scoreGravityCandidate({
+          id:post.id,
+          category:post.media_urls?.some(url => ['.mp4','.webm','.mov','.m4v'].some(ext => url.toLowerCase().split('?')[0].endsWith(ext))) ? 'video' : 'post',
+          title:post.body?.slice(0,160), keywords:post.body,
+          ownerId:post.author_id, createdAt:item.feed_at,
+          isSaved:saved.includes(post.id),
+          popularity:(post.reactions?.length ?? 0) + (post.comments?.length ?? 0) * 2 + (post.reposts?.length ?? 0),
+        }, {intent:gravityIntent,goal:gravityGoal,userId:user?.id,followingIds:following,now:rankingNow});
+        // Complement existing social ranking without changing Following/Trending
+        // or fabricating likes, comments, scarcity or user activity.
+        const repostBoost = item.repost && following.includes(item.repost.profile_id) ? 0.3 : item.repost ? 0.06 : 0;
+        return nativeScore * 0.78 + gravity.score * 0.4 + repostBoost;
+      };
+      candidates.sort((a,b) => score(b) - score(a) || new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime());
     }
 
     const seen = new Set<string>();
@@ -691,7 +735,20 @@ export default function NetworkHome() {
       seen.add(item.post.id);
       return true;
     }).slice(0, 40);
-  }, [posts, reposts, mode, search, focusPostId, user?.id, following]);
+  }, [posts, reposts, mode, search, focusPostId, user?.id, following, saved, gravityIntent, gravityGoal]);
+
+  // An optional city preference also shapes the local run opportunity panel,
+  // without inferring private post author whereabouts from free-form text.
+  const relevantRuns = useMemo(() => {
+    if (!gravityLocation.cityId) return runs;
+    const candidates = rankGravityCandidates(runs.map(run => ({
+      id:run.id,category:'run' as const,title:run.title,
+      city:cityForText([run.location,run.court_name].join(' '))?.name || null,
+      startsAt:run.starts_at,
+    })), {cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles,userId:user?.id});
+    const order = new Map(candidates.map((item,index)=>[item.id,index]));
+    return [...runs].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity));
+  },[runs,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
   const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
   const trendingPosts = useMemo(() => posts.slice().sort((a,b) => trendScore({ key: b.id, post: b, feed_at: b.created_at }) - trendScore({ key: a.id, post: a, feed_at: a.created_at })).slice(0, 4), [posts]);
@@ -711,12 +768,12 @@ export default function NetworkHome() {
     return {
       postsToday,
       activeStories: stories.length,
-      nextRun: runs[0] ?? null,
+      nextRun: relevantRuns[0] ?? null,
       trendingPost,
       rep: currentProfile?.rep ?? 0,
       level: currentProfile?.level ?? 1,
     };
-  }, [posts, stories, runs, currentProfile?.rep, currentProfile?.level]);
+  }, [posts, stories, relevantRuns, currentProfile?.rep, currentProfile?.level]);
 
   return (
     <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page min-h-screen pb-24 lg:pb-0">
@@ -740,6 +797,7 @@ export default function NetworkHome() {
           <input aria-label="Search posts, people and topics" autoFocus type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search posts, people, topics..." />
           <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
         </div>}
+        <GravityLocationPicker compact className="mb-5" />
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="rcl-network-left-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
@@ -768,7 +826,7 @@ export default function NetworkHome() {
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
               <NetworkPostCard onCountView={onCountView} item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
-              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
+              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={relevantRuns[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
               {!focusPostId && index === Math.min(5, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
               {!focusPostId && index === Math.min(7, feedItems.length - 1) && <TodayPanel
               postsToday={todaySnapshot.postsToday}

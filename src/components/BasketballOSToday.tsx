@@ -22,6 +22,10 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
+import { cityForText } from '@/lib/virginia-world';
+import { isGravityGoal, isGravityIntent, rankGravityCandidates, type GravityGoal, type GravityIntent } from '@/lib/rch-gravity';
 
 type Mission = {
   id: string;
@@ -112,6 +116,7 @@ function prettyDate(value: string) {
 }
 
 export function BasketballOSToday() {
+  const {location:gravityLocation,city:gravityCity} = useGravityLocation();
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(true), []);
   const db = supabase as any;
@@ -125,8 +130,21 @@ export function BasketballOSToday() {
   const [claimableOrganizations, setClaimableOrganizations] = useState<ClaimableOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [gravityIntent, setGravityIntent] = useState<GravityIntent|null>(null);
+  const [gravityGoal, setGravityGoal] = useState<GravityGoal|null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+
+  // The same explicit preferences used by Discover and Pulse rank today's
+  // actionable mission suggestions. The authoritative progress remains in DB.
+  useEffect(() => {
+    try {
+      const intent = window.localStorage.getItem('rch-next-move-intent-v1');
+      const goal = window.localStorage.getItem('rch-scene-goal-v1');
+      if (isGravityIntent(intent)) setGravityIntent(intent);
+      if (isGravityGoal(goal)) setGravityGoal(goal);
+    } catch { /* The unpersonalized mission board still works. */ }
+  }, []);
 
   const load = useCallback(async () => {
     if (!db) { setLoading(false); return; }
@@ -143,10 +161,10 @@ export function BasketballOSToday() {
     const [missionsResult, gamesResult, runsResult, highlightsResult, cityPostsResult, organizationsResult] = await Promise.all([
       db.from('weekly_missions').select('id,mission_key,title,description,event_type,rep_dimension,target_count,reward_xp,icon,sort_order').eq('is_active', true).order('sort_order'),
       db.from('games').select('id,scheduled_at,status,home_score,away_score,home:teams!games_home_team_id_fkey(name,short_name),away:teams!games_away_team_id_fkey(name,short_name)').in('status', ['scheduled', 'live']).gte('scheduled_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()).order('scheduled_at').limit(4),
-      db.from('runs').select('id,title,court_name,location,starts_at,skill_level,max_players').neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(3),
+      db.from('runs').select('id,title,court_name,location,starts_at,skill_level,max_players').neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(30),
       db.from('player_highlights').select('id,title,category,clip_url,thumbnail_url,player:players(first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
       db.from('posts').select('id,author_id,body,created_at').eq('status','published').eq('is_automated',false).order('created_at',{ascending:false}).limit(4),
-      db.from('network_organizations').select('id,slug,name,city').eq('status','active').eq('is_claimed',false).neq('network_tier','flagship').order('name').limit(3),
+      db.from('network_organizations').select('id,slug,name,city').eq('status','active').eq('is_claimed',false).neq('network_tier','flagship').order('name').limit(30),
     ]);
 
     if (missionsResult.error) setError('Missions could not be loaded.');
@@ -199,8 +217,41 @@ export function BasketballOSToday() {
   }, [load, supabase]);
 
   const progressByMission = useMemo(() => new Map(progress.map((item) => [item.mission_id, item])), [progress]);
+  const orderedMissions = useMemo(() => {
+    const candidates = missions.map(mission => {
+      const progressRow = progressByMission.get(mission.id);
+      return {
+        id:mission.id, category:'mission' as const, title:mission.title,
+        keywords:[mission.description,mission.event_type,mission.rep_dimension].join(' '),
+        completion: progressRow?.claimed_at ? 0 : Math.min(1,(progressRow?.progress ?? 0) / Math.max(1,mission.target_count))
+      };
+    });
+    const ranked = rankGravityCandidates(candidates, {intent:gravityIntent,goal:gravityGoal,userId:user?.id});
+    const order = new Map(ranked.map((mission,index) => [mission.id,index]));
+    return [...missions].sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
+  }, [missions,progressByMission,gravityIntent,gravityGoal,user?.id]);
   const nextGame = games[0];
-  const nextRun = runs[0];
+  const nearbyRuns = useMemo(() => {
+    if (!gravityLocation.cityId) return runs;
+    const ordered = rankGravityCandidates(runs.map(run => ({
+      id:run.id, category:'run' as const, title:run.title,
+      city:cityForText([run.location,run.court_name].join(' '))?.name || null,
+      // Source query already requires a future noncancelled run.
+      startsAt:run.starts_at,
+    })), {cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles});
+    const order = new Map(ordered.map((item,index)=>[item.id,index]));
+    return [...runs].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity));
+  },[runs,gravityLocation.cityId,gravityLocation.radiusMiles]);
+  const nextRun = nearbyRuns[0];
+  const localOrganizations = useMemo(() => {
+    if (!gravityLocation.cityId) return claimableOrganizations.slice(0,3);
+    const ordered = rankGravityCandidates(claimableOrganizations.map(org => ({
+      id:org.id,category:'organization' as const,title:org.name,
+      city:org.city || null,
+    })),{cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles});
+    const order = new Map(ordered.map((item,index)=>[item.id,index]));
+    return [...claimableOrganizations].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity)).slice(0,3);
+  },[claimableOrganizations,gravityLocation.cityId,gravityLocation.radiusMiles]);
   const completed = missions.filter((mission) => (progressByMission.get(mission.id)?.progress ?? 0) >= mission.target_count).length;
 
   const claimMission = async (mission: Mission) => {
@@ -218,7 +269,9 @@ export function BasketballOSToday() {
       eyebrow="Rich City Hoops · Daily"
       title="RCH Today"
       accent={rep ? `${rep.status_label} · Level ${rep.level}` : 'Your basketball world'}
-      description="Your daily home for real Richmond basketball: players, court activity, new conversations, RCL games and opportunities to get involved."
+      description={gravityCity
+        ? `Your basketball world around ${gravityCity.name}: local opportunities, people, game nights and the wider Virginia scene.`
+        : 'Your daily home for Virginia basketball: court activity, conversations, league games and opportunities.'}
       assetKey="social.cover"
       actions={<div className="flex flex-wrap gap-2"><Link href="/social?compose=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black">Post an update <FaArrowRight /></Link><Link href="/runs?create=1" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-4 text-xs font-black uppercase tracking-wider">Host a run</Link></div>}
       meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5 shadow-xl backdrop-blur"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Your REP</p><p className="mt-1 font-display text-4xl font-black">{rep?.total_xp ?? 0}</p><p className="mt-2 text-xs text-white/40">{user ? `${completed}/${missions.length || 6} weekly missions complete` : 'Sign in to activate your REP board'}</p></div>}
@@ -228,6 +281,7 @@ export function BasketballOSToday() {
       {notice && <div className="mb-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] px-5 py-4 text-sm font-semibold text-emerald-100">{notice}</div>}
       {error && <div className="mb-6 rounded-2xl border border-red-400/20 bg-red-400/[.06] px-5 py-4 text-sm text-red-100">{error}</div>}
 
+      <GravityLocationPicker compact className="mb-5" />
       <RCHActionGuide variant="feed" />
 
       <section aria-label="Richmond community activity" className="mb-7 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
@@ -238,7 +292,7 @@ export function BasketballOSToday() {
         <article className="rounded-3xl border border-white/10 bg-[#071018] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The Richmond Network</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Help bring organizations on board</h2>
           <p className="mt-2 text-xs leading-5 text-white/50">Know someone who operates one of these organizations? Send them a free page-claim link.</p>
-          {claimableOrganizations.length ? <div className="mt-4 space-y-2">{claimableOrganizations.map(org=><Link key={org.id} href={`/organizations/${org.slug}/claim`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm hover:border-rcl-blue/35"><span className="truncate">{org.name}<small className="block text-white/35">{org.city || 'Virginia'}</small></span><FaArrowRight className="shrink-0 text-rcl-blue"/></Link>)}</div> : <p className="mt-4 text-sm text-white/45">Browse participating organizations and businesses across Virginia.</p>}
+          {localOrganizations.length ? <div className="mt-4 space-y-2">{localOrganizations.map(org=><Link key={org.id} href={`/organizations/${org.slug}/claim`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm hover:border-rcl-blue/35"><span className="truncate">{org.name}<small className="block text-white/35">{org.city || 'Virginia'}</small></span><FaArrowRight className="shrink-0 text-rcl-blue"/></Link>)}</div> : <p className="mt-4 text-sm text-white/45">Browse participating organizations and businesses across Virginia.</p>}
           <Link href="/organizations" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-blue">Organization directory <FaArrowRight/></Link>
         </article>
       </section>
@@ -257,7 +311,7 @@ export function BasketballOSToday() {
 
       <section className="mt-7 rounded-3xl border border-white/10 bg-white/[.02] p-5 sm:p-7">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-orange"><FaBolt className="mr-2 inline" />Weekly Missions</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Turn activity into REP</h2></div><Link href="/missions" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Full mission board <FaArrowRight /></Link></div>
-        {!user && !authLoading ? <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/45">Sign in to track mission progress and claim REP rewards.</div> : <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{missions.slice(0, 6).map((mission) => {
+        {!user && !authLoading ? <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/45">Sign in to track mission progress and claim REP rewards.</div> : <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{orderedMissions.slice(0, 6).map((mission) => {
           const item = progressByMission.get(mission.id);
           const current = Math.min(item?.progress ?? 0, mission.target_count);
           const done = current >= mission.target_count;
