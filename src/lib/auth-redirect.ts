@@ -1,3 +1,5 @@
+import { isBrowserAccountRoute, isBrowserPublicRoute } from './rch-mobile-experience';
+
 const INTERNAL_URL_BASE = 'https://rcl.invalid';
 
 const POST_AUTH_BLOCKED_PATHS = ['/member-access', '/access'] as const;
