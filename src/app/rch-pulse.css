@@ -139,3 +139,149 @@ main.rch-pulse-page .rch-pulse-trend-number {display:grid;flex:0 0 29px;width:29
   main.rch-pulse-page .rch-pulse-feature:hover>img {transform:none;}
   main.rch-pulse-page .rch-pulse-moment-tile:hover {transform:none;}
 }
+
+/*
+ * Pulse v2 — feedback-driven feed-first mobile layout.
+ * Avoid billboard stacking: show filters + live member content above the fold.
+ * The shared PWA header remains unchanged.
+ */
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead {
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  min-width:0;margin:0 0 12px;padding:12px 15px;
+  border:1px solid #395f81;border-radius:18px;
+  background:linear-gradient(110deg,#163751,#0b2238 84%);
+  box-shadow:0 10px 25px rgba(0,7,18,.17);
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-brand {
+  display:grid;gap:2px;min-width:0;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-brand>span {
+  color:#a5c9eb!important;font-size:9px;font-weight:800;letter-spacing:.11em;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-brand h1 {
+  margin:0!important;color:#fff!important;font-size:clamp(26px,3vw,34px)!important;
+  font-weight:950;letter-spacing:-.06em;line-height:1.05;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-brand h1 span {
+  color:#55a8ff!important;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions {
+  display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-shrink:0;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions :is(a,button) {
+  display:inline-flex;min-width:40px;min-height:41px;align-items:center;
+  justify-content:center;gap:7px;border:1px solid #426c8e!important;border-radius:12px!important;
+  background:#163551!important;padding:8px 11px!important;
+  color:#eaf6ff!important;text-decoration:none;font-size:11px;font-weight:850;
+  box-shadow:none!important;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions .rch-pulse-primary-action {
+  background:#277bd2!important;border-color:#79baff!important;color:#fff!important;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-search-panel {
+  display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:6px 12px;
+  border:1px solid #5780a4;border-radius:13px;background:#10283f;color:#a9d7ff;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-search-panel input {
+  min-width:0;width:100%;min-height:40px;border:0!important;background:transparent!important;
+  color:#fff!important;font-size:14px;outline:none;box-shadow:none!important;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-search-panel input::placeholder {color:#adc6de!important;}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-search-panel button {
+  display:grid;min-width:35px;min-height:35px;place-items:center;background:#1a3d5b!important;
+  color:#e8f6ff!important;border-radius:10px;border:0!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-network-feed-grid > div.min-w-0.space-y-4 {
+  display:flex;flex-direction:column;gap:12px;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-network-feed-grid > div.min-w-0.space-y-4 > * {
+  margin-top:0!important;margin-bottom:0!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-feed-mode-tabs {
+  margin:0!important;border-radius:13px;position:relative;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-feed-mode-tabs button {
+  min-height:41px!important;padding:5px 2px!important;
+}
+/* Stories are now an editorial avatar strip rather than full-height posters. */
+.rcl-platform-root main.rch-pulse-page .rcl-story-rail {
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;overflow:visible!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-rail-head {
+  min-height:25px!important;padding:0 2px 4px!important;border:0!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-rail-head p {
+  font-size:12px!important;color:#edf7ff!important;font-weight:850!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-rail-head span {display:none!important;}
+.rcl-platform-root main.rch-pulse-page .rcl-story-rail-head>small {
+  padding:3px 7px!important;background:#173b5b!important;border-color:#467599!important;
+  color:#c4e4ff!important;font-size:9px!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-track {
+  gap:11px!important;min-height:93px!important;align-items:flex-start;
+  padding:4px 1px 7px!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-card {
+  display:flex!important;width:68px!important;min-width:68px!important;
+  height:93px!important;flex:0 0 68px!important;align-items:center!important;
+  justify-content:flex-start!important;gap:5px!important;overflow:visible!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  padding:0!important;box-shadow:none!important;text-align:center!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-media {
+  position:relative!important;inset:auto!important;display:block!important;
+  width:66px!important;height:66px!important;min-height:66px!important;flex:0 0 66px!important;
+  border:2px solid #69b0f4!important;border-radius:50%!important;
+  background:#112b44!important;overflow:hidden!important;
+  box-shadow:0 0 0 2px #061b2d!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-media::after {border-radius:50%;background:linear-gradient(180deg,transparent 68%,#06162648)!important;}
+.rcl-platform-root main.rch-pulse-page .rcl-story-media > i {
+  width:21px!important;height:21px!important;right:0!important;top:auto!important;bottom:0!important;
+  font-size:10px!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-label {
+  position:static!important;display:block!important;padding:0!important;
+  width:68px!important;max-width:68px!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-label strong {
+  color:#eff8ff!important;font-size:10px!important;line-height:1.2!important;
+  text-align:center!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-label small {display:none!important;}
+.rcl-platform-root main.rch-pulse-page .rcl-story-empty-card {
+  height:78px!important;min-height:78px!important;width:145px!important;min-width:145px!important;
+  flex:0 0 145px!important;padding:9px!important;gap:3px!important;
+}
+.rcl-platform-root main.rch-pulse-page .rcl-story-empty-card small {display:none!important;}
+/* Post entry = one compact action strip. Full composer still opens unchanged. */
+.rcl-platform-root main.rch-pulse-page .rch-pulse-compose-strip {
+  display:flex;align-items:center;gap:10px;min-width:0;
+  min-height:63px;padding:9px 11px;
+  border:1px solid #365d7e;border-radius:16px;
+  background:linear-gradient(110deg,#112e48,#0d2439);color:#f6faff;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-compose-strip>button:first-child {
+  display:grid;flex:0 0 35px;width:35px;height:40px;place-items:center;padding:0;border:0;background:none;color:#fff;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-compose-strip .rch-pulse-compose-prompt {
+  min-height:42px;flex:1;min-width:0;padding:5px 12px;border:1px solid #466d8e;
+  border-radius:999px;background:#112840;color:#c6d9e9!important;
+  font-size:clamp(11px,1.6vw,13px);font-weight:600;text-align:left;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.rcl-platform-root main.rch-pulse-page .rch-pulse-compose-strip .rch-pulse-compose-media {
+  display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;
+  border:1px solid #486f93;border-radius:12px;background:#173b59!important;
+  color:#9fd7ff!important;font-size:18px;
+}
+@media (max-width:520px) {
+  .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead {margin-bottom:10px;padding:11px 12px;}
+  .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-brand>span {font-size:8px;letter-spacing:.075em;}
+  .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions {gap:5px;}
+  .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions :is(a,button) {min-width:36px;min-height:39px;padding:7px 9px!important;}
+  .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions a:not(.rch-pulse-primary-action) span {display:none;}
+  .rcl-platform-root main.rch-pulse-page .rcl-network-feed-grid>div.min-w-0.space-y-4 {gap:10px;}
+}
