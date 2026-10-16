@@ -15,7 +15,7 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
   // Load coach details
   const { data: coachData, error: coachError } = await client
     .from('team_coaches')
-    .select('*, team:teams(*), profile:profiles(*)')
+    .select('*, team:teams(*), profile:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)')
     .eq('profile_id', id)
     .maybeSingle() as any;
 
