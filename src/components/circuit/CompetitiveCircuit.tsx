@@ -78,14 +78,14 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
     </div>
     <div className="p-5 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#86c8fb]">CIRCUIT SEASON {clock.cycle}</p><h3 className="mt-1 text-xl font-black uppercase">Division standings</h3></div>
-        {champion&&<div className="rounded-lg border border-[#c7aa6e] bg-[#4b361a] px-3 py-2 text-xs font-black text-[#ffe19f]"><FaCrown className="mr-2 inline"/> {winner?winner.competitor_name:'Verified title awarded'}</div>}
+        {board==='cup'&&champion&&<div className="rounded-lg border border-[#c7aa6e] bg-[#4b361a] px-3 py-2 text-xs font-black text-[#ffe19f]"><FaCrown className="mr-2 inline"/> {winner?winner.competitor_name:'Verified title awarded'}</div>}
       </div>
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Choose competition leaderboard"><button type="button" aria-pressed={board==='all'} onClick={()=>setBoard('all')} className={'min-h-10 rounded-lg px-4 text-xs font-black '+(board==='all'?'bg-[#1a73bc] text-white':'border border-[#416889] text-[#b8d7ef]')}>All-time Crew / Run REP</button><button type="button" aria-pressed={board==='cup'} onClick={()=>setBoard('cup')} className={'min-h-10 rounded-lg px-4 text-xs font-black '+(board==='cup'?'bg-[#1a73bc] text-white':'border border-[#416889] text-[#b8d7ef]')}>Nov–Dec Cup qualifying</button></div>
       <div className="mt-4 grid grid-cols-5 gap-1.5 rounded-xl bg-[#020d1b] p-1.5" role="group" aria-label="Commonwealth Cup divisions">
         {divisions.map(value=><button key={value} type="button" aria-pressed={division===value} onClick={()=>setDivision(value)}
           className={'min-h-11 rounded-lg px-1 text-xs font-black sm:text-base '+(division===value?'bg-[#2388ee] text-white':'text-[#9fbcd8] hover:bg-[#153e64]')}>{value}</button>)}
       </div>
-      <p className="mt-3 text-xs leading-5 text-[#a7c3de]">{board==='all'?'Year-round Run / Crew REP counts opponent-confirmed games only. Cup qualification is a separate seasonal snapshot. ':''}{division==='1v1'?'Individual championship: verified player-versus-player results.':'Crew championship: only full, registered crew lineups against other registered crews count.'} Three verified games across at least two separate Run sessions are required; crews must also play at least two different opponents.</p>
+      <p className="mt-3 text-xs leading-5 text-[#a7c3de]">{board==='all'?'Year-round Run / Crew REP counts opponent-confirmed games only. Cup qualification is a separate seasonal snapshot. ':''}{division==='1v1'?'Individual championship: verified player-versus-player results.':'Crew championship: only full, registered crew lineups against other registered crews count.'} Cup qualification requires three verified games across at least two separate Run sessions; crews must also play at least two different opponents.</p>
       <div className="mt-5 overflow-hidden rounded-2xl border border-[#2f5577]">
         <div className="grid grid-cols-[2rem_minmax(0,1fr)_3.5rem_3.5rem] gap-2 bg-[#163958] px-3 py-3 text-[10px] font-black uppercase tracking-wider text-[#bcd9f1] sm:grid-cols-[2.5rem_minmax(0,1fr)_5rem_5rem]">
           <span>Seed</span><span>{division==='1v1'?'Player':'Crew'}</span><span className="text-right">W–L</span><span className="text-right">PTS</span>
@@ -93,8 +93,8 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
         {loading?<p className="p-6 text-sm text-[#b3ccdf]">Loading verified competition standings…</p>:
         error?<p role="status" className="p-6 text-sm text-[#ffdc9d]">Live standings are unavailable. Results are not simulated; check back after competition services are restored.</p>:
         rows.length?rows.slice(0,12).map(row=><div key={row.competitor_id} className="grid grid-cols-[2rem_minmax(0,1fr)_3.5rem_3.5rem] items-center gap-2 border-t border-[#244664] px-3 py-3 sm:grid-cols-[2.5rem_minmax(0,1fr)_5rem_5rem]">
-          <span className="text-sm font-black text-[#ffdb8e]">{row.eligible?row.seed:'—'}</span>
-          <div className="min-w-0"><p className="truncate text-sm font-black">{row.competitor_name}</p><span className="text-[10px] text-[#9fbdd7]">{row.city||'Virginia'} · {row.run_sessions} sessions · {row.eligible?'Cup eligible':'Provisional'}</span></div>
+          <span className="text-sm font-black text-[#ffdb8e]">{board==='all'||row.eligible?row.seed:'—'}</span>
+          <div className="min-w-0"><p className="truncate text-sm font-black">{row.competitor_name}</p><span className="text-[10px] text-[#9fbdd7]">{row.city||'Virginia'} · {row.run_sessions} sessions · {row.eligible?(board==='cup'?'Cup eligible':'Established'):'Provisional'}</span></div>
           <strong className="text-right text-xs text-[#d7e7f3]">{row.wins}–{row.losses}</strong>
           <strong className="text-right text-sm text-[#ffdc94]">{row.qualifying_points}</strong>
         </div>):<p className="p-6 text-sm text-[#b3ccdf]">No verified {division} {board==='cup'?'qualifying':'competitive'} games yet. This board populates only from real, confirmed results.</p>}
