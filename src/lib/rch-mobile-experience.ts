@@ -89,7 +89,9 @@ const BROWSER_MEMBER_PREFIXES = [
   '/clips', '/referrals', '/badges', '/staff', '/radar', '/game-iq',
   '/more', '/account', '/portal', '/admin', '/orders',
   '/network/dashboard', '/sponsors/dashboard', '/sponsors/campaigns',
-  '/media/creators/dashboard', '/league/royaltee/dashboard',
+  '/media/creators/dashboard', '/media/submit',
+  '/league/royaltee/dashboard', '/league/royaltee/manage',
+  '/profile/reset-password',
 ] as const;
 
 export function isBrowserMemberRoute(pathname: string): boolean {
