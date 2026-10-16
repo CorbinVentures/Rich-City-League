@@ -7,7 +7,7 @@ const read=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 describe('RCH crew identity studio',()=>{
   it('renders original editable vector artwork without injecting user-provided SVG or markup',()=>{
     const svg=createCrewLogoSvg({...initialLogoDesign(),name:'<script>alert(1)</script>',tagline:'HIFI & FRIENDS'});
-    expect(svg).toContain('&lt;script&gt;');
+    expect(svg).toContain('&lt;SCRIPT&gt;');
     expect(svg).not.toContain('<script>');
     expect(svg).toContain('HIFI &amp; FRIENDS');
     expect(svg).toContain('viewBox="0 0 512 512"');
