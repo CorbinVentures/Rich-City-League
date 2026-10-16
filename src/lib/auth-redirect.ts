@@ -5,7 +5,7 @@ const INTERNAL_URL_BASE = 'https://rcl.invalid';
 const POST_AUTH_BLOCKED_PATHS = ['/member-access', '/access'] as const;
 
 function isBlockedPostAuthPath(pathname: string) {
-  return pathname.startsWith('/auth/')
+  return pathname === '/auth' || pathname.startsWith('/auth/')
     || POST_AUTH_BLOCKED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
