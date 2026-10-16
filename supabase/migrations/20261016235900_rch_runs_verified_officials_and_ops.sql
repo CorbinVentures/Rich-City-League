@@ -39,6 +39,10 @@ create table if not exists public.rch_run_title_attestations (
   match_id uuid primary key references public.run_ranked_matches(id) on delete cascade,
   run_id uuid not null references public.runs(id) on delete restrict,
   official_id uuid not null references public.profiles(id) on delete restrict,
+  home_crew_id uuid not null references public.commonwealth_crews(id) on delete restrict,
+  away_crew_id uuid not null references public.commonwealth_crews(id) on delete restrict,
+  home_score integer not null,
+  away_score integer not null,
   note text not null default '' check (length(note)<=300),
   attested_at timestamptz not null default now()
 );
@@ -99,6 +103,12 @@ begin
        set role=excluded.role,appointed_by=excluded.appointed_by,appointed_at=now();
  else
   delete from public.rch_run_operators where run_id=p_run and profile_id=p_profile;
+ end if;
+ if not p_enable and p_role='official' and not exists (
+    select 1 from public.rch_run_operators where run_id=p_run and role='official'
+ ) then
+    update public.rch_run_operations set completed=false,updated_by=v_actor,updated_at=now()
+      where run_id=p_run and task_code='official_assigned';
  end if;
  insert into public.rch_run_ops_audit(run_id,actor_id,event_name,details)
    values(p_run,v_actor,case when p_enable then 'operator_appointed' else 'operator_removed' end,
@@ -167,8 +177,10 @@ begin
         or (c.challenger_crew_id=v_away_crew and c.defender_crew_id=v_home_crew)))
  then raise exception 'No accepted Takeover is attached to this match'; end if;
  if length(coalesce(p_note,''))>300 then raise exception 'Keep official notes under 300 characters'; end if;
- insert into public.rch_run_title_attestations(match_id,run_id,official_id,note)
- values(m.id,m.run_id,v_actor,coalesce(p_note,''))
+ insert into public.rch_run_title_attestations(
+   match_id,run_id,official_id,home_crew_id,away_crew_id,home_score,away_score,note
+ )
+ values(m.id,m.run_id,v_actor,v_home_crew,v_away_crew,m.home_score,m.away_score,coalesce(p_note,''))
  on conflict(match_id) do nothing;
  insert into public.rch_run_ops_audit(run_id,actor_id,event_name,details)
  values(m.run_id,v_actor,'title_attested',pg_catalog.jsonb_build_object('match_id',m.id));
@@ -201,8 +213,12 @@ begin
       and c.status='accepted' and c.accepted_at<=new.submitted_at
       and ((c.challenger_crew_id=v_home and c.defender_crew_id=v_away)
         or (c.challenger_crew_id=v_away and c.defender_crew_id=v_home)))
-      and not exists(select 1 from public.rch_run_title_attestations att where att.match_id=new.id)
-   then raise exception 'Takeover title result requires an independent official certification before final player confirmation'; end if;
+      and not exists(select 1 from public.rch_run_title_attestations att
+        where att.match_id=new.id and att.home_crew_id=v_home and att.away_crew_id=v_away
+          and att.home_score=new.home_score and att.away_score=new.away_score
+          and not exists(select 1 from public.commonwealth_crew_members cm
+            where cm.profile_id=att.official_id and cm.crew_id in (v_home,v_away)))
+   then raise exception 'Takeover title result requires current independent official evidence for the exact crews and score'; end if;
  end if;
  return new;
 end $$;
@@ -211,6 +227,25 @@ create trigger rch_before_verified_title_integrity
 before update of status on public.run_ranked_matches
 for each row execute function public.rch_guard_verified_title_integrity();
 
+-- Never allow a host to rewrite verified crew opponents after ranked submission.
+-- This also prevents retroactively declaring a previously completed generic match a crew match.
+create or replace function public.rch_guard_run_crew_assignment()
+returns trigger language plpgsql security definer set search_path='' as $
+declare v_id uuid;
+begin
+ v_id:=case when tg_op='DELETE' then old.run_team_id else new.run_team_id end;
+ if exists(select 1 from public.run_ranked_matches m where m.status in ('pending','verified')
+    and (m.home_team_id=v_id or m.away_team_id=v_id)) then
+    raise exception 'Crew lineup is locked after a ranked match is submitted';
+ end if;
+ return case when tg_op='DELETE' then old else new end;
+end $;
+drop trigger if exists rch_guard_crew_assignment on public.rch_run_crew_teams;
+create trigger rch_guard_crew_assignment
+before insert or update or delete on public.rch_run_crew_teams
+for each row execute function public.rch_guard_run_crew_assignment();
+
+revoke all on function public.rch_guard_run_crew_assignment() from public,anon,authenticated;
 revoke all on function public.rch_manage_run_operator(uuid,uuid,text,boolean),
  public.rch_set_run_operation(uuid,text,boolean,text),
  public.rch_certify_ranked_title_match(uuid,text),
