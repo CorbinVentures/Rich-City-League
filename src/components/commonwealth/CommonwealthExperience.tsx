@@ -13,6 +13,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { VIRGINIA_CITIES } from '@/lib/virginia-world';
 import { COMMONWEALTH_SEASON_SLUG,competitionRecord,formatCompetitionDate,pilotRadarXY,
   stateRadarXY,type CommonwealthSite,type CommonwealthStanding,type CommonwealthFormat } from '@/lib/commonwealth';
+import { CommonwealthCupPath,type CupGroupStanding } from './CommonwealthCupPath';
 import './commonwealth.css';
 
 type Season={id:string;name:string;region:string;status:string};
@@ -22,7 +23,7 @@ type Request={id:string;crew_id:string;profile_id:string;status:string;created_a
 type Challenge={
   id:string;season_id:string;challenger_id:string;defender_id:string;court_slug:string;scheduled_at:string;
   format:CommonwealthFormat;status:string;run_id:string|null;challenger_score:number|null;defender_score:number|null;
-  created_at:string;submitted_by:string|null
+  created_at:string;submitted_by:string|null;cup_stage?:string;cup_group?:string|null
 };
 type RunOption={id:string;title:string;location_slug:string|null;starts_at:string;run_type:string;status:string};
 type RadarMode='state'|'pilot';
@@ -37,6 +38,7 @@ export default function CommonwealthExperience(){
   const [crews,setCrews]=useState<Crew[]>([]);
   const [members,setMembers]=useState<Member[]>([]);
   const [standings,setStandings]=useState<CommonwealthStanding[]>([]);
+  const [cupGroups,setCupGroups]=useState<CupGroupStanding[]>([]);
   const [requests,setRequests]=useState<Request[]>([]);
   const [challenges,setChallenges]=useState<Challenge[]>([]);
   const [runs,setRuns]=useState<RunOption[]>([]);
@@ -57,6 +59,8 @@ export default function CommonwealthExperience(){
   const [gameFormat,setGameFormat]=useState<CommonwealthFormat>('3v3');
   const [resultInputs,setResultInputs]=useState<Record<string,{a:string;b:string}>>({});
   const [runChoices,setRunChoices]=useState<Record<string,string>>({});
+  const [cupSeed,setCupSeed]=useState({group:'A',slot:'1',crew:''});
+  const [cupFixture,setCupFixture]=useState({challenger:'',defender:'',court:'',start:'',format:'5v5',stage:'group',group:'A'});
 
   const reload=useCallback(()=>setVersion(value=>value+1),[]);
   useEffect(()=>{
@@ -71,7 +75,7 @@ export default function CommonwealthExperience(){
       const active=seasonResult.data as Season|null;
       setSeason(active);
       if(!active){setLoading(false);return;}
-      const [siteRefs,crewRows,membersRows,rankingRows,challengeRows,runRows]=await Promise.all([
+      const [siteRefs,crewRows,membersRows,rankingRows,challengeRows,runRows,cupGroupRows]=await Promise.all([
         db.from('commonwealth_sites').select('court_slug').eq('season_id',active.id),
         db.from('commonwealth_crews').select('id,season_id,name,motto,captain_id,city,home_court_slug,created_at')
           .eq('season_id',active.id).order('created_at',{ascending:true}).limit(250),
@@ -79,11 +83,13 @@ export default function CommonwealthExperience(){
           .eq('season_id',active.id).limit(3000):Promise.resolve({data:[]}),
         db.from('commonwealth_standings').select('id,season_id,name,city,home_court_slug,created_at,games,wins,losses,points,points_for,points_against')
           .eq('season_id',active.id).order('points',{ascending:false}).order('wins',{ascending:false}).limit(250),
-        db.from('commonwealth_challenges').select('id,season_id,challenger_id,defender_id,court_slug,scheduled_at,format,status,run_id,challenger_score,defender_score,created_at,submitted_by')
+        db.from('commonwealth_challenges').select('id,season_id,challenger_id,defender_id,court_slug,scheduled_at,format,status,run_id,challenger_score,defender_score,created_at,submitted_by,cup_stage,cup_group')
           .eq('season_id',active.id).order('created_at',{ascending:false}).limit(120),
         user?db.from('runs').select('id,title,location_slug,starts_at,run_type,status')
           .eq('host_id',user.id).eq('run_type','competitive').in('status',['open','full','completed'])
-          .order('starts_at',{ascending:false}).limit(50):Promise.resolve({data:[]})
+          .order('starts_at',{ascending:false}).limit(50):Promise.resolve({data:[]}),
+        db.from('commonwealth_cup_group_standings').select('season_id,group_code,slot,crew_id,name,city,games,wins,losses,points,points_for,points_against')
+          .eq('season_id',active.id).limit(32)
       ]);
       if(cancelled)return;
       const courtSlugs=(siteRefs.data??[]).map((s:any)=>s.court_slug as string);
@@ -109,6 +115,7 @@ export default function CommonwealthExperience(){
       setCrews(teamRows);
       setMembers(membersRows.data??[]);
       setStandings((rankingRows.data??[]) as CommonwealthStanding[]);
+      setCupGroups((cupGroupRows.data??[]) as CupGroupStanding[]);
       setChallenges((challengeRows.data??[]) as Challenge[]);
       setRequests(requestRows);
       setRuns(runRows.data??[]);
@@ -170,6 +177,22 @@ export default function CommonwealthExperience(){
     if(!values || values.a===''||values.b===''||!Number.isInteger(a)||!Number.isInteger(b)){setError('Enter both whole-number scores.');return;}
     void rpc('commonwealth_submit_result',{p_challenge:challenge.id,p_home_score:a,p_away_score:b},'Results sent to RCH for independent verification. Standings are unchanged until approved.');
   };
+  const seedCup=(event:FormEvent)=>{
+    event.preventDefault();
+    if(!season)return;
+    void rpc('commonwealth_seed_cup_group',{p_season:season.id,p_group:cupSeed.group,p_slot:Number(cupSeed.slot),p_crew:cupSeed.crew},'Official group seed saved.');
+  };
+  const scheduleCup=(event:FormEvent)=>{
+    event.preventDefault();
+    if(!season||!cupFixture.start)return;
+    const date=new Date(cupFixture.start);
+    if(Number.isNaN(date.getTime())){setError('Enter a valid Cup fixture date.');return;}
+    void rpc('commonwealth_schedule_cup_fixture',{
+      p_season:season.id,p_challenger:cupFixture.challenger,p_defender:cupFixture.defender,
+      p_court:cupFixture.court||sites[0]?.slug,p_start:date.toISOString(),p_format:cupFixture.format,
+      p_stage:cupFixture.stage,p_group:cupFixture.stage==='group'?cupFixture.group:null
+    },'Official Cup fixture scheduled. The captains can attach a real competitive Run.');
+  };
   const share=async()=>{
     const url=window.location.origin+'/commonwealth';
     try{
@@ -207,6 +230,8 @@ export default function CommonwealthExperience(){
         <div><small>FOUNDING COURTS</small><strong>{sites.length}</strong><span>Mapped pilot sites</span></div>
         <div><small>OPEN CHALLENGES</small><strong>{openChallenges.length}</strong><span>Proposed or in progress</span></div>
       </section>
+
+      <CommonwealthCupPath seasonStatus={season?.status||'enrollment'} qualifiers={standings} groups={cupGroups} challenges={challenges} crews={crews}/>
 
       <div className="rch-cw-grid">
         <section className="rch-cw-world rch-cw-panel" aria-label="Interactive Commonwealth competition radar">
@@ -262,6 +287,32 @@ export default function CommonwealthExperience(){
           </section>
         </aside>
       </div>
+
+      {staff&&season&&<section className="rch-cw-panel mb-6 p-5 sm:p-7" aria-labelledby="rch-cup-director-title">
+        <div className="rch-cw-section-top"><div><p className="rch-cw-eyebrow">RCH STAFF / TOURNAMENT OPERATIONS</p><h2 id="rch-cup-director-title">Cup Director</h2><p>Only RCH staff can set official group seeds and schedule knockout fixtures. Qualifying challenges remain captain-led.</p></div><FaShieldHalved/></div>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <form className="rch-cw-form" onSubmit={seedCup}>
+            <h3>Official Group Draw</h3><div className="rch-cw-fields">
+              <label>Group<select value={cupSeed.group} onChange={e=>setCupSeed(v=>({...v,group:e.target.value}))}>{['A','B','C','D','E','F','G','H'].map(code=><option key={code}>{code}</option>)}</select></label>
+              <label>Slot<select value={cupSeed.slot} onChange={e=>setCupSeed(v=>({...v,slot:e.target.value}))}>{['1','2','3','4'].map(value=><option key={value}>{value}</option>)}</select></label>
+              <label>Crew<select required value={cupSeed.crew} onChange={e=>setCupSeed(v=>({...v,crew:e.target.value}))}><option value="">Choose crew</option>{crews.map(c=><option key={c.id} value={c.id}>{c.name} · {c.city}</option>)}</select></label>
+            </div><p className="rch-cw-fine-print">Four slots per group. Seeding locks once official group or knockout play starts.</p>
+            <button disabled={!!busy||!cupSeed.crew} className="rch-cw-primary"><FaFlag/> Seed official group</button>
+          </form>
+          <form className="rch-cw-form" onSubmit={scheduleCup}>
+            <h3>Schedule Sanctioned Fixture</h3><div className="rch-cw-fields">
+              <label>Stage<select value={cupFixture.stage} onChange={e=>setCupFixture(v=>({...v,stage:e.target.value}))}>{[['group','Group stage'],['round_of_16','Round of 16'],['quarterfinal','Quarterfinal'],['semifinal','Semifinal'],['final','The Final']].map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+              {cupFixture.stage==='group'&&<label>Group<select value={cupFixture.group} onChange={e=>setCupFixture(v=>({...v,group:e.target.value}))}>{['A','B','C','D','E','F','G','H'].map(value=><option key={value}>{value}</option>)}</select></label>}
+              <label>Challenger<select required value={cupFixture.challenger} onChange={e=>setCupFixture(v=>({...v,challenger:e.target.value}))}><option value="">Select crew</option>{crews.map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select></label>
+              <label>Defender<select required value={cupFixture.defender} onChange={e=>setCupFixture(v=>({...v,defender:e.target.value}))}><option value="">Select opponent</option>{crews.filter(c=>c.id!==cupFixture.challenger).map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select></label>
+              <label>Court<select required value={cupFixture.court} onChange={e=>setCupFixture(v=>({...v,court:e.target.value}))}><option value="">Choose court</option>{sites.map(c=><option value={c.slug} key={c.slug}>{c.name}</option>)}</select></label>
+              <label>Game<select value={cupFixture.format} onChange={e=>setCupFixture(v=>({...v,format:e.target.value}))}><option value="5v5">5v5</option><option value="3v3">3v3</option></select></label>
+              <label>Scheduled<input required type="datetime-local" value={cupFixture.start} onChange={e=>setCupFixture(v=>({...v,start:e.target.value}))}/></label>
+            </div><p className="rch-cw-fine-print">Cup season must be active. Scheduling never fabricates a result. Teams still need a linked Run and independent staff review.</p>
+            <button disabled={!!busy||season.status!=='active'||!cupFixture.challenger||!cupFixture.defender||!cupFixture.court||!cupFixture.start} className="rch-cw-primary"><FaCalendarDays/> {season.status!=='active'?'Activate season to schedule':'Schedule Cup fixture'}</button>
+          </form>
+        </div>
+      </section>}
 
       <section className="rch-cw-panel rch-cw-crew-section" id="rch-cw-my-crew">
         <div className="rch-cw-section-top"><div><p className="rch-cw-eyebrow">03 / REP YOUR BLOCK</p><h2>Crews of the Commonwealth</h2><p>Every crew starts at zero. History is earned on a real court.</p></div>{!myCrew&&user&&<button className="rch-cw-primary compact" onClick={()=>setFoundingOpen(v=>!v)}><FaPlus/> Found a crew</button>}</div>
@@ -320,7 +371,7 @@ export default function CommonwealthExperience(){
             return <article key={ch.id} className="rch-cw-match">
               <div className="rch-cw-match-top"><span className={'rch-cw-status '+ch.status}>{ch.status==='review'?'Awaiting staff review':ch.status==='verified'?'✓ Verified final':ch.status==='proposed'?'Invitation pending':ch.status==='accepted'?'Accepted · schedule run':ch.status}</span><span><FaCalendarDays/> {formatCompetitionDate(ch.scheduled_at)}</span></div>
               <div className="rch-cw-matchup"><div><small>CHALLENGER</small><strong>{challenger?.name||'Crew'}</strong>{ch.status==='verified'&&<b>{ch.challenger_score}</b>}</div><span>VS</span><div><small>DEFENDER</small><strong>{defender?.name||'Crew'}</strong>{ch.status==='verified'&&<b>{ch.defender_score}</b>}</div></div>
-              <div className="rch-cw-match-meta"><FaLocationDot/> {courtBySlug.get(ch.court_slug)?.name||'Pilot court'} <span>·</span> {ch.format} {ch.run_id&&<span>· Connected Run</span>}</div>
+              <div className="rch-cw-match-meta"><FaLocationDot/> {courtBySlug.get(ch.court_slug)?.name||'Pilot court'} <span>·</span> {ch.format} <span>· {ch.cup_stage==='qualifier'||!ch.cup_stage?'Qualifier':(ch.cup_stage||'').replaceAll('_',' ').toUpperCase()}</span> {ch.cup_group&&<span>· Group {ch.cup_group}</span>} {ch.run_id&&<span>· Connected Run</span>}</div>
               {defending&&ch.status==='proposed'&&<div className="rch-cw-match-buttons"><button disabled={!!busy} onClick={()=>void rpc('commonwealth_respond_challenge',{p_challenge:ch.id,p_accept:true},'Challenge accepted. Link a competitive Run for game day.')}><FaCheck/> Accept challenge</button><button disabled={!!busy} onClick={()=>void rpc('commonwealth_respond_challenge',{p_challenge:ch.id,p_accept:false},'Challenge declined.')}><FaXmark/> Decline</button></div>}
               {myCaptain&&ch.status==='accepted'&&!ch.run_id&&<div className="rch-cw-run-link">
                 <p><FaShieldHalved/> Link an actual competitive Run at this court (within 24 hours of the proposed time).</p>

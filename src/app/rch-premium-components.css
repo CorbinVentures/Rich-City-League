@@ -130,7 +130,7 @@ body.rch-premium-app .rcl-platform-root .rcl-filter-row button[aria-pressed="tru
 }
 
 /* Inset form panels and inputs — readable in every brightness setting. */
-body.rch-premium-app .rcl-platform-root :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]){
+body.rch-premium-app .rcl-platform-root :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(.rch-scene-native-control){
   border:1px solid #426e92!important;
   border-radius:11px!important;
   background:#071e34!important;
@@ -142,7 +142,7 @@ body.rch-premium-app .rcl-platform-root :is(input,textarea):not([type="checkbox"
   color:#a4bed6!important;
   opacity:1!important;
 }
-body.rch-premium-app .rcl-platform-root :is(input,textarea,select):focus{
+body.rch-premium-app .rcl-platform-root :is(input,textarea,select):focus:not(.rch-scene-native-control){
   border-color:#82c6ff!important;
   outline:none!important;
   box-shadow:0 0 0 3px #348ffc36!important;

@@ -19,10 +19,12 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { RunRankedMatchControl } from '@/components/runs/RunRankedMatchControl';
 
 type Run = {
   id: string;
   host_id: string;
+  run_type: string;
   title: string;
   description: string | null;
   court_name: string | null;
@@ -72,7 +74,7 @@ export default function RunRoomPage() {
     if (!db || !runId) return;
     setError('');
     const [runResult, playersResult, checkResult, teamResult, memberResult, gameResult, mediaResult, claimResult] = await Promise.all([
-      db.from('runs').select('id,host_id,title,description,court_name,location,starts_at,skill_level,game_format,max_players,status').eq('id', runId).maybeSingle(),
+      db.from('runs').select('id,host_id,run_type,title,description,court_name,location,starts_at,skill_level,game_format,max_players,status').eq('id', runId).maybeSingle(),
       db.from('run_players').select('profile_id').eq('run_id', runId),
       db.from('run_checkins').select('profile_id').eq('run_id', runId),
       db.from('run_teams').select('id,name,sort_order').eq('run_id', runId).order('sort_order'),
@@ -311,6 +313,8 @@ export default function RunRoomPage() {
             </article>
           </div>
         </section>
+
+        <RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} />
 
         <section className="mt-6 rounded-3xl border border-white/10 bg-[#07111b] p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
