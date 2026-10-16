@@ -38,7 +38,7 @@ export function RunOperationsHQ({runId,hostId}:{runId:string;hostId:string}) {
   const [loaded,setLoaded] = useState(false);
   const [available,setAvailable] = useState(true);
   const canAccess = isManager || Boolean(ownRole);
-  const canCertify = isManager || ownRole==='official';
+  const canCertify = ownRole==='official';
 
   useEffect(() => {
     if (!db || !user?.id || !runId) {setLoaded(true);return;}
@@ -163,7 +163,7 @@ export function RunOperationsHQ({runId,hostId}:{runId:string;hostId:string}) {
       </div>)}
       {!matches.length&&<p className="text-xs text-[#d9c7a7]">No pending ranked result to certify yet.</p>}
       </div>}
-      {!canCertify&&<p className="mt-3 text-xs text-[#d9c7a7]">Only an appointed independent official or authorized RCH staff can certify a title result.</p>}
+      {!canCertify&&<p className="mt-3 text-xs text-[#d9c7a7]">Only an appointed independent official can certify from this panel. Authorized RCH staff can oversee results through administrative tools.</p>}
     </div>}
   </section>;
 }
