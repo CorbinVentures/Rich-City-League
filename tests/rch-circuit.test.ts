@@ -44,9 +44,10 @@ describe('Verified competition qualification',()=>{
     expect(circuit).toContain("provisional");
     expect(circuit).toContain("No entry or championship is guaranteed from rank alone");
   });
-  it('retains existing experiences and integrates the circuit across all three surfaces',()=>{
-    expect(read('src/app/runs/page.tsx')).toContain('<CompetitiveCircuit variant="runs" />');
-    expect(read('src/app/crews/page.tsx')).toContain('<CompetitiveCircuit variant="crews" />');
+  it('preserves separate experiences while sharing only verified results and member identity',()=>{
+    expect(read('src/app/runs/page.tsx')).toContain('<CourtDominion initialCourt=');
+    expect(read('src/app/crews/page.tsx')).toContain('<CrewPowerBoard />');
+    expect(read('src/app/crews/page.tsx')).toContain('<CourtDominion showTakeovers />');
     expect(read('src/components/commonwealth/CommonwealthExperience.tsx')).toContain('<CompetitiveCircuit variant="cup" />');
     expect(read('src/app/runs/[id]/page.tsx')).toContain('<RunCrewTeamLinker runId={run.id} />');
   });

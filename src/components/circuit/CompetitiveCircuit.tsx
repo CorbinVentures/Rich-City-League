@@ -26,7 +26,7 @@ const phaseLabels={
 export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
   const clock=useMemo(()=>getCircuitClock(),[]);
   const [division,setDivision]=useState<Division>(variant==='runs'?'1v1':'3v3');
-  const [board,setBoard]=useState<'cup'|'all'>(variant==='cup'?'cup':'all');
+  const [board,setBoard]=useState<'cup'|'all'>('cup');
   const [rows,setRows]=useState<Row[]>([]);
   const [champion,setChampion]=useState<Title|null>(null);
   const [loading,setLoading]=useState(true);
@@ -55,8 +55,7 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
 
   const field=board==='cup'?rows.filter(r=>r.eligible).slice(0,16):[];
   const winner=champion&&rows.find(r=>r.competitor_id===(division==='1v1'?champion.winner_profile_id:champion.winner_crew_id));
-  const heading=variant==='runs'?'Every Run Builds a Legacy':
-    variant==='crews'?'Crew Power Rankings':'The Road to the Commonwealth Cup';
+  const heading='The Commonwealth Cup · Elite Championship';
   return <section aria-label="RCH Competitive Circuit" className="my-7 overflow-hidden rounded-[28px] border border-[#3776ac] bg-[radial-gradient(ellipse_at_86%_0%,#174a77,#071a30_52%,#050d1b)] text-white shadow-[0_25px_60px_rgba(2,9,24,.32)]">
     <div className="border-b border-[#31557a] p-5 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -64,9 +63,9 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
         <span className="text-xs font-black uppercase tracking-wider text-[#f8d799]">Road to January 1, {clock.cupYear}</span>
       </div>
       <h2 className="mt-4 max-w-4xl font-display text-3xl font-black uppercase tracking-tight sm:text-5xl">{heading}</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-[#b9d5ed]">Open and partnered competitive Runs feed verified player rankings. Registered crews compete on their own division-specific ladder. The top eligible competitors build the Commonwealth Cup field—no bought REP, imaginary games or self-declared victories.</p>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-[#b9d5ed]">The Commonwealth Cup is an exclusive, separate annual championship honoring the best verified Run competitors. Local Court Masters and crew territory holders remain independent titles; only elite year-round performance earns a Cup invitation.</p>
       <div className="mt-5 grid gap-2 sm:grid-cols-3">
-        <div className="rounded-xl border border-[#2e557d] bg-[#061626]/75 p-4"><FaCalendarDays className="mb-2 text-[#8fc8ff]"/><strong className="block text-sm">Nov 1 – Dec 20</strong><span className="text-[11px] text-[#a8c5e0]">Verified qualification games</span></div>
+        <div className="rounded-xl border border-[#2e557d] bg-[#061626]/75 p-4"><FaCalendarDays className="mb-2 text-[#8fc8ff]"/><strong className="block text-sm">Nov 1 – Dec 20</strong><span className="text-[11px] text-[#a8c5e0]">Final qualifying push · year-round results count</span></div>
         <div className="rounded-xl border border-[#2e557d] bg-[#061626]/75 p-4"><FaShieldHalved className="mb-2 text-[#8fc8ff]"/><strong className="block text-sm">Dec 21 – Dec 31</strong><span className="text-[11px] text-[#a8c5e0]">Review, seed and lock the field</span></div>
         <div className="rounded-xl border border-[#7c693e] bg-[#392b19]/55 p-4"><FaTrophy className="mb-2 text-[#f8d799]"/><strong className="block text-sm">January 1, {clock.cupYear}</strong><span className="text-[11px] text-[#e3cfa5]">Five championship divisions</span></div>
       </div>
@@ -80,12 +79,12 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#86c8fb]">CIRCUIT SEASON {clock.cycle}</p><h3 className="mt-1 text-xl font-black uppercase">Division standings</h3></div>
         {board==='cup'&&champion&&<div className="rounded-lg border border-[#c7aa6e] bg-[#4b361a] px-3 py-2 text-xs font-black text-[#ffe19f]"><FaCrown className="mr-2 inline"/> {winner?winner.competitor_name:'Verified title awarded'}</div>}
       </div>
-      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Choose competition leaderboard"><button type="button" aria-pressed={board==='all'} onClick={()=>setBoard('all')} className={'min-h-10 rounded-lg px-4 text-xs font-black '+(board==='all'?'bg-[#1a73bc] text-white':'border border-[#416889] text-[#b8d7ef]')}>All-time Crew / Run REP</button><button type="button" aria-pressed={board==='cup'} onClick={()=>setBoard('cup')} className={'min-h-10 rounded-lg px-4 text-xs font-black '+(board==='cup'?'bg-[#1a73bc] text-white':'border border-[#416889] text-[#b8d7ef]')}>Nov–Dec Cup qualifying</button></div>
+      <p className="mt-4 text-xs font-bold text-[#f4d39a]">Verified year-round basketball performance · Jan 2 – Dec 20 · Final qualifying push Nov 1 – Dec 20</p>
       <div className="mt-4 grid grid-cols-5 gap-1.5 rounded-xl bg-[#020d1b] p-1.5" role="group" aria-label="Commonwealth Cup divisions">
         {divisions.map(value=><button key={value} type="button" aria-pressed={division===value} onClick={()=>setDivision(value)}
           className={'min-h-11 rounded-lg px-1 text-xs font-black sm:text-base '+(division===value?'bg-[#2388ee] text-white':'text-[#9fbcd8] hover:bg-[#153e64]')}>{value}</button>)}
       </div>
-      <p className="mt-3 text-xs leading-5 text-[#a7c3de]">{board==='all'?'Year-round Run / Crew REP counts opponent-confirmed games only. Cup qualification is a separate seasonal snapshot. ':''}{division==='1v1'?'Individual championship: verified player-versus-player results.':'Crew championship: only full, registered crew lineups against other registered crews count.'} Cup qualification requires three verified games across at least two separate Run sessions; crews must also play at least two different opponents.</p>
+      <p className="mt-3 text-xs leading-5 text-[#a7c3de]">{board==='all'?'Year-round Run / Crew REP counts opponent-confirmed games only. Cup qualification is a separate seasonal snapshot. ':''}{division==='1v1'?'Individual championship: verified player-versus-player results.':'Crew championship: only full, registered crew lineups against other registered crews count.'} Cup qualification considers year-round verified Runs and requires three games across at least two separate Run sessions; crews must also play at least two different opponents.</p>
       <div className="mt-5 overflow-hidden rounded-2xl border border-[#2f5577]">
         <div className="grid grid-cols-[2rem_minmax(0,1fr)_3.5rem_3.5rem] gap-2 bg-[#163958] px-3 py-3 text-[10px] font-black uppercase tracking-wider text-[#bcd9f1] sm:grid-cols-[2.5rem_minmax(0,1fr)_5rem_5rem]">
           <span>Seed</span><span>{division==='1v1'?'Player':'Crew'}</span><span className="text-right">W–L</span><span className="text-right">PTS</span>
@@ -97,14 +96,14 @@ export function CompetitiveCircuit({variant='cup'}:{variant?:Variant}){
           <div className="min-w-0"><p className="truncate text-sm font-black">{row.competitor_name}</p><span className="text-[10px] text-[#9fbdd7]">{row.city||'Virginia'} · {row.run_sessions} sessions · {row.eligible?(board==='cup'?'Cup eligible':'Established'):'Provisional'}</span></div>
           <strong className="text-right text-xs text-[#d7e7f3]">{row.wins}–{row.losses}</strong>
           <strong className="text-right text-sm text-[#ffdc94]">{row.qualifying_points}</strong>
-        </div>):<p className="p-6 text-sm text-[#b3ccdf]">No verified {division} {board==='cup'?'qualifying':'competitive'} games yet. This board populates only from real, confirmed results.</p>}
+        </div>):<p className="p-6 text-sm text-[#b3ccdf]">No verified {division} qualifying games yet. This board populates only from real, confirmed results.</p>}
       </div>
       {board==='cup'&&<div className="mt-5 rounded-xl border border-[#2b4e70] bg-[#071827] p-4">
         <div className="flex flex-wrap justify-between gap-2"><h4 className="font-black uppercase text-[#f0d39a]">Commonwealth Cup field</h4><span className="text-[10px] font-black uppercase tracking-wider text-[#a5c6e3]">{field.length} / 16 provisional eligible spots</span></div>
         <p className="mt-2 text-xs leading-5 text-[#aac3dd]">The top 16 eligible competitors in each division are the proposed Cup field. Seeds are provisional until verification closes and officials confirm the bracket, court and event logistics. No entry or championship is guaranteed from rank alone.</p>
         {field.length>0&&<p className="mt-3 text-xs font-bold text-[#d9ebf8]">{field.slice(0,5).map(r=>r.competitor_name).join(' · ')}</p>}
       </div>}
-      <p className="mt-4 text-xs leading-5 text-[#9ab6d1]">League standings, social REP and ordinary pickup stats remain separate. Sponsored Runs do not buy a ranking boost; only opponent-confirmed competitive games qualify.</p>
+      <p className="mt-4 text-xs leading-5 text-[#9ab6d1]">The Cup is an exclusive invitation event; it does not award court mastery, territory ownership or Run REP. League standings, social REP and ordinary pickup stats remain separate. Sponsored Runs do not buy a ranking boost; only opponent-confirmed competitive games qualify.</p>
     </div>
   </section>;
 }
