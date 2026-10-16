@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
+import { RCHBrowserHomepage } from '@/components/RCHBrowserHomepage';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
@@ -19,12 +20,14 @@ export default async function HomePage() {
 
   // The landing page displays just six players and three posts. Never fetch an
   // unused player-IQ ranking or 1,000 unrelated game-stat rows for first paint.
-  const [{ data: playersRaw }, { data: postsRaw }] = client
+  const [{ data: playersRaw }, { data: postsRaw }, { data: eventsRaw }, { data: runsRaw }] = client
     ? await Promise.all([
         client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
         client.from('posts').select('id,body,created_at,author:profiles(display_name,first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
+        client.from('network_events').select('id,slug,title,starts_at,city,state,event_type').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
+        client.from('runs').select('id,title,starts_at,location,game_format').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   const playerIds = (playersRaw ?? []).map(player => player.id).filter((id): id is string => Boolean(id));
   const { data: statsRaw } = client && playerIds.length && completedGameIds.size
@@ -35,6 +38,15 @@ export default async function HomePage() {
 
   return (
     <>
+      <div className="rch-browser-home-target">
+        <RCHBrowserHomepage
+          news={news as any}
+          events={(eventsRaw ?? []) as any}
+          runs={(runsRaw ?? []) as any}
+          players={(playersRaw ?? []) as any}
+        />
+      </div>
+      <div className="rch-installed-home-target">
       <MemberHomeRedirect />
       <RCLHomeExperience
         teams={teams}
@@ -46,6 +58,7 @@ export default async function HomePage() {
         news={news}
         posts={(postsRaw ?? []) as any}
       />
+      </div>
     </>
   );
 }
