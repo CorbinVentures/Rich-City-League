@@ -192,8 +192,11 @@ export default function DiscoverScene() {
       unavailable:item.full, isSaved:savedIds.includes(item.id), isVerified:item.verified
     })), {intent:sharedIntent,goal,cityId:location.cityId,radiusMiles:location.radiusMiles});
     const order = new Map(priority.map((item,index) => [item.id,index]));
-    return filtered.filter(item => order.has(item.id))
-      .sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
+    // Preserve full runs as clearly labeled listings rather than silently
+    // hiding them. Available opportunities still come first.
+    return filtered.sort((a,b) => Number(Boolean(a.full))-Number(Boolean(b.full))
+      || (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity)
+      || a.startsAt.localeCompare(b.startsAt));
   }, [items,category,city,when,query,goal,sharedIntent,sortPersonalized,savedOnly,savedIds,location.cityId,location.radiusMiles]);
 
   const pulse = useMemo(() => [...items].filter(item => sceneMatchesWhen(item.startsAt,'any'))
