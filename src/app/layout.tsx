@@ -51,6 +51,8 @@ import './rch-intent-navigation.css';
 import './rch-pulse.css';
 // Retain the merged Discover iOS/PWA contrast authority, loaded after Pulse.
 import './rch-scene-visual-authority.css';
+// Isolated browser marketing surface; never applies to installed PWA routes.
+import './rch-browser-home.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';

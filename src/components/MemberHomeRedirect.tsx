@@ -1,18 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export function MemberHomeRedirect() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [installedMobile, setInstalledMobile] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) router.replace('/today');
-  }, [loading, user, router]);
+    const standaloneNavigator = navigator as Navigator & {standalone?: boolean};
+    setInstalledMobile(isMobileStandaloneExperience({
+      standalone: window.matchMedia('(display-mode: standalone)').matches || standaloneNavigator.standalone === true,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      maxTouchPoints: navigator.maxTouchPoints,
+    }));
+  }, []);
 
-  if (!user) return null;
+  useEffect(() => {
+    if (installedMobile && !loading && user) router.replace('/today');
+  }, [installedMobile, loading, user, router]);
+
+  if (!user || !installedMobile) return null;
 
   return (
     <div className="fixed inset-0 z-[90] grid place-items-center bg-[#03070d] text-white">
