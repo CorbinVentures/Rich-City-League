@@ -69,6 +69,15 @@ export default function OAuthCallbackClient() {
         const profile = rawProfile as unknown as CallbackProfile | null;
         const next = getSafePostAuthPath(params.get('next') ?? '/social', '/today');
 
+        // Social sign-in must not bypass a verified authenticator. The MFA
+        // page resumes the original destination after verification.
+        const { data: assurance, error: assuranceError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assuranceError || !assurance) throw new Error('Unable to verify authentication level.');
+        if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (!cancelled) window.location.replace(`/auth/mfa?next=${encodeURIComponent(next)}`);
+          return;
+        }
+
         if (profile?.onboarding_complete === false) {
           const destination = new URL('/auth/complete-profile', window.location.origin);
           destination.searchParams.set('next', next);
