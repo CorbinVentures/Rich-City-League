@@ -33,7 +33,7 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/media/creators/apply', '/league/royaltee', '/league/royaltee/join',
 ]);
 const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs', 'coaches', 'seasons', 'fans', 'shop']);
-const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin', 'scouting']);
+const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin', 'scouting', 'join']);
 
 export function isBrowserPublicRoute(pathname: string): boolean {
   const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
