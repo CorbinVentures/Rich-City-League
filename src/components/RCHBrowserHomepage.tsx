@@ -52,7 +52,7 @@ function SectionTitle({ label, title, href, action }: {label: string; title: str
 export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
   const opportunities = [
     ...runs.map(item => ({ id: 'run-' + item.id, href: '/runs/' + item.id, title: item.title, starts_at: item.starts_at, location: item.location, type: 'Run', art: 'run' })),
-    ...events.map(item => ({ id: 'event-' + item.id, href: '/network/events/' + item.slug, title: item.title, starts_at: item.starts_at, location: [item.city, item.state].filter(Boolean).join(', ') || 'Virginia', type: item.event_type?.replace(/_/g, ' ') || 'Event', art: 'event' })),
+    ...events.map(item => ({ id: 'event-' + item.id, href: `/network/events/${item.slug}`, title: item.title, starts_at: item.starts_at, location: [item.city, item.state].filter(Boolean).join(', ') || 'Virginia', type: item.event_type?.replace(/_/g, ' ') || 'Event', art: 'event' })),
   ].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()).slice(0, 4);
 
   return <main className="rch-browser-home">
