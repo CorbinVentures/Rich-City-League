@@ -8,7 +8,7 @@ import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperien
 
 type Mode = 'checking' | 'mobile-app' | 'browser';
 
-export function RCHExperienceGate({ children, publicContent, apkUrl }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
+export function RCHExperienceGate({ children, publicContent }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
   const pathname = usePathname();
   const [mode, setMode] = useState<Mode>('checking');
   const browserAccountRoute = isBrowserAccountRoute(pathname);
