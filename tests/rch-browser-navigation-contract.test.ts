@@ -15,6 +15,7 @@ function walk(dir: string): string[] {
 
 const pages = walk('src/app').filter(p => /\/page\.(tsx|ts|jsx|js)$/.test(p));
 function routeForPage(file: string) {
+  if (relative('src/app', file) === 'page.tsx') return '/';
   const route = relative('src/app', file)
     .replace(/\\/g, '/').replace(/\/page\.(tsx|ts|jsx|js)$/, '')
     .split('/').filter(segment => !/^\(.*\)$/.test(segment))
