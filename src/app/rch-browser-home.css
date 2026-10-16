@@ -347,9 +347,8 @@
 
 /* Browser/PWA surface selection: no visual changes to the installed home. */
 .rch-browser-home-target {display:none!important}
-.rch-installed-home-target {display:contents}
+.rch-public-web .rcl-social-landing {display:none!important}
 .rch-public-web .rch-browser-home-target {display:block!important}
-.rch-public-web .rch-installed-home-target {display:none!important}
 
 /* Sitewide public browser chrome; member/PWA SiteHeader is never touched. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-public-header {
