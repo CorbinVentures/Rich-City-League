@@ -18,7 +18,10 @@ function BrowserMemberContent({ pathname, children }: { pathname: string; childr
     </main>;
   }
   if (!user) return <RCHBrowserMemberNotice pathname={pathname}/>;
-  return <div className="rch-browser-member-workspace">{children}</div>;
+  return <div className="rch-browser-member-workspace">
+    <div className="rch-browser-member-workspace-label">RCH MEMBER WORKSPACE <span>·</span> SIGNED IN</div>
+    {children}
+  </div>;
 }
 
 export function RCHExperienceGate({ children, publicContent }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
