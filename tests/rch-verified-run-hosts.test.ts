@@ -23,7 +23,10 @@ describe('RCH Verified Runs network',()=>{
  });
  it('makes only actual RCH reviewed events display the badge',()=>{
   expect(room).toContain('<RunVerifiedSignal runId={run.id} />');
-  expect(badge).toContain("data?.verification_status==='verified'");
+  expect(badge).toContain("rch_is_verified_run");
+  const accreditation=src('supabase/migrations/20261017003010_rch_verified_run_expiration_guard.sql');
+  expect(accreditation).toContain("h.expires_at>now()");
+  expect(accreditation).toContain("s.expires_at>now()");
   expect(host).toContain('Verified Runs Network');
   expect(host).toContain('RCH Staff · Verification Desk');
   expect(hub).toContain('href="/runs/hosts"');
