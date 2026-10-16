@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback,useEffect,useMemo,useState } from 'react';
-import { FaCheckCircle,FaPeopleGroup } from 'react-icons/fa6';
+import { FaCircleCheck,FaPeopleGroup } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -50,7 +50,7 @@ export function RunCrewTeamLinker({runId}:{runId:string}){
   return <section className="mt-5 rounded-3xl border border-[#417bb1] bg-[#0b2740] p-5 text-white sm:p-6" aria-label="Assign crew to Run team">
     <h3 className="flex items-center gap-2 text-lg font-black uppercase"><FaPeopleGroup className="text-[#8ec9ff]"/> Crew match identity</h3>
     <p className="mt-2 text-sm text-[#bed7ea]">Captain of {crew.name}: connect your assembled Run team before submitting its first competitive result. The crew must be registered, and every player on the selected team must be on your crew roster.</p>
-    {assigned?<p className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-900/20 p-3 text-xs font-bold text-emerald-200"><FaCheckCircle/> Linked to {teams.find(t=>t.id===assigned.run_team_id)?.name||'your Run team'}. Verified match results will count for crew standings during qualifying.</p>:
+    {assigned?<p className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-900/20 p-3 text-xs font-bold text-emerald-200"><FaCircleCheck/> Linked to {teams.find(t=>t.id===assigned.run_team_id)?.name||'your Run team'}. Verified match results will count for crew standings during qualifying.</p>:
     <div className="mt-4 flex flex-wrap items-center gap-2">
       <select className="min-h-11 min-w-48 flex-1 rounded-xl border border-[#476b88] bg-[#071728] px-3 text-sm text-white" aria-label="Choose your crew Run team" value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Choose an assembled team</option>{freeTeams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
