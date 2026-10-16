@@ -170,7 +170,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
     <section className="rch-browser-last-call">
       <div className="rch-browser-last-call-mantra">PLAY<br/><em>CONNECT</em><br/>COMPETE<br/><em>CREATE</em></div>
       <div><span>RICH CITY HOOPS</span><h2>VIRGINIA BASKETBALL. ALWAYS ON.</h2></div>
-      <Link className="rch-browser-button rch-browser-button-primary" href="/auth/sign-up">JOIN FREE <FaArrowRight/></Link>
+      <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestLabel="Join Free" memberLabel="Go to My Hoops" memberHref="/my-hoops" />
     </section>
   </main>;
 }
