@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { analyticsSection } from '../src/components/analytics/SiteAnalyticsObserver';
+import { analyticsSection } from '../src/lib/analytics/sections';
 
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 
