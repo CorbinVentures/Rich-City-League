@@ -31,6 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = item.seo_description || item.excerpt || `${item.title} — reporting from the RCL Newsroom.`;
   const title = item.seo_title || `${item.title} | RCL News`;
   const keywords = item.seo_keywords?.length ? item.seo_keywords : undefined;
+  const cover = item.cover_image_url || `/api/news-cover/${encodeURIComponent(item.slug)}`;
+  const socialCover = new URL(cover, 'https://www.richcityhoops.com').toString();
 
   return {
     title: { absolute: title },
@@ -44,15 +46,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       publishedTime:item.published_at || undefined,
       section:categoryLabel(item.category),
-      images:item.cover_image_url
-        ? [{url:item.cover_image_url,alt:item.title}]
-        : [{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'RCL — Richmond basketball social'}],
+      images:[{url:socialCover,width:1200,height:630,alt:`Editorial cover: ${item.title}`}],
     },
     twitter: {
       card:'summary_large_image',
       title:item.title,
       description,
-      images:item.cover_image_url ? [item.cover_image_url] : ['https://www.richcityhoops.com/opengraph-image?v=20261014'],
+      images:[socialCover],
     },
   };
 }
@@ -69,6 +69,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     name: sourceNames[index] || (() => { try { return new URL(url).hostname.replace(/^www\./,''); } catch { return 'Source'; } })(),
   }));
   const section = categoryLabel(item.category);
+  const coverImageUrl = item.cover_image_url || `/api/news-cover/${encodeURIComponent(item.slug)}`;
   const paragraphs = item.body.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
   const confidence = item.editorial_confidence === null || item.editorial_confidence === undefined
     ? null
@@ -88,7 +89,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     '@type':'NewsArticle',
     headline:item.title,
     description:item.seo_description || item.excerpt || undefined,
-    image:item.cover_image_url ? [item.cover_image_url] : ['https://www.richcityhoops.com/opengraph-image?v=20261014'],
+    image:[new URL(coverImageUrl, 'https://www.richcityhoops.com').toString()],
     datePublished:item.published_at || undefined,
     dateModified:item.updated_at || item.published_at || undefined,
     articleSection:section,
@@ -126,7 +127,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         </div>}
       </div>
 
-      {item.cover_image_url && <div className="relative mt-8 aspect-[16/9] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"><Image src={item.cover_image_url} alt={item.title} fill priority sizes="(max-width: 1024px) 100vw, 896px" className="object-cover" /></div>}
+      <div className="relative mt-8 aspect-[16/9] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"><Image src={coverImageUrl} alt={`Editorial cover: ${item.title}`} fill priority sizes="(max-width: 1024px) 100vw, 896px" unoptimized={coverImageUrl.startsWith('/api/news-cover/')} className="object-cover" /></div>
 
       <article className="mt-10 max-w-3xl space-y-6 text-[17px] leading-8 text-white/72">
         {paragraphs.map((paragraph,index)=><p key={index}>{paragraph}</p>)}
