@@ -230,7 +230,7 @@ for each row execute function public.rch_guard_verified_title_integrity();
 -- Never allow a host to rewrite verified crew opponents after ranked submission.
 -- This also prevents retroactively declaring a previously completed generic match a crew match.
 create or replace function public.rch_guard_run_crew_assignment()
-returns trigger language plpgsql security definer set search_path='' as $
+returns trigger language plpgsql security definer set search_path='' as $$
 declare v_id uuid;
 begin
  v_id:=case when tg_op='DELETE' then old.run_team_id else new.run_team_id end;
@@ -239,7 +239,7 @@ begin
     raise exception 'Crew lineup is locked after a ranked match is submitted';
  end if;
  return case when tg_op='DELETE' then old else new end;
-end $;
+end $$;
 drop trigger if exists rch_guard_crew_assignment on public.rch_run_crew_teams;
 create trigger rch_guard_crew_assignment
 before insert or update or delete on public.rch_run_crew_teams
