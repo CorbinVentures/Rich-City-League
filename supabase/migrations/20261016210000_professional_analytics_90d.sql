@@ -124,7 +124,7 @@ begin
     from all_daily group by day
   ),
   hourly_agg as (
-    select pg_catalog.extract(hour from viewed_at at time zone v_timezone)::integer as hr,
+    select extract(hour from viewed_at at time zone v_timezone)::integer as hr,
       count(*)::bigint as views
     from views group by 1
   ),
