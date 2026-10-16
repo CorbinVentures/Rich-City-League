@@ -161,10 +161,10 @@ export function BasketballOSToday() {
     const [missionsResult, gamesResult, runsResult, highlightsResult, cityPostsResult, organizationsResult] = await Promise.all([
       db.from('weekly_missions').select('id,mission_key,title,description,event_type,rep_dimension,target_count,reward_xp,icon,sort_order').eq('is_active', true).order('sort_order'),
       db.from('games').select('id,scheduled_at,status,home_score,away_score,home:teams!games_home_team_id_fkey(name,short_name),away:teams!games_away_team_id_fkey(name,short_name)').in('status', ['scheduled', 'live']).gte('scheduled_at', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()).order('scheduled_at').limit(4),
-      db.from('runs').select('id,title,court_name,location,starts_at,skill_level,max_players').neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(3),
+      db.from('runs').select('id,title,court_name,location,starts_at,skill_level,max_players').neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(30),
       db.from('player_highlights').select('id,title,category,clip_url,thumbnail_url,player:players(first_name,last_name)').eq('status', 'published').order('created_at', { ascending: false }).limit(3),
       db.from('posts').select('id,author_id,body,created_at').eq('status','published').eq('is_automated',false).order('created_at',{ascending:false}).limit(4),
-      db.from('network_organizations').select('id,slug,name,city').eq('status','active').eq('is_claimed',false).neq('network_tier','flagship').order('name').limit(3),
+      db.from('network_organizations').select('id,slug,name,city').eq('status','active').eq('is_claimed',false).neq('network_tier','flagship').order('name').limit(30),
     ]);
 
     if (missionsResult.error) setError('Missions could not be loaded.');
@@ -243,6 +243,15 @@ export function BasketballOSToday() {
     return [...runs].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity));
   },[runs,gravityLocation.cityId,gravityLocation.radiusMiles]);
   const nextRun = nearbyRuns[0];
+  const localOrganizations = useMemo(() => {
+    if (!gravityLocation.cityId) return claimableOrganizations.slice(0,3);
+    const ordered = rankGravityCandidates(claimableOrganizations.map(org => ({
+      id:org.id,category:'organization' as const,title:org.name,
+      city:org.city || null,
+    })),{cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles});
+    const order = new Map(ordered.map((item,index)=>[item.id,index]));
+    return [...claimableOrganizations].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity)).slice(0,3);
+  },[claimableOrganizations,gravityLocation.cityId,gravityLocation.radiusMiles]);
   const completed = missions.filter((mission) => (progressByMission.get(mission.id)?.progress ?? 0) >= mission.target_count).length;
 
   const claimMission = async (mission: Mission) => {
@@ -283,7 +292,7 @@ export function BasketballOSToday() {
         <article className="rounded-3xl border border-white/10 bg-[#071018] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The Richmond Network</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Help bring organizations on board</h2>
           <p className="mt-2 text-xs leading-5 text-white/50">Know someone who operates one of these organizations? Send them a free page-claim link.</p>
-          {claimableOrganizations.length ? <div className="mt-4 space-y-2">{claimableOrganizations.map(org=><Link key={org.id} href={`/organizations/${org.slug}/claim`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm hover:border-rcl-blue/35"><span className="truncate">{org.name}<small className="block text-white/35">{org.city || 'Virginia'}</small></span><FaArrowRight className="shrink-0 text-rcl-blue"/></Link>)}</div> : <p className="mt-4 text-sm text-white/45">Browse participating organizations and businesses across Virginia.</p>}
+          {localOrganizations.length ? <div className="mt-4 space-y-2">{localOrganizations.map(org=><Link key={org.id} href={`/organizations/${org.slug}/claim`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm hover:border-rcl-blue/35"><span className="truncate">{org.name}<small className="block text-white/35">{org.city || 'Virginia'}</small></span><FaArrowRight className="shrink-0 text-rcl-blue"/></Link>)}</div> : <p className="mt-4 text-sm text-white/45">Browse participating organizations and businesses across Virginia.</p>}
           <Link href="/organizations" className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-blue">Organization directory <FaArrowRight/></Link>
         </article>
       </section>
