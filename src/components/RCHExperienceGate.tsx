@@ -46,7 +46,7 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
   // Middleware's guest redirect ends at /member-access. Keep that landing
   // browser-native; the original member workspace remains untouched in PWA.
   if (mode === 'browser' && pathname === '/member-access') {
-    return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
+    return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
   }
 
   // Profile setup and MFA security remain functional in a browser, but get the
