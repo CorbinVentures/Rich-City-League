@@ -25,6 +25,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
  const [challenges,setChallenges]=useState<Challenge[]>([]);
  const [runs,setRuns]=useState<Run[]>([]);
  const [repBoard,setRepBoard]=useState<Rep[]>([]);
+ const [badges,setBadges]=useState<string[]>([]);
  const [mine,setMine]=useState<Mine|null>(null);
  const [runId,setRunId]=useState('');
  const [busy,setBusy]=useState(false);
@@ -36,14 +37,17 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
   if(!db)return;
   let active=true;
   void (async()=>{
-   const [a,b,c]=await Promise.all([
+   const [a,b,c,d,e]=await Promise.all([
     db.from('basketball_locations').select('slug,name,locality').eq('is_active',true).order('name').limit(800),
     db.rpc('get_rch_run_rep_board',{p_limit:8}),
-    user?db.from('commonwealth_crews').select('id,name').eq('captain_id',user.id).limit(1):Promise.resolve({data:[]})
+    user?db.from('commonwealth_crews').select('id,name').eq('captain_id',user.id).limit(1):Promise.resolve({data:[]}),
+    user?db.from('rch_run_badge_awards').select('badge_code').eq('profile_id',user.id):Promise.resolve({data:[]}),
+    user?db.from('rch_run_stat_badges').select('badge_code').eq('profile_id',user.id):Promise.resolve({data:[]})
    ]);
    if(!active)return;
    setCourts((a.data||[]) as Court[]);setRepBoard((b.data||[]) as Rep[]);
    setMine(((c.data||[]) as Mine[])[0]||null);
+   setBadges([...((d.data||[]) as {badge_code:string}[]),...((e.data||[]) as {badge_code:string}[])].map(x=>x.badge_code));
   })();
   return ()=>{active=false;};
  },[db,user?.id,version]);
@@ -124,6 +128,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
     {message&&<p role="status" className="mt-3 text-xs text-[#b3f7de]">{message}</p>}
    </div>
   </div>:<p className="border-t border-[#315978] p-6 text-sm text-[#afd0e6]">Select any Virginia basketball court to see three player Master ladders and the current crew stamp. No fabricated winners are shown.</p>}
-  <div className="border-t border-[#315978] p-5 sm:p-7"><h3 className="flex items-center gap-2 font-black uppercase"><FaTrophy className="text-[#90daee]"/> Statewide Run REP</h3><p className="mt-2 text-xs leading-5 text-[#adccdf]">Verified wins: 30 REP · losses: 10 REP · successful Takeover defense: 90 REP (3×). Run REP does not determine Cup titles or crew court ownership.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{repBoard.length?repBoard.map((row,i)=><div key={row.profile_id} className="flex justify-between rounded-lg border border-[#345675] p-3 text-xs"><span>#{i+1} {row.player_name}</span><strong className="text-[#f2d58e]">{row.run_rep} REP</strong></div>):<span className="text-xs text-[#95b9d5]">Verified games will establish the leaderboard.</span>}</div></div>
+  <div className="border-t border-[#315978] p-5 sm:p-7"><h3 className="flex items-center gap-2 font-black uppercase"><FaTrophy className="text-[#90daee]"/> Statewide Run REP</h3>
+   {badges.length>0&&<div className="mt-3 flex flex-wrap gap-2" aria-label="Your verified Run badges">{badges.map(b=><span key={b} className="rounded-full border border-[#c49b63] bg-[#55401e]/40 px-3 py-1.5 text-xs font-black text-[#f6d89a]">{({first_win:"First Win",run_veteran:"Run Veteran",court_defender:"Court Defender",takeover_artist:"Takeover Artist",scorer_20:"20-Point Scorer",glass_cleaner:"Glass Cleaner",floor_general:"Floor General"} as Record<string,string>)[b]||b}</span>)}</div>}<p className="mt-2 text-xs leading-5 text-[#adccdf]">Verified wins: 30 REP · losses: 10 REP · successful Takeover defense: 90 REP (3×). Independently approved box scores earn up to 30 additional stat REP and scoring, rebounding or playmaking badges. None determines Cup titles or crew court ownership.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{repBoard.length?repBoard.map((row,i)=><div key={row.profile_id} className="flex justify-between rounded-lg border border-[#345675] p-3 text-xs"><span>#{i+1} {row.player_name}</span><strong className="text-[#f2d58e]">{row.run_rep} REP</strong></div>):<span className="text-xs text-[#95b9d5]">Verified games will establish the leaderboard.</span>}</div></div>
  </section>;
 }
