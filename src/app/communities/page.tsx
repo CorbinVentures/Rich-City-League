@@ -7,12 +7,16 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getSupabaseClient } from '@/lib/supabase';
+import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import { useGravityLocation } from '@/hooks/useGravityLocation';
+import { gravityLocalRelevance } from '@/lib/rch-gravity-location';
 import { useAuth } from '@/hooks/useAuth';
 
 type Community = { id: string; name: string; slug: string; description: string | null; community_type: string; privacy: string; logo_url?:string|null; cover_url?:string|null; location_slug?:string|null; is_system_community?:boolean };
 type CourtLocation = { slug:string; name:string; address:string; locality:string; area:string };
 
 export default function CommunitiesPage() {
+  const {location:gravityLocation} = useGravityLocation();
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -87,6 +91,15 @@ export default function CommunitiesPage() {
       return !query.trim()||haystack.includes(query.trim().toLowerCase());
     })
     .sort((a,b)=>{
+      if(gravityLocation.cityId){
+        const cityOf = (entry:Community) => entry.location_slug
+          ? locations.get(entry.location_slug)?.locality || null : null;
+        const nearbyA = gravityLocalRelevance(gravityLocation.cityId,cityOf(a),gravityLocation.radiusMiles);
+        const nearbyB = gravityLocalRelevance(gravityLocation.cityId,cityOf(b),gravityLocation.radiusMiles);
+        const relevanceA = nearbyA + (joined.includes(a.id) ? 0.13 : 0);
+        const relevanceB = nearbyB + (joined.includes(b.id) ? 0.13 : 0);
+        if(relevanceA !== relevanceB) return relevanceB-relevanceA;
+      }
       if(a.community_type==='court'&&b.community_type==='court') return a.name.localeCompare(b.name);
       if(a.community_type==='court') return -1;
       if(b.community_type==='court') return 1;
@@ -98,7 +111,7 @@ export default function CommunitiesPage() {
       eyebrow="Community"
       title="Communities"
       accent="Find your people"
-      description="Join basketball spaces built around local courts, teams, runs, shared interests and the conversations that move Richmond hoops."
+      description="Join real Virginia basketball communities, courts, teams and local conversations."
       assetKey="communities.cover"
       meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Community network</p><p className="mt-1 font-display text-3xl font-black">{items.length}<span className="ml-2 text-xs text-white/35">spaces</span></p><p className="mt-2 text-xs text-rcl-blue">{joined.length} joined</p></div>}
     />
@@ -107,6 +120,7 @@ export default function CommunitiesPage() {
       {error && <div role="alert" className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200"><div className="flex flex-wrap items-center justify-between gap-3"><p>{error}</p><button type="button" disabled={loading || Boolean(busy)} onClick={() => { setError(''); void load(); }} className="min-h-10 rounded-lg border border-red-300/20 px-3 font-black uppercase tracking-wider disabled:opacity-50">Refresh</button></div></div>}
       {message && <p role="status" className="mb-5 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-sm text-emerald-300">{message}</p>}
 
+      <GravityLocationPicker compact className="mb-5" />
       <div className="grid items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-24">
           {authLoading ? <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-6 text-sm text-white/40">Loading your account…</div> : user ? <form onSubmit={create} className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 shadow-[0_18px_55px_rgba(0,0,0,.18)]">
