@@ -29,3 +29,27 @@ describe('MFA on server-side administrator API operations', () => {
     expect(profile).toBeGreaterThan(deny);
   });
 });
+
+describe('opted-in member MFA on service-role endpoints', () => {
+  it('requires a completed challenge before spotlight writes', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/app/api/membership/spotlight/route.ts'), 'utf8');
+    const aal = source.indexOf('auth.mfa.getAuthenticatorAssuranceLevel()');
+    const deny = source.indexOf("assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2'", aal);
+    const service = source.indexOf('getSupabaseAdminClient() as any');
+    expect(aal).toBeGreaterThan(-1);
+    expect(deny).toBeGreaterThan(aal);
+    expect(service).toBeGreaterThan(deny);
+  });
+
+  it('requires MFA before creator Stripe onboarding can access privileged creator data', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/app/api/rch-tv/creator/connect/route.ts'), 'utf8');
+    const verified = source.indexOf('auth.mfa.getAuthenticatorAssuranceLevel()');
+    const guard = source.indexOf("assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'", verified);
+    const creatorRead = source.indexOf("from('rch_creator_accounts')", guard);
+    const service = source.indexOf('getSupabaseAdminClient() as any', creatorRead);
+    expect(verified).toBeGreaterThan(-1);
+    expect(guard).toBeGreaterThan(verified);
+    expect(creatorRead).toBeGreaterThan(guard);
+    expect(service).toBeGreaterThan(creatorRead);
+  });
+});
