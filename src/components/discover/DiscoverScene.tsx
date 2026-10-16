@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FaArrowRight, FaArrowUpRightFromSquare, FaBasketball, FaBookmark, FaCalendarDays,
-  FaCompass, FaDumbbell, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaTrophy
+  FaCompass, FaChevronDown, FaDumbbell, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaTrophy
 } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cityForText } from '@/lib/virginia-world';
@@ -87,6 +87,7 @@ export default function DiscoverScene() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [savedOnly, setSavedOnly] = useState(false);
   const [sortPersonalized, setSortPersonalized] = useState(true);
+  const [expandedCities, setExpandedCities] = useState(false);
   const [sharedIntent, setSharedIntent] = useState<GravityIntent|null>(null);
 
   useEffect(() => {
@@ -251,12 +252,12 @@ export default function DiscoverScene() {
       <section className="rch-scene-searchbar" aria-label="Search basketball opportunities">
         <label className="rch-scene-search-input"><FaMagnifyingGlass aria-hidden="true"/>
           <span className="sr-only">Search Virginia basketball opportunities</span>
-          <input type="search" value={query} onChange={event => setQuery(event.target.value)}
+          <input className="rch-scene-native-control" type="search" value={query} onChange={event => setQuery(event.target.value)}
             placeholder="Search a run, tryout, city, organizer..." />
         </label>
         <label className="rch-scene-location-input"><FaLocationDot aria-hidden="true"/>
           <span className="sr-only">Choose a Virginia city</span>
-          <select value={city} onChange={event => setCity(event.target.value)}>
+          <select className="rch-scene-native-control" value={city} onChange={event => setCity(event.target.value)}>
             <option value="all">All Virginia</option>
             {cities.map(name => <option value={name} key={name}>{name}</option>)}
           </select>
@@ -334,9 +335,20 @@ export default function DiscoverScene() {
               </article>)}
             </div> : <div className="rch-scene-empty">
               <FaCompass aria-hidden="true"/>
-              <h3>{savedOnly?'Nothing saved yet':'No matching opportunities right now'}</h3>
-              <p>{savedOnly?'Tap the bookmark on a listing to save it to this device.':'Try another category, date or city. As organizers publish new opportunities, they’ll appear here.'}</p>
-              <button type="button" onClick={clearFilters}>Explore all opportunities <FaArrowRight aria-hidden="true"/></button>
+              <h3>{savedOnly?'Nothing saved yet':items.length===0?'Your next play is waiting.':'No matches for those filters.'}</h3>
+              <p>{savedOnly
+                ? 'Save an opportunity using its bookmark to keep it here on this device.'
+                : items.length===0
+                  ? 'There are no upcoming published listings yet. Explore the basketball network or start a run to bring your scene to life.'
+                  : 'Try another city, category or date to see more Virginia basketball opportunities.'}</p>
+              <div className="rch-scene-empty-actions">
+                {items.length===0&&!savedOnly
+                  ? <>
+                      <Link href="/runs">Explore open runs <FaArrowRight aria-hidden="true"/></Link>
+                      <Link href="/network" className="rch-scene-empty-secondary">Explore organizations</Link>
+                    </>
+                  : <button type="button" onClick={clearFilters}>Clear filters <FaArrowRight aria-hidden="true"/></button>}
+              </div>
             </div>}
           <p className="rch-scene-footnote">Listings come from published RCH Network events and upcoming RCH runs. Verify fees, age eligibility and registration details with the organizer before attending. Saved items stay on this device; saving does not register you or send alerts.</p>
         </div>
@@ -361,9 +373,12 @@ export default function DiscoverScene() {
             <p className="rch-scene-kicker">CITY PORTALS</p>
             <h2>Explore your side of Virginia</h2>
             <div className="rch-scene-city-list">
-              {CITIES.map(name => <button type="button" key={name} onClick={() => selectCity(name)}>
+              {(expandedCities?CITIES:CITIES.slice(0,5)).map(name => <button type="button" key={name} onClick={() => selectCity(name)}>
                 <FaLocationDot aria-hidden="true"/>{name}<FaArrowRight aria-hidden="true"/>
               </button>)}
+              <button type="button" className="rch-scene-city-more" aria-expanded={expandedCities} onClick={() => setExpandedCities(current => !current)}>
+                {expandedCities?'Show fewer cities':'Explore more Virginia cities'} <FaArrowRight aria-hidden="true"/>
+              </button>
             </div>
           </div>
           <Link href="/discover/radar" className="rch-scene-radar-card">
