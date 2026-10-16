@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { VisualArea, VisualDonut, VisualRails, VisualHeatmap, VisualComparison } from './CommandVisuals';
 const CommandLiveAnalytics = dynamic(() => import('./CommandLiveAnalytics').then(m => m.CommandLiveAnalytics), {loading:()=> <p className="rounded-xl border border-[#355777] bg-[#0c2035] p-5">Connecting live Command Center analytics…</p>});
 import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaArrowTrendUp, FaArrowUpRightFromSquare, FaBasketball, FaChartLine,
   FaCircleExclamation, FaClock, FaDownload, FaEye, FaRotate,
-  FaShieldHalved, FaUsers, FaWallet,
+  FaShieldHalved, FaUsers, FaWallet, FaChartColumn, FaWaveSquare,
 } from 'react-icons/fa6';
 
 type Period = 7 | 30 | 90 | 365;
@@ -40,6 +41,7 @@ const reports: {id: Section; title: string}[] = [
 const formatter = new Intl.NumberFormat('en-US');
 const money = (amount: number) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(amount);
 const n = (data: ExecutiveAnalytics, key: string) => Number(data.summary[key] ?? 0);
+const nSafe = (data: ExecutiveAnalytics|null, key: string) => data ? n(data,key) : 0;
 const labelSection = (section: string) => ({home:'Home',social:'RCH Pulse',discover:'Discover',runs:'Runs',crews:'Crews',commonwealth:'Commonwealth Cup',league:'Rich City League',players:'Players',teams:'Teams',media:'RCH TV & Clips',news:'News',communities:'Communities',organizations:'Organization Network',shop:'Shop',professional:'Professional Dashboard',other:'Other'} as Record<string,string>)[section] ?? section;
 
 function KPI({label,value,detail}: {label:string;value:string|number;detail:string}) {
@@ -56,35 +58,6 @@ function Heading({eyebrow,title,description}: {eyebrow:string;title:string;descr
     <h2 className="mt-1 text-2xl font-black text-white">{title}</h2>
     <p className="mt-1 max-w-3xl text-sm leading-6 text-[#bdd4e7]">{description}</p>
   </header>;
-}
-
-function Trend({rows,metric,label}: {rows:DailyRow[];metric:keyof DailyRow;label:string}) {
-  const values=rows.map(row=>Number(row[metric])||0);
-  const peak=Math.max(1,...values);
-  const width=720, height=165, pad=12;
-  const points=values.map((v,i)=>`${pad+(i/Math.max(values.length-1,1))*(width-pad*2)},${height-pad-(v/peak)*(height-pad*2)}`).join(' ');
-  return <div className="rounded-2xl border border-[#355777] bg-[#0c2035] p-4" aria-label={label}>
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><strong className="text-sm text-white">{label}</strong><span className="text-xs text-[#a5c6e2]">Peak: {formatter.format(peak===1&&values.every(v=>v===0)?0:peak)} / day</span></div>
-    <svg className="h-40 w-full overflow-visible" role="img" aria-label={`${label} over ${rows.length} UTC days`} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-      {[0.25,0.5,0.75].map(y=><line key={y} x1="0" y1={height*y} x2={width} y2={height*y} stroke="#2e4b67" strokeDasharray="3 5"/>)}
-      <polyline points={points} fill="none" stroke="#7ec8ff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>
-    </svg>
-    <div className="mt-2 flex items-center justify-between text-xs text-[#aac5dd]"><span>{rows[0]?.day??'—'}</span><span>{rows.at(-1)?.day??'—'}</span></div>
-    {values.every(v=>v===0)&&<p className="mt-2 text-xs text-[#bdd4e7]">No observed activity in this period.</p>}
-  </div>;
-}
-
-function Ranking({title,rows,note}: {title:string;rows:{name:string;amount:number;detail?:string}[];note:string}) {
-  const max=Math.max(1,...rows.map(row=>row.amount));
-  return <section className="rounded-2xl border border-[#355777] bg-[#0c2035] p-5">
-    <h3 className="text-lg font-bold text-white">{title}</h3>
-    <p className="mt-1 text-xs leading-5 text-[#adcae0]">{note}</p>
-    <div className="mt-5 space-y-4">{rows.length?rows.map((row,index)=><div key={index}>
-      <div className="mb-1 flex justify-between gap-3 text-sm"><span className="font-semibold text-white">{row.name}</span><span className="font-bold tabular-nums text-[#96d0ff]">{formatter.format(row.amount)}</span></div>
-      <div className="h-2 overflow-hidden rounded-full bg-[#264562]"><div className="h-full rounded-full bg-[#66b7f8]" style={{width:`${row.amount/max*100}%`}}/></div>
-      {row.detail&&<p className="mt-1 text-xs text-[#b4cde1]">{row.detail}</p>}
-    </div>):<p className="text-sm text-[#c5d7e9]">No records for this reporting period.</p>}</div>
-  </section>;
 }
 
 function downloadReport(data: ExecutiveAnalytics) {
@@ -136,6 +109,37 @@ export function CommandSiteAnalytics() {
   const panel='rounded-2xl border border-[#355777] bg-[#0c2035] p-5';
   const since=data?.data_since ? new Date(data.data_since).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : null;
   const trafficReady=Boolean(since);
+  const palette=['#65d1ff','#a7a8ff','#60e4c9','#f7af62','#e5a4fb','#5c94e7','#e7d18a','#8cc1fc'];
+  const sectionParts=(data?.sections??[]).slice(0,5).map((row,i)=>({
+    label:labelSection(row.section),value:row.visits,color:palette[i],
+  }));
+  const otherVisits=(data?.sections??[]).slice(5).reduce((sum,row)=>sum+row.visits,0);
+  if(otherVisits>0)sectionParts.push({label:'Other sections',value:otherVisits,color:palette[5]});
+  const roleParts=(data?.membership_growth??[]).slice(0,7).map((row,i)=>({
+    label:row.role.replace(/_/g,' '),value:row.members,color:palette[i],
+  }));
+  const totalVisibleRoles=(data?.membership_growth??[]).slice(7).reduce((sum,row)=>sum+row.members,0);
+  if(totalVisibleRoles>0)roleParts.push({label:'Other roles',value:totalVisibleRoles,color:palette[7]});
+  const overallSignals=[
+    {label:'Run joins',value:nSafe(data,'run_signups'),color:'#62d5ff'},
+    {label:'Community joins',value:nSafe(data,'community_joins'),color:'#7be1bb'},
+    {label:'New crews',value:nSafe(data,'crews_created'),color:'#ada5ff'},
+    {label:'League registrations',value:nSafe(data,'player_registrations'),color:'#f3c77a'},
+  ];
+  const growthSeries=[
+    {key:'members' as const,label:'New members',color:'#61cbff'},
+    {key:'visits' as const,label:'Section visits',color:'#9c9bff'},
+    {key:'posts' as const,label:'Published posts',color:'#6ee2b8'},
+  ];
+  const audienceSeries=[
+    {key:'members' as const,label:'Registrations',color:'#63cdff'},
+    {key:'sessions' as const,label:'Observed sessions',color:'#a3a4ff'},
+    {key:'visits' as const,label:'Section visits',color:'#6ce3c3'},
+  ];
+  const contentSeries=[
+    {key:'posts' as const,label:'Published posts',color:'#6cceff'},
+    {key:'content_views' as const,label:'Recorded post views',color:'#b1a1ff'},
+  ];
   return <main className="min-h-[70vh] bg-[#061323] px-3 py-5 text-white sm:px-6 sm:py-8" aria-label="RCH Sitewide Executive Analytics">
     <header className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-[#2a4e70] pb-6">
       <div><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-[#81c3fb]"><FaChartLine/> RCH intelligence / Executive Command</p>
@@ -156,6 +160,16 @@ export function CommandSiteAnalytics() {
     <nav className="mb-5 flex gap-2 overflow-x-auto pb-2" aria-label="Analytics reports">{reports.map(tab=><button key={tab.id} type="button" onClick={()=>setSection(tab.id)} aria-pressed={section===tab.id}
       className={`min-h-11 shrink-0 rounded-xl px-4 text-xs font-bold ${section===tab.id?'border border-[#86caff] bg-[#153c60] text-white':'border border-[#2d516f] text-[#bfd9ed]'}`}>{tab.title}</button>)}</nav>
 
+    <section className="rch-viz-stage" aria-label="RCH visual intelligence">
+      <div className="rch-viz-stage-eyebrow"><FaWaveSquare aria-hidden="true"/> RCH / VIRGINIA INTELLIGENCE</div>
+      <h2>THE NUMBERS. <em>THE MOVEMENT.</em></h2>
+      <p>Explore the pulse of Rich City Hoops through interactive data graphics. Every chart is powered by actual platform records, with separate accounting for observed website traffic and registered basketball activity.</p>
+      <div className="rch-viz-stage-rail">
+        <span><i/> {section==='live'?'Near real-time signals':'Recorded platform data'}</span>
+        <span><FaChartColumn aria-hidden="true"/> {section==='live'?'30-second snapshots':`${period}-day analysis`}</span>
+        <span><FaShieldHalved aria-hidden="true"/> Private executive access</span>
+      </div>
+    </section>
     {section==='live'?<CommandLiveAnalytics/>:loading?<section role="status" className={panel}>Loading verified sitewide analytics…</section>:
       error?<section role="alert" className={panel}><div className="flex items-center gap-2 text-lg font-bold text-white"><FaCircleExclamation/> Report unavailable</div><p className="mt-2 text-sm text-[#d0dfef]">{error}</p><button type="button" onClick={reload} className="mt-4 rounded-lg bg-[#84c7f8] px-5 py-3 text-sm font-bold text-[#0a1b2a]">Retry report</button></section>:
       data?<div className="space-y-6">
@@ -172,12 +186,13 @@ export function CommandSiteAnalytics() {
             <KPI label="New organizations" value={formatter.format(n(data,'organizations_added'))} detail="Basketball organizations in the network"/>
             <KPI label="Paid shop orders" value={formatter.format(n(data,'paid_orders'))} detail="Orders with a recorded paid status"/>
           </div>
-          <div className="grid gap-4 xl:grid-cols-2">
-            <Trend rows={data.daily} metric="members" label="Daily new members"/>
-            <Trend rows={data.daily} metric="visits" label="Observed section visits"/>
+
+          <div className="rch-viz-grid">
+            <div className="rch-viz-wide"><VisualArea rows={data.daily} title="RCH performance velocity" detail="Switch metrics to explore the daily trend without changing the reporting window." series={growthSeries} initialMetric="members"/></div>
+            <VisualDonut title="Where the audience moves" detail="Share of recorded broad-section visits. Not unique people or geographic location." items={sectionParts} centerLabel="section visits"/>
+            <VisualRails title="Top product destinations" detail="Observed section visits. Tab sessions shown for context." items={data.sections.map(row=>({label:labelSection(row.section),value:row.visits,detail:`${formatter.format(row.sessions)} observed tab sessions`}))}/>
+            <div className="rch-viz-wide"><VisualHeatmap rows={data.daily} metric={trafficReady?'visits':'members'} title="Platform activity calendar" detail={trafficReady?'Daily observed site-section visits across the reporting window.':'Daily registrations while first-party traffic collection begins.'}/></div>
           </div>
-          <Ranking title="Most visited sections" note="Instrumented first-party categories, without raw URLs or personal locations."
-            rows={data.sections.slice(0,8).map(s=>({name:labelSection(s.section),amount:s.visits,detail:`${formatter.format(s.sessions)} observed sessions`}))}/>
         </>}
         {section==='audience'&&<>
           <Heading eyebrow="Audience intelligence" title="Membership and discovery" description="Registration trends, reported platform activity, and the most visited product areas. Traffic metrics are observational, not a census of everyone online."/>
@@ -187,10 +202,12 @@ export function CommandSiteAnalytics() {
             <KPI label="Active signed-in members" value={trafficReady?formatter.format(n(data,'active_members_observed')):'Collecting'} detail="Members with recorded section visits, not all activity"/>
             <KPI label="Observed sessions" value={trafficReady?formatter.format(n(data,'sessions_observed')):'Collecting'} detail="Unique tab sessions in observed traffic"/>
           </div>
-          <div className="grid gap-4 xl:grid-cols-2"><Trend rows={data.daily} metric="members" label="Registration growth"/><Trend rows={data.daily} metric="sessions" label="Daily observed sessions"/></div>
-          <div className="grid gap-4 xl:grid-cols-2">
-            <Ranking title="Member role mix" note="Active, non-system profiles by account role." rows={data.membership_growth.map(r=>({name:r.role,amount:r.members}))}/>
-            <Ranking title="Product discovery" note="Broad route sections only; one counted visit per section, session and 10-minute bucket." rows={data.sections.map(s=>({name:labelSection(s.section),amount:s.visits,detail:`${s.members} observed signed-in members`}))}/>
+          
+          <div className="rch-viz-grid">
+            <div className="rch-viz-wide"><VisualArea rows={data.daily} title="Audience growth monitor" detail="Registration and visitor-session trends, using their original units." series={audienceSeries} initialMetric="members"/></div>
+            <VisualDonut title="Who makes up RCH" detail="Breakdown by current active, non-system member role; not a count of daily visitors." items={roleParts} centerLabel="members"/>
+            <VisualRails title="Discovery leaderboard" detail="Measured site sections only; traffic may be blocked or opted out." items={data.sections.map(s=>({label:labelSection(s.section),value:s.visits,detail:`${s.members} observed signed-in members`}))}/>
+            <div className="rch-viz-wide"><VisualHeatmap rows={data.daily} metric="sessions" title="Returning attention calendar" detail="Daily observed browser-tab sessions (not individual returning visitors)."/></div>
           </div>
         </>}
         {section==='social'&&<>
@@ -211,7 +228,18 @@ export function CommandSiteAnalytics() {
               ['Qualified referrals','qualified_referrals','Verified referral outcomes'],
             ] as const).map(([label,key,detail])=><KPI key={key} label={label} value={formatter.format(n(data,key))} detail={detail}/>)}
           </div>
-          <div className="grid gap-4 xl:grid-cols-2"><Trend rows={data.daily} metric="posts" label="Published posts / day"/><Trend rows={data.daily} metric="content_views" label="Recorded post views / day"/></div>
+          
+          <div className="rch-viz-grid">
+            <div className="rch-viz-wide"><VisualArea rows={data.daily} title="Content momentum" detail="Published posts versus measured post views. Switch between event types." series={contentSeries} initialMetric="content_views"/></div>
+            <VisualDonut title="Engagement actions" detail="Share of recorded interaction events; actions may originate from the same member." items={[
+              {label:'Reactions',value:n(data,'reactions'),color:'#65d1ff'},
+              {label:'Comments',value:n(data,'comments'),color:'#a3a4ff'},
+              {label:'Reposts',value:n(data,'reposts'),color:'#66e0c4'},
+              {label:'Saves',value:n(data,'saves'),color:'#f5bd81'},
+            ]} centerLabel="interactions"/>
+            <VisualRails title="Most watched content" detail="Ranked by recorded signed-in views during the selected window." items={data.top_content.map((post,i)=>({label:post.preview||`Media post ${i+1}`,value:post.views,detail:`${post.reactions} reactions · ${post.comments} comments`}))}/>
+            <div className="rch-viz-wide"><VisualHeatmap rows={data.daily} metric="posts" title="Publishing cadence" detail="Daily published posts, including automated publications; heat intensity follows actual counts."/></div>
+          </div>
           <section className={panel}><h3 className="text-lg font-bold">Top observed social content</h3><p className="mt-1 text-xs text-[#b7cde1]">Ranked by recorded views in the reporting period; pre-tracking traffic is unavailable.</p>
             <div className="mt-4 divide-y divide-[#305371]">{data.top_content.length?data.top_content.map((post,i)=><Link key={post.id} href={`/social/post/${post.id}`} className="flex flex-wrap items-center justify-between gap-3 py-4 hover:text-[#93d1fc]"><span className="flex min-w-0 flex-1 gap-3"><b className="text-[#88c8fa]">{i+1}.</b><span className="min-w-0 break-words text-sm">{post.preview || 'Media post'}</span></span><span className="shrink-0 text-xs text-[#b7d1e7]">{formatter.format(post.views)} views · {formatter.format(post.reactions)} reactions · {formatter.format(post.comments)} comments <FaArrowUpRightFromSquare className="ml-1 inline"/></span></Link>):<p className="py-5 text-sm text-[#c4d8e8]">No recorded qualifying post views yet.</p>}</div>
           </section>
@@ -236,6 +264,28 @@ export function CommandSiteAnalytics() {
               ['News articles','news_published','Published editorial articles'],
             ] as const).map(([label,key,detail])=><KPI key={key} label={label} value={formatter.format(n(data,key))} detail={detail}/>)}
           </div>
+          <div className="rch-viz-grid">
+            <div className="rch-viz-wide"><VisualComparison title="Virginia basketball activity scoreboard" detail="An actual recorded count for each activity type, across the selected reporting period." unit="different basketball event types" items={[
+              {label:'Runs created',value:n(data,'runs_created'),color:'#67d3ff'},
+              {label:'Run joins',value:n(data,'run_signups'),color:'#68e1c4'},
+              {label:'Check-ins',value:n(data,'run_checkins'),color:'#aaa7ff'},
+              {label:'Verified results',value:n(data,'ranked_games_verified'),color:'#e0b0f8'},
+              {label:'Crews formed',value:n(data,'crews_created'),color:'#e5bc72'},
+              {label:'League games',value:n(data,'games_scheduled'),color:'#8dbeff'},
+              {label:'Organizations',value:n(data,'organizations_added'),color:'#88d2e0'},
+            ]}/></div>
+            <VisualDonut title="Participation signals" detail="The relative share of four event types—not a conversion funnel or census of players." items={overallSignals} centerLabel="events"/>
+            <VisualRails title="Statewide ecosystem activity" detail="Virginia-wide platform totals; regional or city rankings require verified location aggregates." items={[
+              {label:'Run roster joins',value:n(data,'run_signups')},
+              {label:'Community joins',value:n(data,'community_joins')},
+              {label:'Tryout registrations',value:n(data,'tryout_registrations')},
+              {label:'Training sessions',value:n(data,'lab_sessions')},
+              {label:'Crew run entries',value:n(data,'crew_run_entries')},
+              {label:'Ranked results',value:n(data,'ranked_games_verified')},
+              {label:'League registrations',value:n(data,'player_registrations')},
+            ]}/>
+          </div>
+          <p className="rch-viz-insight"><strong>Geography integrity:</strong> These results represent platform activity across the Commonwealth, not a geographic heatmap. RCH will only rank cities or regions when privacy-safe and verified location counts are available.</p>
           <div className={panel}><h3 className="text-lg font-bold">Operational interpretation</h3><p className="mt-2 text-sm leading-6 text-[#c7daea]">Run participation, competition verification and community membership are real platform actions. This report does not infer game attendance, ticket sales or Commonwealth Cup winners from registrations. Game-day financial outcomes remain separately reconciled in the Financial Office.</p></div>
         </>}
         {section==='business'&&<>
@@ -250,6 +300,25 @@ export function CommandSiteAnalytics() {
             <KPI label="Network prospects joined" value={formatter.format(n(data,'organizations_added'))} detail="Organizations added to the network"/>
             <KPI label="New referrals" value={formatter.format(n(data,'qualified_referrals'))} detail="Qualified referral records"/>
           </div>
+
+          <div className="rch-viz-grid">
+            <VisualDonut title="Reconciled financial split" detail="Comparing ledger income and expense entries recorded in dollars; not a profit margin." centerLabel="ledger flow" format="currency" items={[
+              {label:'Ledger income',value:Math.max(0,n(data,'ledger_income')),color:'#5fdbce'},
+              {label:'Ledger expenses',value:Math.max(0,n(data,'ledger_expenses')),color:'#ef9b9b'},
+            ]}/>
+            <VisualRails title="Commerce activity scoreboard" detail="These are separate observed business record counts, not combined revenue." items={[
+              {label:'Paid shop orders',value:n(data,'paid_orders'),detail:'Recorded paid/completed orders'},
+              {label:'Active or trial memberships',value:n(data,'active_subscriptions'),detail:'Current subscription status'},
+              {label:'Qualified referrals',value:n(data,'qualified_referrals'),detail:'Referral events in this window'},
+              {label:'New organizations',value:n(data,'organizations_added'),detail:'New organization records'},
+            ]}/>
+            <div className="rch-viz-wide"><VisualComparison title="Revenue signals side by side" detail="Amounts shown in USD. Shop order totals and reconciled bookkeeping can overlap and must never be added." unit="recorded USD amounts" items={[
+              {label:'Gross order value',value:Math.max(0,n(data,'paid_order_cents')/100),color:'#65caff'},
+              {label:'Ledger income',value:Math.max(0,n(data,'ledger_income')),color:'#64dbb2'},
+              {label:'Ledger expenses',value:Math.max(0,n(data,'ledger_expenses')),color:'#f6af9a'},
+            ]}/></div>
+          </div>
+          <p className="rch-viz-insight"><strong>Reconciled ledger net:</strong> {money(n(data,'ledger_income')-n(data,'ledger_expenses'))}. This is ledger income less ledger expenses and is not an audited profit-and-loss report.</p>
           <section className={panel}><div className="flex items-center gap-2 text-[#93caff]"><FaWallet/><h3 className="text-lg font-bold text-white">Financial integrity</h3></div><p className="mt-2 text-sm leading-6 text-[#d1e0ee]">Orders are gross recorded order totals; tax, refunds, payment processing, taxes and unsettled receivables may not be represented. Ledger totals include only reconciled entries and may already include order proceeds. These figures are operational indicators—not an audited profit-and-loss statement.</p></section>
         </>}
         <footer className="rounded-xl border border-[#355d7c] bg-[#0d2740] p-4 text-xs leading-6 text-[#c1d8eb]">

@@ -7,6 +7,7 @@ import {
   FaShieldHalved, FaSignal, FaUsers,
 } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import { VisualDonut } from './CommandVisuals';
 
 type LiveSection = { section: string; sessions: number; members: number };
 type TrafficPoint = { bucket: string; visits: number; sessions: number };
@@ -189,6 +190,30 @@ export function CommandLiveAnalytics() {
               <div className="h-2 overflow-hidden rounded-full bg-[#284a69]"><div className="h-full rounded-full bg-[#7bc9f8]" style={{width:`${Math.max(3,100*Number(s.sessions)/sectionPeak)}%`}}/></div>
             </div>):<p className="py-8 text-center text-sm text-[#b5ccdf]">No eligible active tabs observed in the last two minutes.</p>}
           </div>
+        </section>
+      </div>
+      <div className="rch-viz-grid">
+        <VisualDonut title="Audience presence split" detail="Observed visible browser tabs in the last two minutes. Signed-in and guest tabs only; not unique people." centerLabel="browser tabs" items={[
+          {label:'Signed-in tabs',value:Math.max(0,report.active_sessions-report.guest_sessions),color:'#65d1ff'},
+          {label:'Guest tabs',value:report.guest_sessions,color:'#b3a6ff'},
+        ]}/>
+        <section className="rch-viz-panel" aria-label="Recent activity movement chart">
+          <div className="rch-viz-eyebrow"><FaChartLine aria-hidden="true"/> Live activity comparison</div>
+          <h3 className="mt-2 text-xl font-black text-white">Momentum across 30 minutes</h3>
+          <p className="mt-2 text-xs leading-5 text-[#a7c4dd]">Two adjacent 15-minute windows of recorded actions. Different actions are not treated as individual visitors.</p>
+          <div className="mt-5 space-y-4">
+            {allPulse.map(item=>{
+              const peak=Math.max(1,Number(item.current)||0,Number(item.previous)||0);
+              return <div key={item.key}>
+                <div className="mb-2 flex items-center justify-between gap-3 text-xs text-[#e1f0fd]"><strong>{item.label}</strong><span className="tabular-nums">{fmt.format(item.previous)} → {fmt.format(item.current)}</span></div>
+                <div className="space-y-1.5" aria-label={`${item.label}: previous ${item.previous}, current ${item.current}`}>
+                  <div className="h-2.5 rounded-full bg-[#1c425e]"><div className="h-full rounded-full bg-[#6b87ad]" style={{width:`${(Number(item.previous)||0)/peak*100}%`}}/></div>
+                  <div className="h-2.5 rounded-full bg-[#1c425e]"><div className="h-full rounded-full bg-[#76d2ff]" style={{width:`${(Number(item.current)||0)/peak*100}%`}}/></div>
+                </div>
+              </div>;
+            })}
+          </div>
+          <div className="mt-4 flex gap-5 text-xs text-[#bdd6e9]"><span><i className="mr-2 inline-block h-2 w-2 rounded-full bg-[#6b87ad]"/>Prior 15m</span><span><i className="mr-2 inline-block h-2 w-2 rounded-full bg-[#76d2ff]"/>Latest 15m</span></div>
         </section>
       </div>
       <div>
