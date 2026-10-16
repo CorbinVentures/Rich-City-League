@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 const file=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 const sql=file('supabase/migrations/20261017002000_rch_court_master_crown_ledger.sql');
+const timing=file('supabase/migrations/20261017002010_rch_court_master_same_match_initialization.sql');
 const crowns=file('src/components/runs/CourtMasterTitles.tsx');
 const court=file('src/components/runs/CourtDominion.tsx');
 const official=file('src/components/runs/RunMasterOfficialControl.tsx');
@@ -16,6 +17,8 @@ describe('Individual court crowns are legitimate and fully separate from Crew te
   expect(sql).toContain("'title_defense'");
   expect(sql).toContain("'title_takeover'");
   expect(sql).toContain('rch_after_master_duel_verification');
+  expect(timing).toContain('language sql volatile security definer');
+  expect(timing).toContain('rch_eligible_court_master(v_court,new.game_format)');
   expect(court).toContain('<CourtMasterTitles court={court}/>');
  });
  it('rejects unqualified or unauthenticated challengers and title transfers without evidence',()=>{
