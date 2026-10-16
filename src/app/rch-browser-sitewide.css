@@ -641,3 +641,14 @@ html.rch-premium-root body.rch-premium-app .rch-public-web .royaltee-site {
   margin:0;padding:10px 20px;text-align:center;background:#431923;color:#ffe8ec;
   font-size:12px;font-weight:700;
 }
+
+.rch-public-web .rch-browser-signed-in {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  border-bottom:1px solid #366993;background:#0d2f50;color:#dbeeff;
+  padding:14px max(20px,calc((100vw - 1320px)/2));font-size:13px;line-height:1.45;
+}
+.rch-public-web .rch-browser-signed-in strong {color:#fff;letter-spacing:.08em}
+.rch-public-web .rch-browser-signed-in a {
+  display:inline-flex;align-items:center;gap:8px;color:#dcefff!important;
+  font-weight:900;text-decoration:underline;text-underline-offset:3px;
+}
