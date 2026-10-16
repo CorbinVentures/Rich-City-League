@@ -8,9 +8,10 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { MfaSecurityPanel } from '@/components/MfaSecurityPanel';
 
 export default function SecurityPage() {
-  const { user, updatePassword, error, loading } = useAuth();
+  const { user, profile, updatePassword, error, loading } = useAuth();
   const router = useRouter();
   const db = useMemo(() => getSupabaseClient(), []);
   const [password, setPassword] = useState('');
@@ -85,6 +86,8 @@ export default function SecurityPage() {
           <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Password check</p><div className="mt-4 space-y-3 text-sm"><Check ok={meetsLength} text="At least 8 characters"/><Check ok={matches} text="Passwords match"/></div><p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/30">RCL never displays your password. Updating it does not change your league role, REP, stats, or profile history.</p>
         </aside>
       </div>
+
+      <MfaSecurityPanel userId={user?.id ?? null} isAdmin={profile?.role === 'admin'} />
 
       <section className="mt-6 rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 sm:p-8" aria-labelledby="sessions-title">
         <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-blue/10 text-rcl-blue"><FaShieldHalved/></span><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Session security</p><h2 id="sessions-title" className="mt-1 font-display text-2xl font-black uppercase">Protect your signed-in devices</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">If you lose a device or suspect somebody accessed your account, revoke its session. You can preserve this device or sign out everywhere.</p></div></div>
