@@ -17,8 +17,7 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 import { Neighborhood } from '@/components/social/Neighborhood';
-import { RCHPulseHero, RCHPulseMoment } from '@/components/social/RCHPulseModules';
-import { RCHActionGuide } from '@/components/RCHActionGuide';
+import { RCHPulseMoment } from '@/components/social/RCHPulseModules';
 import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
@@ -107,6 +106,7 @@ export default function NetworkHome() {
 
   const [mode, setMode] = useState<FeedMode>('for-you');
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [focusPostId, setFocusPostId] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>(null);
   const [comment, setComment] = useState<Record<string, string>>({});
@@ -717,26 +717,28 @@ export default function NetworkHome() {
     };
   }, [posts, stories, runs, currentProfile?.rep, currentProfile?.level]);
 
-  const pulseFeaturedPost = posts.find((post) => post.media_urls?.length) ?? todaySnapshot.trendingPost;
-
   return (
     <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
       {notice && <div className="fixed left-1/2 top-20 z-[79] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-blue/25 bg-[#071522] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
       <Container maxWidth="xl" className="py-5 sm:py-7">
-        <section className="rcl-feed-intro">
-          <div><p>RCH · SOCIAL</p><h1>RCH <span>Pulse</span></h1><span>People. Basketball. Culture. Community. Always on.</span></div>
-          <div className="rcl-feed-intro-actions"><Link href="/clips" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white"><FaPlay/> RCH Clips</Link>
-            <div className="rcl-feed-search" role="search">
-              <FaMagnifyingGlass className="rcl-feed-search-icon"/>
-              <input aria-label="Search posts, people and topics in this feed" type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Search the feed"/>
-              {search && <button type="button" onClick={()=>setSearch('')} className="rcl-feed-search-clear" aria-label="Clear feed search"><FaXmark/></button>}
-            </div>
-            {user?<button type="button" onClick={openComposer}><FaPlus/> Create</button>:<Link href="/auth/sign-in?redirect=/social">Join free</Link>}
+        <section className="rch-pulse-masthead" aria-label="RCH Pulse timeline">
+          <div className="rch-pulse-masthead-brand">
+            <span>RICH CITY HOOPS · SOCIAL</span>
+            <h1>Pulse<span aria-hidden="true">.</span></h1>
+          </div>
+          <div className="rch-pulse-masthead-actions">
+            <button type="button" onClick={() => setSearchOpen((open) => !open)} aria-expanded={searchOpen} aria-label="Search the Pulse feed" title="Search the Pulse feed"><FaMagnifyingGlass aria-hidden="true"/></button>
+            <Link href="/clips" aria-label="Watch RCH Clips" title="Watch RCH Clips"><FaPlay aria-hidden="true"/> <span>Clips</span></Link>
+            {user ? <button type="button" className="rch-pulse-primary-action" onClick={openComposer}><FaPlus aria-hidden="true"/> Post</button> : <Link className="rch-pulse-primary-action" href="/auth/sign-in?redirect=/social">Join free</Link>}
           </div>
         </section>
-        {!focusPostId&&<RCHActionGuide variant="feed"/>}
+        {searchOpen && <div className="rch-pulse-search-panel" role="search">
+          <FaMagnifyingGlass aria-hidden="true"/>
+          <input aria-label="Search posts, people and topics" autoFocus type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search posts, people, topics..." />
+          <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
+        </div>}
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="rcl-network-left-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
@@ -750,25 +752,24 @@ export default function NetworkHome() {
           <div className="min-w-0 space-y-4">
             {focusPostId && <div className="flex items-center justify-between rounded-xl border border-rcl-blue/15 bg-rcl-blue/[.04] px-4 py-3"><span className="text-xs font-black uppercase tracking-wider text-rcl-blue">Post permalink</span><Link href="/social" className="inline-flex items-center gap-2 text-xs font-black uppercase text-white/45"><FaArrowLeft/> Back to feed</Link></div>}
 
-            {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
-            {!focusPostId && <RCHPulseHero featuredPost={pulseFeaturedPost} onQuickTake={openComposer} onStory={() => user ? setStoryComposerOpen(true) : signInForNetwork()} />}
-
-            {!focusPostId && (
-              <section className="rcl-feed-composer rounded-2xl border p-4">
-                <div className="flex gap-3"><button onClick={openComposer} aria-label="Create post"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCL Member' : 'Guest', username: null }} compact/></button><button onClick={openComposer} className="rcl-composer-prompt min-h-12 flex-1 rounded-2xl border px-4 text-left text-sm">Share something with Richmond basketball…</button></div>
-                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-[#D9E4EF] pt-3"><button onClick={openComposer} className="rcl-composer-action primary inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold"><FaImage/> Photo</button><button onClick={() => user ? setStoryComposerOpen(true) : signInForNetwork()} className="rcl-composer-action inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold"><FaVideo/> Video</button><Link href="/runs" className="rcl-composer-action inline-flex min-h-10 items-center justify-center gap-2 rounded-xl text-xs font-extrabold"><FaBasketball/> Run</Link></div>
-              </section>
-            )}
-
-
-
             {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-4"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton><FeedModeButton active={mode === 'courtside'} onClick={() => { setMode('courtside'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'courtside' }); }}>Courtside</FeedModeButton></div>}
+            {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
+
+            {!focusPostId && <section className="rch-pulse-compose-strip" aria-label="Create a post">
+              <button type="button" onClick={openComposer} aria-label="Open post composer"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCH Member' : 'Guest', username: null }} compact/></button>
+              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>What&apos;s happening in your world?</button>
+              <button type="button" className="rch-pulse-compose-media" onClick={openComposer} aria-label="Create a photo or video post"><FaImage aria-hidden="true"/></button>
+            </section>}
+
+
+
+
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
               <NetworkPostCard item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
-              {!focusPostId && index === Math.min(1, feedItems.length - 1) && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
-              {!focusPostId && index === Math.min(2, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
-              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <TodayPanel
+              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
+              {!focusPostId && index === Math.min(5, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
+              {!focusPostId && index === Math.min(7, feedItems.length - 1) && <TodayPanel
               postsToday={todaySnapshot.postsToday}
               activeStories={todaySnapshot.activeStories}
               rep={todaySnapshot.rep}
