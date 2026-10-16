@@ -85,7 +85,7 @@ export function useAuth() {
       }
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id,username,first_name,last_name,display_name,avatar_url,bio,role,is_active,created_at,updated_at,cover_url,position,jersey_number,location,profile_visibility,friend_request_policy,message_policy,is_vip,vip_label,is_system_account,system_account_key,onboarding_complete,qualified_referral_count,profile_song_url')
         .eq('id', currentUser.id)
         .single();
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
