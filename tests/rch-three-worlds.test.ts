@@ -4,6 +4,7 @@ import {join} from 'node:path';
 const read=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 const sql=read('supabase/migrations/20261016235000_rch_court_masters_takeovers.sql');
 const cup=read('supabase/migrations/20261016235100_rch_cup_year_round_qualifiers.sql');
+const rewards=read('supabase/migrations/20261016235200_rch_verified_run_stat_rewards.sql');
 const runs=read('src/app/runs/page.tsx');
 const crews=read('src/app/crews/page.tsx');
 const masters=read('src/components/runs/CourtDominion.tsx');
@@ -48,6 +49,16 @@ describe('Three separate overlapping RCH competitive worlds',()=>{
   expect(sql).toContain('run_ranked_matches');
   expect(sql).toContain("after update of status");
   expect(sql).not.toContain('grant insert on public.rch_run_rep_events');
+ });
+ it('awards capped basketball stat bonuses and scoring, rebounding and assist badges only after independent review',()=>{
+  expect(rewards).toContain("new.review_status<>'verified'");
+  expect(rewards).toContain('least(30,');
+  expect(rewards).toContain("'scorer_20'");
+  expect(rewards).toContain("'glass_cleaner'");
+  expect(rewards).toContain("'floor_general'");
+  expect(rewards).toContain('rch_run_stat_rewards');
+  expect(rewards).toContain('rch_run_stat_badges');
+  expect(masters).toContain('Your verified Run badges');
  });
  it('keeps exclusive Cup qualification separate but sourced from verified year-round Run performance',()=>{
   expect(cup).toContain("make_timestamptz(p_cycle,1,2,0,0,0,'America/New_York')");
