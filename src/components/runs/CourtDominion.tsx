@@ -5,6 +5,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {FaBasketball,FaBolt,FaCrown,FaLocationDot,FaTrophy} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import {CourtMasterTitles} from '@/components/runs/CourtMasterTitles';
 
 type Court={slug:string;name:string;locality:string};
 type Master={division:string;rank:number;profile_id:string;player_name:string;games:number;wins:number;win_pct:number;ppg:number;is_master:boolean};
@@ -122,13 +123,15 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
    <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-xl font-black">{selected?.name||'Virginia basketball court'}</h3><p className="text-xs text-[#98c1db]">{selected?.locality||'Virginia'} · verified court ladders</p></div><Link className="rounded-xl bg-[#286fa8] px-4 py-3 text-xs font-bold" href={'/runs?court='+encodeURIComponent(court)}>Find Runs here</Link></div>
    {loading&&<p className="mt-3 text-xs">Checking verified results…</p>}
    {error&&<p className="mt-3 text-xs text-[#f6bda1]">{error}</p>}
-   <div className="mt-5 grid gap-3 md:grid-cols-3">
+   <CourtMasterTitles court={court}/>
+   <h3 className="mt-6 text-sm font-black uppercase text-[#a9cfea]">Statistical Court Contenders</h3>
+   <div className="mt-3 grid gap-3 md:grid-cols-3">
     {(['1v1','2v2','3v3'] as const).map(division=>{
      const top=masters.filter(m=>m.division===division);
      const king=top.find(m=>m.is_master);
      return <div key={division} className="rounded-xl border border-[#335c7b] bg-[#0a263e] p-4">
       <div className="flex items-center justify-between"><strong className="text-xl font-black">{division}</strong><FaCrown className={king?'text-[#f1c879]':'text-[#688398]'}/></div>
-      <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#89cbed]">{king?'Court Master':'Master title unclaimed'}</p>
+      <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#89cbed]">{king?'Top qualified contender':'Qualification pending'}</p>
       <p className="mt-2 min-h-7 truncate text-base font-black">{king?.player_name||'Awaiting verified games'}</p>
       <p className="mt-1 text-xs text-[#aac9dc]">{king?king.wins+' wins · '+king.win_pct+'% · '+king.ppg+' PPG':'Requires 3 games across 2+ Runs'}</p>
       <div className="mt-3 space-y-2 border-t border-[#305372] pt-3">{top.map(row=><div key={row.profile_id} className="flex justify-between gap-2 text-xs"><span className="truncate">#{row.rank} {row.player_name}</span><span className="text-[#8bc4e8]">{row.win_pct}%</span></div>)}{!top.length&&<span className="text-xs text-[#8daac0]">No contenders yet</span>}</div>
