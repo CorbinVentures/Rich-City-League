@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
-import { FaArrowRight, FaBell, FaEnvelope, FaFileShield, FaLock, FaShieldHalved, FaUser } from 'react-icons/fa6';
+import { FaArrowRight, FaBell, FaEnvelope, FaFileShield, FaLocationDot, FaLock, FaShieldHalved, FaUser } from 'react-icons/fa6';
 
 const items = [
   { title:'Account', body:'Profile, identity and participation settings', href:'/profile', icon:FaUser },
   { title:'Security', body:'Password and account security', href:'/account/security', icon:FaLock },
   { title:'Notifications', body:'Review your RCL alerts and activity', href:'/notifications', icon:FaBell },
+  { title:'Location & Discovery', body:'Personalize your Virginia basketball area and privacy', href:'/settings/discovery', icon:FaLocationDot },
   { title:'Messages', body:'Open your RCL conversations', href:'/messages', icon:FaEnvelope },
   { title:'Privacy', body:'Privacy controls and data requests', href:'/settings/privacy', icon:FaShieldHalved },
   { title:'Legal & Safety', body:'Terms, privacy, copyright and community rules', href:'/legal', icon:FaFileShield },
