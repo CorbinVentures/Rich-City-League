@@ -23,6 +23,7 @@ import { RunRankedMatchControl } from '@/components/runs/RunRankedMatchControl';
 import { RunCrewEntries } from '@/components/runs/RunCrewEntries';
 import { RunCrewTeamLinker } from '@/components/runs/RunCrewTeamLinker';
 import { RunOperationsHQ } from '@/components/runs/RunOperationsHQ';
+import { RunMasterOfficialControl } from '@/components/runs/RunMasterOfficialControl';
 import { RunNextUp } from '@/components/runs/RunNextUp';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
 
@@ -323,6 +324,7 @@ export default function RunRoomPage() {
         <RunCrewTeamLinker runId={run.id} />
         <RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} />
         <RunOperationsHQ runId={run.id} hostId={run.host_id} />
+        <RunMasterOfficialControl runId={run.id} />
         <RunNextUp runId={run.id} hostId={run.host_id} />
         <RunResultAppeals runId={run.id} hostId={run.host_id} />
 
