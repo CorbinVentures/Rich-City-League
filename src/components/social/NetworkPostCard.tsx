@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import {
   FaBookmark,
+  FaBolt,
+  FaComments,
   FaCheck,
   FaComment,
   FaRetweet,
@@ -102,6 +104,7 @@ export function NetworkPostCard({
   onFollow,
   onToggleRepost,
   onDelete,
+  featured = false,
 }: {
   item: NetworkFeedItem;
   userId?: string;
@@ -119,6 +122,7 @@ export function NetworkPostCard({
   onFollow: () => void;
   onToggleRepost: () => void;
   onDelete?: () => void;
+  featured?: boolean;
 }) {
   const { post, repost } = item;
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
@@ -131,7 +135,8 @@ export function NetworkPostCard({
   const official = Boolean(post.author?.is_system_account);
   const mediaUrls = (post.media_urls ?? []).filter(Boolean);
   const videoPost = mediaUrls.length > 0 && isVideoUrl(mediaUrls[0]);
-  const mediaLabel = videoPost ? 'RCL Clip' : mediaUrls.length ? 'RCL Moment' : null;
+  const mediaLabel = videoPost ? 'RCH Video' : mediaUrls.length ? 'RCH Visual' : null;
+  const postKind = videoPost ? 'video' : mediaUrls.length ? 'visual' : post.body.trim().length <= 260 ? 'quick-take' : 'discussion';
   const reactionCounts = (post.reactions ?? []).reduce<Record<string, number>>((counts, reaction) => {
     counts[reaction.type] = (counts[reaction.type] ?? 0) + 1;
     return counts;
@@ -149,7 +154,7 @@ export function NetworkPostCard({
   };
 
   return (
-    <article id={`post-${post.id}`} className={`rcl-feed-post overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
+    <article id={`post-${post.id}`} data-pulse-kind={postKind} className={`rcl-feed-post rch-pulse-post rch-pulse-post--${postKind} ${featured ? 'rch-pulse-post--featured' : ''} overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
       {repost && (
         <div className="flex items-center gap-2 border-b border-white/[.06] bg-white/[.018] px-4 py-2.5 text-xs font-bold text-white/35 sm:px-5">
           <FaRetweet className="text-rcl-blue" />
@@ -172,6 +177,8 @@ export function NetworkPostCard({
           <Link href={`${profileHref}?tab=highlights`} className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue hover:text-white">The Tape →</Link>
         </div>
       )}
+
+      {!mediaLabel && !official && <div className="rch-pulse-post-kicker">{postKind === 'quick-take' ? <><FaBolt aria-hidden="true" /> Quick Take</> : <><FaComments aria-hidden="true" /> Community Discussion</>}</div>}
 
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3">
