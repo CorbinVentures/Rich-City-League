@@ -8,7 +8,7 @@ import { analyticsSection } from '@/lib/analytics/sections';
 /**
  * First-party, opt-out-respecting section telemetry. Short-lived tab presence
  * is a heartbeat, not a unique-person or exact active-user census.
- * Neither path, search query, geolocation nor device fingerprint is sent.
+ * No raw path, query, position or device fingerprint is sent.
  */
 export function SiteAnalyticsObserver() {
   const pathname = usePathname();
