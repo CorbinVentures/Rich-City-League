@@ -67,7 +67,7 @@ describe('RCH public browser visual authority and route isolation', () => {
     '/communities/members-only', '/media/creators/dashboard',
     '/sponsors/dashboard', '/network/dashboard', '/league/royaltee/manage',
     '/league/royaltee/dashboard', '/teams/new', '/organizations/org-id/claim',
-    '/portal/scorebook', '/runs/run-id/highlight',
+    '/portal/scorebook', '/runs/run-id/highlight', '/coaches/scouting',
   ])('does not accidentally expose account data through guest browser routing: %s', path => {
     expect(isBrowserPublicRoute(path)).toBe(false);
   });
