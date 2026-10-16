@@ -166,3 +166,61 @@ diversity. No pre-claim that an algorithm improves retention.
 - Don't use "personalization" as a way to drown out competing Virginia leagues.
 - Young members are not recommended adult-only opportunities or profiles.
 - Ranking results should fall back safely if storage, data or signals fail.
+
+## Location intelligence v1 — consent-first regional discovery (2026-10-16)
+
+The member's location preference is part of Gravity's explicit relevance context.
+Members may **select a Virginia city**, choose a soft **25 / 50 / 100-mile**
+radius, opt into the browser's location prompt with **Use my location**, or
+clear their location preference by selecting **All Virginia**. The initial state
+is always statewide; do not infer from IP address or request browser location
+on mount.
+
+- Browser coordinates are used transiently *on-device* to find the nearest
+  mapped Virginia city anchor. Only a city ID, radius, and source (manual/device)
+  are retained in `localStorage`. Never log or transmit raw coordinates.
+- The city anchors come from `src/lib/virginia-world.ts`. Their centroid
+  distances are **approximate context signals**, not walking/driving distances,
+  event attendance proof, or a claim about precise venues.
+- Nearby towns receive partial relevance rather than an exact-city-only boost:
+  e.g. Chesterfield, Petersburg and Richmond should not be separate islands.
+- Unknown or statewide locations receive neutral scoring, so rural communities
+  and regionless statewide broadcasts do not disappear.
+- Radius is a **soft ranking preference**. Users still discover worthwhile
+  events outside the chosen area and can clear the preference at any time.
+- Existing publication, moderation, age, privacy, capacity and authorization
+  rules must be enforced before recommendation. The location preference cannot
+  bypass them.
+- The same coarse city preference currently influences **Discover**, **Runs**,
+  **RCH Today**, **Pulse's local run opportunities**, and **Communities**.
+  Location controls are also available under `/settings/discovery` and the
+  member sidebar.
+- Never infer or expose another person's location from their social posts.
+  Creator/profile location suggestions require separate, explicit public profile
+  location disclosure and consent.
+
+### Known limitations / rollout
+1. This first implementation is **device-local**, not cross-device synced.
+   A private, RLS-protected member preference table is future work; public
+   profile city is not a substitute for a private discovery preference.
+2. A fixed set of Virginia city anchors can misrepresent smaller towns.
+   Offer manual selection even if the browser is blocked or outside Virginia.
+3. Discover/Today/Pulse currently rank only the candidates their existing
+   query has already retrieved. A future server-side candidate retrieval
+   layer should expand geographic recall before ranking.
+4. Organization-sponsored inventory must be labeled and never receive organic
+   priority merely due to payment. A city preference does not imply consent
+   to location-targeted advertising.
+5. Maintain a location-discovery feedback loop: report irrelevant distance,
+   missing towns, search abandonment, opt-outs, nearby run saves, and
+   verified event attendance. Keep reporting aggregate and non-sensitive.
+
+### Validation gate
+- Run `npm run type-check` and `npm test -- tests/rch-gravity-location.test.ts`.
+- Test new member (no location), manual city, radius changes, All Virginia,
+  blocked geolocation, iOS standalone PWA, and cross-tab preference updates.
+- Compare recommendations in Richmond, Petersburg, Norfolk and Roanoke.
+- Confirm no exact browser coordinates reach network requests, persisted
+  preferences, profiles, audit logs or analytics; inspect DevTools requests.
+- Confirm search and explicit filters still take priority over ranking.
+- Run mobile visual/contrast and performance tests before release.
