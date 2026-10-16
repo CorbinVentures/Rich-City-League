@@ -25,8 +25,11 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/teams', '/games', '/standings', '/leaderboards', '/schedule',
   '/stats', '/rankings', '/coaches', '/runs', '/draft', '/media',
   '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse',
+  '/commonwealth', '/crews', '/city', '/communities', '/seasons',
+  '/divisions', '/legacy', '/players/compare', '/media/creators',
+  '/media/creators/apply', '/league/royaltee', '/league/royaltee/join',
 ]);
-const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs']);
+const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs', 'coaches', 'seasons', 'fans', 'shop']);
 const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin']);
 
 export function isBrowserPublicRoute(pathname: string): boolean {
@@ -39,6 +42,9 @@ export function isBrowserPublicRoute(pathname: string): boolean {
   }
   if (parts.length === 3 && parts[0] === 'organizations' && parts[1] === 'region') return true;
   if (parts.length === 3 && parts[0] === 'network' && parts[1] === 'events') return true;
+  // Published player basketball passports are public data; management is not.
+  if (parts.length === 3 && parts[0] === 'players' && parts[2] === 'passport'
+      && !PRIVATE_DETAIL_SLUGS.has(parts[1].toLowerCase())) return true;
   return false;
 }
 
