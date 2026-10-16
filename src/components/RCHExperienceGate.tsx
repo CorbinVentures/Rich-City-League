@@ -36,6 +36,12 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
     return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
   }
 
+  // Profile setup and MFA security remain functional in a browser, but get the
+  // website's own shell instead of the installed-PWA wrapper.
+  if (mode === 'browser' && (pathname === '/profile' || pathname === '/account/security' || pathname === '/account/security/')) {
+    return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
+  }
+
   // Browser-only auth screens share the public brand; installed-PWA auth is unchanged.
   // Security/MFA and Command Center exceptions retain their original protected flow.
   if (mode === 'browser' && (pathname === '/auth' || pathname.startsWith('/auth/'))) {
