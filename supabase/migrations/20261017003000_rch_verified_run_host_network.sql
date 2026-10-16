@@ -123,6 +123,7 @@ begin
  then raise exception 'Choose a valid decision and enter 8-500 characters of review evidence'; end if;
  select * into v_app from public.rch_run_host_applications where id=p_application for update;
  if v_app.id is null or v_app.status<>'pending' then raise exception 'Only pending applications may be reviewed'; end if;
+ if v_app.applicant_id=v_actor then raise exception 'Staff cannot approve their own host credential'; end if;
  update public.rch_run_host_applications set status=p_decision,
   review_note=trim(p_note),reviewed_by=v_actor,reviewed_at=now() where id=p_application;
  if p_decision='approved' then
@@ -163,6 +164,7 @@ begin
    raise exception 'Provide 8-500 characters describing the review'; end if;
  select * into v_run from public.runs where id=p_run for update;
  if v_run.id is null then raise exception 'Run not found'; end if;
+ if p_approve and v_run.host_id=v_actor then raise exception 'An independent RCH staff member must certify your Run'; end if;
  if p_approve then
   if v_run.status not in ('open','full') or v_run.starts_at<now()-interval '2 hours'
     or v_run.starts_at>now()+interval '30 days'
@@ -215,6 +217,27 @@ end $$;
 create trigger rch_revoke_modified_verified_run after update on public.runs
  for each row execute function public.rch_revoke_modified_verified_run();
 
+-- Temporary suspension revokes every still-issued Run verification.
+create or replace function public.rch_suspend_verified_run_host(p_host uuid,p_reason text)
+returns void language plpgsql security definer set search_path='' as $
+declare v_actor uuid:=auth.uid();
+begin
+ if v_actor is null or not coalesce(public.is_staff_or_admin(),false) then
+   raise exception 'Only RCH staff may suspend verified hosting credentials'; end if;
+ if p_host=v_actor then raise exception 'Staff cannot self-adjudicate credentials'; end if;
+ if char_length(trim(coalesce(p_reason,''))) not between 12 and 500 then
+   raise exception 'Document the suspension with 12-500 characters'; end if;
+ if not exists(select 1 from public.rch_verified_run_hosts where profile_id=p_host) then
+   raise exception 'No verified hosting credential exists'; end if;
+ update public.rch_verified_run_hosts set verification_status='suspended',
+   suspended_at=now(),updated_at=now() where profile_id=p_host;
+ update public.rch_run_verifications v set verification_status='revoked',
+   revoked_at=now(),revoked_by=v_actor,
+   review_note=left('Host suspended: '||trim(p_reason),500)
+ where v.verification_status='verified'
+   and exists(select 1 from public.runs r where r.id=v.run_id and r.host_id=p_host);
+end $;
+
 -- Authenticated queue participants now receive genuine realtime Next Up events.
 do $$ begin
  if exists(select 1 from pg_catalog.pg_publication where pubname='supabase_realtime')
@@ -228,10 +251,12 @@ revoke all on function public.rch_apply_verified_run_host(text,text,text,text),
  public.rch_review_verified_run_host(uuid,text,text),
  public.rch_review_court_for_runs(text,boolean,text),
  public.rch_certify_verified_run(uuid,boolean,text),
+ public.rch_suspend_verified_run_host(uuid,text),
  public.rch_revoke_modified_verified_run()
  from public,anon,authenticated;
 grant execute on function public.rch_apply_verified_run_host(text,text,text,text),
  public.rch_review_verified_run_host(uuid,text,text),
  public.rch_review_court_for_runs(text,boolean,text),
- public.rch_certify_verified_run(uuid,boolean,text) to authenticated;
+ public.rch_certify_verified_run(uuid,boolean,text),
+ public.rch_suspend_verified_run_host(uuid,text) to authenticated;
 commit;
