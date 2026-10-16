@@ -5,6 +5,8 @@ set role postgres;
 -- production; mirror those existing grants inside this rollback-only test.
 grant select on public.posts, public.stories to anon, authenticated;
 grant select, insert, update on public.friendships to authenticated;
+grant select on public.follows to anon, authenticated;
+grant insert, update on public.follows to authenticated;
 
 -- Isolated fixtures; no production credentials or personal information.
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
@@ -39,6 +41,9 @@ values
  ('b1600000-0000-0000-0000-000000000003','Private story','public'),
  ('b1600000-0000-0000-0000-000000000004','Blocked story','public');
 
+insert into public.follows(follower_id,following_id)
+values ('b1600000-0000-0000-0000-000000000004','b1600000-0000-0000-0000-000000000003');
+
 set role anon;
 select ok(not has_column_privilege('anon','public.profiles','phone','SELECT'),'anonymous member phone SELECT denied');
 select ok(not has_column_privilege('anon','public.profiles','date_of_birth','SELECT'),'anonymous birthday SELECT denied');
@@ -51,6 +56,7 @@ select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'anon cannot see private profile');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000004'),'anon can see otherwise-public profile');
 select ok(not exists(select 1 from public.posts where author_id='b1600000-0000-0000-0000-000000000003'),'anon cannot read hidden-profile posts');
+select ok(not exists(select 1 from public.follows where following_id='b1600000-0000-0000-0000-000000000003'),'anon cannot inspect a private member follow graph');
 
 set role authenticated;
 select set_config('request.jwt.claim.sub','b1600000-0000-0000-0000-000000000001',true);
@@ -62,6 +68,9 @@ select ok(exists(select 1 from public.posts where author_id='b1600000-0000-0000-
 select ok(not exists(select 1 from public.posts where author_id='b1600000-0000-0000-0000-000000000003'),'private posts hidden from connections');
 select ok(not exists(select 1 from public.posts where author_id='b1600000-0000-0000-0000-000000000004'),'blocked posts hidden');
 select ok(exists(select 1 from public.stories where author_id='b1600000-0000-0000-0000-000000000002'),'connection can read story');
+select throws_ok($$insert into public.follows(follower_id,following_id) values ('b1600000-0000-0000-0000-000000000001','b1600000-0000-0000-0000-000000000004')$$,'42501',null,'block prevents direct follow insert');
+select throws_ok($$insert into public.follows(follower_id,following_id) values ('b1600000-0000-0000-0000-000000000001','b1600000-0000-0000-0000-000000000003')$$,'42501',null,'private member rejects direct follow insert');
+select lives_ok($$insert into public.follows(follower_id,following_id) values ('b1600000-0000-0000-0000-000000000001','b1600000-0000-0000-0000-000000000002')$$,'accepted connection can be followed');
 select ok(not exists(select 1 from public.stories where author_id='b1600000-0000-0000-0000-000000000004'),'blocked stories hidden');
 
 select throws_ok($$insert into public.friendships(requester_id,addressee_id,status) values ('b1600000-0000-0000-0000-000000000001','b1600000-0000-0000-0000-000000000005','pending')$$,'42501',null,'nobody preference rejects request at database');
@@ -74,6 +83,7 @@ select lives_ok($$update public.friendships set status='accepted' where requeste
 
 select set_config('request.jwt.claim.sub','b1600000-0000-0000-0000-000000000003',true);
 select is((select count(*)::integer from public.get_my_private_profile()),1,'owner-only private RPC returns exactly one private row');
+select ok(exists(select 1 from public.follows where following_id='b1600000-0000-0000-0000-000000000003'),'private member can see own follower records');
 select ok(not public.is_my_profile_adult(),'missing DOB is not adult-eligible');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'private owner can read own profile');
 
