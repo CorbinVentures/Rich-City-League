@@ -47,6 +47,11 @@ export function RCHPublicRouteGuide() {
     draft: { label: 'The Draft', note: 'The future starts here' },
     register: { label: 'Registration', note: 'Your next basketball chapter' },
     about: { label: 'About RCH', note: 'Built for Virginia hoops' },
+    profile: { label: 'My RCH Profile', note: 'Manage your basketball identity' },
+    account: { label: 'Account security', note: 'Protect your account' },
+    app: { label: 'RCH App', note: 'Add the community to your home screen' },
+    legal: { label: 'Legal & Safety', note: 'Your rights and our community standards' },
+    auth: { label: 'RCH Membership', note: 'Your basketball world starts here' },
   };
   const segment = pathname.split('/').filter(Boolean)[0] || 'discover';
   const info = sections[segment] ?? { label: 'Rich City Hoops', note: 'Virginia basketball lives here' };
