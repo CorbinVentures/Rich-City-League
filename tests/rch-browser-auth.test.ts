@@ -48,7 +48,7 @@ describe('RCH browser sign-in handoff regression', () => {
     const shell = read('src/components/RCHPublicWebShell.tsx');
     const notice = read('src/components/RCHBrowserMemberNotice.tsx');
     const css = read('src/app/rch-browser-sitewide.css');
-    expect(shell).toContain('const { user, profile } = useAuth();');
+    expect(shell).toContain('const { user } = useAuth();');
     expect(shell).toContain('handleBrowserSignOut');
     expect(shell).toContain('My Profile');
     expect(shell).toContain('Sign out');
