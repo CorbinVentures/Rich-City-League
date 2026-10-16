@@ -17,7 +17,7 @@ describe('RCH mobile app experience gate', () => {
     path => expect(isBrowserAccountRoute(path)).toBe(false),
   );
 
-  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/membership', '/register', '/discover', '/search', '/runs/open-run'])(
+  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/membership', '/register', '/discover', '/search', '/runs/open-run', '/pulse'])(
     'renders public information on the open web: %s',
     path => expect(isBrowserPublicRoute(path)).toBe(true),
   );
