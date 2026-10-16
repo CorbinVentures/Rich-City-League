@@ -1,0 +1,395 @@
+/*
+ * RCH Public Browser — Sitewide Visual Authority
+ * Approved cinematic browser design contract.
+ *
+ * This entire layer requires .rch-public-web, emitted ONLY by the browser
+ * experience gate. Installed iOS/Android PWA, scorebook, member social UI,
+ * command center, admin controls and standalone apps are deliberately excluded.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web {
+  --rch-browser-night:#020b17;
+  --rch-browser-deep:#061629;
+  --rch-browser-panel:#0a213a;
+  --rch-browser-panel-2:#102d4b;
+  --rch-browser-line:#31587e;
+  --rch-browser-blue:#318dff;
+  --rch-browser-blue-soft:#9bd0ff;
+  --rch-browser-ink:#f5faff;
+  --rch-browser-copy:#cbdef1;
+  --rch-browser-muted:#a9c4df;
+  --rch-browser-shadow:0 16px 45px #0006;
+  --rch-canvas:var(--rch-browser-night);
+  --rch-card:var(--rch-browser-panel);
+  --rch-card-raised:var(--rch-browser-panel-2);
+  --rch-line:var(--rch-browser-line);
+  --rch-ink:var(--rch-browser-ink);
+  --rch-copy:var(--rch-browser-copy);
+  --rch-muted:var(--rch-browser-muted);
+  --rcl-canvas:var(--rch-browser-night)!important;
+  --rcl-bg:var(--rch-browser-night)!important;
+  --rcl-surface:var(--rch-browser-panel)!important;
+  --rcl-surface-2:var(--rch-browser-panel-2)!important;
+  --rcl-line:var(--rch-browser-line)!important;
+  --rcl-text:var(--rch-browser-ink)!important;
+  --rcl-text-2:var(--rch-browser-copy)!important;
+  --rcl-muted:var(--rch-browser-muted)!important;
+  --rcl-blue:var(--rch-browser-blue)!important;
+  --rcl-orange:var(--rch-browser-blue)!important;
+  --rcl-navy:#071b31!important;
+  color:#f5faff!important;
+  background:#020b17!important;
+  font-family:Arial,Helvetica,sans-serif;
+  color-scheme:dark;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content {
+  min-height:45vh;
+  min-width:0;
+  width:100%;
+  overflow-wrap:break-word;
+  background:#020b17!important;
+  color:#f5faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content > :is(main,div):not(.rch-browser-home-target) {
+  background-color:#020b17!important;
+  color:#f5faff!important;
+  max-width:100%;
+}
+.rch-public-web #rch-public-content :is(main, .rcl-platform-page) {
+  --rch-canvas:#020b17;
+  --rch-card:#0a213a;
+  --rch-line:#31587e;
+  color:#f5faff;
+}
+.rch-public-web #rch-public-content :is(h1,h2,h3,h4,h5,h6){
+  overflow-wrap:break-word;
+  text-wrap:balance;
+}
+.rch-public-web #rch-public-content :is(a,button,input,select,textarea):focus-visible {
+  outline:2px solid #8fcdff!important;
+  outline-offset:3px;
+}
+.rch-public-web #rch-public-content :is(a,button) {
+  transition:filter .17s ease,transform .17s ease,border-color .17s ease;
+}
+.rch-public-web #rch-public-content :is(a,button):hover {
+  filter:brightness(1.1);
+}
+.rch-public-web #rch-public-content main:not(.rch-browser-home):not(.rch-browser-pulse):not(.rch-browser-member-notice) {
+  font-family:Arial,Helvetica,sans-serif;
+}
+.rch-public-web #rch-public-content main:not(.rch-browser-home):not(.rch-browser-pulse):not(.rch-browser-member-notice)
+  :is(.rcl-corporate-page-hero,.rcl-client-page-hero,.rch-shared-page-hero,.rch-arena-hero,.rch-scene-hero,.rcl-cinematic-page-hero) {
+  border-color:#315d89!important;
+  box-shadow:inset 0 -1px 0 #3b82ce28,0 15px 45px #0005!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) {
+  position:relative;
+  background:radial-gradient(ellipse at 80% 22%,#1459a477,transparent 44%),
+    linear-gradient(113deg,#06152b 0%,#0d3156 55%,#071626 100%)!important;
+  color:#f5faff!important;
+  border-bottom:1px solid #3975b0!important;
+}
+.rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) > .mx-auto {
+  padding-top:clamp(30px,4vw,62px)!important;
+  padding-bottom:clamp(30px,4vw,62px)!important;
+}
+.rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) h1,
+html.rch-premium-root body.rch-premium-app .rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) h1 {
+  font-size:clamp(31px,4.6vw,65px)!important;
+  text-transform:uppercase!important;
+  line-height:.99!important;
+  font-weight:950!important;
+  letter-spacing:-.045em!important;
+  max-width:900px;
+  color:#fff!important;
+}
+.rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) p:first-child {
+  color:#8dcbff!important;
+  letter-spacing:.18em!important;
+  font-weight:900!important;
+}
+.rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) p:not(:first-child) {
+  color:#d3e7f8!important;
+  max-width:710px;
+  line-height:1.65!important;
+}
+.rch-public-web :is(.rcl-corporate-page-hero,.rcl-client-page-hero) h1 + span {
+  color:#85c2ff!important;
+  font-weight:800!important;
+}
+/* Original PWA page designs remain functional, but never define browser branding. */
+html.rch-premium-root body.rch-premium-app .rch-public-web main.rch-scene-page {
+  background:radial-gradient(ellipse at 88% 0%,#15529366,transparent 39rem),#020b17!important;
+  color:#f5faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-scene-hero {
+  border-radius:12px!important;
+  border:1px solid #4785c6!important;
+  background:radial-gradient(ellipse at 91% 11%,#287fe944,transparent 42%),
+    linear-gradient(112deg,#051426,#0c3259 70%,#0c4478)!important;
+  box-shadow:var(--rch-browser-shadow)!important;
+}
+.rch-public-web .rch-scene-hero h1 {font-weight:950!important;letter-spacing:-.05em!important}
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-scene-search-input,
+html.rch-premium-root body.rch-premium-app .rch-public-web .rch-scene-location-input {
+  border:1px solid #457cac!important;
+  background:#0a2744!important;
+  color:#f5faff!important;
+  box-shadow:0 6px 20px #0003!important;
+}
+.rch-public-web .rch-scene-search-input :is(input,textarea),
+.rch-public-web .rch-scene-location-input :is(input,textarea) {
+  background:transparent!important;color:#f5faff!important;
+}
+.rch-public-web .rch-scene-search-input :is(input,textarea)::placeholder,
+.rch-public-web .rch-scene-location-input :is(input,textarea)::placeholder {color:#afc9df!important}
+/* Neutral panels and data cards: one web-only editorial treatment everywhere. */
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(.rcl-panel,.rcl-game-card,.rcl-news-card,.rcl-card,.rcl-world-card,
+     .rcl-platform-panel,.rcl-mock-card,.rcl-mock-section,.city-dashboard,
+     .city-section,.rch-arena-panel,.rch-arena-game-card,.rcl-person-card,.rcl-lifestyle-card) {
+  border:1px solid #315a80!important;
+  border-radius:12px!important;
+  background:linear-gradient(150deg,#0d2945,#061629 95%)!important;
+  color:#f5faff!important;
+  box-shadow:0 10px 29px #0004!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(article,aside,section,form,div)[class*="rounded-2xl"][class*="border"],
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(article,aside,section,form,div)[class*="rounded-3xl"][class*="border"] {
+  border-color:#345e81!important;
+  border-radius:13px!important;
+  color:#f5faff!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(article,aside,section,form,div)[class*="bg-[#071522]"][class*="rounded"],
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(article,aside,section,form,div)[class*="bg-white"][class*="rounded"] {
+  background:linear-gradient(150deg,#0d2945,#081a30)!important;
+  border-color:#345e81!important;
+  color:#f5faff!important;
+}
+.rch-public-web #rch-public-content :is(.rch-scene-card,.rch-scene-opportunity-card,
+  .rch-scene-result,.rch-scene-panel) {
+  border-color:#356491!important;
+  background:#102b4a!important;
+  color:#f5faff!important;
+}
+/* Public headings, links, labels and meta text prioritize strong readability. */
+.rch-public-web #rch-public-content main :is(h1,h2,h3) {
+  color:#f5faff!important;
+}
+.rch-public-web #rch-public-content main :is(.text-slate-800,.text-slate-900,
+  .text-gray-800,.text-gray-900,.text-black) {
+  color:#f5faff!important;
+}
+.rch-public-web #rch-public-content main :is(.text-slate-500,.text-slate-600,.text-slate-700,
+  .text-gray-500,.text-gray-600,.text-gray-700) {
+  color:#c4d9ef!important;
+}
+.rch-public-web #rch-public-content main :is(.rcl-kicker,.rcl-page-kicker,
+  .rch-scene-eyebrow,.rcl-eyebrow) {
+  color:#86c9ff!important;
+}
+.rch-public-web #rch-public-content main :is(.rcl-display,.font-display) {
+  letter-spacing:-.035em;
+}
+/* Keep photos/video/canvas surfaces intact rather than hiding contrast by covering media. */
+.rch-public-web #rch-public-content :is(img,video,canvas,iframe) {
+  max-width:100%;
+}
+.rch-public-web #rch-public-content video,
+.rch-public-web #rch-public-content iframe {background:#051329;}
+/* Focused action styling. Avoid mutating functional table and pagination controls. */
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(a,button)[class*="bg-rcl-orange"]:not([class*="opacity-"]),
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
+  :is(a,button)[class*="bg-rcl-blue"]:not([class*="opacity-"]) {
+  border:1px solid #6db4ff!important;
+  color:#fff!important;
+  background:linear-gradient(135deg,#238cff,#185cd0)!important;
+  box-shadow:0 7px 18px #0752ac50!important;
+}
+.rch-public-web #rch-public-content :is(input:not([type=checkbox]):not([type=radio]),textarea,select) {
+  accent-color:#348fff;
+  max-width:100%;
+}
+.rch-public-web #rch-public-content main:not(.royaltee-site) :is(input:not([type=checkbox]):not([type=radio]),textarea,select)[class*="bg-white"]{
+  color:#fff!important;
+  background:#0c2b4b!important;
+  border-color:#4780af!important;
+}
+.rch-public-web #rch-public-content main:not(.royaltee-site)
+  :is(input,textarea)::placeholder {color:#a9c0d5}
+.rch-public-web #rch-public-content :is(select,button,input) {
+  touch-action:manipulation;
+}
+/* Specific full-width public media and special route containers. */
+html.rch-premium-root body.rch-premium-app .rch-public-web main.rch-arena-shell {
+  background:radial-gradient(ellipse at 85% -3%,#144f8666,transparent 42rem),#020b17!important;
+}
+.rch-public-web .rch-arena-hero {
+  border:1px solid #3c80c3!important;
+  border-radius:13px!important;
+  box-shadow:var(--rch-browser-shadow)!important;
+}
+.rch-public-web .rch-arena-shell :is(.rch-arena-panel,.rch-arena-game-card) {
+  border-radius:12px!important;
+}
+.rch-public-web .rcl-platform-page :is(h1,.rcl-display),
+.rch-public-web .rcl-about-page h1 {
+  font-size:clamp(40px,6.4vw,90px)!important;
+  line-height:.96!important;
+  font-weight:950!important;
+  letter-spacing:-.055em!important;
+}
+.rch-public-web .rcl-cinematic-page-hero {
+  background:radial-gradient(ellipse at 68% 14%,#1a50905c,transparent 44%),
+  linear-gradient(130deg,#051428,#082849,#020b17)!important;
+}
+.rch-public-web #rch-public-content :is(.rcl-cinematic-page-hero,.rcl-texture) h1 {
+  color:#fff!important;
+}
+.rch-public-web #rch-public-content .rcl-cinematic-page-hero :is(p,small) {color:#cbdeee!important}
+.rch-public-web .royaltee-site .royaltee-nav-shell {
+  display:none!important; /* Own partner identity remains in page artwork, not duplicate nav */
+}
+/* Smaller screens keep the dominant landing-page energy without app bottom nav. */
+@media(max-width:900px){
+  .rch-public-web #rch-public-content :is(.rcl-corporate-page-hero,.rcl-client-page-hero) > .mx-auto{
+    padding-block:34px!important;
+  }
+}
+@media(max-width:560px){
+  .rch-public-web #rch-public-content :is(.rcl-corporate-page-hero,.rcl-client-page-hero) h1{
+    font-size:clamp(30px,8.5vw,49px)!important;
+  }
+  .rch-public-web #rch-public-content main {overflow-x:clip}
+  .rch-public-web #rch-public-content :is(.rcl-card,.rcl-game-card,.rch-arena-game-card){
+    min-width:0;
+  }
+}
+
+/* Consistent route brand rail: contextual navigation, not the PWA bottom bar. */
+.rch-public-web .rch-browser-route-guide {
+  position:relative;
+  z-index:20;
+  border-bottom:1px solid #25547f;
+  background:linear-gradient(100deg,#071c34 0%,#0b3152 48%,#07172b 100%)!important;
+  color:#eef7ff!important;
+}
+.rch-public-web .rch-browser-route-guide-inner {
+  width:min(100%,1510px);
+  min-height:86px;
+  margin:0 auto;
+  display:flex;align-items:center;gap:22px;
+  padding:12px clamp(16px,2.4vw,34px);
+}
+.rch-public-web .rch-browser-route-guide-copy {min-width:195px;flex:1}
+.rch-public-web .rch-browser-breadcrumb {display:flex;align-items:center;gap:7px;color:#add0ee;font-size:10px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.rch-public-web .rch-browser-breadcrumb a {display:inline-flex;align-items:center;gap:5px;color:#7dc0ff!important}
+.rch-public-web .rch-browser-breadcrumb>svg {font-size:8px}
+.rch-public-web .rch-browser-route-guide-title {display:flex;align-items:baseline;gap:13px;margin-top:7px;flex-wrap:wrap}
+.rch-public-web .rch-browser-route-guide-title b {font-size:21px;font-weight:950;letter-spacing:-.04em;text-transform:uppercase;color:#fff}
+.rch-public-web .rch-browser-route-guide-title span {font-size:11px;color:#c1d5e9}
+.rch-public-web .rch-browser-route-guide-links {display:flex;align-items:center;flex-wrap:wrap;gap:4px;justify-content:center}
+.rch-public-web .rch-browser-route-guide-links a {
+  display:flex;align-items:center;gap:7px;padding:9px 11px;
+  border:1px solid transparent;border-radius:9px;
+  color:#c9e0fa!important;font-size:11px;font-weight:850;white-space:nowrap;
+}
+.rch-public-web .rch-browser-route-guide-links a svg {color:#64afff}
+.rch-public-web .rch-browser-route-guide-links a[aria-current="page"],
+.rch-public-web .rch-browser-route-guide-links a:hover {
+  border-color:#4c8bc5;background:#17466f!important;color:#fff!important;
+}
+.rch-public-web .rch-browser-route-guide-join {
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:40px;padding:10px 14px;border-radius:9px;
+  border:1px solid #6aaafa;color:#fff!important;
+  background:#1557ad;font-size:11px;font-weight:900;white-space:nowrap;
+}
+.rch-public-web .rch-public-nav a[aria-current="page"] {
+  color:#72b7ff!important;
+}
+.rch-public-web .rch-public-nav a[aria-current="page"]::after {
+  content:"";position:absolute;bottom:4px;left:0;right:0;height:2px;background:#318dff;
+}
+.rch-public-web .rch-public-nav a:first-child:not([aria-current="page"]){color:#e5f0ff!important}
+.rch-public-web .rch-public-nav a:first-child:not([aria-current="page"])::after{content:none}
+.rch-public-web .rch-browser-web-to-app {
+  display:flex;align-items:center;justify-content:space-between;gap:23px;
+  padding:23px max(18px,calc((100vw - 1450px)/2));
+  background:radial-gradient(ellipse at 86% 50%,#12478566,transparent 42%),#081d37;
+  border-top:1px solid #225485;
+  color:#f6fbff;
+}
+.rch-public-web .rch-browser-web-to-app>div {display:grid;gap:6px}
+.rch-public-web .rch-browser-web-to-app b {font-size:13px;font-weight:950;letter-spacing:.04em;color:#f5faff}
+.rch-public-web .rch-browser-web-to-app span {font-size:12px;color:#c1d5e8;line-height:1.5}
+.rch-public-web .rch-browser-web-to-app a {
+  display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border:1px solid #548fda;border-radius:10px;
+  color:#fff!important;background:#125fca;font-size:12px;font-weight:900;white-space:nowrap;
+}
+@media(max-width:1100px){
+  .rch-public-web .rch-browser-route-guide-inner {flex-wrap:wrap;gap:10px;min-height:65px}
+  .rch-public-web .rch-browser-route-guide-links {order:3;flex-basis:100%;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;padding-bottom:2px}
+}
+@media(max-width:600px){
+  .rch-public-web .rch-browser-route-guide-inner {padding:10px 12px;gap:8px}
+  .rch-public-web .rch-browser-route-guide-copy {min-width:0}
+  .rch-public-web .rch-browser-route-guide-title b {font-size:18px}
+  .rch-public-web .rch-browser-route-guide-title span {display:none}
+  .rch-public-web .rch-browser-route-guide-join {min-height:35px;padding:8px 10px;font-size:10px}
+  .rch-public-web .rch-browser-route-guide-links a {font-size:10px;padding:8px 10px}
+  .rch-public-web .rch-browser-web-to-app {flex-direction:column;align-items:flex-start;padding:18px}
+}
+/* Nonpublic destinations show an inviting browser-native continuation — never PWA UI. */
+.rch-public-web .rch-browser-member-notice {
+  min-height:70vh;display:flex;align-items:center;
+  background:radial-gradient(ellipse at 78% 16%,#1c559371,transparent 43%),
+    linear-gradient(115deg,#020b17,#0b2a4b 65%,#06182b)!important;
+  padding:55px 24px;color:#fff!important;
+}
+.rch-public-web .rch-browser-member-notice-inner {
+  width:min(100%,1330px);margin:auto;display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(240px,.72fr);gap:clamp(25px,5vw,95px);
+  align-items:center;
+}
+.rch-public-web .rch-browser-member-kicker {display:inline-flex;gap:10px;align-items:center;font-size:11px;font-weight:900;letter-spacing:.19em;color:#96cfff}
+.rch-public-web #rch-public-content .rch-browser-member-notice h1 {
+  font-size:clamp(43px,7vw,100px)!important;
+  line-height:.9!important;letter-spacing:-.052em!important;margin:20px 0!important;
+  color:#fff!important;
+}
+.rch-public-web .rch-browser-member-notice h1 em {font-style:normal;color:#469aff}
+.rch-public-web #rch-public-content .rch-browser-member-notice h2 {font-size:20px!important;letter-spacing:.08em;color:#c4e4ff!important;text-transform:uppercase}
+.rch-public-web .rch-browser-member-notice p {max-width:620px;margin-top:15px;color:#d0e2f6!important;line-height:1.6!important;font-size:16px!important}
+.rch-public-web .rch-browser-member-actions {display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.rch-public-web .rch-browser-member-actions a {display:flex;gap:10px;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:10px;font-size:13px;font-weight:900;text-decoration:none}
+.rch-public-web .rch-browser-member-primary {background:#1b75ee;color:#fff!important;border:1px solid #68b6ff}
+.rch-public-web .rch-browser-member-outline {background:#08203b;color:#d7ecff!important;border:1px solid #5786b4}
+.rch-public-web .rch-browser-member-note {display:block;margin-top:16px;color:#9fbfdd;font-size:11px}
+.rch-public-web .rch-browser-member-discover {display:grid;gap:10px}
+.rch-public-web .rch-browser-member-discover a {
+  display:flex;align-items:center;gap:13px;padding:15px;
+  border:1px solid #3a6b96;border-radius:12px;background:#071b33e8;color:#fff!important;
+}
+.rch-public-web .rch-browser-member-discover a>svg:first-child {font-size:20px;color:#5ca8ff}
+.rch-public-web .rch-browser-member-discover a>svg:last-child {margin-left:auto;color:#77baff;font-size:12px}
+.rch-public-web .rch-browser-member-discover a span {display:grid;gap:4px}
+.rch-public-web .rch-browser-member-discover b {font-size:12px}
+.rch-public-web .rch-browser-member-discover small {color:#b0cee9;font-size:11px}
+@media(max-width:760px){
+  .rch-public-web .rch-browser-member-notice-inner {grid-template-columns:1fr}
+  .rch-public-web .rch-browser-member-notice {padding:45px 18px}
+  .rch-public-web .rch-browser-member-discover {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rch-public-web .rch-browser-member-discover a {align-items:flex-start;padding:13px;gap:9px}
+  .rch-public-web .rch-browser-member-discover a>svg:last-child {display:none}
+  .rch-public-web .rch-browser-member-discover small {display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .rch-public-web #rch-public-content :is(a,button){transition:none!important}
+}
