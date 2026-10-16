@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {
   FaArrowRight, FaBasketball, FaCalendarDays, FaCamera,
-  FaCompass, FaDumbbell, FaLocationDot, FaPlay, FaTrophy,
+  FaCompass, FaLocationDot, FaPlay, FaTrophy,
   FaUserGroup, FaUsers, FaVideo,
 } from 'react-icons/fa6';
 
@@ -72,7 +72,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
         </div>
         <div className="rch-browser-hero-quick" aria-label="Popular places to start">
           <Link href="/runs"><FaLocationDot/><span><b>FIND RUNS</b><small>See where Virginia hoops</small></span><FaArrowRight/></Link>
-          <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Virginia's premier league vision</small></span><FaArrowRight/></Link>
+          <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Virginia&apos;s premier league vision</small></span><FaArrowRight/></Link>
           <Link href="/players"><FaUsers/><span><b>FIND PLAYERS</b><small>Meet the basketball community</small></span><FaArrowRight/></Link>
           <Link href="/community"><FaUserGroup/><span><b>CONNECT</b><small>Culture, creators and fans</small></span><FaArrowRight/></Link>
         </div>
