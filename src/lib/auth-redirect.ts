@@ -1,4 +1,4 @@
-import { isBrowserAccountRoute, isBrowserPublicRoute } from './rch-mobile-experience';
+import { isBrowserAccountRoute, isBrowserPublicRoute, isBrowserMemberRoute } from './rch-mobile-experience';
 
 const INTERNAL_URL_BASE = 'https://rcl.invalid';
 
@@ -53,6 +53,6 @@ export function getSafePostAuthPath(
 export function getBrowserPostAuthPath(value: string | null | undefined, fallback = '/'): string {
   const path = getSafePostAuthPath(value, fallback);
   const pathname = new URL(path, INTERNAL_URL_BASE).pathname;
-  if (isBrowserPublicRoute(pathname) || isBrowserAccountRoute(pathname)) return path;
+  if (isBrowserPublicRoute(pathname) || isBrowserAccountRoute(pathname) || isBrowserMemberRoute(pathname)) return path;
   return `/member-access?next=${encodeURIComponent(path)}`;
 }
