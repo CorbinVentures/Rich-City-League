@@ -148,7 +148,7 @@ export default function RunsHostNetworkPage(){
          <select value={selectedRun} onChange={e=>setSelectedRun(e.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-[#846b60] bg-[#10253a] px-3 text-sm">
           <option value="">Choose a Run</option>{runs.map(r=><option key={r.id} value={r.id}>{r.title} · {r.location} · {new Date(r.starts_at).toLocaleDateString()}</option>)}
          </select></label>
-        {selectedRun&&<Link href={'/runs/'+selectedRun} className="mt-2 inline-block text-xs text-[#9fdcff] underline">Open Run Operations HQ</Link>}
+        {selectedRun && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(selectedRun) && <Link href={'/runs/' + encodeURIComponent(selectedRun)} className="mt-2 inline-block text-xs text-[#9fdcff] underline">Open Run Operations HQ</Link>}
         <textarea rows={3} value={certifyNote} onChange={e=>setCertifyNote(e.target.value.slice(0,500))} placeholder="Venue, independent official and checklist evidence (8+ characters)" className="mt-3 w-full rounded-lg border border-[#846b60] bg-[#10253a] p-3 text-sm"/>
         <div className="mt-2 flex flex-wrap gap-2">
          <button disabled={busy||!selectedRun||certifyNote.trim().length<8} onClick={()=>void action('rch_certify_verified_run',{p_run:selectedRun,p_approve:true,p_note:certifyNote.trim()},'RCH Verified Run badge issued.')} className="min-h-10 rounded-lg bg-[#eac98e] px-4 text-xs font-black text-[#291b12] disabled:opacity-40">Verify Run</button>
