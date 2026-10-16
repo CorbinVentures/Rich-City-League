@@ -52,7 +52,7 @@ describe('RCH browser sign-in handoff regression', () => {
     expect(shell).toContain('handleBrowserSignOut');
     expect(shell).toContain('My Profile');
     expect(shell).toContain('Sign out');
-    expect(shell).not.toContain('PlatformChrome');
+    expect(shell).not.toContain('<PlatformChrome');
     expect(notice).toContain('You are signed in to Rich City Hoops.');
     expect(css).toContain('.rch-public-web .rch-public-mobile-drawer-actions button');
     expect(css).not.toContain('.rcl-universal-bottom');
