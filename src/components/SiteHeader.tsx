@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { FaBars, FaBell, FaGear, FaMagnifyingGlass, FaUser } from 'react-icons/fa6';
+import { FaBars, FaBell, FaGear, FaLocationDot, FaMagnifyingGlass, FaUser } from 'react-icons/fa6';
 import { NavigationDrawer } from '@/components/NavigationDrawer';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { MessageQuickMenu } from '@/components/messaging/MessageQuickMenu';
@@ -127,6 +127,7 @@ export function SiteHeader(){
         </Link>
         {user?<>
           <Link href="/settings" className="rcl-universal-account-link"><FaGear/> Settings</Link>
+          <Link href="/settings/discovery" className="rcl-universal-account-link"><FaLocationDot/> My Area</Link>
           <button onClick={()=>void signOut()} className="rcl-universal-account-link"><span>↪</span> Log Out</button>
         </>:<Link href="/auth/sign-in?redirect=/social" className="rcl-universal-account-link"><FaUser/> Sign In</Link>}
       </div>
