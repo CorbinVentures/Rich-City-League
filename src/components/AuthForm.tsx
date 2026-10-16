@@ -65,14 +65,6 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         const hasExplicitNext = Boolean(requestedNext);
         let destination = getSafePostAuthPath(requestedNext, '/dashboard');
         await signIn(email, password);
-        const pendingReferral = window.localStorage.getItem('rcl_pending_referral');
-        if (pendingReferral) {
-          const client = (await import('@/lib/supabase')).getSupabaseClient();
-          if (client) {
-            const { data: claimed } = await (client.rpc as any)('claim_referral', { invite_code: pendingReferral });
-            if (claimed) window.localStorage.removeItem('rcl_pending_referral');
-          }
-        }
         if (!hasExplicitNext) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
@@ -80,6 +72,23 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             const { data: signedInProfile } = await client.from('profiles').select('role, is_active').eq('id', signedInUser.id).maybeSingle();
             const accessProfile = signedInProfile as { role?: string | null; is_active?: boolean | null } | null;
             if (accessProfile?.is_active === true && (accessProfile.role === 'admin' || accessProfile.role === 'coach')) destination = '/portal/scorebook';
+          }
+        }
+        const client = (await import('@/lib/supabase')).getSupabaseClient();
+        if (!client) throw new Error('Authentication is unavailable.');
+        const { data: aal, error: aalError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalError || !aal) throw new Error('Could not verify your sign-in security.');
+        if (aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          window.location.assign(`/auth/mfa?next=${encodeURIComponent(destination)}`);
+          return;
+        }
+
+        const pendingReferral = window.localStorage.getItem('rcl_pending_referral');
+        if (pendingReferral) {
+          const client = (await import('@/lib/supabase')).getSupabaseClient();
+          if (client) {
+            const { data: claimed } = await (client.rpc as any)('claim_referral', { invite_code: pendingReferral });
+            if (claimed) window.localStorage.removeItem('rcl_pending_referral');
           }
         }
         window.location.assign(destination);
