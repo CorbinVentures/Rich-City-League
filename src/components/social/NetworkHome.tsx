@@ -852,7 +852,7 @@ function TodayPanel({
     <div className="flex items-start justify-between gap-4 border-b border-[#E7EEF6] px-4 py-4 sm:px-5">
       <div>
         <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">THE PULSE · TODAY</p>
-        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">What's moving in the community.</h2>
+        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">What&apos;s moving in the community.</h2>
         <p className="mt-1 text-xs leading-5 text-[#60738D]">Fresh activity, your next court and the conversation moving around you.</p>
       </div>
       <Link href="/discover" className="shrink-0 rounded-lg border border-[#D9E4EF] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore</Link>
