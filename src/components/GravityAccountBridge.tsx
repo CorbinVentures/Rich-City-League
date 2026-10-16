@@ -173,10 +173,11 @@ export function GravityAccountBridge() {
     const {data: authListener} = supabase.auth.onAuthStateChange((event,session) => {
       if (event === 'SIGNED_OUT') { signOutLocal(); return; }
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
-        Promise.resolve().then(() => {
+        window.setTimeout(() => {
+          // GetUser runs after the auth callback releases its internal lock.
           if (!disposed && session?.user) void verifiedMember();
           else if (!disposed && event === 'INITIAL_SESSION') void verifiedMember();
-        });
+        },0);
       }
     });
     window.addEventListener(GRAVITY_LOCATION_EVENT,onPreferenceChange);
