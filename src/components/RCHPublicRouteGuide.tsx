@@ -16,7 +16,7 @@ const items = [
 /** Contextual browser navigation. Never mounted in installed-PWA chrome. */
 export function RCHPublicRouteGuide() {
   const pathname = usePathname() || '/';
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   if (pathname === '/' || pathname === '/pulse') return null;
 
   const sections: Record<string, { label: string; note: string }> = {
@@ -71,7 +71,7 @@ export function RCHPublicRouteGuide() {
           return <Link key={href} href={resolvedHref} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
         })}
       </nav>
-      <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>
+      {loading ? <span className="rch-browser-route-guide-join" role="status">Checking account…</span> : <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>}
     </div>
   </div>;
 }
