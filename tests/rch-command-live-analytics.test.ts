@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { analyticsSection } from '../src/lib/analytics/sections';
 
 const read=(file:string)=>readFileSync(file,'utf8');
-const sql=read('supabase/migrations/20261016160000_rch_command_live_analytics.sql');
+const sql=read('supabase/migrations/20261016144500_rch_command_live_analytics.sql');
 const command=read('src/components/command/CommandSiteAnalytics.tsx');
 const live=read('src/components/command/CommandLiveAnalytics.tsx');
 const observer=read('src/components/analytics/SiteAnalyticsObserver.tsx');
