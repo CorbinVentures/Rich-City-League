@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {useMemo,useState} from 'react';
 import {FaArrowRight,FaBasketball,FaLocationDot,FaMagnifyingGlass,FaMedal,FaPeopleGroup} from 'react-icons/fa6';
 import {ProfileAvatarMedia} from '@/components/ProfileAvatarMedia';
+import {useAuth} from '@/hooks/useAuth';
 import {coachMilestones,type RCHCoachIdentity} from '@/lib/rch-coach-identity';
 
 export type RCHDirectoryCoach=RCHCoachIdentity&{
@@ -11,6 +12,7 @@ export type RCHDirectoryCoach=RCHCoachIdentity&{
 };
 
 export function RCHCoachesNetwork({coaches}:{coaches:RCHDirectoryCoach[]}){
+ const { user, loading: authLoading } = useAuth();
  const [search,setSearch]=useState('');
  const [level,setLevel]=useState('all');
  const [availability,setAvailability]=useState(false);
@@ -59,7 +61,7 @@ export function RCHCoachesNetwork({coaches}:{coaches:RCHDirectoryCoach[]}){
     <FaPeopleGroup className="mx-auto text-4xl text-[#8fcaff]" aria-hidden="true"/>
     <h3 className="mt-4 text-xl font-black">{coaches.length?'No coaches match yet.':'Be one of the first coaches on RCH.'}</h3>
     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#c0d6e9]">{coaches.length?'Try a different city, specialty or coaching level.':'It takes a free RCH member profile and a coaching identity. Coaches choose whether to appear in the directory.'}</p>
-    <Link href={coaches.length?'/coaches':user?'/profile':'/auth/sign-up?next=/profile'} onClick={coaches.length?()=>{setSearch('');setLevel('all');setAvailability(false)}:undefined} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ad4ff] bg-[#226fa8] px-5 text-sm font-black text-white">{coaches.length?'Clear filters':'Join RCH free'} <FaArrowRight/></Link>
+    <Link href={coaches.length?'/coaches':authLoading?'/coaches':user?'/profile':'/auth/sign-up?next=/profile'} onClick={coaches.length?()=>{setSearch('');setLevel('all');setAvailability(false)}:undefined} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ad4ff] bg-[#226fa8] px-5 text-sm font-black text-white">{coaches.length?'Clear filters':authLoading?'Checking account…':user?'Manage my coach identity':'Join RCH free'} <FaArrowRight/></Link>
    </div>}
   </div>;
 }
