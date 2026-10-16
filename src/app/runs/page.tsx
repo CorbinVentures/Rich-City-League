@@ -8,6 +8,7 @@ import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
+import { RunPassport } from '@/components/runs/RunPassport';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import './runs-arena.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -123,6 +124,17 @@ export default function RunsPage() {
   const [notice, setNotice] = useState('');
   const [createdRuns, setCreatedRuns] = useState<Array<{ id:string; title:string; starts_at:string }>>([]);
   const [form, setForm] = useState(emptyForm);
+  const [staffIntelligence, setStaffIntelligence] = useState(false);
+
+  useEffect(() => {
+    if (!db || !user?.id) { setStaffIntelligence(false); return; }
+    let active = true;
+    void db.rpc('is_staff_or_admin').then(({data}: {data:boolean|null}) => {
+      if(active)setStaffIntelligence(Boolean(data));
+    });
+    return () => { active = false; };
+  }, [db,user?.id]);
+
 
   const load = async () => {
     if (!db) {
@@ -389,12 +401,12 @@ export default function RunsPage() {
         <Link href="/crews" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#3576ab] bg-[linear-gradient(95deg,#123b60,#071f37)] p-4 text-[#e5f4ff] hover:border-[#81c6fc]"><span><strong className="block text-sm font-black uppercase tracking-wide">Bring your crew to the Run</strong><small className="mt-1 block text-xs text-[#add6f4]">Create a logo · choose your top five · compete together for the Commonwealth Cup</small></span><FaPeopleGroup className="shrink-0 text-2xl text-[#8ccbfc]" /></Link>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span>
+          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span>{staffIntelligence&&<Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link>}</div>
           <button type="button" onClick={() => setView(view === 'runs' ? 'rewards' : 'runs')} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#325f8d] bg-[#0d2b4a] px-3 text-[11px] font-bold text-[#b8dbff]">
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && <><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
+        {view === 'runs' && <><RunPassport /><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
