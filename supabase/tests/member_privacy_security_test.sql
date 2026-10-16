@@ -44,8 +44,9 @@ select ok(not has_column_privilege('anon','public.profiles','phone','SELECT'),'a
 select ok(not has_column_privilege('anon','public.profiles','date_of_birth','SELECT'),'anonymous birthday SELECT denied');
 select ok(not has_column_privilege('authenticated','public.profiles','phone','SELECT'),'signed-in cross-member phone SELECT denied');
 select ok(not has_column_privilege('authenticated','public.profiles','date_of_birth','SELECT'),'signed-in cross-member birthday SELECT denied');
-select throws_ok($select phone from public.profiles limit 1$,'42501',null,'wildcard/private phone read rejected even for visible rows');
-select throws_ok($select * from public.get_my_private_profile()$,'42501',null,'anonymous callers cannot use private profile RPC');
+select throws_ok($$select phone from public.profiles limit 1$$,'42501',null,'wildcard/private phone read rejected even for visible rows');
+select throws_ok($$select * from public.get_my_private_profile()$$,'42501',null,'anonymous callers cannot use private profile RPC');
+select throws_ok($$select * from public.get_my_blocked_accounts()$$,'42501',null,'anonymous callers cannot list member blocks');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000002'),'anon cannot see connections-only profile');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'anon cannot see private profile');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000004'),'anon can see otherwise-public profile');
@@ -53,6 +54,7 @@ select ok(not exists(select 1 from public.posts where author_id='b1600000-0000-0
 
 set role authenticated;
 select set_config('request.jwt.claim.sub','b1600000-0000-0000-0000-000000000001',true);
+select is((select count(*)::integer from public.get_my_blocked_accounts()),1,'only the blocker can list their blocked account');
 select ok(exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000002'),'accepted connection can see connections-only profile');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000003'),'signed-in non-owner cannot see private profile');
 select ok(not exists(select 1 from public.profiles where id='b1600000-0000-0000-0000-000000000004'),'blocking hides profile both ways');
