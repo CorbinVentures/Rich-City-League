@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { getSafePostAuthPath } from '@/lib/auth-redirect';
+import { getBrowserPostAuthPath, getSafePostAuthPath } from '@/lib/auth-redirect';
 
 type ProfileType = 'player' | 'coach' | 'fan';
 
@@ -63,9 +63,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         const params = new URLSearchParams(window.location.search);
         const requestedNext = params.get('next') ?? params.get('redirect');
         const hasExplicitNext = Boolean(requestedNext);
-        let destination = getSafePostAuthPath(requestedNext, '/dashboard');
+        let destination = getSafePostAuthPath(requestedNext, mobileApp ? '/dashboard' : '/');
         await signIn(email, password);
-        if (!hasExplicitNext) {
+        if (!hasExplicitNext && mobileApp) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           const { data: { user: signedInUser } } = await client?.auth.getUser() ?? { data: { user: null } };
           if (signedInUser && client) {
@@ -74,6 +74,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             if (accessProfile?.is_active === true && (accessProfile.role === 'admin' || accessProfile.role === 'coach')) destination = '/portal/scorebook';
           }
         }
+        if (!mobileApp) destination = getBrowserPostAuthPath(destination, '/');
         const client = (await import('@/lib/supabase')).getSupabaseClient();
         if (!client) throw new Error('Authentication is unavailable.');
         const { data: aal, error: aalError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();

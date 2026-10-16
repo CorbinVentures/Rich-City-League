@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { FaArrowRight, FaBasketball, FaChevronRight, FaCompass, FaHouse, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa6';
 
 const items = [
@@ -15,6 +16,7 @@ const items = [
 /** Contextual browser navigation. Never mounted in installed-PWA chrome. */
 export function RCHPublicRouteGuide() {
   const pathname = usePathname() || '/';
+  const { user } = useAuth();
   if (pathname === '/' || pathname === '/pulse') return null;
 
   const sections: Record<string, { label: string; note: string }> = {
@@ -68,7 +70,7 @@ export function RCHPublicRouteGuide() {
           return <Link key={href} href={href} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
         })}
       </nav>
-      <Link className="rch-browser-route-guide-join" href="/auth/sign-up">Join Free <FaArrowRight aria-hidden="true"/></Link>
+      <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>
     </div>
   </div>;
 }
