@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
 import {
   FaArrowRight, FaBasketball, FaCalendarDays, FaCamera,
   FaCompass, FaLocationDot, FaPlay, FaTrophy,
@@ -65,7 +66,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
           <p className="rch-browser-hero-mantra">PLAY <i>•</i> CONNECT <i>•</i> COMPETE <i>•</i> GET DISCOVERED</p>
           <p className="rch-browser-hero-description">Players. Runs. Leagues. Coaches. Training. Media. The entire Virginia basketball community, all in one place.</p>
           <div className="rch-browser-hero-actions">
-            <Link className="rch-browser-button rch-browser-button-primary" href="/auth/sign-up">Join the Community <FaArrowRight aria-hidden="true" /></Link>
+            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestLabel="Join the Community" memberLabel="My Basketball" memberHref="/my-hoops" />
             <Link className="rch-browser-button rch-browser-button-outline" href="/discover">Explore Basketball <FaCompass aria-hidden="true" /></Link>
           </div>
           <p className="rch-browser-hero-footnote">Free to explore. Free to join. Built for the culture.</p>
