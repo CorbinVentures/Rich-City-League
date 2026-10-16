@@ -1,3 +1,6 @@
+import { gravityApproxCityMiles, gravityLocalRelevance } from '@/lib/rch-gravity-location';
+import { cityForText } from '@/lib/virginia-world';
+
 /**
  * RCH Gravity — a shared, explainable relevance engine.
  *
@@ -34,7 +37,9 @@ export type GravityCandidate = {
 export type GravityContext = {
   intent?: GravityIntent | null;
   goal?: GravityGoal | null;
-  city?: string | null; // Only explicit user-selected city, never precise GPS.
+  city?: string | null; // Backwards-compatible user-selected municipality.
+  cityId?: string | null; // Validated coarse Virginia anchor, never GPS.
+  radiusMiles?: 25 | 50 | 100;
   userId?: string | null;
   followingIds?: readonly string[];
   hiddenIds?: readonly string[];
@@ -118,12 +123,14 @@ export function scoreGravityCandidate(item: GravityCandidate, context: GravityCo
     : intentMatches ? 0.85 : topicMatches ? 0.65 : 0.08;
   if (goalMatches || intentMatches || topicMatches) reasons.push('Matches your basketball goals');
 
-  const explicitCity = context.city?.trim().toLocaleLowerCase();
-  const candidateCity = item.city?.trim().toLocaleLowerCase();
-  const local = explicitCity && candidateCity
-    ? (explicitCity === candidateCity ? 1 : 0.1)
-    : 0.35;
-  if (explicitCity && candidateCity && explicitCity === candidateCity) reasons.push('In your selected city');
+  const preferredCityId = context.cityId || cityForText(context.city)?.id || null;
+  const radius = context.radiusMiles ?? 50;
+  const local = gravityLocalRelevance(preferredCityId,item.city,radius);
+  const approximateCityDistance = gravityApproxCityMiles(preferredCityId,item.city);
+  if (preferredCityId && approximateCityDistance !== null) {
+    if (approximateCityDistance <= 10) reasons.push('Around your selected city');
+    else if (approximateCityDistance <= radius) reasons.push('In your nearby basketball scene');
+  }
 
   const following = Boolean(item.ownerId && context.followingIds?.includes(item.ownerId));
   if (following) reasons.push('From someone you follow');
