@@ -25,7 +25,8 @@ export function GravityAccountBridge() {
       publishGravityAccountStatus({authenticated:false,loading:false,enabled:false,error:'Account sync is unavailable on this device.'});
       return;
     }
-    const db = client as any;
+    const supabase = client;
+    const db = supabase as any;
     let disposed = false;
     let activeUserId: string | null = null;
     let initialized = false;
@@ -103,7 +104,7 @@ export function GravityAccountBridge() {
 
     async function verifiedMember() {
       try {
-        const {data,error} = await client.auth.getUser();
+        const {data,error} = await supabase.auth.getUser();
         if (disposed || error) return;
         if (!data.user) signOutLocal();
         else await loadForMember(data.user.id);
@@ -169,7 +170,7 @@ export function GravityAccountBridge() {
     };
 
     // Never make Supabase async calls directly inside the auth callback.
-    const {data: authListener} = client.auth.onAuthStateChange((event,session) => {
+    const {data: authListener} = supabase.auth.onAuthStateChange((event,session) => {
       if (event === 'SIGNED_OUT') { signOutLocal(); return; }
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
         Promise.resolve().then(() => {
