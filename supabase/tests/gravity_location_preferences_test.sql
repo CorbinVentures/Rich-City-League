@@ -3,8 +3,8 @@ select no_plan();
 set role postgres;
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
 values
- ('c1810000-0000-0000-0000-000000000001','authenticated','authenticated','gravity-a@example.test','{}'::jsonb),
- ('c1810000-0000-0000-0000-000000000002','authenticated','authenticated','gravity-b@example.test','{}'::jsonb);
+ ('c1810000-0000-0000-0000-000000000001','authenticated','authenticated','gravity-a@example.test','{"date_of_birth":"1990-01-01"}'::jsonb),
+ ('c1810000-0000-0000-0000-000000000002','authenticated','authenticated','gravity-b@example.test','{"date_of_birth":"1990-01-01"}'::jsonb);
 set role anon;
 select ok(not has_table_privilege('anon','public.gravity_member_location_preferences','select'),'anonymous cannot read synced discovery city');
 select throws_ok($$select * from public.gravity_member_location_preferences$$,'42501',null,'anonymous query denied');
