@@ -29,7 +29,7 @@ function browserNavHref(href: string, signedIn: boolean) {
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   // Browser menu lives in a viewport-level overlay, not in the tiny header
@@ -110,7 +110,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="rch-public-header-actions">
           <Link href="/search" className="rch-public-search" aria-label="Search players, teams, runs and events"><FaMagnifyingGlass/><span>Search basketball...</span></Link>
-          {user ? <>
+          {authLoading ? <span className="rch-public-signin" role="status">Checking account…</span> : user ? <>
             <Link href="/profile" className="rch-public-signin" aria-label="My RCH profile">My Profile</Link>
             <button type="button" className="rch-public-signin" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
@@ -165,7 +165,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/app" onClick={closeMenu}><span><FaBasketball aria-hidden="true"/> Get the RCH App</span><FaArrowRight aria-hidden="true"/></Link>
         </nav>
         <div className="rch-public-mobile-drawer-actions">
-          {user ? <>
+          {authLoading ? <span role="status" className="rch-browser-auth-loading">Checking account…</span> : user ? <>
             <Link href="/profile" onClick={closeMenu}>My Profile <FaArrowRight aria-hidden="true"/></Link>
             <button type="button" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
