@@ -49,7 +49,7 @@ export default function PrivacyCenter() {
     const load = async () => {
       const [settingsResult, blocksResult, requestsResult] = await Promise.all([
         (db as any).from('profiles').select('message_policy,profile_visibility,friend_request_policy').eq('id', user.id).maybeSingle(),
-        (db as any).from('blocks').select('blocked_id,created_at').eq('blocker_id', user.id).order('created_at', { ascending: false }),
+        (db as any).rpc('get_my_blocked_accounts'),
         (db as any).from('privacy_requests').select('id,request_type,status,created_at').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(10),
       ]);
       if (!active) return;
@@ -58,16 +58,7 @@ export default function PrivacyCenter() {
       if (profile?.profile_visibility && ['public','friends','private'].includes(profile.profile_visibility)) setVisibility(profile.profile_visibility);
       if (profile?.friend_request_policy && ['everyone','friends_of_friends','nobody'].includes(profile.friend_request_policy)) setFriendPolicy(profile.friend_request_policy);
       if (requestsResult.data) setRequests(requestsResult.data as RequestStatus[]);
-      const blockRows = (blocksResult.data ?? []) as Array<{ blocked_id: string; created_at: string }>;
-      const ids = blockRows.map(row => row.blocked_id);
-      let labels = new Map<string, string>();
-      if (ids.length) {
-        const { data: names } = await (db as any).from('profiles').select('id,display_name,username').in('id', ids);
-        labels = new Map(((names ?? []) as Array<{id:string;display_name:string|null;username:string|null}>)
-          .map(row => [row.id, row.display_name || row.username || 'RCH member']));
-      }
-      if (!active) return;
-      setBlocked(blockRows.map(row => ({ ...row, label: labels.get(row.blocked_id) || 'Private member' })));
+      setBlocked((blocksResult.data ?? []) as BlockedAccount[]);
       const failure = settingsResult.error || blocksResult.error || requestsResult.error;
       if (failure) setMessage(failure.message || 'Some privacy information could not be loaded.');
       setPolicyLoading(false);
