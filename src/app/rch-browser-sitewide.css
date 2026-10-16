@@ -628,3 +628,16 @@ html.rch-premium-root body.rch-premium-app .rch-public-web .royaltee-site {
 @media (prefers-reduced-motion:reduce) {
   .rch-public-web .rch-public-mobile-overlay * {scroll-behavior:auto!important;transition:none!important}
 }
+
+/* Browser-only authenticated menu controls match the approved public design. */
+.rch-public-web .rch-public-mobile-drawer-actions button {
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-width:0;min-height:47px;border:1px solid #508ccc;border-radius:9px;
+  background:#113455;color:#f7fbff;font-size:12px;font-weight:900;cursor:pointer;
+}
+.rch-public-web .rch-public-mobile-drawer-actions button:disabled,
+.rch-public-web .rch-public-header-actions button:disabled {opacity:.6;cursor:wait}
+.rch-public-web .rch-browser-auth-error {
+  margin:0;padding:10px 20px;text-align:center;background:#431923;color:#ffe8ec;
+  font-size:12px;font-weight:700;
+}
