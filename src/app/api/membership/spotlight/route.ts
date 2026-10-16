@@ -12,6 +12,11 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ error: 'Membership authentication is unavailable.' }, { status: 503 });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Sign in to request an RCL Spotlight.' }, { status: 401 });
+  // Member-facing service-role writes must respect MFA enrollment even though
+  // they bypass PostgREST's restrictive table policies.
+  const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assuranceError || !assurance) return NextResponse.json({ error: 'Unable to verify session security.' }, { status: 503 });
+  if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') return NextResponse.json({ error: 'Complete authenticator verification to continue.' }, { status: 403 });
 
   const db = supabase as any;
   const { data: entitled, error: entitlementError } = await db.rpc('member_has_entitlement', { entitlement_key: 'monthly_spotlight' });
