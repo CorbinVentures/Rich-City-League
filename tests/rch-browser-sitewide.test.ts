@@ -41,6 +41,7 @@ describe('RCH public browser visual authority and route isolation', () => {
     expect(gate).toContain('<RCHPublicWebShell>{publicContent}</RCHPublicWebShell>');
     expect(gate).toContain('<RCHBrowserMemberNotice pathname={pathname}/>');
     expect(gate).toContain("pathname.startsWith('/auth/')");
+    expect(gate).toContain("pathname === '/member-access'");
     expect(gate).not.toContain('RCHAppDownload');
     expect(isMobileStandaloneExperience({ standalone: true, userAgent: 'Mozilla/5.0 iPhone', platform: 'iPhone' })).toBe(true);
     expect(isMobileStandaloneExperience({ standalone: false, userAgent: 'Mozilla/5.0 iPhone', platform: 'iPhone' })).toBe(false);
