@@ -359,6 +359,7 @@ export default function RunsPage() {
         }}
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
+        <Link href="/crews" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#3576ab] bg-[linear-gradient(95deg,#123b60,#071f37)] p-4 text-[#e5f4ff] hover:border-[#81c6fc]"><span><strong className="block text-sm font-black uppercase tracking-wide">Bring your crew to the Run</strong><small className="mt-1 block text-xs text-[#add6f4]">Create a logo · choose your top five · compete together for the Commonwealth Cup</small></span><FaPeopleGroup className="shrink-0 text-2xl text-[#8ccbfc]" /></Link>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span>
