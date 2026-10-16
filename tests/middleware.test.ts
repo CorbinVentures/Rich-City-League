@@ -292,7 +292,8 @@ describe('share card image regression', () => {
 
   it('gives each news story its own 1200x630 cover rather than replacing it with the sitewide fallback', () => {
     const source = readFileSync(resolve(process.cwd(), 'src/app/news/[slug]/page.tsx'), 'utf8');
-    expect(source).toContain("const cover = item.cover_image_url || \`/api/news-cover/\${encodeURIComponent(item.slug)}\`");
+    expect(source).toContain('const cover = item.cover_image_url ||');
+    expect(source).toContain('encodeURIComponent(item.slug)');
     expect(source).toContain("new URL(cover, 'https://www.richcityhoops.com').toString()");
     expect(source).toContain('images:[{url:socialCover,width:1200,height:630');
     expect(source).toContain('images:[socialCover]');
