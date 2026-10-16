@@ -8,6 +8,7 @@ import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
+import { RunPassport } from '@/components/runs/RunPassport';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import './runs-arena.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -394,7 +395,7 @@ export default function RunsPage() {
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && <><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
+        {view === 'runs' && <><RunPassport /><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
