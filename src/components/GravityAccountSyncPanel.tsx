@@ -37,7 +37,7 @@ export function GravityAccountSyncPanel() {
         <FaArrowsRotate aria-hidden="true"/> Refresh from account
       </button>}
     </div>}
-    {status.enabled&&<p role="status" className="mt-3 flex items-start gap-2 text-xs text-[#b6edcd]"><FaLock className="mt-0.5 shrink-0" aria-hidden="true"/> Saved to your private account. Turning sync off deletes the saved account location and keeps this device's choice.</p>}
+    {status.enabled&&<p role="status" className="mt-3 flex items-start gap-2 text-xs text-[#b6edcd]"><FaLock className="mt-0.5 shrink-0" aria-hidden="true"/> Saved to your private account. Turning sync off deletes the saved account location and keeps this device’s choice.</p>}
     {status.error && <p role="alert" className="mt-3 text-sm text-[#ffc0bb]">{status.error}</p>}
   </section>;
 }
