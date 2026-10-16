@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, type ReactNode } from 'react';
+import React, { useId, useState, type ReactNode } from 'react';
 import {
   FaArrowTrendUp, FaChartColumn, FaChartLine, FaCircleInfo,
   FaFire, FaLayerGroup,
