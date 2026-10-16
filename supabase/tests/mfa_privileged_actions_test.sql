@@ -63,5 +63,23 @@ select lives_ok($$
   insert into public.profile_roles(profile_id,role,status)
   values ('a2200000-0000-0000-0000-000000000002','coach','pending')
 $$,'member can request own pending role without enrolling MFA');
+
+-- Once a member opts in, AAL1 must not be enough for direct Data API reads.
+set role postgres;
+insert into auth.mfa_factors(id,user_id,factor_type,status,created_at,updated_at)
+values ('a2200000-0000-0000-0000-0000000000f2',
+        'a2200000-0000-0000-0000-000000000002',
+        'totp','verified',now(),now());
+set role authenticated;
+select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal1"}',true);
+select ok(not private.member_mfa_session_authorized(),'opted-in user has no access with password-only session');
+select is((select count(*)::integer from public.profiles where id=auth.uid()),0,'opted-in AAL1 session cannot fetch its own private profile directly');
+select is((select count(*)::integer from public.get_my_private_profile()),0,'owner-only contact RPC refuses opted-in AAL1 session');
+select ok(not public.is_my_profile_adult(),'adult eligibility RPC rejects opted-in AAL1 session');
+select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal2"}',true);
+select ok(private.member_mfa_session_authorized(),'opted-in user permitted with verified AAL2 session');
+select is((select count(*)::integer from public.profiles where id=auth.uid()),1,'opted-in AAL2 session can read own profile');
+
 select * from finish();
 rollback;
