@@ -40,6 +40,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Find people, teams, organizations, media and opportunities around you',
     items:[
       {label:'Discover Basketball',href:'/discover',icon:FaCompass},
+      {label:'Crews · Find your five',href:'/crews',icon:FaPeopleGroup},
       {label:'The Commonwealth Cup',href:'/commonwealth',icon:FaTrophy},
       {label:'Players',href:'/players',icon:FaUser},
       {label:'Coaches',href:'/coaches',icon:FaUser},
