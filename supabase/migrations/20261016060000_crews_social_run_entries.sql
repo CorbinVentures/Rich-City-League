@@ -125,6 +125,10 @@ begin
  and public.commonwealth_crew_invitations.created_at<now()-interval '7 days'
  returning id into v_invite;
  if v_invite is null then raise exception 'An invitation for this player is already pending or accepted'; end if;
+ insert into public.notifications(recipient_id,actor_id,type,title,body,link)
+ select p_player,v_actor,'crew_invite','You have a crew invitation',
+   c.name||' invited you to represent their crew.','/crews?crew='||p_crew::text
+ from public.commonwealth_crews c where c.id=p_crew;
  return v_invite;
 end $$;
 
@@ -151,6 +155,10 @@ begin
      insert into public.commonwealth_join_requests(crew_id,profile_id,status)
      values(v_inv.crew_id,v_actor,'pending')
      on conflict(crew_id,profile_id) do update set status='pending',created_at=now(),decided_at=null;
+     insert into public.notifications(recipient_id,actor_id,type,title,body,link)
+     values(v_captain,v_actor,'crew_join_request','Crew recruit ready for review',
+       'A teammate accepted an invitation. Approve their spot in the Commonwealth roster.',
+       '/commonwealth#rch-cw-my-crew');
    end if;
  end if;
  update public.commonwealth_crew_invitations set status=case when p_accept then 'accepted' else 'declined' end,
@@ -195,7 +203,15 @@ begin
  values(p_crew,p_run,v_actor)
  on conflict(crew_id,run_id) do nothing
  returning id into v_id;
- if v_id is null then select id into v_id from public.commonwealth_run_entries where crew_id=p_crew and run_id=p_run; end if;
+ if v_id is null then
+  select id into v_id from public.commonwealth_run_entries where crew_id=p_crew and run_id=p_run;
+ else
+  insert into public.notifications(recipient_id,actor_id,type,title,body,link)
+  select m.profile_id,v_actor,'crew_run','Your crew entered a Run',
+    'Your captain registered the crew. RSVP individually to confirm your spot.',
+    '/runs/'||p_run::text
+  from public.commonwealth_crew_members m where m.crew_id=p_crew and m.profile_id<>v_actor;
+ end if;
  return v_id;
 end $$;
 
