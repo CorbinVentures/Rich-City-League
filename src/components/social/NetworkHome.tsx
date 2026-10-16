@@ -709,7 +709,7 @@ export default function NetworkHome() {
         );
         const gravity = scoreGravityCandidate({
           id:post.id,
-          category:post.media_urls?.some(url => /\\.(mp4|webm|mov|m4v)(\\?|$)/i.test(url)) ? 'video' : 'post',
+          category:post.media_urls?.some(url => ['.mp4','.webm','.mov','.m4v'].some(ext => url.toLowerCase().split('?')[0].endsWith(ext))) ? 'video' : 'post',
           title:post.body?.slice(0,160), keywords:post.body,
           ownerId:post.author_id, createdAt:item.feed_at,
           isSaved:saved.includes(post.id),
