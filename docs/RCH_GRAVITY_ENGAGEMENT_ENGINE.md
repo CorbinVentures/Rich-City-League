@@ -224,3 +224,32 @@ on mount.
   preferences, profiles, audit logs or analytics; inspect DevTools requests.
 - Confirm search and explicit filters still take priority over ranking.
 - Run mobile visual/contrast and performance tests before release.
+
+## Location intelligence v2 — opt-in account sync (draft, 2026-10-16)
+A new minimal table `public.gravity_member_location_preferences` allows signed-in
+members to **explicitly** sync their coarse city ID and 25/50/100-mile discovery
+radius between devices.
+
+- There is **no row by default**. The private setting is opt-in on
+  `/settings/discovery`. The user can disable sync, which **deletes** the
+  account row. Device-only preferences remain available without sign-in.
+- RLS is owner-only for SELECT/INSERT/UPDATE/DELETE. The `anon` and
+  `PUBLIC` roles have no table privileges.
+- A single app-level `GravityAccountBridge` loads owner data after verified
+  sign-in; it listens for local preference changes and serializes writes
+  to prevent out-of-order device saves.
+- A signed-out device clears location preferences hydrated from an account
+  to avoid leaking one member's area to the next signed-in member.
+- The browser geolocation prompt is still user-initiated only. Exact
+  latitude/longitude, IP location, and location history are **not** synced.
+- On another device, account preferences load at verified sign-in; the member
+  can refresh explicitly from settings or when re-opening a tab.
+- A failed backend fetch cannot be treated as a sign-out or forced permission
+  grant. The site remains usable in device-only mode.
+
+**Deployment sequencing:** the migration must be reviewed and deployed with
+the release, otherwise sync stays unavailable and device-only discovery works.
+The branch includes `supabase/tests/gravity_location_preferences_test.sql`
+for owner/stranger/anonymous RLS behavior and validation constraints.
+Do not claim RLS test execution or live account-sync success until the
+migration has been tested in a Supabase test database and reviewed.
