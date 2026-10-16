@@ -9,9 +9,10 @@ import {
 import { getSupabaseClient } from '@/lib/supabase';
 import { cityForText } from '@/lib/virginia-world';
 import {
-  classifySceneOpportunity, sceneGoalScore, sceneMatchesWhen,
+  classifySceneOpportunity, sceneMatchesWhen,
   type SceneCategory, type SceneGoal, type SceneWhen
 } from '@/lib/discover-scene';
+import { isGravityIntent, rankGravityCandidates, type GravityCategory, type GravityIntent } from '@/lib/rch-gravity';
 import './the-scene.css';
 
 type Opportunity = {
@@ -54,6 +55,10 @@ const WHEN: {id: SceneWhen; label: string}[] = [
   {id:'weekend', label:'This weekend'}, {id:'week', label:'Next 7 days'}
 ];
 const CITIES = ['Richmond','Petersburg','Charlottesville','Norfolk','Virginia Beach','Newport News','Hampton','Alexandria','Fairfax','Roanoke'];
+const GRAVITY_CATEGORY: Record<SceneCategory,GravityCategory> = {
+  runs:'run', tournaments:'tournament', training:'training',
+  leagues:'league', aau:'tryout', pro:'tryout', tryouts:'tryout', events:'event'
+};
 const GOAL_STORAGE = 'rch-scene-goal-v1';
 const SAVED_STORAGE = 'rch-scene-saved-v1';
 
@@ -79,9 +84,12 @@ export default function DiscoverScene() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [savedOnly, setSavedOnly] = useState(false);
   const [sortPersonalized, setSortPersonalized] = useState(true);
+  const [sharedIntent, setSharedIntent] = useState<GravityIntent|null>(null);
 
   useEffect(() => {
     try {
+      const storedIntent = window.localStorage.getItem('rch-next-move-intent-v1');
+      if (isGravityIntent(storedIntent)) setSharedIntent(storedIntent);
       const storedGoal = window.localStorage.getItem(GOAL_STORAGE);
       if (GOALS.some(item => item.id === storedGoal)) setGoal(storedGoal as SceneGoal);
       const storedIds = JSON.parse(window.localStorage.getItem(SAVED_STORAGE) || '[]');
@@ -162,21 +170,28 @@ export default function DiscoverScene() {
     .sort((a,b) => a.localeCompare(b)), [items]);
   const visible = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return items
+    const filtered = items
       .filter(item => category === 'all' || item.category === category)
       .filter(item => city === 'all' || cityMatches(item.city,city))
       .filter(item => sceneMatchesWhen(item.startsAt,when))
       .filter(item => !savedOnly || savedIds.includes(item.id))
       .filter(item => !needle || [item.title,item.description,item.city,item.venue,item.organizer || '',CATEGORY_LABELS[item.category]]
-        .some(value => value.toLocaleLowerCase().includes(needle)))
-      .sort((a,b) => {
-        if (sortPersonalized) {
-          const difference = sceneGoalScore(b.category,goal) - sceneGoalScore(a.category,goal);
-          if (difference) return difference;
-        }
-        return a.startsAt.localeCompare(b.startsAt);
-      });
-  }, [items,category,city,when,query,goal,sortPersonalized,savedOnly,savedIds]);
+        .some(value => value.toLocaleLowerCase().includes(needle)));
+    // Soonest first always remains available and never uses personalization.
+    if (!sortPersonalized) return filtered.sort((a,b) => a.startsAt.localeCompare(b.startsAt));
+
+    // The same engine ranks opportunity, feed and mission candidates. Preserve
+    // the original opportunity objects so their card metadata remains intact.
+    const priority = rankGravityCandidates(filtered.map(item => ({
+      id:item.id, category:GRAVITY_CATEGORY[item.category],
+      title:item.title, keywords:item.description,
+      city:item.city, startsAt:item.startsAt,
+      unavailable:item.full, isSaved:savedIds.includes(item.id), isVerified:item.verified
+    })), {intent:sharedIntent,goal,city:city==='all'?null:city});
+    const order = new Map(priority.map((item,index) => [item.id,index]));
+    return filtered.filter(item => order.has(item.id))
+      .sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
+  }, [items,category,city,when,query,goal,sharedIntent,sortPersonalized,savedOnly,savedIds]);
 
   const pulse = useMemo(() => [...items].filter(item => sceneMatchesWhen(item.startsAt,'any'))
     .sort((a,b) => a.startsAt.localeCompare(b.startsAt)).slice(0,3),[items]);
