@@ -2,7 +2,7 @@
 export function analyticsSection(pathname: string): string | null {
   if (pathname === '/') return 'home';
   const root = pathname.split('/').filter(Boolean)[0];
-  if (root === 'social') return 'social';
+  if (root === 'social' || root === 'pulse') return 'social';
   if (root === 'discover' || root === 'explore' || root === 'search') return 'discover';
   if (root === 'runs' || root === 'richmond-basketball-runs') return 'runs';
   if (root === 'crews') return 'crews';
