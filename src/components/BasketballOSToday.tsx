@@ -22,6 +22,7 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { isGravityGoal, isGravityIntent, rankGravityCandidates, type GravityGoal, type GravityIntent } from '@/lib/rch-gravity';
 
 type Mission = {
   id: string;
@@ -125,8 +126,21 @@ export function BasketballOSToday() {
   const [claimableOrganizations, setClaimableOrganizations] = useState<ClaimableOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [gravityIntent, setGravityIntent] = useState<GravityIntent|null>(null);
+  const [gravityGoal, setGravityGoal] = useState<GravityGoal|null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+
+  // The same explicit preferences used by Discover and Pulse rank today's
+  // actionable mission suggestions. The authoritative progress remains in DB.
+  useEffect(() => {
+    try {
+      const intent = window.localStorage.getItem('rch-next-move-intent-v1');
+      const goal = window.localStorage.getItem('rch-scene-goal-v1');
+      if (isGravityIntent(intent)) setGravityIntent(intent);
+      if (isGravityGoal(goal)) setGravityGoal(goal);
+    } catch { /* The unpersonalized mission board still works. */ }
+  }, []);
 
   const load = useCallback(async () => {
     if (!db) { setLoading(false); return; }
@@ -199,6 +213,19 @@ export function BasketballOSToday() {
   }, [load, supabase]);
 
   const progressByMission = useMemo(() => new Map(progress.map((item) => [item.mission_id, item])), [progress]);
+  const orderedMissions = useMemo(() => {
+    const candidates = missions.map(mission => {
+      const progressRow = progressByMission.get(mission.id);
+      return {
+        id:mission.id, category:'mission' as const, title:mission.title,
+        keywords:[mission.description,mission.event_type,mission.rep_dimension].join(' '),
+        completion: progressRow?.claimed_at ? 0 : Math.min(1,(progressRow?.progress ?? 0) / Math.max(1,mission.target_count))
+      };
+    });
+    const ranked = rankGravityCandidates(candidates, {intent:gravityIntent,goal:gravityGoal,userId:user?.id});
+    const order = new Map(ranked.map((mission,index) => [mission.id,index]));
+    return [...missions].sort((a,b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity));
+  }, [missions,progressByMission,gravityIntent,gravityGoal,user?.id]);
   const nextGame = games[0];
   const nextRun = runs[0];
   const completed = missions.filter((mission) => (progressByMission.get(mission.id)?.progress ?? 0) >= mission.target_count).length;
@@ -257,7 +284,7 @@ export function BasketballOSToday() {
 
       <section className="mt-7 rounded-3xl border border-white/10 bg-white/[.02] p-5 sm:p-7">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-orange"><FaBolt className="mr-2 inline" />Weekly Missions</p><h2 className="mt-2 font-display text-2xl font-black uppercase">Turn activity into REP</h2></div><Link href="/missions" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Full mission board <FaArrowRight /></Link></div>
-        {!user && !authLoading ? <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/45">Sign in to track mission progress and claim REP rewards.</div> : <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{missions.slice(0, 6).map((mission) => {
+        {!user && !authLoading ? <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/45">Sign in to track mission progress and claim REP rewards.</div> : <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{orderedMissions.slice(0, 6).map((mission) => {
           const item = progressByMission.get(mission.id);
           const current = Math.min(item?.progress ?? 0, mission.target_count);
           const done = current >= mission.target_count;
