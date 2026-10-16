@@ -83,7 +83,7 @@ create or replace function public.get_rch_circuit_standings(
   run_sessions bigint, eligible boolean, seed bigint
 ) language plpgsql stable security definer set search_path='' as $$
 begin
-  if p_cycle < 2026 or p_cycle > extract(year from now() at time zone 'America/New_York')::integer+1 then
+  if p_cycle<>0 and (p_cycle < 2026 or p_cycle > extract(year from now() at time zone 'America/New_York')::integer+1) then
     raise exception 'Invalid competitive cycle';
   end if;
   if p_format not in ('1v1','2v2','3v3','4v4','5v5') then
@@ -100,9 +100,11 @@ begin
         join public.runs r on r.id=m.run_id
         where m.status='verified' and m.game_format='1v1'
           and r.run_type='competitive' and r.status<>'cancelled'
-          and r.starts_at>=make_timestamptz(p_cycle,11,1,0,0,0,'America/New_York')
-          and r.starts_at<make_timestamptz(p_cycle,12,21,0,0,0,'America/New_York')
-          and m.verified_at<make_timestamptz(p_cycle+1,1,1,0,0,0,'America/New_York')
+          and (case when p_cycle=0 then true else
+            r.starts_at>=make_timestamptz(p_cycle,11,1,0,0,0,'America/New_York')
+            and r.starts_at<make_timestamptz(p_cycle,12,21,0,0,0,'America/New_York')
+            and m.verified_at<make_timestamptz(p_cycle+1,1,1,0,0,0,'America/New_York')
+          end)
       ), totals as (
         select id,count(*)::bigint as played,
           count(*) filter(where won)::bigint as victorious,
@@ -139,9 +141,11 @@ begin
         where m.status='verified' and m.game_format=p_format
           and h.crew_id<>a.crew_id
           and r.run_type='competitive' and r.status<>'cancelled'
-          and r.starts_at>=make_timestamptz(p_cycle,11,1,0,0,0,'America/New_York')
-          and r.starts_at<make_timestamptz(p_cycle,12,21,0,0,0,'America/New_York')
-          and m.verified_at<make_timestamptz(p_cycle+1,1,1,0,0,0,'America/New_York')
+          and (case when p_cycle=0 then true else
+            r.starts_at>=make_timestamptz(p_cycle,11,1,0,0,0,'America/New_York')
+            and r.starts_at<make_timestamptz(p_cycle,12,21,0,0,0,'America/New_York')
+            and m.verified_at<make_timestamptz(p_cycle+1,1,1,0,0,0,'America/New_York')
+          end)
           and exists (select 1 from public.commonwealth_run_entries e where e.run_id=m.run_id and e.crew_id=h.crew_id)
           and exists (select 1 from public.commonwealth_run_entries e where e.run_id=m.run_id and e.crew_id=a.crew_id)
       ), sides as (
@@ -224,5 +228,5 @@ grant execute on function public.rch_assign_run_team_to_crew(uuid,uuid),
 grant execute on function public.get_rch_circuit_standings(integer,text,integer) to anon,authenticated;
 
 comment on function public.get_rch_circuit_standings(integer,text,integer) is
-'Seasonal Cup qualification uses November 1–December 20 America/New_York run dates, opponent-verified results, and a January 1 verification deadline. Three games over at least two sessions required; crews also face at least two opponents.';
+'0=all-time verified Run circuit; seasonal Cup qualification uses November 1–December 20 America/New_York run dates, opponent-verified results, and a January 1 verification deadline. Three games over at least two sessions required; crews also face at least two opponents.';
 commit;
