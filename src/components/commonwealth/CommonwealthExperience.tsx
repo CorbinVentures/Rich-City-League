@@ -14,6 +14,7 @@ import { VIRGINIA_CITIES } from '@/lib/virginia-world';
 import { COMMONWEALTH_SEASON_SLUG,competitionRecord,formatCompetitionDate,pilotRadarXY,
   stateRadarXY,type CommonwealthSite,type CommonwealthStanding,type CommonwealthFormat } from '@/lib/commonwealth';
 import { CommonwealthCupPath,type CupGroupStanding } from './CommonwealthCupPath';
+import { CompetitiveCircuit } from '@/components/circuit/CompetitiveCircuit';
 import './commonwealth.css';
 
 type Season={id:string;name:string;region:string;status:string};
@@ -231,6 +232,7 @@ export default function CommonwealthExperience(){
         <div><small>OPEN CHALLENGES</small><strong>{openChallenges.length}</strong><span>Proposed or in progress</span></div>
       </section>
 
+      <CompetitiveCircuit variant="cup" />
       <CommonwealthCupPath seasonStatus={season?.status||'enrollment'} qualifiers={standings} groups={cupGroups} challenges={challenges} crews={crews}/>
 
       <div className="rch-cw-grid">
