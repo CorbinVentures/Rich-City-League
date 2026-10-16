@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import {
   FaArrowTrendUp, FaChartColumn, FaChartLine, FaCircleInfo,
   FaFire, FaLayerGroup,
@@ -27,7 +27,7 @@ const dateLabel = (value: string) => {
   return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString('en-US', {month:'short', day:'numeric',timeZone:'UTC'});
 };
 
-function VizTitle({eyebrow, title, detail, icon}: {eyebrow:string;title:string;detail:string;icon?:React.ReactNode}) {
+function VizTitle({eyebrow, title, detail, icon}: {eyebrow:string;title:string;detail:string;icon?:ReactNode}) {
   return <header className="rch-viz-heading">
     <div className="rch-viz-eyebrow">{icon??<FaChartLine aria-hidden="true"/>}{eyebrow}</div>
     <h3>{title}</h3><p>{detail}</p>
