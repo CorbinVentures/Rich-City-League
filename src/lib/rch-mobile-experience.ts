@@ -24,7 +24,7 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/network/partners/apply', '/membership', '/news', '/players',
   '/teams', '/games', '/standings', '/leaderboards', '/schedule',
   '/stats', '/rankings', '/coaches', '/runs', '/draft', '/media',
-  '/shop', '/faq', '/register', '/coaches', '/discover', '/search',
+  '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse',
 ]);
 const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs']);
 const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin']);
