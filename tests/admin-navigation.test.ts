@@ -73,4 +73,24 @@ describe('admin navigation integrity', () => {
     expect(middleware).toContain("assurance.currentLevel !== 'aal2'");
   });
 
+
+  it('restores the admin destination after two-factor setup rather than showing password reset first', () => {
+    const security = readFileSync(join(root, 'src/app/account/security/page.tsx'), 'utf8');
+    const panel = readFileSync(join(root, 'src/components/MfaSecurityPanel.tsx'), 'utf8');
+    const middleware = readFileSync(join(root, 'src/middleware.ts'), 'utf8');
+
+    expect(security).toContain("getSafePostAuthPath(next, '')");
+    expect(security).toContain("profile?.role === 'admin'");
+    expect(security).toContain('You do not need to change your password.');
+    expect(security).toContain('returnTo={requestedWorkspace}');
+    expect(security.indexOf('<MfaSecurityPanel userId={user?.id ?? null} isAdmin returnTo={requestedWorkspace} />'))
+      .toBeLessThan(security.indexOf('Other account security settings'));
+
+    expect(panel).toContain("getSafePostAuthPath(returnTo, '/account/security')");
+    expect(panel).toContain('if (returnTo) window.location.replace(verifiedDestination)');
+    expect(panel).toContain('href={`/auth/mfa?next=${encodeURIComponent(verifiedDestination)}`}');
+    expect(middleware).toContain("assurance.currentLevel !== 'aal2'");
+    expect(middleware).toContain("setup.searchParams.set('next', requestedPath)");
+  });
+
 });
