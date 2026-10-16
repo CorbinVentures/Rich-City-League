@@ -62,6 +62,17 @@ const covers: Record<string, Design> = {
   },
 };
 
+const publishedArticleTitles: Record<string, string> = {
+  "richmond-inspire-parks-plan-basketball-courts-2026": "Beyond the Game: Richmond's New 10-Year Parks Plan Could Shape the Future of Neighborhood Basketball",
+  "richmond-basketball-october-2026-aau-vcu-spiders": "Richmond Basketball Heats Up: AAU Opportunities, College Exhibitions and a Big October Ahead",
+  "virginia-union-basketball-aj-english-hampton-vsu-2026": "Virginia Union Opens A.J. English Era Against Hampton as Historic Virginia State Rivalry Awaits",
+  "virginia-high-school-basketball-2026-2027-richmond-state-championships": "Virginia High School Basketball Is Coming Back: Richmond Set to Host 2027 State Championships",
+  "richmond-youth-basketball-open-gym-tryouts-october-2026": "Richmond Youth Basketball Opportunities Expand as Team Richmond Announces October Open Gym and Fall Tryouts",
+  "henrico-international-youth-basketball-tournament-october-2026": "From Virginia to the Philippines: Henrico Hosts International Youth Basketball Showcase This Weekend",
+  "richmond-womens-basketball-vcu-spiders-a10-2026-2027": "Richmond Women’s Basketball Takes Center Stage: VCU, Spiders Set for National TV Showdowns and Henrico Championship",
+  "richmond-basketball-2026-vcu-spiders-season-preview": "Richmond Basketball Is Back: Spiders Face Virginia Friday as VCU Prepares for New Season"
+};
+
 function genericDesign(title: string): Design {
   const words = title.toUpperCase().replace(/[^A-Z0-9\s-]/g, '').split(/\s+/).filter(Boolean);
   const lines = ['', '', ''];
@@ -121,7 +132,9 @@ export async function GET(
   if (!/^[a-z0-9-]{3,180}$/.test(slug)) {
     return new Response('Not found', { status: 404 });
   }
-  const article = await getNewsBySlug(slug);
+  // Existing published stories remain renderable in preview environments without live DB credentials.
+  const knownTitle = publishedArticleTitles[slug];
+  const article = knownTitle ? { title: knownTitle } : await getNewsBySlug(slug);
   if (!article) return new Response('Not found', { status: 404 });
 
   const design = covers[slug] || genericDesign(article.title);
