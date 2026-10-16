@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FaArrowRight, FaArrowUpRightFromSquare, FaBasketball, FaBookmark, FaCalendarDays,
-  FaCompass, FaDumbbell, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaTrophy
+  FaCompass, FaChevronDown, FaDumbbell, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup, FaTrophy
 } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cityForText } from '@/lib/virginia-world';
@@ -231,15 +231,16 @@ export default function DiscoverScene() {
       <section className="rch-scene-searchbar" aria-label="Search basketball opportunities">
         <label className="rch-scene-search-input"><FaMagnifyingGlass aria-hidden="true"/>
           <span className="sr-only">Search Virginia basketball opportunities</span>
-          <input type="search" value={query} onChange={event => setQuery(event.target.value)}
+          <input className="rch-scene-native-control" type="search" value={query} onChange={event => setQuery(event.target.value)}
             placeholder="Search a run, tryout, city, organizer..." />
         </label>
         <label className="rch-scene-location-input"><FaLocationDot aria-hidden="true"/>
           <span className="sr-only">Choose a Virginia city</span>
-          <select value={city} onChange={event => setCity(event.target.value)}>
+          <select className="rch-scene-native-control" value={city} onChange={event => setCity(event.target.value)}>
             <option value="all">All Virginia</option>
             {cities.map(name => <option value={name} key={name}>{name}</option>)}
           </select>
+          <FaChevronDown className="rch-scene-location-caret" aria-hidden="true"/>
         </label>
       </section>
 
