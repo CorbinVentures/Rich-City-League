@@ -11,9 +11,9 @@ export function RunVerifiedSignal({runId}:{runId:string}){
  useEffect(()=>{
   if(!db||!runId)return;
   let alive=true;
-  void db.from('rch_run_verifications').select('verification_status').eq('run_id',runId)
-   .maybeSingle().then(({data}:{data:{verification_status:string}|null})=>{
-    if(alive)setVerified(data?.verification_status==='verified');
+  void db.rpc('rch_is_verified_run',{p_run:runId})
+   .then(({data,error}:{data:boolean|null;error:{message:string}|null})=>{
+    if(alive)setVerified(!error && data===true);
    });
   return()=>{alive=false;};
  },[db,runId]);
