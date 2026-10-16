@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getSupabaseClient } from '@/lib/supabase';
 import {
   FaBookmark,
   FaBolt,
@@ -125,6 +126,34 @@ export function NetworkPostCard({
   featured?: boolean;
 }) {
   const { post, repost } = item;
+  const postElement = useRef<HTMLElement | null>(null);
+  // Only a genuinely visible post records reach. The database deduplicates
+  // by authenticated viewer, post and UTC day; scrolling cannot inflate it.
+  useEffect(() => {
+    if (!userId || userId === post.author_id || !postElement.current || typeof IntersectionObserver === 'undefined') return;
+    let sent = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25);
+      if (visible && document.visibilityState === 'visible' && !sent && timer === null) {
+        timer = setTimeout(() => {
+          timer = null;
+          if (document.visibilityState !== 'visible') return;
+          sent = true;
+          observer.disconnect();
+          void getSupabaseClient()?.rpc('record_professional_post_view', { p_post_id: post.id });
+        }, 850);
+      } else if (!visible && timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }, { threshold: [0, 0.25, 0.5] });
+    observer.observe(postElement.current);
+    return () => {
+      observer.disconnect();
+      if (timer !== null) clearTimeout(timer);
+    };
+  }, [post.author_id, post.id, userId]);
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   const mine = post.reactions?.find((reaction) => reaction.user_id === userId);
   const myRepost = post.reposts?.some((entry) => entry.profile_id === userId) ?? false;
@@ -154,7 +183,7 @@ export function NetworkPostCard({
   };
 
   return (
-    <article id={`post-${post.id}`} data-pulse-kind={postKind} className={`rcl-feed-post rch-pulse-post rch-pulse-post--${postKind} ${featured ? 'rch-pulse-post--featured' : ''} overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
+    <article ref={postElement} id={`post-${post.id}`} data-pulse-kind={postKind} className={`rcl-feed-post rch-pulse-post rch-pulse-post--${postKind} ${featured ? 'rch-pulse-post--featured' : ''} overflow-hidden rounded-2xl border ${official ? 'border-rcl-blue/30' : 'border-white/10'}`}>
       {repost && (
         <div className="flex items-center gap-2 border-b border-white/[.06] bg-white/[.018] px-4 py-2.5 text-xs font-bold text-white/35 sm:px-5">
           <FaRetweet className="text-rcl-blue" />
