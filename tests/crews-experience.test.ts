@@ -21,7 +21,8 @@ describe('RCH crew identity and growth',()=>{
     expect(schema).toContain("2097152,array['image/jpeg','image/png','image/webp']");
     expect(schema).toContain('c.captain_id=(select auth.uid())');
     expect(schema).toContain("raise exception 'Only the crew captain may change the logo'");
-    expect(hq).toContain("commonwealth_set_crew_logo");
+    expect(hq).toContain("saveCrewLogo");
+    expect(read("src/lib/crew-logo-storage.ts")).toContain("commonwealth_set_crew_logo");
   });
   it('invites teammates with explicit recipient acceptance and membership controls',()=>{
     expect(schema).toContain("commonwealth_invite_player(p_crew uuid,p_player uuid)");
