@@ -11,7 +11,7 @@ const nav = [
   { name: 'Discover', href: '/discover' },
   { name: 'Runs', href: '/runs' },
   { name: 'Leagues', href: '/league' },
-  { name: 'Community', href: '/community' },
+  { name: 'Social', href: '/pulse' },
   { name: 'News', href: '/news' },
   { name: 'RCH TV', href: '/media' },
 ];
@@ -48,6 +48,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/discover"><FaCompass/> Discover</Link>
           <Link href="/runs">Runs</Link>
           <Link href="/league">Rich City League</Link>
+          <Link href="/pulse">Social</Link>
           <Link href="/news">News</Link>
           <Link href="/app">Get the PWA</Link>
           <Link href="/legal/privacy">Privacy</Link>
