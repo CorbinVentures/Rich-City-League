@@ -6,7 +6,7 @@ import { analyticsSection } from '../src/lib/analytics/sections';
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 
 describe('RCH Command executive sitewide analytics',()=>{
-  const sql=read('supabase/migrations/20261016070000_rch_executive_site_analytics.sql');
+  const sql=read('supabase/migrations/20261016063528_rch_executive_site_analytics.sql');
   const dashboard=read('src/components/command/CommandDashboard.tsx');
   const analytics=read('src/components/command/CommandSiteAnalytics.tsx');
   const observer=read('src/components/analytics/SiteAnalyticsObserver.tsx');
