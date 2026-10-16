@@ -116,6 +116,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(memberAccessUrl(request, { inactive: true }));
   }
 
+  // An enrolled member must finish MFA on every protected route, not just
+  // immediately after a password login. This also covers OAuth, refreshed
+  // browser sessions, deep links and the installed PWA.
+  const { data: assurance, error: assuranceError } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assuranceError || !assurance) {
+    return NextResponse.json({ error: 'Unable to verify the current session security level.' }, { status: 503 });
+  }
+
+  const requestedPath = `${pathname}${request.nextUrl.search}`;
+  if (assurance.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+    const challenge = new URL('/auth/mfa', request.url);
+    challenge.searchParams.set('next', requestedPath);
+    return NextResponse.redirect(challenge);
+  }
+
+  // Administrators must enroll and verify TOTP before opening either
+  // privileged workspace. Enrollment happens on /account/security.
+  const privilegedWorkspace = matchesRoute(pathname, '/admin') ||
+    (matchesRoute(pathname, '/command') && pathname !== '/command/access');
+  if (privilegedWorkspace && profile?.role === 'admin' && assurance.currentLevel !== 'aal2') {
+    const setup = new URL('/account/security', request.url);
+    setup.searchParams.set('next', requestedPath);
+    return NextResponse.redirect(setup);
+  }
+
   const operatorWorkspace = pathname.startsWith('/portal/operations') || pathname.startsWith('/portal/team') || pathname.startsWith('/portal/scorebook');
   if (operatorWorkspace && (!profile || !['coach', 'staff', 'admin'].includes(profile.role ?? ''))) {
     return NextResponse.redirect(new URL('/league', request.url));
