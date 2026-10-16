@@ -95,7 +95,7 @@ export function CourtMasterTitles({court}:{court:string}){
        <button disabled={busy||!selectedRuns[division]} onClick={()=>void act('rch_request_court_master_duel',{p_court:court,p_division:division,p_run:selectedRuns[division]},'Title challenge requested. Awaiting Master acceptance.')} className="mt-3 min-h-10 rounded-lg bg-[#f3c979] px-3 text-xs font-black text-[#261706] disabled:opacity-40">Challenge the Master</button>
        <p className="mt-2 text-[10px] text-[#b4c9db]">You must already be registered for that Run. Court top-three challengers need three verified games across two sessions.</p>
       </div>}
-      {!challenge&&!eligible&&user?.id&&holder&&holder!==user.id&&<p className="mt-3 text-xs text-[#a9c4db]">Climb this court's verified leaderboard to unlock a title fight.</p>}
+      {!challenge&&!eligible&&user?.id&&holder&&holder!==user.id&&<p className="mt-3 text-xs text-[#a9c4db]">Climb this court&apos;s verified leaderboard to unlock a title fight.</p>}
     </article>;
     })}
    </div>
