@@ -66,8 +66,9 @@ export function RCHPublicRouteGuide() {
       </div>
       <nav aria-label="More Virginia basketball" className="rch-browser-route-guide-links">
         {items.map(({ href,label,Icon }) => {
-          const selected = pathname === href || pathname.startsWith(href + '/');
-          return <Link key={href} href={href} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
+          const resolvedHref = user && href === '/pulse' ? '/social' : href;
+          const selected = pathname === resolvedHref || pathname.startsWith(resolvedHref + '/');
+          return <Link key={href} href={resolvedHref} aria-current={selected?'page':undefined} className={selected?'active':undefined}><Icon aria-hidden="true"/>{label}</Link>;
         })}
       </nav>
       <Link className="rch-browser-route-guide-join" href={user ? '/profile' : '/auth/sign-up'}>{user ? 'My Profile' : 'Join Free'} <FaArrowRight aria-hidden="true"/></Link>
