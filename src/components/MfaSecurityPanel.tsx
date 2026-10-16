@@ -69,7 +69,7 @@ export function MfaSecurityPanel({ userId, isAdmin }: { userId: string | null; i
       if (result.error) throw result.error;
       setEnrollment(null); setCode('');
       await refresh();
-      setNotice('Two-factor authentication is enabled. Other sessions were signed out.');
+      setNotice('Two-factor authentication is enabled. Use your authenticator on future sign-ins.');
       // Admins can continue to the protected destination after they have AAL2.
       const params = new URLSearchParams(window.location.search);
       const next = params.get('next');
