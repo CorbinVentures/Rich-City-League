@@ -88,8 +88,8 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
       return;
     }
 
-    const requestedNext = params.get('next') ?? '/social';
-    const next = getSafeNextPath(requestedNext);
+    const requestedNext = params.get('next') ?? params.get('redirect');
+    const next = requestedNext ? getSafeNextPath(requestedNext) : null;
     const invite = params.get('invite');
     if (invite) {
       try { window.localStorage.setItem('rcl_pending_referral', invite.toLowerCase()); } catch {}
@@ -99,7 +99,7 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setBusy(provider);
     try {
       const callback = new URL('/auth/callback', window.location.origin);
-      callback.searchParams.set('next', next);
+      if (next) callback.searchParams.set('next', next);
       const { error: oauthError } = await client.auth.signInWithOAuth({
         provider,
         options: {
