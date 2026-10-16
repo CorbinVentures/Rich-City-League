@@ -275,7 +275,6 @@ describe('share card image regression', () => {
     'src/app/page.tsx',
     'src/app/faq/page.tsx',
     'src/app/draft/layout.tsx',
-    'src/app/news/[slug]/page.tsx',
     'src/app/richmond-basketball-runs/page.tsx',
     'src/app/games/[id]/page.tsx',
     'src/app/teams/[slug]/page.tsx',
@@ -289,6 +288,15 @@ describe('share card image regression', () => {
       expect(source, file).toContain('https://www.richcityhoops.com/opengraph-image?v=20261014');
       expect(source, file).not.toContain('rcl-share-20261002.png');
     }
+  });
+
+  it('gives each news story its own 1200x630 cover rather than replacing it with the sitewide fallback', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/app/news/[slug]/page.tsx'), 'utf8');
+    expect(source).toContain("const cover = item.cover_image_url || \`/api/news-cover/\${encodeURIComponent(item.slug)}\`");
+    expect(source).toContain("new URL(cover, 'https://www.richcityhoops.com').toString()");
+    expect(source).toContain('images:[{url:socialCover,width:1200,height:630');
+    expect(source).toContain('images:[socialCover]');
+    expect(source).not.toContain('rcl-share-20261002.png');
   });
 
   it('provides the image through a Next.js PNG response instead of the broken static file', () => {
