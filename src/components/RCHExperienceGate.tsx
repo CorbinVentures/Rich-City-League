@@ -2,13 +2,13 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { RCHAppDownload } from '@/components/RCHAppDownload';
+import { RCHBrowserMemberNotice } from '@/components/RCHBrowserMemberNotice';
 import { RCHPublicWebShell } from '@/components/RCHPublicWebShell';
 import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience } from '@/lib/rch-mobile-experience';
 
 type Mode = 'checking' | 'mobile-app' | 'browser';
 
-export function RCHExperienceGate({ children, publicContent, apkUrl }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
+export function RCHExperienceGate({ children, publicContent }: { children: ReactNode; publicContent: ReactNode; apkUrl: string | null }) {
   const pathname = usePathname();
   const [mode, setMode] = useState<Mode>('checking');
   const browserAccountRoute = isBrowserAccountRoute(pathname);
@@ -30,6 +30,18 @@ export function RCHExperienceGate({ children, publicContent, apkUrl }: { childre
     return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
   }
 
+  // Middleware's guest redirect ends at /member-access. Keep that landing
+  // browser-native; the original member workspace remains untouched in PWA.
+  if (mode === 'browser' && pathname === '/member-access') {
+    return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
+  }
+
+  // Browser-only auth screens share the public brand; installed-PWA auth is unchanged.
+  // Security/MFA and Command Center exceptions retain their original protected flow.
+  if (mode === 'browser' && (pathname === '/auth' || pathname.startsWith('/auth/'))) {
+    return <RCHPublicWebShell>{publicContent}</RCHPublicWebShell>;
+  }
+
   // Account registration, profile setup, recovery and legal policies remain available
   // in normal browsers; member PWA functionality stays in installed mobile mode.
   if (browserAccountRoute || mode === 'mobile-app') return <>{children}</>;
@@ -43,6 +55,7 @@ export function RCHExperienceGate({ children, publicContent, apkUrl }: { childre
     );
   }
 
-  // Do not mount app chrome, calls, notifications, or the social experience in browsers.
-  return <div className="rcl-platform-root rch-browser-only"><RCHAppDownload apkUrl={apkUrl} /></div>;
+  // Keep unsupported/private account routes branded and navigable without
+  // revealing any member-only data or mounting PWA UI in normal browsers.
+  return <RCHPublicWebShell><RCHBrowserMemberNotice pathname={pathname}/></RCHPublicWebShell>;
 }

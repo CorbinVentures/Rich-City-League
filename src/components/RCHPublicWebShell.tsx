@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
 import type { ReactNode } from 'react';
 import {
   FaArrowRight, FaBars, FaMagnifyingGlass,
@@ -17,13 +21,14 @@ const nav = [
 ];
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || '/';
   return <div className="rcl-platform-root rch-public-web min-h-svh">
     <a className="rcl-skip-link" href="#rch-public-content">Skip to content</a>
     <header className="rch-public-header">
       <div className="rch-public-header-inner">
         <Link href="/" className="rch-public-logo" aria-label="Rich City Hoops home"><span>RCH</span></Link>
         <nav aria-label="Public basketball navigation" className="rch-public-nav">
-          {nav.map(item => <Link key={item.href} href={item.href}>{item.name}</Link>)}
+          {nav.map(item => <Link key={item.href} href={item.href} aria-current={pathname===item.href || (item.href!=='/' && pathname.startsWith(item.href+'/'))?'page':undefined}>{item.name}</Link>)}
         </nav>
         <div className="rch-public-header-actions">
           <Link href="/search" className="rch-public-search" aria-label="Search players, teams, runs and events"><FaMagnifyingGlass/><span>Search basketball...</span></Link>
@@ -40,7 +45,9 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
         </details>
       </div>
     </header>
+    <RCHPublicRouteGuide />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
+    <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>Browse freely on the web. Create your free profile to save, connect and compete.</span></div><Link href="/app">Explore the app <FaArrowRight aria-hidden="true"/></Link></aside>
     <footer className="rch-public-footer">
       <div className="rch-public-footer-inner">
         <div><Link href="/" className="rch-public-footer-brand">RCH</Link><p>Rich City Hoops · Virginia basketball, connected.</p></div>

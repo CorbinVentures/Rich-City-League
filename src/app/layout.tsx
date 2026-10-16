@@ -53,6 +53,8 @@ import './rch-pulse.css';
 import './rch-scene-visual-authority.css';
 // Isolated browser marketing surface; never applies to installed PWA routes.
 import './rch-browser-home.css';
+// Browser-only visual authority: scoped to guest shell; installed PWA is unaffected.
+import './rch-browser-sitewide.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
