@@ -3,27 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
-
-/** Approved screen categories only. Never transmit raw URLs or query strings. */
-export function analyticsSection(pathname: string): string | null {
-  if (pathname === '/') return 'home';
-  const root = pathname.split('/').filter(Boolean)[0];
-  if (root === 'social') return 'social';
-  if (root === 'discover' || root === 'explore' || root === 'search') return 'discover';
-  if (root === 'runs' || root === 'richmond-basketball-runs') return 'runs';
-  if (root === 'crews') return 'crews';
-  if (root === 'commonwealth') return 'commonwealth';
-  if (['league','games','standings','schedule','stats','draft','rankings'].includes(root)) return 'league';
-  if (root === 'players') return 'players';
-  if (root === 'teams') return 'teams';
-  if (root === 'media' || root === 'clips') return 'media';
-  if (root === 'news') return 'news';
-  if (root === 'communities' || root === 'community') return 'communities';
-  if (root === 'organizations' || root === 'network') return 'organizations';
-  if (root === 'shop') return 'shop';
-  if (root === 'professional') return 'professional';
-  return null; // Never record auth, account, admin, command or private routes.
-}
+import { analyticsSection } from '@/lib/analytics/sections';
 
 /** First-party, privacy-minimal observational telemetry. No identity fingerprinting. */
 export function SiteAnalyticsObserver() {
