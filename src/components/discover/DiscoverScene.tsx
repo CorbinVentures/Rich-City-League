@@ -138,7 +138,7 @@ export default function DiscoverScene() {
             id:'event:'+event.id, title:event.title, description:event.description || '',
             category:classifySceneOpportunity('event', event.event_type, event.title),
             city:event.city || 'Virginia', venue:event.venue_name || 'View event details',
-            startsAt:event.starts_at, href:'/network/events/'+encodeURIComponent(event.slug),
+            startsAt:event.starts_at, href:['','network','events',encodeURIComponent(event.slug)].join('/'),
             featured:!!event.is_featured, organizer:org.name, verified:!!org.is_verified
           });
         }
