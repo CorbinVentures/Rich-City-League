@@ -245,8 +245,8 @@ export async function getSocialFeed() {
       status,
       created_at,
       updated_at,
-      author:profiles(*),
-      comments(id, post_id, author_id, body, parent_id, created_at, author:profiles(*)),
+      author:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility),
+      comments(id, post_id, author_id, body, parent_id, created_at, author:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)),
       reactions(*)
     `)
     .eq('status', 'published')
@@ -263,7 +263,7 @@ export async function getCoachesList() {
   if (!client) return [];
   const { data, error } = await client
     .from('team_coaches')
-    .select('*, team:teams(*), profile:profiles(*)');
+    .select('*, team:teams(*), profile:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)');
   if (error) {
     console.error('getCoachesList error', error);
     return [];
