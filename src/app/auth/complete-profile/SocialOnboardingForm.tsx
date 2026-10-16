@@ -72,7 +72,7 @@ export default function SocialOnboardingForm() {
         return;
       }
 
-      const { data: rawProfile } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      const { data: rawProfile } = await client.from('profiles').select('id,username,first_name,last_name,display_name,avatar_url,bio,role,is_active,created_at,updated_at,cover_url,position,jersey_number,location,profile_visibility,friend_request_policy,message_policy,is_vip,vip_label,is_system_account,system_account_key,onboarding_complete,qualified_referral_count,profile_song_url').eq('id', user.id).maybeSingle();
       const profile = rawProfile as unknown as OnboardingProfile | null;
       if (profile?.onboarding_complete !== false) {
         window.location.replace(next);

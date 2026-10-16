@@ -13,6 +13,10 @@ export async function POST(request:Request){
   if(!client)return NextResponse.json({error:'Authentication unavailable'},{status:503});
   const {data:{user}}=await client.auth.getUser();
   if(!user)return NextResponse.json({error:'Sign in required'},{status:401});
+  // This route uses a service-role client to transfer real funds. Browser route
+  // middleware and database RLS cannot protect this operation by themselves.
+  const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(assuranceError||assurance?.currentLevel!=='aal2')return NextResponse.json({error:'Authenticator verification required for financial transfers.'},{status:403});
   const {data:profile}=await (client as any).from('profiles').select('role').eq('id',user.id).maybeSingle();
   if(profile?.role!=='admin')return NextResponse.json({error:'Admin required'},{status:403});
   if(!creatorTransfersEnabled())return NextResponse.json({error:'Creator transfers are disabled until platform finance and compliance are approved.'},{status:503});

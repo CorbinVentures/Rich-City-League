@@ -11,6 +11,10 @@ async function creator(){
   if(!client)return null;
   const {data:{user}}=await client.auth.getUser();
   if(!user)return null;
+  // A verified creator with MFA enabled must finish the second factor before
+  // the service-role Stripe/creator-account path can act for this account.
+  const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(assuranceError||!assurance||(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'))return null;
   const db=client as any;
   const {data:account}=await db.from('rch_creator_accounts').select('profile_id,status,terms_accepted_at,stripe_connect_account_id').eq('profile_id',user.id).maybeSingle();
   return {user,client,account:account as AccountRecord|null};
@@ -40,10 +44,9 @@ export async function POST(request:Request){
   if(!context)return NextResponse.json({error:'Sign in required'},{status:401});
   if(!context.account||context.account.status!=='approved'||!context.account.terms_accepted_at)return NextResponse.json({error:'A signed approved creator agreement is required.'},{status:403});
   const db=context.client as any;
-  const {data:profile}=await db.from('profiles').select('date_of_birth').eq('id',context.user.id).maybeSingle();
-  const dob=profile?.date_of_birth;
-  const cutoff=new Date();cutoff.setUTCFullYear(cutoff.getUTCFullYear()-18);
-  if(!dob||dob>cutoff.toISOString().slice(0,10))return NextResponse.json({error:'Verified adult age is required for Stripe payout onboarding.'},{status:403});
+  const {data:isAdult,error:ageError}=await db.rpc('is_my_profile_adult');
+  if(ageError)return NextResponse.json({error:'Adult eligibility verification is temporarily unavailable.'},{status:503});
+  if(isAdult!==true)return NextResponse.json({error:'Verified adult age is required for Stripe payout onboarding.'},{status:403});
   const admin=getSupabaseAdminClient() as any;
   if(!admin)return NextResponse.json({error:'Stripe payout onboarding is not configured.'},{status:503});
   try{

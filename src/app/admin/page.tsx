@@ -115,13 +115,13 @@ export default function AdminDashboardPage() {
         { data: logs },
       ] = await Promise.all([
         supabase.from('leagues').select('id, name').eq('is_active', true).order('name'),
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id,username,first_name,last_name,display_name,avatar_url,bio,role,is_active,created_at,updated_at,cover_url,position,jersey_number,location,profile_visibility,friend_request_policy,message_policy,is_vip,vip_label,is_system_account,system_account_key,onboarding_complete,qualified_referral_count,profile_song_url').order('created_at', { ascending: false }),
         supabase.from('teams').select('*').eq('is_active', true).order('name', { ascending: true }),
-        supabase.from('players').select('*, profile:profiles(*)'),
-        supabase.from('team_coaches').select('*, profile:profiles(*)'),
+        supabase.from('players').select('*, profile:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)'),
+        supabase.from('team_coaches').select('*, profile:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)'),
         supabase.from('games').select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)').order('scheduled_at', { ascending: false }),
-        supabase.from('posts').select('*, author:profiles(*)').order('created_at', { ascending: false }),
-        supabase.from('audit_logs').select('*, admin:profiles(*)').order('created_at', { ascending: false }).limit(20),
+        supabase.from('posts').select('*, author:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)').order('created_at', { ascending: false }),
+        supabase.from('audit_logs').select('*, admin:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)').order('created_at', { ascending: false }).limit(20),
       ]);
 
       if (leagues) {
@@ -283,7 +283,7 @@ export default function AdminDashboardPage() {
       : [];
     const playerIds = rosterRows.map((roster) => roster.player_id);
     const teamPlayers: any[] = playerIds.length
-      ? (await supabase.from('players').select('*, profile:profiles(*)').in('id', playerIds)).data ?? []
+      ? (await supabase.from('players').select('*, profile:profiles(id,username,display_name,first_name,last_name,avatar_url,role,is_active,profile_visibility)').in('id', playerIds)).data ?? []
       : [];
     const teamByPlayerId = new Map(
       (rosterRows ?? []).map((roster) => [

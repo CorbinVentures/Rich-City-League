@@ -186,6 +186,7 @@ select is((select status from public.registrations where id = '22222222-aaaa-aaa
   'approved'::public.registration_status, 'staff can manage another users registration');
 
 select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);
+select set_config('request.jwt.claims', jsonb_build_object('aal','aal2')::text, true);
 select lives_ok($$
   update public.profiles set qualified_referral_count=2
     where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'

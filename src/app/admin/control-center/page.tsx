@@ -37,7 +37,7 @@ export default function AdminControlCenterPage() {
     if (!db || !isAdmin) return;
     setBusy(true);
     const [usersResult, reportsResult, postsResult, commentsResult, settingsResult, newsResult, mediaResult, leaguesResult, assetsResult, staffResult, commissionerResult] = await Promise.all([
-      db.from('profiles').select('*').order('created_at', { ascending: false }),
+      db.from('profiles').select('id,username,first_name,last_name,display_name,avatar_url,bio,role,is_active,created_at,updated_at,cover_url,position,jersey_number,location,profile_visibility,friend_request_policy,message_policy,is_vip,vip_label,is_system_account,system_account_key,onboarding_complete,qualified_referral_count,profile_song_url').order('created_at', { ascending: false }),
       db.from('reports').select('*').order('created_at', { ascending: false }),
       db.from('posts').select('*').order('created_at', { ascending: false }),
       db.from('comments').select('*').order('created_at', { ascending: false }),

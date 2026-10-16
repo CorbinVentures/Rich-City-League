@@ -1,7 +1,7 @@
 import { Neighborhood } from '@/components/social/Neighborhood';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPublicClient } from '@/lib/public-data';
+import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { ProfileSoundtrack } from '@/components/ProfileSoundtrack';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
@@ -16,7 +16,6 @@ import { ProfileFollowDirectory } from '@/components/social/ProfileFollowDirecto
 import { reputationProgress, reputationStatus } from '@/lib/reputation';
 import {coachMilestones,type RCHCoachIdentity} from '@/lib/rch-coach-identity';
 
-export const revalidate = 30;
 
 type PlayerRow = {
   id:string;
@@ -51,7 +50,7 @@ const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
 export default async function SocialPublicProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string|string[] }> }) {
   const [{ id }, query] = await Promise.all([params,searchParams]);
   const activeTab = normalizeTab(query.tab);
-  const client = getPublicClient();
+  const client = await getServerSupabaseClient();
   if (!client) notFound();
 
   const { data: profile } = await client
@@ -61,7 +60,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     .eq('is_active', true)
     .maybeSingle() as any;
 
-  if (!profile || profile.profile_visibility === 'private') notFound();
+  if (!profile) notFound();
 
   const [
     { data: posts },

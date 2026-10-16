@@ -34,6 +34,12 @@ export default function CommandAccessPage() {
         const { data: {user}, error } = await client.auth.getUser();
         if (error || !user || cancelled) return;
         setSignedIn(true);
+        const {data:assurance,error:aalError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if(aalError||!assurance)throw new Error('Could not check two-factor status.');
+        if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){
+          if(!cancelled)window.location.replace('/auth/mfa?next=%2Fcommand');
+          return;
+        }
         const {data:profile, error:profileError} = await client.from('profiles')
           .select('role,is_active,onboarding_complete')
           .eq('id',user.id).maybeSingle();
@@ -64,6 +70,12 @@ export default function CommandAccessPage() {
     try {
       const {data,error} = await client.auth.signInWithPassword({email:email.trim(),password});
       if(error || !data.user) throw new Error('Unable to sign in. Verify your email and password.');
+      const {data:assurance,error:aalError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if(aalError||!assurance)throw new Error('Unable to verify your two-factor security status.');
+      if(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'){
+        window.location.replace('/auth/mfa?next=%2Fcommand');
+        return;
+      }
       const {data:profile,error:profileError} = await client.from('profiles')
         .select('role,is_active,onboarding_complete')
         .eq('id',data.user.id).maybeSingle();
