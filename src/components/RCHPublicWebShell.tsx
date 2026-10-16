@@ -25,7 +25,7 @@ const nav = [
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   // Browser menu lives in a viewport-level overlay, not in the tiny header
