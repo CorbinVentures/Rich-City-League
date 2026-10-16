@@ -527,7 +527,8 @@ export default function AdminDashboardPage() {
                     ))}
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <Link href="/command" className="rounded-xl border border-[#477aa9] bg-[#13324d] px-4 py-4 text-sm font-semibold text-white transition hover:border-[#91c6ee] hover:bg-[#1b476c]" aria-label="Open RCL Command Center">RCL Command Center <span className="float-right text-[#a8d8fa]">↗</span><small className="mt-1 block text-xs font-normal text-[#c4def0]">Private league finances, venues, franchises and game-day operations</small></Link>
                     <Link href="/admin/control-center" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">Site controls <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Publishing, safety and platform tools</small></Link>
                     <Link href="/admin/operations" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">League operations <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Tryouts, requests and competition management</small></Link>
                     <Link href="/admin/network" className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-white transition hover:border-rcl-blue/40 hover:bg-white/[0.08]">Organization network <span className="float-right text-rcl-gold">↗</span><small className="mt-1 block text-xs font-normal text-gray-400">Organizations, events and promotion review</small></Link>
