@@ -443,3 +443,36 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rc
   .rch-public-web .rch-public-mobile-menu summary {width:39px;height:40px}
   .rch-public-web .rch-public-footer-inner {flex-direction:column;align-items:flex-start}
 }
+
+
+/* Public read-only social experience — separate from authenticated PWA feed. */
+.rch-public-web .rch-browser-pulse{min-height:75vh;background:#020b17!important;color:#eff7ff!important;padding-bottom:70px}
+.rch-public-web .rch-browser-pulse-inner{width:min(100% - 36px,1200px);margin:0 auto}
+.rch-public-web .rch-browser-pulse-hero{background:radial-gradient(ellipse at 70% 10%,#164f8a8a,transparent 50%),linear-gradient(125deg,#08172a,#051b36 55%,#030b17);border-bottom:1px solid #284e76;padding:70px 0 80px}
+.rch-public-web .rch-browser-pulse-hero span,.rch-public-web .rch-browser-pulse-heading span{font-size:11px;letter-spacing:.3em;color:#87c8ff;font-weight:900}
+.rch-public-web #rch-public-content .rch-browser-pulse h1{font-size:clamp(48px,6.5vw,88px)!important;line-height:.94!important;letter-spacing:-.055em!important;margin:18px 0!important;color:#fff!important;font-weight:1000!important}
+.rch-public-web .rch-browser-pulse h1 em{font-style:normal;color:#368cff}
+.rch-public-web .rch-browser-pulse-hero p{max-width:570px;line-height:1.65!important;color:#c5dbef!important}
+.rch-public-web .rch-browser-pulse-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.rch-public-web .rch-browser-pulse-actions a,.rch-public-web .rch-browser-pulse-empty a{display:inline-flex;align-items:center;gap:12px;border:1px solid #519ff7;border-radius:11px;padding:13px 19px;background:#1869d9;color:#fff!important;font-size:12px;font-weight:900}
+.rch-public-web .rch-browser-pulse-actions a+a{background:#0b2645}
+.rch-public-web .rch-browser-pulse-body{padding-top:30px}
+.rch-public-web .rch-browser-pulse-heading{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:20px}
+.rch-public-web #rch-public-content .rch-browser-pulse-heading h2{margin-top:8px!important;font-size:clamp(25px,3vw,39px)!important;font-weight:950!important}
+.rch-public-web .rch-browser-pulse-heading>a{display:flex;align-items:center;gap:8px;color:#9bd4ff!important;font-size:12px;font-weight:850}
+.rch-public-web .rch-browser-pulse-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.rch-public-web .rch-browser-pulse-post{display:flex;flex-direction:column;gap:14px;min-height:230px;padding:20px;border:1px solid #2d577e;border-radius:13px;background:linear-gradient(160deg,#102f50,#07182c);overflow-wrap:anywhere}
+.rch-public-web .rch-browser-pulse-author{display:flex;align-items:center;gap:10px}
+.rch-public-web .rch-browser-pulse-author>span{display:grid;place-items:center;flex:none;width:38px;height:38px;background:#174d83;border:1px solid #398ed8;border-radius:50%;color:#a9d7ff;font-size:19px}
+.rch-public-web .rch-browser-pulse-author>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rch-public-web .rch-browser-pulse-author strong{color:#f6fbff;font-size:13px}
+.rch-public-web .rch-browser-pulse-author small{color:#a4bed8;font-size:10px}
+.rch-public-web .rch-browser-pulse-post>p{color:#dfebf9!important;font-size:14px!important;line-height:1.55!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.rch-public-web .rch-browser-pulse-post>a{display:flex;gap:8px;align-items:center;margin-top:auto;color:#91c9ff!important;font-size:11px;font-weight:850}
+.rch-public-web .rch-browser-pulse-post>a svg:last-child{margin-left:auto}
+.rch-public-web .rch-browser-pulse-empty{display:grid;justify-items:center;gap:12px;max-width:700px;margin:0 auto;text-align:center;padding:55px 20px;border:1px dashed #3a6590;border-radius:14px;background:#0a223d}
+.rch-public-web .rch-browser-pulse-empty>svg{font-size:39px;color:#4d9aff}
+.rch-public-web #rch-public-content .rch-browser-pulse-empty h3{font-size:27px!important}
+.rch-public-web .rch-browser-pulse-empty p{font-size:13px!important;color:#bdcfe4!important}
+@media(max-width:850px){.rch-public-web .rch-browser-pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.rch-public-web .rch-browser-pulse-grid{grid-template-columns:1fr}.rch-public-web .rch-browser-pulse-heading{align-items:flex-start;flex-direction:column}.rch-public-web .rch-browser-pulse-hero{padding:55px 0 60px}}
