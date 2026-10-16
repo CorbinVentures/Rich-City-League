@@ -130,8 +130,8 @@ begin
   ),
   post_metrics as (
     select p.id,p.created_at,
-      pg_catalog.left(pg_catalog.coalesce(p.body,''),160) as preview,
-      case when pg_catalog.jsonb_array_length(pg_catalog.coalesce(p.media_urls,'[]'::jsonb))>0
+      pg_catalog.left(coalesce(p.body,''),160) as preview,
+      case when pg_catalog.jsonb_array_length(coalesce(p.media_urls,'[]'::jsonb))>0
            then 'Media' else 'Text' end as format,
       (select count(*) from views v where v.post_id=p.id)::bigint as impressions,
       (select count(distinct v.viewer_id) from views v where v.post_id=p.id)::bigint as reach,
@@ -162,23 +162,23 @@ begin
       'posts_published',(select count(*) from my_posts p where p.created_at>=v_from)
     ),
     'daily',(
-      select pg_catalog.coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
-        'day',d.day::date,'impressions',pg_catalog.coalesce(a.impressions,0),
-        'interactions',pg_catalog.coalesce(a.interactions,0)
+      select coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
+        'day',d.day::date,'impressions',coalesce(a.impressions,0),
+        'interactions',coalesce(a.interactions,0)
       ) order by d.day),'[]'::jsonb)
       from pg_catalog.generate_series((v_from at time zone 'UTC')::date,
         (pg_catalog.now() at time zone 'UTC')::date,'1 day'::interval) as d(day)
       left join daily_agg a on a.day=d.day::date
     ),
     'hours',(
-      select pg_catalog.coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
-        'hour',h.hr,'views',pg_catalog.coalesce(a.views,0)
+      select coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
+        'hour',h.hr,'views',coalesce(a.views,0)
       ) order by h.hr),'[]'::jsonb)
       from pg_catalog.generate_series(0,23) as h(hr)
       left join hourly_agg a on a.hr=h.hr
     ),
     'top_posts',(
-      select pg_catalog.coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(b) order by b.impressions desc,b.interactions desc,b.created_at desc),'[]'::jsonb)
+      select coalesce(pg_catalog.jsonb_agg(pg_catalog.to_jsonb(b) order by b.impressions desc,b.interactions desc,b.created_at desc),'[]'::jsonb)
       from best_posts b
     )
   ) into v_result;
