@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
 import { FaArrowRight, FaBasketball, FaCircleUser, FaComments, FaPeopleGroup } from 'react-icons/fa6';
 import { getPublicClient } from '@/lib/public-data';
 
@@ -53,7 +54,7 @@ export default async function PulsePublicPage() {
         <h1>THE COMMUNITY.<br/><em>THE CULTURE.</em></h1>
         <p>The conversations and people behind Virginia basketball. Browse what&apos;s public, discover your next connection, and join free when you&apos;re ready to participate.</p>
         <div className="rch-browser-pulse-actions">
-          <Link href="/auth/sign-up">Join the Community <FaArrowRight/></Link>
+          <RCHBrowserAccountLink guestLabel="Join the Community" memberLabel="Open My Social Feed" memberHref="/social" />
           <Link href="/discover">Find Basketball <FaBasketball/></Link>
         </div>
       </div>
@@ -61,7 +62,7 @@ export default async function PulsePublicPage() {
     <div className="rch-browser-pulse-inner rch-browser-pulse-body">
       <div className="rch-browser-pulse-heading">
         <div><span>PUBLIC COMMUNITY FEED</span><h2>WHAT HOOPERS ARE SAYING</h2></div>
-        <Link href="/auth/sign-in?next=%2Fsocial">Sign in to post <FaArrowRight/></Link>
+        <RCHBrowserAccountLink guestHref="/auth/sign-in?next=%2Fsocial%3Fcompose%3D1" guestLabel="Sign in to post" memberLabel="Create a post" memberHref="/social?compose=1" />
       </div>
       {posts.length ? <div className="rch-browser-pulse-grid">
         {posts.map(post => {
@@ -70,10 +71,10 @@ export default async function PulsePublicPage() {
           return <article key={post.id} className="rch-browser-pulse-post">
             <div className="rch-browser-pulse-author"><span><FaCircleUser/></span><div><strong>{name}</strong><small>{post.created_at ? new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeZone:'America/New_York'}).format(new Date(post.created_at)) : 'RCH Community'}</small></div></div>
             <p>{post.body || 'Shared with the RCH basketball community.'}</p>
-            <Link href="/auth/sign-up"><FaComments/> Join to react or comment <FaArrowRight/></Link>
+            <RCHBrowserAccountLink icon={<FaComments/>} guestLabel="Join to react or comment" memberLabel="React or comment" memberHref={`/social?post=${encodeURIComponent(post.id)}`} />
           </article>;
         })}
-      </div> : <div className="rch-browser-pulse-empty"><FaPeopleGroup/><h3>THE CONVERSATION IS JUST GETTING STARTED.</h3><p>Public community conversations will appear here as members publish them.</p><Link href="/auth/sign-up">Become part of RCH <FaArrowRight/></Link></div>}
+      </div> : <div className="rch-browser-pulse-empty"><FaPeopleGroup/><h3>THE CONVERSATION IS JUST GETTING STARTED.</h3><p>Public community conversations will appear here as members publish them.</p><RCHBrowserAccountLink guestLabel="Become part of RCH" memberLabel="Start a conversation" memberHref="/social?compose=1" /></div>}
     </div>
   </main>;
 }
