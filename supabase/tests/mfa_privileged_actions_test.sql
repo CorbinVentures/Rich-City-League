@@ -18,10 +18,11 @@ set role authenticated;
 select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}',true);
 
-select is((with changed as (
- update public.profiles set display_name='Blocked admin change'
- where id='a2200000-0000-0000-0000-000000000002' returning id
-) select count(*)::integer from changed),0,'AAL1 admin cannot modify a different profile directly');
+select lives_ok($update public.profiles set display_name='Blocked admin change'
+ where id='a2200000-0000-0000-0000-000000000002'$,'RLS safely filters unauthorized profile update');
+select ok((select display_name from public.profiles
+ where id='a2200000-0000-0000-0000-000000000002') is distinct from 'Blocked admin change',
+ 'AAL1 admin cannot modify a different profile directly');
 select throws_ok($$
   insert into public.profile_roles(profile_id,role,status)
   values ('a2200000-0000-0000-0000-000000000002','staff','active')
@@ -36,10 +37,11 @@ select throws_ok($$
 $$,'42501',null,'AAL1 admin cannot change platform settings');
 
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
-select is((with changed as (
- update public.profiles set display_name='Approved admin change'
- where id='a2200000-0000-0000-0000-000000000002' returning id
-) select count(*)::integer from changed),1,'AAL2 admin can modify a different profile');
+select lives_ok($update public.profiles set display_name='Approved admin change'
+ where id='a2200000-0000-0000-0000-000000000002'$,'AAL2 admin update is permitted');
+select is((select display_name from public.profiles
+ where id='a2200000-0000-0000-0000-000000000002'),'Approved admin change',
+ 'AAL2 admin actually updates the target');
 select lives_ok($$
   insert into public.profile_roles(profile_id,role,status)
   values ('a2200000-0000-0000-0000-000000000002','staff','active')
@@ -55,10 +57,9 @@ $$,'AAL2 admin can change platform settings');
 
 select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000002',true);
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal1"}',true);
-select is((with changed as (
- update public.profiles set bio='Normal profile edit'
- where id='a2200000-0000-0000-0000-000000000002' returning id
-) select count(*)::integer from changed),1,'regular member can still edit own profile with AAL1');
+select lives_ok($update public.profiles set bio='Normal profile edit'
+ where id='a2200000-0000-0000-0000-000000000002'$,'regular member can edit profile at AAL1');
+select is((select bio from public.profiles where id=auth.uid()),'Normal profile edit','member profile self-service persists without MFA');
 select lives_ok($$
   insert into public.profile_roles(profile_id,role,status)
   values ('a2200000-0000-0000-0000-000000000002','coach','pending')
