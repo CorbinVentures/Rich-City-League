@@ -26,7 +26,7 @@ describe('Runs Statewide Operating System',()=>{
  });
  it('logs separate appeals without overwriting verified ratings',()=>{
   expect(migration).toContain('create table public.rch_run_result_cases');
-  expect(migration).toContain('rch_cases_one_active_match');
+  expect(migration).toContain('rch_run_cases_one_active_match');
   expect(migration).toContain('rch_file_run_result_case');
   expect(migration).toContain('rch_review_run_result_case');
   expect(migration).toContain("if v_status='verified'");
