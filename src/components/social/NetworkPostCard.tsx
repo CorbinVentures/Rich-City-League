@@ -141,7 +141,8 @@ export function NetworkPostCard({
           if (document.visibilityState !== 'visible') return;
           sent = true;
           observer.disconnect();
-          void getSupabaseClient()?.rpc('record_professional_post_view', { p_post_id: post.id });
+          const db = getSupabaseClient() as any;
+          void db?.rpc('record_professional_post_view', { p_post_id: post.id });
         }, 850);
       } else if (!visible && timer !== null) {
         clearTimeout(timer);
