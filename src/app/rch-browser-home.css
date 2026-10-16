@@ -343,3 +343,104 @@
 @media(prefers-reduced-motion:reduce) {
   .rch-public-web .rch-browser-home * {transition:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Browser/PWA surface selection: no visual changes to the installed home. */
+.rch-browser-home-target {display:none!important}
+.rch-installed-home-target {display:contents}
+.rch-public-web .rch-browser-home-target {display:block!important}
+.rch-public-web .rch-installed-home-target {display:none!important}
+
+/* Sitewide public browser chrome; member/PWA SiteHeader is never touched. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-public-header {
+  position:sticky;top:0;z-index:90;
+  background:#020d1cf5!important;color:#fff!important;
+  border-bottom:1px solid #254a72!important;backdrop-filter:blur(18px);
+}
+.rch-public-web .rch-public-header-inner {
+  width:min(100%,1540px);margin:0 auto;
+  min-height:65px;padding:8px clamp(14px,2.5vw,37px);
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+}
+.rch-public-web .rch-public-logo {display:inline-flex;flex:none;text-decoration:none}
+.rch-public-web .rch-public-logo span {
+  display:grid;place-items:center;width:78px;height:43px;
+  border-radius:15px;border:2px solid #6eb3ff;
+  background:linear-gradient(145deg,#3378d6,#164985);
+  color:#fff!important;font-size:25px;font-weight:1000;font-style:italic;letter-spacing:-.1em;
+  text-shadow:0 2px 6px #08172b;box-shadow:0 0 0 3px rgba(59,141,239,.15);
+  padding-right:5px;
+}
+.rch-public-web .rch-public-nav {display:flex;align-items:center;gap:clamp(11px,1.75vw,30px);white-space:nowrap;min-width:0}
+.rch-public-web .rch-public-nav a {
+  position:relative;font-size:12px;font-weight:850;
+  color:#e5f0ff!important;text-decoration:none;
+  padding:12px 0;transition:color .18s;
+}
+.rch-public-web .rch-public-nav a:hover {color:#64adff!important}
+.rch-public-web .rch-public-nav a:first-child {color:#4a9bff!important}
+.rch-public-web .rch-public-nav a:first-child::after {
+  content:"";position:absolute;bottom:4px;left:0;right:0;height:2px;background:#2e8dff;
+}
+.rch-public-web .rch-public-header-actions {display:flex;align-items:center;gap:11px}
+.rch-public-web .rch-public-search {
+  display:flex;gap:9px;align-items:center;min-width:210px;max-width:300px;
+  padding:11px 13px;border:1px solid #2b5076;border-radius:9px;
+  background:#0b1d33;color:#a9cbe9!important;font-size:12px;text-decoration:none;
+}
+.rch-public-web .rch-public-search svg {color:#91b8e0}
+.rch-public-web .rch-public-signin,
+.rch-public-web .rch-public-join {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:41px;padding:10px 14px;border-radius:9px;
+  font-size:12px;font-weight:850;white-space:nowrap;text-decoration:none;
+}
+.rch-public-web .rch-public-signin {border:1px solid #3d83d5;color:#fff!important;background:transparent}
+.rch-public-web .rch-public-join {border:1px solid #80b8ff;color:#fff!important;background:linear-gradient(135deg,#278cff,#1766e9)}
+.rch-public-web .rch-public-mobile-menu {display:none;position:relative}
+.rch-public-web .rch-public-mobile-menu summary {
+  display:grid;place-items:center;list-style:none;width:43px;height:42px;
+  border:1px solid #3f719d;border-radius:9px;background:#143251;
+  color:#e5f5ff;font-size:20px;cursor:pointer;
+}
+.rch-public-web .rch-public-mobile-menu summary::-webkit-details-marker {display:none}
+.rch-public-web .rch-public-mobile-menu nav {
+  position:absolute;right:0;top:49px;width:min(295px,calc(100vw - 27px));
+  max-height:calc(100dvh - 75px);overflow-y:auto;
+  display:flex;flex-direction:column;gap:0;padding:8px;
+  border:1px solid #4073a0;border-radius:11px;background:#081c33;
+  box-shadow:0 20px 45px #0009;
+}
+.rch-public-web .rch-public-mobile-menu nav a {
+  display:flex;align-items:center;gap:10px;padding:13px 14px;
+  border-radius:6px;font-size:13px;font-weight:850;color:#f4f9ff!important;text-decoration:none;
+}
+.rch-public-web .rch-public-mobile-menu nav a:hover {background:#153a62}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-public-footer {
+  border-top:1px solid #20446a!important;background:#06152a!important;padding:25px 18px;
+}
+.rch-public-web .rch-public-footer-inner {max-width:1450px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.rch-public-web .rch-public-footer-brand {font-size:22px;font-style:italic;font-weight:1000;color:#fff!important}
+.rch-public-web .rch-public-footer-inner p {font-size:11px;color:#aac5e3!important;margin-top:4px}
+.rch-public-web .rch-public-footer-inner nav {display:flex;flex-wrap:wrap;gap:16px}
+.rch-public-web .rch-public-footer-inner nav a {display:flex;align-items:center;gap:6px;font-size:11px;font-weight:750;color:#a8cfff!important}
+@media(max-width:1250px){
+  .rch-public-web .rch-public-nav {gap:12px}
+  .rch-public-web .rch-public-search {min-width:unset;width:42px;justify-content:center;padding:11px}
+  .rch-public-web .rch-public-search span {display:none}
+}
+@media(max-width:940px){
+  .rch-public-web .rch-public-nav {display:none}
+  .rch-public-web .rch-public-mobile-menu {display:block}
+  .rch-public-web .rch-public-header-inner {min-height:66px}
+}
+@media(max-width:430px){
+  .rch-public-web .rch-public-logo span {width:68px;height:40px;font-size:22px}
+  .rch-public-web .rch-public-header-inner {gap:9px;padding-inline:12px}
+  .rch-public-web .rch-public-header-actions {gap:7px;margin-left:auto}
+  .rch-public-web .rch-public-search {width:38px;height:40px}
+  .rch-public-web .rch-public-signin,.rch-public-web .rch-public-join {min-height:40px;padding:8px 10px;font-size:11px}
+  .rch-public-web .rch-public-join svg {display:none}
+  .rch-public-web .rch-public-mobile-menu summary {width:39px;height:40px}
+  .rch-public-web .rch-public-footer-inner {flex-direction:column;align-items:flex-start}
+}
