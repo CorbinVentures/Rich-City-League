@@ -46,7 +46,6 @@ export default async function HomePage() {
           players={(playersRaw ?? []) as any}
         />
       </div>
-      <div className="rch-installed-home-target">
       <MemberHomeRedirect />
       <RCLHomeExperience
         teams={teams}
@@ -58,7 +57,6 @@ export default async function HomePage() {
         news={news}
         posts={(postsRaw ?? []) as any}
       />
-      </div>
     </>
   );
 }
