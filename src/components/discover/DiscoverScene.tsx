@@ -261,6 +261,7 @@ export default function DiscoverScene() {
             <option value="all">All Virginia</option>
             {cities.map(name => <option value={name} key={name}>{name}</option>)}
           </select>
+          <FaChevronDown className="rch-scene-location-caret" aria-hidden="true"/>
         </label>
       </section>
 
