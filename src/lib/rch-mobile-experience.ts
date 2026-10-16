@@ -75,3 +75,26 @@ export function verifiedRCHApkUrl(value?: string): string | null {
     return null;
   }
 }
+
+/**
+ * Browser member workspaces keep their own website chrome, but share the same
+ * authenticated account and RLS-protected tools as the installed application.
+ * This allowlist controls presentation only: middleware and database RLS
+ * remain responsible for authorizing every request.
+ */
+const BROWSER_MEMBER_PREFIXES = [
+  '/social', '/messages', '/notifications', '/my-hoops', '/dashboard',
+  '/settings', '/professional', '/friends', '/connections',
+  '/missions', '/fantasy', '/pickem', '/today', '/create',
+  '/clips', '/referrals', '/badges', '/staff', '/radar', '/game-iq',
+  '/more', '/account', '/portal', '/admin', '/orders',
+  '/network/dashboard', '/sponsors/dashboard', '/sponsors/campaigns',
+  '/media/creators/dashboard', '/league/royaltee/dashboard',
+] as const;
+
+export function isBrowserMemberRoute(pathname: string): boolean {
+  const normalized = pathname.length > 1 ? pathname.replace(/\\/+$/, '') : pathname;
+  return BROWSER_MEMBER_PREFIXES.some(prefix =>
+    normalized === prefix || normalized.startsWith(prefix + '/'),
+  );
+}
