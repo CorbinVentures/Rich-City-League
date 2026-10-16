@@ -79,7 +79,9 @@ begin
     raise exception 'Both independent crews must be attached to the match'; end if;
  if exists(select 1 from public.commonwealth_crew_members cm
       where cm.profile_id=v_actor and cm.crew_id in (v_home_crew,v_away_crew))
- then raise exception 'An official may not belong to either competing crew'; end if;
+    or exists(select 1 from public.commonwealth_crews cr
+      where cr.id in (v_home_crew,v_away_crew) and cr.captain_id=v_actor)
+ then raise exception 'An official may not belong to or captain either competing crew'; end if;
  if not exists(select 1 from public.rch_court_takeovers c
       where c.run_id=m.run_id and c.status='accepted'
       and c.accepted_at<=m.submitted_at
@@ -125,7 +127,9 @@ begin
         where att.match_id=new.id and att.home_crew_id=v_home and att.away_crew_id=v_away
           and att.home_score=new.home_score and att.away_score=new.away_score
           and not exists(select 1 from public.commonwealth_crew_members cm
-            where cm.profile_id=att.official_id and cm.crew_id in (v_home,v_away)))
+            where cm.profile_id=att.official_id and cm.crew_id in (v_home,v_away))
+          and not exists(select 1 from public.commonwealth_crews cr
+            where cr.id in (v_home,v_away) and cr.captain_id=att.official_id))
    then raise exception 'Takeover title result requires current independent official evidence for the exact crews and score'; end if;
  end if;
  return new;
