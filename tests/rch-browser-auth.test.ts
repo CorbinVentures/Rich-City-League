@@ -27,7 +27,7 @@ describe('RCH browser sign-in handoff regression', () => {
     expect(getBrowserPostAuthPath('/command')).toBe('/command');
   });
 
-  it.each(['/auth/sign-in', '/auth/complete-profile', '/member-access?next=/social', '//evil.com', 'https://evil.com', '/\\\\evil.com'])(
+  it.each(['/auth', '/auth/sign-in', '/auth/complete-profile', '/member-access?next=/social', '//evil.com', 'https://evil.com', '/\\\\evil.com'])(
     'rejects a blocked or unsafe post-login destination: %s',
     value => expect(getBrowserPostAuthPath(value)).toBe('/'),
   );
