@@ -17,6 +17,13 @@ values
 set role authenticated;
 select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}',true);
+select throws_ok($$select public.rcl_admin_assign_staff_role(null,'accountant',null)$$,
+ 'P0001','Authenticator verification required','AAL1 admin cannot directly assign staff via SECURITY DEFINER RPC');
+select throws_ok($$select public.rcl_review_staff_application(null,'approved','')$$,
+ 'P0001','Authenticator verification required','AAL1 admin cannot approve staff via SECURITY DEFINER RPC');
+select throws_ok($$select public.rcl_revoke_staff_assignment(null)$$,
+ 'P0001','Authenticator verification required','AAL1 admin cannot revoke staff via SECURITY DEFINER RPC');
+
 
 select lives_ok($$update public.profiles set display_name='Blocked admin change'
  where id='a2200000-0000-0000-0000-000000000002'$$,'RLS safely filters unauthorized profile update');
