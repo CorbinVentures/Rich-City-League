@@ -2,9 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { isBrowserAccountRoute, isBrowserPublicRoute, isMobileStandaloneExperience, verifiedRCHApkUrl } from '../src/lib/rch-mobile-experience';
 
 describe('RCH mobile app experience gate', () => {
-  it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile', '/member-access', '/command', '/command/access'])(
+  it.each(['/app', '/auth/sign-up', '/auth/sign-in', '/auth/complete-profile', '/auth/confirm', '/auth/update-password', '/legal/privacy', '/profile', '/member-access', '/command', '/command/access', '/account/security', '/account/security/'])(
     'allows account setup and installation in a normal browser: %s',
     path => expect(isBrowserAccountRoute(path)).toBe(true),
+  );
+
+  it.each(['/account', '/account/profile', '/account/security/device', '/admin', '/settings'])(
+    'does not widen normal-browser access beyond the MFA enrollment screen: %s',
+    path => expect(isBrowserAccountRoute(path)).toBe(false),
   );
 
   it.each(['/', '/social', '/messages', '/runs', '/league', '/admin', '/discover', '/today', '/notifications', '/profile/some-user'])(
