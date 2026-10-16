@@ -151,7 +151,7 @@ export default function ProfessionalDashboard() {
                 {hasViews ? <p>{numeral(totals.reach)} unique accounts generated {numeral(totals.impressions)} recorded views during this {period}-day window. Review your top posts and busiest observed viewing hours to guide your next update.</p> : <p>Your dashboard is ready. Views begin accumulating as signed-in members see your posts. Previous untracked impressions cannot be reconstructed.</p>}
                 <Link href="/social">Return to your timeline →</Link>
               </section>
-              <section className="rch-pro-panel rch-pro-source"><p className="rch-pro-overline">MEASUREMENT NOTES</p><h2>Clear, private analytics</h2><p>Reach counts unique signed-in accounts who viewed your published posts. A viewer contributes at most one impression per post per UTC day. Anonymous views are not measured. Audience hours describe observed views in your local time zone, not every moment your followers are online. Your viewers' identities are never shown.</p></section>
+              <section className="rch-pro-panel rch-pro-source"><p className="rch-pro-overline">MEASUREMENT NOTES</p><h2>Clear, private analytics</h2><p>Reach counts unique signed-in accounts who viewed your published posts. A viewer contributes at most one impression per post per UTC day. Anonymous views are not measured. Audience hours describe observed views in your local time zone, not every moment your followers are online. Your viewers&apos; identities are never shown.</p></section>
             </div>
           </div>
           <PostPerformance posts={data.top_posts}/>
