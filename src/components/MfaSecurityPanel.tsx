@@ -8,8 +8,9 @@ import { getSafePostAuthPath } from '@/lib/auth-redirect';
 type TotpFactor = { id: string; friendly_name?: string | null; status?: string };
 type Enrollment = { id: string; qrCode: string; secret: string };
 
-export function MfaSecurityPanel({ userId, isAdmin }: { userId: string | null; isAdmin: boolean }) {
+export function MfaSecurityPanel({ userId, isAdmin, returnTo }: { userId: string | null; isAdmin: boolean; returnTo?: string | null }) {
   const client = useMemo(() => getSupabaseClient(), []);
+  const verifiedDestination = getSafePostAuthPath(returnTo, '/account/security');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [factors, setFactors] = useState<TotpFactor[]>([]);
@@ -71,9 +72,7 @@ export function MfaSecurityPanel({ userId, isAdmin }: { userId: string | null; i
       await refresh();
       setNotice('Two-factor authentication is enabled. Use your authenticator on future sign-ins.');
       // Admins can continue to the protected destination after they have AAL2.
-      const params = new URLSearchParams(window.location.search);
-      const next = params.get('next');
-      if (next) window.location.replace(getSafePostAuthPath(next, '/dashboard'));
+      if (returnTo) window.location.replace(verifiedDestination);
     } catch (e) { setError(e instanceof Error ? e.message : 'Invalid authenticator code.'); }
     finally { setBusy(false); }
   }
@@ -131,7 +130,8 @@ export function MfaSecurityPanel({ userId, isAdmin }: { userId: string | null; i
           ? <span className="flex flex-wrap items-center gap-2 text-xs"><span className="text-red-200">Remove this factor?</span><button type="button" disabled={busy || currentLevel !== 'aal2'} onClick={() => void removeFactor(factor.id)} className="rounded-lg bg-red-400 px-3 py-2 font-bold text-black disabled:opacity-50">Confirm removal</button><button type="button" onClick={() => setRemoveId(null)} className="rounded-lg border border-white/20 px-3 py-2">Cancel</button></span>
           : <button type="button" disabled={busy || currentLevel !== 'aal2'} onClick={() => setRemoveId(factor.id)} className="rounded-lg border border-red-400/30 px-3 py-2 text-xs font-bold text-red-200 disabled:opacity-50">Remove</button>}
       </li>)}</ul>}
-      {factors.length > 0 && currentLevel !== 'aal2' && <Link className="mt-4 inline-flex rounded-xl border border-rcl-blue/40 px-4 py-3 text-sm font-bold text-rcl-blue" href="/auth/mfa?next=/account/security">Verify existing authenticator first</Link>}
+      {factors.length > 0 && currentLevel !== 'aal2' && <Link className="mt-4 inline-flex rounded-xl border border-rcl-blue/40 px-4 py-3 text-sm font-bold text-rcl-blue" href={`/auth/mfa?next=${encodeURIComponent(verifiedDestination)}`}>Verify existing authenticator first</Link>}
+      {isAdmin && returnTo && currentLevel === 'aal2' && <Link className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-rcl-blue px-5 py-3 text-sm font-black text-[#071522]" href={verifiedDestination}>Continue to {verifiedDestination.startsWith('/command') ? 'Command Center' : 'Admin Tools'} →</Link>}
       {!enrollment && <button type="button" onClick={() => void startEnrollment()} disabled={busy || !userId || (factors.length > 0 && currentLevel !== 'aal2')} className="mt-5 min-h-11 rounded-xl bg-rcl-blue px-5 text-xs font-black uppercase tracking-wide text-black disabled:opacity-50">{busy ? 'Working…' : factors.length ? 'Add another authenticator' : 'Set up authenticator'}</button>}
       {enrollment && <div className="mt-6 rounded-2xl border border-white/15 bg-black/25 p-5">
         <p className="text-sm font-bold">1. Scan this QR code in your authenticator app</p>

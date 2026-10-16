@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaEye, FaEyeSlash, FaLock, FaShieldHalved } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
@@ -9,6 +9,7 @@ import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { MfaSecurityPanel } from '@/components/MfaSecurityPanel';
+import { getSafePostAuthPath } from '@/lib/auth-redirect';
 
 export default function SecurityPage() {
   const { user, profile, updatePassword, error, loading } = useAuth();
@@ -21,6 +22,15 @@ export default function SecurityPage() {
   const [sessionMessage, setSessionMessage] = useState('');
   const [sessionBusy, setSessionBusy] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
+  const [requestedWorkspace, setRequestedWorkspace] = useState<string | null>(null);
+
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get('next');
+    const safe = getSafePostAuthPath(next, '');
+    if (safe === '/admin' || safe.startsWith('/admin/') || safe === '/command' || safe.startsWith('/command/')) {
+      setRequestedWorkspace(safe);
+    }
+  }, []);
 
   async function revokeSessions(scope: 'others' | 'global') {
     if (!user || !db || sessionBusy) return;
@@ -59,13 +69,11 @@ export default function SecurityPage() {
 
   const meetsLength = password.length >= 8;
   const matches = Boolean(password) && password === confirmation;
+  const isAdminVerification = Boolean(requestedWorkspace && user && profile?.role === 'admin');
+  const workspaceName = requestedWorkspace?.startsWith('/command') ? 'RCL Command Center' : 'Admin Tools';
 
-  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
-    <ClientPageHero eyebrow="Account Security" title="Security" accent="Protect your RCL identity" description="Update your password from an authenticated session without changing your profile, role, or league history." meta={<span className="grid h-14 w-14 place-items-center rounded-2xl border border-rcl-blue/20 bg-rcl-blue/10 text-2xl text-rcl-blue"><FaShieldHalved/></span>} />
-    <Container maxWidth="lg" className="py-8 sm:py-12">
-      <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link>
-      {!user && !loading && <div className="mt-5 rounded-2xl border border-rcl-blue/20 bg-rcl-blue/5 p-5 text-sm text-white/70">Sign in to change your password or manage active sessions. <Link href="/auth/sign-in?next=/account/security" className="font-bold text-rcl-blue underline">Sign in</Link></div>}
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+  const passwordSettings = (
+    <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <form onSubmit={submit} className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 shadow-[0_18px_55px_rgba(0,0,0,.18)] sm:p-8">
           <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-orange/10 text-rcl-orange"><FaLock/></span><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Password</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Change password</h2><p className="mt-2 text-sm leading-6 text-white/40">Your current signed-in session is required.</p></div></div>
 
@@ -86,8 +94,34 @@ export default function SecurityPage() {
           <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Password check</p><div className="mt-4 space-y-3 text-sm"><Check ok={meetsLength} text="At least 8 characters"/><Check ok={matches} text="Passwords match"/></div><p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/30">RCL never displays your password. Updating it does not change your league role, REP, stats, or profile history.</p>
         </aside>
       </div>
+  );
 
-      <MfaSecurityPanel userId={user?.id ?? null} isAdmin={profile?.role === 'admin'} />
+  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
+    <ClientPageHero eyebrow={isAdminVerification ? 'Administrator access' : 'Account Security'} title={isAdminVerification ? 'Verify your access' : 'Security'} accent={isAdminVerification ? 'Complete your security check' : 'Protect your RCL identity'} description={isAdminVerification ? 'Your administrator tools are protected with two-factor authentication. Complete the setup below to continue.' : 'Update your password from an authenticated session without changing your profile, role, or league history.'} meta={<span className="grid h-14 w-14 place-items-center rounded-2xl border border-rcl-blue/20 bg-rcl-blue/10 text-2xl text-rcl-blue"><FaShieldHalved/></span>} />
+    <Container maxWidth="lg" className="py-8 sm:py-12">
+      <Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link>
+      {!user && !loading && <div className="mt-5 rounded-2xl border border-rcl-blue/20 bg-rcl-blue/5 p-5 text-sm text-white/70">Sign in to change your password or manage active sessions. <Link href="/auth/sign-in?next=/account/security" className="font-bold text-rcl-blue underline">Sign in</Link></div>}
+      {isAdminVerification && (
+        <section role="status" className="mt-5 rounded-2xl border border-[#5191c6] bg-[#0e304d] px-5 py-5 text-white shadow-lg sm:px-7">
+          <p className="text-xs font-black uppercase tracking-[.16em] text-[#92c8f5]">One step before {workspaceName}</p>
+          <h2 className="mt-2 text-2xl font-black">Verify your administrator account</h2>
+          <p className="mt-2 text-sm leading-6 text-[#d4e8f8]">Your administrator account requires an authenticator code. Set up an authenticator below, or verify your existing one. You do not need to change your password.</p>
+          <p className="mt-2 text-xs font-semibold text-[#aee1ff]">After successful verification, you will return to {workspaceName}.</p>
+        </section>
+      )}
+
+      {isAdminVerification ? (
+        <>
+          <MfaSecurityPanel userId={user?.id ?? null} isAdmin returnTo={requestedWorkspace} />
+          <h2 className="mt-10 text-lg font-bold text-white">Other account security settings</h2>
+          {passwordSettings}
+        </>
+      ) : (
+        <>
+          {passwordSettings}
+          <MfaSecurityPanel userId={user?.id ?? null} isAdmin={profile?.role === 'admin'} />
+        </>
+      )}
 
       <section className="mt-6 rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-6 sm:p-8" aria-labelledby="sessions-title">
         <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rcl-blue/10 text-rcl-blue"><FaShieldHalved/></span><div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Session security</p><h2 id="sessions-title" className="mt-1 font-display text-2xl font-black uppercase">Protect your signed-in devices</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">If you lose a device or suspect somebody accessed your account, revoke its session. You can preserve this device or sign out everywhere.</p></div></div>
