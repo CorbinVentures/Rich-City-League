@@ -49,7 +49,7 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
    setSelectedPreview(preview);setSelectedMethod(source);setError('');setStatus(source+' logo selected. Save it when you create or update your crew.');
    onChange(file);
  }
- async function useBuilder(){
+ async function handleBuilder(){
    setWorking(true);setError('');
    try{
      const result=await imageToPng(new Blob([svg],{type:'image/svg+xml'}));
@@ -57,7 +57,7 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
    }catch(e){setError(e instanceof Error?e.message:'Could not export this design.');}
    finally{setWorking(false);}
  }
- async function useUpload(file?:File){
+ async function handleUpload(file?:File){
    if(!file)return;
    if(!mime.has(file.type)||file.size>maxSource){setError('Select a PNG, JPG or WebP image under 10 MB. SVG uploads are not supported.');return;}
    setWorking(true);setError('');setUploadedName(file.name);
@@ -65,7 +65,7 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
    catch(e){setError(e instanceof Error?e.message:'Image upload preparation failed.');}
    finally{setWorking(false);}
  }
- async function useAI(){
+ async function handleAI(){
    if(aiPrompt.trim().length<10){setError('Describe the logo in at least 10 characters.');return;}
    setGenerating(true);setError('');setStatus('');
    try{
@@ -117,10 +117,10 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
         <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold">Main color<input aria-label="Main logo color" type="color" value={design.primary} onChange={e=>update('primary',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Background color<input aria-label="Background logo color" type="color" value={design.secondary} onChange={e=>update('secondary',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Lettering color<input aria-label="Logo text color" type="color" value={design.ink} onChange={e=>update('ink',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Tagline<input maxLength={36} value={design.tagline} onChange={e=>update('tagline',e.target.value)} className={field}/></label></div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-xs font-bold">Emblem size <span className="text-[#98bedc]">{Math.round(design.symbolSize*100)}%</span><input type="range" min=".5" max="1.6" step=".1" value={design.symbolSize} onChange={e=>update('symbolSize',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Name size<input type="range" min="26" max="64" value={design.nameSize} onChange={e=>update('nameSize',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Emblem position<input type="range" min="140" max="285" value={design.symbolY} onChange={e=>update('symbolY',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Name position<input type="range" min="290" max="415" value={design.nameY} onChange={e=>update('nameY',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label></div>
         <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold"><label className="flex items-center gap-2"><input type="checkbox" checked={design.showSymbol} onChange={e=>update('showSymbol',e.target.checked)}/> Emblem layer</label><label className="flex items-center gap-2"><input type="checkbox" checked={design.showTagline} onChange={e=>update('showTagline',e.target.checked)}/> Tagline layer</label></div>
-        <button type="button" disabled={working||generating} onClick={()=>void useBuilder()} className="mt-5 min-h-11 w-full rounded-xl bg-[#34d8ea] px-4 py-3 text-sm font-black text-[#041b28] disabled:opacity-40">{working?'Rendering…':'Use custom logo'}</button>
+        <button type="button" disabled={working||generating} onClick={()=>void handleBuilder()} className="mt-5 min-h-11 w-full rounded-xl bg-[#34d8ea] px-4 py-3 text-sm font-black text-[#041b28] disabled:opacity-40">{working?'Rendering…':'Use custom logo'}</button>
        </>}
        {mode==='upload'&&<><h4 className="text-base font-black uppercase">Upload your own logo</h4><p className="mt-2 text-xs leading-5 text-[#b9d4e9]">PNG, JPG or WebP up to 10 MB. We automatically fit it into a 512 × 512 square and compress it for RCH. No SVG or animated images.</p>
-        <label className="mt-5 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#3c769a] bg-[#0b2740] px-4 py-6 text-center hover:border-[#56ccf2]"><FaCloudArrowUp className="mb-3 text-4xl text-[#5fc7e7]"/><strong className="text-sm">Choose your logo file</strong><span className="mt-2 text-xs text-[#a9cbe1]">{uploadedName||'Choose an image from your device'}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={working||generating} onChange={e=>{void useUpload(e.target.files?.[0]);e.target.value='';}}/></label>
+        <label className="mt-5 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#3c769a] bg-[#0b2740] px-4 py-6 text-center hover:border-[#56ccf2]"><FaCloudArrowUp className="mb-3 text-4xl text-[#5fc7e7]"/><strong className="text-sm">Choose your logo file</strong><span className="mt-2 text-xs text-[#a9cbe1]">{uploadedName||'Choose an image from your device'}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={working||generating} onChange={e=>{void handleUpload(e.target.files?.[0]);e.target.value='';}}/></label>
         <p className="mt-4 text-xs text-[#a9c8e1]">Only use artwork you have permission to display. Crew images are public.</p>
        </>}
        {mode==='ai'&&<><h4 className="flex items-center gap-2 text-base font-black uppercase"><FaWandMagicSparkles className="text-[#d1a1ff]"/> AI Logo Creator</h4>
@@ -128,7 +128,7 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
          <label className="mt-4 block text-xs font-bold">Describe your design<textarea maxLength={400} rows={4} value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} placeholder="A fierce teal lightning bolt over a black basketball with championship energy…" className={field+' resize-y'}/></label>
          <p className="mt-4 text-xs font-bold">Select a vibe</p>
          <div className="mt-2 flex flex-wrap gap-2">{styles.map(s=><button key={s} type="button" aria-pressed={aiStyle===s} onClick={()=>setAiStyle(s)} className={'min-h-9 rounded-lg border px-3 text-xs font-bold '+(aiStyle===s?'border-[#daafff] bg-[#522e79]':'border-[#355573]')}>{s}</button>)}</div>
-         <button type="button" disabled={generating||working||aiPrompt.trim().length<10} onClick={()=>void useAI()} className="mt-5 min-h-11 w-full rounded-xl bg-gradient-to-r from-[#5d75ff] to-[#bf75ec] px-4 py-3 text-sm font-black text-white disabled:opacity-40">{generating?'Creating your logo…':'Generate original logo'}</button>
+         <button type="button" disabled={generating||working||aiPrompt.trim().length<10} onClick={()=>void handleAI()} className="mt-5 min-h-11 w-full rounded-xl bg-gradient-to-r from-[#5d75ff] to-[#bf75ec] px-4 py-3 text-sm font-black text-white disabled:opacity-40">{generating?'Creating your logo…':'Generate original logo'}</button>
          <p className="mt-3 text-xs leading-5 text-[#acbdd7]">Limit: 3 AI generations per account per day, with a short cooldown. Your selected result will be attached when you save your crew.</p>
        </>}
      </div>
