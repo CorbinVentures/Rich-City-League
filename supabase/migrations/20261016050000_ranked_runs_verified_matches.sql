@@ -1,5 +1,10 @@
 begin;
 
+-- Existing Runs formats predate 2v2. The create form and rating engine must agree.
+alter table public.runs drop constraint if exists runs_game_format_check;
+alter table public.runs add constraint runs_game_format_check
+  check(game_format in ('1v1','2v2','3v3','4v4','5v5','shootaround','open_run'));
+
 -- RCH Ranked Runs: separate basketball skill from social REP and self-reported box scores.
 -- No historical game or self-reported statistic is retroactively awarded a rating.
 create table public.run_ranked_matches (
