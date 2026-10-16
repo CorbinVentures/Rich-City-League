@@ -1,4 +1,5 @@
 import { Neighborhood } from '@/components/social/Neighborhood';
+import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
@@ -232,6 +233,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{royalteeIdentity&&<Link href="/league/royaltee" className="rounded-full border border-[#ec8e4d]/60 bg-[#c7682b]/15 px-3 py-1 font-black text-[#ffb586]">Royaltee · Official 18+ Cheer + Step</Link>}{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
+          <PublicCrewShowcase profileId={profile.id} />
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
           {!profile.is_system_account && <ProfileViewInsights profileId={profile.id} />}

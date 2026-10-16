@@ -20,6 +20,7 @@ import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { RunRankedMatchControl } from '@/components/runs/RunRankedMatchControl';
+import { RunCrewEntries } from '@/components/runs/RunCrewEntries';
 
 type Run = {
   id: string;
@@ -314,6 +315,7 @@ export default function RunRoomPage() {
           </div>
         </section>
 
+        <RunCrewEntries runId={run.id} />
         <RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} />
 
         <section className="mt-6 rounded-3xl border border-white/10 bg-[#07111b] p-5 sm:p-6">

@@ -17,7 +17,7 @@ import { CommonwealthCupPath,type CupGroupStanding } from './CommonwealthCupPath
 import './commonwealth.css';
 
 type Season={id:string;name:string;region:string;status:string};
-type Crew={id:string;season_id:string;name:string;motto:string;captain_id:string;city:string;home_court_slug:string;created_at:string};
+type Crew={id:string;season_id:string;name:string;motto:string;captain_id:string;city:string;home_court_slug:string;created_at:string;logo_path:string|null};
 type Member={crew_id:string;season_id:string;profile_id:string;role:string;joined_at:string};
 type Request={id:string;crew_id:string;profile_id:string;status:string;created_at:string;display_name?:string};
 type Challenge={
@@ -77,7 +77,7 @@ export default function CommonwealthExperience(){
       if(!active){setLoading(false);return;}
       const [siteRefs,crewRows,membersRows,rankingRows,challengeRows,runRows,cupGroupRows]=await Promise.all([
         db.from('commonwealth_sites').select('court_slug').eq('season_id',active.id),
-        db.from('commonwealth_crews').select('id,season_id,name,motto,captain_id,city,home_court_slug,created_at')
+        db.from('commonwealth_crews').select('id,season_id,name,motto,captain_id,city,home_court_slug,created_at,logo_path')
           .eq('season_id',active.id).order('created_at',{ascending:true}).limit(250),
         user?db.from('commonwealth_crew_members').select('crew_id,season_id,profile_id,role,joined_at')
           .eq('season_id',active.id).limit(3000):Promise.resolve({data:[]}),
@@ -322,7 +322,7 @@ export default function CommonwealthExperience(){
           <div className="rch-cw-fields"><label>Crew name<input required maxLength={36} minLength={3} value={crewName} onChange={e=>setCrewName(e.target.value)} placeholder="Your crew name"/></label>
             <label>Home court<select required value={courtChoice} onChange={e=>setCourtChoice(e.target.value)}>{sites.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select></label></div>
           <label>Motto (optional)<input maxLength={160} value={motto} onChange={e=>setMotto(e.target.value)} placeholder="What does your crew stand for?"/></label>
-          <p className="rch-cw-fine-print">A founding captain joins the roster automatically. One crew per member per season. Court access must be arranged by the participants.</p>
+          <p className="rch-cw-fine-print">A founding captain joins the roster automatically. One crew per member per season. Upload your logo and invite players from Crew HQ after creation. Court access must be arranged by participants.</p>
           <button className="rch-cw-primary" disabled={!!busy||!courtChoice}><FaFlag/> {busy?'Creating…':'Create founding crew'}</button>
         </form>}
         <div className="rch-cw-crew-grid">
@@ -331,9 +331,9 @@ export default function CommonwealthExperience(){
             const mine=crew.id===myCrew?.id;
             const asked=requests.some(r=>r.crew_id===crew.id&&r.profile_id===user?.id&&r.status==='pending');
             return <article key={crew.id} className={'rch-cw-crew-card '+(mine?'mine':'')}>
-              <div className="rch-cw-crew-symbol"><FaBasketball/></div>
+              <div className="rch-cw-crew-symbol">{crew.logo_path?<img src={db.storage.from('rch-crew-logos').getPublicUrl(crew.logo_path).data.publicUrl} alt={crew.name+' logo'} style={{width:'100%',height:'100%',objectFit:'contain'}}/>:<FaBasketball/>}</div>
               <div className="rch-cw-crew-top"><small>{courtBySlug.get(crew.home_court_slug)?.name||crew.city}</small>{mine&&<span>YOUR CREW</span>}</div>
-              <h3>{crew.name}</h3><p>{crew.motto||'Founding crew · Ready to make history.'}</p>
+              <h3>{crew.name}</h3><p>{crew.motto||'Founding crew · Ready to make history.'}</p><Link href={'/crews?crew='+crew.id} className="rch-cw-small-cta">Crew HQ · logo, invites &amp; top five <FaArrowRight/></Link>
               <div className="rch-cw-crew-stats"><span>{user?(rosterCount.get(crew.id)||0)+' / 12 PLAYERS':'ROSTER · MEMBERS ONLY'}</span><span>{standing?competitionRecord(standing):'0-0'} RECORD</span></div>
               {!myCrew&&user&&<button disabled={!!busy||asked} onClick={()=>void rpc('commonwealth_request_to_join',{p_crew:crew.id},'Roster request sent to the crew captain.')} className="rch-cw-small-cta">{asked?'Request pending':'Request roster spot'} <FaArrowRight/></button>}
               {captainCrew&&crew.id!==captainCrew.id&&<button className="rch-cw-small-cta" onClick={()=>{setOpponent(crew.id);setChallengeCourt(crew.home_court_slug);document.getElementById('rch-cw-challenge-form')?.scrollIntoView({behavior:'smooth'});}}>Challenge this crew <FaArrowRight/></button>}
