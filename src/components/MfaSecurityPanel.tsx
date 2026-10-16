@@ -93,6 +93,17 @@ export function MfaSecurityPanel({ userId, isAdmin }: { userId: string | null; i
     try {
       const result = await client.auth.mfa.unenroll({ factorId });
       if (result.error) throw result.error;
+      // Supabase does not immediately downgrade an existing AAL2 JWT when the
+      // final factor is removed. Refresh now rather than leaving privileged
+      // pages available with a stale session assurance claim.
+      if (factors.length === 1) {
+        const refreshed = await client.auth.refreshSession();
+        if (refreshed.error || !refreshed.data.session) {
+          await client.auth.signOut();
+          window.location.replace('/auth/sign-in?next=/account/security');
+          return;
+        }
+      }
       setRemoveId(null);
       await refresh();
       setNotice('Authenticator removed. You can register a new authenticator.');
