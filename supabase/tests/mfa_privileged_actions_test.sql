@@ -18,7 +18,7 @@ set role authenticated;
 select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000001',true);
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}',true);
 
-select lives_ok($update public.profiles set display_name='Blocked admin change'
+select lives_ok($$update public.profiles set display_name='Blocked admin change'
  where id='a2200000-0000-0000-0000-000000000002'$,'RLS safely filters unauthorized profile update');
 select ok((select display_name from public.profiles
  where id='a2200000-0000-0000-0000-000000000002') is distinct from 'Blocked admin change',
@@ -37,7 +37,7 @@ select throws_ok($$
 $$,'42501',null,'AAL1 admin cannot change platform settings');
 
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000001","role":"authenticated","aal":"aal2"}',true);
-select lives_ok($update public.profiles set display_name='Approved admin change'
+select lives_ok($$update public.profiles set display_name='Approved admin change'
  where id='a2200000-0000-0000-0000-000000000002'$,'AAL2 admin update is permitted');
 select is((select display_name from public.profiles
  where id='a2200000-0000-0000-0000-000000000002'),'Approved admin change',
@@ -57,7 +57,7 @@ $$,'AAL2 admin can change platform settings');
 
 select set_config('request.jwt.claim.sub','a2200000-0000-0000-0000-000000000002',true);
 select set_config('request.jwt.claims','{"sub":"a2200000-0000-0000-0000-000000000002","role":"authenticated","aal":"aal1"}',true);
-select lives_ok($update public.profiles set bio='Normal profile edit'
+select lives_ok($$update public.profiles set bio='Normal profile edit'
  where id='a2200000-0000-0000-0000-000000000002'$,'regular member can edit profile at AAL1');
 select is((select bio from public.profiles where id=auth.uid()),'Normal profile edit','member profile self-service persists without MFA');
 select lives_ok($$
