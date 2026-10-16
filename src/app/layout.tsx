@@ -47,6 +47,8 @@ import './rch-header-contrast-authority.css';
 import './rch-public-theme.css';
 // Final, scoped action-first member navigation layer; does not override public pages.
 import './rch-intent-navigation.css';
+// RCH Pulse is isolated to the social home and intentionally wins legacy theme conflicts.
+import './rch-pulse.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
