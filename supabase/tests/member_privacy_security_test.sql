@@ -1,6 +1,10 @@
 begin;
 select no_plan();
 set role postgres;
+-- CI's minimal local database lacks some REST role grants present in
+-- production; mirror those existing grants inside this rollback-only test.
+grant select on public.posts, public.stories to anon, authenticated;
+grant select, insert, update on public.friendships to authenticated;
 
 -- Isolated fixtures; no production credentials or personal information.
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
