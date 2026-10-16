@@ -40,10 +40,9 @@ export async function POST(request:Request){
   if(!context)return NextResponse.json({error:'Sign in required'},{status:401});
   if(!context.account||context.account.status!=='approved'||!context.account.terms_accepted_at)return NextResponse.json({error:'A signed approved creator agreement is required.'},{status:403});
   const db=context.client as any;
-  const {data:profile}=await db.from('profiles').select('date_of_birth').eq('id',context.user.id).maybeSingle();
-  const dob=profile?.date_of_birth;
-  const cutoff=new Date();cutoff.setUTCFullYear(cutoff.getUTCFullYear()-18);
-  if(!dob||dob>cutoff.toISOString().slice(0,10))return NextResponse.json({error:'Verified adult age is required for Stripe payout onboarding.'},{status:403});
+  const {data:isAdult,error:ageError}=await db.rpc('is_my_profile_adult');
+  if(ageError)return NextResponse.json({error:'Adult eligibility verification is temporarily unavailable.'},{status:503});
+  if(isAdult!==true)return NextResponse.json({error:'Verified adult age is required for Stripe payout onboarding.'},{status:403});
   const admin=getSupabaseAdminClient() as any;
   if(!admin)return NextResponse.json({error:'Stripe payout onboarding is not configured.'},{status:503});
   try{
