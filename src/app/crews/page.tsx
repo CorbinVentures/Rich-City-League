@@ -6,6 +6,8 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { CompetitiveCircuit } from '@/components/circuit/CompetitiveCircuit';
+import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
+import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import { getSupabaseClient } from '@/lib/supabase';
 
 type Crew = { id:string; name:string; motto:string; city:string; captain_id:string; logo_path:string|null; home_court_slug:string; season_id:string };
@@ -34,6 +36,8 @@ function CrewsView(){
   const [busy,setBusy]=useState('');
   const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
+  const [logoEditorOpen,setLogoEditorOpen]=useState(false);
+  const [logoDraft,setLogoDraft]=useState<File|null>(null);
   const [reloadKey,setReloadKey]=useState(0);
   const refresh=()=>setReloadKey(n=>n+1);
 
@@ -92,18 +96,15 @@ function CrewsView(){
       else{await navigator.clipboard.writeText(url);setNotice('Crew invitation link copied.');}
     }catch{/* Share sheet dismissed. */}
   };
-  const upload=async(file?:File)=>{
-    if(!file||!myCrew||!db||!captain)return;
-    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){setError('Use a PNG, JPG or WebP logo under 2 MB.');return;}
-    const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
-    const path=myCrew.id+'/logo-'+Date.now()+'.'+ext;
+  const upload=async()=>{
+    if(!logoDraft||!myCrew||!db||!captain)return;
     setBusy('logo');setError('');
-    const uploaded=await db.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});
-    if(uploaded.error){setError(uploaded.error.message);setBusy('');return;}
-    const result=await db.rpc('commonwealth_set_crew_logo',{p_crew:myCrew.id,p_path:path});
-    if(result.error)setError(result.error.message);
-    else{setNotice('Crew logo is live across RCH.');refresh();}
-    setBusy('');
+    try{
+      await saveCrewLogo(db,myCrew.id,logoDraft);
+      setNotice('Your new crew logo is live across RCH.');
+      setLogoDraft(null);setLogoEditorOpen(false);refresh();
+    }catch(err){setError(err instanceof Error?err.message:'Could not save your crew logo.');}
+    finally{setBusy('');}
   };
   const search=async()=>{
     const handle=lookup.trim().replace(/^@/,'');
@@ -142,7 +143,10 @@ function CrewsView(){
           <div className="min-w-0 flex-1"><p className="text-xs font-black tracking-[.16em] text-[#7cb7e7]">{selected.city.toUpperCase()} · {selected.home_court_slug.replace(/-/g,' ').toUpperCase()}</p><h2 className="mt-1 font-display text-3xl font-black uppercase">{selected.name}</h2><p className="mt-1 text-sm text-[#b3d0e6]">{selected.motto||'Building our legacy on Virginia courts.'}</p><p className="mt-2 text-xs font-bold text-[#88b9e1]">{selectedMembers.length} / 12 members · {mine?'Your crew':'RCH crew'}</p></div>
           <div className="flex flex-wrap gap-2">{!myCrew&&user&&<button disabled={!!busy} onClick={()=>void execute('commonwealth_request_to_join',{p_crew:selected.id},'Roster request sent to the captain.')} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Request to join</button>}{!user&&!authLoading&&<Link href={'/auth/sign-up?redirect='+encodeURIComponent('/crews?crew='+selected.id)} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Sign up free to join</Link>}<button onClick={()=>void share(selected)} className="inline-flex items-center gap-2 rounded-xl border border-[#497fac] px-4 py-3 text-xs font-black"><FaShareNodes/> Invite friends</button></div>
         </div>
-        {captain&&mine&&<label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#456e95] px-4 py-3 text-xs font-black"><FaImage/> {busy==='logo'?'Uploading…':'Upload crew logo'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={!!busy} className="sr-only" onChange={e=>void upload(e.target.files?.[0])}/></label>}
+        {captain&&mine&&<div className="mt-5"><button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#456e95] px-4 py-3 text-xs font-black" onClick={()=>setLogoEditorOpen(v=>!v)}><FaImage/>{logoEditorOpen?'Close logo studio':'Create, upload or AI-generate logo'}</button>
+         {logoEditorOpen&&<><CrewLogoStudio crewName={myCrew.name} initialLogoUrl={logo(myCrew)} onChange={setLogoDraft}/>
+           <button type="button" disabled={!!busy||!logoDraft} onClick={()=>void upload()} className="mt-3 min-h-11 w-full rounded-xl bg-[#66c5ed] px-4 py-3 text-sm font-black text-[#061725] disabled:opacity-40">{busy==='logo'?'Saving logo…':'Save selected logo to crew'}</button></>}
+         </div>}
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectedMembers.map(member=><Link href={'/social/profile/'+member.profile_id} key={member.profile_id} className="flex items-center gap-3 rounded-xl border border-[#244e74] bg-[#0c2845] p-3 hover:border-[#83beee]">
           <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[#194265]">{identity(member.profile_id)?.avatar_url?<img src={identity(member.profile_id)?.avatar_url||''} alt="" className="h-full w-full object-cover"/>:<FaBasketball/>}</span>
           <span className="min-w-0"><strong className="block truncate text-sm">{identity(member.profile_id)?.display_name||identity(member.profile_id)?.username||'RCH Member'}</strong><small className="text-xs text-[#9bbcd9]">{member.role==='captain'?'Captain':'Teammate'}</small></span>
