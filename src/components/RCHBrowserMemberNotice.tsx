@@ -22,12 +22,12 @@ export function RCHBrowserMemberNotice({ pathname }: {pathname: string}) {
         <span className="rch-browser-member-kicker"><FaLock aria-hidden="true"/> PERSONAL ACCOUNT FEATURE</span>
         <h1>YOUR BASKETBALL.<br/><em>YOUR WAY.</em></h1>
         <h2>{feature}</h2>
-        <p>This area uses your personal account. You can keep exploring Virginia basketball on the public site without signing in or installing anything.</p>
+        <p>This workspace belongs to your personal RCH account. You can explore public basketball, Runs, teams and the community right here in your browser — no app or sign-in required.</p>
         <div className="rch-browser-member-actions">
-          <Link className="rch-browser-member-primary" href="/auth/sign-in">Sign in <FaArrowRight/></Link>
-          <Link className="rch-browser-member-outline" href="/discover">Explore basketball <FaCompass/></Link>
+          <Link className="rch-browser-member-primary" href="/discover">Explore basketball <FaCompass/></Link>
+          <Link className="rch-browser-member-outline" href="/app">Get the RCH App <FaArrowRight/></Link>
         </div>
-        <span className="rch-browser-member-note">The full installed RCH app remains available whenever you&apos;re ready.</span>
+        <span className="rch-browser-member-note">The installed RCH app is designed for the personal workspace. Have an account? <Link href="/auth/sign-in">Sign in here</Link>.</span>
       </div>
       <nav className="rch-browser-member-discover" aria-label="Continue exploring publicly">
         <Link href="/runs"><FaBasketball/><span><b>Find Runs</b><small>Discover your next game</small></span><FaArrowRight/></Link>

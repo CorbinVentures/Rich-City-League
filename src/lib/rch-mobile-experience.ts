@@ -32,7 +32,7 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/divisions', '/legacy', '/players/compare', '/media/creators',
   '/media/creators/apply', '/league/royaltee', '/league/royaltee/join',
 ]);
-const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs', 'coaches', 'seasons', 'fans', 'shop']);
+const PUBLIC_DETAIL_SECTIONS = new Set(['teams', 'players', 'games', 'news', 'organizations', 'runs', 'coaches', 'seasons', 'fans', 'shop', 'communities']);
 const PRIVATE_DETAIL_SLUGS = new Set(['new', 'create', 'edit', 'settings', 'dashboard', 'manage', 'admin', 'scouting', 'join']);
 
 export function isBrowserPublicRoute(pathname: string): boolean {
