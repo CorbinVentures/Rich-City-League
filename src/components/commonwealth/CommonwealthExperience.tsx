@@ -15,6 +15,8 @@ import { COMMONWEALTH_SEASON_SLUG,competitionRecord,formatCompetitionDate,pilotR
   stateRadarXY,type CommonwealthSite,type CommonwealthStanding,type CommonwealthFormat } from '@/lib/commonwealth';
 import { CommonwealthCupPath,type CupGroupStanding } from './CommonwealthCupPath';
 import { CompetitiveCircuit } from '@/components/circuit/CompetitiveCircuit';
+import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
+import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import './commonwealth.css';
 
 type Season={id:string;name:string;region:string;status:string};
@@ -53,6 +55,7 @@ export default function CommonwealthExperience(){
   const [foundingOpen,setFoundingOpen]=useState(false);
   const [crewName,setCrewName]=useState('');
   const [motto,setMotto]=useState('');
+  const [foundingLogo,setFoundingLogo]=useState<File|null>(null);
   const [courtChoice,setCourtChoice]=useState('');
   const [opponent,setOpponent]=useState('');
   const [challengeCourt,setChallengeCourt]=useState('');
@@ -158,9 +161,32 @@ export default function CommonwealthExperience(){
     }catch(e){setError(e instanceof Error?e.message:'The action could not be completed.');}
     finally{setBusy('');}
   };
-  const foundCrew=(event:FormEvent)=>{
+  const foundCrew=async(event:FormEvent)=>{
     event.preventDefault();
-    void rpc('commonwealth_found_crew',{p_name:crewName.trim(),p_court_slug:courtChoice,p_motto:motto.trim()},'Your crew is founded. Invite players to request a roster spot.');
+    if(!user){signIn();return;}
+    if(!db||!courtChoice)return;
+    setBusy('founding');setError('');setNotice('');
+    try{
+      const {data:crewId,error:createError}=await db.rpc('commonwealth_found_crew',{
+        p_name:crewName.trim(),p_court_slug:courtChoice,p_motto:motto.trim()
+      });
+      if(createError)throw createError;
+      // The crew exists even if logo storage fails; never issue a duplicate founding RPC.
+      setFoundingOpen(false);
+      setFoundingLogo(null);
+      setNotice('Your crew is founded. You can recruit teammates from Crew HQ.');
+      if(foundingLogo&&crewId){
+        try{
+          await saveCrewLogo(db,crewId as string,foundingLogo);
+          setNotice('Your crew is founded and its custom logo is live across RCH.');
+        }catch(logoError){
+          setNotice('Your crew was founded successfully. Finish setting your logo from Crew HQ.');
+          setError(logoError instanceof Error?logoError.message:'Logo saving failed.');
+        }
+      }
+      reload();
+    }catch(e){setError(e instanceof Error?e.message:'The crew could not be founded.');}
+    finally{setBusy('');}
   };
   const issueChallenge=(event:FormEvent)=>{
     event.preventDefault();
@@ -324,8 +350,9 @@ export default function CommonwealthExperience(){
           <div className="rch-cw-fields"><label>Crew name<input required maxLength={36} minLength={3} value={crewName} onChange={e=>setCrewName(e.target.value)} placeholder="Your crew name"/></label>
             <label>Home court<select required value={courtChoice} onChange={e=>setCourtChoice(e.target.value)}>{sites.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select></label></div>
           <label>Motto (optional)<input maxLength={160} value={motto} onChange={e=>setMotto(e.target.value)} placeholder="What does your crew stand for?"/></label>
-          <p className="rch-cw-fine-print">A founding captain joins the roster automatically. One crew per member per season. Upload your logo and invite players from Crew HQ after creation. Court access must be arranged by participants.</p>
-          <button className="rch-cw-primary" disabled={!!busy||!courtChoice}><FaFlag/> {busy?'Creating…':'Create founding crew'}</button>
+          <CrewLogoStudio crewName={crewName} onChange={setFoundingLogo}/>
+          <p className="rch-cw-fine-print">Your logo is optional. Build an original design, upload your own, or generate generic AI artwork before founding to save it with the crew. One crew per member per season. Court access must be arranged by participants.</p>
+          <button className="rch-cw-primary" disabled={!!busy||!courtChoice}><FaFlag/> {busy?'Creating crew and logo…':'Create founding crew'}</button>
         </form>}
         <div className="rch-cw-crew-grid">
           {focusedCrews.length?focusedCrews.map(crew=>{
