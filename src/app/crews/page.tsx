@@ -45,16 +45,25 @@ function CrewsView(){
 
   const load=useCallback(async()=>{
     if(!db)return;
-    const [crewResult,memberResult,inviteResult,runResult,entryResult]=await Promise.all([
+    const [crewResult,memberResult,inviteResult,runResult,entryResult,selectedCrewResult,selectedRosterResult,ownMemberResult]=await Promise.all([
       db.from('commonwealth_crews').select('id,name,motto,city,captain_id,logo_path,home_court_slug,season_id').order('created_at',{ascending:false}).limit(250),
       db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').limit(3000),
       user?db.from('commonwealth_crew_invitations').select('id,crew_id,inviter_id,status').eq('invitee_id',user.id).eq('status','pending'):Promise.resolve({data:[]}),
       db.from('runs').select('id,title,starts_at,game_format,location').eq('run_type','competitive').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at').limit(50),
       db.from('commonwealth_run_entries').select('crew_id,run_id').limit(400),
+      selectedId?db.from('commonwealth_crews').select('id,name,motto,city,captain_id,logo_path,home_court_slug,season_id').eq('id',selectedId).maybeSingle():Promise.resolve({data:null}),
+      selectedId?db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').eq('crew_id',selectedId).limit(12):Promise.resolve({data:[]}),
+      user?db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').eq('profile_id',user.id).order('joined_at',{ascending:false}).limit(1):Promise.resolve({data:[]}),
     ]);
     if(crewResult.error){setError('Crew data is not available. Please try again.');return;}
     const current=(crewResult.data||[]) as Crew[];
-    const roster=(memberResult.data||[]) as CrewMember[];
+    const requested=selectedCrewResult.data as Crew|null;
+    if(requested&&!current.some(c=>c.id===requested.id))current.unshift(requested);
+    const roster=[...new Map([
+      ...(memberResult.data||[]) as CrewMember[],
+      ...(selectedRosterResult.data||[]) as CrewMember[],
+      ...(ownMemberResult.data||[]) as CrewMember[],
+    ].map(member=>[member.crew_id+':'+member.profile_id,member])).values()];
     setCrews(current);
     setMembers(roster);
     setInvites((inviteResult.data||[]) as Invite[]);
@@ -69,7 +78,7 @@ function CrewsView(){
       const {data}=await db.from('commonwealth_crew_favorites').select('member_id,position').eq('owner_id',user.id).order('position');
       setFavorites(((data||[]) as Favorite[]).map(f=>f.member_id));
     }else setFavorites([]);
-  },[db,user?.id]);
+  },[db,user?.id,selectedId]);
 
   useEffect(()=>{void load();},[load,reloadKey]);
   const myMembership=members.find(m=>m.profile_id===user?.id);
