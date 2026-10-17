@@ -117,7 +117,7 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
   {pinError&&<p role="alert" className="mt-4 rounded-lg border border-amber-500/40 p-3 text-xs text-amber-200">{pinError}</p>}
   {pins.length>0&&<div className="mt-5 rounded-2xl border border-[#9e8056] bg-[#172b3e] p-4">
    <h3 className="text-xs font-black uppercase tracking-[.15em] text-[#ffdd98]">Featured Legacy · Top Five</h3>
-   <div className="mt-3 flex flex-wrap gap-2">{pins.map(p=>{const a=awards.find(a=>a.id===p.award_id);const b=a?byCode.get(a.badge_code):null;return a&&b?<span key={p.award_id} className="rounded-xl border border-[#826e4a] bg-[#0d2135] px-3 py-2 text-xs font-bold text-[#e5d5aa]">{p.slot}. {b.display_name} · {a.place_label}</span>:null;})}</div>
+   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{pins.map(p=>{const a=awards.find(a=>a.id===p.award_id);const b=a?byCode.get(a.badge_code):null;return a&&b?<div key={p.award_id} className="rounded-xl border border-[#826e4a] bg-[#0d2135] p-2 text-center"><PlaceBadgeMedal badge={b} place={a.place_label} earned compact/><p className="mt-2 text-xs font-black text-[#f5dfb0]">{b.display_name}</p><p className="mt-1 text-[10px] text-[#9ebbd1]">{a.place_label}</p></div>:null;})}</div>
   </div>}
   {owner&&<p className="mt-3 text-[11px] text-[#a5c3db]">Pin up to five verified location medals to your public profile ({pins.length}/5).</p>}
   <div className="mt-4 flex flex-wrap gap-2">
