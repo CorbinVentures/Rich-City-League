@@ -5,7 +5,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaBasketball,FaCalendarDays,FaCircleCheck,FaClock,FaCrown,FaEye,FaLocationDot,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
-import {buildDailyCircuitPicks,scoreDailyRun,virginiaCircuitDay,type DailyCircuitCandidate,type RunFormat,type RunPlayType} from '@/lib/run-daily-circuit';
+import {buildDailyCircuitPicks,getDailyPlaybook,scoreDailyRun,virginiaCircuitDay,type DailyCircuitCandidate,type RunFormat,type RunPlayType} from '@/lib/run-daily-circuit';
 
 type Prefs={preferred_format:RunFormat;preferred_type:RunPlayType;watched_courts:string[]};
 type Rating={game_format:string;rating:number;games:number;wins:number};
@@ -100,6 +100,7 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,onPreferencesChange,now
   .filter((item,index,arr)=>arr.findIndex(other=>other.run?.id===item.run?.id)===index);
  const dateLabel=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'long',month:'short',day:'numeric'}).format(new Date(clock));
  const openRuns=runs.filter(run=>scoreDailyRun(run,context).isJoinable).length;
+ const playbook=getDailyPlaybook(clock);
  return <section id="rch-daily-circuit" aria-labelledby="rch-daily-circuit-title" className="mb-6 overflow-hidden rounded-3xl border border-[#3b83b5] bg-[radial-gradient(ellipse_at_90%_0%,#1c4267,#071b30_68%)] text-white shadow-[0_15px_55px_rgba(0,13,36,.3)]">
   <div className="border-b border-[#335c83] p-5 sm:p-7">
    <div className="flex flex-wrap items-start justify-between gap-3">
@@ -141,6 +142,10 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,onPreferencesChange,now
    </article>):<div className="rounded-2xl border border-dashed border-[#3a6c93] bg-[#0c2942] p-7 text-[#c0d7e9] lg:col-span-3">
      <FaBasketball className="text-3xl text-[#72bcf3]"/><h3 className="mt-3 text-xl font-black">The next chapter is yours to start.</h3><p className="mt-2 max-w-lg text-sm leading-6">No available scheduled runs match the current feed yet. Host a real court session or discover Virginia organizers—nothing here is simulated.</p><Link href="/runs?create=1" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#288be9] px-5 text-xs font-black">Host the first Run <FaArrowRight className="ml-2"/></Link>
     </div>}
+  </div>
+  <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#946d34] bg-[linear-gradient(110deg,#40321d,#122e47)] p-5 sm:mx-6 sm:p-6">
+   <div className="max-w-2xl"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#ffe09d]"><FaCrown/> TODAY'S PLAYBOOK · REAL-WORLD CHALLENGE</p><h3 className="mt-2 text-xl font-black uppercase sm:text-2xl">{playbook.headline}</h3><p className="mt-2 text-sm leading-6 text-[#f2e3c6]">{playbook.message}</p><p className="mt-2 text-[11px] text-[#c9b998]">Daily inspiration, not a scheduled game, automatic reward or verified victory. Play responsibly, confirm venue access and log real results.</p></div>
+   <Link href={'/runs?create=1&format='+playbook.format+'&mode='+playbook.mode} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-[#eed197] px-4 text-xs font-black text-[#2b210f]">{playbook.callToAction} <FaArrowRight/></Link>
   </div>
   <div className="grid gap-3 border-t border-[#315779] bg-[#081c30]/80 p-4 sm:grid-cols-2 sm:p-6">
    <div className="rounded-xl border border-[#365a75] bg-[#0b273e] p-4">
