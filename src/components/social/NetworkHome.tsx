@@ -816,6 +816,17 @@ export default function NetworkHome() {
             {focusPostId && <div className="flex items-center justify-between rounded-xl border border-rcl-blue/15 bg-rcl-blue/[.04] px-4 py-3"><span className="text-xs font-black uppercase tracking-wider text-rcl-blue">Post permalink</span><Link href="/social" className="inline-flex items-center gap-2 text-xs font-black uppercase text-white/45"><FaArrowLeft/> Back to feed</Link></div>}
 
             {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-4"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton><FeedModeButton active={mode === 'courtside'} onClick={() => { setMode('courtside'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'courtside' }); }}>Courtside</FeedModeButton></div>}
+            {!focusPostId && !loading && <TodayPanel
+              postsToday={todaySnapshot.postsToday}
+              activeStories={todaySnapshot.activeStories}
+              rep={todaySnapshot.rep}
+              level={todaySnapshot.level}
+              nextRun={todaySnapshot.nextRun}
+              trendingPost={todaySnapshot.trendingPost}
+              userId={user?.id}
+              busyRunId={runBusy}
+              onRunToggle={(run) => void toggleRunParticipation(run)}
+            />}
             {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
 
             {!focusPostId && <section className="rch-pulse-compose-strip" aria-label="Create a post">
@@ -832,17 +843,7 @@ export default function NetworkHome() {
               <NetworkPostCard onCountView={onCountView} item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
               {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={relevantRuns[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
               {!focusPostId && index === Math.min(5, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
-              {!focusPostId && index === Math.min(7, feedItems.length - 1) && <TodayPanel
-              postsToday={todaySnapshot.postsToday}
-              activeStories={todaySnapshot.activeStories}
-              rep={todaySnapshot.rep}
-              level={todaySnapshot.level}
-              nextRun={todaySnapshot.nextRun}
-              trendingPost={todaySnapshot.trendingPost}
-              userId={user?.id}
-              busyRunId={runBusy}
-              onRunToggle={(run) => void toggleRunParticipation(run)}
-            />}
+
               {!focusPostId && (index === 4 || (index > 4 && (index - 4) % 14 === 0)) && <NetworkSponsoredPlacement
                 placement="social-feed"
                 surface={`social-feed-inline-${index}`}
@@ -915,9 +916,9 @@ function TodayPanel({
   return <section className="rch-pulse-today overflow-hidden rounded-2xl border border-[#D9E4EF] bg-white shadow-[0_8px_28px_rgba(15,37,71,.07)]">
     <div className="flex items-start justify-between gap-4 border-b border-[#E7EEF6] px-4 py-4 sm:px-5">
       <div>
-        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">THE PULSE · TODAY</p>
-        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">What&apos;s moving in the community.</h2>
-        <p className="mt-1 text-xs leading-5 text-[#60738D]">Fresh activity, your next court and the conversation moving around you.</p>
+        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">YOUR BASKETBALL · TODAY</p>
+        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">Your next move starts here.</h2>
+        <p className="mt-1 text-xs leading-5 text-[#60738D]">See your real next Run, new conversations and verified REP at a glance.</p>
       </div>
       <Link href="/discover" className="shrink-0 rounded-lg border border-[#D9E4EF] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore</Link>
     </div>
