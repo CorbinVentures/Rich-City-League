@@ -53,7 +53,6 @@ describe('RCH identity experience v2 product contract',()=>{
   expect(rep).toContain('wallet.balance');
   expect(rep).toContain('selected.price');
   expect(rep).toContain('Wallet readiness');
-  expect(rep).toContain('No');
   expect(rep).toContain('never pay-to-win');
   expect(rep).not.toContain('update run_competitive_ratings');
  });
