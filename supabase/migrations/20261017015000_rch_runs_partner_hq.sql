@@ -146,6 +146,8 @@ begin
     p.owner_id=a or exists(select 1 from public.rch_runs_partner_members m
     where m.partner_id=p.id and m.profile_id=a and m.role='manager'))
  then raise exception 'Partner management access required'; end if;
+ if p.status='approved' and trim(coalesce(p_name,''))<>p.name
+ then raise exception 'Changing an approved organization name requires fresh RCH review'; end if;
  if char_length(trim(coalesce(p_name,''))) not between 3 and 120
     or char_length(trim(coalesce(p_city,''))) not between 2 and 100
     or char_length(trim(coalesce(p_description,'')))>1200
@@ -192,6 +194,25 @@ begin
    where partner_id=p_partner and profile_id=v_target;
  end if;
 end $$;
+
+-- Removing or downgrading a delegated manager also revokes the cohost
+-- appointment created by the HQ for that person's own published runs.
+create or replace function public.rch_partner_revoke_delegated_run_ops()
+returns trigger language plpgsql security definer set search_path='' as $$
+begin
+ if tg_op='DELETE' or (tg_op='UPDATE' and new.role<>'manager' and old.role='manager') then
+  delete from public.rch_run_operators o using public.rch_runs_partner_sessions s
+   where s.run_id=o.run_id and s.partner_id=old.partner_id
+     and s.created_by=old.profile_id and o.profile_id=old.profile_id
+     and o.appointed_by=(select p.owner_id from public.rch_runs_partners p where p.id=old.partner_id)
+     and o.role='cohost';
+ end if;
+ return case when tg_op='DELETE' then old else new end;
+end $$;
+create trigger rch_partner_member_scope_removed
+ after delete or update of role on public.rch_runs_partner_members
+ for each row execute function public.rch_partner_revoke_delegated_run_ops();
+revoke all on function public.rch_partner_revoke_delegated_run_ops() from public,anon,authenticated;
 
 -- Creates a normal Run and links the partner to it in one transaction. Manager
 -- access is delegated only for this organization and this newly created run.
