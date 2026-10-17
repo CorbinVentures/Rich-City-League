@@ -36,8 +36,8 @@ export function getWorldMissions(input:{
  const cityName=input.city||'a Virginia city';
  return [
   {id:'scout',title:'Scout your next court',detail:'Explore a real court arena in '+cityName+'.',complete:input.scouted,href:'/runs/world#court-mission'},
-  {id:'join',title:'Get in the game',detail:'Register for an upcoming Run. No attendance or REP is assumed.',complete:input.upcomingJoined>0,href:'/runs#rch-upcoming-runs'},
-  {id:'compete',title:'Prove it on the hardwood',detail:'Record a confirmed competitive result in the last 7 days.',complete:input.recentVerified>0,href:'/runs#rch-competition'}
+  {id:'join',title:'Get in the game',detail:'Register for an upcoming Run. No attendance or REP is assumed.',complete:input.upcomingJoined>0,href:'/runs?view=list#rch-upcoming-runs'},
+  {id:'compete',title:'Prove it on the hardwood',detail:'Record a confirmed competitive result in the last 7 days.',complete:input.recentVerified>0,href:'/runs?view=list#rch-competition'}
  ];
 }
 /** Only one player's already verified result count can complete a competition mission. */
@@ -56,3 +56,20 @@ export function localRunsForCity(runs:readonly WorldRun[],city:string):WorldRun[
 }
 /** This visual world is a discovery layer: real awards and rankings remain on
  * existing verified server-controlled APIs, never generated client-side. */
+
+/** Fetch a complete bounded near-term Run index without silently truncating the
+ * first 100 listings. Both the World city panel and classic listing reuse it. */
+export async function readPagedUpcomingRuns<T>(
+ page:(from:number,to:number)=>Promise<{data:T[]|null;error:{message:string}|null}>,
+ size=200,maximum=2000
+):Promise<{data:T[];error:{message:string}|null;truncated:boolean}>{
+ const all:T[]=[];
+ for(let from=0;from<maximum;from+=size){
+  const result=await page(from,Math.min(maximum-1,from+size-1));
+  if(result.error)return {data:[],error:result.error,truncated:false};
+  const rows=result.data||[];
+  all.push(...rows);
+  if(rows.length<size)return {data:all,error:null,truncated:false};
+ }
+ return {data:all,error:null,truncated:true};
+}
