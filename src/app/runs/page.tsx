@@ -113,6 +113,7 @@ export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
+  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -139,13 +140,13 @@ export default function RunsPage() {
   const [dailyPrefs, setDailyPrefs] = useState<{preferred_format:RunFormat;preferred_type:RunPlayType;watched_courts:string[]}>({preferred_format:'all',preferred_type:'all',watched_courts:[]});
 
   useEffect(() => {
-    if (!db || !user?.id) { setStaffIntelligence(false); return; }
+    if (!showLegacyList || !db || !user?.id) { setStaffIntelligence(false); return; }
     let active = true;
     void db.rpc('is_staff_or_admin').then(({data}: {data:boolean|null}) => {
       if(active)setStaffIntelligence(Boolean(data));
     });
     return () => { active = false; };
-  }, [db,user?.id]);
+  }, [db,user?.id,showLegacyList]);
 
 
   const load = async () => {
@@ -234,7 +235,7 @@ export default function RunsPage() {
     }
   };
 
-  useEffect(() => { void load(); }, [supabase, user?.id]);
+  useEffect(() => { if(showLegacyList)void load(); }, [supabase, user?.id,showLegacyList]);
 
   useEffect(() => {
     if (!createIntent) return;
@@ -256,13 +257,13 @@ export default function RunsPage() {
   }, [courtParam,courts]);
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase || !showLegacyList) return;
     const channel = supabase.channel('rcl-runs-network')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, () => void load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'run_players' }, () => void load())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [supabase, user?.id]);
+  }, [supabase, user?.id,showLegacyList]);
 
   const openCreateForCourt = (court?: Court, runType: RunType = 'competitive') => {
     setForm({ ...emptyForm, run_type: runType, location_slug: court?.slug ?? '' });
@@ -431,7 +432,6 @@ export default function RunsPage() {
 
   // Runs World is the primary game. Existing competition, forms and list screens
   // remain available via view=list, create intent, or deep court links.
-  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
   if(!showLegacyList)return <RunsWorldGame/>;
 
   return (
