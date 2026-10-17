@@ -7,6 +7,7 @@ import VirginiaInteractiveAtlas from '@/components/discover/VirginiaInteractiveA
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
 import {RunPassport} from '@/components/runs/RunPassport';
+import {WorldBattleScene,WorldPlayerIdentity} from '@/components/runs/RunsWorldBattleScene';
 import {WorldJourneyPanel,WorldScoutButton,WorldPulse,type WorldPulseEvent} from '@/components/runs/RunsWorldJourney';
 import type {WorldJourney} from '@/lib/runs-world-progression';
 import {useAuth} from '@/hooks/useAuth';
@@ -49,6 +50,7 @@ export default function RunsWorldGame(){
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
  const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],crewName:null,defenses:0,loading:false});
  const [player,setPlayer]=useState<PlayerStats>(blankStats);
+ const [identity,setIdentity]=useState<{display_name:string|null;username:string|null;avatar_url:string|null}|null>(null);
  const [journey,setJourney]=useState<WorldJourney|null>(null);
  const [journeyLoading,setJourneyLoading]=useState(false);
  const [scoutVersion,setScoutVersion]=useState(0);
@@ -187,6 +189,14 @@ export default function RunsWorldGame(){
   return()=>{active=false;};
  },[db,user?.id,pulse,scoutVersion]);
 
+ useEffect(()=>{
+  if(!db||!user?.id){setIdentity(null);return;}
+  let active=true;
+  void db.from('profiles').select('display_name,username,avatar_url').eq('id',user.id).maybeSingle()
+    .then(({data}:{data:{display_name:string|null;username:string|null;avatar_url:string|null}|null})=>{if(active)setIdentity(data||null);});
+  return()=>{active=false;};
+ },[db,user?.id]);
+
  const selectedCourt=courts.find(c=>c.slug===selectedSlug)||null;
  useEffect(()=>{
   if(!db||!selectedSlug){setCourtStats({masters:[],crewName:null,defenses:0,loading:false});return;}
@@ -210,6 +220,7 @@ export default function RunsWorldGame(){
   return()=>{alive=false;};
  },[db,selectedSlug,territories,crewNames]);
 
+ const battleCourtSlugs=useMemo(()=>courts.map(c=>c.slug),[courts]);
  const pins=useMemo(()=>buildCourtMapPins(courts,runs,{
   ownedCourts:territories.map(t=>t.court_slug),
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
@@ -236,6 +247,9 @@ export default function RunsWorldGame(){
      <p>Explore real courts. Challenge verified contenders. Build your basketball legacy.</p>
     </div>
     <div className="rwg-top-actions">
+     <WorldPlayerIdentity avatar={identity?.avatar_url||null}
+       name={identity?.display_name||identity?.username||(user?'RCH Hooper':'Join RCH')}
+       level={journey?.world_level??null} onOpen={()=>setScreen('player')}/>
      <Link href="/runs?view=list#rch-upcoming-runs" className="rwg-soft">List view <FaArrowRight/></Link>
      <button type="button" onClick={refresh} className="rwg-soft" aria-label="Refresh Runs World"><FaArrowRotateRight/></button>
     </div>
@@ -345,6 +359,8 @@ export default function RunsWorldGame(){
      <span className="rwg-kicker">COMPETITIVE MODE / REAL-WORLD MATCHES</span><h2>Take the court. Defend the crown.</h2>
      <p>Battle for local Master titles and crew control through verified competitive games. Challenges and titles are recorded by the existing Court Dominion system.</p>
      <div className="rwg-mode-links"><Link href="/crews?intent=mine" className="rwg-primary">My Crew <FaArrowRight/></Link><Link href="/commonwealth" className="rwg-secondary">Commonwealth Cup</Link></div>
+     <WorldBattleScene cityName={city?.name||null} courtSlugs={battleCourtSlugs}
+       onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
     </section>}
 

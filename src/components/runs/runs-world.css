@@ -211,3 +211,56 @@
 .rwg-map-stage .rch-live-atlas-point.game-battle:after{content:'BATTLE';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.08em;color:#ffd1e8;text-shadow:0 2px 5px #000}
 @keyframes rwg-battle-beacon{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){.rwg-map-stage .rch-live-atlas-point.game-battle{animation:none}}
+
+
+/* Battle Stadium: purely presentation of existing server-verified match state. */
+.rwg-player-identity{display:flex;align-items:center;gap:10px;min-height:48px;max-width:235px;flex:0 1 235px;padding:6px 12px 6px 6px;border:1px solid #d1ac72;border-radius:13px;background:linear-gradient(135deg,#244a66,#122b42);color:#f6faff;box-shadow:0 0 20px #cdaf6530;text-align:left}
+.rwg-player-portrait{display:grid;place-items:center;width:37px;height:37px;flex:0 0 auto;overflow:hidden;border:2px solid #f4d692;border-radius:9px;background:#17324b;color:#f6d08a}
+.rwg-player-portrait img{width:100%;height:100%;object-fit:cover}
+.rwg-player-identity-copy{display:grid;gap:4px;overflow:hidden;flex:1}
+.rwg-player-identity-copy small{font-size:9px;letter-spacing:.04em;color:#f7d592;font-weight:900}
+.rwg-player-identity-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:950}
+.rwg-player-identity>svg{flex:0 0 auto;font-size:12px;color:#9ad6f9}
+.rwg-battle-stadium{margin:22px 0;overflow:hidden;border:1px solid #815a95;border-radius:24px;background:radial-gradient(ellipse at 80% 0%,#60356890,transparent 45%),radial-gradient(circle at 5% 80%,#224e8270,transparent 40%),#081c31;box-shadow:0 18px 55px #0007,0 0 40px #9750ce12}
+.rwg-battle-intro{display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:210px;padding:clamp(20px,3vw,34px);border-bottom:1px solid #674b83}
+.rwg-battle-intro h3{margin:12px 0;font-size:clamp(27px,4vw,53px);line-height:.94;letter-spacing:-.06em;font-weight:1000}
+.rwg-battle-intro h3 span{display:block;color:#c9a1ff}
+.rwg-battle-intro p{max-width:54ch;color:#c7d3e8;font-size:12px;line-height:1.7}
+.rwg-battle-emblem{width:160px;height:160px;display:grid;place-content:center;gap:7px;text-align:center;border:2px solid #d6b081;border-radius:25%;background:radial-gradient(circle,#794375,#1a3356 70%);transform:rotate(-7deg);box-shadow:0 0 55px #df85c940;flex:0 0 auto}
+.rwg-battle-emblem svg{font-size:58px;margin:0 auto;color:#e7bbff;filter:drop-shadow(0 0 12px #d071f7)}
+.rwg-battle-emblem span{font-size:13px;font-weight:1000;letter-spacing:.15em;color:#f7e8ff}
+.rwg-battle-tabs{display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid #4c5374;background:#0b2037}
+.rwg-battle-tabs button{display:inline-flex;gap:11px;align-items:center;justify-content:center;min-height:42px;border:1px solid #485c80;border-radius:11px;padding:10px 15px;color:#c8dbee;background:#133553;font-size:11px;font-weight:900}
+.rwg-battle-tabs button[aria-pressed=true]{border-color:#c4a7f0;background:#57437c;color:white;box-shadow:0 0 16px #ac70dd3d}
+.rwg-battle-tabs button span{border-radius:9px;padding:2px 7px;background:#182d48}
+.rwg-battle-tabs button.refresh{margin-left:auto}
+.rwg-battle-empty{display:grid;justify-items:center;gap:12px;text-align:center;padding:55px 18px;color:#bed6e8}
+.rwg-battle-empty>svg{font-size:34px;color:#c8a6e2}
+.rwg-battle-empty strong{font-size:17px;color:#edf8ff}
+.rwg-battle-empty p{max-width:65ch;font-size:12px;line-height:1.6}
+.rwg-battle-cards{display:grid;gap:16px;padding:18px}
+.rwg-battle-card{overflow:hidden;border:1px solid #7959a1;border-radius:18px;background:linear-gradient(145deg,#1e3652,#0b1c32);box-shadow:0 12px 25px #0005;animation:rwg-battle-enter .4s ease-out both}
+.rwg-battle-card.state-resolved{border-color:#c4ab70}
+.rwg-battle-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:13px 19px;border-bottom:1px solid #4d5f82;background:#152f4e}
+.rwg-battle-card-top span{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:1000;color:#eccbff;letter-spacing:.1em}
+.rwg-battle-card.state-resolved .rwg-battle-card-top span{color:#f6d28b}
+.rwg-battle-card-top small{font-size:11px;color:#b6d1e5}
+.rwg-versus{display:grid;grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr);gap:10px;align-items:center;padding:26px clamp(12px,2vw,32px)}
+.rwg-versus>div:first-child,.rwg-versus>div:last-child{display:grid;justify-items:center;text-align:center;gap:8px;min-width:0}
+.rwg-faction{display:grid;place-items:center;width:64px;height:64px;border:2px solid #74bdf0;border-radius:19px;background:linear-gradient(135deg,#205e95,#102c4b);font-size:25px;box-shadow:0 0 30px #6caaf036}
+.rwg-faction.defend{border-color:#d2ad78;background:linear-gradient(135deg,#83643c,#342f38);box-shadow:0 0 30px #cfa35e36;color:#ffe0a3}
+.rwg-versus>div>span{color:#b8d5eb;font-size:10px;font-weight:950;letter-spacing:.08em}
+.rwg-versus>div>strong{font-size:clamp(14px,2.3vw,23px);font-weight:1000;overflow-wrap:anywhere}
+.rwg-vs-core{display:grid;place-items:center;gap:5px}
+.rwg-vs-core svg{font-size:26px;color:#d8a4ff}
+.rwg-vs-core strong{font-size:27px;font-weight:1000;font-style:italic;color:#faf2ff;text-shadow:0 0 15px #ad70f5}
+.rwg-battle-card-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;padding:15px 18px;border-top:1px solid #425b78;background:#0e2942}
+.rwg-battle-card-footer p{font-size:12px;line-height:1.5;color:#e8e7f2}
+.rwg-battle-card-footer small{display:block;margin-top:6px;font-size:10px;color:#9dc8e3}
+.rwg-battle-cta{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.rwg-battle-cta :is(button,a){display:inline-flex;align-items:center;gap:8px;min-height:43px;border:1px solid #7696b3;border-radius:10px;padding:10px 12px;background:#20557b;color:white;font-size:11px;font-weight:900}
+.rwg-battle-stadium>.rwg-disclosure{padding:14px 19px;background:#091d33}
+@keyframes rwg-battle-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:750px){.rwg-player-identity{max-width:none}.rwg-battle-emblem{width:90px;height:90px;border-radius:22%}.rwg-battle-emblem svg{font-size:34px}.rwg-battle-emblem span{font-size:9px}.rwg-versus{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr)}.rwg-vs-core strong{font-size:20px}.rwg-faction{width:50px;height:50px}.rwg-battle-intro{min-height:170px}}
+@media(max-width:540px){.rwg-top-actions{flex-wrap:wrap;width:100%}.rwg-player-identity{flex:1 1 160px}.rwg-battle-intro{padding:19px}.rwg-battle-emblem{width:62px;height:62px}.rwg-battle-emblem svg{font-size:24px}.rwg-battle-emblem span{display:none}.rwg-battle-tabs{padding:9px;gap:5px}.rwg-battle-tabs button{font-size:10px;padding:9px 7px}.rwg-battle-cards{padding:9px}.rwg-versus{gap:5px;padding:21px 9px}.rwg-versus>div>strong{font-size:12px}.rwg-battle-card-footer{padding:13px}}
+@media(prefers-reduced-motion:reduce){.rwg-battle-card{animation:none}}
