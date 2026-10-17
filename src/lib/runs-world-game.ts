@@ -1,0 +1,58 @@
+import {cityForText, virginiaCoordinates} from './virginia-world';
+import type {AtlasPlace} from '@/components/discover/VirginiaInteractiveAtlas';
+
+/** Only sourced venue coordinates earn an exact court pin; city coordinates never
+ * masquerade as a court's GPS position. */
+export type WorldCourt={
+ slug:string;name:string;address:string;locality:string;latitude:number|null;
+ longitude:number|null;verification_status:string;access_type:string;venue_type:string;
+ source_url:string|null;hours_text:string|null;
+};
+export type WorldRun={
+ id:string;title:string;location:string;location_slug:string|null;starts_at:string;
+ status:string;game_format:string;run_type:string;
+};
+export type WorldMission={
+ id:'scout'|'join'|'compete';title:string;detail:string;complete:boolean;href:string;
+};
+export function playableCourt(court:WorldCourt):boolean{
+ return (court.verification_status==='official'||court.verification_status==='provider')
+   &&court.access_type==='public'&&court.venue_type==='outdoor';
+}
+export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly WorldRun[]):AtlasPlace[]{
+ const active=new Set(runs.filter(run=>(run.status==='open'||run.status==='full')&&Date.parse(run.starts_at)>Date.now()).map(run=>run.location_slug));
+ return courts.filter(court=>playableCourt(court)&&virginiaCoordinates(court.latitude,court.longitude))
+   .map(court=>({
+    id:'court:'+court.slug,title:court.name,city:court.locality,
+    kind:active.has(court.slug)?'run' as const:'court' as const,
+    lat:court.latitude as number,lon:court.longitude as number,
+    href:'/runs/courts/'+encodeURIComponent(court.slug),
+    precision:'venue' as const
+   }));
+}
+export function getWorldMissions(input:{
+ city:string|null;scouted:boolean;upcomingJoined:number;recentVerified:number;
+}):WorldMission[]{
+ const cityName=input.city||'a Virginia city';
+ return [
+  {id:'scout',title:'Scout your next court',detail:'Explore a real court arena in '+cityName+'.',complete:input.scouted,href:'/runs/world#court-mission'},
+  {id:'join',title:'Get in the game',detail:'Register for an upcoming Run. No attendance or REP is assumed.',complete:input.upcomingJoined>0,href:'/runs#rch-upcoming-runs'},
+  {id:'compete',title:'Prove it on the hardwood',detail:'Record a confirmed competitive result in the last 7 days.',complete:input.recentVerified>0,href:'/runs#rch-competition'}
+ ];
+}
+/** Only one player's already verified result count can complete a competition mission. */
+export function recentVerifiedResults(results:readonly {verified_at:string}[],now=Date.now()):number{
+ const ago=now-7*86400000;
+ return results.filter(result=>{
+  const time=Date.parse(result.verified_at);
+  return Number.isFinite(time)&&time>=ago&&time<=now;
+ }).length;
+}
+export function localRunsForCity(runs:readonly WorldRun[],city:string):WorldRun[]{
+ return runs.filter(run=>run.status!=='cancelled'
+   &&Date.parse(run.starts_at)>Date.now()
+   &&cityForText(run.location)?.name.toLowerCase()===city.toLowerCase())
+  .sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
+}
+/** This visual world is a discovery layer: real awards and rankings remain on
+ * existing verified server-controlled APIs, never generated client-side. */
