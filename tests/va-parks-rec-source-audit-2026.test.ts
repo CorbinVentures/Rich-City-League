@@ -34,6 +34,20 @@ describe('2026 Virginia city/county Parks & Recreation source audit',()=>{
   expect(buildCourtMapPins([gym],[])).toHaveLength(0);
  });
 });
+describe('Chesapeake and Virginia Beach official basketball court source review',()=>{
+ const coastal=read('supabase/migrations/20261017235600_chesapeake_virginia_beach_basketball_sources.sql');
+ it('adds only cited government basketball facilities without fabricated geocoordinates',()=>{
+  for(const name of ['James W. McNeil Park','Claire R. Askew Western Branch Park','Chesapeake City Park','Indian River Park','Crestwood Park (Park Side)','Campostella Square Park','Dunedin Park','Level Green Park','Bayville Farms Park','Great Neck Park']){
+   expect(coastal).toContain(name);
+  }
+  expect(coastal).toContain("source_rows");
+  expect(coastal).toContain('null,null');
+  expect(coastal).toContain('on conflict (slug) do nothing');
+  expect(coastal).toContain("regexp_replace(lower(b.name)");
+  expect(coastal).toContain('NORTH SIDE at 1709 Rokeby Avenue');
+  expect(coastal).not.toContain('ST_GeomFromText');
+ });
+});
 describe('Conservative duplicate candidate review',()=>{
  const row=(slug:string,latitude:number|null,longitude:number|null,source:string,verification_status='community')=>({
   slug,name:'Basketball Court',locality:'Roanoke',latitude,longitude,
