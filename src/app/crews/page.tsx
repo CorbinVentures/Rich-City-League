@@ -126,7 +126,7 @@ function CrewsView(){
         <div className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#75beff]"><FaPeopleGroup/> RCH CREWS</div>
         <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">YOUR PEOPLE. YOUR LOGO.<br/><span className="text-[#69b8ff]">YOUR LEGACY.</span></h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[#c1d9ef]">Bring your five, represent your crew on every profile, enter competitive Runs and chase the Commonwealth Cup. No fake wins. All real basketball.</p>
-        <div className="mt-6 flex flex-wrap gap-3"><Link href="/commonwealth#rch-cw-my-crew" className="rounded-xl bg-[#63b5fa] px-5 py-3 text-sm font-black text-[#051321]">{myCrew?'View Cup roster':'Found or join a crew'}</Link><Link href="/runs" className="rounded-xl border border-[#4a79a1] px-5 py-3 text-sm font-bold">Explore runs <FaArrowRight className="ml-1 inline"/></Link></div>
+        <div className="mt-6 flex flex-wrap gap-3"><Link href="/commonwealth#rch-cw-my-crew" className="rounded-xl bg-[#63b5fa] px-5 py-3 text-sm font-black text-[#051321]">{myCrew?'View Cup roster':'Found or join a crew'}</Link><Link href="/runs" className="rounded-xl border border-[#4a79a1] px-5 py-3 text-sm font-bold">Explore runs <FaArrowRight className="ml-1 inline"/></Link>{myCrew&&<Link href={'/crews/'+encodeURIComponent(myCrew.id)+'/treasury'} className="rounded-xl border border-[#bb955b] bg-[#402f25] px-5 py-3 text-sm font-black text-[#ffe1ad]">Crew REP Treasury →</Link>}</div>
       </header>
 
       <CrewPowerBoard />
