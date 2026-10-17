@@ -48,6 +48,27 @@ describe('Chesapeake and Virginia Beach official basketball court source review'
   expect(coastal).not.toContain('ST_GeomFromText');
  });
 });
+describe('Parks GIS access and actual playable court integrity',()=>{
+ const source='City of Newport News Parks GIS';
+ const ref='https://maps.nnva.gov/arcgis/rest/services/Parks/ParksAssetInventory/FeatureServer/26';
+ const base={verification_status:'provider',source_label:source,source_url:ref,venue_type:'outdoor'};
+ it('keeps municipally inventoried elementary school courts pending public-use agreement',()=>{
+  expect(verifiedParksRecFacility({...base,name:'ES-KM_Knollwood Meadows Basketball Court',notes:'1 Court, 2 Baskets'})).toBe(false);
+  expect(verifiedParksRecFacility({...base,name:'ES-ADA_Achievable Dream Academy Basketball Court'})).toBe(false);
+  expect(verifiedParksRecFacility({...base,name:'Anderson Park Basketball Court',notes:'2 Courts, 4 Hoops'})).toBe(true);
+ });
+ it('does not badge an isolated hoop beside asphalt as a verified playable basketball court',()=>{
+  expect(verifiedParksRecFacility({...base,name:'Courthouse Way Community Center Basketball Court',notes:'Basketball hoop structure only, no court. Hoop is adjacent to asphalt parking lot'})).toBe(false);
+ });
+ it('preserves source records without deleting school candidates or overriding past games',()=>{
+  const game=read('src/components/runs/RunsWorldGame.tsx');
+  const qa=read('src/app/admin/runs/map-quality/page.tsx');
+  expect(game).toContain('source_url,hours_text,notes');
+  expect(qa).toContain('Municipal GIS review required');
+  expect(qa).toContain('last_verified_on,notes');
+  expect(game).not.toContain("db.from('basketball_locations').delete()");
+ });
+});
 describe('Conservative duplicate candidate review',()=>{
  const row=(slug:string,latitude:number|null,longitude:number|null,source:string,verification_status='community')=>({
   slug,name:'Basketball Court',locality:'Roanoke',latitude,longitude,
