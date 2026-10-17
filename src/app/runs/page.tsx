@@ -538,36 +538,49 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   onCheckIn: (run: Run) => Promise<void>;
   onClaimHighlight: (run: Run) => Promise<void>;
 }) {
-  const count = run.players?.length ?? 0;
-  const joined = Boolean(userId && run.players?.includes(userId));
-  const host = userId === run.host_id;
-  const starts = new Date(run.starts_at);
-  const now = Date.now();
-  const startMs = starts.getTime();
-  const checkInOpen = now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000;
-  const highlightWindow = now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000;
-  const participantCanHighlight = (joined || host) && highlightWindow;
-  const typeIcon = run.run_type === 'competitive' ? <FaTrophy /> : run.run_type === 'training' ? <FaDumbbell /> : <FaPeopleGroup />;
-
-  return <article className="rch-arena-game-card min-w-0 overflow-hidden rounded-2xl">
-    <div className="rch-arena-game-cover relative h-24 overflow-hidden border-b border-[#264f79]"><div className="absolute inset-0 bg-gradient-to-t from-[#08192d]/85 to-transparent"/><span className="absolute bottom-3 left-3 rounded-full border border-[#53a5ff]/50 bg-[#167af3] px-3 py-1 text-[11px] font-black text-white">{starts.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})} · {starts.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span className="absolute bottom-3 right-3 rounded-full bg-[#071b30]/90 px-2 py-1 text-[10px] font-semibold text-[#d1e6ff]">{count}/{run.max_players} players</span></div>
-    <div className="border-b border-[#244664] p-4">
-      <div className="flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1.5 rounded-lg border border-rcl-blue/16 bg-rcl-blue/[.06] px-2.5 py-1 text-[11px] font-semibold text-rcl-blue">{typeIcon}{runTypeLabels[run.run_type]}</span><span className="rounded-lg border border-white/8 px-2.5 py-1 text-[11px] font-medium text-white/38">{run.game_format}</span><span className="ml-auto text-[11px] text-white/32">{skillLabels[run.skill_level]}</span></div>
-      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-[#64b5e6]/40 bg-[#123a56] px-2.5 py-1.5 text-[11px] font-black text-[#b3e5ff]"><FaCircleCheck className="shrink-0"/><span className="truncate">{run.partner.experience==='rec'?'THE REC':'THE PARK'} · {run.partner.name}</span></Link>}
-      <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]"><Link href={`/runs/${run.id}`} className="hover:text-rcl-blue">{run.title}</Link></h2>
-      {run.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/42">{run.description}</p>}
-    </div>
-    <div className="space-y-3 p-4 text-sm text-[#bacbe2]">
-      <div className="flex items-start gap-3"><FaCalendarDays className="mt-1 shrink-0 text-rcl-blue" /><span>{starts.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · {starts.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span></div>
-      <div className="flex min-w-0 items-start gap-3"><FaLocationDot className="mt-1 shrink-0 text-rcl-blue" /><span className="min-w-0 break-words">{run.location}</span></div>
-      <div className="flex items-center gap-3"><FaPeopleGroup className="shrink-0 text-rcl-blue" /><span>{count}/{run.max_players} attending</span></div>
-      <div className="flex flex-wrap gap-2 pt-2">
-        <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(run.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-white/85">Directions <FaArrowUpRightFromSquare className="ml-1.5" /></a>
-        <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button><ShareRunButton id={run.id} title={run.title} />
-        {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
+  const count=run.players?.length??0;
+  const joined=Boolean(userId&&run.players?.includes(userId));
+  const host=userId===run.host_id;
+  const start=new Date(run.starts_at);
+  const startMs=start.getTime();
+  const now=Date.now();
+  const full=run.status==='full'||count>=run.max_players;
+  const effectiveStatus=full&&run.status==='open'?'full':run.status;
+  const canJoin=!joined&&!!userId&&!full&&run.status==='open';
+  const checkInOpen=now>=startMs-2*3600000&&now<=startMs+6*3600000;
+  const highlightWindow=now>=startMs-2*3600000&&now<=startMs+72*3600000;
+  const dateLabel=start.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const experience=run.partner?.experience==='rec'?'THE REC':run.partner?.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
+  return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
+    <div className="rch-ux-game-cover">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[11px] font-black uppercase tracking-wider text-[#b7e2ff]">{experience} · {run.game_format}</span>
+        <RCHStatusChip status={effectiveStatus}/>
       </div>
-      {participantCanHighlight && <div className="mt-2 rounded-xl border border-white/7 bg-black/15 p-3"><p className="text-xs leading-5 text-white/38">Played here? Post a photo or video from this run, then claim the run-highlight bonus.</p><div className="mt-2 flex flex-wrap gap-2"><Link href="/social?compose=1" className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/62">Post highlight</Link><button disabled={highlightClaimed || busy === `highlight-${run.id}`} onClick={() => void onClaimHighlight(run)} className="rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-2 text-xs font-semibold text-rcl-blue disabled:opacity-45">{highlightClaimed ? 'Highlight bonus claimed ✓' : 'Claim +35 REP'}</button></div></div>}
-      <div className="flex items-center justify-between gap-3 border-t border-white/7 pt-3"><span className="min-w-0 truncate text-xs text-white/30">{run.partner?'Organized by '+run.partner.name+' · '+(run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' paid to organizer':'Free'):'Hosted by '+(run.host?.display_name || run.host?.username || 'RCL member')}</span>{run.allow_fan_checkin && <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-rcl-blue/55">Fan check-in</span>}</div>
+      <Link href={'/runs/'+run.id} className="mt-5 text-white hover:text-[#bfe7ff]"><h3 className="rch-ux-game-title">{run.title}</h3></Link>
+    </div>
+    <div className="rch-ux-game-body">
+      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#3d8c88] bg-[#123e45] px-3 py-2 text-xs font-bold text-[#bbf3e4]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
+      <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
+        {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
+      </div>
+      <div className="rch-ux-game-cta">
+        {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <div className="flex flex-wrap items-center gap-3">
+          {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
+          <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
+        </div>
+      </div>
+      <details className="group border-t border-[#315573] pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
+        <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
+        <div className="flex flex-wrap gap-2"><ShareRunButton id={run.id} title={run.title}/>
+          {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
+          {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
+        </div>
+      </details>
     </div>
   </article>;
 }
