@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCheck,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
 import VirginiaInteractiveAtlas from '@/components/discover/VirginiaInteractiveAtlas';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
