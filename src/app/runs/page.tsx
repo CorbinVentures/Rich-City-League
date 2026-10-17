@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
+import RunsWorldGame from '@/components/runs/RunsWorldGame';
 import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
@@ -425,6 +426,11 @@ export default function RunsPage() {
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
   },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+
+  // Runs World is the primary game. Existing competition, forms and list screens
+  // remain available via view=list, create intent, or deep court links.
+  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
+  if(!showLegacyList)return <RunsWorldGame/>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
