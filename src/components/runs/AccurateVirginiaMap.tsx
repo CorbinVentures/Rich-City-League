@@ -150,14 +150,14 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   }else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration:650});
  },[city?.id,status]);
  useEffect(()=>{
-  if(!city||!['chesterfield','henrico','arlington','prince-william'].includes(city.id)||status!=='ready')return;
+  if(!city||!['chesterfield','henrico','arlington','prince-william','shenandoah'].includes(city.id)||status!=='ready')return;
   let current=true;
   const map=mapRef.current;
   void fetch('/api/geo/virginia?layer=counties',{cache:'force-cache'})
    .then(r=>{if(!r.ok)throw Error('official counties unavailable');return r.json();})
    .then(data=>{
     if(!current||!map)return;
-    const code=({chesterfield:'51041',henrico:'51087',arlington:'51013','prince-william':'51153'} as Record<string,string>)[city.id];
+    const code=({chesterfield:'51041',henrico:'51087',arlington:'51013','prince-william':'51153',shenandoah:'51171'} as Record<string,string>)[city.id];
     const limits=countyBounds(data,code);
     if(limits)map.fitBounds(limits,{padding:45,duration:750});
    }).catch(()=>{/* Retain a navigable center when the official geometry is offline. */});
@@ -170,7 +170,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   // At statewide zoom, city gateways are centered on actual coordinates.
   // Court markers are never moved to a city center as a fallback.
   if(!city){
-   const gateways=areaGateways.filter(c=>c.major||['arlington','henrico','prince-william'].includes(c.id));
+   const gateways=areaGateways.filter(c=>c.major||['arlington','henrico','prince-william','shenandoah'].includes(c.id));
    for(const point of gateways){
     const btn=document.createElement('button');btn.type='button';btn.className='rwg-real-city';
     btn.textContent=point.name;btn.title='Explore '+point.name;btn.setAttribute('aria-label','Explore '+point.name);
