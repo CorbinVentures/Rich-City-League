@@ -8,6 +8,8 @@ select has_table('public','rch_place_badge_awards','Geographic badges retain mat
 select has_table('public','rch_crew_badge_awards','Crews receive independently verified territory medals');
 select has_trigger('public','xp_transactions','rch_rep_from_social_xp','Valid Social XP is bridged into the wallet');
 select has_trigger('public','run_ranked_matches','rch_badges_after_ranked_match','Court badges require an independently verified match');
+select ok(not has_function_privilege('authenticated','public.award_xp(uuid,integer,text,text,uuid)','EXECUTE'),
+ 'A user cannot invent XP through the historical award_xp RPC');
 select ok(not has_table_privilege('authenticated','public.xp_transactions','INSERT'),
  'Authenticated browsers cannot create arbitrary XP to mint currency');
 select ok(not has_table_privilege('anon','public.xp_transactions','INSERT'),
