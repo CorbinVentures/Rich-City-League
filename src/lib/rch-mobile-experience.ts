@@ -27,7 +27,7 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/network/partners/apply', '/membership', '/news', '/players',
   '/teams', '/games', '/standings', '/leaderboards', '/schedule',
   '/stats', '/rankings', '/coaches', '/runs', '/draft', '/media',
-  '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse',
+  '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse', '/world',
   '/commonwealth', '/crews', '/city', '/communities', '/seasons',
   '/divisions', '/legacy', '/players/compare', '/media/creators',
   '/media/creators/apply', '/league/royaltee', '/league/royaltee/join',
