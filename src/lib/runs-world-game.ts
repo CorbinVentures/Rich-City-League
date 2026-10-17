@@ -45,7 +45,8 @@ export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly Wor
      kind:active.has(court.slug)?'run' as const:'court' as const,
      lat:court.latitude as number,lon:court.longitude as number,
      href:'/runs/courts/'+encodeURIComponent(court.slug),
-     precision:'venue' as const,indoor:court.venue_type==='indoor',
+     precision:'venue' as const,
+     ...(court.venue_type==='indoor'?{indoor:true}:{}),
      ...(gameState?{gameState}:{})
     };
    });
