@@ -9,7 +9,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 type Reward={code:string;title:string;description:string;category:string;price:number;requires_post:boolean;delivery:string;duration_hours:number|null};
 type Wallet={balance:number;lifetime_earned:number};
 type Transaction={id:string;amount:number;kind:string;detail:string;created_at:string};
-type Order={id:string;reward_code:string;price_paid:number;status:string;region:string;purchased_at:string;expires_at:string|null};
+type Order={id:string;reward_code:string;price_paid:number;status:string;region:string;purchased_at:string;expires_at:string|null;review_note:string|null};
 type MyPost={id:string;body:string;created_at:string};
 const regionChoices=[
  {value:'virginia',label:'Across Virginia'},{value:'richmond',label:'Richmond'},
@@ -42,7 +42,7 @@ export default function RepExchangeClient(){
    db.from('rch_rep_rewards').select('code,title,description,category,price,requires_post,delivery,duration_hours').eq('available',true).order('price'),
    user?db.from('rch_rep_wallets').select('balance,lifetime_earned').eq('profile_id',user.id).maybeSingle():Promise.resolve({data:null}),
    user?db.from('rch_rep_transactions').select('id,amount,kind,detail,created_at').eq('profile_id',user.id).order('created_at',{ascending:false}).limit(35):Promise.resolve({data:[]}),
-   user?db.from('rch_rep_orders').select('id,reward_code,price_paid,status,region,purchased_at,expires_at').eq('profile_id',user.id).order('purchased_at',{ascending:false}).limit(30):Promise.resolve({data:[]}),
+   user?db.from('rch_rep_orders').select('id,reward_code,price_paid,status,region,purchased_at,expires_at,review_note').eq('profile_id',user.id).order('purchased_at',{ascending:false}).limit(30):Promise.resolve({data:[]}),
    user?db.from('posts').select('id,body,created_at').eq('author_id',user.id).eq('status','published').eq('is_automated',false).order('created_at',{ascending:false}).limit(25):Promise.resolve({data:[]})
   ]);
   setRewards((catalog??[]) as Reward[]);setWallet((cash??{balance:0,lifetime_earned:0}) as Wallet);
@@ -126,7 +126,8 @@ export default function RepExchangeClient(){
      <h2 className="text-xl font-black uppercase">Your Rewards</h2>
      <div className="mt-4 space-y-3">{orders.map(o=><article key={o.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#3c6082] bg-[#0c243a] p-4">
       <div><p className="font-bold">{rewards.find(r=>r.code===o.reward_code)?.title??o.reward_code.replaceAll('_',' ')}</p><p className="mt-1 text-xs text-[#a6c9e0]">{o.status.replaceAll('_',' ')} · {new Date(o.purchased_at).toLocaleDateString()} · {costs(o.price_paid)}</p>
-      {o.expires_at&&<p className="mt-1 text-xs text-[#9fc3d8]">Expires {new Date(o.expires_at).toLocaleDateString()}</p>}</div>
+      {o.expires_at&&<p className="mt-1 text-xs text-[#9fc3d8]">Expires {new Date(o.expires_at).toLocaleDateString()}</p>}
+      {o.review_note&&<p className="mt-2 max-w-xl whitespace-pre-wrap text-xs leading-5 text-[#d1e5f1]">RCH fulfillment note: {o.review_note}</p>}</div>
       {o.status==='pending_review'&&<button type="button" disabled={busy} onClick={()=>void cancel(o.id)} className="min-h-10 rounded-lg border border-[#a5adc0] px-3 text-xs font-bold disabled:opacity-50">Cancel &amp; refund</button>}
      </article>)}{orders.length===0&&<p className="rounded-xl border border-dashed border-[#3c6082] p-6 text-sm text-[#acc9dd]">Your first REP reward will appear here.</p>}</div>
    </section>}
