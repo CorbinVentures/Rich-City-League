@@ -98,7 +98,7 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
    map.on('load',()=>{
     if(disposed||!map)return;
     setStatus('ready');
-    // The outline is sourced directly from a VDOT/VGIN-derived government
+    // The outline is sourced directly from the official 2026 Census
     // polygon. This must not be replaced with our old fictional SVG outline.
     try{
      map.addSource('rch-vdot-virginia',{type:'geojson',data:REAL_VIRGINIA_MAP.stateOutline});
@@ -108,9 +108,9 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
     }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
-     map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',
+     map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
       paint:{'fill-color':'#47A7E8','fill-opacity':0.09}});
-     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',
+     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
       paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
     }catch{/* Do not claim verified county outline if GIS data is unavailable. */}
     if(city)map.fitBounds([[city.lon-0.16,city.lat-0.12],[city.lon+0.16,city.lat+0.12]],{padding:30,duration:0});
@@ -181,6 +181,6 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
    {layerOptions.map(option=><button key={option.id} type='button' aria-pressed={layer===option.id} onClick={()=>setLayer(option.id)}>{option.label}</button>)}
   </div>
   {status==='ready'&&city&&points.length===0&&<div className='rwg-map-zero' role='status'>No precision-verified court pins in this area yet. See court records below for facilities awaiting coordinates.</div>}
-  <div className='rwg-real-map-credit'>Live georeferenced map · OpenFreeMap / OpenStreetMap · VA borders from VDOT/VGIN</div>
+  <div className='rwg-real-map-credit'>Live georeferenced map · OpenFreeMap / OpenStreetMap · 2026 U.S. Census state and county borders</div>
  </div>;
 }
