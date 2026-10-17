@@ -802,7 +802,7 @@ export default function NetworkHome() {
           <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
         </div>}
         <GravityLocationPicker compact className="mb-5" />
-        {!focusPostId && <Link href="/world" className="rch-pulse-world-link" aria-label="Explore the RCH Living World"><span><strong><FaBolt aria-hidden="true"/> THE LIVING WORLD</strong><small>Territories · highlights · verified progress · your next Run</small></span><span>Explore <FaArrowRight aria-hidden="true"/></span></Link>}
+        {!focusPostId && <Link href="/world" className="rch-pulse-world-link" aria-label="Explore the RCH Living World"><span><strong><FaBolt aria-hidden="true"/> THE LIVING WORLD</strong><small>Territories · highlights · verified progress · your next Run</small></span><span>Explore <span aria-hidden="true">→</span></span></Link>}
         {!focusPostId && <RepPromotedPlacement />}
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="rcl-network-left-rail hidden 2xl:block">
