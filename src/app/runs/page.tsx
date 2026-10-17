@@ -9,6 +9,8 @@ import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
 import { RunPassport } from '@/components/runs/RunPassport';
+import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
+import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import './runs-arena.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -17,7 +19,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { GravityLocationPicker } from '@/components/GravityLocationPicker';
 import { useGravityLocation } from '@/hooks/useGravityLocation';
-import { rankGravityCandidates } from '@/lib/rch-gravity';
 import { cityForText } from '@/lib/virginia-world';
 import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
 import {
@@ -56,6 +57,8 @@ type Run = {
   host?: { display_name: string | null; username: string | null; avatar_url?: string | null };
   players?: string[];
   partner?: {slug:string;name:string;experience:'park'|'rec';price_cents:number};
+  independently_verified?:boolean;
+  verified_host?:boolean;
 };
 
 type Badge = {
@@ -126,6 +129,7 @@ export default function RunsPage() {
   const [createdRuns, setCreatedRuns] = useState<Array<{ id:string; title:string; starts_at:string }>>([]);
   const [form, setForm] = useState(emptyForm);
   const [staffIntelligence, setStaffIntelligence] = useState(false);
+  const [dailyPrefs, setDailyPrefs] = useState<{preferred_format:RunFormat;preferred_type:RunPlayType;watched_courts:string[]}>({preferred_format:'all',preferred_type:'all',watched_courts:[]});
 
   useEffect(() => {
     if (!db || !user?.id) { setStaffIntelligence(false); return; }
@@ -175,10 +179,12 @@ export default function RunsPage() {
       const rows = (runsResult.data ?? []) as Run[];
       const hostIds = [...new Set(rows.map((run) => run.host_id))];
       const runIds = rows.map((run) => run.id);
-      const [hostsResult, playersResult, partnerLinksResult] = await Promise.all([
+      const [hostsResult, playersResult, partnerLinksResult, verificationResult, hostVerificationResult] = await Promise.all([
         hostIds.length ? db.from('profiles').select('id,display_name,username,avatar_url').in('id', hostIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('run_players').select('run_id,profile_id').in('run_id', runIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents').in('run_id', runIds) : Promise.resolve({ data: [] }),
+        runIds.length ? db.from('rch_run_verifications').select('run_id').in('run_id',runIds).eq('verification_status','verified'):Promise.resolve({data:[]}),
+        hostIds.length ? db.from('rch_verified_run_hosts').select('profile_id').in('profile_id',hostIds).eq('verification_status','approved').gt('expires_at',new Date().toISOString()):Promise.resolve({data:[]}),
       ]);
 
       const hostMap = new Map<string, Run['host']>((hostsResult.data ?? []).map((host: any) => [host.id, host]));
@@ -196,7 +202,9 @@ export default function RunsPage() {
         const org=partnerById.get(link.partner_id);
         return org?[[link.run_id,{slug:org.slug,name:org.name,experience:link.experience,price_cents:link.price_cents}] as const]:[];
       }));
-      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id) })));
+      const certifiedRuns=new Set(((verificationResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
+      const certifiedHosts=new Set(((hostVerificationResult.data??[]) as {profile_id:string}[]).map(x=>x.profile_id));
+      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id) })));
       const courtRows = (courtsResult.data ?? []) as Court[];
       if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
         const { data: selectedCourtRow } = await db.from('basketball_locations')
@@ -218,7 +226,17 @@ export default function RunsPage() {
 
   useEffect(() => { void load(); }, [supabase, user?.id]);
 
-  useEffect(() => { if (createIntent) setShowCreate(true); }, [createIntent]);
+  useEffect(() => {
+    if (!createIntent) return;
+    const requestedFormat=searchParams.get('format')||'';
+    const requestedMode=searchParams.get('mode')||'';
+    const selectedFormat=['1v1','2v2','3v3','4v4','5v5'].includes(requestedFormat)?requestedFormat:'5v5';
+    const selectedMode:RunType=(['competitive','social','training'] as string[]).includes(requestedMode)
+      ?requestedMode as RunType:'competitive';
+    const teamSize=parseInt(selectedFormat.split('v')[0],10);
+    setForm(current=>({...current,game_format:selectedFormat,run_type:selectedMode,max_players:teamSize*2}));
+    setShowCreate(true);
+  }, [createIntent,searchParams]);
 
   useEffect(() => {
     if (!courtParam || !courts.length) return;
@@ -367,6 +385,15 @@ export default function RunsPage() {
     setBusy(null);
   };
 
+  const dailyCandidates = useMemo<DailyCircuitCandidate[]>(()=>runs.map(run=>({
+    id:run.id,title:run.title,host_id:run.host_id,location:run.location,location_slug:run.location_slug,
+    city:courts.find(c=>c.slug===run.location_slug)?.locality||cityForText(run.location)?.name||null,
+    starts_at:run.starts_at,run_type:run.run_type,game_format:run.game_format,
+    max_players:run.max_players,player_count:run.players?.length??0,status:run.status,
+    independently_verified:run.independently_verified,verified_host:run.verified_host,
+    joined:Boolean(user?.id&&run.players?.includes(user.id)),partner_slug:run.partner?.slug
+  })),[runs,courts,user?.id]);
+
   const visibleRuns = useMemo(() => {
     const matching = runs.filter((run) => {
       const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
@@ -376,26 +403,21 @@ export default function RunsPage() {
       const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
       return skillMatch && typeMatch && courtMatch && searchMatch;
     });
-    if (!gravityLocation.cityId) return matching; // Statewide remains chronological.
-    const locationBySlug = new Map(courts.map(court => [court.slug,court.locality]));
-    const candidates = matching.map(run => ({
-      id:run.id, category:run.run_type === 'training' ? 'training' as const : 'run' as const,
-      title:run.title, keywords:run.description ?? '',
-      city:locationBySlug.get(run.location_slug ?? '') || cityForText(run.location)?.name || null,
-      // Full runs stay visible (not silently removed), after available ones.
-      createdAt:null, startsAt:null,
-      ownerId:run.host_id, isSaved:false,
-    }));
-    const priorities = rankGravityCandidates(candidates,{
+    // Registered availability always comes before filled/cancelled events;
+    // a player-selected city/format makes this feed relevant without hiding other Virginia courts.
+    const matchedIds=new Set(matching.map(run=>run.id));
+    const priorities=rankDailyRuns(dailyCandidates.filter(candidate=>matchedIds.has(candidate.id)),{
       cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles,userId:user?.id,
+      preferredFormat:dailyPrefs.preferred_format,preferredType:dailyPrefs.preferred_type,
+      watchedCourts:dailyPrefs.watched_courts
     });
     const order = new Map(priorities.map((candidate,index)=>[candidate.id,index]));
-    return matching.sort((a,b)=>{
+    return [...matching].sort((a,b)=>{
       const capacityA=a.status === 'full' || (a.players?.length ?? 0) >= a.max_players ? 1 : 0;
       const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
-  },[runs,courts,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
@@ -418,7 +440,7 @@ export default function RunsPage() {
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && <><RunPassport /><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
+        {view === 'runs' && <>{!loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}<RunPassport /><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
