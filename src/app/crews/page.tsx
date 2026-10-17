@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,16 +45,25 @@ function CrewsView(){
 
   const load=useCallback(async()=>{
     if(!db)return;
-    const [crewResult,memberResult,inviteResult,runResult,entryResult]=await Promise.all([
+    const [crewResult,memberResult,inviteResult,runResult,entryResult,selectedCrewResult,selectedRosterResult,ownMemberResult]=await Promise.all([
       db.from('commonwealth_crews').select('id,name,motto,city,captain_id,logo_path,home_court_slug,season_id').order('created_at',{ascending:false}).limit(250),
       db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').limit(3000),
       user?db.from('commonwealth_crew_invitations').select('id,crew_id,inviter_id,status').eq('invitee_id',user.id).eq('status','pending'):Promise.resolve({data:[]}),
       db.from('runs').select('id,title,starts_at,game_format,location').eq('run_type','competitive').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at').limit(50),
       db.from('commonwealth_run_entries').select('crew_id,run_id').limit(400),
+      selectedId?db.from('commonwealth_crews').select('id,name,motto,city,captain_id,logo_path,home_court_slug,season_id').eq('id',selectedId).maybeSingle():Promise.resolve({data:null}),
+      selectedId?db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').eq('crew_id',selectedId).limit(12):Promise.resolve({data:[]}),
+      user?db.from('commonwealth_crew_members').select('crew_id,profile_id,role,joined_at').eq('profile_id',user.id).order('joined_at',{ascending:false}).limit(1):Promise.resolve({data:[]}),
     ]);
     if(crewResult.error){setError('Crew data is not available. Please try again.');return;}
     const current=(crewResult.data||[]) as Crew[];
-    const roster=(memberResult.data||[]) as CrewMember[];
+    const requested=selectedCrewResult.data as Crew|null;
+    if(requested&&!current.some(c=>c.id===requested.id))current.unshift(requested);
+    const roster=[...new Map([
+      ...(memberResult.data||[]) as CrewMember[],
+      ...(selectedRosterResult.data||[]) as CrewMember[],
+      ...(ownMemberResult.data||[]) as CrewMember[],
+    ].map(member=>[member.crew_id+':'+member.profile_id,member])).values()];
     setCrews(current);
     setMembers(roster);
     setInvites((inviteResult.data||[]) as Invite[]);
@@ -69,7 +78,7 @@ function CrewsView(){
       const {data}=await db.from('commonwealth_crew_favorites').select('member_id,position').eq('owner_id',user.id).order('position');
       setFavorites(((data||[]) as Favorite[]).map(f=>f.member_id));
     }else setFavorites([]);
-  },[db,user?.id]);
+  },[db,user?.id,selectedId]);
 
   useEffect(()=>{void load();},[load,reloadKey]);
   const myMembership=members.find(m=>m.profile_id===user?.id);
@@ -203,6 +212,70 @@ function CrewsView(){
 }
 
 
+/**
+ * My Crew is a contextual destination, not the public directory.
+ * Resolve membership from the signed-in member's own row, without relying on
+ * the first 250 crews / first 3000 members shown on the public directory.
+ */
+function MyCrewGateway(){
+  const {user,loading:authLoading}=useAuth();
+  const router=useRouter();
+  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
+  const [error,setError]=useState('');
+  const [attempt,setAttempt]=useState(0);
+
+  useEffect(()=>{
+    if(authLoading)return;
+    if(!user){
+      router.replace('/auth/sign-in?redirect='+encodeURIComponent('/crews?intent=mine'));
+      return;
+    }
+    if(!db){setError('Crew services are currently unavailable. Please try again.');return;}
+    let active=true;
+    const resolve=async()=>{
+      setError('');
+      try{
+        const membership=await db.from('commonwealth_crew_members')
+          .select('crew_id').eq('profile_id',user.id)
+          .order('joined_at',{ascending:false}).limit(1);
+        if(membership.error)throw membership.error;
+        let crewId:string|null=membership.data?.[0]?.crew_id||null;
+        if(!crewId){
+          // An older captain account may be missing its membership row.
+          const captain=await db.from('commonwealth_crews')
+            .select('id').eq('captain_id',user.id)
+            .order('created_at',{ascending:false}).limit(1);
+          if(captain.error)throw captain.error;
+          crewId=captain.data?.[0]?.id||null;
+        }
+        if(!active)return;
+        router.replace(crewId
+          ? '/crews?crew='+encodeURIComponent(crewId)+'#rch-crew-hq'
+          : '/commonwealth?found=1#rch-cw-my-crew');
+      }catch{
+        if(active)setError('We could not check your crew membership. Your account has not been changed.');
+      }
+    };
+    void resolve();
+    return()=>{active=false;};
+  },[user?.id,authLoading,db,router,attempt]);
+
+  return <main className="min-h-[70vh] bg-[#061322] px-5 py-16 text-[#e8f5ff]">
+    <div className="mx-auto max-w-md rounded-2xl border border-[#3d7196] bg-[#0d2942] p-7 text-center">
+      <FaPeopleGroup className="mx-auto mb-4 text-4xl text-[#7ecaff]" aria-hidden="true"/>
+      <h1 className="text-2xl font-black">Opening My Crew</h1>
+      {error?<><p role="alert" className="mt-3 text-sm leading-6 text-[#ffd6c7]">{error}</p>
+        <button type="button" onClick={()=>setAttempt(a=>a+1)} className="mt-5 min-h-11 rounded-xl bg-[#5eacdf] px-5 font-bold text-[#06192a]">Try again</button></>
+      :<p role="status" className="mt-3 text-sm leading-6 text-[#bad9ec]">Taking you to your Crew HQ or crew creator…</p>}
+    </div>
+  </main>;
+}
+
+function CrewsRoute(){
+  const params=useSearchParams();
+  return params.get('intent')==='mine'?<MyCrewGateway/>:<CrewsView/>;
+}
+
 export default function CrewsPage(){
-  return <Suspense fallback={<main className="grid min-h-screen place-items-center bg-[#061322] text-[#b9daee]">Loading Crews…</main>}><CrewsView/></Suspense>;
+  return <Suspense fallback={<main className="grid min-h-screen place-items-center bg-[#061322] text-[#b9daee]">Loading Crews…</main>}><CrewsRoute/></Suspense>;
 }
