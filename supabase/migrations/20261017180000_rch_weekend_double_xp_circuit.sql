@@ -45,9 +45,12 @@ create policy rch_weekend_courts_staff_update on public.rch_weekend_circuit_cour
 create policy rch_weekend_courts_staff_delete on public.rch_weekend_circuit_courts
   for delete to authenticated using(coalesce(public.is_staff_or_admin(),false));
 
--- Approved, distinct public outdoor park sites from the existing official
--- Richmond Parks and Newport News municipal-asset directories.
-insert into public.rch_weekend_circuit_courts(city,slot,court_slug) values
+-- Production directory contains municipal GIS imports that a fresh Supabase
+-- preview may not have. Seed ONLY sites present and eligible in THIS database;
+-- cities with fewer than four valid park slots are never activated.
+insert into public.rch_weekend_circuit_courts(city,slot,court_slug)
+select v.city,v.slot,v.court_slug
+from (values
  ('Richmond',1,'alice-fitz-park'),
  ('Richmond',2,'chimborazo'),
  ('Richmond',3,'fonticello'),
@@ -55,7 +58,13 @@ insert into public.rch_weekend_circuit_courts(city,slot,court_slug) values
  ('Newport News',1,'va-newport-news-gis-2'),
  ('Newport News',2,'va-newport-news-gis-3'),
  ('Newport News',3,'va-newport-news-gis-30'),
- ('Newport News',4,'va-newport-news-gis-37');
+ ('Newport News',4,'va-newport-news-gis-37')
+) as v(city,slot,court_slug)
+join public.basketball_locations l on l.slug=v.court_slug
+where l.is_active and l.venue_type='outdoor' and l.access_type='public'
+  and l.verification_status in ('official','provider')
+  and l.name ~* '(park|playground)'
+on conflict do nothing;
 
 -- Stable anchor: 2026-10-24 = week A (slots 1,2), 2026-10-31 = week B
 -- (slots 3,4). Saturday 11am, Sunday 3pm, America/New_York, year-round.
