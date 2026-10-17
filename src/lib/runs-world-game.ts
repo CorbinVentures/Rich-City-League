@@ -12,6 +12,7 @@ export type WorldRun={
  id:string;title:string;location:string;location_slug:string|null;starts_at:string;
  status:string;game_format:string;run_type:string;
 };
+export type WorldMapState={ownedCourts?:readonly string[];challengedCourts?:readonly string[];doubleRepRuns?:readonly string[]};
 export type WorldMission={
  id:'scout'|'join'|'compete';title:string;detail:string;complete:boolean;href:string;
 };
@@ -19,16 +20,24 @@ export function playableCourt(court:WorldCourt):boolean{
  return (court.verification_status==='official'||court.verification_status==='provider')
    &&court.access_type==='public'&&court.venue_type==='outdoor';
 }
-export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly WorldRun[]):AtlasPlace[]{
- const active=new Set(runs.filter(run=>(run.status==='open'||run.status==='full')&&Date.parse(run.starts_at)>Date.now()).map(run=>run.location_slug));
+export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly WorldRun[],state:WorldMapState={}):AtlasPlace[]{
+ const activeRuns=runs.filter(run=>(run.status==='open'||run.status==='full')&&Date.parse(run.starts_at)>Date.now());
+ const active=new Set(activeRuns.map(run=>run.location_slug));
+ const owned=new Set(state.ownedCourts||[]);
+ const challenged=new Set(state.challengedCourts||[]);
+ const bonus=new Set(activeRuns.filter(run=>(state.doubleRepRuns||[]).includes(run.id)).map(run=>run.location_slug));
  return courts.filter(court=>playableCourt(court)&&virginiaCoordinates(court.latitude,court.longitude))
-   .map(court=>({
-    id:'court:'+court.slug,title:court.name,city:court.locality,
-    kind:active.has(court.slug)?'run' as const:'court' as const,
-    lat:court.latitude as number,lon:court.longitude as number,
-    href:'/runs/courts/'+encodeURIComponent(court.slug),
-    precision:'venue' as const
-   }));
+   .map(court=>{
+    const gameState=challenged.has(court.slug)?'battle' as const:owned.has(court.slug)?'crown' as const:bonus.has(court.slug)?'double-rep' as const:null;
+    return {
+     id:'court:'+court.slug,title:court.name,city:court.locality,
+     kind:active.has(court.slug)?'run' as const:'court' as const,
+     lat:court.latitude as number,lon:court.longitude as number,
+     href:'/runs/courts/'+encodeURIComponent(court.slug),
+     precision:'venue' as const,
+     ...(gameState?{gameState}:{})
+    };
+   });
 }
 export function getWorldMissions(input:{
  city:string|null;scouted:boolean;upcomingJoined:number;recentVerified:number;

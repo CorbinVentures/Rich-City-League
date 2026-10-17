@@ -2,16 +2,18 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCheck,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
 import VirginiaInteractiveAtlas from '@/components/discover/VirginiaInteractiveAtlas';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
 import {RunPassport} from '@/components/runs/RunPassport';
+import {WorldJourneyPanel,WorldScoutButton,WorldPulse,type WorldPulseEvent} from '@/components/runs/RunsWorldJourney';
+import type {WorldJourney} from '@/lib/runs-world-progression';
 import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,getWorldMissions,readPagedUpcomingRuns,recentVerifiedResults,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,readPagedUpcomingRuns,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
 
 type Screen='world'|'battle'|'missions'|'vault'|'player';
@@ -44,11 +46,13 @@ export default function RunsWorldGame(){
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
- const [joined,setJoined]=useState<string[]>([]);
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
- const [scouted,setScouted]=useState(false);
  const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],crewName:null,defenses:0,loading:false});
  const [player,setPlayer]=useState<PlayerStats>(blankStats);
+ const [journey,setJourney]=useState<WorldJourney|null>(null);
+ const [journeyLoading,setJourneyLoading]=useState(false);
+ const [scoutVersion,setScoutVersion]=useState(0);
+ const [worldPulse,setWorldPulse]=useState<WorldPulseEvent[]>([]);
  const [loading,setLoading]=useState(false);
  const [warning,setWarning]=useState('');
  const [pulse,setPulse]=useState(0);
@@ -58,11 +62,11 @@ export default function RunsWorldGame(){
 
  useEffect(()=>{setCityId(location.cityId||null);},[location.cityId]);
  const enterCity=useCallback((next:VirginiaCity)=>{
-   setCityId(next.id);chooseCity(next.id);setSelectedSlug(null);setScouted(false);
+   setCityId(next.id);chooseCity(next.id);setSelectedSlug(null);
    setScreen('world');
  },[chooseCity]);
  const exitCity=useCallback(()=>{
-   setCityId(null);statewide();setSelectedSlug(null);setScouted(false);
+   setCityId(null);statewide();setSelectedSlug(null);
  },[statewide]);
 
  useEffect(()=>{
@@ -70,13 +74,14 @@ export default function RunsWorldGame(){
   let alive=true;
   const work=async()=>{
    setLoading(true);setWarning('');
-   setCourts([]);setRuns([]);setFeatured([]);setTerritories([]);setSelectedSlug(null);
+   setCourts([]);setRuns([]);setFeatured([]);setTerritories([]);setWorldPulse([]);setSelectedSlug(null);
    if(!city){setLoading(false);return;}
    try{
     const [courtResult,runResult,featuredResult]=await Promise.all([
      db.from('basketball_locations')
       .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_url,hours_text')
       .eq('is_active',true).eq('locality',city.name)
+      .eq('access_type','public').eq('venue_type','outdoor')
       .in('verification_status',['official','provider'])
       .order('name').range(0,299),
      readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
@@ -99,6 +104,36 @@ export default function RunsWorldGame(){
     if((courtResult.data||[]).length===300||runResult.truncated)
       setWarning('Court display is capped at 300 verified locations, or 2,000 upcoming Runs. Use the full list and court search for additional places.');
     const slugs=nextCourts.map(c=>c.slug);
+    // Only actual confirmed title history and genuine requested/accepted
+    // crew challenges contribute to the cinematic local world pulse.
+    if(slugs.length){
+     const [crowns,battles]=await Promise.all([
+      db.from('rch_court_master_history')
+       .select('id,court_slug,division,event_type,occurred_at')
+       .in('court_slug',slugs.slice(0,300))
+       .order('occurred_at',{ascending:false}).limit(15),
+      db.from('rch_court_takeovers')
+       .select('id,court_slug,status,created_at')
+       .in('court_slug',slugs.slice(0,300))
+       .in('status',['requested','accepted','resolved'])
+       .order('created_at',{ascending:false}).limit(20)
+     ]);
+     if(!alive)return;
+     const nameFor=(slug:string)=>nextCourts.find(c=>c.slug===slug)?.name||'Virginia court';
+     const history=((crowns.data||[]) as {id:string;court_slug:string;division:string;event_type:string;occurred_at:string}[]).map(c=>({
+      id:'crown:'+c.id,court_slug:c.court_slug,
+      title:(c.event_type==='title_takeover'?'New Court Master':'Crown Defended')+' · '+nameFor(c.court_slug),
+      detail:c.division.toUpperCase()+' Master title · independently confirmed',
+      status:'verified' as const,at:c.occurred_at
+     }));
+     const challenges=((battles.data||[]) as {id:string;court_slug:string;status:string;created_at:string}[]).map(c=>({
+      id:'takeover:'+c.id,court_slug:c.court_slug,
+      title:(c.status==='resolved'?'Crew Takeover Resolved':'Crew Challenge '+(c.status==='accepted'?'Accepted':'Requested'))+' · '+nameFor(c.court_slug),
+      detail:c.status==='resolved'?'Verified challenge resolved; review court for the winner.':'An actual crew challenge exists; no result has been declared.',
+      status:c.status==='resolved'?'verified' as const:'pending' as const,at:c.created_at
+     }));
+     if(alive)setWorldPulse([...history,...challenges].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,12));
+    }
     if(slugs.length){
      const {data:territoryRows,error:territoryError}=await db.from('rch_court_territories')
        .select('court_slug,crew_id,successful_defenses').in('court_slug',slugs.slice(0,300)).limit(300);
@@ -122,14 +157,13 @@ export default function RunsWorldGame(){
  },[db,city?.id,pulse]);
 
  useEffect(()=>{
-  if(!db||!user?.id){setPlayer(blankStats);setJoined([]);return;}
+  if(!db||!user?.id){setPlayer(blankStats);return;}
   let active=true;
   void (async()=>{
-   const [passport,wallet,level,registered]=await Promise.all([
+   const [passport,wallet,level]=await Promise.all([
     db.rpc('get_rch_run_passport'),
     db.from('rch_rep_wallets').select('balance').eq('profile_id',user.id).maybeSingle(),
-    db.from('user_levels').select('xp,level').eq('profile_id',user.id).maybeSingle(),
-    db.from('run_players').select('run_id').eq('profile_id',user.id).limit(1000)
+    db.from('user_levels').select('xp,level').eq('profile_id',user.id).maybeSingle()
    ]);
    if(!active)return;
    setPlayer({
@@ -138,10 +172,20 @@ export default function RunsWorldGame(){
     socialLevel:level.error?null:Number(level.data?.level??1),
     socialXp:level.error?null:Number(level.data?.xp??0),
    });
-   setJoined(((registered.data||[]) as {run_id:string}[]).map(v=>v.run_id));
   })();
   return()=>{active=false;};
  },[db,user?.id,pulse]);
+
+ useEffect(()=>{
+  if(!db||!user?.id){setJourney(null);setJourneyLoading(false);return;}
+  let active=true;setJourneyLoading(true);
+  void db.rpc('get_rch_world_journey').then(({data,error}:{data:WorldJourney|null;error:{message:string}|null})=>{
+   if(!active)return;
+   if(error)setWarning('World Journal could not sync. Verified games are still accessible through your Run Passport.');
+   setJourney(!error&&data?.signed_in?data:null);setJourneyLoading(false);
+  });
+  return()=>{active=false;};
+ },[db,user?.id,pulse,scoutVersion]);
 
  const selectedCourt=courts.find(c=>c.slug===selectedSlug)||null;
  useEffect(()=>{
@@ -166,20 +210,20 @@ export default function RunsWorldGame(){
   return()=>{alive=false;};
  },[db,selectedSlug,territories,crewNames]);
 
- const pins=useMemo(()=>buildCourtMapPins(courts,runs),[courts,runs]);
+ const pins=useMemo(()=>buildCourtMapPins(courts,runs,{
+  ownedCourts:territories.map(t=>t.court_slug),
+  challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
+  doubleRepRuns:featured
+ }),[courts,runs,territories,worldPulse,featured]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
  const areaRuns=useMemo(()=>[...runs].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),[runs]);
  const courtRuns=areaRuns.filter(r=>r.location_slug===selectedSlug);
- const verifiedRecent=recentVerifiedResults(player.passport?.last_results||[]);
- const registeredUpcoming=runs.filter(r=>joined.includes(r.id)).length;
- const missions=getWorldMissions({city:city?.name||null,scouted,upcomingJoined:registeredUpcoming,recentVerified:verifiedRecent});
- const complete=missions.filter(m=>m.complete).length;
  const visibleCourts=courts.filter(c=>{
   const search=query.trim().toLowerCase();
   return !search||(c.name+' '+c.address).toLowerCase().includes(search);
  });
  const chooseCourt=(slug:string)=>{
-   setSelectedSlug(slug);setScouted(true);
+   setSelectedSlug(slug);
    window.requestAnimationFrame(()=>document.getElementById('rch-run-world-court')?.scrollIntoView({behavior:'smooth',block:'nearest'}));
  };
  const ownerCount=new Set(territories.map(t=>t.court_slug)).size;
@@ -282,8 +326,12 @@ export default function RunsWorldGame(){
          <Link href={'/runs?create=1&court='+encodeURIComponent(selectedCourt.slug)} className="rwg-secondary">Organize a Run</Link>
          {selectedCourt.source_url&&<a href={selectedCourt.source_url} rel="noopener noreferrer" target="_blank" className="rwg-secondary">Court source ↗</a>}
         </div>
+        <WorldScoutButton key={selectedCourt.slug} courtSlug={selectedCourt.slug} loggedIn={Boolean(user)}
+          scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))}
+          onScout={()=>setScoutVersion(n=>n+1)}/>
         <p className="rwg-disclosure">Crews, court titles, and REP are awarded only through RCH&apos;s existing verified-results system. Public courts are not reserved and RCH attendance is not guaranteed.</p>
        </section>}
+      <WorldPulse events={worldPulse} onCourt={chooseCourt}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
        <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Scheduled Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
        {areaRuns.length?areaRuns.slice(0,12).map(run=><Link href={'/runs/'+run.id} key={run.id} className="rwg-run-row">
@@ -303,19 +351,13 @@ export default function RunsWorldGame(){
    {screen==='missions'&&<section className="rwg-mode" aria-label="Player missions">
      <span className="rwg-kicker">YOUR WEEKLY PLAYBOOK / REAL ACTIONS</span><h2>The journey is the reward.</h2>
      <p>Earn progress through discovering courts, joining scheduled games and proving performance. These guide existing basketball activity and do not mint bonus REP for clicks or attendance.</p>
-     <div className="rwg-mission-meter"><strong>{complete} / {missions.length}</strong><span>OBJECTIVES COMPLETE</span><div><i style={{width:(complete/missions.length*100)+'%'}}/></div></div>
-     <div className="rwg-missions">{missions.map((m,index)=><div className="rwg-mission" key={m.id}>
-       <span>{m.complete?<FaCheck/>:'0'+(index+1)}</span>
-       <div><strong>{m.title}</strong><p>{m.detail}</p><small>{m.complete?(m.id==='scout'?'Scouted in this session':'Backed by RCH registration or verified results'):'Ready to tackle'}</small></div>
-       {m.id==='scout'?<button type="button" onClick={()=>setScreen('world')}>Explore <FaArrowRight/></button>:
-        <Link href={m.href}>{m.id==='join'?'Browse Runs':'Competition Center'} <FaArrowRight/></Link>}
-      </div>)}</div>
-     <p className="rwg-disclosure">Scouting is marked within this session; joining is backed by your registered Runs, while the competition objective uses approved game results. Weekly objectives do not create a separate XP or REP ledger.</p>
+     <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="missions"/>
     </section>}
 
    {screen==='vault'&&<section className="rwg-mode" aria-label="Basketball achievement vault">
       <span className="rwg-kicker">THE TROPHY VAULT</span><h2>Everything you earned stays yours.</h2>
       <p>Your skill rating, court achievements and competitive history are separate from spendable REP. Money cannot purchase a verified win, Master title or badge.</p>
+      <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="vault"/>
       <RunPassport/>
       <div className="rwg-mode-links"><Link className="rwg-primary" href="/badges">Explore Badges <FaMedal/></Link><Link className="rwg-secondary" href="/rep">REP Exchange <FaGift/></Link></div>
     </section>}
@@ -345,6 +387,7 @@ export default function RunsWorldGame(){
          <small>This comes from your confirmed match history, not a simulated game.</small>
         </section>;
        })():null}
+       <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="player"/>
        <p className="rwg-disclosure">Social XP, spendable REP, competitive skill rating and awards are distinct. No invented gameplay levels or pay-to-win advantages.</p>
        <div className="rwg-mode-links"><Link className="rwg-primary" href="/profile">View Profile <FaArrowRight/></Link><Link className="rwg-secondary" href="/crews?intent=mine">My Crew</Link><Link className="rwg-secondary" href="/rep">REP Exchange</Link></div>
       </>}

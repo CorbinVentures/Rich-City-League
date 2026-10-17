@@ -122,3 +122,92 @@
 .rwg-rating-shift b{margin-left:auto;color:#ffdc93;font-size:12px}
 @keyframes rwg-card-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.rwg-match-reveal{animation:none}}
+
+
+/* Runs World / Journey 2 — cinematic status from verifiable basketball actions. */
+.rwg-scout-control{display:grid;justify-items:start;gap:8px;margin-top:18px}
+.rwg-scout-control button:disabled{opacity:.74;cursor:default}
+.rwg-scout-control p{font-size:11px;max-width:80ch;color:#b7d6e7;line-height:1.55}
+.rwg-journey-panel{margin:24px 0;border:1px solid #396c91;border-radius:22px;padding:clamp(15px,2.5vw,25px);background:radial-gradient(ellipse at 85% 0%,#154a72b3,transparent 55%),#071f34}
+.rwg-journey-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px}
+.rwg-journey-heading h3{font-size:clamp(23px,3vw,35px);line-height:1.1;margin:9px 0;font-weight:950;letter-spacing:-.04em}
+.rwg-journey-heading p{max-width:60ch;color:#b4d2e7;font-size:12px;line-height:1.5}
+.rwg-journey-heading>strong{font-size:32px;white-space:nowrap;color:#f8d791}
+.rwg-journey-empty{display:grid;justify-items:start;gap:14px;margin:23px 0;padding:25px;border:1px dashed #6c89aa;border-radius:16px;background:#0c2b46;color:#e9f7ff}
+.rwg-journey-empty>svg{font-size:26px;color:#92d9ff}
+.rwg-journey-empty h3{font-size:18px;font-weight:900}
+.rwg-journey-empty p{font-size:12px;color:#b7d3e4;max-width:65ch;line-height:1.5}
+.rwg-quest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rwg-quest-card{display:grid;align-content:start;position:relative;gap:9px;min-height:218px;padding:18px;border:1px solid #3a6382;border-radius:17px;background:linear-gradient(140deg,#153c59,#0b263b);overflow:hidden}
+.rwg-quest-card:after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;box-shadow:0 0 50px #55bbff1a;pointer-events:none}
+.rwg-quest-card.done{border-color:#9ebd83;background:linear-gradient(140deg,#1e473e,#123043)}
+.rwg-quest-symbol{font-size:29px;line-height:1}
+.rwg-quest-state{position:absolute;right:13px;top:13px;display:flex;gap:5px;align-items:center;color:#93d5fb;font-size:9px;font-weight:900;letter-spacing:.04em}
+.rwg-quest-card.done .rwg-quest-state{color:#b7ecb9}
+.rwg-quest-card h4{font-size:17px;font-weight:950}
+.rwg-quest-card p{font-size:12px;color:#bad2e2;line-height:1.55}
+.rwg-quest-card>a,.rwg-quest-card>strong{display:inline-flex;gap:8px;align-items:center;align-self:end;font-size:11px;font-weight:850;color:#b9e5ff;margin-top:8px}
+.rwg-quest-card.done>strong{color:#b3efc2}
+.rwg-collectible-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rwg-collectible{display:grid;align-content:start;justify-items:center;text-align:center;gap:8px;min-height:207px;padding:15px;border:1px solid #385a75;border-radius:18px;background:linear-gradient(145deg,#12283c,#091825);filter:saturate(.7)}
+.rwg-collectible.unlocked{filter:none;border-color:#c9a76c;background:radial-gradient(circle at 50% 18%,#775b2b77,transparent 65%),linear-gradient(145deg,#153b56,#091e34);box-shadow:inset 0 0 22px #ddaa5640}
+.rwg-collectible-medal{display:grid;place-items:center;width:85px;height:85px;border:3px solid #4b6173;border-radius:50%;background:linear-gradient(135deg,#1b3c54,#0a2339);font-size:36px;transform:rotate(-4deg)}
+.rwg-collectible.unlocked .rwg-collectible-medal{border:3px solid #e6c780;box-shadow:0 0 0 5px #e3bd6e18,0 0 25px #e1b45c2f;animation:rwg-medal-shine 3s ease-in-out infinite alternate}
+.rwg-collectible strong{font-size:13px;font-weight:950}
+.rwg-collectible small{font-size:9px;font-weight:900;letter-spacing:.1em;color:#acc5d9}
+.rwg-collectible.unlocked small{color:#fce0a1}
+.rwg-collectible p{font-size:10px;line-height:1.55;color:#a7c2d5}
+.rwg-stamps-title{display:flex;align-items:center;gap:9px;margin:25px 0 8px;font-size:18px;font-weight:950}
+.rwg-stamp-disclosure{font-size:11px;color:#b3cddd;margin-bottom:12px}
+.rwg-stamps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rwg-stamp{display:flex;align-items:center;gap:11px;border:1px solid #527490;border-radius:13px;padding:12px;background:#103149;color:#f1fbff}
+.rwg-stamp>span{display:grid;place-items:center;width:41px;height:41px;border-radius:50%;background:#35607a;font-size:19px}
+.rwg-stamp>div{display:grid;gap:5px;flex:1}
+.rwg-stamp strong{font-size:11px}
+.rwg-stamp small{font-size:10px;color:#b6d5e6}
+.rwg-stamp>svg{color:#9cddff}
+.rwg-player-stage{display:grid;grid-template-columns:180px minmax(0,1fr);gap:24px;align-items:center;padding:14px 0}
+.rwg-level-emblem{display:grid;place-items:center;align-content:center;width:176px;height:176px;clip-path:polygon(50% 0%,87% 19%,100% 57%,77% 88%,50% 100%,23% 88%,0 57%,13% 19%);background:linear-gradient(135deg,#b98c45,#ffdf8f 47%,#7b5b31);color:#192e40;box-shadow:0 12px 30px #101a23}
+.rwg-level-emblem strong{font-size:67px;line-height:1;font-weight:1000}
+.rwg-level-emblem span,.rwg-level-emblem small{font-size:9px;font-weight:1000;letter-spacing:.13em}
+.rwg-level-stats h3{margin:10px 0;font-size:clamp(22px,3.5vw,35px);font-weight:1000;line-height:1.1}
+.rwg-level-stats p{font-size:13px;color:#bfe7f8}
+.rwg-level-stats small{font-size:11px;color:#b1cadc}
+.rwg-xp-track{height:14px;border-radius:99px;border:1px solid #6388a9;background:#061626;overflow:hidden;margin:16px 0 8px}
+.rwg-xp-track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#63d4ff,#f6d082);transition:width .8s}
+.rwg-journey-numbers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:20px 0}
+.rwg-journey-numbers>div{display:grid;gap:7px;padding:18px 12px;text-align:center;border:1px solid #3b6786;border-radius:14px;background:#143955}
+.rwg-journey-numbers strong{font-size:29px;font-weight:1000;color:#ffde99}
+.rwg-journey-numbers span{color:#b1d4e7;font-size:10px}
+.rwg-victory-replay{margin-top:20px;padding:22px;border:1px solid #d4b572;border-radius:19px;background:radial-gradient(circle at 90% 10%,#b98a4840,transparent 43%),#132b40;animation:rwg-victory-reveal .6s ease-out}
+.rwg-victory-replay h3{font-size:24px;font-weight:1000;letter-spacing:-.03em;margin:10px 0}
+.rwg-victory-replay p{font-size:12px;color:#c5dded}
+.rwg-victory-replay a{display:inline-flex;align-items:center;gap:8px;margin-top:13px;font-size:12px;color:#ffd99b;font-weight:900}
+.rwg-pulse{margin-top:22px;padding:clamp(17px,2.5vw,25px);border:1px solid #4d648b;border-radius:23px;background:radial-gradient(ellipse at top right,#253f64,#0c253a 65%)}
+.rwg-pulse-list{display:grid;gap:9px}
+.rwg-pulse-row{display:flex;text-align:left;align-items:center;gap:13px;width:100%;min-height:77px;border:1px solid #41678a;border-radius:14px;background:#112e46;padding:13px;color:#f2faff}
+.rwg-pulse-row:hover{border-color:#93c7e9;transform:translateY(-1px)}
+.rwg-pulse-row>span{display:grid;place-items:center;width:47px;height:47px;border-radius:13px;flex:0 0 auto;font-size:22px}
+.rwg-pulse-row .confirmed{border:1px solid #cfac6f;background:#684b23;color:#f6d992;box-shadow:0 0 21px #d0a45820}
+.rwg-pulse-row .pending{border:1px solid #75b5dd;background:#184e76;color:#a2dcff}
+.rwg-pulse-row>div{flex:1;display:grid;gap:6px}
+.rwg-pulse-row strong{font-size:13px}
+.rwg-pulse-row small{color:#b9d2df;font-size:11px}
+.rwg-pulse-row em{font-style:normal;letter-spacing:.07em;color:#a5d8ff;font-size:9px;font-weight:900}
+.rwg-pulse-row>svg{color:#9dcff0}
+@keyframes rwg-medal-shine{from{filter:brightness(.96)}to{filter:brightness(1.22)}}
+@keyframes rwg-victory-reveal{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:720px){.rwg-collectible-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rwg-player-stage{grid-template-columns:1fr;justify-items:center;text-align:center}.rwg-level-stats{width:100%}.rwg-journey-numbers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.rwg-quest-grid,.rwg-stamps{grid-template-columns:1fr}.rwg-journey-heading{align-items:start}.rwg-journey-heading>strong{font-size:25px}.rwg-level-emblem{width:150px;height:150px}.rwg-level-emblem strong{font-size:53px}.rwg-collectible{min-height:190px}.rwg-collectible-medal{width:70px;height:70px;font-size:30px}}
+@media(prefers-reduced-motion:reduce){.rwg-collectible.unlocked .rwg-collectible-medal,.rwg-victory-replay{animation:none}.rwg-xp-track span{transition:none}}
+
+
+/* Official game events alter map markers only in Runs World; ordinary
+   discovery maps remain neutral. Badge visuals never claim an unverified win. */
+.rwg-map-stage .rch-live-atlas-point.game-crown{background:#a16b28!important;border-color:#ffdda0!important;box-shadow:0 0 0 7px #f4b34d29,0 0 30px #e0ad6380!important;color:#fff7dd!important}
+.rwg-map-stage .rch-live-atlas-point.game-battle{background:#922e65!important;border-color:#ffd1e6!important;box-shadow:0 0 0 7px #e24d9629,0 0 30px #d85b967f!important;color:#fff!important;animation:rwg-battle-beacon 2.4s ease-in-out infinite}
+.rwg-map-stage .rch-live-atlas-point.game-double-rep{background:#1559af!important;border-color:#fbd988!important;box-shadow:0 0 0 6px #55aaff29,0 0 25px #4394ee7f!important;color:#fff!important}
+.rwg-map-stage .rch-live-atlas-point.game-crown:after{content:'KING';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.08em;color:#ffdb87;text-shadow:0 2px 5px #000}
+.rwg-map-stage .rch-live-atlas-point.game-battle:after{content:'BATTLE';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.08em;color:#ffd1e8;text-shadow:0 2px 5px #000}
+@keyframes rwg-battle-beacon{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.25)}}
+@media(prefers-reduced-motion:reduce){.rwg-map-stage .rch-live-atlas-point.game-battle{animation:none}}
