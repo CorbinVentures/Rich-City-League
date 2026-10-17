@@ -19,11 +19,14 @@ export default function RunsPartnersPage(){
  const [open,setOpen]=useState(false);
  const [busy,setBusy]=useState(false);
  const [loading,setLoading]=useState(true);
+ const [reviewAccess,setReviewAccess]=useState(false);
  const [message,setMessage]=useState('');
  const [error,setError]=useState('');
  const load=useCallback(async()=>{
   if(!db){setLoading(false);return;}
   setLoading(true);
+  if(user?.id){const {data:admin}=await db.rpc('is_staff_or_admin');setReviewAccess(Boolean(admin));}
+  else setReviewAccess(false);
   const [directory,own,staff]=await Promise.all([
    db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status').eq('status','approved').order('city').order('name').limit(150),
    user?.id?db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status').eq('owner_id',user.id).order('created_at',{ascending:false}):Promise.resolve({data:[]}),
@@ -62,6 +65,7 @@ export default function RunsPartnersPage(){
     <div className="mt-6 flex flex-wrap gap-3">
      <button onClick={()=>setOpen(v=>!v)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#348ff5] px-5 text-sm font-black text-white">Apply for Partner HQ <FaArrowRight/></button>
      <Link href="/runs/hosts" className="inline-flex min-h-11 items-center rounded-xl border border-[#6490b2] px-5 text-sm font-bold text-[#c2e6ff]">Host verification</Link>
+     {reviewAccess&&<Link href="/runs/partners/review" className="inline-flex min-h-11 items-center rounded-xl border border-[#6490b2] px-5 text-sm font-bold text-[#c2e6ff]">Operations approvals →</Link>}
     </div>
    </div>
    {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/40 p-3 text-sm text-red-200">{error}</p>}
