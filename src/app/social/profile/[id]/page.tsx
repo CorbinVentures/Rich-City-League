@@ -1,6 +1,7 @@
 import { Neighborhood } from '@/components/social/Neighborhood';
 import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
+import { RepProfileFrame } from '@/components/rep/RepProfileFrame';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
@@ -220,7 +221,8 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         <div className="rch-profile-cover h-44 overflow-hidden bg-[radial-gradient(circle_at_80%_15%,rgba(21,159,255,.2),transparent_35%),linear-gradient(135deg,#0a1b2a,#03070d)] sm:h-64">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
         <div className="rch-profile-identity px-5 pb-6">
           <div className="-mt-14 flex items-end justify-between gap-4">
-            <div className="rcl-profile-rep-ring" style={{'--profile-progress':progress+'%'} as React.CSSProperties}>
+            <div className="rcl-profile-rep-ring relative" style={{'--profile-progress':progress+'%'} as React.CSSProperties}>
+              <RepProfileFrame profileId={id} />
               <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full border-4 border-[#05080d] bg-white"><ProfileAvatarMedia src={profile.avatar_url} alt={name} className="h-full w-full object-cover" /></div><em>{socialLevel}</em>
             </div>
             <Link href="/social" className="rch-profile-home-link mb-2 rounded-xl border border-rcl-blue/25 bg-rcl-blue/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-rcl-blue">Home</Link>
