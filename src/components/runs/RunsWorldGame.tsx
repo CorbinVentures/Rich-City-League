@@ -111,7 +111,7 @@ export default function RunsWorldGame(){
    try{
     const [courtResult,runResult,featuredResult]=await Promise.all([
      db.from('basketball_locations')
-      .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text')
+      .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text,notes')
       .eq('is_active',true).in('locality',localityNames(city))
       .in('verification_status',['official','provider'])
       .in('venue_type',['outdoor','indoor','mixed'])
