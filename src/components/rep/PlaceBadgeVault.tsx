@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import SkillMasteryCollection from './SkillMasteryCollection';
+import '../../app/rch-identity.css';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaBasketball,FaBolt,FaCrown,FaGem,FaLocationDot,FaRoute,FaShieldHalved,FaTicket,FaTrophy,FaUsers,FaVideo} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
@@ -65,6 +66,7 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
  const [blueprints,setBlueprints]=useState<Blueprint[]>([]);
  const [awards,setAwards]=useState<Award[]>([]);
  const [view,setView]=useState<'earned'|'catalog'>('earned');
+ const [tierFilter,setTierFilter]=useState('all');
  const [crewAwards,setCrewAwards]=useState<{badge_code:string;place_label:string;locality:string;court_slug:string;crew_id:string}[]>([]);
  const [loaded,setLoaded]=useState(false);
  const [pins,setPins]=useState<Array<{award_id:string;slot:number}>>([]);
@@ -92,6 +94,8 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
  useEffect(()=>{void load();},[load]);
  const byCode=new Map(blueprints.map(b=>[b.code,b]));
  const owner=Boolean(user?.id&&target===user.id);
+ const visibleAwards=awards.filter(a=>tierFilter==='all'||byCode.get(a.badge_code)?.tier===tierFilter);
+ const visibleBlueprints=blueprints.filter(b=>tierFilter==='all'||b.tier===tierFilter);
  const togglePin=async(awardId:string)=>{
   if(!db||!owner||pinBusy)return;
   setPinError('');setPinBusy(awardId);
@@ -120,33 +124,45 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{pins.map(p=>{const a=awards.find(a=>a.id===p.award_id);const b=a?byCode.get(a.badge_code):null;return a&&b?<div key={p.award_id} className="rounded-xl border border-[#826e4a] bg-[#0d2135] p-2 text-center"><PlaceBadgeMedal badge={b} place={a.place_label} earned compact/><p className="mt-2 text-xs font-black text-[#f5dfb0]">{b.display_name}</p><p className="mt-1 text-[10px] text-[#9ebbd1]">{a.place_label}</p></div>:null;})}</div>
   </div>}
   {owner&&<p className="mt-3 text-[11px] text-[#a5c3db]">Pin up to five verified location medals to your public profile ({pins.length}/5).</p>}
-  <div className="mt-4 flex flex-wrap gap-2">
-   <button onClick={()=>setView('earned')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='earned'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Earned medals ({awards.length})</button>
-   <button onClick={()=>setView('catalog')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='catalog'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Unlock Collection ({blueprints.length})</button>
+  <div className="mt-4 flex flex-wrap items-center gap-2">
+   <button aria-pressed={view==='earned'} onClick={()=>setView('earned')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='earned'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Earned medals ({awards.length})</button>
+   <button aria-pressed={view==='catalog'} onClick={()=>setView('catalog')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='catalog'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Unlock Collection ({blueprints.length})</button>
+   <label className="ml-auto text-xs font-bold text-[#bdddf2]">Tier
+    <select aria-label="Filter badge tier" value={tierFilter} onChange={e=>setTierFilter(e.target.value)} className="ml-2 min-h-11 rounded-xl border border-[#5284a5] bg-[#0b2843] px-3 text-sm text-white">
+     <option value="all">All tiers</option>{Object.keys(theme).map(t=><option key={t} value={t}>{tierLabel[t]}</option>)}
+    </select>
+   </label>
   </div>
   {!loaded&&<p className="mt-4 text-sm text-[#adc7d9]">Loading verified medals…</p>}
-  {view==='earned'&&<div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-    {awards.map(a=>{const b=byCode.get(a.badge_code);return b?<article key={a.id} className="rounded-2xl border border-[#45698b] bg-[linear-gradient(150deg,#173251,#0a1c31)] p-3 text-center">
+  {view==='earned'&&<div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    {visibleAwards.map(a=>{const b=byCode.get(a.badge_code);return b?<article key={a.id} className="rch-identity-collector-card text-center">
       <PlaceBadgeMedal badge={b} place={a.place_label} earned/>
       <p className="mt-3 text-[10px] font-black uppercase text-[#ffe1a5]">{b.tier} • Verified</p>
       <h3 className="mt-1 text-sm font-black">{b.display_name}</h3>
       <p className="mt-1 text-[11px] text-[#b4d2e7]"><FaLocationDot className="mr-1 inline"/>{a.place_label}</p>
       <p className="mt-2 text-[10px] text-[#879eb8]">{new Date(a.earned_at).toLocaleDateString()}</p>
+      <details className="rch-identity-medal-details text-left"><summary>Artifact details</summary>
+       <p><strong>Achievement:</strong> {b.description}</p>
+       <p><strong>Recorded location:</strong> {a.place_label}{a.locality?' · '+a.locality:''}</p>
+       <p><strong>Earned:</strong> {new Date(a.earned_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</p>
+       <p><strong>Verified source:</strong> {a.source_kind.replaceAll('_',' ')}</p>
+      </details>
       {owner&&<button type="button" disabled={pinBusy!==null} onClick={()=>void togglePin(a.id)} className="mt-3 min-h-10 rounded-lg border border-[#587d9a] px-3 text-[11px] font-black text-[#e3d39b] disabled:opacity-50" aria-label={(pins.some(p=>p.award_id===a.id)?'Unpin ':'Pin ')+b.display_name+' from '+a.place_label}>{pins.some(p=>p.award_id===a.id)?'Unpin from Top Five':'Pin to Top Five'}</button>}
      </article>:null;})}
-     {!awards.length&&<div className="col-span-full rounded-2xl border border-dashed border-[#45698b] p-7 text-center text-[#adc6d9]">
+     {!visibleAwards.length&&<div className="col-span-full rounded-2xl border border-dashed border-[#45698b] p-7 text-center text-[#adc6d9]">
       <FaTrophy className="mx-auto mb-3 text-3xl"/><strong>Collect your first verified court medal.</strong>
       <p className="mt-2 text-xs">Ranked game wins, authentic court crowns, and staff-certified attendance unlock location-specific rewards.</p>
      </div>}
    </div>}
-  {view==='catalog'&&<div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">{blueprints.map(b=>{
+  {view==='catalog'&&<div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">{visibleBlueprints.map(b=>{
    const earned=awards.some(a=>a.badge_code===b.code);
-   return <article key={b.code} className="rounded-2xl border border-white/10 bg-[#0c2438] p-3 text-center">
+   return <article key={b.code} className="rch-identity-collector-card text-center">
      <PlaceBadgeMedal badge={b} earned={earned} place={b.code==='shutout_21'?'ROCKWOOD PARK':'VIRGINIA'}/>
      <p className="mt-3 text-[10px] font-bold uppercase text-[#eaca88]">{b.tier} · {b.audience}</p>
      <h3 className="mt-1 text-sm font-black">{b.display_name}</h3>
      <p className="mt-2 text-xs leading-5 text-[#a8c6db]">{b.description}</p>
      <p className="mt-3 text-[10px] font-black uppercase text-[#b5dfff]">{earned?'Unlocked':'Locked · Earn to unlock'}</p>
+     <details className="rch-identity-medal-details text-left"><summary>How to earn</summary><p>{b.description}</p><p><strong>Requirement:</strong> {b.award_rule.replaceAll('_',' ')}</p><p><strong>Audience:</strong> {b.audience}</p></details>
     </article>;
   })}</div>}
   {crewAwards.length>0&&<div className="mt-7 rounded-2xl border border-[#866d47] p-5">
