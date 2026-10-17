@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import {
   FaArrowLeft,
   FaBasketball,
+  FaBolt,
   FaCompass,
   FaHouse,
   FaImage,
@@ -92,6 +93,7 @@ const leftNav = [
   { href: '/clips', label: 'RCH Clips', icon: FaPlay },
   { href: '/create', label: 'Create', icon: FaPlus },
   { href: '/runs', label: 'Runs', icon: FaBasketball },
+  { href: '/rep', label: 'REP Exchange', icon: FaBolt },
   { href: '/league', label: 'League', icon: FaBasketball },
 ];
 
