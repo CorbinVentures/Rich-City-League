@@ -112,7 +112,7 @@ export function WorldJourneyPanel({journey,mode,loading}:{journey:WorldJourney|n
 export type WorldPulseEvent={id:string;court_slug:string;title:string;detail:string;status:'verified'|'pending';at:string};
 export function WorldPulse({events,onCourt}:{events:WorldPulseEvent[];onCourt:(slug:string)=>void}){
  return <section className="rwg-pulse" aria-label="Confirmed world activity">
-  <div className="rwg-section-head"><div><span className="rwg-kicker">WORLD PULSE / ACTUAL RECORDS</span><h2>What's Happening Here</h2></div><FaCrown/></div>
+  <div className="rwg-section-head"><div><span className="rwg-kicker">WORLD PULSE / ACTUAL RECORDS</span><h2>What&apos;s Happening Here</h2></div><FaCrown/></div>
   {events.length===0?<p className="rwg-empty">No recorded court battles or crown changes in this area yet. Your crew could write the first chapter.</p>:
     <div className="rwg-pulse-list">{events.slice(0,8).map(event=><button type="button" key={event.id} onClick={()=>onCourt(event.court_slug)} className="rwg-pulse-row">
       <span className={event.status==='verified'?'confirmed':'pending'}>{event.status==='verified'?<FaCrown/>:<FaShieldHalved/>}</span>
