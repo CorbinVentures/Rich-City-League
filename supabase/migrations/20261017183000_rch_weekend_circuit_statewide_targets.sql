@@ -78,7 +78,8 @@ left join lateral (
 ) d on true
 left join lateral (
  select count(*) as assigned_total,
-  count(*) filter(where cc.active and l.is_active
+  count(distinct lower(trim(l.name))) filter(where cc.active and l.is_active
+    and lower(trim(l.locality))=lower(trim(t.city_name))
     and l.access_type='public' and l.venue_type='outdoor'
     and l.verification_status in ('official','provider')
     and l.name ~* '(park|playground)') as qualified_total
