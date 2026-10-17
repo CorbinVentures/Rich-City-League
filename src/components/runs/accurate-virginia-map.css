@@ -1,0 +1,38 @@
+.rwg-real-map-shell{position:relative;width:100%;height:min(71dvh,780px);min-height:490px;background:#091b2c;isolation:isolate;overflow:hidden}
+.rwg-real-map{width:100%;height:100%;position:absolute;inset:0;z-index:1}
+.rwg-real-map .maplibregl-control-container{z-index:2}
+.rwg-real-map .maplibregl-ctrl-attrib{font-size:10px!important;background:#071d2bcc!important;color:#dcebf5!important}
+.rwg-real-map .maplibregl-ctrl-attrib a{color:#9dddff!important}
+.rwg-real-map-cover{position:absolute;z-index:6;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;background:#082237eb;color:#e4f4ff;padding:28px;font-size:14px;line-height:1.6}
+.rwg-real-map-cover>svg{font-size:36px;color:#8bd2ff}
+.rwg-real-map-cover strong{font-size:19px}
+.rwg-real-map-cover span{max-width:48ch}
+.rwg-real-map-cover button{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 17px;background:#2272b0;border:1px solid #8dcfff;border-radius:12px;font-weight:900}
+.rwg-real-map-top{position:absolute;z-index:3;top:15px;left:14px;display:flex;align-items:center;gap:10px;max-width:calc(100% - 28px);flex-wrap:wrap}
+.rwg-real-map-top span,.rwg-real-map-top button{display:inline-flex;align-items:center;gap:7px;min-height:39px;background:#071b2be9;border:1px solid #5b90b5;border-radius:12px;box-shadow:0 4px 17px #0007;padding:9px 12px;color:#ebf8ff;font-weight:900;font-size:11px}
+.rwg-real-map-top button{background:#175681}
+.rwg-real-map-layers{position:absolute;z-index:4;bottom:43px;left:12px;right:12px;display:flex;align-items:center;gap:6px;max-width:max-content;padding:8px;border-radius:15px;background:#041b2af0;border:1px solid #6088a5;box-shadow:0 6px 20px #0007;overflow-x:auto;scrollbar-width:none}
+.rwg-real-map-layers>svg{margin:0 6px;flex:0 0 auto;color:#9cd9ff}
+.rwg-real-map-layers button{flex:0 0 auto;min-height:38px;border-radius:9px;border:1px solid #315e81;background:#153753;color:#c6e7ff;font-size:11px;font-weight:850;padding:9px 11px}
+.rwg-real-map-layers button[aria-pressed=true]{background:#378dd0;border-color:#b9e2ff;color:white}
+.rwg-real-map-credit{position:absolute;z-index:2;bottom:5px;right:13px;font-size:9px;color:#ffffff;text-shadow:0 1px 5px black;pointer-events:none}
+.rwg-real-pin,.rwg-real-city{display:flex;align-items:center;justify-content:center;position:relative;transform:none;border:2px solid #ddf0ff!important;background:linear-gradient(135deg,#4087c8,#113e6c)!important;color:white!important;box-shadow:0 0 0 5px #2f94e74f,0 6px 17px #00111bc9!important;cursor:pointer;font-weight:950;white-space:nowrap}
+.rwg-real-pin{height:39px;width:39px;border-radius:13px;font-size:21px;animation:rwg-real-pin-reveal .25s ease-out}
+.rwg-real-pin:after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #c6efff}
+.rwg-real-city{padding:8px 12px;min-height:38px;font-size:11px;border-radius:12px;box-shadow:0 0 0 5px #1c6ab24d,0 6px 17px #00111bc9!important}
+.rwg-real-pin.state-crown{background:linear-gradient(140deg,#be9350,#67471e)!important;border-color:#ffe3a0!important;box-shadow:0 0 0 6px #f4af4d3d,0 0 30px #ffc6668c!important}
+.rwg-real-pin.state-battle{background:linear-gradient(140deg,#b64b98,#4a2165)!important;border-color:#fbd4f5!important;box-shadow:0 0 0 6px #c64ac857,0 0 30px #f4a1fb88!important;animation:rwg-real-battle-pulse 2.5s ease-in-out infinite}
+.rwg-real-pin.state-double-rep{background:linear-gradient(140deg,#e0ac53,#235fb3)!important;border-color:#ffe6b5!important;font-size:14px;box-shadow:0 0 0 7px #e2ac4338,0 0 28px #ffd06980!important}
+.rwg-real-pin.selected{outline:4px solid #ffffff;outline-offset:3px;z-index:8}
+.rwg-real-map .maplibregl-marker{z-index:2}
+.rwg-map-zero{position:absolute;z-index:3;top:71px;left:12px;max-width:min(350px,calc(100% - 24px));border:1px solid #dfbb78;border-radius:13px;background:#192b39ef;padding:12px 15px;color:#f7e1ae;font-size:12px;line-height:1.5}
+.rwg-geography-notice{margin-top:13px;border:1px solid #b99858;border-radius:15px;background:#342e21;padding:13px 17px;display:flex;gap:10px;align-items:start;color:#f2dda8;font-size:12px;line-height:1.55}
+.rwg-geography-notice svg{flex:0 0 auto;margin-top:3px}
+.rwg-coverage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}
+.rwg-coverage>div{display:grid;gap:7px;border:1px solid #2e678c;border-radius:15px;background:#0d2c48;padding:13px}
+.rwg-coverage strong{font-size:clamp(20px,3.4vw,30px);font-weight:1000;line-height:1}
+.rwg-coverage small{font-size:10px;color:#bbd6e8;font-weight:800;line-height:1.35}
+@keyframes rwg-real-pin-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rwg-real-battle-pulse{from,to{filter:brightness(.93)}50%{filter:brightness(1.28)}}
+@media(max-width:640px){.rwg-real-map-shell{height:65dvh;min-height:490px}.rwg-real-map-top{top:11px;left:9px}.rwg-real-map-layers{left:7px;right:7px;bottom:34px}.rwg-real-map-layers button{padding:8px 9px;font-size:10px}.rwg-coverage{grid-template-columns:repeat(2,minmax(0,1fr))}.rwg-real-city{font-size:10px;padding:8px}}
+@media(prefers-reduced-motion:reduce){.rwg-real-pin{animation:none!important}}
