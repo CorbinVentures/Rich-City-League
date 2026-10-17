@@ -55,6 +55,7 @@ type Run = {
   allow_fan_checkin: boolean;
   host?: { display_name: string | null; username: string | null; avatar_url?: string | null };
   players?: string[];
+  partner?: {slug:string;name:string;experience:'park'|'rec';price_cents:number};
 };
 
 type Badge = {
@@ -174,9 +175,10 @@ export default function RunsPage() {
       const rows = (runsResult.data ?? []) as Run[];
       const hostIds = [...new Set(rows.map((run) => run.host_id))];
       const runIds = rows.map((run) => run.id);
-      const [hostsResult, playersResult] = await Promise.all([
+      const [hostsResult, playersResult, partnerLinksResult] = await Promise.all([
         hostIds.length ? db.from('profiles').select('id,display_name,username,avatar_url').in('id', hostIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('run_players').select('run_id,profile_id').in('run_id', runIds) : Promise.resolve({ data: [] }),
+        runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents').in('run_id', runIds) : Promise.resolve({ data: [] }),
       ]);
 
       const hostMap = new Map<string, Run['host']>((hostsResult.data ?? []).map((host: any) => [host.id, host]));
@@ -185,7 +187,16 @@ export default function RunsPage() {
         playerMap.set(player.run_id, [...(playerMap.get(player.run_id) ?? []), player.profile_id]);
       }
 
-      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [] })));
+      const partnerLinks=(partnerLinksResult.data??[]) as Array<{run_id:string;partner_id:string;experience:'park'|'rec';price_cents:number}>;
+      const partnerIds=[...new Set(partnerLinks.map(link=>link.partner_id))];
+      const {data:partnerRows}=partnerIds.length?await db.from('rch_runs_partners')
+        .select('id,slug,name').in('id',partnerIds).eq('status','approved'): {data:[]};
+      const partnerById=new Map(((partnerRows??[]) as Array<{id:string;slug:string;name:string}>).map(p=>[p.id,p]));
+      const runPartners=new Map(partnerLinks.flatMap(link=>{
+        const org=partnerById.get(link.partner_id);
+        return org?[[link.run_id,{slug:org.slug,name:org.name,experience:link.experience,price_cents:link.price_cents}] as const]:[];
+      }));
+      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id) })));
       const courtRows = (courtsResult.data ?? []) as Court[];
       if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
         const { data: selectedCourtRow } = await db.from('basketball_locations')
@@ -398,6 +409,7 @@ export default function RunsPage() {
         }}
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
+        <Link href="/runs/partners" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#387fa7] bg-[linear-gradient(110deg,#153c5e,#0b263e)] p-4 text-[#e5f4ff] hover:border-[#9ad5ff]"><span><strong className="block text-sm font-black uppercase tracking-wide">THE PARK × THE REC · Runs Partner Network</strong><small className="mt-1 block text-xs text-[#b3d6ef]">Play with local organizations · Find organized sessions · Bring your basketball legacy everywhere</small></span><FaArrowUpRightFromSquare className="shrink-0 text-xl text-[#90d2ff]"/></Link>
         <Link href="/crews" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#3576ab] bg-[linear-gradient(95deg,#123b60,#071f37)] p-4 text-[#e5f4ff] hover:border-[#81c6fc]"><span><strong className="block text-sm font-black uppercase tracking-wide">Bring your crew to the Run</strong><small className="mt-1 block text-xs text-[#add6f4]">Create a logo · choose your top five · compete together for the Commonwealth Cup</small></span><FaPeopleGroup className="shrink-0 text-2xl text-[#8ccbfc]" /></Link>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -496,6 +508,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
     <div className="rch-arena-game-cover relative h-24 overflow-hidden border-b border-[#264f79]"><div className="absolute inset-0 bg-gradient-to-t from-[#08192d]/85 to-transparent"/><span className="absolute bottom-3 left-3 rounded-full border border-[#53a5ff]/50 bg-[#167af3] px-3 py-1 text-[11px] font-black text-white">{starts.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})} · {starts.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span className="absolute bottom-3 right-3 rounded-full bg-[#071b30]/90 px-2 py-1 text-[10px] font-semibold text-[#d1e6ff]">{count}/{run.max_players} players</span></div>
     <div className="border-b border-[#244664] p-4">
       <div className="flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1.5 rounded-lg border border-rcl-blue/16 bg-rcl-blue/[.06] px-2.5 py-1 text-[11px] font-semibold text-rcl-blue">{typeIcon}{runTypeLabels[run.run_type]}</span><span className="rounded-lg border border-white/8 px-2.5 py-1 text-[11px] font-medium text-white/38">{run.game_format}</span><span className="ml-auto text-[11px] text-white/32">{skillLabels[run.skill_level]}</span></div>
+      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-[#64b5e6]/40 bg-[#123a56] px-2.5 py-1.5 text-[11px] font-black text-[#b3e5ff]"><FaCircleCheck className="shrink-0"/><span className="truncate">{run.partner.experience==='rec'?'THE REC':'THE PARK'} · {run.partner.name}</span></Link>}
       <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]"><Link href={`/runs/${run.id}`} className="hover:text-rcl-blue">{run.title}</Link></h2>
       {run.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/42">{run.description}</p>}
     </div>
@@ -509,7 +522,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
         {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
       </div>
       {participantCanHighlight && <div className="mt-2 rounded-xl border border-white/7 bg-black/15 p-3"><p className="text-xs leading-5 text-white/38">Played here? Post a photo or video from this run, then claim the run-highlight bonus.</p><div className="mt-2 flex flex-wrap gap-2"><Link href="/social?compose=1" className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/62">Post highlight</Link><button disabled={highlightClaimed || busy === `highlight-${run.id}`} onClick={() => void onClaimHighlight(run)} className="rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-2 text-xs font-semibold text-rcl-blue disabled:opacity-45">{highlightClaimed ? 'Highlight bonus claimed ✓' : 'Claim +35 REP'}</button></div></div>}
-      <div className="flex items-center justify-between gap-3 border-t border-white/7 pt-3"><span className="min-w-0 truncate text-xs text-white/30">Hosted by {run.host?.display_name || run.host?.username || 'RCL member'}</span>{run.allow_fan_checkin && <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-rcl-blue/55">Fan check-in</span>}</div>
+      <div className="flex items-center justify-between gap-3 border-t border-white/7 pt-3"><span className="min-w-0 truncate text-xs text-white/30">{run.partner?'Organized by '+run.partner.name+' · '+(run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' paid to organizer':'Free'):'Hosted by '+(run.host?.display_name || run.host?.username || 'RCL member')}</span>{run.allow_fan_checkin && <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-rcl-blue/55">Fan check-in</span>}</div>
     </div>
   </article>;
 }
