@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaBasketball,FaCalendarDays,FaCircleCheck,FaClock,FaCrown,FaEye,FaLocationDot,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaCalendarDays,FaClock,FaCrown,FaEye,FaLocationDot,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {buildDailyCircuitPicks,getDailyPlaybook,scoreDailyRun,virginiaCircuitDay,type DailyCircuitCandidate,type RunFormat,type RunPlayType} from '@/lib/run-daily-circuit';
@@ -144,7 +144,7 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,onPreferencesChange,now
     </div>}
   </div>
   <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#946d34] bg-[linear-gradient(110deg,#40321d,#122e47)] p-5 sm:mx-6 sm:p-6">
-   <div className="max-w-2xl"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#ffe09d]"><FaCrown/> TODAY'S PLAYBOOK · REAL-WORLD CHALLENGE</p><h3 className="mt-2 text-xl font-black uppercase sm:text-2xl">{playbook.headline}</h3><p className="mt-2 text-sm leading-6 text-[#f2e3c6]">{playbook.message}</p><p className="mt-2 text-[11px] text-[#c9b998]">Daily inspiration, not a scheduled game, automatic reward or verified victory. Play responsibly, confirm venue access and log real results.</p></div>
+   <div className="max-w-2xl"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#ffe09d]"><FaCrown/> TODAY&apos;S PLAYBOOK · REAL-WORLD CHALLENGE</p><h3 className="mt-2 text-xl font-black uppercase sm:text-2xl">{playbook.headline}</h3><p className="mt-2 text-sm leading-6 text-[#f2e3c6]">{playbook.message}</p><p className="mt-2 text-[11px] text-[#c9b998]">Daily inspiration, not a scheduled game, automatic reward or verified victory. Play responsibly, confirm venue access and log real results.</p></div>
    <Link href={'/runs?create=1&format='+playbook.format+'&mode='+playbook.mode} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-[#eed197] px-4 text-xs font-black text-[#2b210f]">{playbook.callToAction} <FaArrowRight/></Link>
   </div>
   <div className="grid gap-3 border-t border-[#315779] bg-[#081c30]/80 p-4 sm:grid-cols-2 sm:p-6">
