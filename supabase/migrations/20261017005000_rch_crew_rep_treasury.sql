@@ -1,4 +1,13 @@
 begin;
+-- Extend wallet expense receipts to crew contributions without pretending a donation is a purchase.
+alter table public.rch_rep_transactions drop constraint if exists rch_rep_transactions_kind_check;
+alter table public.rch_rep_transactions add constraint rch_rep_transactions_kind_check
+ check(kind in ('earn','purchase','refund','contribution'));
+alter table public.rch_rep_transactions drop constraint if exists rch_rep_transactions_check;
+alter table public.rch_rep_transactions add constraint rch_rep_transactions_check
+ check((kind='purchase' and amount<0 and order_id is not null)
+    or (kind='contribution' and amount<0 and order_id is null)
+    or (kind in ('earn','refund') and amount>0));
 -- Crews have a separate, auditable treasury. Individual wallet contributions
 -- never count as basketball victories, crew win rate or court territory.
 create table public.rch_crew_rep_wallets (
@@ -81,19 +90,19 @@ begin
        where m.crew_id=p_crew and m.profile_id=v_actor))) into v_valid;
  if not v_valid then raise exception 'Only crew members may contribute to their treasury'; end if;
  insert into public.rch_rep_wallets(profile_id) values(v_actor) on conflict do nothing;
- select balance into strict v_tx from public.rch_rep_wallets where profile_id=v_actor for update;
+ perform 1 from public.rch_rep_wallets where profile_id=v_actor for update;
  -- Store the spend reference only AFTER acquiring the personal wallet lock.
  if (select balance from public.rch_rep_wallets where profile_id=v_actor)<p_amount
  then raise exception 'Insufficient personal REP to contribute'; end if;
  if (select coalesce(sum(-t.amount),0) from public.rch_rep_transactions t
-   where t.profile_id=v_actor and t.kind='purchase' and t.detail like 'Crew treasury contribution%'
+   where t.profile_id=v_actor and t.kind='contribution' and t.detail like 'Crew treasury contribution%'
     and t.created_at>now()-interval '24 hours')+p_amount>1500
  then raise exception 'Crew contributions are limited to 1500 REP in 24 hours'; end if;
  insert into public.rch_crew_rep_wallets(crew_id) values(p_crew) on conflict do nothing;
  perform 1 from public.rch_crew_rep_wallets where crew_id=p_crew for update;
  v_tx:=gen_random_uuid();
  insert into public.rch_rep_transactions(profile_id,amount,kind,source_key,detail)
- values(v_actor,-p_amount,'purchase','crew_contrib:'||v_tx::text,
+ values(v_actor,-p_amount,'contribution','crew_contrib:'||v_tx::text,
   'Crew treasury contribution: '||p_crew::text);
  update public.rch_rep_wallets set balance=balance-p_amount,updated_at=now() where profile_id=v_actor;
  insert into public.rch_crew_rep_transactions(id,crew_id,member_id,amount,kind,source_key,description)
