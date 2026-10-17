@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {censusBoundaryUrl,validVirginiaFeatures} from '../src/app/api/geo/virginia/route';
+import {censusBoundaryUrl,validVirginiaFeatures} from '../src/lib/virginia-census-boundaries';
 import {countyBounds} from '../src/lib/virginia-geographic-bounds';
 const text=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 
