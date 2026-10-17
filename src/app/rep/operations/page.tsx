@@ -27,6 +27,24 @@ export default function RepOperationsPage(){
  const [busy,setBusy]=useState(false);
  const [loaded,setLoaded]=useState(false);
  const [revision,setRevision]=useState(0);
+ const [awardUsername,setAwardUsername]=useState('');
+ const [awardKind,setAwardKind]=useState<'fan_attendance'|'cheer_event'|'creator_post'>('fan_attendance');
+ const [awardEvidence,setAwardEvidence]=useState('');
+
+ async function certifyCommunity(){
+  if(!db||busy||!staff)return;
+  setBusy(true);setError('');setNotice('');
+  const handle=awardUsername.trim().replace(/^@/,'');
+  const {data:person,error:lookup}=await db.from('profiles').select('id').eq('username',handle).maybeSingle();
+  if(lookup||!person){setBusy(false);setError(lookup?.message||'No RCH member found with that username.');return;}
+  const {error:failure}=await db.rpc('rch_certify_community_badge',{
+   p_profile:person.id,p_kind:awardKind,p_evidence:awardEvidence.trim()
+  });
+  if(failure)setError(failure.message);
+  else{setNotice('Verified participation was recorded. One REP award and its place-specific badge are now credited.');setAwardEvidence('');setRevision(v=>v+1);}
+  setBusy(false);
+ }
+
  const load=useCallback(async()=>{
   if(!db||!user?.id){setLoaded(true);return;}
   const {data:allowed,error:denial}=await db.rpc('is_staff_or_admin');
@@ -94,6 +112,26 @@ export default function RepOperationsPage(){
       </article>)}
       {!orders.length&&<p className="rounded-xl border border-dashed border-[#466d8a] p-7 text-center text-sm text-[#b8d2e3]">No pending REP redemptions.</p>}
     </div>
+    <section aria-label="Verified role and attendance achievements" className="mt-8 rounded-2xl border border-[#796d49] bg-[#292d34] p-5">
+     <h2 className="text-xl font-black uppercase text-[#f4dfa9]">Verify Fan, Cheer &amp; Creator Milestones</h2>
+     <p className="mt-2 text-xs leading-5 text-[#d5cfbf]">Only certify evidence you independently checked. A fan needs a completed Run check-in, a cheerleader needs a recorded event registration check-in, and a creator needs an original published post. Self-reported attendance cannot earn REP.</p>
+     <div className="mt-4 grid gap-3 sm:grid-cols-2">
+       <label className="text-xs font-bold">RCH member username
+         <input value={awardUsername} onChange={e=>setAwardUsername(e.target.value)} maxLength={80} placeholder="@member" className="mt-2 min-h-11 w-full rounded-lg border border-[#8f865e] bg-[#101e2e] px-3 text-sm"/>
+       </label>
+       <label className="text-xs font-bold">Verified milestone
+         <select value={awardKind} onChange={e=>setAwardKind(e.target.value as typeof awardKind)} className="mt-2 min-h-11 w-full rounded-lg border border-[#8f865e] bg-[#101e2e] px-3 text-sm">
+           <option value="fan_attendance">Fan: completed Run attendance</option>
+           <option value="cheer_event">Cheerleader: confirmed event performance</option>
+           <option value="creator_post">Creator: original approved content</option>
+         </select>
+       </label>
+       <label className="text-xs font-bold sm:col-span-2">Original evidence ID
+         <input value={awardEvidence} onChange={e=>setAwardEvidence(e.target.value)} placeholder="Run check-in / cheer registration / published post UUID" className="mt-2 min-h-11 w-full rounded-lg border border-[#8f865e] bg-[#101e2e] px-3 text-sm"/>
+       </label>
+       <button type="button" disabled={busy||awardUsername.trim().length<2||!/^[0-9a-f-]{36}$/i.test(awardEvidence.trim())} onClick={()=>void certifyCommunity()} className="min-h-11 rounded-lg bg-[#e6ca90] px-4 text-xs font-black text-[#292315] disabled:opacity-40">Verify &amp; Award REP</button>
+     </div>
+    </section>
    </div>}
   </div>
  </main>;
