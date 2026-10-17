@@ -12,7 +12,7 @@ export function WorldScoutButton({courtSlug,scouted,loggedIn,onScout}:{courtSlug
  const scout=async()=>{
   setBusy(true);setFeedback('');
   try{
-   const db=getSupabaseClient(true);
+   const db=getSupabaseClient(true) as any;
    if(!db)throw new Error('RCH is offline. Try again.');
    const {error}=await db.rpc('rch_world_scout_court',{p_court:courtSlug});
    if(error)throw error;
