@@ -6,7 +6,7 @@ import type {AtlasPlace} from '@/components/discover/VirginiaInteractiveAtlas';
 export type WorldCourt={
  slug:string;name:string;address:string;locality:string;latitude:number|null;
  longitude:number|null;verification_status:string;access_type:string;venue_type:string;
- source_url:string|null;hours_text:string|null;
+ source_url:string|null;source_label?:string|null;hours_text:string|null;
 };
 export type WorldRun={
  id:string;title:string;location:string;location_slug:string|null;starts_at:string;
@@ -16,6 +16,17 @@ export type WorldMapState={ownedCourts?:readonly string[];challengedCourts?:read
 export type WorldMission={
  id:'scout'|'join'|'compete';title:string;detail:string;complete:boolean;href:string;
 };
+/** Official municipal/county Parks & Recreation basketball site, including
+ * indoor basketball gyms and combined recreational centers. A verified
+ * facility is NOT confirmation of walk-in access or an active open run. */
+export function verifiedParksRecFacility(court:WorldCourt):boolean{
+ return ['official','provider'].includes(court.verification_status)
+   && /\\b(?:parks?|recreation|prcf|municipal)\\b/i.test(court.source_label||'')
+   && Boolean(court.source_url?.startsWith('https://'))
+   && ['outdoor','indoor','mixed'].includes(court.venue_type);
+}
+
+/** Open-air public court candidate, not a real-time availability statement. */
 export function playableCourt(court:WorldCourt):boolean{
  return (court.verification_status==='official'||court.verification_status==='provider')
    &&court.access_type==='public'&&court.venue_type==='outdoor';
@@ -26,7 +37,7 @@ export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly Wor
  const owned=new Set(state.ownedCourts||[]);
  const challenged=new Set(state.challengedCourts||[]);
  const bonus=new Set(activeRuns.filter(run=>(state.doubleRepRuns||[]).includes(run.id)).map(run=>run.location_slug));
- return courts.filter(court=>playableCourt(court)&&virginiaCoordinates(court.latitude,court.longitude))
+ return courts.filter(court=>verifiedParksRecFacility(court)&&virginiaCoordinates(court.latitude,court.longitude))
    .map(court=>{
     const gameState=challenged.has(court.slug)?'battle' as const:owned.has(court.slug)?'crown' as const:bonus.has(court.slug)?'double-rep' as const:null;
     return {
@@ -34,7 +45,7 @@ export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly Wor
      kind:active.has(court.slug)?'run' as const:'court' as const,
      lat:court.latitude as number,lon:court.longitude as number,
      href:'/runs/courts/'+encodeURIComponent(court.slug),
-     precision:'venue' as const,
+     precision:'venue' as const,indoor:court.venue_type==='indoor',
      ...(gameState?{gameState}:{})
     };
    });
