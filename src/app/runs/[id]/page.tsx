@@ -64,6 +64,7 @@ export default function RunRoomPage() {
 
   const [run, setRun] = useState<Run | null>(null);
   const [partner, setPartner] = useState<PartnerSession | null>(null);
+  const [weekendDoubleRep, setWeekendDoubleRep] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
   const [teams, setTeams] = useState<Team[]>([]);
@@ -99,6 +100,8 @@ export default function RunRoomPage() {
     }
 
     setRun((runResult.data ?? null) as Run | null);
+    const {data:weekend}=await db.from('rch_weekend_circuit_events').select('run_id').eq('run_id',runId).eq('bonus_enabled',true).maybeSingle();
+    setWeekendDoubleRep(Boolean(weekend));
     const {data:linked}=await db.from('rch_runs_partner_sessions').select('partner_id,experience,price_cents').eq('run_id',runId).maybeSingle();
     if(linked){
       const {data:org}=await db.from('rch_runs_partners').select('slug,name,status').eq('id',linked.partner_id).eq('status','approved').maybeSingle();
@@ -278,6 +281,7 @@ export default function RunRoomPage() {
 
   return (
     <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
+      {weekendDoubleRep&&<div className="mx-auto max-w-6xl px-4 pt-4"><div className="rounded-2xl border border-[#d4a34d]/50 bg-[#30270e] px-4 py-3 text-sm font-bold text-[#ffe3a2]">2× Verified Runs REP · Weekend Circuit <span className="block pt-1 text-xs font-normal text-[#efe2c6]">Double rewards apply to independently confirmed ranked games and independently reviewed stats only. Check-ins and highlights stay at 1×. This is a community drop-in, not a reserved or staffed court.</span></div></div>}
       <ClientPageHero
         eyebrow="RCL Runs"
         title={run.title}
