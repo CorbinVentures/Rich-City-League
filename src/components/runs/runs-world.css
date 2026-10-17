@@ -1,0 +1,113 @@
+/* Runs World: immersive navigation around actual, RLS-filtered basketball records.
+   Styled independently from the public browser homepage and the existing PWA shell. */
+.rwg-shell{--rwg-blue:#61bdff;--rwg-gold:#f8c879;--rwg-ink:#e9f7ff;--rwg-muted:#a7c8dd;background:radial-gradient(ellipse 60% 35% at 80% 0%,#134b79,transparent 80%),#04101d;color:var(--rwg-ink);isolation:isolate}
+.rwg-shell *{box-sizing:border-box;min-width:0}
+.rwg-shell :is(button,a,input,select):focus-visible{outline:3px solid #a4e1ff;outline-offset:3px}
+.rwg-shell a{text-decoration:none}
+.rwg-frame{max-width:1340px;margin:0 auto;padding:clamp(12px,2.8vw,30px)}
+.rwg-header{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:26px 6px}
+.rwg-kicker{display:inline-flex;align-items:center;gap:8px;color:#83d8ff;font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.rwg-header h1{margin:9px 0 12px;font-size:clamp(37px,6vw,75px);font-weight:1000;letter-spacing:-.065em;line-height:.98;color:#f9fcff}
+.rwg-header h1 span{display:block;color:#65beff;text-shadow:0 0 40px #2589f077}
+.rwg-header p{max-width:50ch;color:#bddef0;font-size:14px;line-height:1.6}
+.rwg-top-actions{display:flex;align-items:center;gap:9px;padding-bottom:5px}
+.rwg-soft,.rwg-secondary{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:1px solid #436e91;background:#102f4a;color:#c9ecff;min-height:44px;padding:11px 15px;border-radius:12px;font-weight:800;font-size:12px}
+.rwg-soft:hover,.rwg-secondary:hover{background:#1b5077;border-color:#89ceff}
+.rwg-primary{display:inline-flex;justify-content:center;align-items:center;gap:10px;min-height:47px;padding:12px 17px;border-radius:12px;background:linear-gradient(125deg,#77c8ff,#2589ea);color:#04182b!important;font-weight:950;font-size:12px;box-shadow:0 8px 30px #0373d24d}
+.rwg-primary:hover{filter:brightness(1.12)}
+.rwg-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;background:#03101e;border:1px solid #346083;border-radius:19px;padding:7px;position:sticky;top:72px;z-index:30;box-shadow:0 12px 28px #0008}
+.rwg-nav button{display:flex;gap:8px;justify-content:center;align-items:center;min-height:53px;border:1px solid transparent;background:#0a233a;color:#b3cfe2;border-radius:12px;font-size:12px;font-weight:850;transition:background .2s,transform .2s}
+.rwg-nav button svg{font-size:16px}
+.rwg-nav button[aria-pressed=true]{border-color:#80d2ff;background:linear-gradient(135deg,#2d79b2,#145187);color:#fff;box-shadow:inset 0 0 18px #6cbaff33,0 0 20px #2a95f744}
+.rwg-nav button:hover{background:#19527e}
+.rwg-hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}
+.rwg-hud>div{display:grid;gap:7px;padding:17px;border:1px solid #295678;background:linear-gradient(145deg,#0d3051,#071f35);border-radius:16px}
+.rwg-hud small{font-size:9px;color:#9fc7e4;font-weight:850;letter-spacing:.1em}
+.rwg-hud strong{font-size:clamp(19px,2vw,28px);line-height:1;font-weight:1000;color:#fff}
+.rwg-world{border:1px solid #357da8;border-radius:24px;overflow:hidden;background:#051d34;box-shadow:0 22px 55px #0008,0 0 30px #145c9f22}
+.rwg-area-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;border-bottom:1px solid #275479;background:linear-gradient(125deg,#0c3656,#092139)}
+.rwg-area-controls h2{display:flex;align-items:center;gap:9px;font-size:18px;line-height:1.3;font-weight:950}
+.rwg-area-controls h2 svg{color:#75cfff}
+.rwg-area-controls p{margin-top:5px;color:#9fc1d6;font-size:11px}
+.rwg-city-actions{display:flex;gap:8px;align-items:center;max-width:100%}
+.rwg-city-actions select{min-height:44px;border:1px solid #6a9fc1;background:#0d314f;padding:9px 12px;border-radius:10px;color:white;font-size:12px;font-weight:800;max-width:210px}
+.rwg-map-stage{position:relative;background:#091b2a}
+.rwg-map-stage .rch-live-atlas{border:0!important;border-radius:0!important;min-height:440px}
+.rwg-map-stage .rch-live-atlas-selection{z-index:6}
+.rwg-disclosure{display:flex;gap:9px;align-items:start;color:#a8c8dd;font-size:11px;line-height:1.6;padding:12px 16px}
+.rwg-disclosure svg{flex:0 0 auto;margin-top:3px;color:#8bd9ff}
+.rwg-portals,.rwg-courts,.rwg-activity,.rwg-mode,.rwg-arena{margin-top:22px;border:1px solid #285471;border-radius:23px;background:linear-gradient(145deg,#0b2943,#061c30);padding:clamp(17px,2.2vw,25px);box-shadow:0 16px 32px #0004}
+.rwg-portals h2,.rwg-section-head h2,.rwg-mode h2,.rwg-arena h2{font-weight:1000;font-size:clamp(24px,3vw,36px);line-height:1.15;letter-spacing:-.04em}
+.rwg-portal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:17px}
+.rwg-portal{display:flex;align-items:center;text-align:left;gap:12px;padding:16px 13px;border:1px solid #2e678f;border-radius:15px;background:#103452;color:#fff;min-height:88px;transition:transform .2s,background .2s}
+.rwg-portal:hover{background:#19496b;transform:translateY(-2px)}
+.rwg-portal>svg{margin-left:auto;color:#79ceff;flex:0 0 auto}
+.rwg-symbol{display:grid;place-items:center;width:40px;height:40px;flex:0 0 auto;font-size:23px;border-radius:12px;background:#1b5379}
+.rwg-portal strong,.rwg-portal small{display:block;line-height:1.25}
+.rwg-portal strong{font-size:13px;font-weight:950}
+.rwg-portal small{font-size:9px;color:#91cbea;font-weight:900;letter-spacing:.07em;margin-top:7px}
+.rwg-section-head{display:flex;align-items:end;justify-content:space-between;gap:13px;flex-wrap:wrap;margin-bottom:16px}
+.rwg-section-head a{display:inline-flex;align-items:center;gap:7px;color:#9de0ff;font-weight:850;font-size:12px;min-height:44px}
+.rwg-section-head input{min-height:45px;min-width:min(240px,100%);border:1px solid #4b7898;border-radius:11px;background:#0a2034;color:white;padding:10px 13px;font-size:12px}
+.rwg-warning{border:1px solid #cb9058;padding:12px;border-radius:10px;color:#ffdfa7;background:#53381d;font-size:12px}
+.rwg-empty{padding:23px;border:1px dashed #406a89;border-radius:13px;color:#c6dbea;font-size:13px;line-height:1.7}
+.rwg-court-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rwg-court{display:flex;gap:12px;align-items:center;text-align:left;min-height:76px;border:1px solid #275679;background:#102f49;color:#fff;border-radius:13px;padding:12px}
+.rwg-court[aria-pressed=true]{border-color:#d9bd75;background:#403a32;box-shadow:inset 0 0 16px #f8c8791c}
+.rwg-court:hover{border-color:#82c8f7}
+.rwg-court-icon{display:grid;place-items:center;flex:0 0 auto;width:42px;height:42px;border-radius:12px;background:#174f76;color:#f6ca7b}
+.rwg-court-copy{display:grid;gap:6px;flex:1}
+.rwg-court-copy strong{font-size:12px;line-height:1.3}
+.rwg-court-copy small{font-size:10px;line-height:1.4;color:#b4d0e4}
+.rwg-court-arrow{font-size:12px;color:#8bccec}
+.rwg-arena{border-color:#b49a64;background:radial-gradient(ellipse at 90% 0%,#50432a70,transparent 40%),#10253b}
+.rwg-arena-top{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.rwg-arena-top h2{margin-top:9px}
+.rwg-arena-top p{margin-top:7px;color:#bed4e3;font-size:12px}
+.rwg-arena-shield{display:grid;place-items:center;width:66px;height:66px;flex:0 0 auto;border:2px solid #f6c779;border-radius:20px;background:#624e2c;color:#ffe4a1;font-size:30px;box-shadow:0 0 30px #e8b95538}
+.rwg-master-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0}
+.rwg-master-grid>div{border:1px solid #4b6d86;border-radius:13px;background:#09223a;padding:14px;display:grid;gap:8px}
+.rwg-master-grid span{display:flex;align-items:center;gap:7px;color:#f0c77c;font-size:10px;font-weight:950}
+.rwg-master-grid strong{font-size:16px;font-weight:950;overflow-wrap:anywhere}
+.rwg-master-grid small{font-size:10px;color:#a3bfd2}
+.rwg-territory{display:flex;justify-content:space-between;align-items:center;border:1px solid #9a804c;border-radius:15px;padding:18px;background:#473c293e}
+.rwg-territory h3{margin:5px 0;font-size:22px;font-weight:950}
+.rwg-territory p{font-size:11px;color:#c9cecf}
+.rwg-territory>svg{font-size:25px;color:#f8d99a}
+.rwg-arena-events h3{margin:18px 0 10px;font-size:14px;font-weight:950}
+.rwg-arena-events>a,.rwg-run-row{display:flex;align-items:center;gap:11px;min-height:62px;padding:12px 14px;border:1px solid #355e7c;border-radius:11px;background:#0d2a44;color:#e6f8ff;margin-top:7px}
+.rwg-arena-events>a:hover,.rwg-run-row:hover{border-color:#7bc8ff}
+.rwg-arena-events>a span,.rwg-run-row>span:nth-child(2){display:grid;gap:5px;flex:1}
+.rwg-arena-events>a strong,.rwg-run-row strong{font-size:12px;font-weight:900}
+.rwg-arena-events>a small,.rwg-run-row small{font-size:10px;color:#abcde6}
+.rwg-arena-events>a>svg{color:#9cd9ff}
+.rwg-arena-events>p{font-size:12px;color:#b7d5e9}
+.rwg-arena-actions,.rwg-mode-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+.rwg-run-basket{display:grid;place-items:center;width:40px;height:40px;flex:0 0 auto;border-radius:12px;background:#174d71;color:#93d8ff}
+.rwg-run-row b{font-size:10px;color:#ffcf7a;white-space:nowrap}
+.rwg-activity .rwg-empty{margin-top:12px}
+.rwg-mode{min-height:55vh}
+.rwg-mode h2{margin-top:10px}
+.rwg-mode>p{margin-top:12px;font-size:13px;line-height:1.6;color:#b9d6e9;max-width:75ch}
+.rwg-mode .rwg-empty{margin-top:17px}
+.rwg-mission-meter{margin:21px 0;padding:20px;border:1px solid #517da2;border-radius:15px;background:#123b58}
+.rwg-mission-meter strong{font-size:28px;font-weight:1000}
+.rwg-mission-meter span{margin-left:12px;font-size:10px;font-weight:900;color:#a9d8f6}
+.rwg-mission-meter>div{height:10px;margin-top:15px;background:#081c2f;border:1px solid #3e6889;border-radius:100px;overflow:hidden}
+.rwg-mission-meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#4ec6f8,#f0d082)}
+.rwg-missions{display:grid;gap:10px}
+.rwg-mission{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px;border:1px solid #335e7a;border-radius:16px;background:#102d44}
+.rwg-mission>span{display:grid;place-items:center;flex:0 0 auto;width:45px;height:45px;border-radius:13px;background:#1d5985;color:#fff;font-size:17px;font-weight:1000}
+.rwg-mission>div{flex:1}
+.rwg-mission strong{font-size:14px;font-weight:950}
+.rwg-mission p{margin:5px 0;font-size:12px;color:#b4d0e6}
+.rwg-mission small{color:#9dbad1;font-size:10px}
+.rwg-mission>a,.rwg-mission>button{display:flex;align-items:center;gap:7px;flex:0 0 auto;min-height:42px;padding:10px 13px;border:1px solid #679eca;border-radius:11px;background:#1d5e91;color:white;font-size:11px;font-weight:850}
+.rwg-player-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}
+.rwg-player-stats>div{display:grid;gap:9px;padding:20px;border:1px solid #447191;border-radius:16px;background:#143753}
+.rwg-player-stats strong{font-size:36px;font-weight:1000;line-height:1}
+.rwg-player-stats small{font-size:10px;font-weight:900;color:#95c6e5}
+.rwg-player-stats span{font-size:11px;color:#adcada}
+@media(max-width:860px){.rwg-portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rwg-nav{top:65px}.rwg-player-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.rwg-frame{padding:10px 10px 90px}.rwg-header{align-items:start;padding:20px 5px 17px;flex-direction:column;gap:12px}.rwg-header h1{font-size:44px}.rwg-nav{top:56px;padding:5px;gap:3px;border-radius:14px}.rwg-nav button{min-height:55px;flex-direction:column;gap:4px;font-size:10px;border-radius:9px}.rwg-nav button svg{font-size:16px}.rwg-hud{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.rwg-hud>div{padding:12px}.rwg-area-controls{flex-direction:column;align-items:start;padding:13px}.rwg-city-actions{width:100%}.rwg-city-actions select{flex:1;max-width:none}.rwg-map-stage .rch-live-atlas{min-height:405px}.rwg-portal-grid{gap:7px}.rwg-portal{padding:11px;min-height:76px}.rwg-portal strong{font-size:11px}.rwg-portal small{font-size:8px}.rwg-court-grid{grid-template-columns:1fr}.rwg-master-grid{gap:5px}.rwg-master-grid>div{padding:10px}.rwg-master-grid strong{font-size:11px}.rwg-master-grid small{font-size:9px}.rwg-territory h3{font-size:17px}.rwg-run-row{flex-wrap:wrap}.rwg-run-row b{order:5}.rwg-mission{align-items:start;flex-wrap:wrap;padding:12px}.rwg-mission>a,.rwg-mission>button{width:100%;justify-content:center}.rwg-player-stats>div{padding:13px}.rwg-player-stats strong{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.rwg-shell :is(button,a){transition:none!important;animation:none!important}}
