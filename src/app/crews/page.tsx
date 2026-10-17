@@ -10,6 +10,7 @@ import { CourtDominion } from '@/components/runs/CourtDominion';
 import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
 import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import { getSupabaseClient } from '@/lib/supabase';
+import '../rch-identity.css';
 
 type Crew = { id:string; name:string; motto:string; city:string; captain_id:string; logo_path:string|null; home_court_slug:string; season_id:string };
 type CrewMember = { crew_id:string; profile_id:string; role:string; joined_at:string };
@@ -119,18 +120,21 @@ function CrewsView(){
     setBusy('');
   };
   const toggleFavorite=(id:string)=>setFavorites(current=>current.includes(id)?current.filter(value=>value!==id):current.length<5?[...current,id]:current);
-  return <main className="rcl-social-secondary min-h-screen bg-[#050d19] pb-28 text-white">
+  return <main className="rcl-social-secondary rch-identity-surface min-h-screen bg-[#050d19] pb-28 text-white">
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-7">
       <nav className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-[#a9cef6]"><Link href="/runs">← Runs</Link><Link href="/commonwealth">Commonwealth Cup →</Link></nav>
-      <header className="mt-8 rounded-3xl border border-[#285580] bg-[radial-gradient(circle_at_80%_10%,#163c64,#071525_65%)] p-6 sm:p-10">
+      <header className="rch-identity-hero mt-6 p-6 sm:p-9">
         <div className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#75beff]"><FaPeopleGroup/> RCH CREWS</div>
         <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">YOUR PEOPLE. YOUR LOGO.<br/><span className="text-[#69b8ff]">YOUR LEGACY.</span></h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[#c1d9ef]">Bring your five, represent your crew on every profile, enter competitive Runs and chase the Commonwealth Cup. No fake wins. All real basketball.</p>
-        <div className="mt-6 flex flex-wrap gap-3"><Link href="/commonwealth#rch-cw-my-crew" className="rounded-xl bg-[#63b5fa] px-5 py-3 text-sm font-black text-[#051321]">{myCrew?'View Cup roster':'Found or join a crew'}</Link><Link href="/runs" className="rounded-xl border border-[#4a79a1] px-5 py-3 text-sm font-bold">Explore runs <FaArrowRight className="ml-1 inline"/></Link>{myCrew&&<Link href={'/crews/'+encodeURIComponent(myCrew.id)+'/treasury'} className="rounded-xl border border-[#bb955b] bg-[#402f25] px-5 py-3 text-sm font-black text-[#ffe1ad]">Crew REP Treasury →</Link>}</div>
+        <div className="rch-identity-actions mt-6"><Link href="/commonwealth#rch-cw-my-crew" className="rch-identity-primary">{myCrew?'View Cup roster':'Found or join a crew'}</Link><Link href="/runs" className="rounded-xl border border-[#4a79a1] px-5 py-3 text-sm font-bold">Explore runs <FaArrowRight className="ml-1 inline"/></Link>{myCrew&&<Link href={'/crews/'+encodeURIComponent(myCrew.id)+'/treasury'} className="rounded-xl border border-[#bb955b] bg-[#402f25] px-5 py-3 text-sm font-black text-[#ffe1ad]">Crew REP Treasury →</Link>}</div>
       </header>
-
-      <CrewPowerBoard />
-      <CourtDominion showTakeovers />
+      <nav aria-label="Crew sections" className="rch-identity-nav mt-4">
+       <a href="#rch-crew-hq"><FaPeopleGroup/> Crew Identity</a>
+       <a href="#rch-crew-rankings"><FaTrophy/> Power Rankings</a>
+       <a href="#rch-crew-courts"><FaCrown/> Territory Battles</a>
+       <a href="#rch-crews-directory"><FaArrowRight/> Find Crews</a>
+      </nav>
       {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/40 bg-red-950/30 p-4 text-sm text-red-100">{error}</p>}
       {notice&&<p role="status" className="mt-5 rounded-xl border border-[#39739c] bg-[#103451] p-4 text-sm text-[#d8f1ff]">{notice}</p>}
 
@@ -139,9 +143,9 @@ function CrewsView(){
         <div className="mt-4 space-y-3">{invites.map(invite=><div key={invite.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#071627] p-4"><span className="text-sm font-bold">{crews.find(c=>c.id===invite.crew_id)?.name||'RCH Crew'} invited you to join</span><div className="flex gap-2"><button disabled={!!busy} className="rounded-lg bg-[#68baff] px-4 py-2 text-xs font-black text-[#051321]" onClick={()=>void execute('commonwealth_respond_invitation',{p_invitation:invite.id,p_accept:true},'Invitation accepted. Captain invitations join immediately; teammate invitations go to the captain for approval.')}>Accept</button><button disabled={!!busy} className="rounded-lg border border-white/20 px-4 py-2 text-xs font-bold" onClick={()=>void execute('commonwealth_respond_invitation',{p_invitation:invite.id,p_accept:false},'Invitation declined.')}>Decline</button></div></div>)}</div>
       </section>}
 
-      {selected&&<section className="mt-7 rounded-3xl border border-[#274969] bg-[#091b2d] p-5 sm:p-7" aria-label="Crew headquarters">
+      {selected&&<section id="rch-crew-hq" className="rch-identity-crew-stage mt-7 scroll-mt-24" aria-label="Crew headquarters">
         <div className="flex flex-wrap items-center gap-5">
-          <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border border-[#478ab8] bg-[#113552]">{logo(selected)?<img src={logo(selected)||''} alt={selected.name+' logo'} className="h-full w-full object-contain"/>:<FaBasketball className="text-4xl text-[#86c8ff]"/>}</div>
+          <div className="rch-identity-crest">{logo(selected)?<img src={logo(selected)||''} alt={selected.name+' logo'} className="h-full w-full object-contain"/>:<FaBasketball className="text-4xl text-[#86c8ff]"/>}</div>
           <div className="min-w-0 flex-1"><p className="text-xs font-black tracking-[.16em] text-[#7cb7e7]">{selected.city.toUpperCase()} · {selected.home_court_slug.replace(/-/g,' ').toUpperCase()}</p><h2 className="mt-1 font-display text-3xl font-black uppercase">{selected.name}</h2><p className="mt-1 text-sm text-[#b3d0e6]">{selected.motto||'Building our legacy on Virginia courts.'}</p><p className="mt-2 text-xs font-bold text-[#88b9e1]">{selectedMembers.length} / 12 members · {mine?'Your crew':'RCH crew'}</p></div>
           <div className="flex flex-wrap gap-2">{!myCrew&&user&&<button disabled={!!busy} onClick={()=>void execute('commonwealth_request_to_join',{p_crew:selected.id},'Roster request sent to the captain.')} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Request to join</button>}{!user&&!authLoading&&<Link href={'/auth/sign-up?redirect='+encodeURIComponent('/crews?crew='+selected.id)} className="rounded-xl bg-[#70bdfb] px-4 py-3 text-xs font-black text-[#051321]">Sign up free to join</Link>}<button onClick={()=>void share(selected)} className="inline-flex items-center gap-2 rounded-xl border border-[#497fac] px-4 py-3 text-xs font-black"><FaShareNodes/> Invite friends</button></div>
         </div>
@@ -149,7 +153,14 @@ function CrewsView(){
          {logoEditorOpen&&<><CrewLogoStudio crewName={myCrew.name} initialLogoUrl={logo(myCrew)} onChange={setLogoDraft}/>
            <button type="button" disabled={!!busy||!logoDraft} onClick={()=>void upload()} className="mt-3 min-h-11 w-full rounded-xl bg-[#66c5ed] px-4 py-3 text-sm font-black text-[#061725] disabled:opacity-40">{busy==='logo'?'Saving logo…':'Save selected logo to crew'}</button></>}
          </div>}
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectedMembers.map(member=><Link href={'/social/profile/'+member.profile_id} key={member.profile_id} className="flex items-center gap-3 rounded-xl border border-[#244e74] bg-[#0c2845] p-3 hover:border-[#83beee]">
+        <div className="rch-identity-stat-grid relative mt-5">
+          <div className="rch-identity-stat"><strong>{selectedMembers.length} / 12</strong><small>Registered members</small></div>
+          <div className="rch-identity-stat"><strong>{entries.filter(e=>e.crew_id===selected.id).length}</strong><small>Recorded Run entries</small></div>
+          <div className="rch-identity-stat"><strong>{selected.city||'VA'}</strong><small>Home city</small></div>
+        </div>
+        {selected.home_court_slug&&<Link href={'/runs/courts/'+encodeURIComponent(selected.home_court_slug)} className="rch-identity-secondary relative mt-4">Visit our home court <FaArrowRight/></Link>}
+        <h3 className="relative mt-6 text-lg font-black uppercase tracking-wide">Meet the roster</h3>
+        <div className="relative mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectedMembers.map(member=><Link href={'/social/profile/'+member.profile_id} key={member.profile_id} className="rch-identity-member">
           <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[#194265]">{identity(member.profile_id)?.avatar_url?<img src={identity(member.profile_id)?.avatar_url||''} alt="" className="h-full w-full object-cover"/>:<FaBasketball/>}</span>
           <span className="min-w-0"><strong className="block truncate text-sm">{identity(member.profile_id)?.display_name||identity(member.profile_id)?.username||'RCH Member'}</strong><small className="text-xs text-[#9bbcd9]">{member.role==='captain'?'Captain':'Teammate'}</small></span>
           {member.role==='captain'&&<FaCrown className="ml-auto text-[#f7bf69]"/>}
@@ -181,7 +192,9 @@ function CrewsView(){
         {!runs.length&&<p className="mt-4 text-sm text-[#9dc6e8]">No upcoming competitive Runs are open yet. <Link className="underline" href="/runs">Host the first one</Link>.</p>}
       </section>}
 
-      <section className="mt-8"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-black uppercase">Crews around Virginia</h2><Link href="/commonwealth" className="text-xs font-black text-[#8cc6ff]">Cup rankings →</Link></div>
+      <section id="rch-crew-rankings" className="mt-8 scroll-mt-24" aria-label="Crew power rankings"><CrewPowerBoard /></section>
+      <section id="rch-crew-courts" className="mt-8 scroll-mt-24" aria-label="Crew territory battles"><CourtDominion showTakeovers /></section>
+      <section id="rch-crews-directory" className="mt-8 scroll-mt-24"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-black uppercase">Crews around Virginia</h2><Link href="/commonwealth" className="text-xs font-black text-[#8cc6ff]">Cup rankings →</Link></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{crews.map(crew=><Link key={crew.id} href={'/crews?crew='+crew.id} className="flex items-center gap-3 rounded-xl border border-[#274a6d] bg-[#0c2035] p-4 hover:border-[#6ab3eb]"><span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#173a5d]">{logo(crew)?<img alt={crew.name+' logo'} src={logo(crew)||''} className="h-full w-full object-contain"/>:<FaBasketball/>}</span><span className="min-w-0"><strong className="block truncate text-sm">{crew.name}</strong><small className="text-xs text-[#a8cae1]">{crew.city} · {members.filter(m=>m.crew_id===crew.id).length} members</small></span><FaArrowRight className="ml-auto text-[#7fbbe7]"/></Link>)}</div>
         {!crews.length&&!authLoading&&<p className="mt-6 text-sm text-[#accde5]">Founding crews are being recruited. Your crew can lead the board.</p>}
       </section>

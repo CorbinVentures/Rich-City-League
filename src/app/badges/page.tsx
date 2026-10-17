@@ -1,4 +1,7 @@
+import Link from 'next/link';
+import {FaArrowRight,FaCrown,FaLocationDot,FaTrophy} from 'react-icons/fa6';
 import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
+import '../rch-identity.css';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
 import { Container } from '@/components/Container';
 import { getPublicClient } from '@/lib/public-data';
@@ -35,24 +38,30 @@ export default async function BadgesPage() {
   }
   const featured = badges.find(badge => /elite|diamond|platinum|gold/i.test(badge.tier)) || badges[0];
 
-  return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
+  return <main className="rcl-social-secondary rch-identity-surface min-h-screen bg-rcl-black pb-24 text-white">
     <header className="relative overflow-hidden border-b border-rcl-blue/20 bg-[radial-gradient(ellipse_at_75%_20%,rgba(18,114,176,.22),transparent_58%),linear-gradient(130deg,#071c2b,#050810)]">
-      <Container maxWidth="xl" className="relative flex flex-col items-center gap-3 py-8 sm:flex-row sm:justify-between sm:gap-8 sm:py-12">
+      <Container maxWidth="xl" className="relative flex flex-col items-center gap-4 py-8 sm:flex-row sm:justify-between sm:gap-8 sm:py-12">
         <div className="w-full sm:max-w-2xl">
           <p className="text-[11px] font-black uppercase tracking-[.24em] text-rcl-blue">RCH achievement vault</p>
-          <h1 className="mt-2 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">Earn your legacy.</h1>
+          <h1 className="rch-identity-title mt-3 font-display uppercase">YOUR GAME.<br/><span className="text-[#93d5ff]">YOUR LEGACY.</span></h1>
           <p className="mt-4 max-w-xl text-sm leading-6 text-white/65">Real achievements. Metallic collectible badges. Every milestone becomes part of your Rich City Hoops identity, displayed on your public profile.</p>
           <div className="mt-5 inline-flex items-center gap-3 rounded-xl border border-white/15 bg-white/[.04] px-4 py-2 text-xs text-white/70">
             <strong className="font-display text-2xl text-white">{badges.length}</strong>
             <span>collectibles to unlock</span>
           </div>
+          <div className="rch-identity-actions mt-5"><Link href="#rch-place-collectibles" className="rch-identity-primary"><FaCrown/> Explore medals <FaArrowRight/></Link><Link href="/rep" className="rch-identity-secondary">Open REP Exchange</Link></div>
         </div>
         {featured && <div className="shrink-0" aria-label="Featured badge preview"><BadgeMedallion badge={featured} size="lg" /></div>}
       </Container>
     </header>
 
     <Container maxWidth="xl" className="py-8 sm:py-10">
-      <PlaceBadgeVault />
+      <div className="mb-7 grid gap-3 sm:grid-cols-3">
+        <div className="rch-identity-stat"><FaLocationDot className="text-[#88d0ff]"/><strong className="mt-2 text-lg">Local Legends</strong><small>Medals tied to real courts and cities</small></div>
+        <div className="rch-identity-stat"><FaTrophy className="text-[#f0d092]"/><strong className="mt-2 text-lg">Certified Wins</strong><small>Ranked mastery only from verified games</small></div>
+        <div className="rch-identity-stat"><FaCrown className="text-[#b8c9ff]"/><strong className="mt-2 text-lg">Show Your Five</strong><small>Pin legitimate location awards to your player identity</small></div>
+      </div>
+      <div id="rch-place-collectibles" className="scroll-mt-24"><PlaceBadgeVault /></div>
       <div className="space-y-11">{[...groups.entries()].map(([category, items]) => <section key={category} aria-label={category}>
         <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/10 pb-3">
           <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-rcl-blue">The collection</p><h2 className="mt-1 font-display text-2xl font-black uppercase">{category}</h2></div>

@@ -1,3 +1,4 @@
+import '../../../rch-identity.css';
 import { Neighborhood } from '@/components/social/Neighborhood';
 import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
@@ -215,7 +216,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
     coach:coachIdentity?coachMilestones(coachIdentity).length:0,
   };
 
-  return <main className={'rcl-social-secondary rcl-social-profile rch-profile-finish min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
+  return <main className={'rcl-social-secondary rcl-social-profile rch-profile-finish rch-identity-surface min-h-screen bg-[#05080d] pb-28 text-white '+(profile.is_vip?'is-vip':'')}>
     <div className="mx-auto max-w-5xl">
       <section className="rch-profile-hero relative border-b border-white/10 bg-[#09111a]">
         <div className="rch-profile-cover h-44 overflow-hidden bg-[radial-gradient(circle_at_80%_15%,rgba(21,159,255,.2),transparent_35%),linear-gradient(135deg,#0a1b2a,#03070d)] sm:h-64">{profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />}</div>
@@ -236,6 +237,16 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
           <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{royalteeIdentity&&<Link href="/league/royaltee" className="rounded-full border border-[#ec8e4d]/60 bg-[#c7682b]/15 px-3 py-1 font-black text-[#ffb586]">Royaltee · Official 18+ Cheer + Step</Link>}{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
+          <section className="rch-identity-player-passport" aria-label="Basketball identity quick view">
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="rch-identity-eyebrow">RCH PLAYER IDENTITY</p><h2 className="mt-2 text-lg font-black text-white">{name}&apos;s Basketball World</h2></div><Link href={profileHref+'?tab=badges'} className="rch-identity-secondary">View achievements →</Link></div>
+            <div className="rch-identity-player-stats mt-4">
+              <div><strong>{allBadges.length}</strong><span>Earned league badges</span></div>
+              <div><strong>{basketball?.games??'—'}</strong><span>Official RCL games</span></div>
+              <div><strong>{repLabel}</strong><span>Social reputation</span></div>
+            </div>
+            <div className="rch-identity-actions mt-4"><Link href="/runs" className="rch-identity-primary">Find a real Run →</Link><Link href="/crews" className="rch-identity-secondary">Explore crews</Link></div>
+            <p className="mt-3 text-xs leading-5 text-[#b9d4e7]">Social reputation, official RCL games, spendable REP and verified Runs ratings are separate systems. This display does not infer unverified wins.</p>
+          </section>
           <PublicCrewShowcase profileId={profile.id} />
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}

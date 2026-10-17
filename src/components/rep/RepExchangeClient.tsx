@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import '../../app/rch-identity.css';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowTrendUp,FaBolt,FaCheck,FaCoins,FaClockRotateLeft,FaGift,FaShieldHalved,FaXmark} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
@@ -73,25 +74,32 @@ export default function RepExchangeClient(){
   else {setNotice('Order cancelled; the original REP amount was returned to your wallet.');await reload();}
   setBusy(false);
  };
- return <main className="min-h-screen bg-[#061322] pb-24 text-white">
+ const requestedRewards=orders.filter(o=>!['cancelled','refunded'].includes(o.status)).length;
+ return <main className="rch-identity-surface min-h-screen bg-[#061322] pb-24 text-white">
   <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-7">
    <Link href="/badges" className="text-xs font-bold text-[#9bdbff]">← Trophy Case</Link>
-   <header className="mt-6 overflow-hidden rounded-3xl border border-[#4d7590] bg-[radial-gradient(ellipse_at_90%_0%,rgba(28,115,173,.4),transparent_65%),linear-gradient(130deg,#0c2845,#09192a)] p-6 sm:p-9">
+   <header className="rch-identity-hero mt-6 p-6 sm:p-9">
     <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.2em] text-[#96d7ff]"><FaBolt/> RCH Economy · Spend Your Influence</p>
     <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">REP <span className="text-[#74c9ff]">Exchange.</span></h1>
     <p className="mt-3 max-w-2xl text-sm text-[#b7d5e9]">Earn from real hoops, creativity and community. Redeem REP for approved promotions, player media, identity perks and crew exposure. Your lifetime reputation and court rankings never go down when you spend.</p>
-    <div className="mt-6 grid grid-cols-2 gap-3 sm:max-w-xl">
-      <div className="rounded-2xl border border-[#4d8cbb]/50 bg-[#082036]/80 p-4">
+    <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <div className="rch-identity-wallet-stat">
        <p className="flex items-center gap-2 text-[11px] font-bold uppercase text-[#9acde9]"><FaCoins/> Spendable wallet</p>
        <p className="mt-2 text-3xl font-black tabular-nums">{Number(wallet.balance).toLocaleString()}</p>
        <p className="text-xs text-[#a8d1ea]">REP available</p>
       </div>
-      <div className="rounded-2xl border border-[#4d8cbb]/50 bg-[#082036]/80 p-4">
+      <div className="rch-identity-wallet-stat">
        <p className="flex items-center gap-2 text-[11px] font-bold uppercase text-[#9acde9]"><FaArrowTrendUp/> Lifetime earned</p>
        <p className="mt-2 text-3xl font-black tabular-nums">{Number(wallet.lifetime_earned).toLocaleString()}</p>
        <p className="text-xs text-[#a8d1ea]">Career wallet earnings</p>
       </div>
+      <div className="rch-identity-wallet-stat col-span-2 lg:col-span-1">
+       <p className="flex items-center gap-2 text-[11px] font-bold uppercase text-[#9acde9]"><FaGift/> Rewards requested</p>
+       <strong className="mt-2">{requestedRewards}</strong>
+       <small>Non-cancelled reward requests · check fulfillment below</small>
+      </div>
     </div>
+    <div className="rch-identity-actions mt-5"><button type="button" onClick={()=>setTab('store')} className="rch-identity-primary"><FaGift/> Browse rewards</button><button type="button" onClick={()=>setTab('ledger')} className="rch-identity-secondary">See REP receipts</button></div>
    </header>
    {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-400/40 bg-[#102c35] p-4 text-sm text-[#aaf2d8]">{notice}</p>}
    {error&&<p role="alert" className="mt-5 rounded-xl border border-rose-400/40 bg-[#3b202b] p-4 text-sm text-[#ffd0d0]">{error}</p>}
@@ -106,17 +114,18 @@ export default function RepExchangeClient(){
        <p className="text-xs text-[#a8bcd0]">{rewards.length} launch rewards · never pay-to-win</p>
      </div>
      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {rewards.map(reward=><article key={reward.code} className="flex flex-col justify-between gap-4 rounded-2xl border border-[#395e80] bg-[#0c253d] p-5">
+      {rewards.map(reward=><article key={reward.code} className="rch-identity-reward flex flex-col justify-between gap-4 p-5">
        <div>
         <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#9cd3f5]">{reward.category} · {reward.delivery==='instant'?'Instant unlock':'Fulfillment review'}</p>
         <h3 className="mt-3 font-display text-xl font-black">{reward.title}</h3>
         <p className="mt-2 text-sm leading-6 text-[#b1cbde]">{reward.description}</p>
         {reward.duration_hours&&<p className="mt-2 text-xs text-[#8ec1df]">{reward.duration_hours===720?'30 days':reward.duration_hours+' hours'} after activation</p>}
+        {user&&reward.price>0&&<div className="mt-4"><div className="flex justify-between gap-2 text-xs text-[#bbd9ef]"><span>Wallet readiness</span><strong>{Number(wallet.balance)>=reward.price?'Ready to redeem':costs(Math.max(0,reward.price-Number(wallet.balance)))+' needed'}</strong></div><div className="rch-identity-capacity mt-2"><span style={{width:Math.max(0,Math.min(100,(Number(wallet.balance)/reward.price)*100))+'%'}}/></div></div>}
        </div>
        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#3d5d77] pt-4">
         <strong className="text-lg text-[#ffdf9b]">{costs(reward.price)}</strong>
         <button type="button" onClick={()=>{setSelected(reward);setSelectedPost('');setError('');}} disabled={!user||wallet.balance<reward.price}
-          className="min-h-10 rounded-xl bg-[#67b8f0] px-4 text-xs font-black text-[#061d2e] disabled:cursor-not-allowed disabled:opacity-35">Redeem</button>
+          className="min-h-11 rounded-xl bg-[#67b8f0] px-4 text-xs font-black text-[#061d2e] disabled:cursor-not-allowed disabled:opacity-35">Redeem</button>
        </div>
       </article>)}
      </div>
@@ -147,6 +156,7 @@ export default function RepExchangeClient(){
    <section role="dialog" aria-modal="true" aria-labelledby="rch-rep-redeem-title" className="w-full max-w-lg rounded-3xl border border-[#6186a2] bg-[#102b42] p-6 text-white shadow-2xl">
     <div className="flex items-center justify-between gap-3"><h2 id="rch-rep-redeem-title" className="text-xl font-black">{selected.title}</h2><button aria-label="Close redemption" onClick={()=>setSelected(null)}><FaXmark/></button></div>
     <p className="mt-3 text-sm text-[#bfd7e6]">{selected.description}</p>
+    <div className="mt-4 rounded-xl border border-[#4d839f] bg-[#0b2239] p-4 text-sm"><div className="flex justify-between gap-2"><span className="text-[#c0d9eb]">Reward cost</span><strong className="text-[#ffe0a5]">{costs(selected.price)}</strong></div><div className="mt-2 flex justify-between gap-2"><span className="text-[#c0d9eb]">Wallet after redemption</span><strong>{Math.max(0,Number(wallet.balance)-selected.price).toLocaleString()} REP</strong></div><p className="mt-3 text-xs leading-5 text-[#b0cadb]">You are spending available REP only. This does not reduce verified basketball rankings or permanent achievements.</p></div>
     {selected.requires_post&&<label className="mt-5 block text-xs font-bold">Your published post
      <select value={selectedPost} onChange={e=>setSelectedPost(e.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-[#5f849a] bg-[#091b2c] px-3 text-sm">
       <option value="">Select a post</option>{posts.map(p=><option key={p.id} value={p.id}>{p.body.slice(0,95)||'Media post'} · {new Date(p.created_at).toLocaleDateString()}</option>)}
