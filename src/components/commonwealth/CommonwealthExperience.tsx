@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FormEvent,useCallback,useEffect,useMemo,useState } from 'react';
 import {
   FaArrowRight,FaBasketball,FaBolt,FaCalendarDays,FaCheck,FaChevronLeft,
@@ -34,6 +35,7 @@ const cityPins=['richmond','petersburg','fredericksburg','charlottesville','roan
 const foundingCourtSlugs=['pine-camp','battery-park','chimborazo','broad-rock-sports','randolph'];
 
 export default function CommonwealthExperience(){
+  const router=useRouter();
   const {user,profile,loading:authLoading}=useAuth();
   const db=useMemo(()=>getSupabaseClient(true) as any,[]);
   const [season,setSeason]=useState<Season|null>(null);
@@ -134,6 +136,15 @@ export default function CommonwealthExperience(){
   const ownMember=members.find(m=>m.profile_id===user?.id);
   const myCrew=crews.find(c=>c.id===ownMember?.crew_id)||null;
   const captainCrew=crews.find(c=>c.captain_id===user?.id)||null;
+
+  // Arriving from Runs > My Crew should open the actual founder form, not
+  // deposit the player at the top of the Cup page.
+  useEffect(()=>{
+    if(loading||authLoading||!user||myCrew)return;
+    if(new URLSearchParams(window.location.search).get('found')!=='1')return;
+    setFoundingOpen(true);
+    document.getElementById('rch-cw-my-crew')?.scrollIntoView({block:'start'});
+  },[loading,authLoading,user?.id,myCrew?.id]);
   const staff=profile?.role==='admin'||profile?.role==='staff';
   const crewById=useMemo(()=>new Map(crews.map(c=>[c.id,c])),[crews]);
   const courtBySlug=useMemo(()=>new Map(sites.map(s=>[s.slug,s])),[sites]);
@@ -185,6 +196,7 @@ export default function CommonwealthExperience(){
         }
       }
       reload();
+      if(crewId)router.replace('/crews?crew='+encodeURIComponent(crewId as string)+'#rch-crew-hq');
     }catch(e){setError(e instanceof Error?e.message:'The crew could not be founded.');}
     finally{setBusy('');}
   };
