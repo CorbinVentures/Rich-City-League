@@ -17,8 +17,8 @@ type Venue={slug:string;name:string;address:string;locality:string;source_label:
 
 const descriptions:Record<Coverage['circuit_status'],string>={
  scheduled:'Weekend listings generated',
- ready_to_generate:'Four courts configured; awaiting scheduler',
- needs_court_assignment:'Enough mapped eligible park sites; assign four distinct courts',
+ ready_to_generate:'Eligible parks assigned; awaiting scheduler',
+ needs_court_assignment:'Enough eligible parks mapped; assign the first two slots',
  needs_venue_verification:'Additional public park courts require independent verification'
 };
 const tags:Record<Coverage['circuit_status'],string>={
@@ -83,7 +83,7 @@ export default function WeekendCircuitCommandPage(){
 
  const filtered=cities.filter(c=>c.city_name.toLowerCase().includes(query.toLowerCase().trim())||c.circuit_status.replaceAll('_',' ').includes(query.toLowerCase().trim()));
  const live=cities.filter(c=>c.circuit_status==='scheduled').length;
- const ready=cities.filter(c=>c.qualified_slots===4).length;
+ const ready=cities.filter(c=>c.qualified_slots>=(c.is_major?2:4)).length;
  const major=cities.filter(c=>c.is_major).length;
  const poolForCity=pool.filter(c=>c.city===target?.city_name);
 
@@ -96,7 +96,7 @@ export default function WeekendCircuitCommandPage(){
    : await db.from('rch_weekend_circuit_courts').upsert({city:target.city_name,slot,court_slug:slug,active:true},{onConflict:'city,slot'});
   if(failure)setError(failure.message);
   else{
-   setNotice('Court slot saved. The circuit generator will activate the city when all four eligible courts are configured. Previously published Runs do not move.');
+   setNotice('Court slot saved. Two verified parks activate a major city; optional third and fourth enable biweekly rotation. Previously published Runs do not move.');
    await refresh();
   }
   setBusy('');
@@ -107,7 +107,7 @@ export default function WeekendCircuitCommandPage(){
   <div className="flex flex-wrap items-center justify-between gap-3">
    <div><p className="text-xs font-black uppercase tracking-[.16em] text-sky-300">RCH Runs · Statewide Operations</p>
     <h1 className="mt-2 text-3xl font-black uppercase">Weekend Circuit Command</h1>
-    <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">Every key Virginia market is tracked. A city needs four distinct officially or provider-mapped public outdoor basketball parks before the weekly 2× verified REP rotation can begin.</p>
+    <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">Every major Virginia city activates with two distinct verified public outdoor basketball parks. With four verified sites, the alternate-weekend rotation remains available. 2× applies only to confirmed competitive REP.</p>
    </div>
    <Link href="/runs" className="rounded-xl border border-white/20 px-4 py-3 text-sm font-bold text-white">← Runs Arena</Link>
   </div>
@@ -118,7 +118,7 @@ export default function WeekendCircuitCommandPage(){
      {[
       [String(cities.length),'Tracked VA markets'],
       [String(major),'Priority major cities'],
-      [String(ready),'Four-court-ready'],
+      [String(ready),'Court-ready markets'],
       [String(live),'Scheduled cities']
      ].map(([value,label])=><div key={label} className="rounded-2xl border border-white/10 bg-[#0a1b2d] p-4"><p className="text-3xl font-black text-white">{value}</p><p className="mt-1 text-xs text-slate-300">{label}</p></div>)}
     </section>
@@ -132,7 +132,7 @@ export default function WeekendCircuitCommandPage(){
         aria-pressed={target?.city_id===c.city_id}
         className={'w-full rounded-xl border p-3 text-left '+(target?.city_id===c.city_id?'border-sky-400/70 bg-[#123655]':'border-white/10 bg-[#0d2133] hover:border-sky-400/30')}>
         <div className="flex flex-wrap items-center justify-between gap-2"><strong>{c.city_name}</strong>{c.is_major&&<span className="text-[10px] font-bold uppercase tracking-wider text-sky-300">Major city</span>}</div>
-        <p className="mt-1 text-xs text-slate-300">{c.qualified_slots}/4 active slots · {c.verified_eligible_park_sites} eligible sites · {c.upcoming_featured_runs} future Runs</p>
+        <p className="mt-1 text-xs text-slate-300">{c.qualified_slots}/{c.is_major?2:4} minimum park slots · {c.verified_eligible_park_sites} eligible sites · {c.upcoming_featured_runs} future Runs</p>
         <span className={'mt-2 inline-flex rounded-md border px-2 py-1 text-[11px] font-semibold '+tags[c.circuit_status]}>{descriptions[c.circuit_status]}</span>
        </button>)}
       </div>
@@ -141,12 +141,12 @@ export default function WeekendCircuitCommandPage(){
       {target&&<>
        <p className="text-xs font-black uppercase tracking-wider text-sky-300">City Court Rotation</p>
        <h2 className="mt-1 text-2xl font-black">{target.city_name}</h2>
-       <p className="mt-2 text-sm leading-6 text-slate-300">{descriptions[target.circuit_status]}. There are {target.mapped_unverified_sites} additional mapped records that are not automatically qualified.</p>
+       <p className="mt-2 text-sm leading-6 text-slate-300">{descriptions[target.circuit_status]}. {target.is_major?'Two parks (Saturday and Sunday) are sufficient to activate this major market. Add all four for the alternating-weekend circuit.':'This market needs all four distinct park sites for alternating weekends.'} There are {target.mapped_unverified_sites} additional mapped records that are not automatically qualified.</p>
        <p className="mt-3 text-xs leading-5 text-amber-100">Selecting a mapped court does not reserve a public facility or prove current physical availability. Verify park conditions, hours and access with the local authority before advertising a pickup session.</p>
        <div className="mt-5 space-y-3">{[1,2,3,4].map(slot=>{
         const current=poolForCity.find(p=>p.slot===slot);
         return <div key={slot} className="rounded-xl border border-white/10 bg-[#061421] p-4">
-         <label className="block text-sm font-black" htmlFor={'circuit-court-'+slot}>{slot===1?'Week A · Saturday':slot===2?'Week A · Sunday':slot===3?'Week B · Saturday':'Week B · Sunday'}</label>
+         <label className="block text-sm font-black" htmlFor={'circuit-court-'+slot}>{slot===1?'Primary · Saturday':slot===2?'Primary · Sunday':slot===3?'Rotation · alternate Saturday (optional for major cities)':'Rotation · alternate Sunday (optional for major cities)'}</label>
          <select id={'circuit-court-'+slot} value={current?.court_slug||''} disabled={!!busy||!authorized}
            onChange={e=>void assign(slot,e.target.value)}
            className="mt-2 min-h-11 w-full rounded-lg border border-white/20 bg-[#10263b] px-3 text-sm text-white">
@@ -158,7 +158,7 @@ export default function WeekendCircuitCommandPage(){
        })}</div>
        <div className="mt-5 rounded-xl border border-sky-400/20 bg-[#0d2a41] p-4">
         <p className="font-bold">Automatic weekend rule</p>
-        <p className="mt-1 text-xs leading-5 text-slate-300">Saturday at 11 a.m., Sunday at 3 p.m. New weekends alternate between slots 1/2 and 3/4. Player-created Runs remain 1×. Changing a slot does not change existing RSVP locations; cancel affected published Runs separately.</p>
+        <p className="mt-1 text-xs leading-5 text-slate-300">Saturday at 11 a.m., Sunday at 3 p.m. Two verified sites keep the same Saturday/Sunday parks each weekend. With four sites, weekends alternate between slots 1/2 and slots 3/4. Player-created Runs remain 1×. Changing a slot does not change existing RSVP locations; cancel affected published Runs separately.</p>
        </div>
       </>}
      </section>
