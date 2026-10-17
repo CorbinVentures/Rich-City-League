@@ -59,7 +59,7 @@ describe('RCH Runs daily opportunity and competitive integrity',()=>{
   expect(getDailyPlaybook(Date.parse('2026-10-20T17:00:00Z')).format).toBe('3v3');
   expect(getDailyPlaybook(Date.parse('2026-10-23T17:00:00Z')).format).toBe('5v5');
   const board=src('src/components/runs/RunDailyCircuit.tsx');
-  expect(board).toContain('TODAY\'S PLAYBOOK');
+  expect(board).toContain('TODAY&apos;S PLAYBOOK');
   expect(board).toContain('not a scheduled game, automatic reward or verified victory');
   expect(board).toContain('/runs?create=1&format=');
  });
