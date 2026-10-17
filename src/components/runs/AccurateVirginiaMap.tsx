@@ -58,7 +58,7 @@ function pinLabel(point:AtlasPlace){
  if(point.gameState==='battle')return '⚔';
  if(point.gameState==='crown')return '♛';
  if(point.gameState==='double-rep')return '2×';
- return '🏀';
+ return point.indoor?'🏟':'🏀';
 }
 function filteredPins(points:readonly AtlasPlace[],layer:Layer){
  if(layer==='all')return [...points];
@@ -182,7 +182,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],onCitySelec
     const btn=document.createElement('button');btn.type='button';
     btn.className='rwg-real-pin'+(p.gameState?' state-'+p.gameState:'')+(p.id===selectedId?' selected':'');
     btn.textContent=pinLabel(p);btn.title=p.title;
-    btn.setAttribute('aria-label',p.title+' basketball court');
+    btn.setAttribute('aria-label',p.title+(p.indoor?' indoor basketball gym':' basketball court'))
     btn.addEventListener('click',()=>callbacks.current.onPlaceSelect(p.id));
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map));
    }
