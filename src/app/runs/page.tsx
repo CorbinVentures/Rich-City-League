@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
+import RunsWorldGame from '@/components/runs/RunsWorldGame';
+import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
 import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
@@ -111,6 +113,7 @@ export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
+  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -137,13 +140,13 @@ export default function RunsPage() {
   const [dailyPrefs, setDailyPrefs] = useState<{preferred_format:RunFormat;preferred_type:RunPlayType;watched_courts:string[]}>({preferred_format:'all',preferred_type:'all',watched_courts:[]});
 
   useEffect(() => {
-    if (!db || !user?.id) { setStaffIntelligence(false); return; }
+    if (!showLegacyList || !db || !user?.id) { setStaffIntelligence(false); return; }
     let active = true;
     void db.rpc('is_staff_or_admin').then(({data}: {data:boolean|null}) => {
       if(active)setStaffIntelligence(Boolean(data));
     });
     return () => { active = false; };
-  }, [db,user?.id]);
+  }, [db,user?.id,showLegacyList]);
 
 
   const load = async () => {
@@ -157,12 +160,12 @@ export default function RunsPage() {
     try {
       const since = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
       const [runsResult, courtsResult, badgesResult, checkinsResult, highlightsResult] = await Promise.all([
-        db.from('runs')
+        readPagedUpcomingRuns<Run>((from,to)=>db.from('runs')
           .select('id,host_id,title,description,location,location_slug,starts_at,skill_level,game_format,max_players,status,run_type,allow_fan_checkin')
           .neq('status', 'cancelled')
           .gte('starts_at', since)
           .order('starts_at', { ascending: true })
-          .limit(100),
+          .range(from,to)),
         db.from('basketball_locations')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('is_active', true)
@@ -179,6 +182,7 @@ export default function RunsPage() {
       ]);
 
       if (runsResult.error) throw runsResult.error;
+      if(runsResult.truncated)setNotice('Showing the first 2,000 upcoming Runs. Refine by city in Runs World.');
       if (courtsResult.error) throw courtsResult.error;
 
       const rows = (runsResult.data ?? []) as Run[];
@@ -231,7 +235,7 @@ export default function RunsPage() {
     }
   };
 
-  useEffect(() => { void load(); }, [supabase, user?.id]);
+  useEffect(() => { if(showLegacyList)void load(); }, [supabase, user?.id,showLegacyList]);
 
   useEffect(() => {
     if (!createIntent) return;
@@ -253,13 +257,13 @@ export default function RunsPage() {
   }, [courtParam,courts]);
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase || !showLegacyList) return;
     const channel = supabase.channel('rcl-runs-network')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, () => void load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'run_players' }, () => void load())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [supabase, user?.id]);
+  }, [supabase, user?.id,showLegacyList]);
 
   const openCreateForCourt = (court?: Court, runType: RunType = 'competitive') => {
     setForm({ ...emptyForm, run_type: runType, location_slug: court?.slug ?? '' });
@@ -425,6 +429,10 @@ export default function RunsPage() {
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
   },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+
+  // Runs World is the primary game. Existing competition, forms and list screens
+  // remain available via view=list, create intent, or deep court links.
+  if(!showLegacyList)return <RunsWorldGame/>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
