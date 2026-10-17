@@ -4,21 +4,33 @@ import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {FaArrowUpRightFromSquare,FaBolt} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
+import {useGravityLocation} from '@/hooks/useGravityLocation';
 
 type Promoted={order_id:string;post_id:string;author_id:string;post_body:string;author_name:string;reward_title:string;region:string};
 
 export function RepPromotedPlacement(){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
+ const {location}=useGravityLocation();
+ const cityId=location.cityId;
+ const region=useMemo(()=>{
+   if(!cityId)return 'virginia';
+   if(['richmond','chesterfield','henrico','petersburg','hopewell'].includes(cityId))return cityId==='richmond'?'richmond':'tri-cities';
+   if(['alexandria','arlington','fairfax','manassas','leesburg'].includes(cityId))return 'northern-virginia';
+   if(['norfolk','virginia-beach','chesapeake','hampton','newport-news','portsmouth'].includes(cityId))return 'hampton-roads';
+   if(['roanoke','blacksburg','bristol','wytheville'].includes(cityId))return 'southwest-virginia';
+   if(['winchester','harrisonburg','staunton'].includes(cityId))return 'shenandoah';
+   return 'central-virginia';
+ },[cityId]);
  const [items,setItems]=useState<Promoted[]>([]);
  useEffect(()=>{
   if(!db)return;
   let alive=true;
-  void db.rpc('rch_active_rep_promotions',{p_limit:2})
+  void db.rpc('rch_active_rep_promotions',{p_limit:2,p_region:region})
    .then(({data,error}:{data:Promoted[]|null,error:{message:string}|null})=>{
     if(alive&&!error)setItems(data??[]);
    });
   return()=>{alive=false;};
- },[db]);
+ },[db,region]);
  if(!items.length)return null;
  return <section aria-label="REP Exchange promoted community posts" className="my-4 rounded-2xl border border-[#547491] bg-[linear-gradient(130deg,#0e2941,#101e32)] p-4 text-white">
   <div className="flex items-center justify-between gap-3">
