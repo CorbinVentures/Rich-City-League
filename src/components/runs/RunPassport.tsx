@@ -4,6 +4,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {FaChartLine,FaMedal,FaTrophy} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import SkillMasteryCollection from '@/components/rep/SkillMasteryCollection';
 
 type Rating={game_format:string;rating:number;games:number;wins:number;losses:number;provisional:boolean};
 type Result={id:string;game_format:string;verified_at:string;court_name:string;rating_before:number;rating_after:number;won:boolean};
@@ -66,6 +67,7 @@ export function RunPassport(){
     {data.badges.length>0&&<div className="mt-5 flex flex-wrap gap-2">{data.badges.map(b=><span key={b} className="rounded-full border border-[#9f8055] bg-[#564222]/40 px-3 py-1.5 text-xs font-bold text-[#ffe3aa]">{b.replaceAll('_',' ')}</span>)}</div>}
     {data.open_appeals>0&&<p className="mt-4 text-xs font-bold text-[#f2d1a6]">{data.open_appeals} integrity review(s) in progress</p>}
     <p className="mt-4 text-[11px] leading-5 text-[#99bbd7]">Only you can view this detailed Passport. Public Run rankings continue to respect your profile privacy settings.</p>
+    <SkillMasteryCollection />
    </div>}
  </section>;
 }
