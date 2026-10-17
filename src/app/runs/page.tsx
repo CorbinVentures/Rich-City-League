@@ -438,7 +438,7 @@ export default function RunsPage() {
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
           <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
-          <Link href="/crews" className="rch-ux-quicklink"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
+          <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
           <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badge Vault</Link>
           <button type="button" className="rch-ux-quicklink" onClick={()=>{setCompetitionView('courts');document.getElementById('rch-competition')?.scrollIntoView({behavior:'auto',block:'start'});}}><FaTrophy aria-hidden="true"/> Court Crowns</button>
         </nav>
