@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
-import VirginiaInteractiveAtlas from '@/components/discover/VirginiaInteractiveAtlas';
+import {AccurateVirginiaMap} from '@/components/runs/AccurateVirginiaMap';
+import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
 import {RunPassport} from '@/components/runs/RunPassport';
@@ -59,6 +60,7 @@ export default function RunsWorldGame(){
  const [warning,setWarning]=useState('');
  const [pulse,setPulse]=useState(0);
  const [query,setQuery]=useState('');
+ const [coverageWarning,setCoverageWarning]=useState('');
  const city=VIRGINIA_CITIES.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
@@ -75,21 +77,20 @@ export default function RunsWorldGame(){
   if(!db){setWarning('The basketball world cannot connect to RCH right now.');return;}
   let alive=true;
   const work=async()=>{
-   setLoading(true);setWarning('');
+   setLoading(true);setWarning('');setCoverageWarning('');
    setCourts([]);setRuns([]);setFeatured([]);setTerritories([]);setWorldPulse([]);setSelectedSlug(null);
    if(!city){setLoading(false);return;}
    try{
     const [courtResult,runResult,featuredResult]=await Promise.all([
      db.from('basketball_locations')
       .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_url,hours_text')
-      .eq('is_active',true).eq('locality',city.name)
+      .eq('is_active',true).in('locality',localityNames(city))
       .eq('access_type','public').eq('venue_type','outdoor')
       .in('verification_status',['official','provider'])
       .order('name').range(0,299),
      readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
       .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
       .in('status',['open','full']).gte('starts_at',new Date().toISOString())
-      .ilike('location','%'+city.name+'%')
       .order('starts_at',{ascending:true}).range(from,to),200,2000),
      db.from('rch_weekend_circuit_events')
       .select('run_id').eq('city',city.name)
@@ -100,11 +101,17 @@ export default function RunsWorldGame(){
     if(runResult.error)throw runResult.error;
     const nextCourts=(courtResult.data||[]) as WorldCourt[];
     setCourts(nextCourts);
-    setRuns((runResult.data||[]) as WorldRun[]);
+    const citySlugs=new Set(nextCourts.map(c=>c.slug));
+    // Filter Runs by their canonical court relationship, not a fragile city
+    // substring, which can include a neighboring county or exclude postal aliases.
+    const cityRuns=((runResult.data||[]) as WorldRun[]).filter(r=>matchesRunToCourts(r,citySlugs));
+    setRuns(cityRuns);
+    if(city.id==='chesterfield'&&nextCourts.some(c=>c.latitude===null||c.longitude===null))
+     setCoverageWarning('Chesterfield courts are recorded but their exact facility coordinates need verification. Their addresses remain discoverable; no fake precision pins are shown.');
     setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
     if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
     if((courtResult.data||[]).length===300||runResult.truncated)
-      setWarning('Court display is capped at 300 verified locations, or 2,000 upcoming Runs. Use the full list and court search for additional places.');
+      setWarning('Court display is capped at 300 verified locations and the Run lookup at 2,000 statewide. Additional results may exist.');
     const slugs=nextCourts.map(c=>c.slug);
     // Only actual confirmed title history and genuine requested/accepted
     // crew challenges contribute to the cinematic local world pulse.
@@ -226,6 +233,7 @@ export default function RunsWorldGame(){
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
   doubleRepRuns:featured
  }),[courts,runs,territories,worldPulse,featured]);
+ const coverage=useMemo(()=>courtCoverage(courts,runs,pins),[courts,runs,pins]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
  const areaRuns=useMemo(()=>[...runs].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),[runs]);
  const courtRuns=areaRuns.filter(r=>r.location_slug===selectedSlug);
@@ -264,9 +272,9 @@ export default function RunsWorldGame(){
    {screen==='world'&&<>
     <div className="rwg-hud" aria-label="Your game-world overview">
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
-     <div><small>LOADED COURTS</small><strong>{courts.length}</strong></div>
-     <div><small>UPCOMING RUNS</small><strong>{areaRuns.length}</strong></div>
-     <div><small>CREW TERRITORIES</small><strong>{ownerCount}</strong></div>
+     <div><small>VERIFIED COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
+     <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
+     <div><small>UPCOMING RUNS</small><strong>{loading?'…':coverage.scheduled}</strong></div>
     </div>
     <section className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
@@ -280,11 +288,10 @@ export default function RunsWorldGame(){
       </div>
      </div>
      <div className="rwg-map-stage">
-      <VirginiaInteractiveAtlas city={city} points={pins} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
-       userLocation={null} mode="atlas" searchActive={Boolean(query)} streetReady={false}
+      <AccurateVirginiaMap city={city} points={pins} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Exact pins appear only when a venue has real coordinates. Parks without verified coordinates appear in the court list; the city portal is an area marker, not a GPS court pin. No location permission required.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data. The Virginia outline is sourced from VDOT/VGIN. Court markers use recorded coordinates only. No GPS permission required.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
@@ -299,6 +306,13 @@ export default function RunsWorldGame(){
        </div>
        {loading&&<p className="rwg-empty" role="status">Loading official court records and upcoming Runs…</p>}
        {warning&&<p className="rwg-warning" role="status">{warning}</p>}
+       {coverageWarning&&<div className="rwg-geography-notice" role="status"><FaLocationDot/>{coverageWarning}</div>}
+       <div className="rwg-coverage" aria-label="Geographic coverage from this court dataset">
+        <div><strong>{loading?'…':coverage.total}</strong><small>Eligible courts</small></div>
+        <div><strong>{loading?'…':coverage.mapped}</strong><small>Precision pins</small></div>
+        <div><strong>{loading?'…':coverage.needsCoordinates}</strong><small>Need pin verification</small></div>
+        <div><strong>{loading?'…':coverage.scheduled}</strong><small>Linked upcoming Runs</small></div>
+       </div>
        {!loading&&visibleCourts.length===0&&<p className="rwg-empty">No verified public court records found here. Try another city or explore the full Runs list.</p>}
        <div className="rwg-court-grid">
         {visibleCourts.slice(0,80).map(c=>{
@@ -307,7 +321,7 @@ export default function RunsWorldGame(){
          const mapped=pins.some(p=>p.id==='court:'+c.slug);
          return <button key={c.slug} type="button" onClick={()=>chooseCourt(c.slug)} aria-pressed={selectedSlug===c.slug} className={'rwg-court '+(selectedSlug===c.slug?'selected':'')}>
           <span className="rwg-court-icon">{ownership?<FaCrown/>:count?<FaBolt/>:<FaBasketball/>}</span>
-          <span className="rwg-court-copy"><strong>{c.name}</strong><small>{ownership?'Territory controlled':count?count+' scheduled Run'+(count===1?'':'s'):'Open to discover'} · {mapped?'Map pin':'Area listing'}</small></span>
+          <span className="rwg-court-copy"><strong>{c.name}</strong><small>{ownership?'Territory controlled':count?count+' scheduled Run'+(count===1?'':'s'):'Open to discover'} · {mapped?'Verified coordinates':'Pin needs review'}</small></span>
           <FaArrowRight className="rwg-court-arrow"/>
          </button>;
         })}
@@ -316,7 +330,7 @@ export default function RunsWorldGame(){
       </section>
       {selectedCourt&&<section className="rwg-arena" id="rch-run-world-court" aria-label={selectedCourt.name+' Court Arena'}>
         <div className="rwg-arena-top"><div><span className="rwg-kicker"><FaCrown/> COURT ARENA / {city.name.toUpperCase()}</span>
-          <h2>{selectedCourt.name}</h2><p>{selectedCourt.address} · Official/provider-mapped location</p></div>
+          <h2>{selectedCourt.name}</h2><p>{selectedCourt.address} · {pins.some(p=>p.id==='court:'+selectedCourt.slug)?'Coordinate on file':'Precise court coordinates not yet verified'}</p></div>
          <span className="rwg-arena-shield"><FaShieldHalved/></span>
         </div>
         <div className="rwg-master-grid">{(['1v1','2v2','3v3'] as const).map(format=>{
