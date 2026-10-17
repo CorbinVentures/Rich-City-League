@@ -42,11 +42,12 @@ export function PlaceBadgeMedal({badge,place,earned=false,compact=false}:{
      <span className="absolute inset-x-0 top-[7%] text-[8px] font-black tracking-[.23em]" style={{color:t.light}}>RCH • {tierLabel[badge.tier]}</span>
      <div className="absolute inset-x-0 top-[23%] flex h-[47%] items-center justify-center">
       {map?<div className="relative h-full w-full">
-        <svg viewBox="0 0 220 130" role="presentation" className="h-full w-full" aria-hidden="true">
-          <path d="M12 81 L45 81 L62 75 L75 75 L98 53 L109 49 L119 27 L132 24 L141 45 L154 49 L168 65 L182 66 L194 85 L210 99 L198 101 L181 94 L160 98 L144 107 L125 103 L112 112 L86 103 L64 105 L51 96 L20 96 Z" fill={t.mid} stroke={t.light} strokeWidth="4" strokeLinejoin="round"/>
+        {/* Virginia outline from MIT-licensed coryetzkorn/state-svg-defs, based on the original ProPublica state icon. */}
+        <svg viewBox="0 0 92 80" role="presentation" className="h-full w-full" aria-hidden="true">
+          <path d="M81.84 51.36l-0.4 0.16 0.32 0.32h0.080v-0.48zM82.72 43.2l0.080-0.24v-0.72l-0.56 0.96h0.48zM83.6 41.2l0.32-0.72 0.16-0.080-0.56 0.64zM86.24 34.64l0.56-1.36-2.64 0.24-0.96 1.28 0.72 0.8-1.2 0.4-0.16 1.6-1.12 0.88-0.8 3.68 0.64 2.16 0.56-0.96 0.32 0.56 0.56-3.44 0.88-0.64-0.4-0.16 0.4-0.56 0.48 0.72 0.56-0.48zM87.2 34.8l0.8-1.92-1.52 2.16h0.4zM62.080 19.6l-4.64-3.52-0.8 3.52-4.32 4.56-1.28-0.72-2.88 5.36-2.16-0.72-0.24-1.2-1.12-0.48-1.52 4.16-4.88 7.2 0.56 0.8-0.72 1.36-1.6 1.12-0.72-0.56-2.16 0.96-1.12-0.4-0.24 1.12-3.52 0.8-1.44-1.12-2.16 1.52-3.44-2.16-0.24-2.080-3.76 3.040-3.44 1.76-2.080 2.88-2 0.4-0.72 1.2-5.44 1.52 35.68 2.16h20.64l20.32-0.24-0.16-0.56 0.8 0.56v-2.4l1.28 2.4-1.52-4.64-3.28-0.4 0.16 1.2-0.8-0.4-1.52 0.4 0.56-1.2-1.84-1.12-0.24-1.76-0.64 0.4-2.32-0.96-0.56-0.72-0.56 0.32-1.92-0.4 0.16-0.56 2.080 0.8 0.32-0.56 0.72 1.12 0.8-1.12 1.28 1.68 0.88-0.4 2.4 2.96 1.040-0.4 0.4-1.12-0.64-0.080 0.24-0.48-0.8-1.040-1.52-0.4-2.72-3.040 0.16-0.24 3.36 3.28 0.88-0.32-0.72-0.48 0.32-1.52 1.44 1.6 0.16-2.32-1.52-0.24 0.96-0.56-2.4-0.8-4.16-5.44-1.92-0.96 0.72-0.16 1.2 0.96 4.4 5.44 0.4-0.64 1.6 0.8-0.4-2.72 0.96 0.4v-1.12l-2.8-1.36-0.72-1.6-1.36 0.080-2.080-0.8-1.2-1.36 0.56-0.24-0.24-0.72-3.2 0.72 0.72-0.32-0.88-0.8 0.56 0.4 0.72-2.96 0.64 0.080 0.16-0.8 0.96-0.56v-1.92l-2.16-1.84-2.24-0.96 0.48-1.2-1.12-1.040-1.68-0.24z" fill={t.mid} stroke={t.light} strokeWidth="1.1" strokeLinejoin="round"/>
           {badge.visual_key==='virginia-crown'
-            ?<path d="M88 27 L91 11 L105 19 L117 6 L132 19 L143 11 L146 27 Z" fill={t.light} stroke={t.dark} strokeWidth="2"/>
-            :<path d="M53 89 Q92 50 149 83 T188 94" fill="none" stroke={t.light} strokeWidth="4" strokeDasharray="6 5"/>}
+            ?<path d="M39 18 L39 9 L48 13 L54 3 L61 13 L69 8 L68 18 Z" fill={t.light} stroke={t.dark} strokeWidth=".75"/>
+            :<path d="M17 51 Q31 36 43 42 T73 49" fill="none" stroke={t.light} strokeWidth="1.7" strokeDasharray="3 2"/>}
         </svg>
        </div>:<Icon aria-hidden="true" className="h-[65%] w-[65%]" style={{color:t.light,filter:'drop-shadow(0 2px 2px #0009)'}}/>}
      </div>
