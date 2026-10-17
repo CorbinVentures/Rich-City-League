@@ -15,18 +15,17 @@ const map=(changes:Record<string,unknown>={})=>({
   queryRenderedFeatures:(_:unknown,options:{layers:string[]})=>options.layers.includes('water')?[{id:1}]:[],
   ...changes
 });
-describe('Virginia 3D map never hides the Atlas for a blank street map',()=>{
+describe('Virginia real-world map requires actual painted vector geography',()=>{
   it('waits for the style to load',()=>expect(isVirginiaBasemapRenderable(map({isStyleLoaded:()=>false}))).toBe(false));
   it('waits for the OpenStreetMap tile source',()=>expect(isVirginiaBasemapRenderable(map({isSourceLoaded:()=>false}))).toBe(false));
   it('does not mistake an empty but loaded source for rendered geography',()=>expect(isVirginiaBasemapRenderable(map({queryRenderedFeatures:()=>[]}))).toBe(false));
   it('requires painted vector layers, not just background',()=>expect(isVirginiaBasemapRenderable(map({getStyle:()=>({layers:[{id:'background',type:'background'}]})}))).toBe(false));
   it('rejects map-query errors safely',()=>expect(isVirginiaBasemapRenderable(map({queryRenderedFeatures:()=>{throw Error('context lost')}}))).toBe(false));
   it('reveals MapLibre only after visible geography is present',()=>expect(isVirginiaBasemapRenderable(map())).toBe(true));
-  it('always renders the local Atlas behind the optional 3D canvas',()=>{
+  it('never shows the inaccurate illustrated fallback when real streets are unavailable',()=>{
     const source=readFileSync(join(process.cwd(),'src/components/discover/VirginiaWorld.tsx'),'utf8');
-    expect(source).toContain('<VirginiaInteractiveAtlas');
-    expect(source).toContain('mode={mapMode}');
-    expect(source).toContain('onCitySelect={moveCity}');
-    expect(source).not.toContain('!mapShown&&<VirginiaInteractiveAtlas');
+    expect(source).not.toContain('<VirginiaInteractiveAtlas');
+    expect(source).toContain('rch-world-verified-map-placeholder');
+    expect(source).toContain("mapMode]=useState<'3d'>('3d')");
   });
 });
