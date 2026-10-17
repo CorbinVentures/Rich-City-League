@@ -9,7 +9,7 @@ import {FaArrowLeft,FaArrowRotateRight,FaMapLocationDot,FaTriangleExclamation,Fa
 
 type Court={slug:string;name:string;address:string;locality:string;latitude:number|null;longitude:number|null;
  source_url:string|null;source_label:string|null;verification_status:string;access_type:string;
- venue_type:string;is_active:boolean;last_verified_on:string|null};
+ venue_type:string;is_active:boolean;last_verified_on:string|null;notes:string|null};
 type Proposal={id:string;court_slug:string;proposed_latitude:number;proposed_longitude:number;
  evidence_url:string;evidence_notes:string;status:string;submitted_at:string;submitted_by:string;reviewed_at:string|null};
 type Audit={id:number;court_slug:string;action:string;occurred_at:string;review_notes:string};
@@ -51,7 +51,7 @@ export default function StatewideCourtMapQuality(){
    const all:Court[]=[];
    for(let start=0;start<6000;start+=500){
     const {data,error}=await db.from('basketball_locations')
-     .select('slug,name,address,locality,latitude,longitude,source_url,source_label,verification_status,access_type,venue_type,is_active,last_verified_on')
+     .select('slug,name,address,locality,latitude,longitude,source_url,source_label,verification_status,access_type,venue_type,is_active,last_verified_on,notes')
      .order('slug').range(start,start+499);
     if(error)throw error;
     all.push(...(data||[]));
@@ -213,7 +213,9 @@ export default function StatewideCourtMapQuality(){
     <p className="text-xs text-slate-400">Displaying {Math.min(matches.length,300)} court records. Refine the name or locality to reduce results. Numeric coordinates on file are not proof of court-level accuracy.</p>
     {!matches.length&&<p className="rounded-xl border border-white/15 p-4 text-sm">No matching courts in this category.</p>}
     {matches.map(c=><article key={c.slug} className="rounded-2xl border border-white/15 bg-[#0d2940] p-4">
-     <div className="flex flex-wrap justify-between gap-3"><div><strong>{c.name}</strong><p className="mt-1 text-xs text-slate-300">{c.address} · {c.locality}</p><p className="mt-1 text-xs text-sky-200">{c.verification_status} · {c.access_type} · {c.venue_type}</p></div>
+     <div className="flex flex-wrap justify-between gap-3"><div><strong>{c.name}</strong><p className="mt-1 text-xs text-slate-300">{c.address} · {c.locality}</p><p className="mt-1 text-xs text-sky-200">{c.verification_status} · {c.access_type} · {c.venue_type}</p>{!qualified(c)&&c.source_label==='City of Newport News Parks GIS'&&
+      (c.name.startsWith('ES-')||(c.notes||'').toLowerCase().includes('no court'))&&
+      <p className="mt-2 text-xs font-bold text-amber-200">Municipal GIS review required: school-site access or no playable basketball court. Not verified as an RCH Parks & Rec playing site.</p>}</div>
       <span className={'rounded-lg border px-3 py-2 text-xs '+(qualified(c)&&coords(c)?'border-emerald-500/40 text-emerald-200':'border-amber-400/40 text-amber-200')}>
        {qualified(c)&&coords(c)?<FaCheck className="mr-1 inline"/>:<FaTriangleExclamation className="mr-1 inline"/>}{qualified(c)?coords(c)?'Coordinates on file':'Location needs review':'Community / restricted'}
       </span></div>
