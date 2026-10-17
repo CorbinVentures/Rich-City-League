@@ -111,3 +111,14 @@
 @media(max-width:860px){.rwg-portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rwg-nav{top:65px}.rwg-player-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.rwg-frame{padding:10px 10px 90px}.rwg-header{align-items:start;padding:20px 5px 17px;flex-direction:column;gap:12px}.rwg-header h1{font-size:44px}.rwg-nav{top:56px;padding:5px;gap:3px;border-radius:14px}.rwg-nav button{min-height:55px;flex-direction:column;gap:4px;font-size:10px;border-radius:9px}.rwg-nav button svg{font-size:16px}.rwg-hud{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.rwg-hud>div{padding:12px}.rwg-area-controls{flex-direction:column;align-items:start;padding:13px}.rwg-city-actions{width:100%}.rwg-city-actions select{flex:1;max-width:none}.rwg-map-stage .rch-live-atlas{min-height:405px}.rwg-portal-grid{gap:7px}.rwg-portal{padding:11px;min-height:76px}.rwg-portal strong{font-size:11px}.rwg-portal small{font-size:8px}.rwg-court-grid{grid-template-columns:1fr}.rwg-master-grid{gap:5px}.rwg-master-grid>div{padding:10px}.rwg-master-grid strong{font-size:11px}.rwg-master-grid small{font-size:9px}.rwg-territory h3{font-size:17px}.rwg-run-row{flex-wrap:wrap}.rwg-run-row b{order:5}.rwg-mission{align-items:start;flex-wrap:wrap;padding:12px}.rwg-mission>a,.rwg-mission>button{width:100%;justify-content:center}.rwg-player-stats>div{padding:13px}.rwg-player-stats strong{font-size:27px}}
 @media(prefers-reduced-motion:reduce){.rwg-shell :is(button,a){transition:none!important;animation:none!important}}
+
+
+.rwg-match-reveal{margin:18px 0;padding:20px;border:1px solid #f1c372;border-radius:18px;background:radial-gradient(circle at 95% 0%,#684d26,transparent 55%),linear-gradient(110deg,#233e53,#102739);box-shadow:0 0 32px #e0ab4230;animation:rwg-card-enter .35s ease-out}
+.rwg-match-reveal h3{margin:10px 0 6px;font-size:20px;font-weight:950}
+.rwg-match-reveal p,.rwg-match-reveal small{color:#d0e1e9;font-size:11px}
+.rwg-rating-shift{display:flex;align-items:center;gap:13px;margin:15px 0;padding:13px;border-radius:12px;background:#071c30}
+.rwg-rating-shift span{display:grid;gap:4px;font-size:9px;color:#a7cce4;font-weight:850}
+.rwg-rating-shift strong{color:#f3faff;font-size:22px}
+.rwg-rating-shift b{margin-left:auto;color:#ffdc93;font-size:12px}
+@keyframes rwg-card-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.rwg-match-reveal{animation:none}}
