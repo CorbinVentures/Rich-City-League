@@ -64,7 +64,7 @@ export default function RunCourtProfile(){
  const owner=crews.find(c=>c.is_controller);
  return <main className="rch-arena-shell min-h-screen px-4 pb-28 pt-6 sm:px-8">
   <div className="mx-auto max-w-6xl">
-   <Link href={'/runs?court='+encodeURIComponent(slug)} className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#a2d7ff]">← Back to this court's Runs</Link>
+   <Link href={'/runs?court='+encodeURIComponent(slug)} className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#a2d7ff]">← Back to this court&apos;s Runs</Link>
    <section className="rch-ux-court-hero">
     <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
      <div className="max-w-2xl"><div className="rch-ux-court-mark" aria-hidden="true"><FaBasketball/></div>
