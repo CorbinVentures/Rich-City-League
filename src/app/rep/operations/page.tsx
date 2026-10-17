@@ -80,6 +80,7 @@ export default function RepOperationsPage(){
    <Link href="/rep" className="text-xs font-bold text-[#9bdcff]">← REP Exchange</Link>
    <p className="mt-7 flex items-center gap-2 text-[11px] font-black uppercase tracking-[.2em] text-[#95d6fe]"><FaShieldHalved/> RCH Command Operations</p>
    <h1 className="mt-3 text-3xl font-black uppercase sm:text-5xl">REP Fulfillment Desk</h1>
+   <Link href="/rep/operations/crews" className="mt-3 inline-flex min-h-10 items-center rounded-xl border border-[#c5a477] px-4 text-xs font-black text-[#ffe1a9]">Crew REP Fulfillment Desk →</Link>
    <p className="mt-3 max-w-2xl text-sm text-[#bad0de]">RCH staff must approve promotions before they become visible. Declined rewards automatically refund the original REP amount. Member purchases never affect competitive rankings.</p>
    {!authLoading&&(!user||!staff)&&loaded&&<p role="alert" className="mt-7 rounded-xl border border-[#b58c57] p-5 text-sm text-[#e5ceaa]">Only authorized RCH administrators and staff can review REP redemption requests.</p>}
    {staff&&<div className="mt-7">
