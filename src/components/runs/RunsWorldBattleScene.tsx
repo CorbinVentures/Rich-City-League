@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaArrowRotateRight,FaBolt,FaCrown,FaShieldHalved,FaSwords,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaArrowRotateRight,FaBolt,FaCrown,FaShieldHalved,FaBolt,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 
 type Challenge={
@@ -79,10 +79,10 @@ export function WorldBattleScene({cityName,courtSlugs,onSelectCourt}:{cityName:s
  const completedCount=battles.filter(b=>b.status==='resolved').length;
  return <section className="rwg-battle-stadium" aria-label="Verified Runs World crew battleboard">
    <div className="rwg-battle-intro">
-    <div><span className="rwg-kicker"><FaSwords/> REAL-WORLD CREW BATTLES</span>
+    <div><span className="rwg-kicker"><FaBolt/> REAL-WORLD CREW BATTLES</span>
      <h3>THE PARK <span>IS THE ARENA.</span></h3>
      <p>Challenges are issued by actual RCH crew captains. No simulated opponents, invented scores, or automatic territory transfers.</p></div>
-    <div className="rwg-battle-emblem" aria-hidden="true"><FaSwords/><span>BATTLE</span></div>
+    <div className="rwg-battle-emblem" aria-hidden="true"><FaBolt/><span>BATTLE</span></div>
    </div>
    <div className="rwg-battle-tabs" role="group" aria-label="Battle records">
     <button type="button" aria-pressed={filter==='active'} onClick={()=>setFilter('active')}>Active challenges <span>{activeCount}</span></button>
@@ -100,7 +100,7 @@ export function WorldBattleScene({cityName,courtSlugs,onSelectCourt}:{cityName:s
         <div className="rwg-battle-card-top"><span><FaBolt/> {state.eyebrow}</span><small>{b.court}</small></div>
         <div className="rwg-versus">
          <div><div className="rwg-faction"><FaShieldHalved/></div><span>CHALLENGER</span><strong>{b.challenger}</strong></div>
-         <div className="rwg-vs-core"><FaSwords/><strong>VS</strong></div>
+         <div className="rwg-vs-core"><FaBolt/><strong>VS</strong></div>
          <div><div className="rwg-faction defend"><FaCrown/></div><span>DEFENDER</span><strong>{b.defender}</strong></div>
         </div>
         <div className="rwg-battle-card-footer"><div>
