@@ -20,7 +20,7 @@ describe('Weekend Double XP Circuit',()=>{
   });
   it('never manufactures venue reservation, a physical host, or verified attendance',()=>{
     expect(migration).toContain('not a reserved court');
-    expect(migration).toContain('not a guaranteed RCH-staffed session');
+    expect(migration).toContain('not a reserved court or a guaranteed RCH-staffed session');
     expect(migration).toContain("l.access_type='public'");
     expect(migration).toContain("l.verification_status in ('official','provider')");
     expect(migration).not.toContain("insert into public.run_checkins");
