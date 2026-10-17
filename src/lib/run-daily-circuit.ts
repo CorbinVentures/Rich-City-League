@@ -52,10 +52,7 @@ export function virginiaCircuitDay(now:number){
  return [part('year'),part('month'),part('day')].join('-');
 }
 export function dailyRunEligible(run:DailyCircuitCandidate, now:number){
- const starts=Date.parse(run.starts_at);
- return Boolean(run.id&&run.host_id&&run.title.trim())&&
-  Number.isFinite(starts)&&starts>=now&&starts<=now+45*DAY&&
-  run.status==='open' || false;
+ return isFutureRun(run,now)&&dailyRunJoinable(run,now);
 }
 /** Full sessions remain in the unpersonalized list, but cannot take a Daily pick. */
 export function dailyRunJoinable(run:DailyCircuitCandidate,now:number){
