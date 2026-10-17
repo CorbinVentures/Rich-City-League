@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
+import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
 import { RunPassport } from '@/components/runs/RunPassport';
@@ -13,6 +14,7 @@ import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import './runs-arena.css';
+import './visual-experience.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +25,7 @@ import { cityForText } from '@/lib/virginia-world';
 import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
 import {
   FaArrowUpRightFromSquare,
+  FaArrowRight,
   FaBasketball,
   FaCalendarDays,
   FaCircleCheck,
@@ -117,6 +120,7 @@ export default function RunsPage() {
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
   const [highlightClaims, setHighlightClaims] = useState<Set<string>>(new Set());
   const [view, setView] = useState<ViewMode>('runs');
+  const [competitionView, setCompetitionView] = useState<'passport'|'courts'|'rankings'>('passport');
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
@@ -424,15 +428,20 @@ export default function RunsPage() {
       <RunArenaHero
         activeMode={typeFilter}
         onHost={() => openCreateForCourt(selectedCourt ?? undefined)}
+        onFind={() => {setView('runs');document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});}}
         onMode={mode => {
           setTypeFilter(mode);
           setView('runs');
-          document.getElementById('rch-upcoming-runs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
         }}
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
-        <Link href="/runs/partners" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#387fa7] bg-[linear-gradient(110deg,#153c5e,#0b263e)] p-4 text-[#e5f4ff] hover:border-[#9ad5ff]"><span><strong className="block text-sm font-black uppercase tracking-wide">THE PARK × THE REC · Runs Partner Network</strong><small className="mt-1 block text-xs text-[#b3d6ef]">Play with local organizations · Find organized sessions · Bring your basketball legacy everywhere</small></span><FaArrowUpRightFromSquare className="shrink-0 text-xl text-[#90d2ff]"/></Link>
-        <Link href="/crews" className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-[#3576ab] bg-[linear-gradient(95deg,#123b60,#071f37)] p-4 text-[#e5f4ff] hover:border-[#81c6fc]"><span><strong className="block text-sm font-black uppercase tracking-wide">Bring your crew to the Run</strong><small className="mt-1 block text-xs text-[#add6f4]">Create a logo · choose your top five · compete together for the Commonwealth Cup</small></span><FaPeopleGroup className="shrink-0 text-2xl text-[#8ccbfc]" /></Link>
+        <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
+          <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
+          <Link href="/crews" className="rch-ux-quicklink"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
+          <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badge Vault</Link>
+          <button type="button" className="rch-ux-quicklink" onClick={()=>{setCompetitionView('courts');document.getElementById('rch-competition')?.scrollIntoView({behavior:'auto',block:'start'});}}><FaTrophy aria-hidden="true"/> Court Crowns</button>
+        </nav>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link>}</div>
@@ -440,7 +449,7 @@ export default function RunsPage() {
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && <>{!loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}<RunPassport /><RunRankedLadder /><CourtDominion initialCourt={courtParam||""} /><RunArenaLeaderboard /></>}
+        {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
@@ -450,10 +459,8 @@ export default function RunsPage() {
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 text-xl font-black text-white sm:text-2xl"><FaCalendarDays className="text-[#82caff]"/> Upcoming Runs</h2>
-            <button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');}} className="text-xs font-bold text-[#6cbaff]">See all runs →</button>
-          </div>
+          <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Upcoming Runs" description="Real courts, real people. See who's hosting and find a place on the floor." action={{href:'/runs/partners',label:'Explore organizers'}}/>
+          <div className="mb-3 flex justify-end"><button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');}} className="min-h-11 text-xs font-bold text-[#9cd7ff]">Clear filters <FaArrowRight className="ml-1 inline"/></button></div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setTypeFilter('all')} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'}>All Runs</button>
             <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#315b86] bg-[#0a1d34] px-3 text-xs font-semibold text-white">
@@ -468,7 +475,23 @@ export default function RunsPage() {
               placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#315b86] bg-[#081a2e] px-4 text-sm text-white placeholder:text-[#97b3d1] outline-none focus:border-[#4b9fff]" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <div className="rch-arena-empty rounded-2xl border border-dashed p-6 text-center sm:p-8"><FaBasketball className="mx-auto text-3xl text-rcl-blue/60" /><h2 className="mt-3 text-xl font-black">{runs.length ? 'No runs match these filters' : 'Your next game starts here'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#bed6ef]">{runs.length ? 'Try another mode or skill level.' : 'No upcoming games yet. Host a competitive run, social meetup or training session, then invite your crew.'}</p><div className="mt-5 flex flex-wrap items-center justify-center gap-2"><button onClick={() => openCreateForCourt()} className="rounded-xl bg-rcl-blue px-5 py-3 text-sm font-semibold text-[#071018]">Host a run</button><button onClick={() => setView('rewards')} className="rounded-xl border border-rcl-blue/30 px-5 py-3 text-sm font-semibold text-rcl-blue">How run rewards work</button></div></div> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+        </section>}
+
+        {view==='runs'&&<section id="rch-competition" className="mt-9 scroll-mt-20">
+          <RCHSectionHeader eyebrow="YOUR BASKETBALL LEGACY" title="Competition Center" description="Your verified history, court championships, and real player ladders."/>
+          <div role="group" aria-label="Choose competition section" className="rch-ux-competition-tabs">
+            {([
+              ['passport','My Passport',FaMedal],
+              ['courts','Court Dominion',FaTrophy],
+              ['rankings','Ranked Arena',FaPeopleGroup],
+            ] as const).map(([tab,label,Icon])=><button key={tab} type="button" aria-pressed={competitionView===tab} className="rch-ux-competition-tab" onClick={()=>setCompetitionView(tab)}><Icon aria-hidden="true"/>{label}</button>)}
+          </div>
+          <div className="rch-ux-competition-panel">
+            {competitionView==='passport'&&<RunPassport />}
+            {competitionView==='courts'&&<CourtDominion initialCourt={courtParam||''} showTakeovers/>}
+            {competitionView==='rankings'&&<><RunRankedLadder/><RunArenaLeaderboard/></>}
+          </div>
         </section>}
 
         <NetworkSponsoredPlacement
@@ -515,36 +538,49 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   onCheckIn: (run: Run) => Promise<void>;
   onClaimHighlight: (run: Run) => Promise<void>;
 }) {
-  const count = run.players?.length ?? 0;
-  const joined = Boolean(userId && run.players?.includes(userId));
-  const host = userId === run.host_id;
-  const starts = new Date(run.starts_at);
-  const now = Date.now();
-  const startMs = starts.getTime();
-  const checkInOpen = now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000;
-  const highlightWindow = now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000;
-  const participantCanHighlight = (joined || host) && highlightWindow;
-  const typeIcon = run.run_type === 'competitive' ? <FaTrophy /> : run.run_type === 'training' ? <FaDumbbell /> : <FaPeopleGroup />;
-
-  return <article className="rch-arena-game-card min-w-0 overflow-hidden rounded-2xl">
-    <div className="rch-arena-game-cover relative h-24 overflow-hidden border-b border-[#264f79]"><div className="absolute inset-0 bg-gradient-to-t from-[#08192d]/85 to-transparent"/><span className="absolute bottom-3 left-3 rounded-full border border-[#53a5ff]/50 bg-[#167af3] px-3 py-1 text-[11px] font-black text-white">{starts.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})} · {starts.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span className="absolute bottom-3 right-3 rounded-full bg-[#071b30]/90 px-2 py-1 text-[10px] font-semibold text-[#d1e6ff]">{count}/{run.max_players} players</span></div>
-    <div className="border-b border-[#244664] p-4">
-      <div className="flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1.5 rounded-lg border border-rcl-blue/16 bg-rcl-blue/[.06] px-2.5 py-1 text-[11px] font-semibold text-rcl-blue">{typeIcon}{runTypeLabels[run.run_type]}</span><span className="rounded-lg border border-white/8 px-2.5 py-1 text-[11px] font-medium text-white/38">{run.game_format}</span><span className="ml-auto text-[11px] text-white/32">{skillLabels[run.skill_level]}</span></div>
-      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-[#64b5e6]/40 bg-[#123a56] px-2.5 py-1.5 text-[11px] font-black text-[#b3e5ff]"><FaCircleCheck className="shrink-0"/><span className="truncate">{run.partner.experience==='rec'?'THE REC':'THE PARK'} · {run.partner.name}</span></Link>}
-      <h2 className="mt-4 break-words text-xl font-semibold tracking-[-.02em]"><Link href={`/runs/${run.id}`} className="hover:text-rcl-blue">{run.title}</Link></h2>
-      {run.description && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/42">{run.description}</p>}
-    </div>
-    <div className="space-y-3 p-4 text-sm text-[#bacbe2]">
-      <div className="flex items-start gap-3"><FaCalendarDays className="mt-1 shrink-0 text-rcl-blue" /><span>{starts.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · {starts.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span></div>
-      <div className="flex min-w-0 items-start gap-3"><FaLocationDot className="mt-1 shrink-0 text-rcl-blue" /><span className="min-w-0 break-words">{run.location}</span></div>
-      <div className="flex items-center gap-3"><FaPeopleGroup className="shrink-0 text-rcl-blue" /><span>{count}/{run.max_players} attending</span></div>
-      <div className="flex flex-wrap gap-2 pt-2">
-        <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(run.location)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-white/85">Directions <FaArrowUpRightFromSquare className="ml-1.5" /></a>
-        <button disabled={busy === `join-${run.id}`} onClick={() => void onJoin(run)} className={`rounded-xl px-4 py-2.5 text-xs font-semibold ${joined ? 'border border-white/10 bg-white/[.035] text-white/65' : 'bg-rcl-blue text-[#071018]'}`}>{joined ? 'Leave' : count >= run.max_players ? 'Full' : run.run_type === 'social' ? 'Join meetup' : 'Join run'}</button><ShareRunButton id={run.id} title={run.title} />
-        {checkInOpen && <button disabled={checkedIn || busy === `checkin-${run.id}`} onClick={() => void onCheckIn(run)} className="rounded-xl border border-rcl-blue/22 bg-rcl-blue/[.06] px-4 py-2.5 text-xs font-semibold text-rcl-blue disabled:opacity-45">{checkedIn ? 'Checked in ✓' : 'Check in · +15 REP'}</button>}
+  const count=run.players?.length??0;
+  const joined=Boolean(userId&&run.players?.includes(userId));
+  const host=userId===run.host_id;
+  const start=new Date(run.starts_at);
+  const startMs=start.getTime();
+  const now=Date.now();
+  const full=run.status==='full'||count>=run.max_players;
+  const effectiveStatus=full&&run.status==='open'?'full':run.status;
+  const canJoin=!joined&&!!userId&&!full&&run.status==='open';
+  const checkInOpen=now>=startMs-2*3600000&&now<=startMs+6*3600000;
+  const highlightWindow=now>=startMs-2*3600000&&now<=startMs+72*3600000;
+  const dateLabel=start.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const experience=run.partner&&run.partner.experience==='rec'?'THE REC':run.partner&&run.partner.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
+  return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
+    <div className="rch-ux-game-cover">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[11px] font-black uppercase tracking-wider text-[#b7e2ff]">{experience} · {run.game_format}</span>
+        <RCHStatusChip status={effectiveStatus}/>
       </div>
-      {participantCanHighlight && <div className="mt-2 rounded-xl border border-white/7 bg-black/15 p-3"><p className="text-xs leading-5 text-white/38">Played here? Post a photo or video from this run, then claim the run-highlight bonus.</p><div className="mt-2 flex flex-wrap gap-2"><Link href="/social?compose=1" className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/62">Post highlight</Link><button disabled={highlightClaimed || busy === `highlight-${run.id}`} onClick={() => void onClaimHighlight(run)} className="rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-3 py-2 text-xs font-semibold text-rcl-blue disabled:opacity-45">{highlightClaimed ? 'Highlight bonus claimed ✓' : 'Claim +35 REP'}</button></div></div>}
-      <div className="flex items-center justify-between gap-3 border-t border-white/7 pt-3"><span className="min-w-0 truncate text-xs text-white/30">{run.partner?'Organized by '+run.partner.name+' · '+(run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' paid to organizer':'Free'):'Hosted by '+(run.host?.display_name || run.host?.username || 'RCL member')}</span>{run.allow_fan_checkin && <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-rcl-blue/55">Fan check-in</span>}</div>
+      <Link href={'/runs/'+run.id} className="mt-5 text-white hover:text-[#bfe7ff]"><h3 className="rch-ux-game-title">{run.title}</h3></Link>
+    </div>
+    <div className="rch-ux-game-body">
+      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#3d8c88] bg-[#123e45] px-3 py-2 text-xs font-bold text-[#bbf3e4]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
+      <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
+        {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
+      </div>
+      <div className="rch-ux-game-cta">
+        {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <div className="flex flex-wrap items-center gap-3">
+          {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
+          <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
+        </div>
+      </div>
+      <details className="group border-t border-[#315573] pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
+        <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
+        <div className="flex flex-wrap gap-2"><ShareRunButton id={run.id} title={run.title}/>
+          {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
+          {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
+        </div>
+      </details>
     </div>
   </article>;
 }
