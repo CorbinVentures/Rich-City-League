@@ -43,6 +43,7 @@ type Run = {
   status: string;
 };
 
+type PartnerSession={slug:string;name:string;experience:'park'|'rec';price_cents:number};
 type Profile = { id: string; display_name: string | null; username: string | null; avatar_url?: string | null };
 type Team = { id: string; name: string; sort_order: number };
 type Member = { run_team_id: string; profile_id: string };
@@ -62,6 +63,7 @@ export default function RunRoomPage() {
   const db = supabase as any;
 
   const [run, setRun] = useState<Run | null>(null);
+  const [partner, setPartner] = useState<PartnerSession | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
   const [teams, setTeams] = useState<Team[]>([]);
@@ -97,6 +99,11 @@ export default function RunRoomPage() {
     }
 
     setRun((runResult.data ?? null) as Run | null);
+    const {data:linked}=await db.from('rch_runs_partner_sessions').select('partner_id,experience,price_cents').eq('run_id',runId).maybeSingle();
+    if(linked){
+      const {data:org}=await db.from('rch_runs_partners').select('slug,name,status').eq('id',linked.partner_id).eq('status','approved').maybeSingle();
+      setPartner(org?{slug:org.slug,name:org.name,experience:linked.experience,price_cents:linked.price_cents}:null);
+    }else setPartner(null);
     const playerIds = (playersResult.data ?? []).map((item: any) => item.profile_id) as string[];
     const mediaRows = (mediaResult.data ?? []) as Array<Omit<RunPost, 'media_urls'> & { media_urls: unknown }>;
     const mediaAuthorIds = mediaRows.map((item) => item.author_id);
@@ -277,11 +284,12 @@ export default function RunRoomPage() {
         accent={run.status === 'cancelled' ? 'Cancelled' : 'Run Room'}
         description={run.description ?? 'Pickup basketball organized through RCL Runs.'}
         assetKey="runs.cover"
-        actions={<div className="flex flex-wrap gap-2"><Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
+        actions={<div className="flex flex-wrap gap-2">{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#65b6ff]/40 bg-[#13456c] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
         meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5"><p className="text-[10px] font-black uppercase tracking-wider text-rcl-blue"><FaLocationDot className="mr-1 inline" />{run.court_name || run.location}</p><p className="mt-2 text-sm font-black">{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p><p className="mt-2 text-xs text-white/35">{run.skill_level} · {run.game_format ?? 'Pickup'} · {profiles.length}/{run.max_players}</p></div>}
       />
 
       <Container maxWidth="xl" className="py-9">
+        {partner&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4288b5] bg-[#0a3453] p-4"><div><p className="text-[11px] font-black uppercase tracking-wider text-[#92d2ff]">Official Runs Partner · {partner.experience==='rec'?'The REC':'The PARK'}</p><p className="mt-1 text-lg font-black text-white">Organized by {partner.name}</p><p className="mt-1 text-xs text-[#bdd7e9]">{partner.price_cents?'Advertised organizer fee $'+(partner.price_cents/100).toFixed(2)+' · Pay the organizer directly':'Free session · No advertised entry fee'} · RCH verifies competitive results separately</p></div><Link href={'/runs/partners/'+partner.slug} className="rounded-xl border border-[#73b6e3] px-4 py-2 text-xs font-bold text-[#cbeaff]">Partner HQ profile →</Link></div>}
         {notice && <p className="mb-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] p-4 text-sm text-emerald-100">{notice}</p>}
         {error && <p className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/[.06] p-4 text-sm text-red-100">{error}</p>}
 
