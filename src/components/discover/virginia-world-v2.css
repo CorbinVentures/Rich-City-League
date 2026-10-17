@@ -93,3 +93,8 @@
   .rch-world-page .rch-world-map-shell-v2 .rch-world-expand{width:37px}
 }
 @media(prefers-reduced-motion:reduce){.rch-world-page .rch-world-map-shell-v2 *{animation:none!important;transition:none!important}}
+
+/* All Discover map views now use the same real georeferenced streets.
+   If rendering is unavailable, never revive the hand-drawn outline. */
+.rch-world-verified-map-placeholder{position:absolute;z-index:5;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px;background:linear-gradient(150deg,#0a2942,#061625);color:#d7efff;font-size:13px;font-weight:800;line-height:1.7}
+.rch-world-map-shell-v2 .rch-world-map{touch-action:pan-x pan-y}
