@@ -129,6 +129,7 @@ export default function StatewideCourtMapQuality(){
    <header className="mt-5">
     <p className="text-xs font-black uppercase tracking-[.15em] text-sky-300">RCH Geography Office · Staff Only</p>
     <h1 className="mt-2 text-3xl font-black">Virginia Court Map Operations</h1>
+    <Link href="/admin/runs/facility-sources" className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-sky-400/60 bg-sky-700/20 px-4 py-3 text-xs font-black text-sky-200">Submit / verify Parks & Rec sources →</Link>
     <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">Official city/county Parks & Recreation basketball courts, indoor gyms and mixed centers are verified facilities when supported by their Parks & Rec listing. Access and open-play schedules remain separate. Community map leads and private providers are not automatically Parks & Rec verified. Coordinate changes require evidence, review and an audit entry.</p>
    </header>
    {error&&<p className="mt-5 rounded-xl border border-red-400/60 bg-red-900/30 p-4 text-sm" role="alert">{error}</p>}
