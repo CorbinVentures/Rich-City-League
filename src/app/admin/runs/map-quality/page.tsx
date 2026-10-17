@@ -85,7 +85,7 @@ export default function StatewideCourtMapQuality(){
  const pending=proposals.filter(r=>r.status==='pending');
  // Postal-locality matching is a coverage lead, NOT a GIS county assignment.
  const sourceCountFor=(name:string)=>{
-  const clean=name.toLowerCase().replace(/\\s+(county|city)$/,'');
+  const clean=name.toLowerCase().replace(/\s+(county|city)$/,'');
   return items.filter(c=>qualified(c)&&(
    c.locality.toLowerCase()===clean
    ||clean==='chesterfield'&&['chesterfield','north chesterfield','south chesterfield','chester'].includes(c.locality.toLowerCase())
