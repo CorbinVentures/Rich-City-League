@@ -10,7 +10,7 @@ const runs=read('src/app/runs/page.tsx');
 
 describe('Runs Weekend Double REP statewide expansion',()=>{
  it('registers ALL existing Virginia World city targets plus North Chesterfield',()=>{
-  const names=[...world.matchAll(/\\{id:'([^']+)',name:'([^']+)',lat:/g)].map(match=>match[1]);
+  const names=[...world.matchAll(/\{id:'([^']+)',name:'([^']+)',lat:/g)].map(match=>match[1]);
   expect(names.length).toBe(30);
   for(const id of names)expect(sql).toContain("('"+id+"',");
   expect(sql).toContain("('north-chesterfield','North Chesterfield',false)");
