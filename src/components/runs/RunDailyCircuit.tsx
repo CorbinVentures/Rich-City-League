@@ -16,10 +16,11 @@ const types:RunPlayType[]=['all','competitive','social','training'];
 const formatLabel=(format:RunFormat)=>format==='all'?'Any format':format;
 const typeLabel=(type:RunPlayType)=>type==='all'?'Any run':type==='competitive'?'Competitive':type==='social'?'Social hoops':'Training';
 
-export function RunDailyCircuit({runs,cityId,radiusMiles,now=Date.now()}:{
+export function RunDailyCircuit({runs,cityId,radiusMiles,onPreferencesChange,now=Date.now()}:{
  runs:readonly DailyCircuitCandidate[];
  cityId:string|null;
  radiusMiles:25|50|100;
+ onPreferencesChange?:(prefs:Prefs)=>void;
  now?:number;
 }){
  const {user}=useAuth();
@@ -51,6 +52,7 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,now=Date.now()}:{
    watched_courts:settings.data.watched_courts||[]
   }:defaults;
   setPrefs(options);
+  onPreferencesChange?.(options);
   setRatings((games.data||[]) as Rating[]);
   const runIds=(played.data||[]).map((row:{run_id:string})=>row.run_id);
   if(runIds.length){
@@ -66,14 +68,14 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,now=Date.now()}:{
  async function update(next:Prefs,court:string|null=null,watch=true){
   if(busy)return;
   const previous=prefs;
-  setPrefs(next);setError('');setNotice('');
+  setPrefs(next);onPreferencesChange?.(next);setError('');setNotice('');
   if(!user?.id){setNotice('Sign in to save these preferences across your devices.');return;}
   setBusy(true);
   const {error:failure}=await db.rpc('rch_set_run_daily_preferences',{
    p_format:next.preferred_format,p_type:next.preferred_type,
    p_court:court,p_watch:watch
   });
-  if(failure){setError(failure.message);setPrefs(previous);}
+  if(failure){setError(failure.message);setPrefs(previous);onPreferencesChange?.(previous);}
   else{
    setNotice('Your Runs board is updated.');
    void load();
