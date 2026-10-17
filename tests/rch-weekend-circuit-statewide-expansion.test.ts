@@ -21,6 +21,7 @@ describe('Runs Weekend Double REP statewide expansion',()=>{
   expect(sql).toContain("l.access_type='public'");
   expect(sql).toContain("l.venue_type='outdoor'");
   expect(sql).toContain("count(distinct lower(trim(l.name)))");
+  expect(sql).toContain("lower(trim(l.locality))=lower(trim(t.city_name))");
   expect(sql).toContain("l.verification_status='community'");
   expect(sql).not.toContain("update public.basketball_locations set verification_status");
  });
