@@ -23,6 +23,7 @@ import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
+import { RepPromotedPlacement } from '@/components/rep/RepPromotedPlacement';
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -798,6 +799,7 @@ export default function NetworkHome() {
           <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
         </div>}
         <GravityLocationPicker compact className="mb-5" />
+        {!focusPostId && <RepPromotedPlacement />}
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
           <aside className="rcl-network-left-rail hidden 2xl:block">
             <div className="sticky top-24 space-y-1">
