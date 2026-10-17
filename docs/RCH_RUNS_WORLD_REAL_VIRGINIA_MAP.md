@@ -33,3 +33,15 @@ Locality labels are grouped for the first pilot; this is not yet full spatial co
 - Verify VDOT/Census outline geometry against an independent official comparison; remote overlays can fail independently of the basemap.
 - Use reproducible visual/geospatial snapshots for the Eastern Shore, Chesapeake Bay, Southwest Virginia and Richmond-Chesterfield-Henrico boundary edges.
 - If the map provider is down, the existing text-based list and detailed court access remain usable.
+
+
+## October 17 Geographic Completion Expansion
+- All public basketball mapping, including /discover/radar, now defaults to georeferenced MapLibre streets. The previous simplified state illustration is removed from live map selection. Flat and tilted views use the same coordinates.
+- State and county geometry is served from /api/geo/virginia?layer=state|counties, which accepts no dynamic source URL and validates official January 2026 Census TIGERweb GeoJSON boundaries, GEOIDs and polygon geometry. These official boundaries supersede the previous experimental VDOT URL; the underlying streets remain OpenStreetMap-based.
+- Runs World can load community-sourced statewide leads with coordinate records as translucent, separately clustered hints. These are NOT venue verification, evidence of public access, official games, player counts, or reliable court-center GPS. They never join competitive events or count as confirmed Court Arenas.
+- Full staff Map Operations at /admin/runs/map-quality provides Virginia-wide records, missing-coordinate queues, community leads, duplicate-name review leads, evidence-backed coordinate proposals, approvals, rejections and immutable audit records.
+- Submitted location coordinates do not change the court listing until an authorized staff decision is entered. An authenticated direct edit to latitude/longitude outside the reviewed function is rejected. These changes do not alter the court's verification_status, gameplay REP, or rank.
+- Census polygons represent county/independent-city administrative geography, while original postal-city text on legacy court records may still differ. We do not claim the full legacy inventory is county-spatially verified or that all community data is accurate.
+
+### Remaining human verification dependency
+RCH cannot guarantee every Virginia basketball facility is accurate by automatically displaying third-party data. More than 3,700 community leads require local validation and access verification. Chesterfield's six currently official/provider-verified public outdoor parks still lack approved exact court coordinates; staff should use imagery, municipal GIS and field evidence through Map Quality to approve points. Never generate guessed court-level coordinates from addresses.
