@@ -6,7 +6,9 @@ import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
 export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Richmond Basketball Community' }, description: 'Join Rich City Hoops free. Connect with Richmond players, find pickup runs, share highlights and follow Rich City League competition.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Richmond Basketball Community',description:'Richmond basketball connected: players, runs, highlights, and Rich City League.'} };
 
-export const revalidate = 60;
+// Resolve the root path at request time so the browser shell can render on
+// first paint rather than serving the client-side mode-check loading fallback.
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const { teams, games, standings, news, seasons, divisions } = await getLeagueSnapshot();
