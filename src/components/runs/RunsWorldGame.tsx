@@ -11,7 +11,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,getWorldMissions,recentVerifiedResults,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,getWorldMissions,readPagedUpcomingRuns,recentVerifiedResults,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
 
 type Screen='world'|'battle'|'missions'|'vault'|'player';
@@ -33,7 +33,6 @@ function shortWhen(value:string){
  const d=new Date(value);
  return Number.isFinite(d.getTime())?d.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET':'Time unavailable';
 }
-const empty=Promise.resolve({data:[],error:null});
 export default function RunsWorldGame(){
  const {user}=useAuth();
  const {location,chooseCity,statewide}=useGravityLocation();
@@ -80,11 +79,11 @@ export default function RunsWorldGame(){
       .eq('is_active',true).eq('locality',city.name)
       .in('verification_status',['official','provider'])
       .order('name').range(0,299),
-     db.from('runs')
+     readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
       .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
       .in('status',['open','full']).gte('starts_at',new Date().toISOString())
       .ilike('location','%'+city.name+'%')
-      .order('starts_at',{ascending:true}).range(0,299),
+      .order('starts_at',{ascending:true}).range(from,to),200,2000),
      db.from('rch_weekend_circuit_events')
       .select('run_id').eq('city',city.name)
       .eq('bonus_enabled',true).gte('starts_at',new Date().toISOString()).limit(150)
@@ -97,8 +96,8 @@ export default function RunsWorldGame(){
     setRuns((runResult.data||[]) as WorldRun[]);
     setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
     if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
-    if((courtResult.data||[]).length===300||(runResult.data||[]).length===300)
-      setWarning('Showing the first 300 local records. Use court search or the full Runs list for more.');
+    if((courtResult.data||[]).length===300||runResult.truncated)
+      setWarning('Court display is capped at 300 verified locations, or 2,000 upcoming Runs. Use the full list and court search for additional places.');
     const slugs=nextCourts.map(c=>c.slug);
     if(slugs.length){
      const {data:territoryRows,error:territoryError}=await db.from('rch_court_territories')
