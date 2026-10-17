@@ -49,3 +49,11 @@ These records are each one **park site**, not one physical basketball hoop. All 
 
 ### Combined expansion validation
 Migrations `20261017235500` and `20261017235600` succeeded together in `BEGIN; ... ROLLBACK` on connected Supabase, finding **13 Alexandria + 7 Chesapeake + 1 Hampton + 1 Roanoke + 3 Virginia Beach = 25 additional source-backed sites** with **zero invented GPS points**.
+
+
+## Existing Newport News Parks GIS audit: school-site and non-court exceptions
+Production source inventory `City of Newport News Parks GIS` (https://maps.nnva.gov/arcgis/rest/services/Parks/ParksAssetInventory/FeatureServer/26) includes **28 basketball asset records with an `ES-` naming prefix**. Those indicate possible school facilities. Presence in the city asset database confirms a municipal inventory reference, but is not proof that the courts are Parks & Recreation-managed or open to public pickup. Until a current public-use agreement/access policy is reviewed, those 28 records remain in the underlying source inventory but are excluded from RCH verified Parks & Rec play markers. Staff can review them in Map Operations' other-status cases.
+
+The same inventory contains **Courthouse Way Community Center Basketball Court** with notes explicitly stating **“Basketball hoop structure only, no court. Hoop is adjacent to asphalt parking lot.”** This is a basketball amenity but not a verified playable court surface. Its source record is preserved; it is also excluded from the verified-play arena layer.
+
+This changes game-facing verified venue eligibility only. It **does not delete records, silently merge GIS surface IDs, alter source provenance, or rewrite game/REP/territory history**. Reviewers must independently check any school-public-use arrangements and physical court status before upgrading either classification.
