@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback,useEffect,useMemo,useRef,useState,type PointerEvent,type WheelEvent } from 'react';
 import {
-  FaArrowLeft,FaArrowRight,FaBasketball,FaCompress,FaCrosshairs,
+  FaArrowLeft,FaArrowRight,FaBasketball,FaBolt,FaCrown,FaCompress,FaCrosshairs,
   FaLocationDot,FaMinus,FaPlus
 } from 'react-icons/fa6';
 import { ATLAS_OVERVIEW,atlasCityCamera,atlasVenueCamera,atlasXY,clampAtlasZoom,type AtlasCamera } from '@/lib/virginia-atlas-camera';
@@ -15,6 +15,7 @@ import './virginia-interactive-atlas-v2.css';
 export type AtlasPlace={
   id:string;title:string;city:string;kind:'run'|'event'|'court';
   lat:number;lon:number;href:string;precision:'venue'|'city';
+  gameState?:'crown'|'battle'|'double-rep';
 };
 type Props={
   city:VirginiaCity|null;
@@ -169,12 +170,12 @@ export default function VirginiaInteractiveAtlas({
         const point=cluster.point!;
         const xy=atlasXY(point);
         return <button key={point.id} type="button"
-          className={'rch-live-atlas-point '+point.kind+(selectedId===point.id?' selected':'')}
+          className={'rch-live-atlas-point '+point.kind+(selectedId===point.id?' selected':'')+(point.gameState?' game-'+point.gameState:'')}
           style={{left:xy.x*100+'%',top:xy.y*100+'%'}}
           onClick={()=>onPlaceSelect(point.id)}
           aria-label={'View '+point.title}
           data-label={point.title} title={point.title}>
-          <FaBasketball aria-hidden="true"/>
+          {point.gameState==='crown'?<FaCrown aria-hidden="true"/>:point.gameState==='battle'?<FaBolt aria-hidden="true"/>:<FaBasketball aria-hidden="true"/>}
         </button>;
       })}
       {userLocation&&virginiaCoordinates(userLocation.lat,userLocation.lon)&&(()=>{
