@@ -86,6 +86,7 @@ export function SiteHeader(){
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
   const sectionLabel=pathname.startsWith('/social/profile')?'Profile'
     :pathname.startsWith('/social')?'Feed'
+    :pathname.startsWith('/world')?'Living World'
     :pathname.startsWith('/discover')?'Discover'
     :pathname.startsWith('/runs')?'Runs'
     :pathname.startsWith('/media')?'RCH TV'
