@@ -62,6 +62,7 @@ type Run = {
   partner?: {slug:string;name:string;experience:'park'|'rec';price_cents:number};
   independently_verified?:boolean;
   verified_host?:boolean;
+  weekendMultiplier?: 1 | 2;
 };
 
 type Badge = {
@@ -183,12 +184,13 @@ export default function RunsPage() {
       const rows = (runsResult.data ?? []) as Run[];
       const hostIds = [...new Set(rows.map((run) => run.host_id))];
       const runIds = rows.map((run) => run.id);
-      const [hostsResult, playersResult, partnerLinksResult, verificationResult, hostVerificationResult] = await Promise.all([
+      const [hostsResult, playersResult, partnerLinksResult, verificationResult, hostVerificationResult, weekendResult] = await Promise.all([
         hostIds.length ? db.from('profiles').select('id,display_name,username,avatar_url').in('id', hostIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('run_players').select('run_id,profile_id').in('run_id', runIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents').in('run_id', runIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('rch_run_verifications').select('run_id').in('run_id',runIds).eq('verification_status','verified'):Promise.resolve({data:[]}),
         hostIds.length ? db.from('rch_verified_run_hosts').select('profile_id').in('profile_id',hostIds).eq('verification_status','approved').gt('expires_at',new Date().toISOString()):Promise.resolve({data:[]}),
+        runIds.length ? db.from('rch_weekend_circuit_events').select('run_id').in('run_id',runIds).eq('bonus_enabled',true) : Promise.resolve({data:[]}),
       ]);
 
       const hostMap = new Map<string, Run['host']>((hostsResult.data ?? []).map((host: any) => [host.id, host]));
@@ -208,7 +210,8 @@ export default function RunsPage() {
       }));
       const certifiedRuns=new Set(((verificationResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
       const certifiedHosts=new Set(((hostVerificationResult.data??[]) as {profile_id:string}[]).map(x=>x.profile_id));
-      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id) })));
+      const weekendRunIds=new Set(((weekendResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
+      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id), weekendMultiplier:weekendRunIds.has(run.id)?2:1 })));
       const courtRows = (courtsResult.data ?? []) as Court[];
       if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
         const { data: selectedCourtRow } = await db.from('basketball_locations')
@@ -444,12 +447,19 @@ export default function RunsPage() {
         </nav>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link>}</div>
+          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<><Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link><Link href="/admin/runs/weekend-circuit" className="rounded-full border border-[#e8b96b]/60 bg-[#372b19] px-3 py-2 text-[11px] font-black text-[#ffe2ab]">Weekend Circuit HQ →</Link></>}</div>
           <button type="button" onClick={() => setView(view === 'runs' ? 'rewards' : 'runs')} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#325f8d] bg-[#0d2b4a] px-3 text-[11px] font-bold text-[#b8dbff]">
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
         {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>
+            <span className="rounded-xl bg-[#ffd47a] px-3 py-2 text-sm font-black text-[#182137]">2× VERIFIED REP</span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.weekendMultiplier===2&&run.status!=='cancelled').slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}</span><FaArrowRight aria-hidden="true"/></Link>)}</div>
+        </section>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
@@ -555,11 +565,13 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
     <div className="rch-ux-game-cover">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[11px] font-black uppercase tracking-wider text-[#b7e2ff]">{experience} · {run.game_format}</span>
+        {run.weekendMultiplier===2&&<span className="rounded-full border border-[#ffe3a2]/60 bg-[#473410] px-2.5 py-1 text-[11px] font-black text-[#ffe3a2]">2× VERIFIED REP</span>}
         <RCHStatusChip status={effectiveStatus}/>
       </div>
       <Link href={'/runs/'+run.id} className="mt-5 text-white hover:text-[#bfe7ff]"><h3 className="rch-ux-game-title">{run.title}</h3></Link>
     </div>
     <div className="rch-ux-game-body">
+      {run.weekendMultiplier===2&&<p className="text-xs leading-5 text-[#ffe3a2]">Featured weekend community drop-in · Court access and staffing are not guaranteed.</p>}
       {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#3d8c88] bg-[#123e45] px-3 py-2 text-xs font-bold text-[#bbf3e4]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
