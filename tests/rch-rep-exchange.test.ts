@@ -51,7 +51,7 @@ describe('RCH REP Exchange economy',()=>{
  it('limits promotional engagement rebates to 20% with unique real-member reactions',()=>{
   expect(loop).toContain('(v_order.price_paid/5)');
   expect(loop).toContain('primary key(order_id,actor_id,interaction)');
-  expect(loop).toContain('v_order.profile_id<>v_actor');
+  expect(loop).toContain('o.profile_id<>v_actor');
   expect(loop).toContain('rch_rep_credit_internal');
   expect(frame).toContain('rch_has_active_rep_frame');
  });
