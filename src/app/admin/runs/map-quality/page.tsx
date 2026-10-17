@@ -175,7 +175,7 @@ export default function StatewideCourtMapQuality(){
    {loading?<p className="mt-7 text-sm text-slate-300" role="status">Auditing the statewide venue registry…</p>:
    mode==='all'?<section className="mt-6 space-y-3">
     <h2 className="text-xl font-black">Coverage and audit overview</h2>
-    <p className="text-sm text-slate-300">Potential repeated court names in this selection: {duplicateGroups.length} groups. Multiple court surfaces can share a name, so this report never automatically merges, deletes or transfers a venue's competitive history.</p>
+    <p className="text-sm text-slate-300">Potential repeated court names in this selection: {duplicateGroups.length} groups. Multiple court surfaces can share a name, so this report never automatically merges, deletes or transfers a venue&apos;s competitive history.</p>
     <details className="rounded-xl border border-sky-800 bg-[#0b2942] p-4">
      <summary className="cursor-pointer text-sm font-bold text-sky-200">Investigate duplicate court candidates ({duplicateGroups.length})</summary>
      <div className="mt-4 space-y-3">
