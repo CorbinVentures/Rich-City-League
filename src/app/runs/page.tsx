@@ -437,7 +437,7 @@ export default function RunsPage() {
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
-          <Link href="/runs/partners" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
+          <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
           <Link href="/crews" className="rch-ux-quicklink"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
           <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badge Vault</Link>
           <button type="button" className="rch-ux-quicklink" onClick={()=>{setCompetitionView('courts');document.getElementById('rch-competition')?.scrollIntoView({behavior:'auto',block:'start'});}}><FaTrophy aria-hidden="true"/> Court Crowns</button>
@@ -488,7 +488,7 @@ export default function RunsPage() {
             ] as const).map(([tab,label,Icon])=><button key={tab} type="button" aria-pressed={competitionView===tab} className="rch-ux-competition-tab" onClick={()=>setCompetitionView(tab)}><Icon aria-hidden="true"/>{label}</button>)}
           </div>
           <div className="rch-ux-competition-panel">
-            {competitionView==='passport'&&<RunPassport/>}
+            {competitionView==='passport'&&<RunPassport />}
             {competitionView==='courts'&&<CourtDominion initialCourt={courtParam||''} showTakeovers/>}
             {competitionView==='rankings'&&<><RunRankedLadder/><RunArenaLeaderboard/></>}
           </div>
