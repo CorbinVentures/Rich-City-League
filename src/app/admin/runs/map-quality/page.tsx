@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import {verifiedParksRecFacility} from '@/lib/runs-world-game';
 import {FaArrowLeft,FaArrowRotateRight,FaMapLocationDot,FaTriangleExclamation,FaCheck,FaArrowUpRightFromSquare} from 'react-icons/fa6';
 
 type Court={slug:string;name:string;address:string;locality:string;latitude:number|null;longitude:number|null;
@@ -12,7 +13,7 @@ type Proposal={id:string;court_slug:string;proposed_latitude:number;proposed_lon
  evidence_url:string;evidence_notes:string;status:string;submitted_at:string;submitted_by:string;reviewed_at:string|null};
 type Audit={id:number;court_slug:string;action:string;occurred_at:string;review_notes:string};
 const matchesChesterfield=(locality:string)=>['chesterfield','north chesterfield','south chesterfield'].includes(locality.toLowerCase());
-function qualified(r:Court){return r.is_active&&['official','provider'].includes(r.verification_status)&&r.access_type==='public'&&r.venue_type==='outdoor';}
+function qualified(r:Court){return r.is_active&&verifiedParksRecFacility(r);}
 function coords(r:Court){return r.latitude!==null&&r.longitude!==null&&Number.isFinite(r.latitude)&&Number.isFinite(r.longitude);}
 const blank={lat:'',lon:'',url:'',notes:'',decision:''};
 export default function StatewideCourtMapQuality(){
@@ -101,12 +102,12 @@ export default function StatewideCourtMapQuality(){
    <header className="mt-5">
     <p className="text-xs font-black uppercase tracking-[.15em] text-sky-300">RCH Geography Office · Staff Only</p>
     <h1 className="mt-2 text-3xl font-black">Virginia Court Map Operations</h1>
-    <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">Evidence-based facility corrections and a statewide coordinate-quality queue. A community map lead is never automatically a verified playable court. Changing a court location requires documented source evidence, approval and a permanent audit entry.</p>
+    <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">Official city/county Parks & Recreation basketball courts, indoor gyms and mixed centers are verified facilities when supported by their Parks & Rec listing. Access and open-play schedules remain separate. Community map leads and private providers are not automatically Parks & Rec verified. Coordinate changes require evidence, review and an audit entry.</p>
    </header>
    {error&&<p className="mt-5 rounded-xl border border-red-400/60 bg-red-900/30 p-4 text-sm" role="alert">{error}</p>}
    {notice&&<p className="mt-5 rounded-xl border border-emerald-400/60 bg-emerald-900/30 p-4 text-sm" role="status">{notice}</p>}
    <div className="mt-6 grid gap-3 md:grid-cols-4">
-    {[[regional.length,'Recorded leads and venues'],[regionalQualified.length,'Eligible verified courts'],[mapped.length,'Coordinate-backed eligible'],[regionalQualified.length-mapped.length,'Need precision review']].map(([n,label])=><div key={label} className="rounded-2xl border border-sky-800 bg-[#103049] p-4"><strong className="text-3xl font-black">{loading?'…':n}</strong><p className="mt-1 text-xs text-slate-300">{label}</p></div>)}
+    {[[regional.length,'Recorded leads and venues'],[regionalQualified.length,'Parks & Rec basketball facilities'],[mapped.length,'Parks & Rec sites with coordinates'],[regionalQualified.length-mapped.length,'Parks & Rec pins to review']].map(([n,label])=><div key={label} className="rounded-2xl border border-sky-800 bg-[#103049] p-4"><strong className="text-3xl font-black">{loading?'…':n}</strong><p className="mt-1 text-xs text-slate-300">{label}</p></div>)}
    </div>
    <div className="mt-5 flex flex-wrap gap-3">
     <label className="text-xs font-bold text-slate-200">Review region

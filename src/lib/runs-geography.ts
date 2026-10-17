@@ -6,6 +6,7 @@ import type {WorldCourt,WorldRun} from '@/lib/runs-world-game';
  * discovery region, but Richmond's independent city is NEVER merged. */
 export function localityNames(city:VirginiaCity):string[]{
  if(city.id==='chesterfield')return ['Chesterfield','North Chesterfield','South Chesterfield'];
+ if(city.id==='henrico')return ['Henrico','Glen Allen','Sandston'];
  return [city.name];
 }
 export function matchesRunToCourts(run:WorldRun,slugs:ReadonlySet<string>){

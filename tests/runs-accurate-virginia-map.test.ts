@@ -21,6 +21,8 @@ describe('Real Virginia geospatial discovery',()=>{
  it('groups all three Chesterfield postal labels but never merges independent Richmond City',()=>{
   expect(localityNames(chesterfield)).toEqual(['Chesterfield','North Chesterfield','South Chesterfield']);
   expect(localityNames(richmond)).toEqual(['Richmond']);
+  const henrico={id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'};
+  expect(localityNames(henrico)).toEqual(['Henrico','Glen Allen','Sandston']);
  });
  it('never invents court coordinates or calls unmapped courts missing',()=>{
   const venues=[court(),court({slug:'chester-2',locality:'North Chesterfield'}),

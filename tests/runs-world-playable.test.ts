@@ -2,14 +2,14 @@ import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {
- buildCourtMapPins,playableCourt,getWorldMissions,recentVerifiedResults,readPagedUpcomingRuns,
+ buildCourtMapPins,playableCourt,verifiedParksRecFacility,getWorldMissions,recentVerifiedResults,readPagedUpcomingRuns,
  type WorldCourt,type WorldRun
 } from '../src/lib/runs-world-game';
 
 const court=(overrides:Partial<WorldCourt>={}):WorldCourt=>({
  slug:'real-park',name:'Real Municipal Park',address:'100 Public St',locality:'Richmond',
  latitude:37.54,longitude:-77.44,verification_status:'official',access_type:'public',
- venue_type:'outdoor',source_url:'https://example.gov/parks',hours_text:null,...overrides
+ venue_type:'outdoor',source_label:'City of Richmond PRCF',source_url:'https://example.gov/parks',hours_text:null,...overrides
 });
 const run=(overrides:Partial<WorldRun>={}):WorldRun=>({
  id:'a',title:'Local Run',location:'Real Park, Richmond, VA',location_slug:'real-park',
@@ -24,11 +24,31 @@ describe('Runs World playable geography and game progression',()=>{
   expect(buildCourtMapPins([
    court(),court({slug:'unmapped',latitude:null,longitude:null}),
    court({slug:'untrusted',verification_status:'community'}),
-   court({slug:'private',access_type:'membership'}),
+   court({slug:'private',access_type:'membership',source_label:'YMCA of Greater Richmond'}),
   ],[run()])).toEqual([{
    id:'court:real-park',title:'Real Municipal Park',city:'Richmond',kind:'run',
    lat:37.54,lon:-77.44,href:'/runs/courts/real-park',precision:'venue'
   }]);
+ });
+ it('verifies both outdoor Parks & Rec basketball courts and indoor gymnasiums, without promising walk-in use',()=>{
+  const beulah=court({slug:'beulah-rec',name:'Beulah Recreation Center',locality:'North Chesterfield',
+    venue_type:'indoor',access_type:'varies',source_label:'Chesterfield County Parks & Recreation'});
+  const deepRun=court({slug:'deep-run-rec',venue_type:'mixed',access_type:'free_pass',
+    source_label:'Henrico Recreation & Parks'});
+  const cityGym=court({slug:'eastern-henrico-rec',venue_type:'indoor',access_type:'free_pass',
+    source_label:'Henrico Recreation & Parks'});
+  expect(verifiedParksRecFacility(beulah)).toBe(true);
+  expect(verifiedParksRecFacility(deepRun)).toBe(true);
+  expect(verifiedParksRecFacility(cityGym)).toBe(true);
+  expect(playableCourt(beulah)).toBe(false); // verified gym is not an unscheduled walk-in park
+  expect(verifiedParksRecFacility(court({source_label:'YMCA of Greater Richmond',verification_status:'provider'}))).toBe(false);
+  expect(verifiedParksRecFacility(court({source_label:null}))).toBe(false);
+  expect(verifiedParksRecFacility(court({source_url:null}))).toBe(false);
+  expect(verifiedParksRecFacility(court({verification_status:'community'}))).toBe(false);
+  const pins=buildCourtMapPins([beulah,deepRun,cityGym],[]);
+  expect(pins).toHaveLength(3);
+  expect(pins.find(p=>p.id==='court:beulah-rec')?.indoor).toBe(true);
+  expect(pins.find(p=>p.id==='court:deep-run-rec')?.indoor).toBeUndefined();
  });
  it('does not fabricate competitive results or award extra REP for tasks',()=>{
   const missions=getWorldMissions({city:'Richmond',scouted:true,upcomingJoined:1,recentVerified:0});

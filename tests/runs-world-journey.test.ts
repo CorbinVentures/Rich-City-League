@@ -17,7 +17,7 @@ const journey:WorldJourney={
 };
 const court:WorldCourt={slug:'park',name:'Official Court',address:'123 Main St',locality:'Richmond',
  latitude:37.54,longitude:-77.44,verification_status:'official',access_type:'public',
- venue_type:'outdoor',source_url:null,hours_text:null};
+ venue_type:'outdoor',source_label:'City of Richmond PRCF',source_url:'https://www.rva.gov/parks-recreation/about-department',hours_text:null};
 const run:WorldRun={id:'run-1',title:'Verified Rep Weekend',location:'Richmond',
  location_slug:'park',starts_at:'2030-10-25T15:00:00Z',status:'open',
  game_format:'3v3',run_type:'competitive'};
