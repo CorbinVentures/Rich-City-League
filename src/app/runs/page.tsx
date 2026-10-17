@@ -550,7 +550,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   const checkInOpen=now>=startMs-2*3600000&&now<=startMs+6*3600000;
   const highlightWindow=now>=startMs-2*3600000&&now<=startMs+72*3600000;
   const dateLabel=start.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-  const experience=run.partner?.experience==='rec'?'THE REC':run.partner?.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
+  const experience=run.partner&&run.partner.experience==='rec'?'THE REC':run.partner&&run.partner.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
   return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
     <div className="rch-ux-game-cover">
       <div className="flex flex-wrap items-center justify-between gap-2">
