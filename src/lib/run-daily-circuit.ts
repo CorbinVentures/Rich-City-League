@@ -144,3 +144,25 @@ export function buildDailyCircuitPicks<T extends DailyCircuitCandidate>(
   others.find(r=>r.id!==explore?.id)||null;
  return {next,explore,week};
 }
+
+export type DailyPlaybook={
+ headline:string;
+ mode:'competitive'|'social'|'training';
+ format:'1v1'|'2v2'|'3v3'|'4v4'|'5v5';
+ message:string;
+ callToAction:string;
+};
+/** An optional editorial challenge prompt, not a scheduled event or REP quest. */
+const DAILY_PLAYBOOK:readonly DailyPlaybook[]=[
+ {headline:'RUN IT BACK SUNDAY',mode:'competitive',format:'3v3',message:'Had a close game? Set up a real 3v3 rematch. A runback counts only when the opponents confirm the result.',callToAction:'Host a 3v3 runback'},
+ {headline:'KINGMAKER MONDAY',mode:'competitive',format:'1v1',message:'Every court needs someone willing to defend it. Set up a real 1v1 and bring an independent official for title-level competition.',callToAction:'Start a 1v1 challenge'},
+ {headline:'TAKEOVER TUESDAY',mode:'competitive',format:'3v3',message:'Bring your crew, find another crew and organize a competitive 3v3. Territory changes only after the official takeover process.',callToAction:'Bring your crew'},
+ {headline:'WORK YOUR BAG WEDNESDAY',mode:'training',format:'1v1',message:'Work on one real part of your game with a training partner. Film your progress if everyone involved agrees.',callToAction:'Set up skill work'},
+ {headline:'DUO THURSDAY',mode:'competitive',format:'2v2',message:'Your favorite partner versus another duo. Put the chemistry to the test in a real 2v2 with recorded results.',callToAction:'Host a 2v2'},
+ {headline:'FRIDAY NIGHT LIGHTS',mode:'competitive',format:'5v5',message:'Put together a real full-court 5v5. Invite your crew and another team, then let the actual game make the story.',callToAction:'Organize 5v5'},
+ {headline:'STATEWIDE SATURDAY',mode:'competitive',format:'3v3',message:'Play at a different Virginia court this weekend and meet a new basketball community. Explore real gyms and parks before committing.',callToAction:'Plan a road Run'},
+] as const;
+export function getDailyPlaybook(now:number):DailyPlaybook{
+ const day=virginiaCircuitDay(now);
+ return DAILY_PLAYBOOK[new Date(day+'T12:00:00Z').getUTCDay()];
+}
