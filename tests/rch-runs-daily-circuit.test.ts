@@ -1,7 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {buildDailyCircuitPicks,dailyRunEligible,dailyRunJoinable,rankDailyRuns,scoreDailyRun,virginiaCircuitDay,type DailyCircuitCandidate} from '../src/lib/run-daily-circuit';
+import {buildDailyCircuitPicks,dailyRunEligible,dailyRunJoinable,getDailyPlaybook,rankDailyRuns,scoreDailyRun,virginiaCircuitDay,type DailyCircuitCandidate} from '../src/lib/run-daily-circuit';
 
 const now=Date.parse('2026-10-17T01:00:00Z');
 function candidate(partial:Partial<DailyCircuitCandidate>={}):DailyCircuitCandidate{
@@ -53,6 +53,15 @@ describe('RCH Runs daily opportunity and competitive integrity',()=>{
   const picks=buildDailyCircuitPicks(runs,{now});
   expect(picks.next?.id).not.toBe(picks.explore?.id);
   expect(picks.explore?.host_id).not.toBe(picks.next?.host_id);
+ });
+ it('offers real-world daily playbooks without creating fake results or false REP',()=>{
+  expect(getDailyPlaybook(Date.parse('2026-10-19T17:00:00Z')).headline).toBe('KINGMAKER MONDAY');
+  expect(getDailyPlaybook(Date.parse('2026-10-20T17:00:00Z')).format).toBe('3v3');
+  expect(getDailyPlaybook(Date.parse('2026-10-23T17:00:00Z')).format).toBe('5v5');
+  const board=src('src/components/runs/RunDailyCircuit.tsx');
+  expect(board).toContain('TODAY\'S PLAYBOOK');
+  expect(board).toContain('not a scheduled game, automatic reward or verified victory');
+  expect(board).toContain('/runs?create=1&format=');
  });
  it('keeps private preferences RLS-only and server validated without inventing score/REP',()=>{
   const migration=src('supabase/migrations/20261017020000_rch_runs_daily_circuit_preferences.sql');
