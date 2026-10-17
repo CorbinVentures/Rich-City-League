@@ -111,7 +111,7 @@ end $$;
 -- Prevent ordinary staff form updates from silently bypassing evidence review.
 -- Service-role maintenance with no end-user JWT is not restricted.
 create function public.rch_guard_court_coordinates()
-returns trigger language plpgsql security definer set search_path='' as $
+returns trigger language plpgsql security definer set search_path='' as $$
 begin
  if (old.latitude is distinct from new.latitude or old.longitude is distinct from new.longitude)
   and auth.uid() is not null
@@ -119,7 +119,7 @@ begin
  then raise exception 'Court coordinates require an approved geographic review';
  end if;
  return new;
-end $;
+end $$;
 create trigger rch_guard_court_latlon_change
  before update of latitude,longitude on public.basketball_locations
  for each row execute function public.rch_guard_court_coordinates();
