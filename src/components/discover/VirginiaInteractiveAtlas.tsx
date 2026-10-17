@@ -16,6 +16,7 @@ export type AtlasPlace={
   id:string;title:string;city:string;kind:'run'|'event'|'court';
   lat:number;lon:number;href:string;precision:'venue'|'city';
   gameState?:'crown'|'battle'|'double-rep';
+  indoor?:boolean; // Gym icon only; never implies open pickup or gym availability.
 };
 type Props={
   city:VirginiaCity|null;
