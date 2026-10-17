@@ -22,6 +22,7 @@ export const VIRGINIA_CITIES:VirginiaCity[] = [
   {id:'abingdon',name:'Abingdon',lat:36.7098,lon:-81.9774,landmark:'Historic town',symbol:'🎭'},
   {id:'petersburg',name:'Petersburg',lat:37.2279,lon:-77.4019,landmark:'Old Towne',symbol:'🏛️',major:true},
   {id:'chesterfield',name:'Chesterfield',lat:37.3771,lon:-77.504,landmark:'Chesterfield County',symbol:'🌳'},
+  {id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'},
   {id:'williamsburg',name:'Williamsburg',lat:37.2707,lon:-76.7075,landmark:'Colonial district',symbol:'🏛️'},
   {id:'newport-news',name:'Newport News',lat:37.0871,lon:-76.473,landmark:'James River waterfront',symbol:'⚓',major:true},
   {id:'hampton',name:'Hampton',lat:37.0299,lon:-76.3452,landmark:'Hampton Roads',symbol:'🌉'},
