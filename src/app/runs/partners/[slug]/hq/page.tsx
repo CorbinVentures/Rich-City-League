@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useParams} from 'next/navigation';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaBasketball,FaCalendarDays,FaChartLine,FaCircleCheck,FaClipboardCheck,FaGear,FaPeopleGroup,FaShieldHalved,FaUsers} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaCalendarDays,FaChartLine,FaClipboardCheck,FaGear,FaPeopleGroup,FaShieldHalved} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {RunVenuePicker,runVenueLocation,type RunVenue} from '@/components/runs/RunVenuePicker';
@@ -133,7 +133,7 @@ export default function RunsPartnerHeadquarters(){
      <label className="text-xs font-black">Player capacity<input required type="number" min={2} max={50} className={fieldClass} value={form.capacity} onChange={e=>setForm({...form,capacity:Number(e.target.value)})}/></label>
      <label className="text-xs font-black">Organizer fee (USD)<input required type="number" min={0} max={500} step=".01" className={fieldClass} value={form.price} onChange={e=>setForm({...form,price:e.target.value})}/></label>
      <label className="text-xs font-black sm:col-span-2">Run rules / check-in instructions<textarea maxLength={1600} rows={3} className={fieldClass} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Team rotation, arrival, parking, skill requirements, bring a light/dark jersey…"/></label>
-     <p className="text-xs leading-5 text-[#a9c8dd] sm:col-span-2">Event fees are listed for transparency. RCH does not collect payments on the organizer's behalf. Results are verified separately after play.</p>
+     <p className="text-xs leading-5 text-[#a9c8dd] sm:col-span-2">Event fees are listed for transparency. RCH does not collect payments on the organizer&apos;s behalf. Results are verified separately after play.</p>
      <button disabled={busy} type="submit" className="min-h-12 rounded-xl bg-[#3b95f5] px-5 font-black disabled:opacity-50">{busy?'Publishing…':'Publish under this Partner HQ'}</button>
     </form>}
     <div className="mt-5 space-y-3">{sessions.map(s=><div key={s.run_id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#3c607e] bg-[#092037] p-4">
