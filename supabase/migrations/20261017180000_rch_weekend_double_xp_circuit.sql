@@ -62,6 +62,7 @@ from (values
 ) as v(city,slot,court_slug)
 join public.basketball_locations l on l.slug=v.court_slug
 where l.is_active and l.venue_type='outdoor' and l.access_type='public'
+  and lower(trim(l.locality))=lower(trim(v.city))
   and l.verification_status in ('official','provider')
   and l.name ~* '(park|playground)'
 on conflict do nothing;
@@ -89,9 +90,11 @@ begin
      select c.city from public.rch_weekend_circuit_courts c
      join public.basketball_locations l on l.slug=c.court_slug
      where c.active and l.is_active and l.venue_type='outdoor'
+       and lower(trim(l.locality))=lower(trim(c.city))
        and l.access_type='public' and l.verification_status in ('official','provider')
        and l.name ~* '(park|playground)'
      group by c.city having count(*)=4 and count(distinct c.court_slug)=4
+       and count(distinct lower(trim(l.name)))=4
      order by c.city
    loop
      for v_day in 0..1 loop
