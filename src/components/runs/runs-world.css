@@ -200,3 +200,14 @@
 @media(max-width:720px){.rwg-collectible-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rwg-player-stage{grid-template-columns:1fr;justify-items:center;text-align:center}.rwg-level-stats{width:100%}.rwg-journey-numbers{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){.rwg-quest-grid,.rwg-stamps{grid-template-columns:1fr}.rwg-journey-heading{align-items:start}.rwg-journey-heading>strong{font-size:25px}.rwg-level-emblem{width:150px;height:150px}.rwg-level-emblem strong{font-size:53px}.rwg-collectible{min-height:190px}.rwg-collectible-medal{width:70px;height:70px;font-size:30px}}
 @media(prefers-reduced-motion:reduce){.rwg-collectible.unlocked .rwg-collectible-medal,.rwg-victory-replay{animation:none}.rwg-xp-track span{transition:none}}
+
+
+/* Official game events alter map markers only in Runs World; ordinary
+   discovery maps remain neutral. Badge visuals never claim an unverified win. */
+.rwg-map-stage .rch-live-atlas-point.game-crown{background:#a16b28!important;border-color:#ffdda0!important;box-shadow:0 0 0 7px #f4b34d29,0 0 30px #e0ad6380!important;color:#fff7dd!important}
+.rwg-map-stage .rch-live-atlas-point.game-battle{background:#922e65!important;border-color:#ffd1e6!important;box-shadow:0 0 0 7px #e24d9629,0 0 30px #d85b967f!important;color:#fff!important;animation:rwg-battle-beacon 2.4s ease-in-out infinite}
+.rwg-map-stage .rch-live-atlas-point.game-double-rep{background:#1559af!important;border-color:#fbd988!important;box-shadow:0 0 0 6px #55aaff29,0 0 25px #4394ee7f!important;color:#fff!important}
+.rwg-map-stage .rch-live-atlas-point.game-crown:after{content:'KING';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.08em;color:#ffdb87;text-shadow:0 2px 5px #000}
+.rwg-map-stage .rch-live-atlas-point.game-battle:after{content:'BATTLE';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.08em;color:#ffd1e8;text-shadow:0 2px 5px #000}
+@keyframes rwg-battle-beacon{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.25)}}
+@media(prefers-reduced-motion:reduce){.rwg-map-stage .rch-live-atlas-point.game-battle{animation:none}}
