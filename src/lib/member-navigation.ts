@@ -24,6 +24,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Your identity, people, conversations and personalized basketball world',
     items:[
       {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'Living World · Courts + legacy',href:'/world',icon:FaGlobe},
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
       {label:'My Profile',href:'/social/profile/me',icon:FaUser},
