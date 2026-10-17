@@ -23,7 +23,8 @@ export function courtCoverage(courts:readonly WorldCourt[],runs:readonly WorldRu
 }
 export const REAL_VIRGINIA_MAP={
  provider:'OpenFreeMap / OpenStreetMap',
+ boundaries:'U.S. Census Bureau TIGERweb 2026',
  style:'https://tiles.openfreemap.org/styles/dark',
- stateOutline:'https://services.arcgis.com/p5v98VHDX9Atv3l7/ArcGIS/rest/services/VDOTAdministrativeBoundaries/FeatureServer/0/query?where=1%3D1&outFields=STATEFP&outSR=4326&geometryPrecision=5&f=geojson',
- chesterfieldJurisdiction:'https://services.dwr.virginia.gov/arcgis/rest/services/WMA_Editing/WMA_VGIN_CountyBoundaries/FeatureServer/0/query?where=NAME%3D%27Chesterfield%27&outFields=NAME%2CSTCOFIPS&outSR=4326&geometryPrecision=5&f=geojson',
+ stateOutline:'/api/geo/virginia?layer=state',
+ chesterfieldJurisdiction:'/api/geo/virginia?layer=counties',
 } as const;

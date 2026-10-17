@@ -4,6 +4,7 @@ import {FaBasketball,FaCrown,FaBolt,FaCompass,FaArrowRotateRight,FaLocationDot,F
 import type {AtlasPlace} from '@/components/discover/VirginiaInteractiveAtlas';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {REAL_VIRGINIA_MAP} from '@/lib/runs-geography';
+import {countyBounds} from '@/lib/virginia-geographic-bounds';
 import './accurate-virginia-map.css';
 
 /* MapLibre loaded as an explicitly pinned, existing UMD bundle. Its WebGL worker
@@ -11,6 +12,7 @@ import './accurate-virginia-map.css';
  * to the same exact version. No freehand image projection or invented lat/lon. */
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre-gl.css';
+export type CommunityCourtLead={slug:string;name:string;locality:string;latitude:number;longitude:number};
 type MapMarker={remove:()=>void};
 type MapLike={
  on:(event:string,listener:(e?:any)=>void)=>void;
@@ -68,8 +70,8 @@ function safeCoordinate(point:AtlasPlace){
  return Number.isFinite(point.lat)&&Number.isFinite(point.lon)&&
   point.lat>=36.4&&point.lat<=39.65&&point.lon>=-83.85&&point.lon<=-74.95;
 }
-export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlaceSelect,onOverview}:{
- city:VirginiaCity|null;points:AtlasPlace[];selectedId:string|null;
+export function AccurateVirginiaMap({city,points,selectedId,leads=[],onCitySelect,onPlaceSelect,onOverview}:{
+ city:VirginiaCity|null;points:AtlasPlace[];selectedId:string|null;leads?:CommunityCourtLead[];
  onCitySelect:(city:VirginiaCity)=>void;onPlaceSelect:(id:string)=>void;onOverview:()=>void
 }){
  const container=useRef<HTMLDivElement|null>(null);
@@ -82,6 +84,12 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
  const [revision,setRevision]=useState(0);
  const [layer,setLayer]=useState<Layer>('all');
  const mapped=useMemo(()=>filteredPins(points,layer).filter(safeCoordinate),[points,layer]);
+ const candidateCollection=useMemo(()=>({type:'FeatureCollection' as const,features:
+  (layer==='all'||layer==='courts'?leads:[])
+   .filter(l=>Number.isFinite(l.latitude)&&Number.isFinite(l.longitude)&&l.latitude>=36.4&&l.latitude<=39.65&&l.longitude>=-83.85&&l.longitude<=-74.95)
+   .map(l=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[l.longitude,l.latitude]},
+      properties:{slug:l.slug,name:l.name,locality:l.locality}}))
+ }),[leads,layer]);
  const markerItems=useMemo(()=>mapped.map(p=>({p,key:p.id+':'+p.kind})),[mapped]);
  // One map per mount; changing region / markers never destroys the base tiles.
  useEffect(()=>{
@@ -98,7 +106,16 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
    map.on('load',()=>{
     if(disposed||!map)return;
     setStatus('ready');
-    // The outline is sourced directly from a VDOT/VGIN-derived government
+    // Community tips are a different, non-actionable layer. They are NOT
+    // verified courts or precise facility pins.
+    try{
+     map.addSource('rch-unverified-leads',{type:'geojson',data:{type:'FeatureCollection',features:[]},cluster:true,clusterRadius:40,clusterMaxZoom:13});
+     map.addLayer({id:'rch-lead-cluster',type:'circle',source:'rch-unverified-leads',filter:['has','point_count'],
+      paint:{'circle-color':'#607b91','circle-opacity':0.53,'circle-stroke-color':'#c2d5de','circle-stroke-width':1,'circle-radius':['step',['get','point_count'],10,25,15,100,20]}});
+     map.addLayer({id:'rch-lead-circles',type:'circle',source:'rch-unverified-leads',filter:['!',['has','point_count']],
+      paint:{'circle-color':'#7c91a1','circle-opacity':0.48,'circle-radius':['interpolate',['linear'],['zoom'],5,2,13,6],'circle-stroke-color':'#cee1eb','circle-stroke-width':1}});
+    }catch{/* Verified court markers still work independently. */}
+    // The outline is sourced directly from the official 2026 Census
     // polygon. This must not be replaced with our old fictional SVG outline.
     try{
      map.addSource('rch-vdot-virginia',{type:'geojson',data:REAL_VIRGINIA_MAP.stateOutline});
@@ -108,9 +125,9 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
     }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
-     map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',
+     map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
       paint:{'fill-color':'#47A7E8','fill-opacity':0.09}});
-     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',
+     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
       paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
     }catch{/* Do not claim verified county outline if GIS data is unavailable. */}
     if(city)map.fitBounds([[city.lon-0.16,city.lat-0.12],[city.lon+0.16,city.lat+0.12]],{padding:30,duration:0});
@@ -131,6 +148,19 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
    }catch{/* map still remains geographically referenced */}
   }else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration:650});
+ },[city?.id,status]);
+ useEffect(()=>{
+  if(city?.id!=='chesterfield'||status!=='ready')return;
+  let current=true;
+  const map=mapRef.current;
+  void fetch('/api/geo/virginia?layer=counties',{cache:'force-cache'})
+   .then(r=>{if(!r.ok)throw Error('official counties unavailable');return r.json();})
+   .then(data=>{
+    if(!current||!map)return;
+    const limits=countyBounds(data,'51041');
+    if(limits)map.fitBounds(limits,{padding:45,duration:750});
+   }).catch(()=>{/* Retain a navigable center when the official geometry is offline. */});
+  return()=>{current=false;};
  },[city?.id,status]);
  useEffect(()=>{
   const map=mapRef.current,lib=libRef.current;
@@ -159,6 +189,10 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
   }
  },[city?.id,markerItems,selectedId,status]);
  useEffect(()=>{
+  const source=mapRef.current?.getSource('rch-unverified-leads');
+  if(status==='ready'&&source?.setData)source.setData(candidateCollection);
+ },[candidateCollection,status]);
+ useEffect(()=>{
   if(!selectedId||status!=='ready')return;
   const point=points.find(p=>p.id===selectedId);
   if(point&&safeCoordinate(point))mapRef.current?.flyTo({center:[point.lon,point.lat],zoom:Math.max(13,mapRef.current.getZoom()),speed:1.2});
@@ -181,6 +215,7 @@ export function AccurateVirginiaMap({city,points,selectedId,onCitySelect,onPlace
    {layerOptions.map(option=><button key={option.id} type='button' aria-pressed={layer===option.id} onClick={()=>setLayer(option.id)}>{option.label}</button>)}
   </div>
   {status==='ready'&&city&&points.length===0&&<div className='rwg-map-zero' role='status'>No precision-verified court pins in this area yet. See court records below for facilities awaiting coordinates.</div>}
-  <div className='rwg-real-map-credit'>Live georeferenced map · OpenFreeMap / OpenStreetMap · VA borders from VDOT/VGIN</div>
+  <div className='rwg-real-map-lead-key'>● Gray = community tip, <strong>not a verified court</strong> ({leads.length.toLocaleString()} mapped leads)</div>
+  <div className='rwg-real-map-credit'>Live georeferenced map · OpenFreeMap / OpenStreetMap · 2026 U.S. Census state and county borders</div>
  </div>;
 }

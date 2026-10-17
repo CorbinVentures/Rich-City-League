@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
-import {AccurateVirginiaMap} from '@/components/runs/AccurateVirginiaMap';
+import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
 import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
@@ -44,6 +44,7 @@ export default function RunsWorldGame(){
  const [screen,setScreen]=useState<Screen>('world');
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
+ const [communityLeads,setCommunityLeads]=useState<CommunityCourtLead[]>([]);
  const [runs,setRuns]=useState<WorldRun[]>([]);
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
@@ -61,6 +62,25 @@ export default function RunsWorldGame(){
  const [pulse,setPulse]=useState(0);
  const [query,setQuery]=useState('');
  const [coverageWarning,setCoverageWarning]=useState('');
+ useEffect(()=>{
+  if(!db)return;
+  let active=true;
+  void (async()=>{
+   const collected:CommunityCourtLead[]=[];
+   for(let from=0;from<5500;from+=500){
+    const {data,error}=await db.from('basketball_locations')
+      .select('slug,name,locality,latitude,longitude')
+      .eq('is_active',true).eq('verification_status','community')
+      .not('latitude','is',null).not('longitude','is',null)
+      .order('slug').range(from,from+499);
+    if(error||!active)return;
+    collected.push(...((data||[]) as CommunityCourtLead[]));
+    if((data||[]).length<500)break;
+   }
+   if(active)setCommunityLeads(collected);
+  })();
+  return()=>{active=false;};
+ },[db]);
  const city=VIRGINIA_CITIES.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
@@ -273,7 +293,7 @@ export default function RunsWorldGame(){
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
      <div><small>VERIFIED COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
-     <div><small>UPCOMING RUNS</small><strong>{loading?'…':coverage.scheduled}</strong></div>
+     <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
     </div>
     <section className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
@@ -287,10 +307,10 @@ export default function RunsWorldGame(){
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data. The Virginia outline is sourced from VDOT/VGIN. Court markers use recorded coordinates only. No location permission required. GPS is optional.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent verified, public basketball sites with coordinates on file. Gray dots are community tips awaiting access/location review, not approved courts. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">

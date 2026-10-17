@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import VirginiaInteractiveAtlas from './VirginiaInteractiveAtlas';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 import { isVirginiaBasemapRenderable } from '@/lib/virginia-map-readiness';
@@ -29,8 +28,8 @@ type CourtRow = {
 };
 type View = {lat:number; lon:number; zoom:number};
 type MapInstance = any;
-const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
-const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
+const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre-gl.js';
+const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre-gl.css';
 const WORLD_STYLE='https://tiles.openfreemap.org/styles/liberty';
 const INITIAL:View={lat:37.55,lon:-79.35,zoom:6.7};
 const FILTERS:{id:Filter;label:string}[]=[
@@ -165,7 +164,8 @@ export default function VirginiaWorld() {
   const positionWatchRef=useRef<number|null>(null);
   const [mapReady,setMapReady]=useState(false);
   const [tilesReady,setTilesReady]=useState(false);
-  const [mapMode,setMapMode]=useState<'atlas'|'3d'>('atlas');
+  const [mapMode]=useState<'3d'>('3d');
+  const [perspective,setPerspective]=useState<'flat'|'tilted'>('tilted');
   const [isExpanded,setIsExpanded]=useState(false);
   const [mapFailure,setMapFailure]=useState(false);
   const [mapError,setMapError]=useState('');
@@ -272,6 +272,12 @@ export default function VirginiaWorld() {
       map.on('load',()=>{
         if(!active)return;
         tintMap(map);addLayers(map);
+        // Both discovery and Runs use the same authoritative 2026 census
+        // GeoJSON, rather than the former hand-drawn state silhouette.
+        try{
+          map.addSource('rch-2026-va-state',{type:'geojson',data:'/api/geo/virginia?layer=state'});
+          map.addLayer({id:'rch-2026-va-outline',type:'line',source:'rch-2026-va-state',paint:{'line-color':'#91ceff','line-width':1.8,'line-opacity':0.8}});
+        }catch{/* The real street basemap remains available without an overlay. */}
         cityPinsRef.current=VIRGINIA_CITIES.map(c=>new lib.Marker({
           element:cityMarker(c,()=>moveCity(c)),anchor:'bottom'
         }).setLngLat([c.lon,c.lat]).addTo(map));
@@ -311,7 +317,7 @@ export default function VirginiaWorld() {
         // illustrated perspective with a blank screen because of one network error.
         if(/webgl|context lost|style.*(failed|error)/i.test(String(event.error.message||''))){
           setMapFailure(true);
-          setMapError('Detailed street rendering is unavailable. Using the illustrated 3D view.');
+          setMapError('Real street rendering is unavailable. Use the basketball location listings below.');
         }
       });
     }).catch(()=>{if(active){setMapFailure(true);setMapError('Detailed street rendering is unavailable. Using the illustrated 3D view.');}});
@@ -325,18 +331,7 @@ export default function VirginiaWorld() {
     };
   },[mapMode,moveCity]);
 
-  useEffect(()=>{
-    let active=true;
-    if(navigator.permissions?.query){
-      navigator.permissions.query({name:'geolocation'}).then(status=>{
-        if(active&&status.state==='granted')startLocation(false);
-      }).catch(()=>{});
-    }
-    return()=>{
-      active=false;
-      if(positionWatchRef.current!==null)navigator.geolocation.clearWatch(positionWatchRef.current);
-    };
-  },[startLocation]);
+  useEffect(()=>()=>{if(positionWatchRef.current!==null)navigator.geolocation.clearWatch(positionWatchRef.current);},[]);
 
   useEffect(()=>{
     let cancelled=false;
@@ -495,20 +490,17 @@ export default function VirginiaWorld() {
     return()=>window.cancelAnimationFrame(frame);
   },[mapMode,mapReady,isExpanded]);
 
-  // 3D always starts with a visible, tilted local Atlas; live street geometry
-  // replaces that illustration only after verified rendered features appear.
-  const toggle3d=()=>{
-    if(mapMode==='3d'){setMapMode('atlas');setMapError('');return;}
-    tilesReadyRef.current=false;
-    setMapFailure(false);
-    setMapError('');
-    setMapMode('3d');
+  // Both visual perspectives use the same real georeferenced street map.
+  // The old invented illustrated state outline is no longer a public choice.
+  const changePerspective=(next:'flat'|'tilted')=>{
+    setPerspective(next);
+    mapRef.current?.easeTo({pitch:next==='flat'?0:48,bearing:next==='flat'?0:-10,duration:420});
   };
   useEffect(()=>{
     if(mapMode!=='3d'||tilesReady||mapFailure)return;
     const timeout=window.setTimeout(()=>{
       if(!tilesReadyRef.current){
-        setMapError('Street detail is unavailable right now. The interactive 3D Atlas is still working.');
+        setMapError('Real street geometry is unavailable right now. Use the verified listings below.');
       }
     },11000);
     return()=>window.clearTimeout(timeout);
@@ -550,25 +542,23 @@ export default function VirginiaWorld() {
     <div className="rch-world-layout">
       <div className={'rch-world-map-shell rch-world-map-shell-v2'+(isExpanded?' is-expanded':'')}>
         <div className="rch-world-map" ref={hostRef} role="region" aria-label="3D street map of Virginia" style={{opacity:mapShown?1:0,pointerEvents:mapShown?'auto':'none'}}/>
-        <VirginiaInteractiveAtlas
-          city={city} points={shown} selectedId={selectedId} userLocation={userLocation}
-          mode={mapMode} streetReady={mapShown} searchActive={query.trim().length>=2} onCitySelect={moveCity} onOverview={overview}
-          onPlaceSelect={id=>{const point=allPoints.find(item=>item.id===id);if(point)openPoint(point);}}
-        />
+        {!mapShown&&<div className="rch-world-verified-map-placeholder" role="status">
+          {mapError||'Preparing real Virginia streets and coastlines…'}
+         </div>}
         <div className="rch-world-map-hud"><FaCompass/><span className="rch-world-map-hud-name">{city?.name||'Virginia'}</span><em>{city?'CITY EXPLORER':'STATEWIDE ATLAS'}</em></div>
         <div className="rch-world-map-controls">
           <div className="rch-world-view-toggle" role="group" aria-label="Map display mode">
-            <button type="button" aria-pressed={mapMode==='atlas'}
-              onClick={()=>{if(mapMode!=='atlas')toggle3d();}}>Atlas</button>
-            <button type="button" aria-pressed={mapMode==='3d'}
-              onClick={()=>{if(mapMode!=='3d')toggle3d();}}>3D Streets</button>
+            <button type="button" aria-pressed={perspective==='flat'}
+              onClick={()=>changePerspective('flat')}>Street Map</button>
+            <button type="button" aria-pressed={perspective==='tilted'}
+              onClick={()=>changePerspective('tilted')}>3D Streets</button>
           </div>
           <button type="button" className="rch-world-expand" onClick={()=>setIsExpanded(v=>!v)}
             title={isExpanded?'Exit expanded map':'Expand map'} aria-label={isExpanded?'Close expanded map':'Expand map'}>
             {isExpanded?<FaCompress/>:<FaExpand/>}
           </button>
         </div>
-        {mapMode==='3d'&&!mapShown&&!mapError&&<div className="rch-world-3d-status" role="status">Loading street detail · Atlas stays available</div>}
+        {mapMode==='3d'&&!mapShown&&!mapError&&<div className="rch-world-3d-status" role="status">Loading official street geometry</div>}
         <div className="rch-world-layer-note"><FaLayerGroup/> Drag · Pinch · Tap markers</div>
         {mapShown&&<div className="rch-world-street-legend"><span>● Courts</span><span>● Runs</span><span>● Events</span></div>}
         {mapError&&mapMode==='3d'&&<div className="rch-world-map-error" role="status">{mapError}</div>}

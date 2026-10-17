@@ -35,8 +35,8 @@ describe('Real Virginia geospatial discovery',()=>{
   expect(matchesRunToCourts(run({location_slug:null}),new Set(['cogbill-park']))).toBe(false);
  });
  it('uses legitimate geographic sources with real coordinates and no illustrated SVG as Runs map',()=>{
-  expect(REAL_VIRGINIA_MAP.stateOutline).toContain('VDOTAdministrativeBoundaries');
-  expect(REAL_VIRGINIA_MAP.chesterfieldJurisdiction).toContain('VGIN_CountyBoundaries');
+  expect(REAL_VIRGINIA_MAP.stateOutline).toBe('/api/geo/virginia?layer=state');
+  expect(REAL_VIRGINIA_MAP.chesterfieldJurisdiction).toBe('/api/geo/virginia?layer=counties');
   expect(REAL_VIRGINIA_MAP.style).toContain('openfreemap.org');
   const root=process.cwd();
   const map=readFileSync(join(root,'src/components/runs/AccurateVirginiaMap.tsx'),'utf8');
@@ -59,8 +59,9 @@ describe('Real Virginia geospatial discovery',()=>{
   expect(config).toContain('https://services.dwr.virginia.gov');
   const qa=readFileSync(join(root,'src/app/admin/runs/map-quality/page.tsx'),'utf8');
   expect(qa).toContain("db.rpc('is_staff_or_admin')");
-  expect(qa).toContain("['Chesterfield','North Chesterfield','South Chesterfield']");
-  expect(qa).toContain('read-only');
+  expect(qa).toContain('matchesChesterfield');
+  expect(qa).toContain("rch_propose_court_coordinates");
+  expect(qa).toContain("rch_resolve_court_coordinate_review");
   expect(qa).not.toContain(".update({latitude");
  });
 });
