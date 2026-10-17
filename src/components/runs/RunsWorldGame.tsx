@@ -18,7 +18,7 @@ type Screen='world'|'battle'|'missions'|'vault'|'player';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
 type CourtStats={masters:Master[];crewName:string|null;defenses:number;loading:boolean};
-type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string}[]};
+type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string;court_name?:string;game_format?:string;won?:boolean;rating_before?:number;rating_after?:number}[]};
 type PlayerStats={socialLevel:number|null;socialXp:number|null;repBalance:number|null;passport:Passport|null};
 const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,passport:null};
 const cityTabs=VIRGINIA_CITIES.filter(city=>city.major);
@@ -306,7 +306,7 @@ export default function RunsWorldGame(){
      <div className="rwg-mission-meter"><strong>{complete} / {missions.length}</strong><span>OBJECTIVES COMPLETE</span><div><i style={{width:(complete/missions.length*100)+'%'}}/></div></div>
      <div className="rwg-missions">{missions.map((m,index)=><div className="rwg-mission" key={m.id}>
        <span>{m.complete?<FaCheck/>:'0'+(index+1)}</span>
-       <div><strong>{m.title}</strong><p>{m.detail}</p><small>{m.complete?'Verified by your current game/session activity':'Ready to tackle'}</small></div>
+       <div><strong>{m.title}</strong><p>{m.detail}</p><small>{m.complete?(m.id==='scout'?'Scouted in this session':'Backed by RCH registration or verified results'):'Ready to tackle'}</small></div>
        {m.id==='scout'?<button type="button" onClick={()=>setScreen('world')}>Explore <FaArrowRight/></button>:
         <Link href={m.href}>{m.id==='join'?'Browse Runs':'Competition Center'} <FaArrowRight/></Link>}
       </div>)}</div>
@@ -330,6 +330,21 @@ export default function RunsWorldGame(){
         <div><small>VERIFIED GAMES</small><strong>{player.passport?.verified_games??'—'}</strong><span>Competitive history</span></div>
         <div><small>RUN BADGES</small><strong>{player.passport?.badges?.length??'—'}</strong><span>Confirmed achievements</span></div>
        </div>
+
+       {player.passport?.last_results?.length?(()=>{
+        const result=player.passport!.last_results[0];
+        const ratingChanged=typeof result.rating_after==='number'&&typeof result.rating_before==='number';
+        return <section className="rwg-match-reveal" aria-label="Your most recent verified match">
+         <span className="rwg-kicker"><FaTrophy/> VERIFIED MATCH RECEIPT</span>
+         <h3>{result.court_name||'Competitive match'}</h3>
+         <p>{result.game_format||'Basketball'} · {shortWhen(result.verified_at)}{typeof result.won==='boolean'?(result.won?' · Verified win':' · Verified loss'):''}</p>
+         {ratingChanged&&<div className="rwg-rating-shift"><span>BEFORE <strong>{result.rating_before}</strong></span>
+           <FaArrowRight/><span>AFTER <strong>{result.rating_after}</strong></span>
+           <b>{(result.rating_after!-result.rating_before!)>=0?'+':''}{result.rating_after!-result.rating_before!} rating</b>
+         </div>}
+         <small>This comes from your confirmed match history, not a simulated game.</small>
+        </section>;
+       })():null}
        <p className="rwg-disclosure">Social XP, spendable REP, competitive skill rating and awards are distinct. No invented gameplay levels or pay-to-win advantages.</p>
        <div className="rwg-mode-links"><Link className="rwg-primary" href="/profile">View Profile <FaArrowRight/></Link><Link className="rwg-secondary" href="/crews?intent=mine">My Crew</Link><Link className="rwg-secondary" href="/rep">REP Exchange</Link></div>
       </>}
