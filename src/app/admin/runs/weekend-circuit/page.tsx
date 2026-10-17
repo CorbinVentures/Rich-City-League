@@ -109,7 +109,7 @@ export default function WeekendCircuitCommandPage(){
     <h1 className="mt-2 text-3xl font-black uppercase">Weekend Circuit Command</h1>
     <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">Every major Virginia city activates with two distinct verified public outdoor basketball parks. With four verified sites, the alternate-weekend rotation remains available. 2× applies only to confirmed competitive REP.</p>
    </div>
-   <Link href="/runs" className="rounded-xl border border-white/20 px-4 py-3 text-sm font-bold text-white">← Runs Arena</Link>
+   <div className="flex flex-wrap gap-2"><Link href="/admin/runs/map-quality" className="rounded-xl border border-sky-400/50 bg-sky-500/10 px-4 py-3 text-sm font-bold text-sky-200">Court Map QA →</Link>   <Link href="/runs" className="rounded-xl border border-white/20 px-4 py-3 text-sm font-bold text-white">← Runs Arena</Link></div>
   </div>
   {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-3 text-sm text-emerald-100">{notice}</p>}
   {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-100">{error}</p>}
