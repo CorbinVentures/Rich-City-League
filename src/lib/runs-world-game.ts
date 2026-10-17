@@ -28,7 +28,7 @@ export function verifiedParksRecFacility(court:Pick<WorldCourt,'verification_sta
 
 /** Open-air public court candidate, not a real-time availability statement. */
 export function playableCourt(court:WorldCourt):boolean{
- return (court.verification_status==='official'||court.verification_status==='provider')
+ return verifiedParksRecFacility(court)
    &&court.access_type==='public'&&court.venue_type==='outdoor';
 }
 export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly WorldRun[],state:WorldMapState={}):AtlasPlace[]{
