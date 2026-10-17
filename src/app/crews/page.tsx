@@ -193,7 +193,7 @@ function CrewsView(){
       </section>}
 
       <section id="rch-crew-rankings" className="mt-8 scroll-mt-24" aria-label="Crew power rankings"><CrewPowerBoard /></section>
-      <section id="rch-crew-courts" className="mt-8 scroll-mt-24" aria-label="Crew territory battles"><CourtDominion showTakeovers/></section>
+      <section id="rch-crew-courts" className="mt-8 scroll-mt-24" aria-label="Crew territory battles"><CourtDominion showTakeovers /></section>
       <section id="rch-crews-directory" className="mt-8 scroll-mt-24"><div className="flex items-center justify-between"><h2 className="font-display text-2xl font-black uppercase">Crews around Virginia</h2><Link href="/commonwealth" className="text-xs font-black text-[#8cc6ff]">Cup rankings →</Link></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{crews.map(crew=><Link key={crew.id} href={'/crews?crew='+crew.id} className="flex items-center gap-3 rounded-xl border border-[#274a6d] bg-[#0c2035] p-4 hover:border-[#6ab3eb]"><span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#173a5d]">{logo(crew)?<img alt={crew.name+' logo'} src={logo(crew)||''} className="h-full w-full object-contain"/>:<FaBasketball/>}</span><span className="min-w-0"><strong className="block truncate text-sm">{crew.name}</strong><small className="text-xs text-[#a8cae1]">{crew.city} · {members.filter(m=>m.crew_id===crew.id).length} members</small></span><FaArrowRight className="ml-auto text-[#7fbbe7]"/></Link>)}</div>
         {!crews.length&&!authLoading&&<p className="mt-6 text-sm text-[#accde5]">Founding crews are being recruited. Your crew can lead the board.</p>}
