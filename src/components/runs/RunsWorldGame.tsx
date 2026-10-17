@@ -46,7 +46,6 @@ export default function RunsWorldGame(){
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
- const [joined,setJoined]=useState<string[]>([]);
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
  const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],crewName:null,defenses:0,loading:false});
  const [player,setPlayer]=useState<PlayerStats>(blankStats);
@@ -157,14 +156,13 @@ export default function RunsWorldGame(){
  },[db,city?.id,pulse]);
 
  useEffect(()=>{
-  if(!db||!user?.id){setPlayer(blankStats);setJoined([]);return;}
+  if(!db||!user?.id){setPlayer(blankStats);return;}
   let active=true;
   void (async()=>{
-   const [passport,wallet,level,registered]=await Promise.all([
+   const [passport,wallet,level]=await Promise.all([
     db.rpc('get_rch_run_passport'),
     db.from('rch_rep_wallets').select('balance').eq('profile_id',user.id).maybeSingle(),
-    db.from('user_levels').select('xp,level').eq('profile_id',user.id).maybeSingle(),
-    db.from('run_players').select('run_id').eq('profile_id',user.id).limit(1000)
+    db.from('user_levels').select('xp,level').eq('profile_id',user.id).maybeSingle()
    ]);
    if(!active)return;
    setPlayer({
@@ -173,7 +171,6 @@ export default function RunsWorldGame(){
     socialLevel:level.error?null:Number(level.data?.level??1),
     socialXp:level.error?null:Number(level.data?.xp??0),
    });
-   setJoined(((registered.data||[]) as {run_id:string}[]).map(v=>v.run_id));
   })();
   return()=>{active=false;};
  },[db,user?.id,pulse]);
@@ -212,7 +209,11 @@ export default function RunsWorldGame(){
   return()=>{alive=false;};
  },[db,selectedSlug,territories,crewNames]);
 
- const pins=useMemo(()=>buildCourtMapPins(courts,runs),[courts,runs]);
+ const pins=useMemo(()=>buildCourtMapPins(courts,runs,{
+  ownedCourts:territories.map(t=>t.court_slug),
+  challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
+  doubleRepRuns:featured
+ }),[courts,runs,territories,worldPulse,featured]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
  const areaRuns=useMemo(()=>[...runs].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),[runs]);
  const courtRuns=areaRuns.filter(r=>r.location_slug===selectedSlug);
