@@ -285,3 +285,19 @@ main.rch-pulse-page .rch-pulse-trend-number {display:grid;flex:0 0 29px;width:29
   .rcl-platform-root main.rch-pulse-page .rch-pulse-masthead-actions a:not(.rch-pulse-primary-action) span {display:none;}
   .rcl-platform-root main.rch-pulse-page .rcl-network-feed-grid>div.min-w-0.space-y-4 {gap:10px;}
 }
+
+
+/* Living World is an optional gateway, not an interruption to the feed. */
+html.rch-premium-root body.rch-premium-app main.rch-pulse-page .rch-pulse-world-link {
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+  margin:0 0 16px;padding:15px 19px;border:1px solid #67a5d4;border-radius:17px;
+  background:linear-gradient(105deg,#173f61,#0b2b46)!important;color:#e9f7ff!important;
+  text-decoration:none;box-shadow:0 8px 27px #0003;
+}
+main.rch-pulse-page .rch-pulse-world-link>span:first-child {display:grid;gap:5px;min-width:0}
+main.rch-pulse-page .rch-pulse-world-link strong {display:flex;align-items:center;gap:9px;color:#a5ddff!important;font-size:11px;font-weight:900;letter-spacing:.1em}
+main.rch-pulse-page .rch-pulse-world-link small {color:#d3e5f3!important;font-size:12px;line-height:1.5}
+main.rch-pulse-page .rch-pulse-world-link>span:last-child {display:flex;align-items:center;gap:6px;flex:0 0 auto;color:#eaf7ff!important;font-size:12px;font-weight:900}
+main.rch-pulse-page .rch-pulse-world-link:hover {border-color:#c5e8ff}
+main.rch-pulse-page .rch-pulse-world-link:focus-visible {outline:3px solid #c5e8ff;outline-offset:4px}
+@media(max-width:430px){main.rch-pulse-page .rch-pulse-world-link {padding:13px}main.rch-pulse-page .rch-pulse-world-link small {font-size:11px}}

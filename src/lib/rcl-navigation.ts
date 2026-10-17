@@ -43,6 +43,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'Your identity, conversations and personalized basketball world',
     items:[
       {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'Living World · Virginia basketball',href:'/world',icon:FaGlobe},
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
       {label:'Communities',href:'/communities',icon:FaPeopleGroup},

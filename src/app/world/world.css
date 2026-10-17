@@ -1,0 +1,141 @@
+/* RCH Living World: isolated responsive game-world surface.
+ * Does not modify the installed PWA's existing Home, Runs or Discover layouts.
+ */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-living-world,
+.rcl-platform-root main.rch-living-world {
+  background:radial-gradient(ellipse at 88% 0%,#194a76 0%,transparent 37rem),#061525!important;
+  color:#ecf7ff!important;
+  isolation:isolate;
+}
+main.rch-living-world * {box-sizing:border-box;min-width:0}
+main.rch-living-world :is(h1,h2,h3,strong) {color:inherit!important}
+main.rch-living-world :is(a,button):focus-visible {outline:3px solid #9cdbff!important;outline-offset:4px}
+main.rch-living-world a {text-decoration:none}
+main.rch-living-world .rch-world-wrap {max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,36px) clamp(14px,3vw,32px) 80px}
+main.rch-living-world .rch-world-hero {
+  position:relative;min-height:355px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.75fr);
+  overflow:hidden;border:1px solid #3876a8;border-radius:30px;
+  background:radial-gradient(circle at 78% 46%,#1c5d91 0%,transparent 40%),linear-gradient(115deg,#0e3050 0%,#071827 72%);
+  box-shadow:0 24px 60px #0006;
+}
+main.rch-living-world .rch-world-hero:after {content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#5dc9ff,#f1b85f,#5dc9ff)}
+main.rch-living-world .rch-world-hero-body {position:relative;z-index:1;align-self:center;padding:clamp(24px,4vw,50px)}
+main.rch-living-world .rch-world-kicker,
+main.rch-living-world .rch-world-eyebrow {display:inline-flex;align-items:center;gap:7px;color:#9ed8ff!important;font-size:11px;font-weight:900;letter-spacing:.12em}
+main.rch-living-world .rch-world-hero h1 {margin:18px 0 16px;color:#fff!important;font-family:inherit;font-weight:950;letter-spacing:-.066em;line-height:.94;font-size:clamp(44px,6vw,80px)}
+main.rch-living-world .rch-world-hero h1 em {color:#8ccfff!important;font-style:normal}
+main.rch-living-world .rch-world-hero p {max-width:50ch;color:#c8deee!important;font-size:clamp(14px,1.4vw,16px);line-height:1.65}
+main.rch-living-world .rch-world-hero-actions {display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+main.rch-living-world .rch-world-primary,
+main.rch-living-world .rch-world-secondary {
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:49px;
+  border-radius:13px;padding:12px 18px;font-size:13px;font-weight:850;
+  transition:transform .18s,background .18s;
+}
+main.rch-living-world .rch-world-primary {background:#7ac6fc!important;color:#06233a!important}
+main.rch-living-world .rch-world-secondary {border:1px solid #6899bb;background:#123c5c!important;color:#f5fbff!important}
+main.rch-living-world .rch-world-primary:hover,
+main.rch-living-world .rch-world-secondary:hover {transform:translateY(-2px)}
+main.rch-living-world .rch-world-hero-art {position:relative;display:grid;place-items:center;overflow:hidden}
+main.rch-living-world .rch-world-ring {position:absolute;aspect-ratio:1;border-radius:50%}
+main.rch-living-world .ring-outer {width:295px;border:2px solid #4eacdd75;box-shadow:0 0 65px #4595d94b,inset 0 0 40px #2f8cdb35;transform:rotate(-20deg) scaleX(.85)}
+main.rch-living-world .ring-inner {width:228px;border:17px solid #173f68;box-shadow:0 0 0 2px #7dd5ff66,0 0 0 12px #0c2a46}
+main.rch-living-world .rch-world-monogram {position:relative;z-index:1;font-size:170px;line-height:1;font-weight:1000;font-style:italic;letter-spacing:-.13em;text-shadow:0 9px 10px #021226,0 0 30px #56bfff;color:#e4f8ff;padding-right:20px}
+main.rch-living-world .rch-world-art-caption {position:absolute;bottom:23px;color:#96d8ff;font-size:11px;font-weight:950;letter-spacing:.25em}
+main.rch-living-world .rch-world-jump {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 25px}
+main.rch-living-world .rch-world-jump a {display:flex;gap:11px;align-items:center;min-height:63px;border:1px solid #396589;border-radius:15px;padding:14px;background:#0e2b44!important;color:#e8f6ff!important;font-size:13px;font-weight:850;transition:border-color .18s,transform .18s}
+main.rch-living-world .rch-world-jump a svg:first-child {flex:0 0 auto;color:#81c9f7}
+main.rch-living-world .rch-world-jump a svg:last-child {margin-left:auto;opacity:.7}
+main.rch-living-world .rch-world-jump a:hover {border-color:#91d7ff;transform:translateY(-2px)}
+main.rch-living-world .rch-world-columns {display:grid;grid-template-columns:minmax(0,1.6fr) minmax(275px,.8fr);align-items:start;gap:20px}
+main.rch-living-world .rch-world-feed, main.rch-living-world .rch-world-panel {
+  border:1px solid #355e80;border-radius:21px;background:#0b2339!important;color:#edf8ff!important;
+  box-shadow:0 16px 38px #0003;
+}
+main.rch-living-world .rch-world-feed {padding:clamp(17px,2.5vw,27px)}
+main.rch-living-world .rch-world-section-head {display:flex;justify-content:space-between;align-items:start;gap:15px}
+main.rch-living-world .rch-world-section-head h2 {font-size:clamp(27px,3vw,36px);font-weight:950;letter-spacing:-.045em;margin:7px 0}
+main.rch-living-world .rch-world-section-head h2 span {color:#75c3fb!important}
+main.rch-living-world .rch-world-section-head p {max-width:54ch;font-size:12px;line-height:1.55;color:#b9d0e2!important}
+main.rch-living-world .rch-world-refresh {display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;min-height:42px;padding:8px 12px;border:1px solid #537d9d;border-radius:11px;background:#183851!important;color:#e1f3ff!important;font-size:12px;font-weight:800}
+main.rch-living-world .rch-world-refresh:disabled {opacity:.55}
+main.rch-living-world .rch-world-feed-controls {display:flex;align-items:center;justify-content:space-between;gap:13px;margin:22px 0 15px;flex-wrap:wrap}
+main.rch-living-world .rch-world-tabs {display:flex;gap:5px;overflow-x:auto;max-width:100%;padding:5px;background:#061b2b;border:1px solid #294a64;border-radius:13px;scrollbar-width:thin}
+main.rch-living-world .rch-world-tabs button {flex:0 0 auto;min-height:41px;white-space:nowrap;padding:10px 13px;border:0;border-radius:9px;color:#b4d2e8!important;font-size:12px;font-weight:850;background:transparent!important}
+main.rch-living-world .rch-world-tabs button.selected {background:#266fa9!important;color:#fff!important;box-shadow:0 5px 15px #0005}
+main.rch-living-world .rch-world-geo {display:flex;align-items:center;gap:11px;font-size:12px;color:#d5e9f9}
+main.rch-living-world .rch-world-geo>span {display:inline-flex;align-items:center;gap:5px;max-width:150px;font-weight:750}
+main.rch-living-world .rch-world-geo button,main.rch-living-world .rch-world-geo a {border:1px solid #467594;border-radius:9px;padding:9px;background:#153b58!important;color:#def2ff!important;font-weight:850}
+main.rch-living-world .rch-world-stream {display:grid;gap:11px}
+main.rch-living-world .rch-world-event {display:grid;grid-template-columns:48px minmax(0,1fr);gap:13px;padding:17px;border:1px solid #325a76;border-radius:16px;background:linear-gradient(125deg,#11334e,#0b2237)!important;transition:border-color .18s}
+main.rch-living-world .rch-world-event:hover {border-color:#66a8d3}
+main.rch-living-world .rch-world-event-symbol {display:grid;place-items:center;height:45px;border-radius:13px;background:#215f92;color:#f4faff;font-size:19px}
+main.rch-living-world .rch-world-event-territory .rch-world-event-symbol {background:#4c3b24;color:#ffe0a1}
+main.rch-living-world .rch-world-event-highlights .rch-world-event-symbol {background:#2b4f70;color:#a9dfff}
+main.rch-living-world .rch-world-event-meta,main.rch-living-world .rch-world-event-bottom {display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:7px}
+main.rch-living-world .rch-world-event-meta {font-size:10px;font-weight:850;letter-spacing:.035em;color:#a7d7f7}
+main.rch-living-world .rch-world-event-meta time {font-weight:550;color:#a8bfd2}
+main.rch-living-world .rch-world-event h3 {font-size:16px;font-weight:900;line-height:1.35;margin:7px 0;overflow-wrap:anywhere}
+main.rch-living-world .rch-world-event p {font-size:12px;line-height:1.65;color:#bbd2e4!important;overflow-wrap:anywhere}
+main.rch-living-world .rch-world-event-bottom {margin-top:14px;gap:12px;font-size:11px}
+main.rch-living-world .rch-world-event-bottom>span {display:inline-flex;align-items:center;gap:5px;color:#c6d7e6}
+main.rch-living-world .rch-world-event-bottom>a {display:inline-flex;align-items:center;gap:6px;color:#8dd3ff!important;font-weight:850}
+main.rch-living-world .rch-world-empty {display:grid;gap:10px;padding:30px;border:1px dashed #547996;border-radius:13px;text-align:center;color:#bfd6e8}
+main.rch-living-world .rch-world-empty strong {color:#f3faff!important;font-size:16px}
+main.rch-living-world .rch-world-empty p {font-size:13px}
+main.rch-living-world .rch-world-empty-actions {display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+main.rch-living-world .rch-world-empty-actions :is(button,a) {padding:10px 13px;border-radius:10px;background:#235981!important;color:white!important;font-weight:850}
+main.rch-living-world .rch-world-warning {margin:10px 0;padding:12px;border:1px solid #d5ac71;border-radius:11px;color:#ffe4bc!important;background:#52381a!important;font-size:12px}
+main.rch-living-world .rch-world-footnote {display:flex;gap:10px;margin:18px 0 0;font-size:11px;line-height:1.65;color:#a6c4db!important}
+main.rch-living-world .rch-world-footnote svg {flex:0 0 auto;margin-top:4px}
+main.rch-living-world .rch-world-side-column {display:grid;gap:16px}
+main.rch-living-world .rch-world-panel {padding:23px}
+main.rch-living-world .rch-world-panel h2 {font-size:clamp(21px,2.3vw,28px);font-weight:950;letter-spacing:-.035em;margin:11px 0 16px}
+main.rch-living-world .rch-world-muted,main.rch-living-world .rch-world-panel p {font-size:12px;line-height:1.65;color:#bed3e5!important}
+main.rch-living-world .rch-world-player {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+main.rch-living-world .rch-world-player>div {display:grid;align-content:start;gap:4px;padding:14px;border:1px solid #365f80;border-radius:13px;background:#13334d!important}
+main.rch-living-world .rch-world-player span,main.rch-living-world .rch-world-balance span {font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#b4d6eb!important}
+main.rch-living-world .rch-world-player strong {font-size:27px;font-weight:950;line-height:1.2;color:#fff!important;font-variant-numeric:tabular-nums}
+main.rch-living-world .rch-world-player small {font-size:10px;color:#a8c2d5!important}
+main.rch-living-world .rch-world-balance {display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:18px;border-radius:14px;background:linear-gradient(110deg,#215e8c,#103951)!important}
+main.rch-living-world .rch-world-balance>div {display:grid;gap:4px}
+main.rch-living-world .rch-world-balance strong {font-size:29px;font-weight:950;font-variant-numeric:tabular-nums}
+main.rch-living-world .rch-world-balance>svg {font-size:29px;color:#a3dfff}
+main.rch-living-world .rch-world-side-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+main.rch-living-world .rch-world-side-actions a,main.rch-living-world .rch-world-signup,
+main.rch-living-world .rch-world-next a {display:inline-flex;justify-content:center;align-items:center;gap:7px;min-height:45px;border-radius:11px;padding:10px;background:#2b75ad!important;color:#fff!important;font-size:12px;font-weight:900}
+main.rch-living-world .rch-world-next {border-color:#a68c5b;background:linear-gradient(135deg,#263e49,#132a3f)!important}
+main.rch-living-world .rch-world-next a {margin-top:15px;background:#f0c277!important;color:#182633!important}
+main.rch-living-world .rch-world-principles {background:#092034!important}
+@media (max-width:950px){
+ main.rch-living-world .rch-world-columns {grid-template-columns:1fr}
+ main.rch-living-world .rch-world-side-column {grid-template-columns:repeat(2,minmax(0,1fr))}
+ main.rch-living-world .rch-world-principles {grid-column:span 2}
+}
+@media (max-width:670px){
+ main.rch-living-world .rch-world-wrap {padding:12px 12px 85px}
+ main.rch-living-world .rch-world-hero {grid-template-columns:1fr;min-height:0;border-radius:22px}
+ main.rch-living-world .rch-world-hero-body {padding:28px 23px 24px}
+ main.rch-living-world .rch-world-hero h1 {font-size:clamp(40px,10vw,57px)}
+ main.rch-living-world .rch-world-hero-art {height:110px;opacity:.45}
+ main.rch-living-world .rch-world-monogram {font-size:120px}
+ main.rch-living-world .rch-world-ring.ring-outer {width:160px}
+ main.rch-living-world .rch-world-ring.ring-inner {width:120px;border-width:9px}
+ main.rch-living-world .rch-world-art-caption {bottom:6px}
+ main.rch-living-world .rch-world-jump {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ main.rch-living-world .rch-world-jump a {min-height:59px;font-size:12px;padding:11px}
+ main.rch-living-world .rch-world-feed {padding:14px}
+ main.rch-living-world .rch-world-section-head {flex-wrap:wrap}
+ main.rch-living-world .rch-world-tabs {width:100%}
+ main.rch-living-world .rch-world-tabs button {flex:1 0 auto}
+ main.rch-living-world .rch-world-geo {width:100%;justify-content:space-between}
+ main.rch-living-world .rch-world-event {grid-template-columns:39px minmax(0,1fr);padding:13px;gap:10px}
+ main.rch-living-world .rch-world-event-symbol {height:38px;font-size:17px}
+ main.rch-living-world .rch-world-side-column {grid-template-columns:1fr}
+ main.rch-living-world .rch-world-principles {grid-column:auto}
+}
+@media (prefers-reduced-motion:reduce){
+ main.rch-living-world .rch-world-jump a,
+ main.rch-living-world .rch-world-primary,
+ main.rch-living-world .rch-world-secondary {transition:none!important}
+}

@@ -16,6 +16,7 @@ import {
 const nav = [
   { name: 'Home', href: '/' },
   { name: 'Discover', href: '/discover' },
+  { name: 'Living World', href: '/world' },
   { name: 'Runs', href: '/runs' },
   { name: 'Leagues', href: '/league' },
   { name: 'Social', href: '/pulse' },
