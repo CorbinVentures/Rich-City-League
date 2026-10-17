@@ -29,3 +29,23 @@ RCH has prior GIS and community records with identical site names that may descr
 This stage does **not** complete all Virginia Parks & Recreation departments or court-level audits. Staff still must verify hundreds of remaining agency inventories, inspect municipal GIS polygons, review precise basketball court centers and access restrictions, remove stale entries only with documented decisions, and address the separate operational question of organizer permits or gym reservations.
 
 Existing public Run listings that are **scheduled community pickup meetups** are not confirmed facility bookings and do not guarantee attendance.
+
+## Coastal city source additions: Chesapeake and Virginia Beach
+**Chesapeake — 7 outdoor basketball facilities** documented on the city’s current facilities directory:
+- James W. McNeil Park: https://www.cityofchesapeake.net/facilities/facility/details/James-W-McNeil-Park-47
+- Claire R. Askew Western Branch Park (half courts, first-come public use): https://www.cityofchesapeake.net/Facilities/Facility/Details/Western-Branch-Park-103
+- Chesapeake City Park: https://www.cityofchesapeake.net/facilities/facility/details/Chesapeake-City-Park-92
+- Indian River Park **north side**, at 1709 Rokeby Avenue, rather than the separate south-side trail entrance: https://www.cityofchesapeake.net/facilities/facility/details/Indian-River-Park-98
+- Crestwood Park (Park Side): https://www.cityofchesapeake.net/facilities/facility/details/Crestwood-Park-Park-Side-30
+- Campostella Square Park: https://www.cityofchesapeake.net/facilities/facility/details/Campostella-Square-Park-20
+- Dunedin Park – M. Anne Tregembo Park: https://www.cityofchesapeake.net/Facilities/Facility/Details/Dunedin-Park-M-Anne-Tregembo-Park-34
+
+**Virginia Beach — 3 additional outdoor parks** (distinct from existing City View and Little Island sites):
+- Level Green Park (two full-size basketball courts, upgrades completed): https://parks.virginiabeach.gov/outdoors/city-parks/level-green-park
+- Bayville Farms Park (three lighted basketball courts): https://parks.virginiabeach.gov/outdoors/city-parks/bayville-farms-park
+- Great Neck Park (three basketball courts): https://parks.virginiabeach.gov/outdoors/city-parks/great-neck-park
+
+These records are each one **park site**, not one physical basketball hoop. All 10 have official sourced street addresses and **NULL** precise court center coordinates pending separate review. Public park access does not imply guaranteed Run scheduling or that all individual hoops are available.
+
+### Combined expansion validation
+Migrations `20261017235500` and `20261017235600` succeeded together in `BEGIN; ... ROLLBACK` on connected Supabase, finding **13 Alexandria + 7 Chesapeake + 1 Hampton + 1 Roanoke + 3 Virginia Beach = 25 additional source-backed sites** with **zero invented GPS points**.
