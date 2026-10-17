@@ -220,6 +220,7 @@ export default function RunsWorldGame(){
   return()=>{alive=false;};
  },[db,selectedSlug,territories,crewNames]);
 
+ const battleCourtSlugs=useMemo(()=>courts.map(c=>c.slug),[courts]);
  const pins=useMemo(()=>buildCourtMapPins(courts,runs,{
   ownedCourts:territories.map(t=>t.court_slug),
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
@@ -358,7 +359,7 @@ export default function RunsWorldGame(){
      <span className="rwg-kicker">COMPETITIVE MODE / REAL-WORLD MATCHES</span><h2>Take the court. Defend the crown.</h2>
      <p>Battle for local Master titles and crew control through verified competitive games. Challenges and titles are recorded by the existing Court Dominion system.</p>
      <div className="rwg-mode-links"><Link href="/crews?intent=mine" className="rwg-primary">My Crew <FaArrowRight/></Link><Link href="/commonwealth" className="rwg-secondary">Commonwealth Cup</Link></div>
-     <WorldBattleScene cityName={city?.name||null} courtSlugs={courts.map(c=>c.slug)}
+     <WorldBattleScene cityName={city?.name||null} courtSlugs={battleCourtSlugs}
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
     </section>}
