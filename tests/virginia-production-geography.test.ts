@@ -2,6 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {censusBoundaryUrl,validVirginiaFeatures} from '../src/app/api/geo/virginia/route';
+import {countyBounds} from '../src/lib/virginia-geographic-bounds';
 const text=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 
 describe('RCH official 2026 Virginia geographic data',()=>{
@@ -34,6 +35,15 @@ describe('RCH official 2026 Virginia geographic data',()=>{
   expect(runs).toContain(".eq('verification_status','community')");
   expect(runs).toContain('leads={communityLeads}');
   expect(runs).toContain('not approved courts');
+ });
+});
+describe('Real county polygon camera framing',()=>{
+ it('uses the 2026 Chesterfield County geometry including multipart points',()=>{
+  const data={features:[{properties:{GEOID:'51041'},geometry:{type:'MultiPolygon',
+   coordinates:[[[[-77.8,37.1],[-77.3,37.1],[-77.3,37.5],[-77.8,37.1]]],
+                [[[-77.7,37.2],[-77.6,37.2],[-77.7,37.3],[-77.7,37.2]]]]}}]};
+  expect(countyBounds(data,'51041')).toEqual([[-77.8,37.1],[-77.3,37.5]]);
+  expect(countyBounds(data,'51760')).toBeNull();
  });
 });
 describe('RCH sourced court-coordinate correction control',()=>{
