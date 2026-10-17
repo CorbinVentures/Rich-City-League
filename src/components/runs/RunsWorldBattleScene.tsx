@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {FaArrowRight,FaArrowRotateRight,FaBolt,FaCrown,FaShieldHalved,FaBolt,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 
@@ -41,6 +41,7 @@ export function shortBattleDate(date:string|null){
 
 export function WorldBattleScene({cityName,courtSlugs,onSelectCourt}:{cityName:string|null;courtSlugs:readonly string[];onSelectCourt:(slug:string)=>void}){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
+ const requestRef=useRef(0);
  const [battles,setBattles]=useState<BattleDisplay[]>([]);
  const [filter,setFilter]=useState<'active'|'completed'>('active');
  const [busy,setBusy]=useState(false);
@@ -48,7 +49,7 @@ export function WorldBattleScene({cityName,courtSlugs,onSelectCourt}:{cityName:s
  const [revision,setRevision]=useState(0);
  const load=useCallback(async()=>{
   if(!db||!cityName||!courtSlugs.length){setBattles([]);setNotice('');return;}
-  let active=true;
+  const request=++requestRef.current;
   setBusy(true);setNotice('');
   try{
    const [takes,courts]=await Promise.all([
@@ -68,12 +69,12 @@ export function WorldBattleScene({cityName,courtSlugs,onSelectCourt}:{cityName:s
    ]);
    const crewNames=Object.fromEntries(((crews.data||[]) as {id:string;name:string}[]).map(c=>[c.id,c.name]));
    const starts=Object.fromEntries(((runs.data||[]) as {id:string;starts_at:string}[]).map(c=>[c.id,c.starts_at]));
-   if(active)setBattles(buildBattleDisplays(records,names,crewNames,starts));
+   if(request===requestRef.current)setBattles(buildBattleDisplays(records,names,crewNames,starts));
   }catch{
-   if(active){setBattles([]);setNotice('Battle records are temporarily unavailable. Court Dominion remains accessible below.');}
-  }finally{if(active)setBusy(false);}
- },[db,cityName,courtSlugs.join('|'),revision]);
- useEffect(()=>{void load();},[load]);
+   if(request===requestRef.current){setBattles([]);setNotice('Battle records are temporarily unavailable. Court Dominion remains accessible below.');}
+  }finally{if(request===requestRef.current)setBusy(false);}
+ },[db,cityName,courtSlugs,revision]);
+ useEffect(()=>{void load();return()=>{requestRef.current+=1;};},[load]);
  const visible=battles.filter(b=>filter==='active'?b.status!=='resolved':b.status==='resolved');
  const activeCount=battles.filter(b=>b.status!=='resolved').length;
  const completedCount=battles.filter(b=>b.status==='resolved').length;
