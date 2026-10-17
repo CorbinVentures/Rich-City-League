@@ -120,7 +120,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
    </div>
   </div>
   {court?<div className="border-t border-[#315978] p-5 sm:p-7">
-   <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-xl font-black">{selected?.name||'Virginia basketball court'}</h3><p className="text-xs text-[#98c1db]">{selected?.locality||'Virginia'} · verified court ladders</p></div><Link className="rounded-xl bg-[#286fa8] px-4 py-3 text-xs font-bold" href={'/runs?court='+encodeURIComponent(court)}>Find Runs here</Link></div>
+   <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="text-xl font-black">{selected?.name||'Virginia basketball court'}</h3><p className="text-xs text-[#98c1db]">{selected?.locality||'Virginia'} · verified court ladders</p></div><div className="flex flex-wrap gap-2"><Link className="rch-ux-btn-primary" href={'/runs/courts/'+encodeURIComponent(court)}>Explore Court →</Link><Link className="rch-ux-btn-secondary" href={'/runs?court='+encodeURIComponent(court)}>Find Runs here</Link></div></div>
    {loading&&<p className="mt-3 text-xs">Checking verified results…</p>}
    {error&&<p className="mt-3 text-xs text-[#f6bda1]">{error}</p>}
    <CourtMasterTitles court={court}/>
