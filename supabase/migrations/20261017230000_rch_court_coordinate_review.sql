@@ -91,6 +91,7 @@ begin
       previous_latitude=v_court.latitude,previous_longitude=v_court.longitude
  where id=p_review;
  if p_approve then
+  perform set_config('rch.coordinate_approval','reviewed',true);
   update public.basketball_locations
     set latitude=v_review.proposed_latitude,longitude=v_review.proposed_longitude,
         updated_at=now()
@@ -107,6 +108,22 @@ begin
  return jsonb_build_object('court_slug',v_review.court_slug,'review_id',p_review,
   'approved',p_approve,'status',case when p_approve then 'approved' else 'rejected' end);
 end $$;
+-- Prevent ordinary staff form updates from silently bypassing evidence review.
+-- Service-role maintenance with no end-user JWT is not restricted.
+create function public.rch_guard_court_coordinates()
+returns trigger language plpgsql security definer set search_path='' as $
+begin
+ if (old.latitude is distinct from new.latitude or old.longitude is distinct from new.longitude)
+  and auth.uid() is not null
+  and coalesce(current_setting('rch.coordinate_approval',true),'')<>'reviewed'
+ then raise exception 'Court coordinates require an approved geographic review';
+ end if;
+ return new;
+end $;
+create trigger rch_guard_court_latlon_change
+ before update of latitude,longitude on public.basketball_locations
+ for each row execute function public.rch_guard_court_coordinates();
+
 revoke all on function public.rch_propose_court_coordinates(text,double precision,double precision,text,text) from public,anon,authenticated;
 revoke all on function public.rch_resolve_court_coordinate_review(uuid,boolean,text) from public,anon,authenticated;
 grant execute on function public.rch_propose_court_coordinates(text,double precision,double precision,text,text) to authenticated;
