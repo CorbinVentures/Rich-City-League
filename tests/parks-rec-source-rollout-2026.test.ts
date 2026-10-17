@@ -10,6 +10,8 @@ const world=file('src/components/runs/RunsWorldGame.tsx');
 const atlas=file('src/components/runs/AccurateVirginiaMap.tsx');
 const quality=file('src/app/admin/runs/map-quality/page.tsx');
 
+const sourceSql=file('supabase/migrations/20261017234700_official_parks_rec_facility_source_review.sql');
+const sourceWorkbench=file('src/app/admin/runs/facility-sources/page.tsx');
 describe('Official Virginia Parks & Recreation source expansion',()=>{
  it('imports official-source basketball places without invented court coordinates',()=>{
   expect(arlington).toContain('Arlington County Parks & Recreation');
@@ -48,5 +50,20 @@ describe('Official Virginia Parks & Recreation source expansion',()=>{
   expect(quality).toContain('Source needed');
   expect(quality).toContain('jurisdiction audit');
   expect(quality).toContain('officialLocalities');
+ });
+ it('allows staff to submit official government basketball evidence while keeping the verified directory protected',()=>{
+  expect(sourceSql).toContain('rch_official_facility_reviews');
+  expect(sourceSql).toContain('enable row level security');
+  expect(sourceSql).toContain('public.is_staff_or_admin()');
+  expect(sourceSql).toContain('rch_submit_official_basketball_facility');
+  expect(sourceSql).toContain('rch_review_official_basketball_facility');
+  expect(sourceSql).toContain("v_row.status<>'pending'");
+  expect(sourceSql).toContain('null,null');
+  expect(sourceSql).toContain("char_length(trim(p_reason)) not between 24 and 2000");
+  expect(sourceSql).not.toContain('insert into public.rch_rep_wallets');
+  expect(sourceWorkbench).toContain("db.rpc('is_staff_or_admin')");
+  expect(sourceWorkbench).toContain("rch_submit_official_basketball_facility");
+  expect(sourceWorkbench).toContain("rch_review_official_basketball_facility");
+  expect(quality).toContain('/admin/runs/facility-sources');
  });
 });
