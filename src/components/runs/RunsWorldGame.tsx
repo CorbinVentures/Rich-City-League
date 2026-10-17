@@ -26,9 +26,14 @@ type Passport={run_rep:number;verified_games:number;badges:string[];last_results
 type PlayerStats={socialLevel:number|null;socialXp:number|null;repBalance:number|null;passport:Passport|null};
 const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,passport:null};
 // County-only Parks & Rec discovery area, not a new statewide Circuit city.
-const parksRecArea:VirginiaCity={id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'};
-const runsAreaOptions=[...VIRGINIA_CITIES,parksRecArea];
-const cityTabs=VIRGINIA_CITIES.filter(city=>city.major);
+const parksRecAreas:VirginiaCity[]=[
+ {id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'},
+ {id:'arlington',name:'Arlington',lat:38.88,lon:-77.10,landmark:'Arlington County',symbol:'🏀'},
+ {id:'prince-william',name:'Prince William',lat:38.67,lon:-77.45,landmark:'Prince William County',symbol:'🏀'},
+ {id:'shenandoah',name:'Shenandoah',lat:38.83,lon:-78.59,landmark:'Shenandoah County',symbol:'🏀'}
+];
+const runsAreaOptions=[...VIRGINIA_CITIES,...parksRecAreas];
+const cityTabs=[...VIRGINIA_CITIES.filter(city=>city.major),...parksRecAreas];
 const nav:{id:Screen;title:string;icon:typeof FaCompass}[]=[
  {id:'world',title:'World',icon:FaCompass},
  {id:'battle',title:'Battle',icon:FaBolt},
@@ -89,7 +94,7 @@ export default function RunsWorldGame(){
 
  useEffect(()=>{setCityId(location.cityId||null);},[location.cityId]);
  const enterCity=useCallback((next:VirginiaCity)=>{
-   setCityId(next.id);if(next.id!=='henrico')chooseCity(next.id);setSelectedSlug(null);
+   setCityId(next.id);if(!parksRecAreas.some(area=>area.id===next.id))chooseCity(next.id);setSelectedSlug(null);
    setScreen('world');
  },[chooseCity]);
  const exitCity=useCallback(()=>{
@@ -129,8 +134,8 @@ export default function RunsWorldGame(){
     // substring, which can include a neighboring county or exclude postal aliases.
     const cityRuns=((runResult.data||[]) as WorldRun[]).filter(r=>matchesRunToCourts(r,citySlugs));
     setRuns(cityRuns);
-    if(city.id==='chesterfield'&&nextCourts.some(c=>c.latitude===null||c.longitude===null))
-     setCoverageWarning('Chesterfield courts are recorded but their exact facility coordinates need verification. Their addresses remain discoverable; no fake precision pins are shown.');
+    if(nextCourts.some(c=>c.latitude===null||c.longitude===null))
+     setCoverageWarning('Official Parks & Recreation basketball facilities are listed, but some lack facility-verified coordinates. Their source records remain searchable; no guessed precision pins are shown.');
     setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
     if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
     if((courtResult.data||[]).length===300||runResult.truncated)
@@ -310,7 +315,7 @@ export default function RunsWorldGame(){
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
      <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>

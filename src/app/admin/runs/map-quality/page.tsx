@@ -12,6 +12,7 @@ type Court={slug:string;name:string;address:string;locality:string;latitude:numb
 type Proposal={id:string;court_slug:string;proposed_latitude:number;proposed_longitude:number;
  evidence_url:string;evidence_notes:string;status:string;submitted_at:string;submitted_by:string;reviewed_at:string|null};
 type Audit={id:number;court_slug:string;action:string;occurred_at:string;review_notes:string};
+type CensusLocality={geoid:string;name:string};
 const matchesChesterfield=(locality:string)=>['chesterfield','north chesterfield','south chesterfield'].includes(locality.toLowerCase());
 function qualified(r:Court){return r.is_active&&verifiedParksRecFacility(r);}
 function coords(r:Court){return r.latitude!==null&&r.longitude!==null&&Number.isFinite(r.latitude)&&Number.isFinite(r.longitude);}
@@ -23,6 +24,7 @@ export default function StatewideCourtMapQuality(){
  const [items,setItems]=useState<Court[]>([]),[proposals,setProposals]=useState<Proposal[]>([]),[history,setHistory]=useState<Audit[]>([]);
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
  const [region,setRegion]=useState('Chesterfield'),[query,setQuery]=useState('');
+ const [officialLocalities,setOfficialLocalities]=useState<CensusLocality[]>([]),[censusUnavailable,setCensusUnavailable]=useState(false);
  const [mode,setMode]=useState<'needs-pin'|'mapped'|'community'|'all'|'reviews'>('needs-pin');
  const [selected,setSelected]=useState<string|null>(null),[decisionId,setDecisionId]=useState<string|null>(null);
  const [form,setForm]=useState(blank);
@@ -59,6 +61,21 @@ export default function StatewideCourtMapQuality(){
   finally{setLoading(false);}
  },[db,allowed]);
  useEffect(()=>{if(allowed)void refresh();},[allowed,refresh]);
+ useEffect(()=>{
+  if(!allowed)return;
+  let active=true;
+  void fetch('/api/geo/virginia?layer=counties',{cache:'force-cache'})
+   .then(r=>{if(!r.ok)throw Error('County data unavailable');return r.json();})
+   .then(data=>{
+    if(!active||!Array.isArray(data?.features))return;
+    const jurisdictions=data.features.map((f:{properties?:{GEOID?:string;NAME?:string}})=>({
+     geoid:f.properties?.GEOID||'',name:f.properties?.NAME||''
+    })).filter((c:CensusLocality)=>/^51[0-9]{3}$/.test(c.geoid)&&c.name)
+      .sort((a:CensusLocality,b:CensusLocality)=>a.name.localeCompare(b.name));
+    setOfficialLocalities(jurisdictions);setCensusUnavailable(false);
+   }).catch(()=>{if(active)setCensusUnavailable(true);});
+  return()=>{active=false;};
+ },[allowed]);
  if(!checked)return <main className="min-h-screen bg-[#071727] p-8 text-white">Verifying staff authorization…</main>;
  if(!allowed)return <main className="min-h-screen bg-[#071727] p-8 text-white"><h1 className="text-2xl font-black">Staff access required</h1><Link href="/runs" className="mt-4 inline-block text-sky-300">Return to Runs</Link></main>;
  const regions=[...new Set(items.map(c=>c.locality))].sort((a,b)=>a.localeCompare(b));
@@ -66,6 +83,16 @@ export default function StatewideCourtMapQuality(){
  const regionalQualified=regional.filter(qualified);
  const mapped=regionalQualified.filter(coords);
  const pending=proposals.filter(r=>r.status==='pending');
+ // Postal-locality matching is a coverage lead, NOT a GIS county assignment.
+ const sourceCountFor=(name:string)=>{
+  const clean=name.toLowerCase().replace(/\s+(county|city)$/,'');
+  return items.filter(c=>qualified(c)&&(
+   c.locality.toLowerCase()===clean
+   ||clean==='chesterfield'&&['chesterfield','north chesterfield','south chesterfield','chester'].includes(c.locality.toLowerCase())
+   ||clean==='henrico'&&['henrico','glen allen','sandston'].includes(c.locality.toLowerCase())
+  )).length;
+ };
+ const countiesWithListedSources=officialLocalities.filter(c=>sourceCountFor(c.name)>0).length;
  const normalized=query.trim().toLowerCase();
  const duplicateKeys=new Map<string,number>();
  regional.forEach(c=>{const key=(c.name+'|'+c.locality).toLowerCase().replace(/[^a-z0-9|]/g,'');duplicateKeys.set(key,(duplicateKeys.get(key)||0)+1);});
@@ -102,6 +129,7 @@ export default function StatewideCourtMapQuality(){
    <header className="mt-5">
     <p className="text-xs font-black uppercase tracking-[.15em] text-sky-300">RCH Geography Office · Staff Only</p>
     <h1 className="mt-2 text-3xl font-black">Virginia Court Map Operations</h1>
+    <Link href="/admin/runs/facility-sources" className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-sky-400/60 bg-sky-700/20 px-4 py-3 text-xs font-black text-sky-200">Submit / verify Parks & Rec sources →</Link>
     <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">Official city/county Parks & Recreation basketball courts, indoor gyms and mixed centers are verified facilities when supported by their Parks & Rec listing. Access and open-play schedules remain separate. Community map leads and private providers are not automatically Parks & Rec verified. Coordinate changes require evidence, review and an audit entry.</p>
    </header>
    {error&&<p className="mt-5 rounded-xl border border-red-400/60 bg-red-900/30 p-4 text-sm" role="alert">{error}</p>}
@@ -109,6 +137,29 @@ export default function StatewideCourtMapQuality(){
    <div className="mt-6 grid gap-3 md:grid-cols-4">
     {[[regional.length,'Recorded leads and venues'],[regionalQualified.length,'Parks & Rec basketball facilities'],[mapped.length,'Parks & Rec sites with coordinates'],[regionalQualified.length-mapped.length,'Parks & Rec pins to review']].map(([n,label])=><div key={label} className="rounded-2xl border border-sky-800 bg-[#103049] p-4"><strong className="text-3xl font-black">{loading?'…':n}</strong><p className="mt-1 text-xs text-slate-300">{label}</p></div>)}
    </div>
+   <section className="mt-6 rounded-2xl border border-sky-800 bg-[#0d2940] p-4" aria-label="Statewide Parks and Recreation geographic coverage">
+    <h2 className="text-lg font-black">Statewide official-source coverage</h2>
+    <p className="mt-2 text-xs leading-6 text-slate-300">All Virginia county and independent-city labels are sourced from the U.S. Census 2026. Numbers below count documented basketball facilities matched by postal locality name only. They do not represent a complete jurisdiction audit or precise physical court locations.</p>
+    {censusUnavailable?<p role="status" className="mt-3 text-xs text-amber-200">The official county coverage index is temporarily unavailable. Verified facility records remain available below.</p>:officialLocalities.length===0?<p className="mt-3 text-xs text-slate-300">Loading official jurisdictions…</p>:<>
+     <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="rounded-lg bg-[#173c55] p-3"><strong className="block text-2xl">{officialLocalities.length}</strong><small>Official jurisdictions</small></div>
+      <div className="rounded-lg bg-[#173c55] p-3"><strong className="block text-2xl">{countiesWithListedSources}</strong><small>With a listed source record</small></div>
+      <div className="rounded-lg bg-[#173c55] p-3"><strong className="block text-2xl">{officialLocalities.length-countiesWithListedSources}</strong><small>Without a matched source listing</small></div>
+     </div>
+     <details className="mt-4">
+      <summary className="cursor-pointer py-2 text-sm font-bold text-sky-200">Inspect all county and city coverage leads</summary>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+       {officialLocalities.map(c=>{
+        const count=sourceCountFor(c.name);
+        return <div key={c.geoid} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#092036] p-3 text-xs">
+         <span>{c.name}<span className="ml-2 text-slate-400">{c.geoid}</span></span>
+         <span className={count?'font-black text-emerald-300':'text-amber-300'}>{count?count+' listed':'Source needed'}</span>
+        </div>;
+       })}
+      </div>
+     </details>
+    </>}
+   </section>
    <div className="mt-5 flex flex-wrap gap-3">
     <label className="text-xs font-bold text-slate-200">Review region
      <select value={region} onChange={e=>setRegion(e.target.value)} className="mt-1 block min-h-11 rounded-lg border border-sky-800 bg-[#0c2c44] p-2 text-sm">
