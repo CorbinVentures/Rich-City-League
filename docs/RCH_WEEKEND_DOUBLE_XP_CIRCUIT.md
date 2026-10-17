@@ -29,3 +29,13 @@
 
 ## Release gates
 Run test/type-check/lint/build, full migration replay, RLS tests and Vercel preview checks. In a transaction that is rolled back, verify four-court eligibility, one Saturday + one Sunday listing per city, alternating city court slots, no duplicate records on second invocation, and client inability to create featured entries. After release, monitor cron job history and event listing health. Municipal venue access must still be independently verified.
+
+## Statewide target coverage and operational readiness
+
+- The expanded city target registry tracks all **30** named RCH Virginia World city anchors plus **North Chesterfield** (**31** targets total; 14 marked major). Each target is visible in the staff-only **Weekend Circuit Command** page at `/admin/runs/weekend-circuit`, linked from staff controls on Runs.
+- A live, read-only coverage view reports approved public outdoor park candidates, existing four-court assignments, current future Runs, and independent unverified site counts. `scheduled` is not used unless future circuit Runs actually exist.
+- A city is listed as `needs_venue_verification` while fewer than four qualified park sites exist. A mapped OpenStreetMap/GIS record marked `community` does not prove access; it cannot be promoted by the scheduler. Staff must verify and update the court directory using authoritative evidence and local access rules first.
+- Once four appropriately verified public outdoor parks exist, administrators use four assignment controls for slots 1–4 (Week A Saturday/Sunday and Week B Saturday/Sunday). The existing daily scheduler creates event listings automatically. Existing events retain their original locations; changing the pool does not silently edit RSVPs.
+- As of the October 17, 2026 connected-directory audit, only **Richmond** and **Newport News** have four configured qualifying parks. Other major city locations are mapped, but those data are not yet confirmed as eligible for public unreserved pickup.
+- City registry inclusion is **coverage accountability, not a claim that weekend events are live everywhere**. City expansion requires park verification and, operationally, a local organizer and independent score-verification capability to substantiate any boosted rewards.
+
