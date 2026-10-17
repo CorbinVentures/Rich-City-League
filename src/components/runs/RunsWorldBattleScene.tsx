@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {FaArrowRight,FaArrowRotateRight,FaBolt,FaCrown,FaShieldHalved,FaBolt,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaArrowRotateRight,FaBolt,FaCrown,FaShieldHalved} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {buildBattleDisplays,shortBattleDate,phase,type BattleChallengeRow as Challenge,type BattleDisplay} from '@/lib/runs-world-battles';
 
