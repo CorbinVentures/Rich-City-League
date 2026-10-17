@@ -4,11 +4,12 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 import {verifiedParksRecFacility} from '@/lib/runs-world-game';
+import {duplicateCourtReviews} from '@/lib/parks-rec-duplicate-audit';
 import {FaArrowLeft,FaArrowRotateRight,FaMapLocationDot,FaTriangleExclamation,FaCheck,FaArrowUpRightFromSquare} from 'react-icons/fa6';
 
 type Court={slug:string;name:string;address:string;locality:string;latitude:number|null;longitude:number|null;
  source_url:string|null;source_label:string|null;verification_status:string;access_type:string;
- venue_type:string;is_active:boolean;last_verified_on:string|null};
+ venue_type:string;is_active:boolean;last_verified_on:string|null;notes:string|null};
 type Proposal={id:string;court_slug:string;proposed_latitude:number;proposed_longitude:number;
  evidence_url:string;evidence_notes:string;status:string;submitted_at:string;submitted_by:string;reviewed_at:string|null};
 type Audit={id:number;court_slug:string;action:string;occurred_at:string;review_notes:string};
@@ -50,7 +51,7 @@ export default function StatewideCourtMapQuality(){
    const all:Court[]=[];
    for(let start=0;start<6000;start+=500){
     const {data,error}=await db.from('basketball_locations')
-     .select('slug,name,address,locality,latitude,longitude,source_url,source_label,verification_status,access_type,venue_type,is_active,last_verified_on')
+     .select('slug,name,address,locality,latitude,longitude,source_url,source_label,verification_status,access_type,venue_type,is_active,last_verified_on,notes')
      .order('slug').range(start,start+499);
     if(error)throw error;
     all.push(...(data||[]));
@@ -94,8 +95,7 @@ export default function StatewideCourtMapQuality(){
  };
  const countiesWithListedSources=officialLocalities.filter(c=>sourceCountFor(c.name)>0).length;
  const normalized=query.trim().toLowerCase();
- const duplicateKeys=new Map<string,number>();
- regional.forEach(c=>{const key=(c.name+'|'+c.locality).toLowerCase().replace(/[^a-z0-9|]/g,'');duplicateKeys.set(key,(duplicateKeys.get(key)||0)+1);});
+ const duplicateGroups=duplicateCourtReviews(regional);
  const matches=regional.filter(c=>{
   if(normalized&&!([c.name,c.address,c.locality,c.slug].join(' ').toLowerCase().includes(normalized)))return false;
   return mode==='all'||mode==='reviews'?false:mode==='community'?c.verification_status==='community':
@@ -175,7 +175,24 @@ export default function StatewideCourtMapQuality(){
    {loading?<p className="mt-7 text-sm text-slate-300" role="status">Auditing the statewide venue registry…</p>:
    mode==='all'?<section className="mt-6 space-y-3">
     <h2 className="text-xl font-black">Coverage and audit overview</h2>
-    <p className="text-sm text-slate-300">Potential duplicate names in this selection: {Array.from(duplicateKeys.values()).filter(n=>n>1).length} groups. These are review leads only; no records were merged automatically.</p>
+    <p className="text-sm text-slate-300">Potential repeated court names in this selection: {duplicateGroups.length} groups. Multiple court surfaces can share a name, so this report never automatically merges, deletes or transfers a venue&apos;s competitive history.</p>
+    <details className="rounded-xl border border-sky-800 bg-[#0b2942] p-4">
+     <summary className="cursor-pointer text-sm font-bold text-sky-200">Investigate duplicate court candidates ({duplicateGroups.length})</summary>
+     <div className="mt-4 space-y-3">
+      {duplicateGroups.slice(0,80).map(group=><article key={group.key} className="rounded-xl border border-white/15 bg-[#061d30] p-3">
+       <h3 className="text-sm font-black">{group.name} · {group.locality}</h3>
+       <p className="mt-2 text-xs text-amber-200">{group.candidates.length} records · {group.officialCount} sourced · {group.communityCount} community · Closest recorded pair: {group.nearestMeters===null?'Coordinates unavailable':group.nearestMeters+' meters'}</p>
+       <p className="mt-1 text-xs text-slate-300">{group.reviewHint}</p>
+       <div className="mt-3 grid gap-2">
+        {group.candidates.slice(0,10).map(c=><div key={c.slug} className="flex flex-wrap justify-between gap-2 rounded-lg border border-white/10 bg-[#112d43] px-3 py-2 text-xs">
+         <span className="break-all">{c.slug} · {c.verification_status} · {c.source_label||'No source label'}</span>
+         {c.source_url?.startsWith('https://')&&<a href={c.source_url} target="_blank" rel="noopener noreferrer" className="shrink-0 font-bold text-sky-200">Source ↗</a>}
+        </div>)}
+       </div>
+      </article>)}
+      {duplicateGroups.length>80&&<p className="text-xs text-amber-200">Showing the first 80 candidate groups. Narrow the locality filter for additional records.</p>}
+     </div>
+    </details>
     {history.map(a=><article key={a.id} className="rounded-xl border border-white/15 bg-[#0b2942] p-3 text-xs"><strong>{a.action.toUpperCase()} · {a.court_slug}</strong><p className="mt-1 text-slate-300">{new Date(a.occurred_at).toLocaleString()} · {a.review_notes}</p></article>)}
    </section>:mode==='reviews'?<section className="mt-6 space-y-3">
     <h2 className="text-xl font-black">Submitted coordinate evidence</h2>
@@ -196,7 +213,9 @@ export default function StatewideCourtMapQuality(){
     <p className="text-xs text-slate-400">Displaying {Math.min(matches.length,300)} court records. Refine the name or locality to reduce results. Numeric coordinates on file are not proof of court-level accuracy.</p>
     {!matches.length&&<p className="rounded-xl border border-white/15 p-4 text-sm">No matching courts in this category.</p>}
     {matches.map(c=><article key={c.slug} className="rounded-2xl border border-white/15 bg-[#0d2940] p-4">
-     <div className="flex flex-wrap justify-between gap-3"><div><strong>{c.name}</strong><p className="mt-1 text-xs text-slate-300">{c.address} · {c.locality}</p><p className="mt-1 text-xs text-sky-200">{c.verification_status} · {c.access_type} · {c.venue_type}</p></div>
+     <div className="flex flex-wrap justify-between gap-3"><div><strong>{c.name}</strong><p className="mt-1 text-xs text-slate-300">{c.address} · {c.locality}</p><p className="mt-1 text-xs text-sky-200">{c.verification_status} · {c.access_type} · {c.venue_type}</p>{!qualified(c)&&c.source_label==='City of Newport News Parks GIS'&&
+      (c.name.startsWith('ES-')||(c.notes||'').toLowerCase().includes('no court'))&&
+      <p className="mt-2 text-xs font-bold text-amber-200">Municipal GIS review required: school-site access or no playable basketball court. Not verified as an RCH Parks & Rec playing site.</p>}</div>
       <span className={'rounded-lg border px-3 py-2 text-xs '+(qualified(c)&&coords(c)?'border-emerald-500/40 text-emerald-200':'border-amber-400/40 text-amber-200')}>
        {qualified(c)&&coords(c)?<FaCheck className="mr-1 inline"/>:<FaTriangleExclamation className="mr-1 inline"/>}{qualified(c)?coords(c)?'Coordinates on file':'Location needs review':'Community / restricted'}
       </span></div>
