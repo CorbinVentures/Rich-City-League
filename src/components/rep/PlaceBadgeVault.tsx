@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import SkillMasteryCollection from './SkillMasteryCollection';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaBasketball,FaBolt,FaCrown,FaGem,FaLocationDot,FaRoute,FaShieldHalved,FaTicket,FaTrophy,FaUsers,FaVideo} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
@@ -66,6 +67,9 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
  const [view,setView]=useState<'earned'|'catalog'>('earned');
  const [crewAwards,setCrewAwards]=useState<{badge_code:string;place_label:string;locality:string;court_slug:string;crew_id:string}[]>([]);
  const [loaded,setLoaded]=useState(false);
+ const [pins,setPins]=useState<Array<{award_id:string;slot:number}>>([]);
+ const [pinBusy,setPinBusy]=useState<string|null>(null);
+ const [pinError,setPinError]=useState('');
  const target=profileId||user?.id;
  const load=useCallback(async()=>{
   if(!db)return;
@@ -74,17 +78,34 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
   if(target){
    const {data:mine}=await db.from('rch_place_badge_awards').select('id,badge_code,court_slug,scope_key,place_label,locality,source_kind,earned_at').eq('profile_id',target).order('earned_at',{ascending:false}).limit(120);
    setAwards((mine??[]) as Award[]);
+   const {data:pinRows}=await db.from('rch_badge_showcase_pins').select('award_id,slot').eq('profile_id',target).order('slot').limit(5);
+   setPins((pinRows??[]) as Array<{award_id:string;slot:number}>);
    const {data:teams}=await db.from('commonwealth_crew_members').select('crew_id').eq('profile_id',target).limit(20);
    const ids=(teams??[]).map((x:{crew_id:string})=>x.crew_id);
    if(ids.length){
     const {data:c}=await db.from('rch_crew_badge_awards').select('badge_code,place_label,locality,court_slug,crew_id').in('crew_id',ids).limit(60);
     setCrewAwards(c??[]);
    }else setCrewAwards([]);
-  } else {setAwards([]);setCrewAwards([]);}
+  } else {setAwards([]);setCrewAwards([]);setPins([]);}
   setLoaded(true);
  },[db,target]);
  useEffect(()=>{void load();},[load]);
  const byCode=new Map(blueprints.map(b=>[b.code,b]));
+ const owner=Boolean(user?.id&&target===user.id);
+ const togglePin=async(awardId:string)=>{
+  if(!db||!owner||pinBusy)return;
+  setPinError('');setPinBusy(awardId);
+  const pinned=pins.some(p=>p.award_id===awardId);
+  const slot=([1,2,3,4,5] as const).find(n=>!pins.some(p=>p.slot===n));
+  if(!pinned&&!slot){setPinError('Your showcase already has five medals. Unpin one to add another.');setPinBusy(null);return;}
+  const request=pinned
+   ?db.from('rch_badge_showcase_pins').delete().eq('profile_id',target).eq('award_id',awardId)
+   :db.from('rch_badge_showcase_pins').insert({profile_id:target,award_id:awardId,slot});
+  const {error:failure}=await request;
+  if(failure)setPinError(failure.message);
+  else await load();
+  setPinBusy(null);
+ };
  return <section aria-label="RCH geographic achievements" className="mt-9">
   <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/15 pb-4">
    <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#a1d7ff]">Location authenticated • Original collectible artwork</p>
@@ -93,6 +114,12 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
    </div>
    <Link href="/rep" className="flex min-h-11 items-center gap-2 rounded-xl border border-[#6a91b4] px-4 text-xs font-black text-[#b8dfff]"><FaBolt/> Open REP Exchange</Link>
   </div>
+  {pinError&&<p role="alert" className="mt-4 rounded-lg border border-amber-500/40 p-3 text-xs text-amber-200">{pinError}</p>}
+  {pins.length>0&&<div className="mt-5 rounded-2xl border border-[#9e8056] bg-[#172b3e] p-4">
+   <h3 className="text-xs font-black uppercase tracking-[.15em] text-[#ffdd98]">Featured Legacy · Top Five</h3>
+   <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{pins.map(p=>{const a=awards.find(a=>a.id===p.award_id);const b=a?byCode.get(a.badge_code):null;return a&&b?<div key={p.award_id} className="rounded-xl border border-[#826e4a] bg-[#0d2135] p-2 text-center"><PlaceBadgeMedal badge={b} place={a.place_label} earned compact/><p className="mt-2 text-xs font-black text-[#f5dfb0]">{b.display_name}</p><p className="mt-1 text-[10px] text-[#9ebbd1]">{a.place_label}</p></div>:null;})}</div>
+  </div>}
+  {owner&&<p className="mt-3 text-[11px] text-[#a5c3db]">Pin up to five verified location medals to your public profile ({pins.length}/5).</p>}
   <div className="mt-4 flex flex-wrap gap-2">
    <button onClick={()=>setView('earned')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='earned'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Earned medals ({awards.length})</button>
    <button onClick={()=>setView('catalog')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='catalog'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Unlock Collection ({blueprints.length})</button>
@@ -105,6 +132,7 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
       <h3 className="mt-1 text-sm font-black">{b.display_name}</h3>
       <p className="mt-1 text-[11px] text-[#b4d2e7]"><FaLocationDot className="mr-1 inline"/>{a.place_label}</p>
       <p className="mt-2 text-[10px] text-[#879eb8]">{new Date(a.earned_at).toLocaleDateString()}</p>
+      {owner&&<button type="button" disabled={pinBusy!==null} onClick={()=>void togglePin(a.id)} className="mt-3 min-h-10 rounded-lg border border-[#587d9a] px-3 text-[11px] font-black text-[#e3d39b] disabled:opacity-50" aria-label={(pins.some(p=>p.award_id===a.id)?'Unpin ':'Pin ')+b.display_name+' from '+a.place_label}>{pins.some(p=>p.award_id===a.id)?'Unpin from Top Five':'Pin to Top Five'}</button>}
      </article>:null;})}
      {!awards.length&&<div className="col-span-full rounded-2xl border border-dashed border-[#45698b] p-7 text-center text-[#adc6d9]">
       <FaTrophy className="mx-auto mb-3 text-3xl"/><strong>Collect your first verified court medal.</strong>
@@ -125,5 +153,6 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
     <h3 className="flex items-center gap-2 text-sm font-black uppercase text-[#edd4a1]"><FaUsers/> Your Crew Territory Medals</h3>
     <div className="mt-3 flex flex-wrap gap-2">{crewAwards.map((c,i)=><span key={c.crew_id+':'+c.court_slug+':'+i} className="rounded-full border border-[#90754d] bg-[#282c35] px-3 py-2 text-xs">Territory Taker · {c.place_label}</span>)}</div>
    </div>}
+  <SkillMasteryCollection profileId={target}/>
  </section>;
 }

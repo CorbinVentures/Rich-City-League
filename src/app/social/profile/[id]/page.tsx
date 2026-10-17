@@ -308,6 +308,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
         {activeTab==='career'&&<CareerTab basketball={basketball} rows={careerRows} authorMap={authorMap} />}
         {activeTab==='badges'&&<BadgesTab name={name} username={profile.username} repLabel={repLabel} repStatus={repStatus.label} socialLevel={socialLevel} followers={followers ?? 0} latestAchievement={latestAchievement} allBadges={allBadges} repRows={repRows} nextLevelXp={nextLevelXp} rep={rep} />}
+        {activeTab==='badges' && <PlaceBadgeVault profileId={id}/>}
         {activeTab==='media'&&<MediaTab rows={mediaRows} />}
         {activeTab==='coach'&&(coachIdentity?<CoachMemberTab identity={coachIdentity} awards={(earnedCoachBadges??[]) as any[]}/>:<EmptyTab title="Coaching details are not published" copy="Coach identity is optional and controlled by each member."/>)}
       </section>
