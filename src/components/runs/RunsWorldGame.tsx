@@ -290,7 +290,7 @@ export default function RunsWorldGame(){
       <AccurateVirginiaMap city={city} points={pins} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data. The Virginia outline is sourced from VDOT/VGIN. Court markers use recorded coordinates only. No GPS permission required.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data. The Virginia outline is sourced from VDOT/VGIN. Court markers use recorded coordinates only. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
