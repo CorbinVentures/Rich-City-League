@@ -39,3 +39,13 @@ Run test/type-check/lint/build, full migration replay, RLS tests and Vercel prev
 - As of the October 17, 2026 connected-directory audit, only **Richmond** and **Newport News** have four configured qualifying parks. Other major city locations are mapped, but those data are not yet confirmed as eligible for public unreserved pickup.
 - City registry inclusion is **coverage accountability, not a claim that weekend events are live everywhere**. City expansion requires park verification and, operationally, a local organizer and independent score-verification capability to substantiate any boosted rewards.
 
+## October 17: two-park activation for major Virginia cities
+
+- Major = `is_major` in the existing 31-market Virginia World registry: **14 major cities**. Minimum activation has changed from four to **two** independently documented, public outdoor basketball parks per major city.
+- Each major city's first two slots are the recurring **Saturday 11 a.m.** and **Sunday 3 p.m.** suggested unstaffed pickup destinations. If four distinct qualified parks are configured, the original alternating-weekend pool (slots 1–2 then 3–4) remains active.
+- The new migration creates **24 official-source park directory records across 12 new cities**, each with its municipal citation URL, public location, and access limitations. Combined with the existing Richmond and Newport News circuits, all **14 current major city targets** can be scheduled subject to their continued public access eligibility. A documented city park is **not** a park reservation, an RCH-staffed event, or proof a referee is on site.
+- Half-court warning: Fairfax's Fairchester Woods Park is publicly documented as a **half basketball court**; only formats suitable for a half court should be played there. Municipal programming, existing reservations, site closures and venue conditions take precedence.
+- The database scheduler preserves one featured listing per city/day even when a city upgrades from two to four sites, preventing duplicate announcements; it also avoids changing an existing RSVP venue silently.
+- Only **verified competitive match REP and reviewed statistical REP** are doubled; ordinary check-ins, highlights and user-created Runs remain normal.
+- This is the **municipal court directory verification phase**, not a claim of advance permission from every city to run organized events. Tournament-scale or exclusive activities must obtain permits and local operator support.
+
