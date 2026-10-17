@@ -15,7 +15,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,readPagedUpcomingRuns,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
 
 type Screen='world'|'battle'|'missions'|'vault'|'player';
@@ -103,10 +103,10 @@ export default function RunsWorldGame(){
    try{
     const [courtResult,runResult,featuredResult]=await Promise.all([
      db.from('basketball_locations')
-      .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_url,hours_text')
+      .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text')
       .eq('is_active',true).in('locality',localityNames(city))
-      .eq('access_type','public').eq('venue_type','outdoor')
       .in('verification_status',['official','provider'])
+      .in('venue_type',['outdoor','indoor','mixed'])
       .order('name').range(0,299),
      readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
       .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
@@ -119,7 +119,7 @@ export default function RunsWorldGame(){
     if(!alive)return;
     if(courtResult.error)throw courtResult.error;
     if(runResult.error)throw runResult.error;
-    const nextCourts=(courtResult.data||[]) as WorldCourt[];
+    const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(verifiedParksRecFacility);
     setCourts(nextCourts);
     const citySlugs=new Set(nextCourts.map(c=>c.slug));
     // Filter Runs by their canonical court relationship, not a fragile city
@@ -131,7 +131,7 @@ export default function RunsWorldGame(){
     setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
     if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
     if((courtResult.data||[]).length===300||runResult.truncated)
-      setWarning('Court display is capped at 300 verified locations and the Run lookup at 2,000 statewide. Additional results may exist.');
+      setWarning('Parks & Recreation display is capped at 300 sourced facilities and the Run lookup at 2,000 statewide. Additional results may exist.');
     const slugs=nextCourts.map(c=>c.slug);
     // Only actual confirmed title history and genuine requested/accepted
     // crew challenges contribute to the cinematic local world pulse.
@@ -291,7 +291,7 @@ export default function RunsWorldGame(){
    {screen==='world'&&<>
     <div className="rwg-hud" aria-label="Your game-world overview">
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
-     <div><small>VERIFIED COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
+     <div><small>PARKS & REC COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
     </div>
@@ -310,7 +310,7 @@ export default function RunsWorldGame(){
       <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent verified, public basketball sites with coordinates on file. Gray dots are community tips awaiting access/location review, not approved courts. No location permission required. GPS is optional.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
@@ -327,12 +327,12 @@ export default function RunsWorldGame(){
        {warning&&<p className="rwg-warning" role="status">{warning}</p>}
        {coverageWarning&&<div className="rwg-geography-notice" role="status"><FaLocationDot/>{coverageWarning}</div>}
        <div className="rwg-coverage" aria-label="Geographic coverage from this court dataset">
-        <div><strong>{loading?'…':coverage.total}</strong><small>Eligible courts</small></div>
-        <div><strong>{loading?'…':coverage.mapped}</strong><small>Precision pins</small></div>
+        <div><strong>{loading?'…':coverage.total}</strong><small>Parks & Rec facilities</small></div>
+        <div><strong>{loading?'…':coverage.mapped}</strong><small>Mapped facilities</small></div>
         <div><strong>{loading?'…':coverage.needsCoordinates}</strong><small>Need pin verification</small></div>
         <div><strong>{loading?'…':coverage.scheduled}</strong><small>Linked upcoming Runs</small></div>
        </div>
-       {!loading&&visibleCourts.length===0&&<p className="rwg-empty">No verified public court records found here. Try another city or explore the full Runs list.</p>}
+       {!loading&&visibleCourts.length===0&&<p className="rwg-empty">No officially sourced Parks & Recreation basketball facilities are listed here yet. Try another city or explore the full Runs list.</p>}
        <div className="rwg-court-grid">
         {visibleCourts.slice(0,80).map(c=>{
          const ownership=territories.find(t=>t.court_slug===c.slug);
@@ -340,7 +340,7 @@ export default function RunsWorldGame(){
          const mapped=pins.some(p=>p.id==='court:'+c.slug);
          return <button key={c.slug} type="button" onClick={()=>chooseCourt(c.slug)} aria-pressed={selectedSlug===c.slug} className={'rwg-court '+(selectedSlug===c.slug?'selected':'')}>
           <span className="rwg-court-icon">{ownership?<FaCrown/>:count?<FaBolt/>:<FaBasketball/>}</span>
-          <span className="rwg-court-copy"><strong>{c.name}</strong><small>{ownership?'Territory controlled':count?count+' scheduled Run'+(count===1?'':'s'):'Open to discover'} · {mapped?'Verified coordinates':'Pin needs review'}</small></span>
+          <span className="rwg-court-copy"><strong>{c.name}</strong><small>{c.venue_type==='indoor'?'Indoor gym':c.venue_type==='mixed'?'Recreation center':'Outdoor court'} · {count?count+' scheduled Run'+(count===1?'':'s'):c.access_type==='public'&&c.venue_type==='outdoor'?'Check park hours':'Check gym access / schedule'} · {mapped?'Coordinates on file':'Pin needs review'}</small></span>
           <FaArrowRight className="rwg-court-arrow"/>
          </button>;
         })}
@@ -349,7 +349,7 @@ export default function RunsWorldGame(){
       </section>
       {selectedCourt&&<section className="rwg-arena" id="rch-run-world-court" aria-label={selectedCourt.name+' Court Arena'}>
         <div className="rwg-arena-top"><div><span className="rwg-kicker"><FaCrown/> COURT ARENA / {city.name.toUpperCase()}</span>
-          <h2>{selectedCourt.name}</h2><p>{selectedCourt.address} · {pins.some(p=>p.id==='court:'+selectedCourt.slug)?'Coordinate on file':'Precise court coordinates not yet verified'}</p></div>
+          <h2>{selectedCourt.name}</h2><p>{selectedCourt.address} · Parks & Rec verified · {selectedCourt.venue_type==='outdoor'?'Outdoor courts':selectedCourt.venue_type==='indoor'?'Indoor gym':'Recreation center / mixed'} · {selectedCourt.access_type==='public'&&selectedCourt.venue_type==='outdoor'?'Check park hours':'Indoor access or reservations may be required'} · {pins.some(p=>p.id==='court:'+selectedCourt.slug)?'Coordinate on file':'Precise court coordinates not yet verified'}</p></div>
          <span className="rwg-arena-shield"><FaShieldHalved/></span>
         </div>
         <div className="rwg-master-grid">{(['1v1','2v2','3v3'] as const).map(format=>{
@@ -376,7 +376,7 @@ export default function RunsWorldGame(){
         <WorldScoutButton key={selectedCourt.slug} courtSlug={selectedCourt.slug} loggedIn={Boolean(user)}
           scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))}
           onScout={()=>setScoutVersion(n=>n+1)}/>
-        <p className="rwg-disclosure">Crews, court titles, and REP are awarded only through RCH&apos;s existing verified-results system. Public courts are not reserved and RCH attendance is not guaranteed.</p>
+        <p className="rwg-disclosure">Crews, court titles, and REP require verified results. A verified Parks & Rec location does not mean basketball is currently available, that a gym is open for pickup, or that RCH has reserved it. Confirm facility rules and hours first.</p>
        </section>}
       <WorldPulse events={worldPulse} onCourt={chooseCourt}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
