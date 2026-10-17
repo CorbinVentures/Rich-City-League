@@ -4,6 +4,7 @@ import {FaBasketball,FaCrown,FaBolt,FaCompass,FaArrowRotateRight,FaLocationDot,F
 import type {AtlasPlace} from '@/components/discover/VirginiaInteractiveAtlas';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {REAL_VIRGINIA_MAP} from '@/lib/runs-geography';
+import {countyBounds} from '@/lib/virginia-geographic-bounds';
 import './accurate-virginia-map.css';
 
 /* MapLibre loaded as an explicitly pinned, existing UMD bundle. Its WebGL worker
@@ -147,6 +148,19 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],onCitySelec
     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
    }catch{/* map still remains geographically referenced */}
   }else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration:650});
+ },[city?.id,status]);
+ useEffect(()=>{
+  if(city?.id!=='chesterfield'||status!=='ready')return;
+  let current=true;
+  const map=mapRef.current;
+  void fetch('/api/geo/virginia?layer=counties',{cache:'force-cache'})
+   .then(r=>{if(!r.ok)throw Error('official counties unavailable');return r.json();})
+   .then(data=>{
+    if(!current||!map)return;
+    const limits=countyBounds(data,'51041');
+    if(limits)map.fitBounds(limits,{padding:45,duration:750});
+   }).catch(()=>{/* Retain a navigable center when the official geometry is offline. */});
+  return()=>{current=false;};
  },[city?.id,status]);
  useEffect(()=>{
   const map=mapRef.current,lib=libRef.current;
