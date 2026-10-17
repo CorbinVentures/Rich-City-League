@@ -226,7 +226,17 @@ export default function RunsPage() {
 
   useEffect(() => { void load(); }, [supabase, user?.id]);
 
-  useEffect(() => { if (createIntent) setShowCreate(true); }, [createIntent]);
+  useEffect(() => {
+    if (!createIntent) return;
+    const requestedFormat=searchParams.get('format')||'';
+    const requestedMode=searchParams.get('mode')||'';
+    const selectedFormat=['1v1','2v2','3v3','4v4','5v5'].includes(requestedFormat)?requestedFormat:'5v5';
+    const selectedMode:RunType=(['competitive','social','training'] as string[]).includes(requestedMode)
+      ?requestedMode as RunType:'competitive';
+    const teamSize=parseInt(selectedFormat.split('v')[0],10);
+    setForm(current=>({...current,game_format:selectedFormat,run_type:selectedMode,max_players:teamSize*2}));
+    setShowCreate(true);
+  }, [createIntent,searchParams]);
 
   useEffect(() => {
     if (!courtParam || !courts.length) return;
