@@ -1,4 +1,5 @@
 import { BadgeMedallion, BadgeShowcaseCard } from '@/components/BadgeMedallion';
+import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
 import { Container } from '@/components/Container';
 import { getPublicClient } from '@/lib/public-data';
 import type { Badge } from '@/types/database';
@@ -51,6 +52,7 @@ export default async function BadgesPage() {
     </header>
 
     <Container maxWidth="xl" className="py-8 sm:py-10">
+      <PlaceBadgeVault />
       <div className="space-y-11">{[...groups.entries()].map(([category, items]) => <section key={category} aria-label={category}>
         <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/10 pb-3">
           <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-rcl-blue">The collection</p><h2 className="mt-1 font-display text-2xl font-black uppercase">{category}</h2></div>
