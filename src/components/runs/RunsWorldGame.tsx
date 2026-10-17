@@ -245,7 +245,6 @@ export default function RunsWorldGame(){
    setSelectedSlug(slug);
    window.requestAnimationFrame(()=>document.getElementById('rch-run-world-court')?.scrollIntoView({behavior:'smooth',block:'nearest'}));
  };
- const ownerCount=new Set(territories.map(t=>t.court_slug)).size;
 
  return <main className="rwg-shell min-h-screen pb-28 text-white" aria-label="RCH Runs World game">
   <div className="rwg-frame">
