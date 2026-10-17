@@ -54,7 +54,7 @@ describe('RCH Living World', () => {
     expect(page).toContain("getSupabaseClient(true)");
     expect(page).toContain("rch_rep_wallets");
     expect(page).toContain("rch_run_badge_awards");
-    expect(page).toContain("no simulated wins");
+    expect(page).toContain("No simulated wins");
     expect(memberNav).toContain("href:'/world'");
     expect(social).toContain('href="/world"');
     expect(read('src/components/rep/RepExchangeClient.tsx')).toContain("rch_buy_rep_reward");
