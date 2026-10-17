@@ -56,7 +56,8 @@ describe('Runs World playable geography and game progression',()=>{
   const classic=readFileSync(join(root,'src/app/runs/page.tsx'),'utf8');
   expect(classic).toContain('if(!showLegacyList)return <RunsWorldGame/>');
   expect(classic).toContain('readPagedUpcomingRuns<Run>');
-  expect(world).toContain('VirginiaInteractiveAtlas');
+  expect(world).toContain('AccurateVirginiaMap');
+  expect(world).toContain('localityNames(city)');
   expect(world).toContain('get_rch_court_masters');
   expect(world).toContain('get_rch_court_crew_standings');
   expect(world).toContain('rch_court_territories');
