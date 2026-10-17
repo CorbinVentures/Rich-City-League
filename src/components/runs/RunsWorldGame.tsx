@@ -29,7 +29,8 @@ const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,pas
 const parksRecAreas:VirginiaCity[]=[
  {id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'},
  {id:'arlington',name:'Arlington',lat:38.88,lon:-77.10,landmark:'Arlington County',symbol:'🏀'},
- {id:'prince-william',name:'Prince William',lat:38.67,lon:-77.45,landmark:'Prince William County',symbol:'🏀'}
+ {id:'prince-william',name:'Prince William',lat:38.67,lon:-77.45,landmark:'Prince William County',symbol:'🏀'},
+ {id:'shenandoah',name:'Shenandoah',lat:38.83,lon:-78.59,landmark:'Shenandoah County',symbol:'🏀'}
 ];
 const runsAreaOptions=[...VIRGINIA_CITIES,...parksRecAreas];
 const cityTabs=[...VIRGINIA_CITIES.filter(city=>city.major),...parksRecAreas];
