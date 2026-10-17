@@ -89,8 +89,8 @@ begin
  select coalesce(jsonb_agg(jsonb_build_object(
    'court_slug',r.location_slug,'verified_at',m.verified_at,
    'game_format',m.game_format,
-   'won',((mp.side='home' and m.home_score>m.away_score)
-     or (mp.side='away' and m.away_score>m.home_score))
+   'won',((m.side='home' and m.home_score>m.away_score)
+     or (m.side='away' and m.away_score>m.home_score))
  ) order by m.verified_at desc),'[]'::jsonb) into v_recent
  from (select m.verified_at,m.game_format,m.home_score,m.away_score,
    mp.side,m.run_id from public.run_ranked_matches m
