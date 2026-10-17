@@ -31,7 +31,7 @@ describe('RCH Visual Experience v1 product contract',()=>{
   expect(page).toContain('run.partner.price_cents');
   expect(page).toContain('onJoin(run)');
   expect(page).toContain('ShareRunButton');
-  expect(page).toContain('<RunPassport/>');
+  expect(page).toContain('<RunPassport />');
   expect(page).toContain('showTakeovers');
   expect(page).toContain('<RunRankedLadder/>');
  });
