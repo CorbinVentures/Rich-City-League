@@ -19,7 +19,7 @@ export type WorldMission={
 /** Official municipal/county Parks & Recreation basketball site, including
  * indoor basketball gyms and combined recreational centers. A verified
  * facility is NOT confirmation of walk-in access or an active open run. */
-export function verifiedParksRecFacility(court:WorldCourt):boolean{
+export function verifiedParksRecFacility(court:Pick<WorldCourt,'verification_status'|'source_label'|'source_url'|'venue_type'>):boolean{
  return ['official','provider'].includes(court.verification_status)
    && /\\b(?:parks?|recreation|prcf|municipal)\\b/i.test(court.source_label||'')
    && Boolean(court.source_url?.startsWith('https://'))
