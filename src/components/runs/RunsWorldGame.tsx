@@ -25,6 +25,9 @@ type CourtStats={masters:Master[];crewName:string|null;defenses:number;loading:b
 type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string;court_name?:string;game_format?:string;won?:boolean;rating_before?:number;rating_after?:number}[]};
 type PlayerStats={socialLevel:number|null;socialXp:number|null;repBalance:number|null;passport:Passport|null};
 const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,passport:null};
+// County-only Parks & Rec discovery area, not a new statewide Circuit city.
+const parksRecArea:VirginiaCity={id:'henrico',name:'Henrico',lat:37.61,lon:-77.40,landmark:'Henrico County',symbol:'🏟️'};
+const runsAreaOptions=[...VIRGINIA_CITIES,parksRecArea];
 const cityTabs=VIRGINIA_CITIES.filter(city=>city.major);
 const nav:{id:Screen;title:string;icon:typeof FaCompass}[]=[
  {id:'world',title:'World',icon:FaCompass},
@@ -81,12 +84,12 @@ export default function RunsWorldGame(){
   })();
   return()=>{active=false;};
  },[db]);
- const city=VIRGINIA_CITIES.find(c=>c.id===cityId)||null;
+ const city=runsAreaOptions.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
  useEffect(()=>{setCityId(location.cityId||null);},[location.cityId]);
  const enterCity=useCallback((next:VirginiaCity)=>{
-   setCityId(next.id);chooseCity(next.id);setSelectedSlug(null);
+   setCityId(next.id);if(next.id!=='henrico')chooseCity(next.id);setSelectedSlug(null);
    setScreen('world');
  },[chooseCity]);
  const exitCity=useCallback(()=>{
@@ -300,8 +303,8 @@ export default function RunsWorldGame(){
       <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Enter a basketball area, then tap a real court to inspect its Arena.</p></div>
       <div className="rwg-city-actions">
        <label className="sr-only" htmlFor="rwg-city">Virginia city</label>
-       <select id="rwg-city" value={city?.id||''} onChange={e=>{const match=VIRGINIA_CITIES.find(c=>c.id===e.target.value);if(match)enterCity(match);else exitCity();}}>
-        <option value="">All Virginia</option>{VIRGINIA_CITIES.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+       <select id="rwg-city" value={city?.id||''} onChange={e=>{const match=runsAreaOptions.find(c=>c.id===e.target.value);if(match)enterCity(match);else exitCity();}}>
+        <option value="">All Virginia</option>{runsAreaOptions.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
        </select>
        {city&&<button type="button" className="rwg-soft" onClick={exitCity}>Statewide</button>}
       </div>
@@ -310,7 +313,7 @@ export default function RunsWorldGame(){
       <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips. No location permission required. GPS is optional.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
@@ -376,7 +379,7 @@ export default function RunsWorldGame(){
         <WorldScoutButton key={selectedCourt.slug} courtSlug={selectedCourt.slug} loggedIn={Boolean(user)}
           scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))}
           onScout={()=>setScoutVersion(n=>n+1)}/>
-        <p className="rwg-disclosure">Crews, court titles, and REP require verified results. A verified Parks & Rec location does not mean basketball is currently available, that a gym is open for pickup, or that RCH has reserved it. Confirm facility rules and hours first.</p>
+        <p className="rwg-disclosure">Crews, court titles, and REP require verified results. A verified Parks & Rec location does not mean basketball is currently available, that a gym is open for pickup, or that a court has been reserved. This site is not reserved by RCH. Confirm facility rules and hours first.</p>
        </section>}
       <WorldPulse events={worldPulse} onCourt={chooseCourt}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
