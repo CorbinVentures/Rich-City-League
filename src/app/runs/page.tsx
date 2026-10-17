@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
+import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
 import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
@@ -158,12 +159,12 @@ export default function RunsPage() {
     try {
       const since = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
       const [runsResult, courtsResult, badgesResult, checkinsResult, highlightsResult] = await Promise.all([
-        db.from('runs')
+        readPagedUpcomingRuns<Run>((from,to)=>db.from('runs')
           .select('id,host_id,title,description,location,location_slug,starts_at,skill_level,game_format,max_players,status,run_type,allow_fan_checkin')
           .neq('status', 'cancelled')
           .gte('starts_at', since)
           .order('starts_at', { ascending: true })
-          .limit(100),
+          .range(from,to)),
         db.from('basketball_locations')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('is_active', true)
@@ -180,6 +181,7 @@ export default function RunsPage() {
       ]);
 
       if (runsResult.error) throw runsResult.error;
+      if(runsResult.truncated)setNotice('Showing the first 2,000 upcoming Runs. Refine by city in Runs World.');
       if (courtsResult.error) throw courtsResult.error;
 
       const rows = (runsResult.data ?? []) as Run[];
