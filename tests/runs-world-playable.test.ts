@@ -1,0 +1,69 @@
+import {describe,it,expect} from 'vitest';
+import {readFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {
+ buildCourtMapPins,playableCourt,getWorldMissions,recentVerifiedResults,readPagedUpcomingRuns,
+ type WorldCourt,type WorldRun
+} from '../src/lib/runs-world-game';
+
+const court=(overrides:Partial<WorldCourt>={}):WorldCourt=>({
+ slug:'real-park',name:'Real Municipal Park',address:'100 Public St',locality:'Richmond',
+ latitude:37.54,longitude:-77.44,verification_status:'official',access_type:'public',
+ venue_type:'outdoor',source_url:'https://example.gov/parks',hours_text:null,...overrides
+});
+const run=(overrides:Partial<WorldRun>={}):WorldRun=>({
+ id:'a',title:'Local Run',location:'Real Park, Richmond, VA',location_slug:'real-park',
+ starts_at:'2035-10-20T15:00:00Z',status:'open',game_format:'3v3',run_type:'competitive',...overrides
+});
+
+describe('Runs World playable geography and game progression',()=>{
+ it('shows precise map pins only with official/provider public court coordinates',()=>{
+  expect(playableCourt(court())).toBe(true);
+  expect(playableCourt(court({verification_status:'community'}))).toBe(false);
+  expect(playableCourt(court({access_type:'membership'}))).toBe(false);
+  expect(buildCourtMapPins([
+   court(),court({slug:'unmapped',latitude:null,longitude:null}),
+   court({slug:'untrusted',verification_status:'community'}),
+   court({slug:'private',access_type:'membership'}),
+  ],[run()])).toEqual([{
+   id:'court:real-park',title:'Real Municipal Park',city:'Richmond',kind:'run',
+   lat:37.54,lon:-77.44,href:'/runs/courts/real-park',precision:'venue'
+  }]);
+ });
+ it('does not fabricate competitive results or award extra REP for tasks',()=>{
+  const missions=getWorldMissions({city:'Richmond',scouted:true,upcomingJoined:1,recentVerified:0});
+  expect(missions.map(m=>m.complete)).toEqual([true,true,false]);
+  expect(missions[2].href).toContain('view=list');
+  expect(recentVerifiedResults([{verified_at:'2020-01-01T00:00:00Z'}],Date.parse('2026-10-17T15:00:00Z'))).toBe(0);
+  expect(recentVerifiedResults([{verified_at:'2026-10-16T15:00:00Z'}],Date.parse('2026-10-17T15:00:00Z'))).toBe(1);
+ });
+ it('paginates rather than cutting off the first 100 upcoming Runs',async()=>{
+  const all=Array.from({length:421},(_,i)=>({id:i}));
+  const result=await readPagedUpcomingRuns<{id:number}>(async(from,to)=>({
+   data:all.slice(from,to+1),error:null
+  }),200,2000);
+  expect(result.data).toHaveLength(421);
+  expect(result.truncated).toBe(false);
+  const truncated=await readPagedUpcomingRuns<{id:number}>(async(from,to)=>({
+   data:all.slice(from,to+1),error:null
+  }),100,300);
+  expect(truncated.data).toHaveLength(300);
+  expect(truncated.truncated).toBe(true);
+ });
+ it('has a real connected game home, court arena, challenge and player flows',()=>{
+  const root=process.cwd();
+  const world=readFileSync(join(root,'src/components/runs/RunsWorldGame.tsx'),'utf8');
+  const classic=readFileSync(join(root,'src/app/runs/page.tsx'),'utf8');
+  expect(classic).toContain('if(!showLegacyList)return <RunsWorldGame/>');
+  expect(classic).toContain('readPagedUpcomingRuns<Run>');
+  expect(world).toContain('VirginiaInteractiveAtlas');
+  expect(world).toContain('get_rch_court_masters');
+  expect(world).toContain('get_rch_court_crew_standings');
+  expect(world).toContain('rch_court_territories');
+  expect(world).toContain('<CourtDominion');
+  expect(world).toContain('<RunPassport');
+  expect(world).toContain('No location permission required');
+  expect(world).toContain('not reserved');
+  expect(world).toContain('readPagedUpcomingRuns<WorldRun>');
+ });
+});
