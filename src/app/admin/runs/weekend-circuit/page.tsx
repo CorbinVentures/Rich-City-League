@@ -51,7 +51,7 @@ export default function WeekendCircuitCommandPage(){
    if(active){setAuthorized(!error&&data===true);setAuthorizationChecked(true);}
   });
   return ()=>{active=false;};
- },[db,user?.id,authLoading]);
+ },[db,user,authLoading]);
 
  const refresh=useCallback(async()=>{
   if(!db)return;
@@ -79,7 +79,7 @@ export default function WeekendCircuitCommandPage(){
     if(active){if(error)setError(error.message);else setVenues((data||[]).filter(v=>/(park|playground)/i.test(v.name)));}
    });
   return ()=>{active=false;};
- },[authorized,db,target?.city_id,target?.city_name]);
+ },[authorized,db,target]);
 
  const filtered=cities.filter(c=>c.city_name.toLowerCase().includes(query.toLowerCase().trim())||c.circuit_status.replaceAll('_',' ').includes(query.toLowerCase().trim()));
  const live=cities.filter(c=>c.circuit_status==='scheduled').length;
@@ -153,7 +153,7 @@ export default function WeekendCircuitCommandPage(){
           <option value="">No court selected</option>
           {venues.map(v=><option key={v.slug} value={v.slug}>{v.name} · {v.address}</option>)}
          </select>
-         {current&&!venues.some(v=>v.slug===current.court_slug)&&<p className="mt-2 text-xs text-amber-200">This slot's court is no longer in the eligible list and will block activation.</p>}
+         {current&&!venues.some(v=>v.slug===current.court_slug)&&<p className="mt-2 text-xs text-amber-200">This slot&apos;s court is no longer in the eligible list and will block activation.</p>}
         </div>;
        })}</div>
        <div className="mt-5 rounded-xl border border-sky-400/20 bg-[#0d2a41] p-4">
