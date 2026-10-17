@@ -29,3 +29,11 @@ Staff can inspect **all 2026 Census county/independent-city names** in Map Quali
 - Repeat official-source audits because programs and park facilities close, change access rules, and change court layouts.
 
 No secret service keys, full-user GPS traces or player-count predictions are used by this rollout.
+
+
+## Repeatable official-facility intake without code changes
+A staff-only workbench at /admin/runs/facility-sources lets authorized members submit a new official Parks & Recreation basketball site for evidence review. It supports the published facility name, city/locality, optional verified street address, indoor/outdoor/mixed classification, access requirements, official city/county source URL, responsible Parks & Rec agency and specific basketball amenity evidence.
+
+Submissions go into public.rch_official_facility_reviews with RLS and staff-only review RPCs. An approved site receives a new immutable canonical venue ID and documented source, but NULL map coordinates. It is not marked as reservable or gameplay verified. Rejected records and review notes remain in the audit queue. Automatic venue discovery, source URL content scraping, geocoding, and blanket state-wide verification are intentionally not permitted.
+
+**Outstanding human tasks:** Consult each remaining Virginia local government Parks & Recreation directory, verify the basketball amenity (not just park existence), resolve conflicting/duplicate names, inspect facility accessibility and court coordinates, and review seasonal gym schedules. The official Census jurisdiction list in Map Operations makes remaining gaps visible; it does not certify geographic completeness.
