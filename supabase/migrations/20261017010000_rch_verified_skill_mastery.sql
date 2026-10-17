@@ -80,6 +80,7 @@ select s.code,s.name,s.discipline,s.description,s.q,s.games,
       when s.q>=1 then floor((s.q-1)*100.0/2)::integer
       else 0 end::integer
 from skills s
+where exists(select 1 from allowed_member)
 order by s.code;
 $$;
 revoke all on function public.get_rch_skill_mastery(uuid) from public,anon,authenticated;
