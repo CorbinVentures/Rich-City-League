@@ -6,7 +6,7 @@ import type {AtlasPlace} from '@/components/discover/VirginiaInteractiveAtlas';
 export type WorldCourt={
  slug:string;name:string;address:string;locality:string;latitude:number|null;
  longitude:number|null;verification_status:string;access_type:string;venue_type:string;
- source_url:string|null;source_label?:string|null;hours_text:string|null;
+ source_url:string|null;source_label?:string|null;hours_text:string|null;notes?:string|null;
 };
 export type WorldRun={
  id:string;title:string;location:string;location_slug:string|null;starts_at:string;
@@ -19,7 +19,14 @@ export type WorldMission={
 /** Official municipal/county Parks & Recreation basketball site, including
  * indoor basketball gyms and combined recreational centers. A verified
  * facility is NOT confirmation of walk-in access or an active open run. */
-export function verifiedParksRecFacility(court:Pick<WorldCourt,'verification_status'|'source_label'|'source_url'|'venue_type'>):boolean{
+export function verifiedParksRecFacility(court:Pick<WorldCourt,'verification_status'|'source_label'|'source_url'|'venue_type'>
+ & Partial<Pick<WorldCourt,'name'|'notes'>>):boolean{
+ // The Newport News municipal asset inventory includes school-code ES- records.
+ // An inventory row isn't proof of a public Parks & Recreation access agreement.
+ // One location is explicitly documented as a hoop beside parking, no court.
+ if(court.source_label==='City of Newport News Parks GIS'&&
+   (/^ES[-_]/i.test(court.name||'')||/\bno court\b|hoop structure only/i.test(court.notes||'')))
+   return false;
  return ['official','provider'].includes(court.verification_status)
    && /\b(?:parks?|recreation|prcf|municipal)\b/i.test(court.source_label||'')
    && Boolean(court.source_url?.startsWith('https://'))
