@@ -81,6 +81,7 @@ export default function RunsWorldGame(){
      db.from('basketball_locations')
       .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_url,hours_text')
       .eq('is_active',true).eq('locality',city.name)
+      .eq('access_type','public').eq('venue_type','outdoor')
       .in('verification_status',['official','provider'])
       .order('name').range(0,299),
      readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
