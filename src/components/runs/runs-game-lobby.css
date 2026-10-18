@@ -6,3 +6,14 @@
 /* The public browser shell normalizes headings; retain the lobby's game title. */
 html body .rwg-shell .rgl-content h2{font-size:clamp(38px,5.5vw,76px)!important;line-height:.98!important;letter-spacing:-.055em!important;font-weight:950!important;margin:23px 0 17px!important}
 @media(max-width:600px){html body .rwg-shell .rgl-content h2{font-size:clamp(32px,9vw,40px)!important;line-height:1.02!important}}
+/* Respond to usable game width, including space taken by the site's sidebar. */
+.rwg-frame{container-name:runsworld;container-type:inline-size}
+@container runsworld (max-width:750px){
+ .rgl-lobby{min-height:0}.rgl-content{width:100%;padding:28px 24px 24px}
+ .rgl-objective{position:relative;right:auto;bottom:auto;width:auto;margin:0 20px 20px;padding:16px}
+ .rgl-bottom{position:relative;flex-wrap:wrap;gap:14px;padding:16px 20px}
+ .rgl-progress{flex-basis:100%;order:3;max-width:none}.rgl-progress p{margin:0}
+ .rgl-court{right:-140px;opacity:.5}.rgl-court-badge{right:20px;top:70px}
+ .rgl-battle{padding:12px}.rgl-battle span{display:none}
+ html body .rwg-shell .rgl-content h2{font-size:clamp(32px,6.5cqi,48px)!important;line-height:1.02!important}
+}
