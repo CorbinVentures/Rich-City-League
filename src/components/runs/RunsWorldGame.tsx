@@ -17,6 +17,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
+import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 
 type Screen='world'|'battle'|'missions'|'vault'|'player';
@@ -278,8 +279,8 @@ export default function RunsWorldGame(){
  return <main className="rwg-shell min-h-screen pb-28 text-white" aria-label="RCH Runs World game">
   <div className="rwg-frame">
    <header className="rwg-header">
-    <div><span className="rwg-kicker"><FaBolt/> RCH RUNS WORLD / SEASON ZERO</span>
-     <h1>THE CITY <span>IS THE GAME.</span></h1>
+    <div><span className="rwg-kicker"><FaBolt/> THE REAL-WORLD BASKETBALL GAME</span>
+     <h1>RUNS <span>WORLD</span></h1>
      <p>Explore real courts. Challenge verified contenders. Build your basketball legacy.</p>
     </div>
     <div className="rwg-top-actions">
@@ -290,6 +291,10 @@ export default function RunsWorldGame(){
      <button type="button" onClick={refresh} className="rwg-soft" aria-label="Refresh Runs World"><FaArrowRotateRight/></button>
     </div>
    </header>
+
+   {screen==='world'&&<RunsGameLobby city={city?.name||null} journey={journey} signedIn={Boolean(user)} loading={journeyLoading}
+     onExplore={()=>{const arena=document.getElementById('rwg-world-map');arena?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});arena?.focus({preventScroll:true});}}
+     onMissions={()=>setScreen('missions')} onBattle={()=>setScreen('battle')}/>}
 
    <nav className="rwg-nav" aria-label="Runs World gameplay modes">
     {nav.map(item=><button type="button" key={item.id} aria-pressed={screen===item.id} onClick={()=>setScreen(item.id)} className={screen===item.id?'active':''}>
@@ -304,7 +309,7 @@ export default function RunsWorldGame(){
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
     </div>
-    <section className="rwg-world" aria-label="Explore Virginia basketball courts">
+    <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
       <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Enter a basketball area, then tap a real court to inspect its Arena.</p></div>
       <div className="rwg-city-actions">
