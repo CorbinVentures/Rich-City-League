@@ -17,6 +17,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
+import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 
 type Screen='world'|'battle'|'missions'|'vault'|'player';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
@@ -395,6 +396,8 @@ export default function RunsWorldGame(){
       </section>
      </>}
    </>}
+
+   {user&&screen!=='battle'&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
 
    {screen==='battle'&&<section className="rwg-mode" aria-label="Battle arena">
      <span className="rwg-kicker">COMPETITIVE MODE / REAL-WORLD MATCHES</span><h2>Take the court. Defend the crown.</h2>
