@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
+import { RunsRulesIntro } from '@/components/runs/RunsRulesIntro';
 import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
 import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
@@ -29,6 +30,7 @@ import {
   FaArrowUpRightFromSquare,
   FaArrowRight,
   FaBasketball,
+  FaBookOpen,
   FaCalendarDays,
   FaCircleCheck,
   FaDumbbell,
@@ -124,6 +126,18 @@ export default function RunsPage() {
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
   const [highlightClaims, setHighlightClaims] = useState<Set<string>>(new Set());
   const [view, setView] = useState<ViewMode>('runs');
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const closeRules = useCallback(() => {
+    setRulesOpen(false);
+    try { window.sessionStorage.setItem('rch-runs-rules-intro-session-v1', 'seen'); } catch { /* Storage must never block basketball. */ }
+  }, []);
+  useEffect(() => {
+    // Auto-show on entry to the game world once per browser session; let
+    // explicit RSVP, Run creation and court deep links proceed uninterrupted.
+    if (showLegacyList) return;
+    try { if (window.sessionStorage.getItem('rch-runs-rules-intro-session-v1') === 'seen') return; } catch { /* Show the rules if storage is unavailable. */ }
+    setRulesOpen(true);
+  }, [showLegacyList]);
   const [competitionView, setCompetitionView] = useState<'passport'|'courts'|'rankings'>('passport');
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
@@ -432,7 +446,7 @@ export default function RunsPage() {
 
   // Runs World is the primary game. Existing competition, forms and list screens
   // remain available via view=list, create intent, or deep court links.
-  if(!showLegacyList)return <RunsWorldGame/>;
+  if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
@@ -448,6 +462,7 @@ export default function RunsPage() {
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
+          <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How to Play</button>
           <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
           <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badge Vault</Link>
@@ -538,6 +553,7 @@ export default function RunsPage() {
       </Container>
 
       {showCreate && <CreateRunModal form={form} setForm={setForm} courts={courts} onPickVenue={pickRunVenue} busy={busy === 'create'} onClose={() => setShowCreate(false)} onSubmit={createRun} />}
+      <RunsRulesIntro open={rulesOpen} onClose={closeRules} />
     </main>
   );
 }
