@@ -74,7 +74,16 @@ describe('Runs World playable geography and game progression',()=>{
   const root=process.cwd();
   const world=readFileSync(join(root,'src/components/runs/RunsWorldGame.tsx'),'utf8');
   const classic=readFileSync(join(root,'src/app/runs/page.tsx'),'utf8');
-  expect(classic).toContain('if(!showLegacyList)return <RunsWorldGame/>');
+  // A connected World renderer may be wrapped in onboarding UI without changing routing.
+  expect(classic).toMatch(/if\s*\(!showLegacyList\)\s*return\s*<>\s*<RunsWorldGame\b/);
+  expect(classic).toContain('<RunsRulesIntro open={rulesOpen} onClose={closeRules} />');
+  expect(world).toContain('onOpenRules');
+  const direct=readFileSync(join(root,'src/app/runs/world/page.tsx'),'utf8');
+  const rules=readFileSync(join(root,'src/components/runs/RunsRulesIntro.tsx'),'utf8');
+  expect(direct).toContain('<RunsRulesIntro open={rulesOpen} onClose={closeRules}/>');
+  expect(rules).toContain('2× VERIFIED REP');
+  expect(rules).toContain('independent score or stat verification');
+  expect(rules).toContain('aria-modal="true"');
   expect(classic).toContain('readPagedUpcomingRuns<Run>');
   expect(world).toContain('AccurateVirginiaMap');
   expect(world).toContain('localityNames(city)');

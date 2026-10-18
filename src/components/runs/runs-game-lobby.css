@@ -17,3 +17,7 @@ html body .rwg-shell .rgl-content h2{font-size:clamp(38px,5.5vw,76px)!important;
  .rgl-battle{padding:12px}.rgl-battle span{display:none}
  html body .rwg-shell .rgl-content h2{font-size:clamp(32px,6.5cqi,48px)!important;line-height:1.02!important}
 }
+
+/* Runs rules replay button must fit alongside player HUD at sidebar-constrained widths. */
+.rwg-shell .rwg-top-actions{flex-wrap:wrap;min-width:0}
+@container runsworld (max-width:750px){.rwg-shell .rwg-top-actions{width:100%}}

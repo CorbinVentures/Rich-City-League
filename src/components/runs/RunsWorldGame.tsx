@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBookOpen,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
 import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
 import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
@@ -47,7 +47,7 @@ function shortWhen(value:string){
  const d=new Date(value);
  return Number.isFinite(d.getTime())?d.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET':'Time unavailable';
 }
-export default function RunsWorldGame(){
+export default function RunsWorldGame({onOpenRules}:{onOpenRules:()=>void}){
  const {user}=useAuth();
  const {location,chooseCity,statewide}=useGravityLocation();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
@@ -284,6 +284,7 @@ export default function RunsWorldGame(){
      <p>Explore real courts. Challenge verified contenders. Build your basketball legacy.</p>
     </div>
     <div className="rwg-top-actions">
+     <button type="button" className="rwg-soft" onClick={onOpenRules} aria-label="Read the Runs World rules"><FaBookOpen/> How to play</button>
      <WorldPlayerIdentity avatar={identity?.avatar_url||null}
        name={identity?.display_name||identity?.username||(user?'RCH Hooper':'Join RCH')}
        level={journey?.world_level??null} onOpen={()=>setScreen('player')}/>
