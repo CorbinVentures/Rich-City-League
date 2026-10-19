@@ -194,6 +194,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/league">Rich City League</Link>
           <Link href={user ? '/social' : '/pulse'}>Social</Link>
           <Link href="/news">News</Link>
+          <a href="https://www.instagram.com/richcityhoops/" target="_blank" rel="noopener noreferrer" aria-label="Rich City Hoops on Instagram">Instagram</a>
           {user && <Link href="/messages">Messages</Link>}
           <Link href="/app">Get the PWA</Link>
           <Link href="/legal/privacy">Privacy</Link>
