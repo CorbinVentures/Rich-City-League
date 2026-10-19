@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function RichmondBasketballRunsPage() {
   const breadcrumb = {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[
-    {'@type':'ListItem',position:1,name:'Rich City League',item:'https://richcityhoops.com/'},
-    {'@type':'ListItem',position:2,name:'Richmond Basketball Runs',item:'https://richcityhoops.com/richmond-basketball-runs'}
+    {'@type':'ListItem',position:1,name:'Rich City League',item:'https://www.richcityhoops.com/'},
+    {'@type':'ListItem',position:2,name:'Richmond Basketball Runs',item:'https://www.richcityhoops.com/richmond-basketball-runs'}
   ]};
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(breadcrumb)}}/>

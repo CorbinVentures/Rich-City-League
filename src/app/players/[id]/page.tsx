@@ -19,7 +19,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   const { player, rosters, teamSeasons, teams, seasons, divisions, games, stats, iq, iqHistory } = data;
   const playerName = `${player.first_name} ${player.last_name}`;
-  const breadcrumbSchema = { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Rich City League',item:'https://richcityhoops.com/'},{'@type':'ListItem',position:2,name:'Players',item:'https://richcityhoops.com/players'},{'@type':'ListItem',position:3,name:playerName,item:`https://richcityhoops.com/players/${id}`}] };
+  const breadcrumbSchema = { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Rich City League',item:'https://www.richcityhoops.com/'},{'@type':'ListItem',position:2,name:'Players',item:'https://www.richcityhoops.com/players'},{'@type':'ListItem',position:3,name:playerName,item:`https://www.richcityhoops.com/players/${id}`}] };
   const client = getPublicClient();
 
   // Load earned badges

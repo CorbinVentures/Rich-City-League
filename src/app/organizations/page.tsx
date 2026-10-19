@@ -8,6 +8,7 @@ import { FaArrowRight, FaBullhorn, FaCircleCheck, FaLocationDot, FaPeopleGroup }
 export const metadata = {
   title: 'Virginia Organizations & Community Partners | RCH Network',
   description: 'Discover basketball organizations, social clubs, car clubs, run clubs, creators, local businesses, and community partners across Virginia through Rich City Hoops.',
+  alternates: { canonical: '/organizations' },
 };
 
 export const revalidate = 60;

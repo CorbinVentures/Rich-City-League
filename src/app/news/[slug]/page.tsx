@@ -79,9 +79,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     '@context':'https://schema.org',
     '@type':'BreadcrumbList',
     itemListElement:[
-      {'@type':'ListItem',position:1,name:'Rich City League',item:'https://richcityhoops.com/'},
-      {'@type':'ListItem',position:2,name:'RCL Newsroom',item:'https://richcityhoops.com/news'},
-      {'@type':'ListItem',position:3,name:item.title,item:`https://richcityhoops.com/news/${item.slug}`},
+      {'@type':'ListItem',position:1,name:'Rich City League',item:'https://www.richcityhoops.com/'},
+      {'@type':'ListItem',position:2,name:'RCL Newsroom',item:'https://www.richcityhoops.com/news'},
+      {'@type':'ListItem',position:3,name:item.title,item:`https://www.richcityhoops.com/news/${item.slug}`},
     ],
   };
   const articleSchema={
@@ -94,9 +94,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     dateModified:item.updated_at || item.published_at || undefined,
     articleSection:section,
     keywords:item.seo_keywords?.length ? item.seo_keywords.join(', ') : undefined,
-    mainEntityOfPage:`https://richcityhoops.com/news/${item.slug}`,
-    author:{'@type':'Organization',name:'RCL Newsroom',url:'https://richcityhoops.com/news'},
-    publisher:{'@type':'Organization',name:'Rich City League',url:'https://richcityhoops.com'},
+    mainEntityOfPage:`https://www.richcityhoops.com/news/${item.slug}`,
+    author:{'@type':'Organization',name:'RCL Newsroom',url:'https://www.richcityhoops.com/news'},
+    publisher:{'@type':'Organization',name:'Rich City League',url:'https://www.richcityhoops.com'},
     isAccessibleForFree:true,
   };
 

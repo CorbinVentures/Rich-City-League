@@ -20,8 +20,8 @@ const REGIONS:Record<string,{label:string;description:string}>={
 
 export async function generateMetadata({params}:{params:Promise<{region:string}>}) {
   const {region}=await params; const item=REGIONS[region];
-  if(!item) return {title:'Virginia Organizations | RCH Network'};
-  return {title:`${item.label} Organizations | RCH Network`,description:item.description};
+  if(!item) return {title:'Virginia Organizations | RCH Network',robots:{index:false,follow:false}};
+  return {title:`${item.label} Organizations | RCH Network`,description:item.description,alternates:{canonical:`/organizations/region/${region}`}};
 }
 
 export default async function RegionalOrganizationsPage({params}:{params:Promise<{region:string}>}) {

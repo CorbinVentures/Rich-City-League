@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    const [{ teams }, news, publicClient] = await Promise.all([
+    const [{ teams, games }, news, publicClient] = await Promise.all([
       getLeagueSnapshot(),
       getPublishedNews(500),
       Promise.resolve(getPublicClient()),
@@ -59,6 +59,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     for (const team of teams) {
       if (team.slug) entries.push({ url: `${SITE}/teams/${team.slug}`, changeFrequency: 'weekly', priority: .7 });
+    }
+    // Only list games that the public game detail route can resolve from its league snapshot.
+    for (const game of games) {
+      if (game.id && game.status !== 'cancelled') entries.push({ url: `${SITE}/games/${game.id}`, changeFrequency: 'weekly', priority: .65 });
     }
     for (const item of news) {
       if (item.slug) entries.push({ url: `${SITE}/news/${item.slug}`, lastModified: item.published_at ? new Date(item.published_at) : undefined, changeFrequency: 'monthly', priority: .75 });
