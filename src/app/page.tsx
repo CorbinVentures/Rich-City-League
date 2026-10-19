@@ -4,7 +4,7 @@ import { RCHBrowserHomepage } from '@/components/RCHBrowserHomepage';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
-export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Richmond Basketball Community' }, description: 'Join Rich City Hoops free. Connect with Richmond players, find pickup runs, share highlights and follow Rich City League competition.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Richmond Basketball Community',description:'Richmond basketball connected: players, runs, highlights, and Rich City League.'} };
+export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Virginia Basketball Runs & Leagues' }, description: 'Find pickup basketball runs, 1v1 games, courts and competition in Richmond and across Virginia. Join Rich City Hoops free to connect with players and crews.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Virginia Basketball Runs & Leagues',description:'Find local pickup basketball runs, 1v1 challenges, courts, crews and leagues in Virginia. Free to join.'} };
 
 export const revalidate = 60;
 
