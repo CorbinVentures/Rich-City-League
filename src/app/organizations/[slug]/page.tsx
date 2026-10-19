@@ -26,7 +26,7 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
   const {slug}=await params;
   const client=getPublicClient(); const db:any=client;
   const {data}=db ? await db.from('network_organizations').select('name,description').eq('slug',slug).eq('status','active').maybeSingle() : {data:null};
-  return {title:data?.name ? `${data.name} | RCH Network` : 'Organization | RCH Network',description:data?.description || 'Virginia organization connected to the Rich City Hoops Network.'};
+  return {title:data?.name ? `${data.name} | RCH Network` : 'Organization | RCH Network',description:data?.description || 'Virginia organization connected to the Rich City Hoops Network.',alternates:{canonical:`/organizations/${slug}`},...(!data ? {robots:{index:false,follow:false}} : {})};
 }
 
 export default async function OrganizationPage({params}:{params:Promise<{slug:string}>}) {

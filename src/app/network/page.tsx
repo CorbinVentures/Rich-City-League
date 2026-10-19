@@ -8,6 +8,7 @@ import { FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaLocationDot, Fa
 export const metadata = {
   title: 'RCL Network | Virginia Basketball',
   description: 'Discover Virginia basketball organizations, leagues, tournaments, programs, events, and stories through the RCL Network.',
+  alternates: { canonical: '/network' },
 };
 
 export const revalidate = 60;

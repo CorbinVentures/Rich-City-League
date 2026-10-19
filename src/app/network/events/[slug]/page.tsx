@@ -11,9 +11,9 @@ export async function generateMetadata({ params }:{ params:Promise<{slug:string}
   const { slug } = await params;
   const client = getPublicClient();
   const supabase:any = client;
-  if (!supabase) return { title:'RCH Network Event' };
+  if (!supabase) return { title:'RCH Network Event', robots:{index:false,follow:false} };
   const { data } = await supabase.from('network_events').select('title,description').eq('slug',slug).eq('status','published').maybeSingle();
-  return data ? { title:`${data.title} | RCH Network`, description:data.description || 'Virginia event discovered through the RCH Network.' } : { title:'RCH Network Event' };
+  return data ? { title:`${data.title} | RCH Network`, description:data.description || 'Virginia event discovered through the RCH Network.', alternates:{canonical:`/network/events/${slug}`} } : { title:'RCH Network Event', robots:{index:false,follow:false} };
 }
 
 export default async function NetworkEventPage({ params }:{ params:Promise<{slug:string}> }) {
