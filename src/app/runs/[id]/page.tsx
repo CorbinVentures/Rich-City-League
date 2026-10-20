@@ -66,6 +66,7 @@ export default function RunRoomPage() {
   const [partner, setPartner] = useState<PartnerSession | null>(null);
   const [weekendDoubleRep, setWeekendDoubleRep] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [registeredPlayerIds,setRegisteredPlayerIds]=useState<string[]>([]);
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -108,6 +109,7 @@ export default function RunRoomPage() {
       setPartner(org?{slug:org.slug,name:org.name,experience:linked.experience,price_cents:linked.price_cents}:null);
     }else setPartner(null);
     const playerIds = (playersResult.data ?? []).map((item: any) => item.profile_id) as string[];
+    setRegisteredPlayerIds(playerIds);
     const mediaRows = (mediaResult.data ?? []) as Array<Omit<RunPost, 'media_urls'> & { media_urls: unknown }>;
     const mediaAuthorIds = mediaRows.map((item) => item.author_id);
     const identityIds = [...new Set([...playerIds, ...mediaAuthorIds])];
@@ -171,11 +173,28 @@ export default function RunRoomPage() {
   };
 
   const team = (id: string) => teams.find((item) => item.id === id)?.name ?? 'Team';
-  const joined = Boolean(user && (run?.host_id === user.id || profiles.some((profile) => profile.id === user.id)));
+  const joined = Boolean(user && (run?.host_id === user.id || registeredPlayerIds.includes(user.id)));
+  const registered = Boolean(user && registeredPlayerIds.includes(user.id));
+  const spotsLeft=run?Math.max(0,run.max_players-registeredPlayerIds.length):0;
+  const canJoin=Boolean(run?.status==='open'&&spotsLeft>0);
   const startMs = run ? new Date(run.starts_at).getTime() : 0;
   const now = Date.now();
   const checkInOpen = Boolean(run && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000);
   const highlightWindow = Boolean(run && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000);
+
+  const toggleRegistration = async () => {
+    if(!db||!run)return;
+    if(!user){window.location.href='/auth/sign-in?next='+encodeURIComponent('/runs/'+runId);return;}
+    if(user.id===run.host_id&&!registered){setNotice('You are hosting this Run. Manage its roster through the event tools.');return;}
+    if(!registered&&!canJoin){setError('This Run is full or no longer accepting registrations.');return;}
+    setBusy('registration');setError('');setNotice('');
+    const result=registered
+      ?await db.from('run_players').delete().eq('run_id',run.id).eq('profile_id',user.id)
+      :await db.from('run_players').insert({run_id:run.id,profile_id:user.id});
+    if(result.error)setError(result.error.message);
+    else{setNotice(registered?'You left this Run.':'You joined this Run. Review the venue rules and arrive during the posted event window.');await load();}
+    setBusy('');
+  };
 
   const addTeam = async () => {
     if (!db || !user || !teamName.trim()) return;
@@ -293,18 +312,27 @@ export default function RunRoomPage() {
       />
 
       <Container maxWidth="xl" className="py-9">
+        <section aria-label="Your game-day pathway" className="mb-7 overflow-hidden rounded-3xl border border-[#4f84ae] bg-[linear-gradient(135deg,#102f53,#071528)] p-5 shadow-[0_15px_45px_#0006] sm:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-black tracking-[.2em] text-[#9cd9ff]">RUNS WORLD / GAME LOBBY</p><h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">The real game starts here.</h2><p className="mt-2 max-w-xl text-xs leading-6 text-[#bdd7e9]">Meet the roster, register for an available place, then show up at the real court. Score review and rewards remain separate from checking in.</p></div><div className="rounded-xl border border-[#6499bf] bg-[#071b2f] px-4 py-3 text-right"><small className="block text-[10px] font-bold text-[#99c5e3]">REGISTERED PLAYERS</small><strong className="text-2xl font-black text-white">{registeredPlayerIds.length}<span className="text-[#7da4bb]"> / {run.max_players}</span></strong><small className="block text-[10px] text-[#b0dbf3]">{spotsLeft?spotsLeft+' open spots':run.status==='full'?'Full':'No open spots'}</small></div></div>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={()=>void toggleRegistration()} disabled={busy==='registration'||(user?.id===run.host_id&&!registered)||(!registered&&!canJoin)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-3 rounded-xl border border-[#8bd1ff] bg-[#196cef] px-6 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-55 sm:flex-none"><FaBasketball/>{busy==='registration'?'Updating registration…':registered?'Leave Run':joined?'Hosting this Run':canJoin?'JOIN THIS RUN':run.status==='cancelled'?'Run Cancelled':'Registration Closed'}<FaArrowRight/></button><button type="button" onClick={()=>void shareRun()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#4b789a] bg-[#0d304e] px-5 text-xs font-bold"><FaShareNodes/> Invite your crew</button></div>
+          <nav aria-label="Game-day sections" className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+           {([{id:'rch-run-lobby',title:'01 · Lobby'},{id:'rch-game-day',title:'02 · Check in'},{id:'rch-next-up',title:'03 · Next Up'},{id:'rch-result-review',title:'04 · Results'}] as const).map(step=><a key={step.id} href={'#'+step.id} className="flex min-h-11 items-center justify-center rounded-lg border border-[#375f85] bg-[#061e34] px-2 text-center text-[11px] font-bold text-[#d0e9fb] hover:border-[#91d7ff]">{step.title}</a>)}
+          </nav>
+          {!user&&<p className="mt-3 text-xs text-[#b9d6eb]">Sign in to register, check in and save your verified basketball progression.</p>}
+          <p className="mt-3 text-[10px] leading-5 text-[#9cbdd5]"><FaCircleCheck className="mr-1 inline"/> Registrations and check-ins are not verified game outcomes. Ranked results require opponent confirmation; official title matches require independent certification.</p>
+        </section>
         {partner&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4288b5] bg-[#0a3453] p-4"><div><p className="text-[11px] font-black uppercase tracking-wider text-[#92d2ff]">Official Runs Partner · {partner.experience==='rec'?'The REC':'The PARK'}</p><p className="mt-1 text-lg font-black text-white">Organized by {partner.name}</p><p className="mt-1 text-xs text-[#bdd7e9]">{partner.price_cents?'Advertised organizer fee $'+(partner.price_cents/100).toFixed(2)+' · Pay the organizer directly':'Free session · No advertised entry fee'} · RCH verifies competitive results separately</p></div><Link href={'/runs/partners/'+partner.slug} className="rounded-xl border border-[#73b6e3] px-4 py-2 text-xs font-bold text-[#cbeaff]">Partner HQ profile →</Link></div>}
         {notice && <p className="mb-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] p-4 text-sm text-emerald-100">{notice}</p>}
         {error && <p className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/[.06] p-4 text-sm text-red-100">{error}</p>}
 
-        <section className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section id="rch-game-day" className="mb-6 grid scroll-mt-36 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Game day check-in and media">
           {checkInOpen && <button type="button" onClick={() => void checkIn()} disabled={busy === 'checkin' || Boolean(user && checkins.has(user.id))} className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[.055] p-4 text-left disabled:opacity-55"><span className="text-[10px] font-black uppercase tracking-wider text-emerald-300">At the court?</span><strong className="mt-1 block text-sm">{user && checkins.has(user.id) ? 'Checked in ✓' : 'Verify check-in · +15 REP'}</strong></button>}
           <Link href={`/runs/${run.id}/highlight?mode=clip`} className="rounded-2xl border border-rcl-orange/20 bg-rcl-orange/[.05] p-4"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-orange">Run Tape</span><strong className="mt-1 flex items-center gap-2 text-sm"><FaVideo />Drop a clip</strong></Link>
           <Link href={`/runs/${run.id}/highlight?mode=moment`} className="rounded-2xl border border-rcl-blue/20 bg-rcl-blue/[.05] p-4"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">Run Tape</span><strong className="mt-1 flex items-center gap-2 text-sm"><FaCamera />Post photos</strong></Link>
           {joined && highlightWindow && <button type="button" onClick={() => void claimHighlight()} disabled={highlightClaimed || busy === 'highlight'} className="rounded-2xl border border-rcl-blue/20 bg-white/[.025] p-4 text-left disabled:opacity-55"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">Verified highlight</span><strong className="mt-1 block text-sm">{highlightClaimed ? 'Reward claimed ✓' : 'Claim +35 REP'}</strong></button>}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[.75fr_1.25fr]">
+        <section id="rch-run-lobby" className="grid scroll-mt-36 gap-6 lg:grid-cols-[.75fr_1.25fr]" aria-label="Run roster and floor">
           <article className="rounded-3xl border border-white/10 bg-white/[.02] p-6">
             <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaPeopleGroup className="mr-1 inline" />Run roster</p>
             <h2 className="mt-1 font-display text-2xl font-black uppercase">Who showed up</h2>
@@ -335,14 +363,14 @@ export default function RunRoomPage() {
 
         <RunCrewEntries runId={run.id} />
         <RunCrewTeamLinker runId={run.id} />
-        <RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} />
-        <RunOperationsHQ runId={run.id} hostId={run.host_id} />
+        <div id="rch-result-review" className="scroll-mt-36"><RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} /></div>
+        <div id="rch-host-operations" className="scroll-mt-36"><RunOperationsHQ runId={run.id} hostId={run.host_id} /></div>
         <RunVerifiedSignal runId={run.id} />
         <RunMasterOfficialControl runId={run.id} />
-        <RunNextUp runId={run.id} hostId={run.host_id} />
-        <RunResultAppeals runId={run.id} hostId={run.host_id} />
+        <div id="rch-next-up" className="scroll-mt-36"><RunNextUp runId={run.id} hostId={run.host_id} /></div>
+        <div id="rch-appeals" className="scroll-mt-36"><RunResultAppeals runId={run.id} hostId={run.host_id} /></div>
 
-        <section className="mt-6 rounded-3xl border border-white/10 bg-[#07111b] p-5 sm:p-6">
+        <section id="rch-run-tape" className="mt-6 scroll-mt-36 rounded-3xl border border-white/10 bg-[#07111b] p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange"><FaImage className="mr-1 inline" />Run Tape</p><h2 className="mt-1 font-display text-3xl font-black uppercase">What happened here.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/40">Native clips and photos from this Run stay attached to the Run Room while also living in the RCL social feed.</p></div>
             <div className="flex gap-2"><Link href={`/runs/${run.id}/highlight?mode=clip`} className="rounded-xl bg-rcl-orange px-4 py-3 text-xs font-black uppercase text-black">Add clip</Link><Link href={`/runs/${run.id}/highlight?mode=moment`} className="rounded-xl border border-rcl-blue/25 px-4 py-3 text-xs font-black uppercase text-rcl-blue">Add photos</Link></div>
