@@ -130,7 +130,7 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
      <div className="rwg-court-preview-access">
       <FaShieldHalved/><p>{isPublic?'Public outdoor facility record; verify opening hours before visiting.':'Venue access, staffing and basketball availability must be confirmed with the facility.'} This site is not reserved by RCH; a location record is not evidence of active players.</p>
      </div>
-     <WorldScoutButton courtSlug={court.slug} loggedIn={loggedIn} scouted={scouted} onScout={onScout}/>
+     {isPublic&&<WorldScoutButton courtSlug={court.slug} loggedIn={loggedIn} scouted={scouted} onScout={onScout}/>}
      {court.source_url&&<a className="rwg-court-preview-source" href={court.source_url} rel="noopener noreferrer" target="_blank">Inspect court source <FaArrowRight/></a>}
     </div>}
 
