@@ -335,6 +335,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
     </div>
+    <div className="rwg-world-game-legend" aria-label="Runs World map marker guide"><span><FaLocationDot/> Sourced Court</span><span><FaCrown/> Crew Territory</span><span><FaBolt/> Active Challenge</span><span><FaGift/> 2× Verified REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
       <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Enter a basketball area, then tap a real court to inspect its Arena.</p></div>
