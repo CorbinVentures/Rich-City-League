@@ -12,7 +12,7 @@ import '../../visual-experience.css';
 import './court-game-arena.css';
 
 type Venue={slug:string;name:string;locality:string|null;address:string|null;venue_type:string|null;access_type:string|null;hours_text:string|null;open_gym_text:string|null;verification_status:string|null};
-type Crew={crew_id:string;crew_name:string;games:number;wins:number;win_pct:number;is_controller:boolean};
+type Crew={crew_id:string;crew_name:string;logo_path?:string|null;games:number;wins:number;win_pct:number;is_controller:boolean};
 type Run={id:string;title:string;starts_at:string;game_format:string;status:'open'|'full'|'cancelled'|'completed';max_players:number};
 export default function RunCourtProfile(){
  const {slug}=useParams<{slug:string}>();
@@ -96,7 +96,7 @@ export default function RunCourtProfile(){
    <section id="rch-court-territory" className="mt-7 grid scroll-mt-32 gap-4 md:grid-cols-2" aria-label="Verified crew court control">
     <div className="rch-ux-court-card rch-ux-badge-luster">
      <p className="rch-ux-eyebrow"><FaCrown/> COURT DOMINION</p>
-     <h2 className="mt-3 text-2xl font-black">{owner?owner.crew_name:'The territory is unclaimed'}</h2>
+     <div className="mt-3 flex flex-wrap items-center gap-3">{owner?.logo_path&&db?<img src={db.storage.from('rch-crew-logos').getPublicUrl(owner.logo_path).data.publicUrl} alt={owner.crew_name+' current court crew emblem'} className="h-16 w-16 rounded-xl border border-[#dbb978] bg-[#091b2c] object-contain p-1"/>:<span className="grid h-16 w-16 place-items-center rounded-xl border border-[#ddbf83] bg-[#18334a] text-3xl text-[#f7d68e]"><FaCrown/></span>}<h2 className="text-2xl font-black">{owner?owner.crew_name:'The territory is unclaimed'}</h2></div>
      <p className="mt-2 text-sm leading-6 text-[#c8d8e9]">{owner?'Current controlling crew · '+owner.wins+' wins on record':'No registered crew currently holds this court. Territory ownership is awarded only through verified results.'}</p>
      <Link className="rch-ux-header-action mt-3" href={'/runs?court='+encodeURIComponent(slug)}>View takeover competitions <FaArrowRight/></Link>
     </div>
