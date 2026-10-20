@@ -1,0 +1,130 @@
+/* RCH RUNS: cinematic hybrid entry, isolated from league/social site styles. */
+.rwg-shell .rch-gh{--gh-blue:#328dff;--gh-gold:#f7c677;--gh-ink:#eef8ff;--gh-muted:#a9c8e2;color:var(--gh-ink);max-width:1080px;margin:0 auto 18px;isolation:isolate}
+.rwg-shell .rch-gh *{box-sizing:border-box;min-width:0}
+.rwg-shell .rch-gh :is(a,button):focus-visible,.rch-intro-overlay button:focus-visible{outline:3px solid #d4f5ff;outline-offset:3px}
+.rwg-shell .rch-gh button{cursor:pointer}
+.rwg-shell .rch-gh-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px 15px}
+.rwg-shell .rch-gh-wordmark{display:flex;align-items:center;gap:5px;position:relative;font-size:clamp(22px,3vw,33px);font-weight:1000;font-style:italic;letter-spacing:-.075em;line-height:1;color:white;text-shadow:0 3px 8px #000}
+.rwg-shell .rch-gh-wordmark em{font-style:italic;color:#4095ff}
+.rwg-shell .rch-gh-wordmark svg{position:absolute;color:#ffd380;font-size:14px;top:-12px;left:0;transform:rotate(-14deg)}
+.rwg-shell .rch-gh-top-actions{display:flex;align-items:center;gap:8px}
+.rwg-shell .rch-gh-guide,.rwg-shell .rch-gh-icon,.rwg-shell .rch-gh-avatar{min-height:43px;display:inline-flex;align-items:center;justify-content:center;gap:7px;color:#d6ebff;border:1px solid #38608b;background:#0b2640;border-radius:13px}
+.rwg-shell .rch-gh-guide{padding:10px 12px;font-size:11px;font-weight:850}
+.rwg-shell .rch-gh-icon{width:44px;font-size:17px}
+.rwg-shell .rch-gh-avatar{width:44px;padding:2px;overflow:hidden;color:var(--gh-gold)}
+.rwg-shell .rch-gh-avatar img,.rwg-shell .rch-gh-portrait img{width:100%;height:100%;object-fit:cover}
+.rwg-shell .rch-gh-cinema{height:clamp(270px,38vw,420px);position:relative;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid #37699c;border-radius:23px;overflow:hidden;background:linear-gradient(90deg,#031121ec 0%,#061626b8 38%,#081a3345 85%),linear-gradient(0deg,#051120 0%,transparent 65%),url('/rch-runs-night-court.svg') center 53%/cover no-repeat;box-shadow:0 12px 42px #0008,0 0 35px #145fa41c}
+.rwg-shell .rch-gh-cinema:after{content:'';pointer-events:none;position:absolute;inset:0;border:1px solid #8bb8e132;border-radius:inherit;box-shadow:inset 0 0 75px #031124}
+.rwg-shell .rch-gh-live{position:absolute;z-index:1;right:16px;top:14px;display:flex;align-items:center;gap:7px;border:1px solid #537ba0;border-radius:30px;background:#081b31d9;padding:7px 10px;color:#e1f4ff;font-size:9px;font-weight:950;letter-spacing:.08em}
+.rwg-shell .rch-gh-live>span{height:7px;width:7px;background:#50ccfd;border-radius:50%;box-shadow:0 0 12px #2ce7ff}
+.rwg-shell .rch-gh-cinema-copy{position:relative;z-index:1;padding:34px clamp(19px,4vw,38px) 38px;max-width:580px}
+.rwg-shell .rch-gh-eyebrow{display:block;color:#aad9ff;letter-spacing:.14em;font-weight:950;font-size:10px;margin-bottom:10px}
+html body .rwg-shell .rch-gh-cinema h1{color:white!important;font-style:italic;font-size:clamp(37px,6.3vw,72px)!important;line-height:.97!important;font-weight:1000!important;letter-spacing:-.065em!important;text-shadow:0 6px 25px #000;margin:0 0 12px!important}
+html body .rwg-shell .rch-gh-cinema h1 span{color:#62b7ff!important}
+.rwg-shell .rch-gh-cinema p{max-width:350px;color:#dcecff;font-size:13px;line-height:1.55;text-shadow:0 3px 10px #000}
+.rwg-shell .rch-gh-explore{margin-top:18px;min-height:43px;padding:10px 14px;background:#155eb3e8;border:1px solid #7ec4ff;border-radius:12px;color:white;font-size:11px;font-weight:950;display:inline-flex;align-items:center;gap:10px;box-shadow:0 0 20px #1767dd33}
+.rwg-shell .rch-gh-cinema-foot{position:absolute;right:16px;bottom:12px;display:flex;align-items:center;gap:7px;color:#d2e8faad;font-size:9px;font-weight:900;letter-spacing:.08em}
+.rwg-shell .rch-gh-player-card{display:flex;align-items:center;gap:15px;position:relative;margin:13px 0 9px;padding:13px 16px;border:1px solid #3b6d9c;background:linear-gradient(118deg,#102f51,#071828);border-radius:18px;box-shadow:0 8px 26px #0004}
+.rwg-shell .rch-gh-portrait{display:grid;place-items:center;flex:0 0 72px;width:72px;height:72px;overflow:hidden;background:linear-gradient(135deg,#204e82,#061c32);border:1px solid #68b4e7;border-radius:12px;color:#a4d9ff;font-size:26px}
+.rwg-shell .rch-gh-player-main{flex:1}
+.rwg-shell .rch-gh-kicker{display:block;color:#88c8f9;font-size:9px;font-weight:950;letter-spacing:.11em}
+.rwg-shell .rch-gh-player-main>strong{display:block;color:#fff;font-size:clamp(15px,3vw,22px);line-height:1.3;margin-top:4px;font-weight:950;overflow-wrap:anywhere}
+.rwg-shell .rch-gh-level{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.rwg-shell .rch-gh-level span{font-size:11px;font-weight:900;color:#d9ebff}
+.rwg-shell .rch-gh-level small{font-size:10px;color:#b9d0e7;text-align:right}
+.rwg-shell .rch-gh-player-main progress,.rwg-shell .rch-gh-mission progress{appearance:none;width:100%;height:6px;display:block;overflow:hidden;border:0;border-radius:10px;background:#203851;margin-top:7px}
+.rwg-shell .rch-gh-player-main progress::-webkit-progress-bar,.rwg-shell .rch-gh-mission progress::-webkit-progress-bar{background:#203851}
+.rwg-shell .rch-gh-player-main progress::-webkit-progress-value,.rwg-shell .rch-gh-mission progress::-webkit-progress-value{background:linear-gradient(90deg,#276cf1,#77d2ff)}
+.rwg-shell .rch-gh-player-main progress::-moz-progress-bar,.rwg-shell .rch-gh-mission progress::-moz-progress-bar{background:#5cb6ff}
+.rwg-shell .rch-gh-player-crown{display:grid;place-items:center;flex:0 0 46px;height:46px;border:1px solid #aa8d4f;border-radius:12px;background:#403219;color:#ffe19e;font-size:22px}
+.rwg-shell .rch-gh-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.rwg-shell .rch-gh-metrics>div{display:grid;justify-items:center;gap:3px;background:#071e34;border:1px solid #294c70;border-radius:12px;padding:11px 5px}
+.rwg-shell .rch-gh-metrics svg{color:var(--gh-gold);font-size:17px}
+.rwg-shell .rch-gh-metrics strong{font-size:clamp(18px,2.4vw,24px);font-weight:950;color:white;font-variant-numeric:tabular-nums}
+.rwg-shell .rch-gh-metrics span{font-size:9px;font-weight:900;letter-spacing:.06em;color:#a6c9e7;text-align:center}
+.rwg-shell .rch-gh-play{display:flex;align-items:center;justify-content:center;gap:15px;min-height:67px;border:1px solid #98d7ff;border-radius:15px;background:linear-gradient(110deg,#1238ff,#168af5 55%,#0755f8);color:white!important;box-shadow:0 0 28px #147ef655,inset 0 1px #defaff77;text-align:center;text-decoration:none;transition:filter .15s,transform .15s}
+.rwg-shell .rch-gh-play:hover{filter:brightness(1.14);transform:translateY(-1px)}
+.rwg-shell .rch-gh-play>svg:first-child{font-size:23px}
+.rwg-shell .rch-gh-play>span{display:grid;gap:2px;font-size:22px;font-weight:1000;font-style:italic;letter-spacing:.01em}
+.rwg-shell .rch-gh-play small{font-size:10px;font-style:normal;font-weight:700;letter-spacing:0}
+.rwg-shell .rch-gh-section{margin-top:20px}
+.rwg-shell .rch-gh-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+html body .rwg-shell .rch-gh-section-title h2{color:white!important;font-size:18px!important;font-weight:950!important;letter-spacing:.01em!important;margin:0!important}
+.rwg-shell .rch-gh-section-title :is(button,a){display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:7px 4px;color:#8ccfff;font-size:10px;font-weight:950;background:none;border:0}
+.rwg-shell .rch-gh-next-card{position:relative;display:flex;align-items:center;gap:15px;min-height:105px;border:1px solid #345b7f;border-radius:15px;background:linear-gradient(110deg,#0b2841,#081626);padding:10px;text-decoration:none;color:white}
+.rwg-shell .rch-gh-next-card:hover{border-color:#8acbfa}
+.rwg-shell .rch-gh-run-photo{flex:0 0 115px;display:grid;place-items:center;align-self:stretch;border-radius:10px;color:#c7e8ff;font-size:26px;background:linear-gradient(0deg,#071b35bd,#13274025),url('/rch-runs-night-court.svg') center/cover no-repeat}
+.rwg-shell .rch-gh-run-body{flex:1;display:grid;gap:6px}
+.rwg-shell .rch-gh-run-body strong{font-size:15px;font-weight:950;line-height:1.3;overflow-wrap:anywhere}
+.rwg-shell .rch-gh-run-body small{display:flex;align-items:center;gap:7px;font-size:11px;color:#c4dced;line-height:1.3}
+.rwg-shell .rch-gh-double{position:absolute;top:5px;right:8px;background:#5524a1;border:1px solid #c08aff;border-radius:6px;color:#fff;font-size:8px;font-weight:950;padding:4px 7px}
+.rwg-shell .rch-gh-run-arrow{flex:0 0 auto;font-size:15px;color:#83c9ff;margin-right:9px}
+.rwg-shell .rch-gh-next-empty{border:1px dashed #406884;border-radius:13px;padding:23px;background:#08223a;color:#c8dbeb;font-size:12px;line-height:1.6}
+.rwg-shell .rch-gh-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.rwg-shell .rch-gh-actions>*{display:grid;place-items:center;gap:9px;min-height:94px;background:linear-gradient(130deg,#102942,#071a2e);border:1px solid #365875;border-radius:13px;color:#f3faff;font-size:11px;font-weight:950;text-decoration:none}
+.rwg-shell .rch-gh-actions>*:hover{border-color:#a8d7fa;background:#133b64}
+.rwg-shell .rch-gh-actions svg{color:#62b6ff;font-size:25px}
+.rwg-shell .rch-gh-actions>*:nth-child(2){border-color:#a4804b}.rwg-shell .rch-gh-actions>*:nth-child(2) svg{color:#ffd17b}
+.rwg-shell .rch-gh-actions>*:nth-child(3){border-color:#7950ae}.rwg-shell .rch-gh-actions>*:nth-child(3) svg{color:#cba8ff}
+.rwg-shell .rch-gh-mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rwg-shell .rch-gh-mission{display:grid;grid-template-columns:37px 1fr;column-gap:7px;align-items:center;min-height:77px;padding:11px;background:linear-gradient(130deg,#10253c,#08192c);border:1px solid #345474;border-radius:12px;color:#fff;text-align:left}
+.rwg-shell .rch-gh-mission>span{grid-row:span 2;display:grid;place-items:center;width:36px;height:36px;border:1px solid #4783b1;border-radius:10px;background:#13395c;font-size:19px}
+.rwg-shell .rch-gh-mission strong{font-size:11px;font-weight:900;line-height:1.3}
+.rwg-shell .rch-gh-mission small{font-size:9px;color:#9bbee2}
+.rwg-shell .rch-gh-mission progress{grid-column:1/-1;height:4px;margin-top:8px}
+.rwg-shell .rch-gh-fair{display:flex;align-items:start;gap:7px;margin-top:11px;color:#a8c0d6;font-size:10px;line-height:1.55}
+.rwg-shell .rch-gh-fair svg{flex:none;margin-top:2px}
+.rwg-shell .rch-gh-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;color:#729ec0;font-size:9px;letter-spacing:.05em}
+.rwg-shell .rch-gh-footer button{display:inline-flex;align-items:center;gap:7px;min-height:40px;background:transparent;border:0;color:#9ed2fa;font-weight:800}
+
+/* True intro: decorative image is illustrative only and never represents a court location or live activity. */
+.rch-intro-overlay{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;background:#020816;color:#fff;isolation:isolate;overflow:hidden}
+.rch-intro-court{position:absolute;inset:0;background:linear-gradient(0deg,#020816,#030d1c77 50%,#020816a0),url('/rch-runs-night-court.svg') center/cover no-repeat;filter:saturate(1.35);transform:scale(1.07);animation:rch-intro-enter 2.65s ease-out both}
+.rch-intro-overlay:after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,#225cc644,transparent 60%)}
+.rch-intro-stage{position:relative;z-index:2;text-align:center;padding:22px;display:flex;align-items:center;flex-direction:column;gap:14px}
+.rch-intro-crown{color:#fdd68f;font-size:38px;filter:drop-shadow(0 0 12px #e29c56)}
+.rch-intro-logo{font-size:clamp(50px,10vw,100px);font-weight:1000;font-style:italic;letter-spacing:-.09em;line-height:.95;text-shadow:0 7px 35px #000;animation:rch-intro-logo 1.15s both}
+.rch-intro-logo em{color:#398eff;font-style:italic}
+.rch-intro-pulse{display:grid;place-items:center;width:68px;height:68px;border:1px solid #6ebaff;border-radius:50%;font-size:32px;color:#b6e7ff;background:#092a51bb;box-shadow:0 0 45px #3296ff65;animation:rch-intro-pulse 1.5s ease-in-out infinite}
+.rch-intro-stage strong{font-size:clamp(12px,3vw,20px);letter-spacing:.18em;color:#ffda9c;font-weight:950}
+.rch-intro-stage>span:last-child{font-size:11px;font-weight:850;letter-spacing:.23em;color:#a2cce9}
+.rch-intro-overlay.stage-world .rch-intro-stage{animation:rch-intro-world .6s both}
+.rch-intro-skip{position:absolute;z-index:4;top:calc(env(safe-area-inset-top) + 19px);right:18px;display:flex;align-items:center;gap:9px;padding:11px 14px;border:1px solid #7aa2bc;border-radius:11px;background:#071b30dd;color:white;font-size:12px;font-weight:800;cursor:pointer}
+@keyframes rch-intro-enter{from{transform:scale(1.15);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes rch-intro-logo{from{opacity:0;transform:translateY(22px) scale(.88)}to{opacity:1;transform:none}}
+@keyframes rch-intro-pulse{50%{box-shadow:0 0 70px #349cffad;transform:scale(1.07)}}
+@keyframes rch-intro-world{from{opacity:.3;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+@media(max-width:650px){
+ .rwg-shell .rch-gh{margin-bottom:95px}
+ .rwg-shell .rch-gh-top{padding:7px 1px 13px}
+ .rwg-shell .rch-gh-guide span{display:none}
+ .rwg-shell .rch-gh-guide{width:44px}
+ .rwg-shell .rch-gh-cinema{height:290px;border-radius:17px}
+ .rwg-shell .rch-gh-cinema-copy{padding:20px 20px 33px}
+ html body .rwg-shell .rch-gh-cinema h1{font-size:clamp(38px,10vw,58px)!important}
+ .rwg-shell .rch-gh-cinema-foot{right:12px;bottom:7px;font-size:7px}
+ .rwg-shell .rch-gh-live{right:9px;top:9px;font-size:8px}
+ .rwg-shell .rch-gh-portrait{width:62px;height:64px;flex-basis:62px}
+ .rwg-shell .rch-gh-player-card{gap:11px;padding:11px}
+ .rwg-shell .rch-gh-player-crown{width:36px;height:39px;flex-basis:36px;font-size:18px}
+ .rwg-shell .rch-gh-level{display:block}
+ .rwg-shell .rch-gh-level small{display:block;text-align:left;margin-top:2px}
+ .rwg-shell .rch-gh-metrics span{font-size:8px}
+ .rwg-shell .rch-gh-actions>*{min-height:77px}
+ .rwg-shell .rch-gh-actions svg{font-size:21px}
+ .rwg-shell .rch-gh-run-photo{flex-basis:74px;min-height:90px}
+ .rwg-shell .rch-gh-run-body strong{font-size:12px}
+ .rwg-shell .rch-gh-run-body small{font-size:9px}
+ .rwg-shell .rch-gh-mission-grid{gap:6px}
+ .rwg-shell .rch-gh-mission{grid-template-columns:1fr;gap:5px;padding:8px;justify-items:start}
+ .rwg-shell .rch-gh-mission>span{grid-row:auto;width:30px;height:30px;font-size:16px}
+ .rwg-shell .rch-gh-mission strong{font-size:10px}
+ .rwg-shell .rch-gh-mission progress{grid-column:auto}
+ .rwg-shell .rch-gh-footer>span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .rch-intro-overlay *{animation:none!important}
+ .rwg-shell .rch-gh-play{transition:none}
+ .rwg-shell .rch-gh-play:hover{transform:none}
+}
