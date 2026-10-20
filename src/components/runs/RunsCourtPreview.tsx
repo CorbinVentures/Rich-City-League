@@ -8,6 +8,7 @@ import {
  FaTrophy,FaXmark
 } from 'react-icons/fa6';
 import type {WorldCourt,WorldRun} from '@/lib/runs-world-game';
+import {WorldScoutButton} from '@/components/runs/RunsWorldJourney';
 import './runs-court-preview.css';
 
 export type CertifiedCourtBelt={division:string;player_name:string;defenses:number};
@@ -15,6 +16,7 @@ type Props={
  court:WorldCourt;cityId:string;events:readonly WorldRun[];
  belts:readonly CertifiedCourtBelt[];beltLoading:boolean;
  controllingCrew:string|null;crewLogoUrl:string|null;recordedDefenses:number;
+ loggedIn:boolean;scouted:boolean;onScout:()=>void;
  onClose:()=>void;
 };
 const formats=['1v1','2v2','3v3'] as const;
@@ -32,7 +34,7 @@ function accessLabel(court:WorldCourt){
 }
 
 /** On-map disclosure, not a new match authority or a modal that remounts the map. */
-export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,onClose}:Props){
+export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,loggedIn,scouted,onScout,onClose}:Props){
  const [expanded,setExpanded]=useState(false);
  const dismiss=useRef<HTMLButtonElement|null>(null);
  const scroller=useRef<HTMLDivElement|null>(null);
@@ -126,8 +128,9 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
        <span><strong>{run.title}</strong><small>{eventWhen(run.starts_at)} · {run.game_format} · {run.status}</small></span><FaArrowRight/>
       </Link>):<p className="rwg-court-preview-muted">No scheduled Run. You can organize a real event subject to facility rules.</p>}
      <div className="rwg-court-preview-access">
-      <FaShieldHalved/><p>{isPublic?'Public outdoor facility record; verify opening hours before visiting.':'Venue access, staffing and basketball availability must be confirmed with the facility.'} A location record is not a facility reservation or evidence of active players.</p>
+      <FaShieldHalved/><p>{isPublic?'Public outdoor facility record; verify opening hours before visiting.':'Venue access, staffing and basketball availability must be confirmed with the facility.'} This site is not reserved by RCH; a location record is not evidence of active players.</p>
      </div>
+     <WorldScoutButton courtSlug={court.slug} loggedIn={loggedIn} scouted={scouted} onScout={onScout}/>
      {court.source_url&&<a className="rwg-court-preview-source" href={court.source_url} rel="noopener noreferrer" target="_blank">Inspect court source <FaArrowRight/></a>}
     </div>}
 
