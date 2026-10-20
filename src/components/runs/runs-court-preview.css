@@ -88,3 +88,5 @@
  .rwg-court-preview:not(.is-expanded) .rwg-court-preview-body{gap:7px;padding:9px 12px 13px}
  .rwg-court-preview:not(.is-expanded) .rwg-court-preview-actions{margin-top:auto}
 }
+
+.rwg-court-preview-crest img{width:100%;height:100%;object-fit:contain;border-radius:9px}
