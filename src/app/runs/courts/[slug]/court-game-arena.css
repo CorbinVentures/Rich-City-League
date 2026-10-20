@@ -24,3 +24,14 @@
  .rch-arena-shell .rch-court-scorebar small{font-size:8px}
  .rch-arena-shell .rch-court-scorebar strong{font-size:12px}
 }
+
+
+/* World 3.0 full Arena: real history timeline, not fabricated achievements. */
+.rch-arena-shell .rch-court-section-nav{grid-template-columns:repeat(5,minmax(0,1fr))}
+.rch-arena-shell .rch-court-game-history{margin-top:17px;display:grid;gap:9px}
+.rch-arena-shell .rch-court-game-history li{display:flex;align-items:center;gap:12px;min-height:66px;background:#0d2d49;border:1px solid #3e698c;border-radius:13px;padding:12px;color:#fff}
+.rch-arena-shell .rch-court-game-history-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border:1px solid #a78c4e;border-radius:11px;background:#43341e;color:#fbd78d}
+.rch-arena-shell .rch-court-game-history li>span:last-child{display:grid;gap:5px}
+.rch-arena-shell .rch-court-game-history strong{font-size:13px;font-weight:900}
+.rch-arena-shell .rch-court-game-history small{font-size:10px;color:#b8cfdf}
+@media(max-width:600px){.rch-arena-shell .rch-court-section-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.rch-arena-shell .rch-court-section-nav a{font-size:8px;gap:4px;padding:5px 2px}.rch-arena-shell .rch-court-section-nav a svg{font-size:14px}}

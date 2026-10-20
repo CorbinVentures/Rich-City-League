@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FaArrowLeft,
@@ -38,6 +38,7 @@ type Run = {
   description: string | null;
   court_name: string | null;
   location: string;
+  location_slug: string | null;
   starts_at: string;
   skill_level: string;
   game_format: string | null;
@@ -60,6 +61,9 @@ function isVideoUrl(url: string) {
 export default function RunRoomPage() {
   const params = useParams<{ id: string }>();
   const runId = params.id;
+  const searchParams=useSearchParams();
+  const fromCourt=searchParams.get('fromCourt');
+  const fromCity=searchParams.get('fromCity');
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(true), []);
   const db = supabase as any;
@@ -87,7 +91,7 @@ export default function RunRoomPage() {
     if (!db || !runId) return;
     setError('');
     const [runResult, playersResult, checkResult, teamResult, memberResult, gameResult, mediaResult, claimResult] = await Promise.all([
-      db.from('runs').select('id,host_id,run_type,title,description,court_name,location,starts_at,skill_level,game_format,max_players,status').eq('id', runId).maybeSingle(),
+      db.from('runs').select('id,host_id,run_type,title,description,court_name,location,location_slug,starts_at,skill_level,game_format,max_players,status').eq('id', runId).maybeSingle(),
       db.from('run_players').select('profile_id').eq('run_id', runId),
       db.from('run_checkins').select('profile_id').eq('run_id', runId),
       db.from('run_teams').select('id,name,sort_order').eq('run_id', runId).order('sort_order'),
@@ -178,6 +182,8 @@ export default function RunRoomPage() {
 
   const team = (id: string) => teams.find((item) => item.id === id)?.name ?? 'Team';
   const joined = Boolean(user && (run?.host_id === user.id || registeredPlayerIds.includes(user.id)));
+  const returnCourt=run?.location_slug&&(fromCourt===run.location_slug||!fromCourt)?run.location_slug:null;
+  const returnHref=returnCourt?'/runs/courts/'+encodeURIComponent(returnCourt)+(fromCity&&/^[a-z-]{2,40}$/.test(fromCity)?'?fromCity='+encodeURIComponent(fromCity):''):null;
   const registered = Boolean(user && registeredPlayerIds.includes(user.id));
   const spotsLeft=run?Math.max(0,run.max_players-registeredPlayerIds.length):0;
   const canJoin=Boolean(run?.status==='open'&&spotsLeft>0);
@@ -311,7 +317,7 @@ export default function RunRoomPage() {
         accent={run.status === 'cancelled' ? 'Cancelled' : 'Run Room'}
         description={run.description ?? 'Pickup basketball organized through RCL Runs.'}
         assetKey="runs.cover"
-        actions={<div className="flex flex-wrap gap-2">{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#65b6ff]/40 bg-[#13456c] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
+        actions={<div className="flex flex-wrap gap-2">{returnHref&&<Link href={returnHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#5592bb] bg-[#103b5c] px-4 text-xs font-black uppercase"><FaArrowLeft/> Back to Court Arena</Link>}{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#65b6ff]/40 bg-[#13456c] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
         meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5"><p className="text-[10px] font-black uppercase tracking-wider text-rcl-blue"><FaLocationDot className="mr-1 inline" />{run.court_name || run.location}</p><p className="mt-2 text-sm font-black">{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p><p className="mt-2 text-xs text-white/35">{run.skill_level} · {run.game_format ?? 'Pickup'} · {profiles.length}/{run.max_players}</p></div>}
       />
 
