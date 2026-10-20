@@ -176,7 +176,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
    });
    map.on('error',(e:any)=>{if(e?.error?.message&&/style|source|failed to fetch/i.test(e.error.message))setStatus(s=>s==='ready'?s:'unavailable');});
   }).catch(()=>{if(!disposed)setStatus('unavailable');});
-  return()=>{disposed=true;markers.current.forEach(m=>m.remove());markers.current=[];map?.remove();mapRef.current=null;};
+  return()=>{disposed=true;if(map)saveCamera(map,cityRef.current);markers.current.forEach(m=>m.remove());markers.current=[];map?.remove();mapRef.current=null;};
  },[revision]);
 
  useEffect(()=>{
