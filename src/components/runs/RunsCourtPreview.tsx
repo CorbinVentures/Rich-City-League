@@ -14,7 +14,7 @@ export type CertifiedCourtBelt={division:string;player_name:string;defenses:numb
 type Props={
  court:WorldCourt;cityId:string;events:readonly WorldRun[];
  belts:readonly CertifiedCourtBelt[];beltLoading:boolean;
- controllingCrew:string|null;recordedDefenses:number;
+ controllingCrew:string|null;crewLogoUrl:string|null;recordedDefenses:number;
  onClose:()=>void;
 };
 const formats=['1v1','2v2','3v3'] as const;
@@ -32,7 +32,7 @@ function accessLabel(court:WorldCourt){
 }
 
 /** On-map disclosure, not a new match authority or a modal that remounts the map. */
-export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,recordedDefenses,onClose}:Props){
+export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,onClose}:Props){
  const [expanded,setExpanded]=useState(false);
  const dismiss=useRef<HTMLButtonElement|null>(null);
  const touchStartY=useRef<number|null>(null);
@@ -90,7 +90,7 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
      <span>{scheduled.length} scheduled {scheduled.length===1?'Run':'Runs'}</span>
     </div>
     <div className="rwg-court-preview-territory">
-     <span className="rwg-court-preview-crest"><FaCrown/></span>
+     <span className="rwg-court-preview-crest">{controllingCrew&&crewLogoUrl?<img src={crewLogoUrl} alt={controllingCrew+' crew logo'}/>:<FaCrown/>}</span>
      <div><small>COURT TERRITORY · CONTROLLING CREW</small><strong>{controllingCrew||'Unclaimed'}</strong>
       <small>{controllingCrew?recordedDefenses+' recorded successful defenses':'No verified crew controller on record'}</small>
      </div>
