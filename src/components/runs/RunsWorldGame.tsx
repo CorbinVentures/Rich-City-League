@@ -419,10 +419,20 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
 
    {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
 
-   {screen==='battle'&&<section className="rwg-mode" aria-label="Battle arena">
-     <span className="rwg-kicker">COMPETITIVE MODE / REAL-WORLD MATCHES</span><h2>Take the court. Defend the crown.</h2>
-     <p>Battle for local Master titles and crew control through verified competitive games. Challenges and titles are recorded by the existing Court Dominion system.</p>
-     <div className="rwg-mode-links"><Link href="/crews?intent=mine" className="rwg-primary">My Crew <FaArrowRight/></Link><Link href="/commonwealth" className="rwg-secondary">Commonwealth Cup</Link></div>
+   {screen==='battle'&&<section className="rwg-mode" aria-label="Runs and court battles">
+     <span className="rwg-kicker">REAL RUNS / REAL BASKETBALL</span><h2>Find a game. Build your legacy.</h2>
+     <p>Join upcoming basketball Runs, then compete for local Master titles and crew territory through verified games. Registered Runs are real events, not simulated matchmaking.</p>
+     <div className="rwg-mode-links"><Link href="/runs?view=list#rch-upcoming-runs" className="rwg-primary">Find a Run <FaArrowRight/></Link>
+      <Link href="/runs?create=1" className="rwg-secondary">Organize a Run</Link>
+      <Link href="/crews?intent=mine" className="rwg-secondary">My Crew</Link></div>
+     <div className="rwg-activity" aria-label="Upcoming local basketball Runs">
+      <div className="rwg-section-head"><div><span className="rwg-kicker">NEXT UP</span><h2>{city?city.name+' Games':'Virginia Runs'}</h2></div>
+       <Link href="/runs?view=list#rch-upcoming-runs">Browse all <FaArrowRight/></Link></div>
+      {areaRuns.length?areaRuns.slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="rwg-run-row">
+       <span className="rwg-run-basket"><FaBasketball/></span><span><strong>{run.title}</strong><small>{shortWhen(run.starts_at)} · {run.game_format} · {run.status==='full'?'Full':'Scheduled'}</small></span><FaArrowRight/></Link>):
+       <p className="rwg-empty">{city?'No upcoming Runs recorded in this city. Try another location or the full Runs list.':'Choose a city on the map to view local Runs, or browse the statewide list.'}</p>}
+     </div>
+     <div className="rwg-section-head" style={{marginTop:24}}><div><span className="rwg-kicker">THE COMPETITIVE ARENA</span><h2>Defend the crown.</h2></div><Link href="/commonwealth">Commonwealth Cup <FaArrowRight/></Link></div>
      <WorldBattleScene cityName={city?.name||null} courtSlugs={battleCourtSlugs}
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
