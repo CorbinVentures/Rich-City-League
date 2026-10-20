@@ -19,10 +19,10 @@ export default function RunCourtProfile(){
  const {slug}=useParams<{slug:string}>();
  const params=useSearchParams();
  const incomingCity=params.get('fromCity');
- const returnCity=incomingCity&&/^[a-z-]{2,40}$/.test(incomingCity)?incomingCity:(court?.locality||'');
  const {user}=useAuth();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [court,setCourt]=useState<Venue|null>(null);
+ const returnCity=incomingCity&&/^[a-z-]{2,40}$/.test(incomingCity)?incomingCity:(court?.locality||'');
  const [crews,setCrews]=useState<Crew[]>([]);
  const [runs,setRuns]=useState<Run[]>([]);
  const [loading,setLoading]=useState(true);
