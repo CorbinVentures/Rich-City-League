@@ -374,6 +374,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
        controllingCrew={courtStats.crewName} crewLogoUrl={courtStats.crewLogoPath&&db?db.storage.from('rch-crew-logos').getPublicUrl(courtStats.crewLogoPath).data.publicUrl:null} recordedDefenses={courtStats.defenses}
+       loggedIn={Boolean(user)} scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))} onScout={()=>setScoutVersion(n=>n+1)}
        onClose={closeCourtPreview}/>}
      </div>
      <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
