@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { RunRoomLauncher } from '@/components/RunRoomLauncher';
+import { RunsGlobalNav } from '@/components/runs/RunsGlobalNav';
+import './runs-global-nav.css';
 
 export const metadata: Metadata = {
   title: { absolute: 'Pickup Basketball Runs in Virginia | Rich City Hoops' },
@@ -9,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RunsLayout({children}:{children:ReactNode}){
-  return <>{children}<RunRoomLauncher/></>;
+  return <>{children}<RunsGlobalNav/><RunRoomLauncher/></>;
 }
