@@ -302,6 +302,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    // Keep the exact MapLibre camera alive; court previews live over that map.
    setSelectedSlug(slug);
  };
+ const closeCourtPreview=useCallback(()=>{
+   setSelectedSlug(null);
+   window.requestAnimationFrame(()=>{
+    const canvas=document.querySelector('.rwg-real-map .maplibregl-canvas') as HTMLElement|null;
+    canvas?.focus({preventScroll:true});
+   });
+ },[]);
 
  return <main className="rwg-shell min-h-screen pb-28 text-white" aria-label="RCH Runs World game">
   <RunsCinematicIntro enabled={introEnabled&&screen==='home'} replayToken={introReplay}/>
@@ -367,7 +374,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
        controllingCrew={courtStats.crewName} crewLogoUrl={courtStats.crewLogoPath&&db?db.storage.from('rch-crew-logos').getPublicUrl(courtStats.crewLogoPath).data.publicUrl:null} recordedDefenses={courtStats.defenses}
-       onClose={()=>setSelectedSlug(null)}/>}
+       onClose={closeCourtPreview}/>}
      </div>
      <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
     </section>
