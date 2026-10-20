@@ -52,7 +52,7 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
  useEffect(()=>{
   if(!scroller.current)return;
   scroller.current.scrollTo({top:expanded?Math.max(0,scroller.current.scrollHeight/4):0,
-   behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+   behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
  },[expanded]);
  const arenaHref='/runs/courts/'+encodeURIComponent(court.slug)+'?fromCity='+encodeURIComponent(cityId);
  const scheduled=[...events].filter(e=>(e.status==='open'||e.status==='full')&&Date.parse(e.starts_at)>Date.now())
