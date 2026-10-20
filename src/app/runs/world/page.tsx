@@ -16,5 +16,5 @@ export default function RunsWorldPage(){
   setRulesOpen(false);
   try{window.sessionStorage.setItem(SESSION_KEY,'seen');}catch{/* Never block entry. */}
  },[]);
- return <><RunsWorldGame onOpenRules={()=>setRulesOpen(true)}/><RunsRulesIntro open={rulesOpen} onClose={closeRules}/></>;
+ return <><RunsWorldGame onOpenRules={()=>setRulesOpen(true)} introEnabled={!rulesOpen} initialScreen="world"/><RunsRulesIntro open={rulesOpen} onClose={closeRules}/></>;
 }

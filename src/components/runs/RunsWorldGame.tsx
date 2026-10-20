@@ -19,8 +19,9 @@ import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type Wo
 import './runs-world.css';
 import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
+import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
 
-type Screen='world'|'battle'|'missions'|'vault'|'player';
+type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
 type CourtStats={masters:Master[];crewName:string|null;defenses:number;loading:boolean};
@@ -37,21 +38,22 @@ const parksRecAreas:VirginiaCity[]=[
 const runsAreaOptions=[...VIRGINIA_CITIES,...parksRecAreas];
 const cityTabs=[...VIRGINIA_CITIES.filter(city=>city.major),...parksRecAreas];
 const nav:{id:Screen;title:string;icon:typeof FaCompass}[]=[
- {id:'world',title:'World',icon:FaCompass},
- {id:'battle',title:'Battle',icon:FaBolt},
- {id:'missions',title:'Missions',icon:FaTrophy},
+ {id:'home',title:'Home',icon:FaBasketball},
+ {id:'world',title:'Map',icon:FaCompass},
+ {id:'battle',title:'Runs',icon:FaBolt},
  {id:'vault',title:'Vault',icon:FaMedal},
- {id:'player',title:'My Player',icon:FaPeopleGroup},
+ {id:'crew',title:'Crew',icon:FaPeopleGroup},
 ];
 function shortWhen(value:string){
  const d=new Date(value);
  return Number.isFinite(d.getTime())?d.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET':'Time unavailable';
 }
-export default function RunsWorldGame({onOpenRules}:{onOpenRules:()=>void}){
+export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScreen='home'}:{onOpenRules:()=>void;introEnabled?:boolean;initialScreen?:'home'|'world'}){
  const {user}=useAuth();
  const {location,chooseCity,statewide}=useGravityLocation();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
- const [screen,setScreen]=useState<Screen>('world');
+ const [screen,setScreen]=useState<Screen>(initialScreen);
+ const [introReplay,setIntroReplay]=useState(0);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
  const [communityLeads,setCommunityLeads]=useState<CommunityCourtLead[]>([]);
@@ -277,8 +279,9 @@ export default function RunsWorldGame({onOpenRules}:{onOpenRules:()=>void}){
  };
 
  return <main className="rwg-shell min-h-screen pb-28 text-white" aria-label="RCH Runs World game">
+  <RunsCinematicIntro enabled={introEnabled&&screen==='home'} replayToken={introReplay}/>
   <div className="rwg-frame">
-   <header className="rwg-header">
+   {screen!=='home'&&<header className="rwg-header">
     <div><span className="rwg-kicker"><FaBolt/> THE REAL-WORLD BASKETBALL GAME</span>
      <h1>RUNS <span>WORLD</span></h1>
      <p>Explore real courts. Challenge verified contenders. Build your basketball legacy.</p>
@@ -291,7 +294,18 @@ export default function RunsWorldGame({onOpenRules}:{onOpenRules:()=>void}){
      <Link href="/runs?view=list#rch-upcoming-runs" className="rwg-soft">List view <FaArrowRight/></Link>
      <button type="button" onClick={refresh} className="rwg-soft" aria-label="Refresh Runs World"><FaArrowRotateRight/></button>
     </div>
-   </header>
+   </header>}
+
+   {screen==='home'&&<RunsCinematicHome
+      city={city?.name||null} signedIn={Boolean(user)}
+      name={identity?.display_name||identity?.username||(user?'RCH Hooper':'Guest Hooper')}
+      avatar={identity?.avatar_url||null} journey={journey} journeyLoading={journeyLoading}
+      player={{repBalance:player.repBalance,verifiedGames:player.passport?.verified_games??null,badges:player.passport?.badges?.length??null}}
+      runs={areaRuns} featuredRunIds={featured}
+      onWorld={()=>setScreen('world')} onMissions={()=>setScreen('missions')}
+      onPlayer={()=>setScreen('player')} onVault={()=>setScreen('vault')}
+      onBattle={()=>setScreen('battle')} onRules={onOpenRules}
+      onReplay={()=>setIntroReplay(n=>n+1)}/>}
 
    {screen==='world'&&<RunsGameLobby city={city?.name||null} journey={journey} signedIn={Boolean(user)} loading={journeyLoading}
      onExplore={()=>{const arena=document.getElementById('rwg-world-map');arena?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});arena?.focus({preventScroll:true});}}
@@ -403,15 +417,34 @@ export default function RunsWorldGame({onOpenRules}:{onOpenRules:()=>void}){
      </>}
    </>}
 
-   {user&&screen!=='battle'&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
+   {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
 
-   {screen==='battle'&&<section className="rwg-mode" aria-label="Battle arena">
-     <span className="rwg-kicker">COMPETITIVE MODE / REAL-WORLD MATCHES</span><h2>Take the court. Defend the crown.</h2>
-     <p>Battle for local Master titles and crew control through verified competitive games. Challenges and titles are recorded by the existing Court Dominion system.</p>
-     <div className="rwg-mode-links"><Link href="/crews?intent=mine" className="rwg-primary">My Crew <FaArrowRight/></Link><Link href="/commonwealth" className="rwg-secondary">Commonwealth Cup</Link></div>
+   {screen==='battle'&&<section className="rwg-mode" aria-label="Runs and court battles">
+     <span className="rwg-kicker">REAL RUNS / REAL BASKETBALL</span><h2>Find a game. Build your legacy.</h2>
+     <p>Join upcoming basketball Runs, then compete for local Master titles and crew territory through verified games. Registered Runs are real events, not simulated matchmaking.</p>
+     <div className="rwg-mode-links"><Link href="/runs?view=list#rch-upcoming-runs" className="rwg-primary">Find a Run <FaArrowRight/></Link>
+      <Link href="/runs?create=1" className="rwg-secondary">Organize a Run</Link>
+      <Link href="/crews?intent=mine" className="rwg-secondary">My Crew</Link></div>
+     <div className="rwg-activity" aria-label="Upcoming local basketball Runs">
+      <div className="rwg-section-head"><div><span className="rwg-kicker">NEXT UP</span><h2>{city?city.name+' Games':'Virginia Runs'}</h2></div>
+       <Link href="/runs?view=list#rch-upcoming-runs">Browse all <FaArrowRight/></Link></div>
+      {areaRuns.length?areaRuns.slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="rwg-run-row">
+       <span className="rwg-run-basket"><FaBasketball/></span><span><strong>{run.title}</strong><small>{shortWhen(run.starts_at)} · {run.game_format} · {run.status==='full'?'Full':'Scheduled'}</small></span><FaArrowRight/></Link>):
+       <p className="rwg-empty">{city?'No upcoming Runs recorded in this city. Try another location or the full Runs list.':'Choose a city on the map to view local Runs, or browse the statewide list.'}</p>}
+     </div>
+     <div className="rwg-section-head" style={{marginTop:24}}><div><span className="rwg-kicker">THE COMPETITIVE ARENA</span><h2>Defend the crown.</h2></div><Link href="/commonwealth">Commonwealth Cup <FaArrowRight/></Link></div>
      <WorldBattleScene cityName={city?.name||null} courtSlugs={battleCourtSlugs}
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
+    </section>}
+
+   {screen==='crew'&&<section className="rwg-mode" aria-label="Your basketball crew">
+      <span className="rwg-kicker"><FaPeopleGroup/> REPRESENT YOUR CITY</span><h2>Make your crew a name worth defending.</h2>
+      <p>Build your squad, join actual Runs together, and compete for real court territory through independently verified Takeover challenges.</p>
+      <div className="rwg-mode-links"><Link href="/crews?intent=mine" className="rwg-primary">Open My Crew <FaArrowRight/></Link>
+       <button type="button" className="rwg-secondary" onClick={()=>setScreen('battle')}>Court Battles <FaBolt/></button>
+       <Link href="/commonwealth" className="rwg-secondary">Commonwealth Cup</Link></div>
+      <p className="rwg-disclosure"><FaShieldHalved/> Court control, individual Master titles, and Commonwealth Cup qualification are separate, verified competitions.</p>
     </section>}
 
    {screen==='missions'&&<section className="rwg-mode" aria-label="Player missions">
