@@ -77,3 +77,14 @@
  .rwg-court-preview{animation:none!important;transition:none!important}
  .rwg-court-preview-handle button{transition:none}
 }
+
+
+/* Keep the primary Arena action visible in the compact phone preview. */
+@media(max-width:700px){
+ .rwg-court-preview:not(.is-expanded){height:342px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-hero{min-height:143px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-chips span:not(:first-child){display:none}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-actions>button{display:none}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-body{gap:7px;padding:9px 12px 13px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-actions{margin-top:auto}
+}
