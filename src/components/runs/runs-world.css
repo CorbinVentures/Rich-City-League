@@ -264,3 +264,13 @@
 @media(max-width:750px){.rwg-player-identity{max-width:none}.rwg-battle-emblem{width:90px;height:90px;border-radius:22%}.rwg-battle-emblem svg{font-size:34px}.rwg-battle-emblem span{font-size:9px}.rwg-versus{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr)}.rwg-vs-core strong{font-size:20px}.rwg-faction{width:50px;height:50px}.rwg-battle-intro{min-height:170px}}
 @media(max-width:540px){.rwg-top-actions{flex-wrap:wrap;width:100%}.rwg-player-identity{flex:1 1 160px}.rwg-battle-intro{padding:19px}.rwg-battle-emblem{width:62px;height:62px}.rwg-battle-emblem svg{font-size:24px}.rwg-battle-emblem span{display:none}.rwg-battle-tabs{padding:9px;gap:5px}.rwg-battle-tabs button{font-size:10px;padding:9px 7px}.rwg-battle-cards{padding:9px}.rwg-versus{gap:5px;padding:21px 9px}.rwg-versus>div>strong{font-size:12px}.rwg-battle-card-footer{padding:13px}}
 @media(prefers-reduced-motion:reduce){.rwg-battle-card{animation:none}}
+
+
+/* V2 map legend: marker meaning without invented crowds, court coordinates or winnings. */
+.rwg-world-game-legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:13px 0}
+.rwg-world-game-legend>span{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:8px 12px;border:1px solid #355e7f;border-radius:10px;background:#0c2942;color:#c9e4f5;font-size:10px;font-weight:850}
+.rwg-world-game-legend>span:nth-child(1) svg{color:#7bd4ff}
+.rwg-world-game-legend>span:nth-child(2) svg{color:#f1cb8d}
+.rwg-world-game-legend>span:nth-child(3) svg{color:#be93fb}
+.rwg-world-game-legend>span:nth-child(4) svg{color:#73d9fc}
+@media(max-width:600px){.rwg-world-game-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.rwg-world-game-legend>span{font-size:9px;padding:7px}}

@@ -9,9 +9,10 @@ import {useAuth} from '@/hooks/useAuth';
 import {CourtMasterTitles} from '@/components/runs/CourtMasterTitles';
 import {RCHEmptyState,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import '../../visual-experience.css';
+import './court-game-arena.css';
 
 type Venue={slug:string;name:string;locality:string|null;address:string|null;venue_type:string|null;access_type:string|null;hours_text:string|null;open_gym_text:string|null;verification_status:string|null};
-type Crew={crew_id:string;crew_name:string;games:number;wins:number;win_pct:number;is_controller:boolean};
+type Crew={crew_id:string;crew_name:string;logo_path?:string|null;games:number;wins:number;win_pct:number;is_controller:boolean};
 type Run={id:string;title:string;starts_at:string;game_format:string;status:'open'|'full'|'cancelled'|'completed';max_players:number};
 export default function RunCourtProfile(){
  const {slug}=useParams<{slug:string}>();
@@ -64,13 +65,14 @@ export default function RunCourtProfile(){
  const owner=crews.find(c=>c.is_controller);
  return <main className="rch-arena-shell min-h-screen px-4 pb-28 pt-6 sm:px-8">
   <div className="mx-auto max-w-6xl">
-   <Link href={'/runs?court='+encodeURIComponent(slug)} className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#a2d7ff]">← Back to this court&apos;s Runs</Link>
-   <section className="rch-ux-court-hero">
+   <Link href={'/runs/world?city='+encodeURIComponent(court.locality||'')} className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#a2d7ff]">← Back to Virginia World</Link>
+   <section className="rch-ux-court-hero rch-court-game-hero" aria-label="Court Arena entrance">
     <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
      <div className="max-w-2xl"><div className="rch-ux-court-mark" aria-hidden="true"><FaBasketball/></div>
-      <p className="rch-ux-eyebrow mt-5"><FaLocationDot aria-hidden="true"/> VIRGINIA COURT IDENTITY</p>
+      <p className="rch-ux-eyebrow mt-5"><FaLocationDot aria-hidden="true"/> RUNS WORLD · VERIFIED VENUE RECORD</p>
       <h1 className="mt-2 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">{court.name}</h1>
       <p className="mt-2 flex items-center gap-2 text-sm text-[#c4dcec]"><FaLocationDot/>{court.locality||'Virginia'}{court.address?' · '+court.address:''}</p>
+      <p className="mt-4 max-w-md text-xs leading-5 text-[#d2e7f8]">Every court has a story. Earn your name here through real, independently verified basketball.</p>
       <div className="mt-4 flex flex-wrap gap-2"><span className="rch-ux-status">{court.venue_type||'Basketball venue'}</span>
        {court.verification_status&&<span className="rch-ux-status rch-ux-status--verified"><FaShieldHalved/> Venue sourced: {court.verification_status}</span>}</div>
      </div>
@@ -80,12 +82,21 @@ export default function RunCourtProfile(){
      </div>
     </div>
    </section>
+   <nav className="rch-court-section-nav" aria-label="Court Arena sections">
+    <a href="#rch-court-territory"><FaCrown/> Territory</a><a href="#rch-court-masters"><FaTrophy/> Masters</a>
+    <a href="#rch-court-schedule"><FaCalendarDays/> Next Runs</a><a href="#rch-court-venue"><FaLocationDot/> Venue</a>
+   </nav>
+   <div className="rch-court-scorebar" aria-label="Verified court overview">
+    <div><small>CONTROLLING CREW</small><strong>{owner?owner.crew_name:'Unclaimed'}</strong></div>
+    <div><small>CREWS ON LADDER</small><strong>{crews.length}</strong></div>
+    <div><small>UPCOMING RUNS</small><strong>{runs.length}</strong></div>
+   </div>
    {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/40 p-4 text-sm text-red-200">{error}</p>}
    {notice&&<p role="status" className="mt-4 rounded-xl border border-emerald-400/40 p-4 text-sm text-emerald-200">{notice}</p>}
-   <section className="mt-7 grid gap-4 md:grid-cols-2">
+   <section id="rch-court-territory" className="mt-7 grid scroll-mt-32 gap-4 md:grid-cols-2" aria-label="Verified crew court control">
     <div className="rch-ux-court-card rch-ux-badge-luster">
      <p className="rch-ux-eyebrow"><FaCrown/> COURT DOMINION</p>
-     <h2 className="mt-3 text-2xl font-black">{owner?owner.crew_name:'The territory is unclaimed'}</h2>
+     <div className="mt-3 flex flex-wrap items-center gap-3">{owner?.logo_path&&db?<img src={db.storage.from('rch-crew-logos').getPublicUrl(owner.logo_path).data.publicUrl} alt={owner.crew_name+' current court crew emblem'} className="h-16 w-16 rounded-xl border border-[#dbb978] bg-[#091b2c] object-contain p-1"/>:<span className="grid h-16 w-16 place-items-center rounded-xl border border-[#ddbf83] bg-[#18334a] text-3xl text-[#f7d68e]"><FaCrown/></span>}<h2 className="text-2xl font-black">{owner?owner.crew_name:'The territory is unclaimed'}</h2></div>
      <p className="mt-2 text-sm leading-6 text-[#c8d8e9]">{owner?'Current controlling crew · '+owner.wins+' wins on record':'No registered crew currently holds this court. Territory ownership is awarded only through verified results.'}</p>
      <Link className="rch-ux-header-action mt-3" href={'/runs?court='+encodeURIComponent(slug)}>View takeover competitions <FaArrowRight/></Link>
     </div>
@@ -93,17 +104,21 @@ export default function RunCourtProfile(){
      <p className="rch-ux-eyebrow"><FaPeopleGroup/> COURT COMMUNITY</p>
      <p className="rch-ux-rank-stage">{crews.length}</p><p className="rch-ux-rank-label">Crews on the court leaderboard</p>
      <p className="mt-3 text-sm text-[#c4d6e8]">Court control belongs to real results—not likes or REP boosts.</p>
+     {crews.length>0&&<ol className="rch-court-crew-ladder" aria-label="Court crew standings">{[...crews].sort((a,b)=>b.win_pct-a.win_pct).slice(0,5).map((crew,i)=><li key={crew.crew_id}><span>{i+1}. {crew.crew_name}{crew.is_controller?' 👑':''}</span><strong>{crew.win_pct}% · {crew.wins} wins</strong></li>)}</ol>}
      <Link href="/crews" className="rch-ux-header-action mt-3">Discover crews <FaArrowRight/></Link>
     </div>
    </section>
-   <CourtMasterTitles court={court.slug}/>
-   <section className="mt-8">
+   <div id="rch-court-masters" className="scroll-mt-32"><CourtMasterTitles court={court.slug}/></div>
+   <section id="rch-court-schedule" className="mt-8 scroll-mt-32" aria-label="Upcoming real Runs at this venue">
     <RCHSectionHeader eyebrow="REAL BASKETBALL OPPORTUNITIES" title="Upcoming on this court" description="These are scheduled events, not simulated games." action={{href:'/runs?create=1&court='+encodeURIComponent(slug),label:'Host here'}}/>
     {runs.length?<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{runs.map(run=><Link key={run.id} href={'/runs/'+run.id} className="rch-ux-court-card block transition hover:border-[#81c2f5]">
      <div className="flex items-start justify-between gap-2"><p className="text-xs font-black text-[#93cfff]">{run.game_format} · {new Date(run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p><RCHStatusChip status={run.status}/></div>
      <h3 className="mt-3 text-lg font-black">{run.title}</h3><p className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#a8d9ff]">View Run <FaArrowRight/></p>
     </Link>)}</div>:<RCHEmptyState title="The next game is yours to organize" description="No scheduled games at this court right now. Bring your crew, invite a rival, or set up a real pickup session." actions={[{href:'/runs?create=1&court='+encodeURIComponent(slug),label:'Host at this court',primary:true},{href:'/runs/partners',label:'Explore organizers'}]}/>}
    </section>
+   <aside id="rch-court-venue" className="mt-7 scroll-mt-32 rounded-2xl border border-[#355c7d] bg-[#071a2c] p-5 text-sm leading-6 text-[#c3d9ec]" aria-label="Court access and venue safety"><h2 className="font-black text-white">Venue access & fair play</h2>
+    <p className="mt-2 text-xs text-[#c1d8e9]">An official or provider-sourced venue is not a reservation, open-gym permission, or assurance of availability. Respect park hours, facility policies and each event’s rules.</p>
+    <p className="mt-2 text-xs text-[#c1d8e9]">Crew ownership and Court Master crowns reflect verified competition—not control over public access to the park.</p></aside>
    {(court.hours_text||court.open_gym_text)&&<aside className="mt-6 rounded-2xl border border-[#355c7d] p-5 text-sm leading-6 text-[#c3d9ec]"><h2 className="font-black text-white">Venue information</h2>{court.hours_text&&<p className="mt-2">Published hours: {court.hours_text}</p>}{court.open_gym_text&&<p className="mt-2">Open gym details: {court.open_gym_text}</p>}<p className="mt-2 text-xs text-[#abc2d7]">Confirm the current schedule and access rules with the venue before traveling.</p></aside>}
   </div>
  </main>;

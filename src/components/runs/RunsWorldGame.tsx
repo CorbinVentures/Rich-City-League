@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useSearchParams} from 'next/navigation';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBookOpen,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
 import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
 import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
@@ -20,6 +21,7 @@ import './runs-world.css';
 import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
+import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
 
 type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
@@ -52,7 +54,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const {user}=useAuth();
  const {location,chooseCity,statewide}=useGravityLocation();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
- const [screen,setScreen]=useState<Screen>(initialScreen);
+ const searchParams=useSearchParams();
+ const requestedMode=searchParams.get('mode');
+ const requestedCity=searchParams.get('city');
+ const allowedModes:readonly Screen[]=['home','world','battle','missions','vault','player','crew'];
+ const selectedMode=requestedMode&&allowedModes.includes(requestedMode as Screen)?requestedMode as Screen:initialScreen;
+ const [screen,setScreen]=useState<Screen>(selectedMode);
+ useEffect(()=>{setScreen(selectedMode);},[selectedMode]);
  const [introReplay,setIntroReplay]=useState(0);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
@@ -96,7 +104,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const city=runsAreaOptions.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
- useEffect(()=>{setCityId(location.cityId||null);},[location.cityId]);
+ useEffect(()=>{
+  const requested=runsAreaOptions.find(c=>c.id===requestedCity||c.name.toLowerCase()===requestedCity?.toLowerCase());
+  setCityId(requested?.id||location.cityId||null);
+ },[location.cityId,requestedCity]);
  const enterCity=useCallback((next:VirginiaCity)=>{
    setCityId(next.id);if(!parksRecAreas.some(area=>area.id===next.id))chooseCity(next.id);setSelectedSlug(null);
    setScreen('world');
@@ -324,6 +335,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
     </div>
+    <div className="rwg-world-game-legend" aria-label="Runs World map marker guide"><span><FaLocationDot/> Sourced Court</span><span><FaCrown/> Crew Territory</span><span><FaBolt/> Active Challenge</span><span><FaGift/> 2× Verified REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
       <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Enter a basketball area, then tap a real court to inspect its Arena.</p></div>
@@ -417,7 +429,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      </>}
    </>}
 
-   {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
+   {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<div id={screen==='player'?'rch-verified-recap':undefined} className="scroll-mt-32"><RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/></div> }
 
    {screen==='battle'&&<section className="rwg-mode" aria-label="Runs and court battles">
      <span className="rwg-kicker">REAL RUNS / REAL BASKETBALL</span><h2>Find a game. Build your legacy.</h2>
@@ -492,6 +504,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </>}
       <GravityLocationPicker compact/>
     </section>}
+   {screen==='home'&&<RunsJourneyHub runId={areaRuns.find(r=>r.status==='open')?.id||null} courtSlug={selectedSlug}/>}
   </div>
  </main>;
 }

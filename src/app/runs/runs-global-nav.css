@@ -1,0 +1,13 @@
+/* Shared mobile game dock for detail pages only. World owns its own navigation. */
+.runs-global-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;max-width:860px;margin:0 auto;padding:9px;border:1px solid #376287;border-radius:15px;background:#05182d;color:white;box-shadow:0 12px 35px #0007}
+.runs-global-nav a{display:flex;min-height:53px;align-items:center;justify-content:center;flex-direction:column;gap:6px;border:1px solid transparent;border-radius:10px;background:#102a44;color:#d4edff;text-decoration:none;font-size:11px;font-weight:850}
+.runs-global-nav a svg{color:#92d0ff;font-size:19px}
+.runs-global-nav a[aria-current=page]{background:#18466b;border-color:#8dc6f6;color:#fff}
+.runs-global-nav a[aria-current=page] svg{color:#f4cd8e}
+.runs-global-nav a:hover{background:#20547e}
+.runs-global-nav a:focus-visible{outline:3px solid #b7e8ff;outline-offset:2px}
+@media(max-width:650px){
+ .runs-global-nav{position:fixed;z-index:70;bottom:max(7px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 18px);max-width:540px;gap:4px;padding:6px;border-radius:15px;background:#06182af5;backdrop-filter:blur(16px)}
+ .runs-global-nav a{min-height:56px;font-size:10px}
+ .runs-global-nav a svg{font-size:18px}
+}

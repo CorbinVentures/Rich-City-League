@@ -138,7 +138,8 @@ export default function RunsPage() {
     try { if (window.sessionStorage.getItem('rch-runs-rules-intro-session-v1') === 'seen') return; } catch { /* Show the rules if storage is unavailable. */ }
     setRulesOpen(true);
   }, [showLegacyList]);
-  const [competitionView, setCompetitionView] = useState<'passport'|'courts'|'rankings'>('passport');
+  const competitionParam=searchParams.get('competition');
+  const [competitionView, setCompetitionView] = useState<'passport'|'courts'|'rankings'>(competitionParam==='rankings'?'rankings':competitionParam==='courts'?'courts':'passport');
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
