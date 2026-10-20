@@ -428,7 +428,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      </>}
    </>}
 
-   {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/> }
+   {user&&(screen==='world'||screen==='missions'||screen==='vault'||screen==='player')&&<div id={screen==='player'?'rch-verified-recap':undefined} className="scroll-mt-32"><RunsWorldExpansion key={user.id} mode={screen} journey={journey} revision={pulse+scoutVersion}/></div> }
 
    {screen==='battle'&&<section className="rwg-mode" aria-label="Runs and court battles">
      <span className="rwg-kicker">REAL RUNS / REAL BASKETBALL</span><h2>Find a game. Build your legacy.</h2>
