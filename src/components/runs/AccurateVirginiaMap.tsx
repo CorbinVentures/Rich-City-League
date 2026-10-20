@@ -24,6 +24,9 @@ type MapLike={
  flyTo:(options:any)=>void;
  easeTo:(options:any)=>void;
  getZoom:()=>number;
+ getCenter:()=>{lng:number;lat:number};
+ getPitch:()=>number;
+ getBearing:()=>number;
  resize:()=>void;
  remove:()=>void;
 };
@@ -50,6 +53,29 @@ function mapLibre(){
  return loadingMapLibre;
 }
 type Layer='all'|'courts'|'runs'|'battle'|'crown'|'double-rep';
+const MAP_SESSION='rch-runs-world3-view-';
+type SavedCamera={center:[number,number];zoom:number;pitch:number;bearing:number;at:number};
+function savedCamera(key:string):SavedCamera|null{
+ try{
+  const raw=window.sessionStorage.getItem(MAP_SESSION+key);
+  if(!raw)return null;
+  const v=JSON.parse(raw) as SavedCamera;
+  if(!Array.isArray(v.center)||v.center.length!==2||!Number.isFinite(v.center[0])||!Number.isFinite(v.center[1])||
+    v.center[0]<-83.85||v.center[0]>-74.95||v.center[1]<36.4||v.center[1]>39.65||
+    !Number.isFinite(v.zoom)||v.zoom<5.5||v.zoom>18||!Number.isFinite(v.pitch)||v.pitch<0||v.pitch>55||
+    !Number.isFinite(v.bearing)||Math.abs(v.bearing)>180||!Number.isFinite(v.at)||Date.now()-v.at>86400000)return null;
+  return v;
+ }catch{return null;}
+}
+function saveCamera(map:MapLike,key:string){
+ try{
+  const position=map.getCenter();
+  if(position.lng<-83.85||position.lng>-74.95||position.lat<36.4||position.lat>39.65)return;
+  window.sessionStorage.setItem(MAP_SESSION+key,JSON.stringify({
+   center:[position.lng,position.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),at:Date.now()
+  } satisfies SavedCamera));
+ }catch{/* Local session storage is optional. */}
+}
 const layerOptions:{id:Layer;label:string}[]=[
  {id:'all',label:'All'},{id:'courts',label:'Courts'},{id:'runs',label:'Runs'},
  {id:'battle',label:'Battles'},{id:'crown',label:'Crews'},{id:'double-rep',label:'2× REP'}
@@ -83,6 +109,18 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
  const [status,setStatus]=useState<'loading'|'ready'|'unavailable'>('loading');
  const [revision,setRevision]=useState(0);
  const [layer,setLayer]=useState<Layer>('all');
+ const cityRef=useRef(city?.id||'statewide');
+ cityRef.current=city?.id||'statewide';
+ useEffect(()=>{
+  try{
+   const value=window.sessionStorage.getItem('rch-runs-world3-map-layer');
+   if(layerOptions.some(l=>l.id===value))setLayer(value as Layer);
+  }catch{/* Session storage is optional. */}
+ },[]);
+ const selectLayer=(next:Layer)=>{
+  setLayer(next);
+  try{window.sessionStorage.setItem('rch-runs-world3-map-layer',next);}catch{/* Optional. */}
+ };
  const mapped=useMemo(()=>filteredPins(points,layer).filter(safeCoordinate),[points,layer]);
  const candidateCollection=useMemo(()=>({type:'FeatureCollection' as const,features:
   (layer==='all'||layer==='courts'?leads:[])
@@ -130,8 +168,11 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
      map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
       paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
     }catch{/* Do not claim verified county outline if GIS data is unavailable. */}
-    if(city)map.fitBounds([[city.lon-0.16,city.lat-0.12],[city.lon+0.16,city.lat+0.12]],{padding:30,duration:0});
+    const remembered=savedCamera(cityRef.current);
+    if(remembered)map.easeTo({...remembered,center:remembered.center,duration:0});
+    else if(city)map.fitBounds([[city.lon-0.16,city.lat-0.12],[city.lon+0.16,city.lat+0.12]],{padding:30,duration:0});
     else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:22,duration:0});
+    map.on('moveend',()=>{if(!disposed&&map)saveCamera(map,cityRef.current);});
    });
    map.on('error',(e:any)=>{if(e?.error?.message&&/style|source|failed to fetch/i.test(e.error.message))setStatus(s=>s==='ready'?s:'unavailable');});
   }).catch(()=>{if(!disposed)setStatus('unavailable');});
@@ -140,14 +181,18 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
 
  useEffect(()=>{
   const map=mapRef.current;if(!map||status!=='ready')return;
+  const remembered=savedCamera(city?.id||'statewide');
+  const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:650;
   if(city){
-   map.fitBounds([[city.lon-0.15,city.lat-0.11],[city.lon+0.15,city.lat+0.11]],{padding:40,duration:650});
+   if(remembered)map.easeTo({center:remembered.center,zoom:remembered.zoom,pitch:remembered.pitch,bearing:remembered.bearing,duration});
+   else map.fitBounds([[city.lon-0.15,city.lat-0.11],[city.lon+0.15,city.lat+0.11]],{padding:40,duration});
    if(city.id==='chesterfield'&&!map.getSource('rch-chesterfield-vgin'))try{
     map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
     map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',paint:{'fill-color':'#47A7E8','fill-opacity':0.09}});
     map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
    }catch{/* map still remains geographically referenced */}
-  }else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration:650});
+  }else if(remembered)map.easeTo({center:remembered.center,zoom:remembered.zoom,pitch:remembered.pitch,bearing:remembered.bearing,duration});
+  else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration});
  },[city?.id,status]);
  useEffect(()=>{
   if(!city||!['chesterfield','henrico','arlington','prince-william','shenandoah'].includes(city.id)||status!=='ready')return;
@@ -184,6 +229,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     btn.className='rwg-real-pin'+(p.gameState?' state-'+p.gameState:'')+(p.id===selectedId?' selected':'');
     btn.textContent=pinLabel(p);btn.title=p.title;
     btn.setAttribute('aria-label',p.title+(p.indoor?' indoor basketball gym':' basketball court'))
+    btn.setAttribute('aria-pressed',String(p.id===selectedId));
     btn.addEventListener('click',()=>callbacks.current.onPlaceSelect(p.id));
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map));
    }
@@ -196,7 +242,8 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
  useEffect(()=>{
   if(!selectedId||status!=='ready')return;
   const point=points.find(p=>p.id===selectedId);
-  if(point&&safeCoordinate(point))mapRef.current?.flyTo({center:[point.lon,point.lat],zoom:Math.max(13,mapRef.current.getZoom()),speed:1.2});
+  if(point&&safeCoordinate(point))mapRef.current?.flyTo({center:[point.lon,point.lat],zoom:Math.max(12,mapRef.current.getZoom()),
+   speed:1.2,essential:false,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:650});
  },[selectedId,status]);
  const retry=useCallback(()=>setRevision(v=>v+1),[]);
  return <div className='rwg-real-map-shell' aria-label='Georeferenced Virginia basketball map'>
@@ -213,7 +260,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   </div>
   <div className='rwg-real-map-layers' role='group' aria-label='Basketball map layers'>
    <FaLayerGroup aria-hidden='true'/>
-   {layerOptions.map(option=><button key={option.id} type='button' aria-pressed={layer===option.id} onClick={()=>setLayer(option.id)}>{option.label}</button>)}
+   {layerOptions.map(option=><button key={option.id} type='button' aria-pressed={layer===option.id} onClick={()=>selectLayer(option.id)}>{option.label}</button>)}
   </div>
   {status==='ready'&&city&&points.length===0&&<div className='rwg-map-zero' role='status'>No precision-verified court pins in this area yet. See court records below for facilities awaiting coordinates.</div>}
   <div className='rwg-real-map-lead-key'>● Gray = community tip, <strong>not a verified court</strong> ({leads.length.toLocaleString()} mapped leads)</div>
