@@ -39,8 +39,8 @@ function stages(runId:string|null,courtSlug:string|null):Stage[]{
   {id:'15',label:'Crew HQ',description:'Roster, invitations and squad profile',href:'/crews?intent=mine',status:'linked'},
   {id:'16',label:'Takeovers',description:'Certified challenges and territorial history',href:root+'?mode=battle',status:'core'}]},
  {id:'compete',eyebrow:'05 / COMPETE STATEWIDE',title:'Chase the crown',summary:'Separate player titles, crew victories and Cup competitions.',icon:FaTrophy,destinations:[
-  {id:'17',label:'Court Masters',description:'1v1, 2v2 and 3v3 verified crowns',href:court,status:'core'},
-  {id:'18',label:'Leaderboards',description:'Independent records, format and court standings',href:root+'?view=list#rch-competition',status:'core'},
+  {id:'17',label:'Court Masters',description:'1v1, 2v2 and 3v3 verified crowns',href:courtSlug?court+'#rch-court-masters':court,status:'core'},
+  {id:'18',label:'Leaderboards',description:'Independent records, format and court standings',href:root+'?view=list&competition=rankings#rch-competition',status:'core'},
   {id:'19',label:'Commonwealth Cup',description:'Distinct statewide qualification and event competition',href:'/commonwealth',status:'linked'},
   {id:'20',label:'Host Operations',description:'Venue readiness, roster, staff and score tools',href:eventTarget('rch-host-operations'),status:'core'}]},
  {id:'community',eyebrow:'06 / THE LIVING COMMUNITY',title:'Keep basketball connected',summary:'Partners, media, invitations and fair-play controls.',icon:FaPeopleGroup,destinations:[
