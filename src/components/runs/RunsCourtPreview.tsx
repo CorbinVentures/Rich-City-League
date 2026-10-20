@@ -35,9 +35,10 @@ function accessLabel(court:WorldCourt){
 export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,onClose}:Props){
  const [expanded,setExpanded]=useState(false);
  const dismiss=useRef<HTMLButtonElement|null>(null);
+ const scroller=useRef<HTMLDivElement|null>(null);
  const touchStartY=useRef<number|null>(null);
+ useEffect(()=>{dismiss.current?.focus({preventScroll:true});},[court.slug]);
  useEffect(()=>{
-  dismiss.current?.focus({preventScroll:true});
   const key=(event:KeyboardEvent)=>{
    if(event.key==='Escape'){
     event.preventDefault();
@@ -48,13 +49,18 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
   document.addEventListener('keydown',key);
   return()=>document.removeEventListener('keydown',key);
  },[expanded,onClose]);
+ useEffect(()=>{
+  if(!scroller.current)return;
+  scroller.current.scrollTo({top:expanded?Math.max(0,scroller.current.scrollHeight/4):0,
+   behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ },[expanded]);
  const arenaHref='/runs/courts/'+encodeURIComponent(court.slug)+'?fromCity='+encodeURIComponent(cityId);
  const scheduled=[...events].filter(e=>(e.status==='open'||e.status==='full')&&Date.parse(e.starts_at)>Date.now())
    .sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
  const next=scheduled[0];
  const isPublic= court.access_type==='public'&&court.venue_type==='outdoor';
  return <aside className={'rwg-court-preview'+(expanded?' is-expanded':'')} aria-label={court.name+' court preview'} role="region">
-  <div className="rwg-court-preview-scroll">
+  <div className="rwg-court-preview-scroll" ref={scroller}>
    <div className="rwg-court-preview-hero">
     <div className="rwg-court-preview-topline">
      <span><FaBasketball/> RCH RUNS · COURT DISCOVERY</span>
