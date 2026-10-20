@@ -1,0 +1,26 @@
+/* Court Arena: cinematic presentation surrounding authoritative venue and match data. */
+.rch-arena-shell .rch-court-game-hero{
+ position:relative;overflow:hidden;border-color:#5e91c0;min-height:285px;
+ background:linear-gradient(95deg,#041223ed,#07172dbc 45%,#0c315281),linear-gradient(0deg,#031225af,transparent 70%),url('/rch-runs-night-court.svg') center 48%/cover no-repeat;
+ box-shadow:0 18px 60px #0008,inset 0 0 65px #102949;
+}
+.rch-arena-shell .rch-court-game-hero:before{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 65px #06172b;border:1px solid #c6dfff2b;border-radius:inherit}
+.rch-arena-shell .rch-court-section-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px;padding:8px;background:#061729;border:1px solid #3c6689;border-radius:14px;position:sticky;top:76px;z-index:24;box-shadow:0 9px 28px #0009}
+.rch-arena-shell .rch-court-section-nav a{min-height:48px;display:flex;gap:7px;align-items:center;justify-content:center;border-radius:9px;background:#10324e;color:#d6edff;text-decoration:none;font-weight:900;font-size:11px}
+.rch-arena-shell .rch-court-section-nav a:hover,.rch-arena-shell .rch-court-section-nav a:focus-visible{background:#1c527c;border-color:#8cd0ff}
+.rch-arena-shell .rch-court-section-nav a svg{color:#eccc86}
+.rch-arena-shell .rch-court-scorebar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:13px;overflow:hidden;border:1px solid #355a78;border-radius:13px;background:#36556b}
+.rch-arena-shell .rch-court-scorebar>div{padding:13px 16px;background:#091d31;display:grid;gap:5px}
+.rch-arena-shell .rch-court-scorebar small{font-size:9px;font-weight:900;color:#92bee2;letter-spacing:.1em}
+.rch-arena-shell .rch-court-scorebar strong{font-size:clamp(13px,2vw,20px);line-height:1.3;font-weight:950;color:white;overflow-wrap:anywhere}
+.rch-arena-shell .rch-court-crew-ladder{margin-top:16px;display:grid;gap:6px}
+.rch-arena-shell .rch-court-crew-ladder li{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:36px;padding:8px 10px;background:#071c31;border:1px solid #3b607b;border-radius:8px;font-size:10px;color:#d1eaff}
+.rch-arena-shell .rch-court-crew-ladder li strong{color:#efd59c;text-align:right;white-space:nowrap}
+@media(max-width:600px){
+ .rch-arena-shell .rch-court-game-hero{min-height:320px}
+ .rch-arena-shell .rch-court-section-nav{gap:4px;padding:5px;top:65px}
+ .rch-arena-shell .rch-court-section-nav a{min-height:47px;flex-direction:column;gap:5px;font-size:9px}
+ .rch-arena-shell .rch-court-scorebar>div{padding:12px 8px}
+ .rch-arena-shell .rch-court-scorebar small{font-size:8px}
+ .rch-arena-shell .rch-court-scorebar strong{font-size:12px}
+}
