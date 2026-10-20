@@ -1,0 +1,17 @@
+/* Run Room V2. All active features still use existing RLS and server-authoritative match APIs. */
+.rcl-social-secondary:has([aria-label="Your game-day pathway"]){
+ background:radial-gradient(ellipse 95% 28% at 60% 0,#122d50 0,transparent 80%),#030c19;
+ color:#f2f9ff;
+}
+.rcl-social-secondary:has([aria-label="Your game-day pathway"]) [aria-label="Your game-day pathway"]{
+ background:linear-gradient(108deg,#0b2544f4,#071524df),url('/rch-runs-night-court.svg') center/cover no-repeat;
+}
+.rcl-social-secondary:has([aria-label="Your game-day pathway"]) [aria-label="Your game-day pathway"] a:focus-visible,
+.rcl-social-secondary:has([aria-label="Your game-day pathway"]) [aria-label="Your game-day pathway"] button:focus-visible{
+ outline:3px solid #a4e4ff;outline-offset:3px;
+}
+.rcl-social-secondary :is(#rch-game-day,#rch-run-lobby,#rch-next-up,#rch-result-review,#rch-host-operations,#rch-run-tape,#rch-appeals){scroll-margin-top:145px}
+.rcl-social-secondary [aria-label="Game-day sections"] a{transition:background .2s,border-color .2s}
+.rcl-social-secondary [aria-label="Game-day sections"] a:hover{background:#174267}
+.rcl-social-secondary [aria-label="Game-day sections"] a:active{background:#2a6eaa}
+@media(prefers-reduced-motion:reduce){.rcl-social-secondary [aria-label="Game-day sections"] a{transition:none}}
