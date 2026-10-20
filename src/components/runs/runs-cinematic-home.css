@@ -128,3 +128,17 @@ html body .rwg-shell .rch-gh-section-title h2{color:white!important;font-size:18
  .rwg-shell .rch-gh-play{transition:none}
  .rwg-shell .rch-gh-play:hover{transform:none}
 }
+
+/* Five-mode game navigation becomes the blueprint's bottom dock on mobile. */
+@media(max-width:650px){
+ .rwg-shell .rwg-nav{
+  position:fixed;top:auto;bottom:max(7px,env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);
+  width:min(calc(100vw - 20px),560px);z-index:65;
+  margin:0;border:1px solid #5182aa;border-radius:17px;
+  background:#06172ff5;box-shadow:0 12px 45px #000e;
+  backdrop-filter:blur(18px);
+ }
+ .rwg-shell .rwg-nav button{min-height:55px}
+ .rwg-shell .rwg-frame{padding-bottom:80px}
+}
