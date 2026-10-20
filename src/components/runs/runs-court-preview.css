@@ -106,3 +106,8 @@
  .rwg-court-preview:not(.is-expanded) .rwg-court-preview-place{font-size:10px}
  .rwg-court-preview:not(.is-expanded) .rwg-court-preview-territory{min-height:40px}
 }
+
+/* Touch targets for mobile, including the sheet handle and close control. */
+.rwg-court-preview-controls button{width:44px;height:44px}
+.rwg-court-preview-handle button{min-height:44px}
+.rwg-court-preview-actions>button{min-height:44px}
