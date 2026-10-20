@@ -22,7 +22,10 @@ export default function RunCourtProfile(){
  const {user}=useAuth();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [court,setCourt]=useState<Venue|null>(null);
- const returnCity=incomingCity&&/^[a-z-]{2,40}$/.test(incomingCity)?incomingCity:(court?.locality||'');
+ const postalCity=(court?.locality||'').toLowerCase();
+ const fallbackCity=postalCity.includes('chesterfield')?'chesterfield':
+  ['glen allen','sandston'].includes(postalCity)?'henrico':postalCity;
+ const returnCity=incomingCity&&/^[a-z-]{2,40}$/.test(incomingCity)?incomingCity:fallbackCity;
  const [crews,setCrews]=useState<Crew[]>([]);
  const [runs,setRuns]=useState<Run[]>([]);
  const [loading,setLoading]=useState(true);
@@ -53,9 +56,9 @@ export default function RunCourtProfile(){
    setWatched(Boolean(setting.data?.watched_courts?.includes(slug)));
    const matchEvents:HistoryEntry[]=[
     ...((crowns.data||[]) as {id:string;division:string;event_type:string;occurred_at:string}[])
-     .map(e=>({id:'crown-'+e.id,kind:'crown' as const,title:(e.event_type==='title_takeover'?'Title won':'Title defended')+' · '+e.division,occurred_at:e.occurred_at})),
+     .map(e=>({id:'crown-'+e.id,kind:'crown' as const,title:(e.event_type==='title_takeover'?'Master crowned':e.event_type==='title_defense'?'Crown defended':'Court Master event')+' · '+e.division,occurred_at:e.occurred_at})),
     ...((takeovers.data||[]) as {id:string;status:string;created_at:string}[])
-     .map(e=>({id:'takeover-'+e.id,kind:'takeover' as const,title:'Resolved crew takeover',occurred_at:e.created_at}))
+     .map(e=>({id:'takeover-'+e.id,kind:'takeover' as const,title:'Resolved crew challenge (recorded at creation)',occurred_at:e.created_at}))
    ].filter(e=>Number.isFinite(Date.parse(e.occurred_at)));
    setHistory(matchEvents.sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)).slice(0,15));
    setHistoryLoading(false);
