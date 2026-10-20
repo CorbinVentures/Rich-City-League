@@ -103,7 +103,7 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
     </div>
     <div className="rwg-court-preview-next">
      <h3><FaCalendarDays/> NEXT REAL RUN</h3>
-     {next?<Link href={'/runs/'+encodeURIComponent(next.id)}>
+     {next?<Link href={'/runs/'+encodeURIComponent(next.id)+'?fromCourt='+encodeURIComponent(court.slug)+'&fromCity='+encodeURIComponent(cityId)}>
       <span><strong>{next.title}</strong><small>{eventWhen(next.starts_at)} · {next.game_format} · {next.status==='full'?'Full':'Registration status: open'}</small></span>
       <span className="rwg-court-preview-run-cta">{next.status==='full'?'View Run':'View / Join'} <FaArrowRight/></span>
      </Link>:<p>No upcoming organized Run is currently listed at this court. The court record does not guarantee open play.</p>}
@@ -122,7 +122,7 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
       })}
      </div>
      <h3><FaPeopleGroup/> ALL UPCOMING RUNS</h3>
-     {scheduled.length?scheduled.slice(0,5).map(run=><Link key={run.id} className="rwg-court-preview-runline" href={'/runs/'+encodeURIComponent(run.id)}>
+     {scheduled.length?scheduled.slice(0,5).map(run=><Link key={run.id} className="rwg-court-preview-runline" href={'/runs/'+encodeURIComponent(run.id)+'?fromCourt='+encodeURIComponent(court.slug)+'&fromCity='+encodeURIComponent(cityId)}>
        <span><strong>{run.title}</strong><small>{eventWhen(run.starts_at)} · {run.game_format} · {run.status}</small></span><FaArrowRight/>
       </Link>):<p className="rwg-court-preview-muted">No scheduled Run. You can organize a real event subject to facility rules.</p>}
      <div className="rwg-court-preview-access">
