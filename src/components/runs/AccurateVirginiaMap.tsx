@@ -243,7 +243,8 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   if(!selectedId||status!=='ready')return;
   const point=points.find(p=>p.id===selectedId);
   if(point&&safeCoordinate(point))mapRef.current?.flyTo({center:[point.lon,point.lat],zoom:Math.max(12,mapRef.current.getZoom()),
-   speed:1.2,essential:false,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:650});
+   speed:1.2,offset:window.matchMedia('(max-width: 700px)').matches?[0,-150]:[-175,0],
+   essential:false,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:650});
  },[selectedId,status]);
  const retry=useCallback(()=>setRevision(v=>v+1),[]);
  return <div className='rwg-real-map-shell' aria-label='Georeferenced Virginia basketball map'>
