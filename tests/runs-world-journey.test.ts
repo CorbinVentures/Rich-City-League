@@ -60,11 +60,14 @@ describe('Runs World Journey: persistent, verified and independent of REP',()=>{
  it('shows live court action, cross-device collection and honest collectible milestones',()=>{
   const ui=readFileSync(join(process.cwd(),'src/components/runs/RunsWorldGame.tsx'),'utf8');
   const page=readFileSync(join(process.cwd(),'src/components/runs/RunsWorldJourney.tsx'),'utf8');
+  const preview=readFileSync(join(process.cwd(),'src/components/runs/RunsCourtPreview.tsx'),'utf8');
   const atlas=readFileSync(join(process.cwd(),'src/components/discover/VirginiaInteractiveAtlas.tsx'),'utf8');
   expect(ui).toContain("db.rpc('get_rch_world_journey')");
   expect(ui).toContain("db.from('rch_court_master_history')");
   expect(ui).toContain("db.from('rch_court_takeovers')");
-  expect(ui).toContain('<WorldScoutButton');
+  expect(ui).toContain('<RunsCourtPreview');
+  expect(preview).toContain('<WorldScoutButton');
+  expect(preview).toContain('scouted={scouted}');
   expect(ui).toContain('<WorldPulse');
   expect(ui).toContain('challengedCourts:worldPulse');
   expect(page).toContain("db.rpc('rch_world_scout_court'");
