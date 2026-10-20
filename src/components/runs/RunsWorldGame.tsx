@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBookOpen,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
 import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
@@ -22,11 +22,12 @@ import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
 import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
+import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCourtPreview';
 
 type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
-type CourtStats={masters:Master[];crewName:string|null;defenses:number;loading:boolean};
+type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;defenses:number;loading:boolean};
 type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string;court_name?:string;game_format?:string;won?:boolean;rating_before?:number;rating_after?:number}[]};
 type PlayerStats={socialLevel:number|null;socialXp:number|null;repBalance:number|null;passport:Passport|null};
 const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,passport:null};
@@ -57,6 +58,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const searchParams=useSearchParams();
  const requestedMode=searchParams.get('mode');
  const requestedCity=searchParams.get('city');
+ const requestedCourt=searchParams.get('court');
  const allowedModes:readonly Screen[]=['home','world','battle','missions','vault','player','crew'];
  const selectedMode=requestedMode&&allowedModes.includes(requestedMode as Screen)?requestedMode as Screen:initialScreen;
  const [screen,setScreen]=useState<Screen>(selectedMode);
@@ -70,7 +72,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [territories,setTerritories]=useState<Territory[]>([]);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
- const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],crewName:null,defenses:0,loading:false});
+ const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],belts:[],crewName:null,defenses:0,loading:false});
  const [player,setPlayer]=useState<PlayerStats>(blankStats);
  const [identity,setIdentity]=useState<{display_name:string|null;username:string|null;avatar_url:string|null}|null>(null);
  const [journey,setJourney]=useState<WorldJourney|null>(null);
@@ -82,6 +84,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [pulse,setPulse]=useState(0);
  const [query,setQuery]=useState('');
  const [coverageWarning,setCoverageWarning]=useState('');
+ const restoredCourt=useRef<string|null>(null);
  useEffect(()=>{
   if(!db)return;
   let active=true;
@@ -248,20 +251,30 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  },[db,user?.id]);
 
  const selectedCourt=courts.find(c=>c.slug===selectedSlug)||null;
+ // A return from Court Arena restores its selected map pin exactly once.
  useEffect(()=>{
-  if(!db||!selectedSlug){setCourtStats({masters:[],crewName:null,defenses:0,loading:false});return;}
+  if(!requestedCourt||!city||loading||restoredCourt.current===requestedCourt)return;
+  if(courts.some(c=>c.slug===requestedCourt)){
+   restoredCourt.current=requestedCourt;
+   setSelectedSlug(requestedCourt);
+  }
+ },[requestedCourt,city?.id,loading,courts]);
+ useEffect(()=>{
+  if(!db||!selectedSlug){setCourtStats({masters:[],belts:[],crewName:null,defenses:0,loading:false});return;}
   let alive=true;
-  setCourtStats({masters:[],crewName:null,defenses:0,loading:true});
+  setCourtStats({masters:[],belts:[],crewName:null,defenses:0,loading:true});
   void (async()=>{
-   const [masterResult,crewResult]=await Promise.all([
+   const [masterResult,crewResult,beltResult]=await Promise.all([
     db.rpc('get_rch_court_masters',{p_court:selectedSlug}),
-    db.rpc('get_rch_court_crew_standings',{p_court:selectedSlug})
+    db.rpc('get_rch_court_crew_standings',{p_court:selectedSlug}),
+    db.rpc('get_rch_court_master_belts',{p_court:selectedSlug})
    ]);
    if(!alive)return;
    const controller=((crewResult.data||[]) as {crew_name:string;is_controller:boolean}[]).find(c=>c.is_controller);
    const territory=territories.find(t=>t.court_slug===selectedSlug);
    setCourtStats({
     masters:masterResult.error?[]:(masterResult.data||[]) as Master[],
+    belts:beltResult.error?[]:(beltResult.data||[]) as CertifiedCourtBelt[],
     crewName:controller?.crew_name||(territory?crewNames[territory.crew_id]:null)||null,
     defenses:territory?.successful_defenses||0,
     loading:false
@@ -285,8 +298,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   return !search||(c.name+' '+c.address).toLowerCase().includes(search);
  });
  const chooseCourt=(slug:string)=>{
+   // Keep the exact MapLibre camera alive; court previews live over that map.
    setSelectedSlug(slug);
-   window.requestAnimationFrame(()=>document.getElementById('rch-run-world-court')?.scrollIntoView({behavior:'smooth',block:'nearest'}));
  };
 
  return <main className="rwg-shell min-h-screen pb-28 text-white" aria-label="RCH Runs World game">
@@ -350,6 +363,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div className="rwg-map-stage">
       <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
+      {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
+       events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
+       controllingCrew={courtStats.crewName} recordedDefenses={courtStats.defenses}
+       onClose={()=>setSelectedSlug(null)}/>}
      </div>
      <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
     </section>
@@ -388,37 +405,6 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        </div>
        {visibleCourts.length>80&&<p className="rwg-disclosure">Displaying the first 80 court cards. Refine your search to locate a court.</p>}
       </section>
-      {selectedCourt&&<section className="rwg-arena" id="rch-run-world-court" aria-label={selectedCourt.name+' Court Arena'}>
-        <div className="rwg-arena-top"><div><span className="rwg-kicker"><FaCrown/> COURT ARENA / {city.name.toUpperCase()}</span>
-          <h2>{selectedCourt.name}</h2><p>{selectedCourt.address} · Parks & Rec verified · {selectedCourt.venue_type==='outdoor'?'Outdoor courts':selectedCourt.venue_type==='indoor'?'Indoor gym':'Recreation center / mixed'} · {selectedCourt.access_type==='public'&&selectedCourt.venue_type==='outdoor'?'Check park hours':'Indoor access or reservations may be required'} · {pins.some(p=>p.id==='court:'+selectedCourt.slug)?'Coordinate on file':'Precise court coordinates not yet verified'}</p></div>
-         <span className="rwg-arena-shield"><FaShieldHalved/></span>
-        </div>
-        <div className="rwg-master-grid">{(['1v1','2v2','3v3'] as const).map(format=>{
-         const master=courtStats.masters.find(m=>m.division===format&&m.is_master);
-         return <div key={format}><span><FaCrown/> {format} MASTER</span>
-          <strong>{courtStats.loading?'Checking…':master?.player_name||'Title unclaimed'}</strong>
-          <small>{master?'Verified contender · '+master.wins+' wins':'Verified results required'}</small>
-         </div>;
-        })}</div>
-        <div className="rwg-territory"><div><span className="rwg-kicker">CONTROLLING CREW</span>
-           <h3>{courtStats.crewName||'Unclaimed territory'}</h3>
-           <p>{courtStats.crewName?courtStats.defenses+' recorded title defenses':'Only verified play can establish control.'}</p></div><FaPeopleGroup/></div>
-        <div className="rwg-arena-events"><h3>Next Runs at this court</h3>
-         {courtRuns.length?courtRuns.slice(0,4).map(r=><Link href={'/runs/'+encodeURIComponent(r.id)} key={r.id}>
-          <span><strong>{r.title}</strong><small>{shortWhen(r.starts_at)} · {r.game_format} {featuredSet.has(r.id)?'· 2× verified REP':''}</small></span><FaArrowRight/>
-         </Link>):<p>No upcoming Run is listed at this court. A public park listing does not guarantee a game.</p>}
-        </div>
-        <div className="rwg-arena-actions">
-         <Link href={'/runs/courts/'+encodeURIComponent(selectedCourt.slug)} className="rwg-primary">Open full Court Arena <FaArrowRight/></Link>
-         <button type="button" onClick={()=>setScreen('battle')} className="rwg-secondary">Court Battles <FaBolt/></button>
-         <Link href={'/runs?create=1&court='+encodeURIComponent(selectedCourt.slug)} className="rwg-secondary">Organize a Run</Link>
-         {selectedCourt.source_url&&<a href={selectedCourt.source_url} rel="noopener noreferrer" target="_blank" className="rwg-secondary">Court source ↗</a>}
-        </div>
-        <WorldScoutButton key={selectedCourt.slug} courtSlug={selectedCourt.slug} loggedIn={Boolean(user)}
-          scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))}
-          onScout={()=>setScoutVersion(n=>n+1)}/>
-        <p className="rwg-disclosure">Crews, court titles, and REP require verified results. A verified Parks & Rec location does not mean basketball is currently available, that a gym is open for pickup, or that a court has been reserved. This site is not reserved by RCH. Confirm facility rules and hours first.</p>
-       </section>}
       <WorldPulse events={worldPulse} onCourt={chooseCourt}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
        <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Scheduled Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
