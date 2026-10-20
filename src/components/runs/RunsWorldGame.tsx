@@ -27,7 +27,7 @@ import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCo
 type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
-type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;defenses:number;loading:boolean};
+type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;crewLogoPath:string|null;defenses:number;loading:boolean};
 type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string;court_name?:string;game_format?:string;won?:boolean;rating_before?:number;rating_after?:number}[]};
 type PlayerStats={socialLevel:number|null;socialXp:number|null;repBalance:number|null;passport:Passport|null};
 const blankStats:PlayerStats={socialLevel:null,socialXp:null,repBalance:null,passport:null};
@@ -72,7 +72,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [territories,setTerritories]=useState<Territory[]>([]);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
- const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],belts:[],crewName:null,defenses:0,loading:false});
+ const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],belts:[],crewName:null,crewLogoPath:null,defenses:0,loading:false});
  const [player,setPlayer]=useState<PlayerStats>(blankStats);
  const [identity,setIdentity]=useState<{display_name:string|null;username:string|null;avatar_url:string|null}|null>(null);
  const [journey,setJourney]=useState<WorldJourney|null>(null);
@@ -260,9 +260,9 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   }
  },[requestedCourt,city?.id,loading,courts]);
  useEffect(()=>{
-  if(!db||!selectedSlug){setCourtStats({masters:[],belts:[],crewName:null,defenses:0,loading:false});return;}
+  if(!db||!selectedSlug){setCourtStats({masters:[],belts:[],crewName:null,crewLogoPath:null,defenses:0,loading:false});return;}
   let alive=true;
-  setCourtStats({masters:[],belts:[],crewName:null,defenses:0,loading:true});
+  setCourtStats({masters:[],belts:[],crewName:null,crewLogoPath:null,defenses:0,loading:true});
   void (async()=>{
    const [masterResult,crewResult,beltResult]=await Promise.all([
     db.rpc('get_rch_court_masters',{p_court:selectedSlug}),
@@ -270,12 +270,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
     db.rpc('get_rch_court_master_belts',{p_court:selectedSlug})
    ]);
    if(!alive)return;
-   const controller=((crewResult.data||[]) as {crew_name:string;is_controller:boolean}[]).find(c=>c.is_controller);
+   const controller=((crewResult.data||[]) as {crew_name:string;logo_path:string|null;is_controller:boolean}[]).find(c=>c.is_controller);
    const territory=territories.find(t=>t.court_slug===selectedSlug);
    setCourtStats({
     masters:masterResult.error?[]:(masterResult.data||[]) as Master[],
     belts:beltResult.error?[]:(beltResult.data||[]) as CertifiedCourtBelt[],
     crewName:controller?.crew_name||(territory?crewNames[territory.crew_id]:null)||null,
+    crewLogoPath:controller?.logo_path||null,
     defenses:territory?.successful_defenses||0,
     loading:false
    });
@@ -365,7 +366,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
-       controllingCrew={courtStats.crewName} recordedDefenses={courtStats.defenses}
+       controllingCrew={courtStats.crewName} crewLogoUrl={courtStats.crewLogoPath&&db?db.storage.from('rch-crew-logos').getPublicUrl(courtStats.crewLogoPath).data.publicUrl:null} recordedDefenses={courtStats.defenses}
        onClose={()=>setSelectedSlug(null)}/>}
      </div>
      <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
