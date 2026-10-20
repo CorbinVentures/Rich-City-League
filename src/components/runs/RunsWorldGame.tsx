@@ -298,9 +298,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   const search=query.trim().toLowerCase();
   return !search||(c.name+' '+c.address).toLowerCase().includes(search);
  });
- const chooseCourt=(slug:string)=>{
+ const chooseCourt=(slug:string,fromList=false)=>{
    // Keep the exact MapLibre camera alive; court previews live over that map.
    setSelectedSlug(slug);
+   if(fromList)window.requestAnimationFrame(()=>{
+    const area=document.getElementById('rwg-world-map');
+    area?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+   });
  };
  const closeCourtPreview=useCallback(()=>{
    setSelectedSlug(null);
@@ -405,7 +409,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
          const ownership=territories.find(t=>t.court_slug===c.slug);
          const count=areaRuns.filter(r=>r.location_slug===c.slug).length;
          const mapped=pins.some(p=>p.id==='court:'+c.slug);
-         return <button key={c.slug} type="button" onClick={()=>chooseCourt(c.slug)} aria-pressed={selectedSlug===c.slug} className={'rwg-court '+(selectedSlug===c.slug?'selected':'')}>
+         return <button key={c.slug} type="button" onClick={()=>chooseCourt(c.slug,true)} aria-pressed={selectedSlug===c.slug} className={'rwg-court '+(selectedSlug===c.slug?'selected':'')}>
           <span className="rwg-court-icon">{ownership?<FaCrown/>:count?<FaBolt/>:<FaBasketball/>}</span>
           <span className="rwg-court-copy"><strong>{c.name}</strong><small>{c.venue_type==='indoor'?'Indoor gym':c.venue_type==='mixed'?'Recreation center':'Outdoor court'} · {count?count+' scheduled Run'+(count===1?'':'s'):c.access_type==='public'&&c.venue_type==='outdoor'?'Check park hours':'Check gym access / schedule'} · {mapped?'Coordinates on file':'Pin needs review'}</small></span>
           <FaArrowRight className="rwg-court-arrow"/>
@@ -414,7 +418,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        </div>
        {visibleCourts.length>80&&<p className="rwg-disclosure">Displaying the first 80 court cards. Refine your search to locate a court.</p>}
       </section>
-      <WorldPulse events={worldPulse} onCourt={chooseCourt}/>
+      <WorldPulse events={worldPulse} onCourt={slug=>chooseCourt(slug,true)}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
        <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Scheduled Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
        {areaRuns.length?areaRuns.slice(0,12).map(run=><Link href={'/runs/'+run.id} key={run.id} className="rwg-run-row">
