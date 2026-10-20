@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {
- FaArrowRight,FaBasketball,FaBell,FaBolt,FaBookOpen,FaCalendarDays,
- FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,
+ FaArrowRight,FaBasketball,FaBell,FaBookOpen,FaCalendarDays,
+ FaCompass,FaCrown,FaLocationDot,FaMedal,FaPeopleGroup,
  FaPlay,FaShieldHalved,FaTrophy,FaXmark
 } from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
@@ -25,10 +25,10 @@ function formatWhen(value:string){
 export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replayToken:number}){
  const [step,setStep]=useState<'done'|'logo'|'world'>('done');
  const skipRef=useRef<HTMLButtonElement>(null);
- const close=()=>{
+ const close=useCallback(()=>{
   setStep('done');
   try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional session storage. */}
- };
+ },[]);
  useEffect(()=>{
   if(!enabled)return;
   let rulesSeen=true,alreadySeen=false;
@@ -67,7 +67,7 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
    document.body.style.overflow=prevOverflow;
    prevFocus?.focus({preventScroll:true});
   };
- },[enabled,step]);
+ },[enabled,step,close]);
  if(!enabled||step==='done')return null;
  return <div className={'rch-intro-overlay stage-'+step} role="dialog" aria-modal="true" aria-label="Entering RCH Runs">
   <div className="rch-intro-court" aria-hidden="true"/>
