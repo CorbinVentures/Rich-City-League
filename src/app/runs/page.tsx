@@ -446,7 +446,7 @@ export default function RunsPage() {
 
   // Runs World is the primary game. Existing competition, forms and list screens
   // remain available via view=list, create intent, or deep court links.
-  if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
+  if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
