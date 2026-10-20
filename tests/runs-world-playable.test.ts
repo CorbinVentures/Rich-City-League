@@ -74,6 +74,7 @@ describe('Runs World playable geography and game progression',()=>{
   const root=process.cwd();
   const world=readFileSync(join(root,'src/components/runs/RunsWorldGame.tsx'),'utf8');
   const classic=readFileSync(join(root,'src/app/runs/page.tsx'),'utf8');
+  const preview=readFileSync(join(root,'src/components/runs/RunsCourtPreview.tsx'),'utf8');
   // A connected World renderer may be wrapped in onboarding UI without changing routing.
   expect(classic).toMatch(/if\s*\(!showLegacyList\)\s*return\s*<>\s*<RunsWorldGame\b/);
   expect(classic).toContain('<RunsRulesIntro open={rulesOpen} onClose={closeRules} />');
@@ -93,7 +94,8 @@ describe('Runs World playable geography and game progression',()=>{
   expect(world).toContain('<CourtDominion');
   expect(world).toContain('<RunPassport');
   expect(world).toContain('No location permission required');
-  expect(world).toContain('not reserved');
+  expect(preview).toContain('not reserved');
+  expect(world).toContain('<RunsCourtPreview');
   expect(world).toContain('readPagedUpcomingRuns<WorldRun>');
  });
 });
