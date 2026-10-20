@@ -90,3 +90,19 @@
 }
 
 .rwg-court-preview-crest img{width:100%;height:100%;object-fit:contain;border-radius:9px}
+
+
+/* Keep map visible above mobile sheet, while making real next Run actionable. */
+@media(max-width:700px){
+ .rwg-court-preview{position:fixed;z-index:100;left:0;right:0;bottom:0;width:100%;height:min(385px,76dvh)}
+ .rwg-court-preview.is-expanded{height:min(90dvh,780px)}
+ .rwg-court-preview:not(.is-expanded){height:min(385px,76dvh)}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-next{display:block}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-next h3{display:none}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-next>a{min-height:52px;padding:7px 9px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-next>a small{display:none}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-next>a strong{font-size:10px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-hero{min-height:128px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-place{font-size:10px}
+ .rwg-court-preview:not(.is-expanded) .rwg-court-preview-territory{min-height:40px}
+}
