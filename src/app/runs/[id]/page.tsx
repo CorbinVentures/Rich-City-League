@@ -27,6 +27,7 @@ import { RunVerifiedSignal } from '@/components/runs/RunVerifiedSignal';
 import { RunMasterOfficialControl } from '@/components/runs/RunMasterOfficialControl';
 import { RunNextUp } from '@/components/runs/RunNextUp';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
+import './run-room-game.css';
 
 type Run = {
   id: string;
