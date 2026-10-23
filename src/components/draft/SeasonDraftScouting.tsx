@@ -22,12 +22,12 @@ export function SeasonDraftScouting({
       <article className="rounded-2xl border border-white/10 bg-black/25 p-4">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-orange"><FaArrowTrendUp/> Best Player Available</p>
         <h3 className="mt-3 text-lg font-extrabold">{bpa?.name??'Awaiting official evidence'}</h3>
-        {bpa?<><p className="mt-1 text-xs text-white/60">{bpa.position??'Unlisted position'} · basketball evidence score {bpa.grade?.toFixed(1)}</p><p className="mt-2 text-[11px] text-white/40">{bpa.games} recorded game evaluations · {bpa.sample} sample · excludes popularity and age</p></>:<p className="mt-2 text-xs leading-5 text-white/40">No qualified prospect has at least three evaluated games and complete performance metrics.</p>}
+        {bpa?<><p className="mt-1 text-xs text-white/60">{bpa.position??'Unlisted position'} · basketball evidence score {bpa.grade?.toFixed(1)}</p><p className="mt-2 text-[11px] text-white/40">{bpa.source==='official tryouts' ? bpa.tryoutEvaluations+' independent evaluator(s)' : bpa.games+' completed games'} · {bpa.sample} evidence · excludes popularity and age</p></>:<p className="mt-2 text-xs leading-5 text-white/40">No prospect has two independent tryout evaluations or three verified games with complete performance metrics.</p>}
       </article>
       <article className="rounded-2xl border border-rcl-blue/20 bg-rcl-blue/5 p-4">
         <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rcl-blue"><FaShieldHalved/> Best Roster Fit</p>
         <h3 className="mt-3 text-lg font-extrabold">{fit?.name??'Build an evaluated pool'}</h3>
-        {fit?<><p className="mt-1 text-xs text-white/60">{fit.position??'Unlisted position'} · fit index {fit.fitGrade?.toFixed(1)}</p><p className="mt-2 text-[11px] text-white/40">Public on-court metrics + a small position-needs adjustment. It does not guarantee performance.</p></>:<p className="mt-2 text-xs leading-5 text-white/40">Verified basketball data is needed to generate a draft-fit comparison.</p>}
+        {fit?<><p className="mt-1 text-xs text-white/60">{fit.position??'Unlisted position'} · fit index {fit.fitGrade?.toFixed(1)}</p><p className="mt-2 text-[11px] text-white/40">{fit.source==='official tryouts'?'Official tryout evaluation':'Verified game performance'} + a small position-needs adjustment. It does not guarantee performance.</p></>:<p className="mt-2 text-xs leading-5 text-white/40">At least two independent official tryout evaluations or three completed-game assessments are needed.</p>}
       </article>
     </div>
     <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4">
@@ -38,7 +38,7 @@ export function SeasonDraftScouting({
       <p className="mt-3 text-[11px] text-white/50">Counts include official active season rosters and draft selections. Positions are scouting context, not compulsory lineup quotas.</p>
     </div>
     <div className="mt-3 grid gap-3 sm:grid-cols-2">
-      <div className="flex gap-2 rounded-xl border border-white/10 p-3 text-xs leading-5 text-white/50"><FaBasketball className="mt-1 shrink-0"/><p>Value above the available positional median is shown only when enough records exist. No speculative pick-availability odds are generated.</p></div>
+      <div className="flex gap-2 rounded-xl border border-white/10 p-3 text-xs leading-5 text-white/50"><FaBasketball className="mt-1 shrink-0"/><p>Values compare against available same-position prospects only when verified evidence exists. No speculative pick-availability odds are generated.</p></div>
       <div className="flex gap-2 rounded-xl border border-white/10 p-3 text-xs leading-5 text-white/50"><FaCircleInfo className="mt-1 shrink-0"/><p>{isCoach?'Coach view: insights support your decision, but you control the official pick.':'Community view: these public-performance insights do not expose private scouting notes.'}</p></div>
     </div>
   </section>;
