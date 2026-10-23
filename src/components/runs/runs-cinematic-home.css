@@ -23,6 +23,10 @@ html body .rwg-shell .rch-gh-cinema h1{color:white!important;font-style:italic;f
 html body .rwg-shell .rch-gh-cinema h1 span{color:var(--rch-brand-accent-text)!important}
 .rwg-shell .rch-gh-cinema p{max-width:350px;color:var(--rch-brand-ink);font-size:13px;line-height:1.55;text-shadow:0 3px 10px #000}
 .rwg-shell .rch-gh-explore{margin-top:18px;min-height:43px;padding:10px 14px;background:rgb(var(--rch-brand-border-rgb) / 0.910);border:1px solid var(--rch-brand-accent-text);border-radius:12px;color:white;font-size:11px;font-weight:950;display:inline-flex;align-items:center;gap:10px;box-shadow:0 0 20px rgb(var(--rch-brand-accent-rgb) / 0.200)}
+.rwg-shell .rch-gh-entrance-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:18px}
+.rwg-shell .rch-gh-entrance-actions .rch-gh-explore{margin-top:0}
+.rwg-shell .rch-gh-find{min-height:43px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;background:var(--rch-brand-accent);border:1px solid var(--rch-brand-accent-text);border-radius:12px;color:#fff;text-decoration:none;font-size:11px;font-weight:950}
+.rwg-shell .rch-gh-find:hover{filter:brightness(1.12)}
 .rwg-shell .rch-gh-cinema-foot{position:absolute;right:16px;bottom:12px;display:flex;align-items:center;gap:7px;color:rgb(var(--rch-brand-ink-rgb) / 0.678);font-size:9px;font-weight:900;letter-spacing:.08em}
 .rwg-shell .rch-gh-player-card{display:flex;align-items:center;gap:15px;position:relative;margin:13px 0 9px;padding:13px 16px;border:1px solid var(--rch-brand-muted);background:linear-gradient(118deg,var(--rch-brand-raised),var(--rch-brand-surface));border-radius:18px;box-shadow:0 8px 26px #0004}
 .rwg-shell .rch-gh-portrait{display:grid;place-items:center;flex:0 0 72px;width:72px;height:72px;overflow:hidden;background:linear-gradient(135deg,var(--rch-brand-border),var(--rch-brand-surface));border:1px solid var(--rch-brand-accent-text);border-radius:12px;color:var(--rch-brand-copy);font-size:26px}

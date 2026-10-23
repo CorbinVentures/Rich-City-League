@@ -147,7 +147,10 @@ export function RunsCinematicHome({
     <span className="rch-gh-eyebrow">THE REAL-WORLD BASKETBALL GAME</span>
     <h1>YOUR CITY.<br/><span>YOUR RUNS.</span></h1>
     <p>Find real courts. Meet real hoopers. Build a legacy you can prove.</p>
-    <button type="button" onClick={onWorld} className="rch-gh-explore"><FaCompass/> EXPLORE THE WORLD <FaArrowRight/></button>
+    <div className="rch-gh-entrance-actions">
+     <Link href="/runs?view=list#rch-upcoming-runs" className="rch-gh-find"><FaBasketball/> FIND A REAL RUN <FaArrowRight/></Link>
+     <button type="button" onClick={onWorld} className="rch-gh-explore"><FaCompass/> EXPLORE WORLD <FaArrowRight/></button>
+    </div>
    </div>
    <div className="rch-gh-cinema-foot"><FaLocationDot/> REAL COURTS · REAL PEOPLE · REAL RUNS</div>
   </div>
@@ -174,7 +177,7 @@ export function RunsCinematicHome({
    <div><FaMedal/><strong>{player.badges===null?'—':player.badges}</strong><span>RUN BADGES</span></div>
   </div>
 
-  <Link href={nextHref} className="rch-gh-play"><FaBasketball/><span>{nextRun?'PLAY NOW':'FIND A RUN'}<small>{nextRun?'Open the next real Run':'Browse upcoming basketball games'}</small></span><FaArrowRight/></Link>
+  <Link href={nextHref} className="rch-gh-play"><FaBasketball/><span>{nextRun?'VIEW RUN DETAILS':'FIND A RUN'}<small>{nextRun?'See date, location and registration':'Browse upcoming basketball games'}</small></span><FaArrowRight/></Link>
 
   <section className="rch-gh-section" aria-labelledby="rch-next-run">
    <div className="rch-gh-section-title"><h2 id="rch-next-run">NEXT REAL RUN</h2><Link href="/runs?view=list#rch-upcoming-runs">VIEW ALL <FaArrowRight/></Link></div>
