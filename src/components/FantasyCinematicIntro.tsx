@@ -2,12 +2,13 @@
 import { useCallback,useEffect,useState } from 'react';
 import { FaArrowRight,FaChartSimple,FaCrown,FaTrophy,FaUsers } from 'react-icons/fa6';
 import './FantasyCinematicIntro.css';
-const KEY='rcl_fantasy_intro_seen_session_v1';
+const KEY='rch_fantasy_intro_seen_v2';
+const INTRO_SECONDS=4;
 export function FantasyCinematicIntro(){
  const[show,setShow]=useState(false),[elapsed,setElapsed]=useState(0);
- const close=useCallback(()=>{try{sessionStorage.setItem(KEY,'1')}catch{}setShow(false)},[]);
- useEffect(()=>{try{if(sessionStorage.getItem(KEY)==='1')return}catch{}setShow(true)},[]);
- useEffect(()=>{if(!show)return;const start=performance.now(),tick=setInterval(()=>setElapsed(Math.min(11,(performance.now()-start)/1000)),50),done=setTimeout(close,11000);return()=>{clearInterval(tick);clearTimeout(done)}},[show,close]);
+ const close=useCallback(()=>{try{localStorage.setItem(KEY,'1')}catch{}setShow(false)},[]);
+ useEffect(()=>{try{if(localStorage.getItem(KEY)==='1')return; if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){localStorage.setItem(KEY,'1');return}}catch{}setShow(true)},[]);
+ useEffect(()=>{if(!show)return;const start=performance.now(),tick=setInterval(()=>setElapsed(Math.min(INTRO_SECONDS,(performance.now()-start)/1000)),50),done=setTimeout(close,INTRO_SECONDS*1000);return()=>{clearInterval(tick);clearTimeout(done)}},[show,close]);
  if(!show)return null;
  return <div className="fantasy-intro" role="dialog" aria-label="RCL Fantasy intro">
   <div className="fi-arena"/><div className="fi-lights"><i/><i/><i/><i/></div><div className="fi-city"/>
@@ -24,6 +25,6 @@ export function FantasyCinematicIntro(){
   <div className="fi-tag">FANTASY<br/><b>BUILT DIFFERENT.</b></div>
   <div className="fi-ticker"><b>RCL FANTASY</b><span>REAL MANAGERS. REAL FANS. REAL BASKETBALL.</span><i>PLAYERS TODAY. LEGENDS TOMORROW.</i></div>
   <button className="fi-skip" onClick={close}>SKIP INTRO ›</button>
-  <div className="fi-progress"><i><span style={{width:(elapsed/11*100)+'%'}}/></i><b>{String(Math.min(11,Math.ceil(elapsed))).padStart(2,'0')} / 11</b></div>
+  <div className="fi-progress"><i><span style={{width:(elapsed/INTRO_SECONDS*100)+'%'}}/></i><b>{String(Math.min(INTRO_SECONDS,Math.ceil(elapsed))).padStart(2,'0')} / 11</b></div>
  </div>
 }
