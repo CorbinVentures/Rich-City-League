@@ -32,14 +32,14 @@ describe('RCH premium sitewide design contract',()=>{
     expect(layout).toContain('className="rch-premium-app"');
   });
   it('sets dark browser chrome on phones and installed PWAs',()=>{
-    expect(layout).toContain("themeColor: '#07172a'");
+    expect(layout).toContain("themeColor: '#0b0c0e'");
     expect(layout).toContain("colorScheme: 'dark'");
     expect(foundation).toContain('color-scheme:dark!important');
   });
   it('provides readable colors meeting WCAG AA text contrast',()=>{
     expect(contrast('#f5f9ff','#102841')).toBeGreaterThanOrEqual(4.5);
     expect(contrast('#bdcfe4','#102841')).toBeGreaterThanOrEqual(4.5);
-    expect(contrast('#9bb6d1','#07172a')).toBeGreaterThanOrEqual(4.5);
+    expect(contrast('#9bb6d1','#0b0c0e')).toBeGreaterThanOrEqual(4.5);
     expect(contrast('#ffffff','#348ffc')).toBeGreaterThan(3);
   });
   it('unifies primary navigation and mobile PWA buttons',()=>{

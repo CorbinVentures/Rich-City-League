@@ -62,12 +62,12 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       <div className="rch-browser-hero-container">
         <div className="rch-browser-hero-copy">
           <p className="rch-browser-eyebrow">RICH CITY HOOPS <span>·</span> VIRGINIA BASKETBALL</p>
-          <h1 id="rch-browser-hero-heading">VIRGINIA<br/>BASKETBALL<br/><em>LIVES HERE.</em></h1>
+          <h1 id="rch-browser-hero-heading">YOUR CITY.<br/><em>YOUR GAME.</em></h1>
           <p className="rch-browser-hero-mantra">PLAY <i>•</i> CONNECT <i>•</i> COMPETE <i>•</i> GET DISCOVERED</p>
-          <p className="rch-browser-hero-description">Players. Runs. Leagues. Coaches. Training. Media. The entire Virginia basketball community, all in one place.</p>
+          <p className="rch-browser-hero-description">Virginia basketball lives here. Find your next run, meet your crew, and build your basketball identity.</p>
           <div className="rch-browser-hero-actions">
-            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestLabel="Join the Community" memberLabel="My Basketball" memberHref="/my-hoops" />
-            <Link className="rch-browser-button rch-browser-button-outline" href="/discover">Explore Basketball <FaCompass aria-hidden="true" /></Link>
+            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestLabel="Join Free" memberLabel="My Basketball" memberHref="/my-hoops" />
+            <Link className="rch-browser-button rch-browser-button-outline" href="/runs">Explore Runs <FaCompass aria-hidden="true" /></Link>
           </div>
           <p className="rch-browser-hero-footnote">Free to explore. Free to join. Built for the culture.</p>
         </div>

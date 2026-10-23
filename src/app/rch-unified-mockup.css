@@ -1,0 +1,130 @@
+/* Final geometry/type contract. Palette ownership lives in rch-brand-tokens.css.
+   No image filters, blanket SVG recoloring, auth logic or gameplay geometry. */
+html.rch-premium-root {
+  --rch-radius: 8px;
+  --rch-radius-card: 10px;
+  --rch-shadow: 0 12px 32px #0004;
+  --rch-blue: var(--rch-brand-accent);
+  --rch-blue-bright: var(--rch-brand-accent-text);
+  --rch-blue-glow: rgb(var(--rch-brand-accent-rgb) / .12);
+  background: var(--rch-brand-canvas)!important;
+}
+html.rch-premium-root body.rch-premium-app {
+  background: var(--rch-brand-canvas)!important;
+  font-family: var(--rch-font-body)!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root,.rch-public-web) {
+  --rch-radius: 8px;
+  --rch-radius-card: 10px;
+}
+/* Athletic display hierarchy is for titles; labels, forms and prose stay readable. */
+html.rch-premium-root body.rch-premium-app :is(h1,h2,.font-display),
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content :is(h1,h2) {
+  font-family: var(--rch-font-display)!important;
+  font-weight: 800!important;
+  letter-spacing: .005em!important;
+  text-transform: uppercase;
+  text-shadow: none!important;
+  text-wrap: balance;
+}
+html.rch-premium-root body.rch-premium-app h1 { line-height: 1.04!important; }
+html.rch-premium-root body.rch-premium-app :is(button,input,select,textarea) {
+  font-family: var(--rch-font-body);
+}
+html.rch-premium-root body.rch-premium-app :is(a,button,input,textarea,select,[tabindex]):focus-visible {
+  outline: 2px solid var(--rch-brand-ink)!important;
+  outline-offset: 3px!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar,.rcl-universal-sidebar,.rcl-universal-bottom,.rch-public-header,.rch-public-footer,.rch-public-mobile-drawer) {
+  background: var(--rch-brand-canvas)!important;
+  border-color: var(--rch-brand-border)!important;
+  box-shadow: none!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-mark,.rcl-universal-wordmark>span,.rch-public-logo>span,.rch-public-footer-brand) {
+  font-family: var(--rch-font-display)!important;
+  color: #ed2340!important;
+  background: transparent!important;
+  box-shadow: none!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-bottom,.rch-mockup-mobile-nav) a {
+  min-height: 48px;
+  color: var(--rch-brand-muted)!important;
+  background: transparent!important;
+  box-shadow: none!important;
+  border-radius: 0!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-bottom,.rch-mockup-mobile-nav) a[aria-current="page"] {
+  color: var(--rch-brand-accent-text)!important;
+  border-top: 2px solid var(--rch-brand-accent);
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-panel,.rch-browser-event,.rch-browser-news,.rch-browser-feature) {
+  border-radius: 10px!important;
+  border-color: var(--rch-brand-border)!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rch-button-primary,.rch-browser-button-primary,.rch-identity-primary) {
+  background: var(--rch-brand-accent)!important;
+  color: #fff!important;
+  border: 1px solid var(--rch-brand-accent)!important;
+  box-shadow: none!important;
+  border-radius: 8px!important;
+  min-height: 44px;
+}
+html.rch-premium-root body.rch-premium-app .rch-button-secondary {
+  color: var(--rch-brand-accent-text)!important;
+  background: rgb(var(--rch-brand-accent-rgb) / .12)!important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rch-browser-button-outline,.rch-button-outline) {
+  color: var(--rch-brand-ink)!important;
+  border: 1px solid var(--rch-brand-border)!important;
+  background: transparent!important;
+  border-radius: 8px!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content .rch-browser-hero h1 {
+  font-size: clamp(54px,7.8vw,116px)!important;
+  line-height: .94!important;
+  letter-spacing: -.015em!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-browser-hero h1 em { color: #ed2340!important; }
+html.rch-premium-root body.rch-premium-app .rch-browser-hero::after { background: none; }
+html.rch-premium-root body.rch-premium-app .rch-browser-hero-art { filter: none; }
+html.rch-premium-root body.rch-premium-app .rch-browser-hero-description { max-width: 34rem; }
+html.rch-premium-root body.rch-premium-app .rch-browser-hero-mantra { display:none; }
+html.rch-premium-root body.rch-premium-app .rch-browser-hero-corner { display:none; }
+html.rch-premium-root body.rch-premium-app .rch-browser-feature-grid { gap:16px; }
+/* Seasonal atmosphere can decorate content, but cannot recolor navigation/actions. */
+html.rch-premium-root[data-season-theme] {
+  --season-accent: var(--rch-brand-accent)!important;
+  --season-accent-2: var(--rch-brand-accent-text)!important;
+  --season-glow: rgb(var(--rch-brand-accent-rgb) / .12)!important;
+}
+.rch-mockup-mobile-nav { display:none; }
+@media(max-width:767px) {
+  .rch-public-web { padding-bottom:calc(64px + env(safe-area-inset-bottom)); }
+  .rch-mockup-mobile-nav {
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    position:fixed;inset:auto 0 0;z-index:80;
+    padding:4px 8px calc(4px + env(safe-area-inset-bottom));
+    background:var(--rch-brand-canvas);border-top:1px solid var(--rch-brand-border);
+  }
+  .rch-mockup-mobile-nav a { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:11px;text-decoration:none; }
+  .rch-mockup-mobile-nav svg { font-size:20px; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-hero-container { display:block;padding:180px 20px 28px; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-hero-art { background-position:center,center,60% top; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-hero-quick { display:none; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-hero-actions { display:grid;grid-template-columns:1fr;gap:10px; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-hero-eyebrow { letter-spacing:.12em!important; }
+  html.rch-premium-root body.rch-premium-app .rch-browser-category-strip { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(prefers-reduced-motion:reduce) {
+  html.rch-premium-root *,html.rch-premium-root *::before,html.rch-premium-root *::after {
+    scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;
+  }
+}
+html.rch-premium-root body.rch-premium-app .rcl-universal-bottom { grid-template-columns:repeat(4,minmax(0,1fr))!important; }
+/* Legacy inline Tailwind action colors also get a readable label. */
+html.rch-premium-root body.rch-premium-app :is(a,button)[class~="bg-rcl-blue"] {
+  background:var(--rch-brand-accent)!important;color:#fff!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-universal-bottom a[aria-current="page"] svg {
+  color:var(--rch-brand-accent-text)!important;
+}

@@ -13,15 +13,15 @@
  */
 
 :root {
-  --rcl-psych-bg: #090d12;
-  --rcl-psych-bg-deep: #06090d;
-  --rcl-psych-surface: #111820;
-  --rcl-psych-surface-2: #18212c;
-  --rcl-psych-surface-3: #202b37;
-  --rcl-psych-border: #26313d;
-  --rcl-psych-border-soft: rgba(167, 176, 188, .14);
-  --rcl-psych-text: #f5f7fa;
-  --rcl-psych-muted: #a7b0bc;
+  --rcl-psych-bg: var(--rch-brand-canvas);
+  --rcl-psych-bg-deep: var(--rch-brand-canvas);
+  --rcl-psych-surface: var(--rch-brand-surface);
+  --rcl-psych-surface-2: var(--rch-brand-surface);
+  --rcl-psych-surface-3: var(--rch-brand-raised);
+  --rcl-psych-border: var(--rch-brand-raised);
+  --rcl-psych-border-soft: rgb(var(--rch-brand-copy-rgb) / .14);
+  --rcl-psych-text: var(--rch-brand-ink);
+  --rcl-psych-muted: var(--rch-brand-copy);
   --rcl-psych-subtle: #778391;
   --rcl-psych-orange: #ff6a00;
   --rcl-psych-orange-soft: #ff8a33;
@@ -29,7 +29,7 @@
   --rcl-psych-gold: #f4bf4f;
   --rcl-psych-gold-soft: #ffdd8a;
   --rcl-psych-success: #32d583;
-  --rcl-psych-info: #46a8ff;
+  --rcl-psych-info: var(--rch-brand-accent-text);
   --rcl-psych-danger: #ff5664;
   --rcl-psych-radius: 14px;
   --rcl-psych-radius-sm: 10px;
@@ -61,8 +61,8 @@ html body {
   color: var(--rcl-psych-text) !important;
   background:
     radial-gradient(circle at 84% -10%, rgba(255, 106, 0, .045), transparent 26rem),
-    radial-gradient(circle at 7% 74%, rgba(70, 168, 255, .025), transparent 34rem),
-    linear-gradient(180deg, #0a0f15 0%, var(--rcl-psych-bg) 52%, var(--rcl-psych-bg-deep) 100%) !important;
+    radial-gradient(circle at 7% 74%, rgb(var(--rch-brand-accent-text-rgb) / .025), transparent 34rem),
+    linear-gradient(180deg, var(--rch-brand-canvas) 0%, var(--rcl-psych-bg) 52%, var(--rcl-psych-bg-deep) 100%) !important;
   background-attachment: fixed;
 }
 
@@ -72,7 +72,7 @@ body::before {
 
 ::selection {
   background: rgba(255, 106, 0, .86) !important;
-  color: #090d12 !important;
+  color: var(--rch-brand-canvas) !important;
 }
 
 /* -------------------- Readability / hierarchy -------------------- */
@@ -151,7 +151,7 @@ select {
 .rcl-admin-module,
 .rcl-navigation-panel {
   border-color: var(--rcl-psych-border-soft) !important;
-  background: linear-gradient(145deg, rgba(24, 33, 44, .93), rgba(14, 20, 28, .96)) !important;
+  background: linear-gradient(145deg, rgb(var(--rch-brand-surface-rgb) / .93), rgb(var(--rch-brand-surface-rgb) / .96)) !important;
   box-shadow: var(--rcl-psych-shadow-soft) !important;
 }
 
@@ -162,7 +162,7 @@ select {
 }
 
 .rcl-platform-root :where(.rcl-card, .rcl-panel, .rcl-game-card, .rcl-news-card, .rcl-admin-module):hover {
-  border-color: rgba(167, 176, 188, .24) !important;
+  border-color: rgb(var(--rch-brand-copy-rgb) / .24) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -177,7 +177,7 @@ select {
 .rcl-draft-hero {
   background:
     radial-gradient(circle at 80% 25%, rgba(255, 106, 0, .065), transparent 23rem),
-    linear-gradient(145deg, #121b25 0%, #0b1118 56%, #080c11 100%) !important;
+    linear-gradient(145deg, var(--rch-brand-surface) 0%, var(--rch-brand-canvas) 56%, var(--rch-brand-canvas) 100%) !important;
   border-color: var(--rcl-psych-border-soft) !important;
 }
 
@@ -189,7 +189,7 @@ select {
   border: 1px solid rgba(255, 138, 51, .46) !important;
   border-radius: var(--rcl-psych-radius-sm) !important;
   background: linear-gradient(145deg, var(--rcl-psych-orange-soft), var(--rcl-psych-orange)) !important;
-  color: #090d12 !important;
+  color: var(--rch-brand-canvas) !important;
   box-shadow: 0 10px 24px rgba(255, 106, 0, .13) !important;
   font-weight: 760 !important;
 }
@@ -211,15 +211,15 @@ select {
 
 /* Blue is informational / secondary, not the default emotional CTA. */
 .rcl-platform-root :where(button, a)[class*="bg-rcl-blue"] {
-  border: 1px solid rgba(70, 168, 255, .26) !important;
-  background: rgba(70, 168, 255, .12) !important;
-  color: #d8ecff !important;
+  border: 1px solid rgb(var(--rch-brand-accent-text-rgb) / .26) !important;
+  background: rgb(var(--rch-brand-accent-text-rgb) / .12) !important;
+  color: var(--rch-brand-ink) !important;
   box-shadow: none !important;
 }
 
 .rcl-secondary-action,
 .rcl-platform-root :where(button, a)[class*="bg-white/"] {
-  border-color: rgba(167, 176, 188, .18) !important;
+  border-color: rgb(var(--rch-brand-copy-rgb) / .18) !important;
 }
 
 /* Active controls receive one restrained orange signal rather than full orange chrome. */
@@ -236,7 +236,7 @@ select {
 .rcl-platform-root select {
   border: 1px solid var(--rcl-psych-border) !important;
   border-radius: var(--rcl-psych-radius-sm) !important;
-  background: #0d141c !important;
+  background: var(--rch-brand-surface) !important;
   color: var(--rcl-psych-text) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.018) !important;
 }
@@ -261,7 +261,7 @@ select {
 /* -------------------- Navigation: orientation before decoration -------------------- */
 .rcl-universal-sidebar,
 .rcl-home-sidebar {
-  background: linear-gradient(180deg, rgba(17, 24, 32, .985), rgba(8, 13, 18, .995)) !important;
+  background: linear-gradient(180deg, rgb(var(--rch-brand-surface-rgb) / .985), rgb(var(--rch-brand-canvas-rgb) / .995)) !important;
   border-right-color: var(--rcl-psych-border-soft) !important;
   box-shadow: 14px 0 40px rgba(0,0,0,.16) !important;
 }
@@ -269,7 +269,7 @@ select {
 .rcl-universal-topbar,
 .rcl-home-topbar,
 .rcl-member-topbar {
-  background: rgba(9, 13, 18, .88) !important;
+  background: rgb(var(--rch-brand-canvas-rgb) / .88) !important;
   border-bottom-color: var(--rcl-psych-border-soft) !important;
   box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
 }
@@ -297,7 +297,7 @@ select {
 .rcl-home-sidebar nav a,
 .rcl-universal-more,
 .rcl-home-all-rcl {
-  color: #aeb8c3 !important;
+  color: var(--rch-brand-copy) !important;
 }
 
 .rcl-universal-nav a svg,
@@ -311,7 +311,7 @@ select {
 .rcl-home-sidebar nav a:hover,
 .rcl-universal-more:hover,
 .rcl-home-all-rcl:hover {
-  border-color: rgba(167, 176, 188, .13) !important;
+  border-color: rgb(var(--rch-brand-copy-rgb) / .13) !important;
   background: rgba(255,255,255,.035) !important;
   color: var(--rcl-psych-text) !important;
 }
@@ -334,13 +334,13 @@ select {
 }
 
 .rcl-universal-avatar {
-  border-color: rgba(167, 176, 188, .18) !important;
+  border-color: rgb(var(--rch-brand-copy-rgb) / .18) !important;
   background: var(--rcl-psych-surface-2) !important;
   color: var(--rcl-psych-text) !important;
 }
 
 .rcl-universal-bottom {
-  background: rgba(9, 13, 18, .94) !important;
+  background: rgb(var(--rch-brand-canvas-rgb) / .94) !important;
   border-top-color: var(--rcl-psych-border-soft) !important;
   box-shadow: 0 -10px 28px rgba(0,0,0,.18) !important;
 }
@@ -376,9 +376,9 @@ select {
 }
 
 .rcl-status-info {
-  border-color: rgba(70, 168, 255, .30) !important;
-  background: rgba(70, 168, 255, .10) !important;
-  color: #a9d6ff !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .30) !important;
+  background: rgb(var(--rch-brand-accent-text-rgb) / .10) !important;
+  color: var(--rch-brand-copy) !important;
 }
 
 .rcl-status-danger {
@@ -398,7 +398,7 @@ select {
   overflow: hidden;
   height: 8px;
   border-radius: 999px;
-  background: #1b2530;
+  background: var(--rch-brand-surface);
 }
 
 .rcl-progress-fill {

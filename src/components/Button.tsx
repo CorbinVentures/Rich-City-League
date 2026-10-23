@@ -14,9 +14,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const baseStyles = 'min-h-11 min-w-0 max-w-full whitespace-normal text-center leading-snug font-semibold tracking-[.02em] rounded-lg transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed';
 
 const variants = {
-  primary: 'bg-rcl-blue text-[#071018] hover:brightness-105 disabled:opacity-50',
-  secondary: 'border border-rcl-blue/25 bg-rcl-blue/10 text-rcl-blue hover:bg-rcl-blue/15 disabled:opacity-50',
-  outline: 'border border-white/15 bg-white/[.025] text-white hover:border-rcl-blue/35 hover:text-rcl-blue disabled:opacity-50',
+  primary: 'rch-button-primary bg-rcl-blue text-white hover:brightness-105 disabled:opacity-50',
+  secondary: 'rch-button-secondary border border-rcl-blue/25 bg-rcl-blue/10 text-rcl-blue hover:bg-rcl-blue/15 disabled:opacity-50',
+  outline: 'rch-button-outline border border-white/15 bg-white/[.025] text-white hover:border-rcl-blue/35 hover:text-rcl-blue disabled:opacity-50',
   ghost: 'text-rcl-muted hover:bg-white/[.04] hover:text-white disabled:opacity-50',
 };
 

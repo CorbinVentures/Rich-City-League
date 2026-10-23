@@ -6,70 +6,70 @@
  * Do NOT change global site tokens or other routes to fix Discover.
  */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page {
-  --scene-ink:#112d4c;
-  --scene-muted:#526d87;
-  --scene-blue:#286ed5;
-  --scene-blue-soft:#e9f3ff;
-  --scene-edge:#cfdeec;
-  background:radial-gradient(ellipse at 93% 1%,rgba(22,93,166,.23),transparent 36rem),#071b31!important;
-  background-color:#071b31!important;
-  color:#eaf4ff!important;
-  color-scheme:light;
+  --scene-ink:var(--rch-brand-ink);
+  --scene-muted:var(--rch-brand-muted);
+  --scene-blue:var(--rch-brand-accent);
+  --scene-blue-soft:var(--rch-brand-ink);
+  --scene-edge:var(--rch-brand-copy);
+  background:radial-gradient(ellipse at 93% 1%,rgb(var(--rch-brand-border-rgb) / .23),transparent 36rem),var(--rch-brand-surface)!important;
+  background-color:var(--rch-brand-surface)!important;
+  color:var(--rch-brand-ink)!important;
+  color-scheme:dark;
   padding-top:clamp(16px,2vw,25px);
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page > .rch-scene-container {
   max-width:1320px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero {
-  color:#f5faff!important;
-  background:radial-gradient(ellipse at 91% 13%,rgba(101,177,251,.17),transparent 45%),
-    linear-gradient(115deg,#092038,#10395f 57%,#14568c)!important;
-  border:1px solid #315b83!important;
-  box-shadow:0 15px 36px #020c1b6b!important;
+  color:var(--rch-brand-ink)!important;
+  background:radial-gradient(ellipse at 91% 13%,rgb(var(--rch-brand-accent-text-rgb) / .17),transparent 45%),
+    linear-gradient(115deg,var(--rch-brand-surface),var(--rch-brand-raised) 57%,var(--rch-brand-border))!important;
+  border:1px solid var(--rch-brand-border)!important;
+  box-shadow:0 15px 36px rgb(var(--rch-brand-canvas-rgb) / 0.420)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1,
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1 *,
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero .rch-scene-eyebrow {
-  color:#f6faff!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero h1 em {
-  color:#90c8ff!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-copy > p:not(.rch-scene-eyebrow) {
-  color:#d6e8f9!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-action {
-  background:#fff!important;
-  color:#0b3766!important;
+  background:var(--rch-brand-surface)!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-hero-radar {
-  background:rgba(15,48,81,.67)!important;
-  border-color:#83aacf!important;
-  color:#eef8ff!important;
+  background:rgb(var(--rch-brand-raised-rgb) / .67)!important;
+  border-color:var(--rch-brand-muted)!important;
+  color:var(--rch-brand-ink)!important;
 }
 /* Clear white-on-navy section headings. Cards themselves have navy-on-white text. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) h2 {
-  color:#f6fbff!important;
+  color:var(--rch-brand-ink)!important;
   text-shadow:none!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) > p {
-  color:#c1d5e9!important;
+  color:var(--rch-brand-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-section-title,.rch-scene-feed-title) .rch-scene-kicker {
-  color:#79b9fc!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar {
   gap:11px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-search-input,.rch-scene-location-input) {
-  background:#fff!important;
-  border:1px solid #b9d2e8!important;
-  color:#2469aa!important;
-  box-shadow:0 8px 24px #0013274d!important;
+  background:var(--rch-brand-surface)!important;
+  border:1px solid var(--rch-brand-border)!important;
+  color:var(--rch-brand-accent-text)!important;
+  box-shadow:0 8px 24px rgb(var(--rch-brand-surface-rgb) / 0.302)!important;
   min-width:0;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-search-input input,.rch-scene-location-input select) {
-  color-scheme:light!important;
+  color-scheme:dark!important;
   -webkit-appearance:none;
   appearance:none;
   display:block;
@@ -83,13 +83,13 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   border-radius:0!important;
   box-shadow:none!important;
   outline:none!important;
-  color:#102e4f!important;
-  caret-color:#2563eb!important;
+  color:var(--rch-brand-ink)!important;
+  caret-color:var(--rch-brand-accent-text)!important;
   font-size:16px!important;
   line-height:1.35!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-search-input input::placeholder {
-  color:#526b83!important;
+  color:var(--rch-brand-muted)!important;
   opacity:1!important;
 }
 /*
@@ -103,13 +103,13 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   gap:12px!important;
   min-height:54px!important;
   padding:0 16px!important;
-  border:1px solid #bad5ed!important;
+  border:1px solid var(--rch-brand-border)!important;
   border-radius:14px!important;
-  background:#ffffff!important;
-  background-color:#ffffff!important;
-  color:#2469aa!important;
+  background:var(--rch-brand-surface)fff!important;
+  background-color:var(--rch-brand-surface)fff!important;
+  color:var(--rch-brand-accent-text)!important;
   overflow:hidden;
-  box-shadow:0 8px 24px #00132736!important;
+  box-shadow:0 8px 24px rgb(var(--rch-brand-surface-rgb) / 0.212)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > input.rch-scene-native-control,
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > select.rch-scene-native-control {
@@ -128,10 +128,10 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   background:transparent!important;
   background-color:transparent!important;
   background-image:none!important;
-  color:#153450!important;
-  -webkit-text-fill-color:#153450!important;
-  caret-color:#2563eb!important;
-  color-scheme:light!important;
+  color:var(--rch-brand-ink)!important;
+  -webkit-text-fill-color:var(--rch-brand-ink)!important;
+  caret-color:var(--rch-brand-accent-text)!important;
+  color-scheme:dark!important;
   -webkit-appearance:none!important;
   appearance:none!important;
   font-family:inherit!important;
@@ -139,12 +139,12 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   line-height:1.25!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > input.rch-scene-native-control::placeholder {
-  color:#587087!important;
-  -webkit-text-fill-color:#587087!important;
+  color:var(--rch-brand-muted)!important;
+  -webkit-text-fill-color:var(--rch-brand-muted)!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label > .rch-scene-location-caret {
-  color:#2869ad!important;
+  color:var(--rch-brand-accent-text)!important;
   width:15px;
   height:15px;
   flex:0 0 15px;
@@ -154,12 +154,12 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   flex:0 0 20px;
   width:20px;
   height:20px;
-  color:#2869ad!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-searchbar > label:focus-within {
-  outline:2px solid #7dbfff!important;
+  outline:2px solid var(--rch-brand-accent-text)!important;
   outline-offset:2px!important;
-  border-color:#3e8de0!important;
+  border-color:var(--rch-brand-accent-text)!important;
 }
 
 /* No horizontal collision at narrow screen sizes. */
@@ -168,109 +168,109 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   overflow-wrap:anywhere;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category {
-  background:#fff!important;
+  background:var(--rch-brand-surface)!important;
   border:1px solid var(--scene-edge)!important;
   color:var(--scene-ink)!important;
-  box-shadow:0 9px 20px #00102024!important;
+  box-shadow:0 9px 20px rgb(var(--rch-brand-canvas-rgb) / 0.141)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category[aria-pressed="true"] {
-  background:#e4f1ff!important;
-  border:2px solid #4591e9!important;
+  background:var(--rch-brand-ink)!important;
+  border:2px solid var(--rch-brand-accent)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category :is(strong) {
-  color:#112e50!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category small {
-  color:#4e667f!important;
+  color:var(--rch-brand-muted)!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category-icon {
-  background:#e8f2ff!important;
-  color:#2872c4!important;
+  background:var(--rch-brand-ink)!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-category-arrow {
-  color:#2679da!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 /* My Path: explicitly reset global pale text on pale-blue cards. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path {
-  background:linear-gradient(120deg,#eaf4ff,#dcecfb)!important;
-  border:1px solid #bdD9f1!important;
-  color:#133350!important;
-  box-shadow:0 10px 28px #03152929!important;
+  background:linear-gradient(120deg,var(--rch-brand-ink),var(--rch-brand-ink))!important;
+  border:1px solid var(--rch-brand-border)!important;
+  color:var(--rch-brand-ink)!important;
+  box-shadow:0 10px 28px rgb(var(--rch-brand-surface-rgb) / 0.161)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path-head strong {
-  color:#133453!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path-head p {
-  color:#3e5f80!important;
+  color:var(--rch-brand-copy)!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-path .rch-scene-kicker,
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) .rch-scene-kicker {
-  color:#2568bc!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals button {
-  background:#fff!important;
-  color:#17476c!important;
-  border:1px solid #b3cce4!important;
+  background:var(--rch-brand-surface)!important;
+  color:var(--rch-brand-ink)!important;
+  border:1px solid var(--rch-brand-border)!important;
   min-height:43px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-goals button[aria-pressed="true"] {
-  background:#256cdf!important;
-  border-color:#256cdf!important;
+  background:var(--rch-brand-accent)!important;
+  border-color:var(--rch-brand-accent-text)!important;
   color:#fff!important;
-  box-shadow:0 5px 12px #256cdf33!important;
+  box-shadow:0 5px 12px rgb(var(--rch-brand-accent-rgb) / 0.200)!important;
 }
 /* Filters: selected states must have white text on deep blue — never white on icy blue. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-when,.rch-scene-toolbar-secondary) button {
-  color:#194464!important;
-  background:#fff!important;
-  border:1px solid #c3d6e8!important;
+  color:var(--rch-brand-ink)!important;
+  background:var(--rch-brand-surface)!important;
+  border:1px solid var(--rch-brand-border)!important;
   min-height:42px;
   box-shadow:none!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-when,.rch-scene-toolbar-secondary) button[aria-pressed="true"] {
-  background:#256cdf!important;
-  border-color:#3988f6!important;
+  background:var(--rch-brand-accent)!important;
+  border-color:var(--rch-brand-accent-text)!important;
   color:#fff!important;
-  box-shadow:0 4px 14px #256cdf36!important;
+  box-shadow:0 4px 14px rgb(var(--rch-brand-accent-rgb) / 0.212)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-active-filter {
-  color:#d5e8fa!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-active-filter button {
-  color:#92c9ff!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 /* Opportunity feed, zero-result state and VA Pulse each get a coherent light surface. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-card,.rch-scene-empty,.rch-scene-message,.rch-scene-rail-card:not(.rch-scene-spotlight)) {
-  background:#fff!important;
-  background-color:#fff!important;
-  border:1px solid #d1e1ed!important;
-  color:#183b5e!important;
-  box-shadow:0 10px 26px #010e1c30!important;
+  background:var(--rch-brand-surface)!important;
+  background-color:var(--rch-brand-surface)!important;
+  border:1px solid var(--rch-brand-border)!important;
+  color:var(--rch-brand-ink)!important;
+  box-shadow:0 10px 26px rgb(var(--rch-brand-canvas-rgb) / 0.188)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-empty,.rch-scene-card,.rch-scene-rail-card:not(.rch-scene-spotlight)) :is(h2,h3,strong) {
-  color:#153554!important;
+  color:var(--rch-brand-ink)!important;
   opacity:1!important;
   text-shadow:none!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(.rch-scene-empty,.rch-scene-card,.rch-scene-rail-card:not(.rch-scene-spotlight)) :is(p,small,li) {
-  color:#46627d!important;
+  color:var(--rch-brand-copy)!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty {
-  background:radial-gradient(ellipse at 96% 0%,#e7f3ff,transparent 55%),#fff!important;
+  background:radial-gradient(ellipse at 96% 0%,var(--rch-brand-raised),transparent 55%),var(--rch-brand-surface)!important;
   padding:30px 24px!important;
   min-height:0!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty h3 {
-  color:#133858!important;
+  color:var(--rch-brand-ink)!important;
   font-size:clamp(20px,3vw,26px)!important;
   line-height:1.2;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty p {
   max-width:440px;
-  color:#4a6680!important;
+  color:var(--rch-brand-copy)!important;
   font-size:13px!important;
   margin:8px auto 14px;
 }
@@ -282,9 +282,9 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   margin-top:15px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty :is(button,a) {
-  background:#256cdf!important;
+  background:var(--rch-brand-accent)!important;
   color:#fff!important;
-  border:1px solid #256cdf!important;
+  border:1px solid var(--rch-brand-accent)!important;
   border-radius:11px;
   display:inline-flex;
   align-items:center;
@@ -296,51 +296,51 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   font-weight:800;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-empty a.rch-scene-empty-secondary {
-  color:#174d8a!important;
-  background:#e9f4ff!important;
-  border:1px solid #bed9f0!important;
+  color:var(--rch-brand-copy)!important;
+  background:var(--rch-brand-ink)!important;
+  border:1px solid var(--rch-brand-border)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-footnote {
-  color:#c1d6e9!important;
+  color:var(--rch-brand-copy)!important;
   font-size:12px;
   line-height:1.6;
 }
 /* Rails: avoid blank white-on-white headings inherited from the global heading authority. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) h2 {
-  color:#153653!important;
+  color:var(--rch-brand-ink)!important;
   font-size:21px!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-rail-card:not(.rch-scene-spotlight) .rch-scene-rail-empty {
-  color:#4c6983!important;
+  color:var(--rch-brand-muted)!important;
   line-height:1.5;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-pulse li a {
-  color:#1e527d!important;
+  color:var(--rch-brand-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-pulse li small {
-  color:#53728f!important;
+  color:var(--rch-brand-muted)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight {
-  background:linear-gradient(140deg,#0d3558,#155887)!important;
-  border-color:#467eab!important;
-  color:#eef8ff!important;
+  background:linear-gradient(140deg,var(--rch-brand-raised),var(--rch-brand-border))!important;
+  border-color:var(--rch-brand-muted)!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight h2 {
   color:#fff!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-spotlight p {
-  color:#d1e7fc!important;
+  color:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button {
   background:transparent!important;
-  color:#245175!important;
+  color:var(--rch-brand-copy)!important;
   border-color:transparent!important;
   min-height:43px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button.rch-scene-city-more {
-  border-top:1px solid #e2ecf5!important;
+  border-top:1px solid var(--rch-brand-ink)!important;
   border-radius:0!important;
-  color:#1d64b7!important;
+  color:var(--rch-brand-accent-text)!important;
   font-size:12px;
   font-weight:850!important;
   justify-content:space-between;
@@ -348,23 +348,23 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-pag
   padding-top:13px;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-city-list button:hover {
-  background:#edf5fe!important;
+  background:var(--rch-brand-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-radar-card {
-  background:#e5f2ff!important;
-  color:#145589!important;
-  border-color:#accfeb!important;
+  background:var(--rch-brand-ink)!important;
+  color:var(--rch-brand-copy)!important;
+  border-color:var(--rch-brand-accent-text)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-radar-card :is(strong,small) {
-  color:#145589!important;
+  color:var(--rch-brand-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-create,
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page .rch-scene-create strong {
-  color:#a6d2fb!important;
+  color:var(--rch-brand-copy)!important;
 }
 /* Focus and motion: gestures work even with the PWA's dark root theme. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-scene-page :is(button,a,input,select):focus-visible {
-  outline:3px solid #80c3ff!important;
+  outline:3px solid var(--rch-brand-accent-text)!important;
   outline-offset:3px!important;
 }
 @media(max-width:780px) {

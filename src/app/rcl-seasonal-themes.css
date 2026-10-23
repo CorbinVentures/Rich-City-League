@@ -82,7 +82,7 @@ html[data-season-theme='black-history'] .rcl-seasonal-atmosphere {
 }
 
 html[data-season-theme='black-history'] .rcl-platform-root::before {
-  background: linear-gradient(90deg, #D94B4B 0 25%, #F4C95D 25% 50%, #111827 50% 75%, #2EA44F 75%);
+  background: linear-gradient(90deg, #D94B4B 0 25%, #F4C95D 25% 50%, var(--rch-brand-surface) 50% 75%, #2EA44F 75%);
 }
 
 html[data-season-theme='juneteenth'] .rcl-seasonal-atmosphere {
@@ -113,21 +113,21 @@ html[data-season-theme='st-patricks'] .rcl-seasonal-atmosphere {
 html[data-season-theme='easter'] .rcl-seasonal-atmosphere {
   background:
     radial-gradient(circle at 16% 18%, rgba(197, 163, 255, .08), transparent 24rem),
-    radial-gradient(circle at 88% 20%, rgba(158, 216, 255, .08), transparent 24rem),
+    radial-gradient(circle at 88% 20%, rgb(var(--rch-brand-copy-rgb) / .08), transparent 24rem),
     radial-gradient(circle at 60% 94%, rgba(255, 203, 222, .07), transparent 22rem);
 }
 
 /* Memorial Day and July 4 share a respectful night-game patriotic language. */
 html[data-season-theme='memorial-day'] .rcl-platform-root::before,
 html[data-season-theme='july-fourth'] .rcl-platform-root::before {
-  background: linear-gradient(90deg, #F56C78, #F6F9FC, #60A5FA);
+  background: linear-gradient(90deg, #F56C78, var(--rch-brand-ink), var(--rch-brand-accent-text));
 }
 
 html[data-season-theme='memorial-day'] .rcl-seasonal-atmosphere,
 html[data-season-theme='july-fourth'] .rcl-seasonal-atmosphere {
   background:
     radial-gradient(circle at 6% 12%, rgba(245, 108, 120, .08), transparent 22rem),
-    radial-gradient(circle at 94% 18%, rgba(96, 165, 250, .09), transparent 24rem);
+    radial-gradient(circle at 94% 18%, rgb(var(--rch-brand-accent-text-rgb) / .09), transparent 24rem);
 }
 
 /* Halloween: atmospheric fog and drifting basketball-sized lantern glows. */
@@ -146,7 +146,7 @@ html[data-season-theme='halloween'] .rcl-seasonal-particles::after {
   height: 9rem;
   border-radius: 50%;
   filter: blur(26px);
-  background: rgba(221, 228, 235, .075);
+  background: rgb(var(--rch-brand-ink-rgb) / .075);
   animation: rcl-season-fog 16s ease-in-out infinite alternate;
 }
 
@@ -203,7 +203,7 @@ html[data-season-theme='christmas'] .rcl-seasonal-particles i:nth-child(12) { le
 html[data-season-theme='new-year'] .rcl-seasonal-atmosphere {
   background:
     radial-gradient(circle at 50% 0, rgba(232, 200, 106, .1), transparent 28rem),
-    radial-gradient(circle at 88% 85%, rgba(113, 168, 255, .07), transparent 24rem);
+    radial-gradient(circle at 88% 85%, rgb(var(--rch-brand-accent-text-rgb) / .07), transparent 24rem);
 }
 
 html[data-season-theme='new-year'] .rcl-seasonal-particles i,

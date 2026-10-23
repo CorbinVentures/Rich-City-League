@@ -2,7 +2,7 @@
    that global legacy rule forcibly makes dark pages white on mobile. */
 .rch-arena-shell {
   min-height:100vh;
-  background:radial-gradient(circle at 50% 12%,rgba(23,87,151,.22),transparent 34rem),#05101e;
+  background:radial-gradient(circle at 50% 12%,rgb(var(--rch-brand-border-rgb) / .22),transparent 34rem),var(--rch-brand-canvas);
   color:#fff;
   color-scheme:dark;
 }
@@ -13,76 +13,76 @@
   color:#fff;
   color-scheme:dark;
 }
-.rch-arena-shell input::placeholder,.rch-arena-shell textarea::placeholder {color:#8ba9c8;}
+.rch-arena-shell input::placeholder,.rch-arena-shell textarea::placeholder {color:var(--rch-brand-muted);}
 .rch-arena-hero {
   min-height:345px;
-  background:linear-gradient(90deg,rgba(3,12,26,.92),rgba(3,12,26,.52) 52%,rgba(3,12,26,.24)),
-    radial-gradient(ellipse at 90% 0,rgba(31,132,249,.47),transparent 50%),
-    linear-gradient(160deg,#082444,#04172c 60%,#030913);
+  background:linear-gradient(90deg,rgb(var(--rch-brand-canvas-rgb) / .92),rgb(var(--rch-brand-canvas-rgb) / .52) 52%,rgb(var(--rch-brand-canvas-rgb) / .24)),
+    radial-gradient(ellipse at 90% 0,rgb(var(--rch-brand-accent-rgb) / .47),transparent 50%),
+    linear-gradient(160deg,var(--rch-brand-surface),var(--rch-brand-surface) 60%,var(--rch-brand-canvas));
 }
 .rch-arena-lights {
-  background:radial-gradient(ellipse at 87% 43%,rgba(28,151,255,.34),transparent 30%),
-    radial-gradient(circle at 7% 2%,rgba(55,145,255,.20),transparent 32%),
-    repeating-linear-gradient(0deg,transparent 0 19px,rgba(94,160,232,.075) 20px 21px),
-    repeating-linear-gradient(90deg,transparent 0 19px,rgba(94,160,232,.075) 20px 21px);
+  background:radial-gradient(ellipse at 87% 43%,rgb(var(--rch-brand-accent-rgb) / .34),transparent 30%),
+    radial-gradient(circle at 7% 2%,rgb(var(--rch-brand-accent-rgb) / .20),transparent 32%),
+    repeating-linear-gradient(0deg,transparent 0 19px,rgb(var(--rch-brand-accent-text-rgb) / .075) 20px 21px),
+    repeating-linear-gradient(90deg,transparent 0 19px,rgb(var(--rch-brand-accent-text-rgb) / .075) 20px 21px);
   opacity:.77;
 }
 .rch-arena-skyline {
-  background:linear-gradient(90deg,#081627 0 10%,#0b2644 10% 19%,#081629 19% 29%,#0c2a4b 29% 38%,#081527 38% 46%,#09213c 46% 57%,#0d3156 57% 64%,#081b32 64% 72%,#0e3760 72% 83%,#08182c 83%);
+  background:linear-gradient(90deg,var(--rch-brand-surface) 0 10%,var(--rch-brand-surface) 10% 19%,var(--rch-brand-surface) 19% 29%,var(--rch-brand-raised) 29% 38%,var(--rch-brand-surface) 38% 46%,var(--rch-brand-surface) 46% 57%,var(--rch-brand-raised) 57% 64%,var(--rch-brand-surface) 64% 72%,var(--rch-brand-raised) 72% 83%,var(--rch-brand-surface) 83%);
   clip-path:polygon(0 50%,9% 50%,9% 25%,13% 25%,13% 44%,19% 44%,19% 10%,25% 10%,25% 55%,31% 55%,31% 35%,38% 35%,38% 0,46% 0,46% 54%,51% 54%,51% 22%,58% 22%,58% 42%,66% 42%,66% 8%,72% 8%,72% 58%,78% 58%,78% 32%,86% 32%,86% 47%,92% 47%,92% 20%,100% 20%,100% 100%,0 100%);
 }
 .rch-arena-floor {
-  background:linear-gradient(0deg,rgba(4,15,30,.95),rgba(18,93,172,.14)),
-    repeating-linear-gradient(0deg,transparent 0 43px,rgba(54,143,240,.13) 44px 45px),
-    repeating-linear-gradient(90deg,transparent 0 69px,rgba(54,143,240,.13) 70px 71px);
-  box-shadow:inset 0 20px 25px rgba(4,15,27,.78);
+  background:linear-gradient(0deg,rgb(var(--rch-brand-canvas-rgb) / .95),rgb(var(--rch-brand-border-rgb) / .14)),
+    repeating-linear-gradient(0deg,transparent 0 43px,rgb(var(--rch-brand-accent-rgb) / .13) 44px 45px),
+    repeating-linear-gradient(90deg,transparent 0 69px,rgb(var(--rch-brand-accent-rgb) / .13) 70px 71px);
+  box-shadow:inset 0 20px 25px rgb(var(--rch-brand-canvas-rgb) / .78);
   transform:perspective(480px) rotateX(25deg) scale(1.2);
   transform-origin:bottom;
 }
 .rch-arena-headline {
-  text-shadow:0 0 22px rgba(68,151,255,.45);
+  text-shadow:0 0 22px rgb(var(--rch-brand-accent-text-rgb) / .45);
   font-style:italic;
   letter-spacing:-.055em;
 }
 .rch-arena-mode {
-  background:linear-gradient(150deg,rgba(18,47,80,.98),rgba(7,21,39,.96));
-  border-color:rgba(76,158,245,.46);
-  box-shadow:inset 0 1px 0 rgba(110,182,255,.10);
+  background:linear-gradient(150deg,rgb(var(--rch-brand-raised-rgb) / .98),rgb(var(--rch-brand-surface-rgb) / .96));
+  border-color:rgb(var(--rch-brand-accent-rgb) / .46);
+  box-shadow:inset 0 1px 0 rgb(var(--rch-brand-accent-text-rgb) / .10);
 }
 .rch-arena-mode-active {
-  border-color:#429fff;
-  background:linear-gradient(140deg,rgba(16,72,147,.8),rgba(5,27,55,.98));
-  box-shadow:inset 0 0 0 1px #1687fe,0 0 15px rgba(36,137,255,.35);
+  border-color:var(--rch-brand-accent);
+  background:linear-gradient(140deg,rgb(var(--rch-brand-border-rgb) / .8),rgb(var(--rch-brand-surface-rgb) / .98));
+  box-shadow:inset 0 0 0 1px var(--rch-brand-accent),0 0 15px rgb(var(--rch-brand-accent-rgb) / .35);
 }
 .rch-arena-profile {
-  background:linear-gradient(118deg,rgba(24,57,96,.96),rgba(10,26,48,.96));
-  box-shadow:inset 0 1px 0 rgba(110,180,255,.13);
+  background:linear-gradient(118deg,rgb(var(--rch-brand-raised-rgb) / .96),rgb(var(--rch-brand-surface-rgb) / .96));
+  box-shadow:inset 0 1px 0 rgb(var(--rch-brand-accent-text-rgb) / .13);
 }
 .rch-arena-panel {
-  background:linear-gradient(160deg,#0b2037 0%,#081524 100%);
+  background:linear-gradient(160deg,var(--rch-brand-surface) 0%,var(--rch-brand-surface) 100%);
   box-shadow:0 12px 30px rgba(0,0,0,.21);
 }
 .rch-arena-game-card {
-  border:1px solid rgba(73,142,219,.40)!important;
-  background:linear-gradient(160deg,rgba(12,35,61,.98),rgba(6,19,36,.99))!important;
+  border:1px solid rgb(var(--rch-brand-accent-rgb) / .40)!important;
+  background:linear-gradient(160deg,rgb(var(--rch-brand-surface-rgb) / .98),rgb(var(--rch-brand-surface-rgb) / .99))!important;
   box-shadow:0 6px 26px rgba(0,0,0,.15);
 }
 .rch-arena-shell .rch-arena-game-card:hover {
-  border-color:#309cff!important;
-  box-shadow:0 0 17px rgba(44,137,247,.2);
+  border-color:var(--rch-brand-accent)!important;
+  box-shadow:0 0 17px rgb(var(--rch-brand-accent-rgb) / .2);
 }
 .rch-arena-shell .rch-arena-empty {
-  background:linear-gradient(150deg,rgba(10,37,69,.82),rgba(4,18,34,.9));
-  border-color:#285482;
+  background:linear-gradient(150deg,rgb(var(--rch-brand-surface-rgb) / .82),rgb(var(--rch-brand-canvas-rgb) / .9));
+  border-color:var(--rch-brand-border);
 }
 .rch-arena-shell .rch-arena-upcoming-filter {
-  border-color:rgba(97,152,210,.40);
-  background:rgba(12,39,71,.84);
-  color:#d6e9fb;
+  border-color:rgb(var(--rch-brand-accent-rgb) / .40);
+  background:rgb(var(--rch-brand-raised-rgb) / .84);
+  color:var(--rch-brand-ink);
 }
 .rch-arena-shell .rch-arena-upcoming-filter[aria-pressed="true"] {
-  border-color:#4aafff;
-  background:#187bef;
+  border-color:var(--rch-brand-accent-text);
+  background:var(--rch-brand-accent);
   color:#fff;
 }
 
@@ -94,17 +94,17 @@
   gap: 12px;
   min-width: 0;
   padding: 14px;
-  border: 1px solid #28537f;
+  border: 1px solid var(--rch-brand-border);
   border-radius: 17px;
-  background: linear-gradient(120deg, #0b2744, #081c33 80%);
-  box-shadow: inset 0 1px 0 rgba(99, 183, 255, .07);
+  background: linear-gradient(120deg, var(--rch-brand-surface), var(--rch-brand-surface) 80%);
+  box-shadow: inset 0 1px 0 rgb(var(--rch-brand-accent-text-rgb) / .07);
 }
 .rch-run-rank-card-first {
-  border-color: #319bff;
-  box-shadow: 0 0 0 1px rgba(40, 144, 255, .14), inset 0 1px 0 rgba(99, 183, 255, .12);
+  border-color: var(--rch-brand-accent);
+  box-shadow: 0 0 0 1px rgb(var(--rch-brand-accent-rgb) / .14), inset 0 1px 0 rgb(var(--rch-brand-accent-text-rgb) / .12);
 }
 .rch-run-rank-card-verified {
-  background: linear-gradient(120deg, #103052, #0a2038 80%);
+  background: linear-gradient(120deg, var(--rch-brand-raised), var(--rch-brand-surface) 80%);
 }
 .rch-run-rank-identity {
   display: grid;
@@ -123,10 +123,10 @@
   font-size: 19px;
   font-variant-numeric: tabular-nums;
 }
-.rch-run-rank-gold { background: #f7c54d; color: #0a1c33; }
-.rch-run-rank-silver { background: #bfd2ea; color: #0a1c33; }
-.rch-run-rank-bronze { background: #dda26e; color: #0a1c33; }
-.rch-run-rank-regular { background: #193956; color: #e1efff; }
+.rch-run-rank-gold { background: #f7c54d; color: var(--rch-brand-surface); }
+.rch-run-rank-silver { background: var(--rch-brand-copy); color: var(--rch-brand-surface); }
+.rch-run-rank-bronze { background: #dda26e; color: var(--rch-brand-surface); }
+.rch-run-rank-regular { background: var(--rch-brand-raised); color: var(--rch-brand-ink); }
 .rch-run-rank-details { min-width: 0; }
 .rch-run-rank-name {
   overflow: hidden;
@@ -135,7 +135,7 @@
   font-size: clamp(15px, 4.2vw, 19px);
   font-weight: 850;
   line-height: 1.25;
-  color: #f7fbff;
+  color: var(--rch-brand-ink);
 }
 .rch-run-rank-status {
   display: inline-flex;
@@ -169,7 +169,7 @@
   white-space: nowrap;
   font-size: 12px;
   line-height: 1.45;
-  color: #acc5e1;
+  color: var(--rch-brand-copy);
 }
 .rch-run-rank-stats {
   display: grid;
@@ -184,16 +184,16 @@
   min-width: 0;
   min-height: 56px;
   padding: 7px 2px;
-  border: 1px solid #204c76;
+  border: 1px solid var(--rch-brand-border);
   border-radius: 10px;
-  background: rgba(5, 21, 39, .8);
+  background: rgb(var(--rch-brand-surface-rgb) / .8);
   text-align: center;
 }
 .rch-run-rank-stat strong {
   display: block;
   max-width: 100%;
   white-space: nowrap;
-  color: #54b1ff;
+  color: var(--rch-brand-accent-text);
   font-size: clamp(15px, 4.1vw, 22px);
   line-height: 1.22;
   font-weight: 900;
@@ -202,7 +202,7 @@
 .rch-run-rank-stat span {
   display: block;
   margin-top: 4px;
-  color: #b0cbe8;
+  color: var(--rch-brand-copy);
   font-size: 10px;
   font-weight: 650;
   letter-spacing: .04em;
@@ -239,21 +239,21 @@
    isolated stacking context). Preserve its dark inputs and 16px iOS text size. */
 .rch-run-create-dialog { color-scheme: dark; }
 .rch-run-create-dialog :is(input:not([type="checkbox"]), select, textarea) {
-  color: #f4f9ff !important;
-  background: #081a2e !important;
-  border-color: #34618e !important;
+  color: var(--rch-brand-ink) !important;
+  background: var(--rch-brand-surface) !important;
+  border-color: var(--rch-brand-border) !important;
   color-scheme: dark;
 }
 .rch-run-create-dialog :is(input, textarea)::placeholder {
-  color: #9bb4d0 !important;
+  color: var(--rch-brand-copy) !important;
   opacity: 1;
 }
 .rch-run-create-dialog :is(input, select, textarea):focus-visible {
-  outline: 2px solid #56b5ff;
+  outline: 2px solid var(--rch-brand-accent-text);
   outline-offset: 2px;
 }
 .rch-run-create-dialog form label > span:first-child {
-  color: #b8cbe2;
+  color: var(--rch-brand-copy);
 }
 @media (max-width: 639px) {
   .rch-run-create-dialog :is(input:not([type="checkbox"]), select, textarea) {

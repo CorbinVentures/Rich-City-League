@@ -71,7 +71,7 @@ body {
  * media/competition zones receive their own readable light-copy fallback.
  */
 :where(.rcl-platform-root) :where(p,li,dd,dt,figcaption) {
-  color: var(--rcl-v3-copy, #64748B);
+  color: var(--rcl-v3-copy, var(--rch-brand-muted));
   opacity: 1;
 }
 
@@ -83,7 +83,7 @@ body {
   .rcl-scorebook-immersive,
   .city-hero
 ) :where(p,li,dd,dt,figcaption) {
-  color: #CBD5E1;
+  color: var(--rch-brand-copy);
 }
 
 .rcl-platform-root :where(a,button,label,span,strong,small) {
@@ -451,7 +451,7 @@ body {
   .rcl-social-landing .rcl-landing-lede {
     margin-top:20px!important;
     max-width:34rem!important;
-    color:#566B83!important;
+    color:var(--rch-brand-muted)!important;
     font-size:1rem!important;
     line-height:1.65!important;
   }

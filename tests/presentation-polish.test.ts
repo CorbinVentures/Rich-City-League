@@ -35,7 +35,7 @@ describe('sitewide presentation polish', () => {
     expect(mockup).not.toContain(':where(p,li,dd,dt) {\n  color:inherit;');
     expect(professional).not.toContain('color: rgba(225,235,242,.58);');
     expect(polish).toContain(':where(.rcl-platform-root) :where(p,li,dd,dt,figcaption)');
-    expect(polish).toContain('color: var(--rcl-v3-copy, #64748B);');
+    expect(polish).toContain('color: var(--rcl-v3-copy, var(--rch-brand-muted));');
     expect(polish).toContain('opacity: 1;');
   });
 

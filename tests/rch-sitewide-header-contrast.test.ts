@@ -30,14 +30,14 @@ describe('RCH sitewide header and text contrast authority',()=>{
   it('never re-introduces old white-header styling through dynamic light-theme components',()=>{
     expect(runtime).not.toContain('html body { background:#F6F9FC');
     expect(visual).not.toContain('color-scheme:light');
-    expect(visual).toContain('--rcl-canvas:#07172a');
-    expect(visual).toContain('background:#071e34!important');
+    expect(visual).toContain('--rcl-canvas:var(--rch-brand-surface)');
+    expect(visual).toContain('background:var(--rch-brand-surface)!important');
     expect(visual).not.toContain('background:#fff!important');
   });
   it('repairs all three legacy header source layers and both reusable JSX heroes',()=>{
     for(const code of [uniform,mockup,social]){
       expect(code).not.toContain('linear-gradient(180deg,#FFFFFF 0%,#F6F9FC 100%)!important');
-      expect(code).toContain('linear-gradient(140deg,#153653 0%,#071b2e 100%)!important');
+      expect(code).toContain('linear-gradient(140deg,var(--rch-brand-raised) 0%,var(--rch-brand-surface) 100%)!important');
     }
     for(const code of [client,corporate]){
       expect(code).toContain('rch-shared-page-hero');

@@ -1,0 +1,31 @@
+/* RCH approved charcoal/crimson mockup. All legacy presentation layers consume
+   these tokens; semantic success, warning, team and partner colors stay separate. */
+@font-face {
+  font-family: 'RCH Condensed';
+  src: url('/fonts/barlow-condensed-800.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --rch-brand-canvas: #0b0c0e;
+  --rch-brand-surface: #141618;
+  --rch-brand-raised: #202326;
+  --rch-brand-border: #44484e;
+  --rch-brand-accent: #c8102e;
+  --rch-brand-accent-text: #ff768c;
+  --rch-brand-muted: #a6a8ad;
+  --rch-brand-copy: #d0d1d4;
+  --rch-brand-ink: #f5f5f3;
+  --rch-brand-canvas-rgb: 11 12 14;
+  --rch-brand-surface-rgb: 20 22 24;
+  --rch-brand-raised-rgb: 32 35 38;
+  --rch-brand-border-rgb: 68 72 78;
+  --rch-brand-accent-rgb: 200 16 46;
+  --rch-brand-accent-text-rgb: 255 118 140;
+  --rch-brand-muted-rgb: 166 168 173;
+  --rch-brand-copy-rgb: 208 209 212;
+  --rch-brand-ink-rgb: 245 245 243;
+  --rch-font-display: 'RCH Condensed', 'Arial Narrow', Impact, sans-serif;
+  --rch-font-body: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+}

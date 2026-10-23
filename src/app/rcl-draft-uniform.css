@@ -6,7 +6,7 @@
  */
 
 .rcl-platform-root .rcl-draft-platform {
-  --draft-accent: var(--rcl-orange, #3B82F6);
+  --draft-accent: var(--rcl-orange, var(--rch-brand-accent));
   background: var(--rcl-v3-canvas) !important;
   color: var(--rcl-v3-ink) !important;
 }
@@ -26,7 +26,7 @@
   border-bottom: 1px solid var(--rcl-v3-border) !important;
   background:
     radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--draft-accent) 12%, transparent), transparent 28rem),
-    linear-gradient(180deg, #FFFFFF 0%, #F6F9FC 100%) !important;
+    linear-gradient(180deg, #FFFFFF 0%, var(--rch-brand-ink) 100%) !important;
   color: var(--rcl-v3-ink) !important;
 }
 

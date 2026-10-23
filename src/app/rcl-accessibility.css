@@ -16,29 +16,29 @@ select { max-width: 100%; }
 .rcl-skip-link {
   position: fixed; top: 1rem; left: 1rem; z-index: 1000;
   transform: translateY(-200%); border-radius: .75rem;
-  background: #ff6b1a; color: #07090d; padding: .875rem 1.25rem; font-weight: 700;
+  background: #ff6b1a; color: var(--rch-brand-canvas); padding: .875rem 1.25rem; font-weight: 700;
 }
 .rcl-skip-link:focus { transform: translateY(0); }
 
 .rcl-navigation-dialog {
   position: fixed; inset: 0; margin: 0; border: 0; padding: 0;
   width: 100%; max-width: none; height: 100dvh; max-height: none;
-  background: transparent; color: #f6f8fb;
+  background: transparent; color: var(--rch-brand-ink);
 }
 .rcl-navigation-dialog::backdrop { background: rgb(0 0 0 / .72); backdrop-filter: blur(5px); }
 .rcl-navigation-panel {
   width: min(25rem, 92vw); height: 100%; overflow-y: auto; overscroll-behavior: contain;
   padding: max(1.25rem, env(safe-area-inset-top)) 1rem max(1.5rem, env(safe-area-inset-bottom));
-  border-right: 1px solid #24394d; background: #091420; box-shadow: 1rem 0 4rem #0006;
+  border-right: 1px solid var(--rch-brand-raised); background: var(--rch-brand-surface); box-shadow: 1rem 0 4rem #0006;
 }
 .rcl-navigation-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .5rem .5rem 1.5rem; }
-.rcl-navigation-heading button { display: grid; place-items: center; flex: 0 0 2.75rem; height: 2.75rem; border: 1px solid #334155; border-radius: 50%; }
+.rcl-navigation-heading button { display: grid; place-items: center; flex: 0 0 2.75rem; height: 2.75rem; border: 1px solid var(--rch-brand-raised); border-radius: 50%; }
 .rcl-navigation-panel nav { display: grid; gap: .25rem; }
-.rcl-navigation-panel nav a { display: flex; align-items: center; gap: 1rem; min-height: 2.75rem; padding: .75rem 1rem; border-radius: .625rem; color: #bcc9d6; font-size: .875rem; font-weight: 600; }
-.rcl-navigation-panel nav a svg { flex-shrink: 0; color: #4da3ff; }
-.rcl-navigation-panel nav a:hover, .rcl-navigation-panel nav a[aria-current="page"] { background: #183047; color: #fff; }
+.rcl-navigation-panel nav a { display: flex; align-items: center; gap: 1rem; min-height: 2.75rem; padding: .75rem 1rem; border-radius: .625rem; color: var(--rch-brand-copy); font-size: .875rem; font-weight: 600; }
+.rcl-navigation-panel nav a svg { flex-shrink: 0; color: var(--rch-brand-accent-text); }
+.rcl-navigation-panel nav a:hover, .rcl-navigation-panel nav a[aria-current="page"] { background: var(--rch-brand-raised); color: #fff; }
 .rcl-navigation-panel nav a[aria-current="page"] { box-shadow: inset 3px 0 #ff6b1a; }
-.rcl-navigation-settings { display: flex; min-height: 2.75rem; align-items: center; margin-top: 1rem; padding: .75rem 1rem; border-top: 1px solid #24394d; font-size: .875rem; }
+.rcl-navigation-settings { display: flex; min-height: 2.75rem; align-items: center; margin-top: 1rem; padding: .75rem 1rem; border-top: 1px solid var(--rch-brand-raised); font-size: .875rem; }
 
 .rcl-universal-nav a, .rcl-home-sidebar nav a { font-size: .875rem; min-height: 2.75rem; letter-spacing: .02em; }
 .rcl-universal-brand b, .rcl-home-wordmark b, .rcl-universal-wordmark b { letter-spacing: .06em; white-space: normal; }
@@ -56,11 +56,11 @@ select { max-width: 100%; }
 .rcl-home-quick-card { min-width: 0; background-size: cover; background-position: center; }
 .rcl-home-quick-card > span { flex-shrink: 0; }
 .rcl-home-quick-card b { font-size: .875rem; }
-.rcl-home-quick-card small, .rcl-home-game-grid span { color: #a5b4c4; }
+.rcl-home-quick-card small, .rcl-home-game-grid span { color: var(--rch-brand-copy); }
 .rcl-home-section-head { flex-wrap: wrap; }
 .rcl-home-section-head h2 { line-height: 1.15; }
 .rcl-home-section-head > a { min-height: 2.75rem; font-size: .875rem; }
-.rcl-home-empty { width: 100%; padding: 2rem 1.25rem; font-size: .875rem; line-height: 1.7; color: #a5b4c4; }
+.rcl-home-empty { width: 100%; padding: 2rem 1.25rem; font-size: .875rem; line-height: 1.7; color: var(--rch-brand-copy); }
 .rcl-home-game-grid > a { min-width: 0; }
 .rcl-home-game-grid b { overflow-wrap: anywhere; }
 .rcl-home-news-grid p { overflow-wrap: anywhere; }
@@ -69,13 +69,13 @@ select { max-width: 100%; }
 .rcl-home-player-card > small { bottom: 6.5rem; }
 .rcl-home-player-card h3 { bottom: 2.75rem; line-height: 1.05; }
 .rcl-home-player-card > span { bottom: 1rem; }
-.rcl-home-player-card > .rcl-home-player-placeholder { display: grid; place-items: center; height: 100%; min-height: 18rem; color: #4da3ff; background: linear-gradient(145deg, #122b40, #07111b); font-size: 4rem; font-weight: 800; }
+.rcl-home-player-card > .rcl-home-player-placeholder { display: grid; place-items: center; height: 100%; min-height: 18rem; color: var(--rch-brand-accent-text); background: linear-gradient(145deg, var(--rch-brand-raised), var(--rch-brand-canvas)); font-size: 4rem; font-weight: 800; }
 .rcl-home-latest b, .rcl-home-news-grid p { font-size: .875rem; line-height: 1.6; }
 
 .rcl-page-state { display: grid; min-height: 65svh; place-items: center; padding: 3rem 1.25rem; }
-.rcl-page-state-card { width: 100%; max-width: 46rem; padding: clamp(1.5rem, 5vw, 3.5rem); border: 1px solid #24394d; border-radius: 1.5rem; background: linear-gradient(145deg, #102032, #070d15); }
-.rcl-state-link { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: .75rem 1rem; border: 1px solid #3d5267; border-radius: .75rem; font-size: .875rem; font-weight: 700; }
-.rcl-state-primary { border-color: #ff6b1a; background: #ff6b1a; color: #07090d; }
+.rcl-page-state-card { width: 100%; max-width: 46rem; padding: clamp(1.5rem, 5vw, 3.5rem); border: 1px solid var(--rch-brand-raised); border-radius: 1.5rem; background: linear-gradient(145deg, var(--rch-brand-surface), var(--rch-brand-canvas)); }
+.rcl-state-link { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: .75rem 1rem; border: 1px solid var(--rch-brand-border); border-radius: .75rem; font-size: .875rem; font-weight: 700; }
+.rcl-state-primary { border-color: #ff6b1a; background: #ff6b1a; color: var(--rch-brand-canvas); }
 
 @media (min-width: 700px) {
   body:has(.rcl-universal-sidebar) .rcl-legal-footer { margin-left: 212px; }

@@ -10,37 +10,37 @@
 }
 
 .rcl-pwa-install-card::before {
-  background: linear-gradient(90deg, transparent, #91cef2 28%, #c7e8fb 68%, transparent) !important;
+  background: linear-gradient(90deg, transparent, var(--rch-brand-accent-text) 28%, var(--rch-brand-ink) 68%, transparent) !important;
 }
 
 .rcl-splash-loading,
 .rcl-splash-feature-icon {
-  color: #91cef2 !important;
+  color: var(--rch-brand-accent-text) !important;
 }
 
 .rcl-splash-glow {
   background:
-    radial-gradient(circle at 50% 34%, rgba(145,206,242,.16), transparent 21%),
-    radial-gradient(circle at 18% 60%, rgba(20,83,128,.42), transparent 30%),
-    radial-gradient(circle at 88% 55%, rgba(24,75,115,.32), transparent 28%) !important;
+    radial-gradient(circle at 50% 34%, rgb(var(--rch-brand-accent-text-rgb) / .16), transparent 21%),
+    radial-gradient(circle at 18% 60%, rgb(var(--rch-brand-border-rgb) / .42), transparent 30%),
+    radial-gradient(circle at 88% 55%, rgb(var(--rch-brand-border-rgb) / .32), transparent 28%) !important;
 }
 
 .rcl-splash-feature-icon {
-  background: rgba(145,206,242,.10) !important;
+  background: rgb(var(--rch-brand-accent-text-rgb) / .10) !important;
 }
 
 .rcl-splash-feature:hover {
-  border-color: rgba(199,232,251,.42) !important;
+  border-color: rgb(var(--rch-brand-ink-rgb) / .42) !important;
 }
 
 .rcl-splash-enter {
-  border: 1px solid rgba(225,243,252,.42) !important;
-  background: linear-gradient(145deg,#d6effc,#9ed2ee) !important;
-  color: #071018 !important;
+  border: 1px solid rgb(var(--rch-brand-ink-rgb) / .42) !important;
+  background: linear-gradient(145deg,var(--rch-brand-ink),var(--rch-brand-accent-text)) !important;
+  color: var(--rch-brand-canvas) !important;
 }
 
 .rcl-splash-microcopy {
-  color: #91cef2 !important;
+  color: var(--rch-brand-accent-text) !important;
 }
 
 @media (max-width: 767px) {

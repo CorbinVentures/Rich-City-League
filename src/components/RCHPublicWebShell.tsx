@@ -9,7 +9,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import type { ReactNode } from 'react';
 import {
   FaArrowRight, FaBars, FaXmark, FaMagnifyingGlass,
-  FaBasketball, FaCompass,
+  FaBasketball, FaCompass, FaHouse, FaPeopleGroup, FaUser,
 } from 'react-icons/fa6';
 
 /** Searchable public browser shell. Installed mobile PWA uses PlatformChrome. */
@@ -182,6 +182,14 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     </div>}
     {user && pathname === '/' && <div className="rch-browser-signed-in" role="status"><span><strong>WELCOME BACK.</strong> You are signed in to Rich City Hoops.</span><Link href="/profile">My Profile <FaArrowRight aria-hidden="true"/></Link></div>}
     {signOutError && <p role="alert" className="rch-browser-auth-error">{signOutError}</p>}
+    <nav className="rch-mockup-mobile-nav" aria-label="RCH mobile navigation">
+      {[
+        { label: 'Home', href: '/', icon: FaHouse, selected: pathname === '/' || pathname === '/social' },
+        { label: 'Runs', href: '/runs', icon: FaBasketball, selected: pathname === '/runs' || pathname.startsWith('/runs/') },
+        { label: 'Community', href: '/community', icon: FaPeopleGroup, selected: ['/community','/communities','/crews','/friends'].some(p => pathname === p || pathname.startsWith(p + '/')) },
+        { label: 'Profile', href: user ? '/profile' : '/auth/sign-up', icon: FaUser, selected: pathname === '/profile' || pathname.startsWith('/social/profile/') },
+      ].map(item => <Link key={item.label} href={item.href} aria-current={item.selected ? 'page' : undefined}><item.icon aria-hidden="true"/><span>{item.label}</span></Link>)}
+    </nav>
     <RCHPublicRouteGuide />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
     <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>{user ? 'Your RCH account is active. Keep exploring the website or install the app for the standalone experience.' : 'Browse freely on the web. Create your free profile to save, connect and compete.'}</span></div><Link href={user ? '/my-hoops' : '/app'}>{user ? 'Open My Hoops' : 'Explore the app'} <FaArrowRight aria-hidden="true"/></Link></aside>

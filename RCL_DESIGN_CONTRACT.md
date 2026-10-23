@@ -1,133 +1,47 @@
-# RCL — Social World Design Contract
+# RCH — Unified Charcoal / Crimson Design Contract
 
-This document is the visual and information-architecture source of truth for RCL.
+Approved reference: the Home / Runs / Profile mockup in the October 23, 2026 design conversation. This supersedes the previous light-blue Social World palette. Rich City Hoops remains a basketball social platform; Rich City League remains its competition property.
 
-## 1. Product identity
-RCL is a basketball social platform first.
+## Visual foundation
 
-- The everyday product is a social world for local basketball people.
-- Rich City League is the flagship and premier competition property inside RCL.
-- Discovery connects people to players, teams, runs, events, organizations, media and opportunities.
-- Organization tools support exposure and publishing, but the consumer product must never feel like a business directory.
-- Membership and merch are native parts of the basketball lifestyle, not interruptions.
+`src/app/rch-brand-tokens.css` is the palette source. Historical CSS layers consume these shared tokens rather than independently choosing blue values. `rch-unified-mockup.css`, loaded last in the root layout, owns shared type, card geometry, navigation, actions, and responsive homepage treatment.
 
-## 2. Primary navigation
-The same five destinations anchor desktop and mobile:
+| Role | Value | Application |
+|---|---|---|
+| Canvas | #0b0c0e | Page and navigation background |
+| Surface | #141618 | Cards, forms and panels |
+| Raised surface | #202326 | Nested panels and hover surfaces |
+| Border | #44484e | Panel edges and input boundaries |
+| Primary action | #c8102e | White-label primary buttons |
+| Accent text | #ff768c | Readable links and selected indicators on charcoal |
+| Main text | #f5f5f3 | Headings and primary copy |
+| Supporting text | #d0d1d4 | Descriptions |
+| Muted text | #a6a8ad | Metadata and captions |
 
-1. Home — the social feed
-2. Discover — find basketball
-3. Create — add something to the world
-4. Runs — find or host basketball activity
-5. League — Rich City League competition
+Use the supplied, self-hosted Barlow Condensed 800 font for H1/H2 and display titles. Use the system/Inter body stack for paragraphs, labels, inputs, tables and buttons. Card titles remain readable normal sans where their density demands it. Font license is in public/fonts.
 
-Profile, Messages, Notifications, My Hoops, Communities, Membership, Shop and organization tools are secondary destinations.
+Cards use 10px corners, thin visible borders, and restrained shadows. Primary buttons use 8px corners and a minimum 44px target. No blanket recoloring of images, videos, team badges, medal tiers, charts, shot maps or partner logos. Crimson identifies action; errors also require explicit labels/icons so color is never the only signal.
 
-Global navigation answers “Where am I going?”
-Page navigation answers “What can I do here?”
+## Navigation
 
-## 3. Brand character
-The product should feel cool, trustworthy, premium, human and social.
+Mobile browser and installed-app navigation share Home, Runs, Community and Profile. Public Home opens `/`; signed-in app Home opens `/social`. Profile opens the real account/profile route or sign-up for guests. Discover, Create, League, media, messages and staff tools remain available through existing menus. Preserve account-aware links and route protections. Navigation active states must not mark Home selected while viewing a profile.
 
-Avoid:
-- dark esports/gaming treatment as the default
-- neon decoration
-- dense directory grids as the primary experience
-- every heading being uppercase athletic display type
-- multiple equally strong calls to action
-- excessive texture, glow and motion
+Browser chrome includes the same persistent four-item mobile bar, safe-area padding and enough page clearance. Desktop retains its broader navigation. Preserve dedicated scorebook and production-studio controls.
 
-Prefer:
-- strong text/background contrast on every surface
-- white cards on the cool canvas with subtle blue-gray borders and shadows
-- blue selected states and primary actions
-- real people
-- clean editorial photography
-- generous breathing room
-- human-scale typography
-- quiet surfaces
-- familiar social-product patterns
-- one obvious primary action
+## Page families
 
-## 4. Color tokens
-- Canvas: #F6F9FC
-- Surface: #FFFFFF
-- Soft surface: #EDF4FA
-- Border: #D9E4EF
-- Primary text / navy ink: #0F2547
-- Secondary text / slate: #64748B
-- Muted text: #8190A1
-- Trust blue / primary action: #3B82F6
-- Deep trust blue: #2563EB
-- Prestige gold: #D4AF37
-- Success: #2E8B70
-- Danger: #C65361
+- **Public homepage:** large basketball imagery; YOUR CITY. YOUR GAME.; Join Free primary and Explore Runs secondary; live event, player and news data; accurate empty states. Mobile hero gives the image breathing room, stacks CTAs and removes the competing quick-link rail.
+- **Runs, courts, crews and World:** charcoal panels, crimson interactions, strong condensed titles. Preserve map coordinates, scene geometry, court preview/arena transitions, filters, join/host behavior and verification. Do not invent games, attendance or territorial ownership.
+- **Profiles and social:** preserve user photographs, cover imagery, highlights, music, role identity, following and edit actions. Apply consistent headings, panels and selected tabs. No sample player or invented statistics from the mockup may enter real profiles.
+- **Discover:** dark readable cards and dark native controls with visible placeholders, active filters and empty states. Keep the scoped native-input contrast protections.
+- **League, standings, rankings, fantasy and draft:** share typography, action palette and surfaces; preserve statistics, competitive rules and earned gold/status colors.
+- **News, media and shop:** imagery leads; supporting metadata is quiet but readable; stable card geometry. Keep live camera/broadcast and media controls functionally isolated.
+- **Account, signup, settings and messages:** same visual system, clear form boundaries and focus indicators, retained errors and loading states. Never change authentication to simplify a mockup.
+- **Admin, Command Center and professional tools:** shared neutral surfaces and crimson actions; retain dense tables, operational controls, role gates and chart distinctions. Royaltee retains its organization branding inside the common platform.
+- **PWA:** manifest and browser theme color match the charcoal canvas. Existing install, push, offline and launch behavior remain intact.
 
-Trust blue means action, navigation focus and platform confidence.
-Slate supports secondary information without competing with the primary action.
-White is the default card/panel surface. Do not place slate text on slate/gray panels.
-Gold is reserved for earned/premium status.
-Green means successful completion.
-Red is reserved for true warnings/destructive actions.
+## Accessibility and delivery
 
-## 5. Social composition
-The Home feed is the center of gravity.
+Normal text token pairs must meet 4.5:1 contrast. Primary labels are white on crimson. Accent text uses the lighter token, never the button-fill token on dark surfaces. Focus rings stay visible, touch targets remain comfortable, reduced-motion preferences are respected, and photographs are not tinted globally.
 
-Priority:
-1. stories / current activity
-2. post composer
-3. following / for-you / trending feed
-4. people and runs
-5. league activity
-6. sponsored content when eligible and clearly disclosed
-
-People and content should visually dominate chrome.
-
-## 6. Rich City League
-Rich City League receives a distinct prestige treatment inside the platform:
-- stronger editorial hierarchy
-- premium game storytelling
-- statistics, standings and rankings
-- league history
-- fantasy / draft / Game IQ
-
-The League is elevated, but it does not redefine the entire platform shell.
-
-## 7. Monetization
-Revenue should feel native:
-- RCL+ appears as enhanced basketball utility
-- Shop appears as culture / limited drops
-- sponsored exposure appears as disclosed social/discovery inventory
-- paid status never changes competitive credibility, REP, ratings, rankings, stats, awards or results
-
-## 8. Interaction psychology
-Every important screen should answer:
-1. Where am I?
-2. What is happening?
-3. What should I do next?
-
-Use:
-- one dominant action
-- clear progress
-- real social proof
-- obvious information scent
-- restrained motion for feedback
-- consistent active states
-- familiar social affordances
-
-## 9. Responsive rule
-Desktop may use a calm left rail plus top bar.
-Mobile uses the same five primary destinations in a persistent bottom bar.
-The mental model must not change between homepage, Social, member pages and public pages.
-
-## 10. QA gate
-A release is not complete until:
-- the five primary destinations are consistent
-- active states match the page being viewed
-- no competing navigation system appears
-- key social surfaces use the light-neutral system
-- mobile touch targets remain comfortable
-- content remains readable at WCAG contrast targets
-- no text is visually lost into a same-tone card/background
-- the approved mockup palette is used across public, member, league, admin and PWA surfaces
-- no horizontal overflow is introduced
-- production build and automated checks pass
+Validate TypeScript, production build, existing behavioral tests, CSS parse/token references and actual palette contrast. Inspect mobile and desktop renderings when preview infrastructure is available. Root inheritance is coverage, not evidence of a manual review of each page. Record verification limitations in the PR and route coverage document.

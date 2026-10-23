@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Suspense } from 'react';
 import './globals.css';
+import './rch-brand-tokens.css';
 import './rcl-future.css';
 import './rcl-basketball-branding.css';
 import './rcl-accessibility.css';
@@ -27,9 +28,9 @@ import './rcl-messaging.css';
 import './rch-launch.css';
 import './rcl-pwa-contrast.css';
 import './rch-app-download.css';
-// Runs intentionally uses an immersive dark scene; load its scoped overrides after the sitewide light system.
+// Runs intentionally uses an immersive dark scene; load its scoped overrides after the sitewide base system.
 import './rch-runs-visual-lock.css';
-// Loaded last to preserve live-camera and overlay contrast against global light-theme rules.
+// Loaded last to preserve live-camera and overlay contrast against global theme rules.
 import './rch-tv-production-lock.css';
 // Tablet-only shell fit after all legacy chrome rules, without touching the standalone scorebook.
 import './rch-ipad-responsive.css';
@@ -43,7 +44,7 @@ import './rch-premium-discover.css';
 import './rch-visual-qa-finish.css';
 // Last: keep legacy light headers from reappearing in member and admin views.
 import './rch-header-contrast-authority.css';
-// Public browser routes inherit the installed-app palette; final layer owns public contrast.
+// Public browser routes inherit the installed-app palette; scoped layer owns public contrast.
 import './rch-public-theme.css';
 // Final, scoped action-first member navigation layer; does not override public pages.
 import './rch-intent-navigation.css';
@@ -53,8 +54,9 @@ import './rch-pulse.css';
 import './rch-scene-visual-authority.css';
 // Isolated browser marketing surface; never applies to installed PWA routes.
 import './rch-browser-home.css';
-// Browser-only visual authority: scoped to guest shell; installed PWA is unaffected.
+// Browser-specific geometry; both shells consume the shared charcoal/crimson palette.
 import './rch-browser-sitewide.css';
+import './rch-unified-mockup.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
@@ -109,7 +111,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#07172a',
+  themeColor: '#0b0c0e',
   colorScheme: 'dark',
 };
 

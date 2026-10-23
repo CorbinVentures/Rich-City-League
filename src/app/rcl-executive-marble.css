@@ -6,20 +6,20 @@
  */
 
 :root {
-  --rcl-exec-ink: #05090d;
-  --rcl-exec-ink-2: #081018;
-  --rcl-exec-ink-3: #0b151e;
-  --rcl-exec-marble-line: rgba(215, 229, 238, .055);
-  --rcl-exec-marble-line-soft: rgba(130, 170, 194, .035);
-  --rcl-exec-ice: #c7e8fb;
-  --rcl-exec-ice-strong: #91cef2;
-  --rcl-exec-ice-deep: #5fa9d5;
-  --rcl-exec-glass: rgba(170, 215, 242, .075);
-  --rcl-exec-glass-strong: rgba(170, 215, 242, .115);
-  --rcl-exec-border: rgba(198, 227, 244, .20);
-  --rcl-exec-border-soft: rgba(198, 227, 244, .11);
-  --rcl-exec-text: #f4f8fb;
-  --rcl-exec-muted: #93a7b5;
+  --rcl-exec-ink: var(--rch-brand-canvas);
+  --rcl-exec-ink-2: var(--rch-brand-canvas);
+  --rcl-exec-ink-3: var(--rch-brand-surface);
+  --rcl-exec-marble-line: rgb(var(--rch-brand-ink-rgb) / .055);
+  --rcl-exec-marble-line-soft: rgb(var(--rch-brand-muted-rgb) / .035);
+  --rcl-exec-ice: var(--rch-brand-ink);
+  --rcl-exec-ice-strong: var(--rch-brand-accent-text);
+  --rcl-exec-ice-deep: var(--rch-brand-accent);
+  --rcl-exec-glass: rgb(var(--rch-brand-copy-rgb) / .075);
+  --rcl-exec-glass-strong: rgb(var(--rch-brand-copy-rgb) / .115);
+  --rcl-exec-border: rgb(var(--rch-brand-copy-rgb) / .20);
+  --rcl-exec-border-soft: rgb(var(--rch-brand-copy-rgb) / .11);
+  --rcl-exec-text: var(--rch-brand-ink);
+  --rcl-exec-muted: var(--rch-brand-muted);
   --rcl-exec-shadow: 0 18px 55px rgba(0, 0, 0, .28);
   --rcl-exec-shadow-soft: 0 10px 34px rgba(0, 0, 0, .18);
   --rcl-exec-radius: 14px;
@@ -47,16 +47,16 @@ html body {
   background-image:
     linear-gradient(118deg, transparent 0 27%, var(--rcl-exec-marble-line) 27.15%, transparent 27.4% 100%),
     linear-gradient(62deg, transparent 0 63%, var(--rcl-exec-marble-line-soft) 63.1%, transparent 63.38% 100%),
-    linear-gradient(137deg, transparent 0 76%, rgba(220,235,244,.035) 76.08%, transparent 76.35% 100%),
-    radial-gradient(circle at 78% 4%, rgba(145, 206, 242, .08), transparent 28rem),
-    radial-gradient(circle at 8% 72%, rgba(98, 145, 174, .045), transparent 34rem),
-    linear-gradient(180deg, #070d13 0%, #05090d 48%, #04070a 100%) !important;
+    linear-gradient(137deg, transparent 0 76%, rgb(var(--rch-brand-ink-rgb) / .035) 76.08%, transparent 76.35% 100%),
+    radial-gradient(circle at 78% 4%, rgb(var(--rch-brand-accent-text-rgb) / .08), transparent 28rem),
+    radial-gradient(circle at 8% 72%, rgb(var(--rch-brand-muted-rgb) / .045), transparent 34rem),
+    linear-gradient(180deg, var(--rch-brand-canvas) 0%, var(--rch-brand-canvas) 48%, var(--rch-brand-canvas) 100%) !important;
   background-attachment: fixed;
 }
 
 ::selection {
-  background: rgba(145, 206, 242, .88);
-  color: #071018;
+  background: rgb(var(--rch-brand-accent-text-rgb) / .88);
+  color: var(--rch-brand-canvas);
 }
 
 /* Typography: remove poster / arcade energy from the main system. */
@@ -97,12 +97,12 @@ select {
 .bg-rcl-orange,
 .bg-rcl-gold {
   background-color: var(--rcl-exec-ice-strong) !important;
-  color: #071018 !important;
+  color: var(--rch-brand-canvas) !important;
 }
 
 .border-rcl-orange,
 .border-rcl-gold {
-  border-color: rgba(145, 206, 242, .34) !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .34) !important;
 }
 
 /* App shell: precise, architectural, intentionally quieter. */
@@ -111,8 +111,8 @@ select {
   width: 228px !important;
   padding: 18px 14px !important;
   background:
-    linear-gradient(124deg, transparent 0 38%, rgba(220,235,244,.045) 38.1%, transparent 38.35%),
-    linear-gradient(180deg, rgba(12, 24, 34, .96), rgba(5, 10, 15, .985)) !important;
+    linear-gradient(124deg, transparent 0 38%, rgb(var(--rch-brand-ink-rgb) / .045) 38.1%, transparent 38.35%),
+    linear-gradient(180deg, rgb(var(--rch-brand-surface-rgb) / .96), rgb(var(--rch-brand-canvas-rgb) / .985)) !important;
   border-right: 1px solid var(--rcl-exec-border-soft) !important;
   box-shadow: 18px 0 48px rgba(0,0,0,.18) !important;
   backdrop-filter: blur(24px) saturate(112%) !important;
@@ -130,9 +130,9 @@ select {
 .rcl-universal-wordmark > span,
 .rcl-home-wordmark > span {
   border-radius: 8px !important;
-  border: 1px solid rgba(199, 232, 251, .32) !important;
-  background: linear-gradient(145deg, rgba(199,232,251,.12), rgba(95,169,213,.045)) !important;
-  color: #eaf7ff !important;
+  border: 1px solid rgb(var(--rch-brand-ink-rgb) / .32) !important;
+  background: linear-gradient(145deg, rgb(var(--rch-brand-ink-rgb) / .12), rgb(var(--rch-brand-accent-rgb) / .045)) !important;
+  color: var(--rch-brand-ink) !important;
   box-shadow: inset 0 1px rgba(255,255,255,.08) !important;
 }
 
@@ -156,7 +156,7 @@ select {
 
 .rcl-universal-brand small,
 .rcl-home-brand small {
-  color: rgba(205, 222, 233, .48) !important;
+  color: rgb(var(--rch-brand-copy-rgb) / .48) !important;
   letter-spacing: .14em !important;
 }
 
@@ -174,7 +174,7 @@ select {
   border-radius: 8px !important;
   border: 1px solid transparent !important;
   background: transparent !important;
-  color: rgba(222, 234, 242, .62) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .62) !important;
   font-size: 11px !important;
   font-weight: 650 !important;
   letter-spacing: .035em !important;
@@ -188,17 +188,17 @@ select {
 .rcl-home-all-rcl:hover {
   transform: none !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(190, 225, 246, .055) !important;
-  color: #f7fbfe !important;
+  background: rgb(var(--rch-brand-copy-rgb) / .055) !important;
+  color: var(--rch-brand-ink) !important;
 }
 
 .rcl-universal-nav a.active,
 .rcl-home-sidebar nav a.active,
 .rcl-universal-nav a[aria-current="page"],
 .rcl-home-sidebar nav a[aria-current="page"] {
-  border-color: rgba(199,232,251,.20) !important;
-  background: linear-gradient(90deg, rgba(199,232,251,.105), rgba(132,193,228,.035)) !important;
-  color: #f8fcff !important;
+  border-color: rgb(var(--rch-brand-ink-rgb) / .20) !important;
+  background: linear-gradient(90deg, rgb(var(--rch-brand-ink-rgb) / .105), rgb(var(--rch-brand-accent-text-rgb) / .035)) !important;
+  color: var(--rch-brand-ink) !important;
   box-shadow: inset 2px 0 0 var(--rcl-exec-ice-strong) !important;
 }
 
@@ -206,7 +206,7 @@ select {
 .rcl-home-sidebar nav a svg,
 .rcl-universal-more svg,
 .rcl-home-all-rcl svg {
-  color: rgba(179, 214, 235, .76) !important;
+  color: rgb(var(--rch-brand-copy-rgb) / .76) !important;
 }
 
 .rcl-universal-account {
@@ -220,38 +220,38 @@ select {
 
 .rcl-universal-profile:hover,
 .rcl-universal-account-link:hover {
-  background: rgba(199,232,251,.05) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .05) !important;
 }
 
 .rcl-universal-avatar {
   border-radius: 8px !important;
   border: 1px solid var(--rcl-exec-border) !important;
-  background: rgba(199,232,251,.08) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .08) !important;
   color: var(--rcl-exec-ice) !important;
 }
 
 .rcl-universal-motto,
 .rcl-member-motto {
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.025) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .025) !important;
   border-radius: 8px !important;
   opacity: .76;
 }
 
 .rcl-universal-motto b,
 .rcl-universal-motto span {
-  color: rgba(225,236,244,.72) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .72) !important;
 }
 
 .rcl-universal-motto small {
-  color: rgba(164, 195, 214, .48) !important;
+  color: rgb(var(--rch-brand-copy-rgb) / .48) !important;
 }
 
 .rcl-universal-topbar,
 .rcl-home-topbar,
 .rcl-member-topbar {
   height: 62px !important;
-  background: rgba(8, 16, 24, .78) !important;
+  background: rgb(var(--rch-brand-canvas-rgb) / .78) !important;
   border-bottom: 1px solid var(--rcl-exec-border-soft) !important;
   box-shadow: 0 10px 28px rgba(0,0,0,.12) !important;
   backdrop-filter: blur(26px) saturate(120%) !important;
@@ -261,13 +261,13 @@ select {
 .rcl-universal-tools :where(a, button) {
   border-radius: 8px !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.035) !important;
-  color: rgba(229,240,247,.70) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .035) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .70) !important;
   box-shadow: none !important;
 }
 
 .rcl-universal-tools :where(a, button):hover {
-  background: rgba(199,232,251,.075) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .075) !important;
   color: #fff !important;
   transform: none !important;
 }
@@ -275,7 +275,7 @@ select {
 .rcl-member-search-link {
   border-radius: 9px !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.045) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .045) !important;
   box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
 }
 
@@ -285,7 +285,7 @@ select {
 .rcl-member-social-nav,
 .rcl-social-bottom {
   border-top: 1px solid var(--rcl-exec-border-soft) !important;
-  background: rgba(7, 14, 20, .92) !important;
+  background: rgb(var(--rch-brand-canvas-rgb) / .92) !important;
   box-shadow: 0 -10px 36px rgba(0,0,0,.22) !important;
   backdrop-filter: blur(24px) saturate(115%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(115%) !important;
@@ -295,7 +295,7 @@ select {
 .rcl-member-social-nav a,
 .rcl-social-bottom a {
   border-radius: 7px !important;
-  color: rgba(220,233,241,.48) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .48) !important;
   font-weight: 600 !important;
   letter-spacing: .02em !important;
   text-transform: none !important;
@@ -305,8 +305,8 @@ select {
 .rcl-universal-bottom :where(a, button)[aria-current="page"],
 .rcl-member-social-nav a.active,
 .rcl-social-bottom a[aria-current="page"] {
-  color: #f6fbff !important;
-  background: rgba(199,232,251,.06) !important;
+  color: var(--rch-brand-ink) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .06) !important;
 }
 
 .rcl-member-bottom .rcl-member-create-tab svg,
@@ -316,8 +316,8 @@ select {
   margin-top: 0 !important;
   padding: 8px !important;
   border-radius: 8px !important;
-  border: 1px solid rgba(199,232,251,.26) !important;
-  background: linear-gradient(145deg, rgba(199,232,251,.17), rgba(95,169,213,.08)) !important;
+  border: 1px solid rgb(var(--rch-brand-ink-rgb) / .26) !important;
+  background: linear-gradient(145deg, rgb(var(--rch-brand-ink-rgb) / .17), rgb(var(--rch-brand-accent-rgb) / .08)) !important;
   color: var(--rcl-exec-ice) !important;
   box-shadow: none !important;
 }
@@ -326,8 +326,8 @@ select {
 .rcl-navigation-panel,
 .rcl-universal-drawer {
   background:
-    linear-gradient(126deg, transparent 0 54%, rgba(220,235,244,.045) 54.1%, transparent 54.35%),
-    linear-gradient(180deg, rgba(11,22,31,.985), rgba(5,10,15,.995)) !important;
+    linear-gradient(126deg, transparent 0 54%, rgb(var(--rch-brand-ink-rgb) / .045) 54.1%, transparent 54.35%),
+    linear-gradient(180deg, rgb(var(--rch-brand-surface-rgb) / .985), rgb(var(--rch-brand-canvas-rgb) / .995)) !important;
   border-color: var(--rcl-exec-border-soft) !important;
   box-shadow: 24px 0 70px rgba(0,0,0,.38) !important;
 }
@@ -346,7 +346,7 @@ select {
 }
 
 .rcl-navigation-group-heading b {
-  color: rgba(232,241,247,.88) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .88) !important;
   font-weight: 700 !important;
   letter-spacing: .08em !important;
 }
@@ -355,13 +355,13 @@ select {
 .rcl-navigation-utility a {
   border-radius: 8px !important;
   border-color: transparent !important;
-  background: rgba(199,232,251,.025) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .025) !important;
 }
 
 .rcl-navigation-panel .rcl-navigation-group-links a:hover,
 .rcl-navigation-utility a:hover {
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.06) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .06) !important;
   transform: none !important;
 }
 
@@ -375,8 +375,8 @@ select {
 .rcl-card {
   border-radius: var(--rcl-exec-radius) !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background-color: rgba(13, 25, 34, .66) !important;
-  background-image: linear-gradient(145deg, rgba(199,232,251,.072), rgba(99,158,193,.025) 42%, rgba(5,10,15,.36)) !important;
+  background-color: rgb(var(--rch-brand-surface-rgb) / .66) !important;
+  background-image: linear-gradient(145deg, rgb(var(--rch-brand-ink-rgb) / .072), rgb(var(--rch-brand-muted-rgb) / .025) 42%, rgb(var(--rch-brand-canvas-rgb) / .36)) !important;
   box-shadow: var(--rcl-exec-shadow-soft), inset 0 1px rgba(255,255,255,.035) !important;
   backdrop-filter: blur(18px) saturate(112%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(112%) !important;
@@ -393,35 +393,35 @@ select {
 .rcl-game-card:hover,
 .rcl-news-card:hover,
 .rcl-admin-module:hover {
-  border-color: rgba(199,232,251,.24) !important;
+  border-color: rgb(var(--rch-brand-ink-rgb) / .24) !important;
   box-shadow: var(--rcl-exec-shadow), inset 0 1px rgba(255,255,255,.04) !important;
   transform: none !important;
 }
 
 /* Common utility backgrounds that previously read as neon / gamer UI. */
 .rcl-platform-root [class*="bg-white/[."] {
-  background-color: rgba(199,232,251,.042) !important;
+  background-color: rgb(var(--rch-brand-ink-rgb) / .042) !important;
 }
 
 .rcl-platform-root [class*="from-rcl-navy"],
 .rcl-platform-root [class*="bg-[linear-gradient"] {
-  --tw-gradient-from: rgba(18, 35, 47, .80) var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: rgba(7, 14, 20, .92) var(--tw-gradient-to-position) !important;
+  --tw-gradient-from: rgb(var(--rch-brand-surface-rgb) / .80) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(var(--rch-brand-canvas-rgb) / .92) var(--tw-gradient-to-position) !important;
 }
 
 /* Form controls: professional product UI, not oversized game controls. */
 .rcl-platform-root :where(input, textarea, select) {
   border-radius: 8px !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.04) !important;
-  color: #f5f9fc !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .04) !important;
+  color: var(--rch-brand-ink) !important;
   box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
 }
 
 .rcl-platform-root :where(input, textarea, select):focus {
-  border-color: rgba(145,206,242,.48) !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .48) !important;
   outline: 0 !important;
-  box-shadow: 0 0 0 3px rgba(145,206,242,.09) !important;
+  box-shadow: 0 0 0 3px rgb(var(--rch-brand-accent-text-rgb) / .09) !important;
 }
 
 .rcl-platform-root :where(button, a)[class*="rounded-full"]:not(.rcl-universal-avatar) {
@@ -430,15 +430,15 @@ select {
 
 .rcl-platform-root :where(button, a)[class*="bg-rcl-orange"],
 .rcl-platform-root :where(button, a)[class*="bg-rcl-blue"] {
-  background: linear-gradient(145deg, #bfe4f8, #86c4e8) !important;
-  color: #071018 !important;
-  border-color: rgba(225,243,252,.50) !important;
+  background: linear-gradient(145deg, var(--rch-brand-copy), var(--rch-brand-accent-text)) !important;
+  color: var(--rch-brand-canvas) !important;
+  border-color: rgb(var(--rch-brand-ink-rgb) / .50) !important;
   box-shadow: none !important;
 }
 
 .rcl-platform-root :where(button, a)[class*="bg-rcl-orange"]:hover,
 .rcl-platform-root :where(button, a)[class*="bg-rcl-blue"]:hover {
-  background: linear-gradient(145deg, #d4eefc, #9cd1ed) !important;
+  background: linear-gradient(145deg, var(--rch-brand-ink), var(--rch-brand-accent-text)) !important;
   transform: none !important;
 }
 
@@ -455,8 +455,8 @@ select {
   min-height: 39rem !important;
   border-bottom-color: var(--rcl-exec-border-soft) !important;
   background:
-    linear-gradient(90deg, rgba(5,9,13,.96) 0%, rgba(5,9,13,.82) 44%, rgba(5,9,13,.38) 76%, rgba(5,9,13,.64) 100%),
-    linear-gradient(180deg, rgba(5,9,13,.04), #05090d 98%),
+    linear-gradient(90deg, rgb(var(--rch-brand-canvas-rgb) / .96) 0%, rgb(var(--rch-brand-canvas-rgb) / .82) 44%, rgb(var(--rch-brand-canvas-rgb) / .38) 76%, rgb(var(--rch-brand-canvas-rgb) / .64) 100%),
+    linear-gradient(180deg, rgb(var(--rch-brand-canvas-rgb) / .04), var(--rch-brand-canvas) 98%),
     url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1800&q=88') center 34%/cover no-repeat !important;
 }
 
@@ -484,14 +484,14 @@ select {
 }
 
 .rcl-world .rcl-hero h1.rcl-display .text-rcl-orange {
-  color: #d8edf9 !important;
+  color: var(--rch-brand-ink) !important;
   transform: none !important;
   font-style: normal !important;
 }
 
 .rcl-world .rcl-hero h1.rcl-display + p {
   max-width: 38rem !important;
-  color: rgba(230,239,245,.72) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .72) !important;
   font-size: 13px !important;
   font-weight: 560 !important;
   line-height: 1.65 !important;
@@ -501,10 +501,10 @@ select {
 
 .rcl-world .rcl-hero .rcl-button {
   min-height: 48px !important;
-  border: 1px solid rgba(213,238,251,.34) !important;
+  border: 1px solid rgb(var(--rch-brand-ink-rgb) / .34) !important;
   border-radius: 9px !important;
-  background: linear-gradient(145deg, rgba(199,232,251,.92), rgba(133,196,232,.90)) !important;
-  color: #071018 !important;
+  background: linear-gradient(145deg, rgb(var(--rch-brand-ink-rgb) / .92), rgb(var(--rch-brand-accent-text-rgb) / .90)) !important;
+  color: var(--rch-brand-canvas) !important;
   box-shadow: 0 12px 32px rgba(0,0,0,.20) !important;
   font-size: 12px !important;
   font-weight: 700 !important;
@@ -533,7 +533,7 @@ select {
 .rcl-world .rcl-home-content section:nth-of-type(4) {
   border-radius: 12px !important;
   border: 1px solid var(--rcl-exec-border-soft) !important;
-  background: linear-gradient(145deg, rgba(199,232,251,.075), rgba(95,169,213,.028) 46%, rgba(5,10,15,.50)) !important;
+  background: linear-gradient(145deg, rgb(var(--rch-brand-ink-rgb) / .075), rgb(var(--rch-brand-accent-rgb) / .028) 46%, rgb(var(--rch-brand-canvas-rgb) / .50)) !important;
   box-shadow: var(--rcl-exec-shadow-soft), inset 0 1px rgba(255,255,255,.03) !important;
   backdrop-filter: blur(18px) saturate(112%) !important;
   -webkit-backdrop-filter: blur(18px) saturate(112%) !important;
@@ -542,13 +542,13 @@ select {
 .rcl-world .rcl-destination:hover,
 .rcl-world .rcl-game-card:hover,
 .rcl-world .rcl-news-card:hover {
-  border-color: rgba(199,232,251,.26) !important;
+  border-color: rgb(var(--rch-brand-ink-rgb) / .26) !important;
   transform: none !important;
 }
 
 .rcl-world .rcl-destination-icon {
   border-radius: 8px !important;
-  background: rgba(199,232,251,.065) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .065) !important;
   color: var(--rcl-exec-ice-strong) !important;
 }
 
@@ -559,7 +559,7 @@ select {
 }
 
 .rcl-world .rcl-destination small {
-  color: rgba(205,221,231,.48) !important;
+  color: rgb(var(--rch-brand-copy-rgb) / .48) !important;
   font-size: 11px !important;
 }
 
@@ -586,15 +586,15 @@ select {
 
 .rcl-admin-icon {
   border-radius: 8px !important;
-  background: rgba(199,232,251,.065) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .065) !important;
   color: var(--rcl-exec-ice-strong) !important;
 }
 
 .rcl-admin-badge {
   border-radius: 6px !important;
   border-color: var(--rcl-exec-border-soft) !important;
-  background: rgba(199,232,251,.035) !important;
-  color: rgba(222,234,242,.62) !important;
+  background: rgb(var(--rch-brand-ink-rgb) / .035) !important;
+  color: rgb(var(--rch-brand-ink-rgb) / .62) !important;
 }
 
 /* PWA install card should look like part of the organization, not a promo popup. */
@@ -602,7 +602,7 @@ select {
   border-radius: 14px !important;
   border-color: var(--rcl-exec-border) !important;
   background:
-    linear-gradient(135deg, rgba(199,232,251,.11), rgba(95,169,213,.045) 45%, rgba(7,14,20,.96)) !important;
+    linear-gradient(135deg, rgb(var(--rch-brand-ink-rgb) / .11), rgb(var(--rch-brand-accent-rgb) / .045) 45%, rgb(var(--rch-brand-canvas-rgb) / .96)) !important;
   box-shadow: 0 24px 70px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.06) !important;
   backdrop-filter: blur(26px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(26px) saturate(120%) !important;
@@ -610,8 +610,8 @@ select {
 
 .rcl-pwa-primary {
   border-radius: 8px !important;
-  background: linear-gradient(145deg, #c7e8fb, #8fcbed) !important;
-  color: #071018 !important;
+  background: linear-gradient(145deg, var(--rch-brand-ink), var(--rch-brand-accent-text)) !important;
+  color: var(--rch-brand-canvas) !important;
   box-shadow: none !important;
 }
 
@@ -622,7 +622,7 @@ select {
 
 /* Footer: quiet institutional close. */
 .rcl-legal-footer {
-  background: rgba(4, 8, 12, .86) !important;
+  background: rgb(var(--rch-brand-canvas-rgb) / .86) !important;
   border-top-color: var(--rcl-exec-border-soft) !important;
   backdrop-filter: blur(18px) !important;
 }
