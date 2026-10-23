@@ -54,6 +54,7 @@ import './rch-pulse.css';
 import './rch-scene-visual-authority.css';
 // Isolated browser marketing surface; never applies to installed PWA routes.
 import './rch-browser-home.css';
+import './rch-discovery-starter.css';
 // Browser-specific geometry; both shells consume the shared charcoal/crimson palette.
 import './rch-browser-sitewide.css';
 import './rch-unified-mockup.css';
