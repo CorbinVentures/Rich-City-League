@@ -34,6 +34,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   const [signupHasSession, setSignupHasSession] = useState(false);
   const [mobileApp, setMobileApp] = useState(false);
   const [referralCode, setReferralCode] = useState('');
+  const [signupDestination, setSignupDestination] = useState('/runs');
 
   useEffect(() => {
     const nav = navigator as Navigator & { standalone?: boolean };
@@ -44,7 +45,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
 
   useEffect(() => {
     if (mode !== 'sign-up') return;
-    const invite = new URLSearchParams(window.location.search).get('invite');
+    const signupParams = new URLSearchParams(window.location.search);
+    setSignupDestination(getSafePostAuthPath(signupParams.get('next') ?? signupParams.get('redirect'), '/runs'));
+    const invite = signupParams.get('invite');
     if (invite) {
       const normalized = invite.toLowerCase();
       setReferralCode(normalized);
@@ -128,7 +131,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           }
         }
         setStep(4);
-        setMessage(session ? 'Your RCH identity is ready. Add the app to get started.' : 'Account created. Check your inbox to verify your email. Your welcome guide arrives after verification.');
+        setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. You can still explore public runs and stories.');
         // The shared install prompt opens as soon as registration succeeds.
         window.dispatchEvent(new Event('rch:registration-complete'));
       } else {
@@ -140,58 +143,63 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
     }
   }
 
-  const inputClass = "mt-2 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 font-normal outline-none transition focus:border-rcl-gold";
-  const title = mode === 'sign-in' ? 'Welcome back' : mode === 'sign-up' ? 'Join RCL' : 'Reset your password';
+  const inputClass = "mt-2 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 font-normal outline-none transition focus:border-[var(--rch-brand-accent-text)]";
+  const title = mode === 'sign-in' ? 'Welcome back' : mode === 'sign-up' ? 'Join Rich City Hoops' : 'Reset your password';
 
   return (
-    <form onSubmit={submit} className="space-y-5 rounded-2xl border border-sky-500/30 bg-white/[0.04] p-6">
+    <form onSubmit={submit} className="space-y-5 rounded-2xl border border-[var(--rch-brand-border)] bg-white/[0.04] p-6">
       <div>
         <h1 className="font-display text-3xl font-bold uppercase">{title}</h1>
-        <p className="mt-2 text-sm text-gray-400">{mode === 'sign-up' ? 'Create your identity inside the Rich City League community.' : mode === 'reset' ? 'Enter your email and we’ll send you a password recovery link.' : 'Use your RCL account to access league tools.'}</p>
+        <p className="mt-2 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-up' ? 'Create a free profile. Find runs, connect with players and stay in the game.' : mode === 'reset' ? 'Enter your email and we’ll send you a password recovery link.' : 'Use your Rich City Hoops account to pick up where you left off.'}</p>
       </div>
 
-      {mode === 'sign-up' && referralCode && step < 4 && <div className="rounded-xl border border-rcl-gold/25 bg-rcl-gold/10 px-4 py-3 text-xs font-bold text-rcl-gold">You were invited by an RCL member. Finish signup to connect the referral.</div>}
+      {mode === 'sign-up' && referralCode && step < 4 && <div className="rounded-xl border border-[var(--rch-brand-accent-text)]/25 bg-[var(--rch-brand-raised)] px-4 py-3 text-xs font-bold text-[var(--rch-brand-accent-text)]">You were invited by an RCH member. Finish signup to connect the referral.</div>}
 
       {mode === 'sign-up' && step < 4 && (
         <div>
-          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-500"><span className={step >= 1 ? 'text-rcl-gold' : ''}>Account</span><span className={step >= 2 ? 'text-rcl-gold' : ''}>Identity</span><span className={step >= 3 ? 'text-rcl-gold' : ''}>Profile</span><span>Welcome</span></div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-gold transition-all" style={{ width: `${step * 25}%` }} /></div>
+          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-[var(--rch-brand-muted)]"><span className={step >= 1 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Account</span><span className={step >= 2 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Identity</span><span className={step >= 3 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Profile</span><span>Welcome</span></div>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-[var(--rch-brand-accent)] transition-all" style={{ width: `${step * 25}%` }} /></div>
         </div>
       )}
 
       {(mode !== 'sign-up' || step === 1) && <>
         <label className="block text-sm font-semibold" htmlFor="auth-email">Email<input id="auth-email" required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} /></label>
-        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={mode === 'sign-up' ? 8 : undefined} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="absolute inset-y-2 right-1 min-w-14 text-sm text-rcl-gold">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-gray-400">Use at least 8 characters.</span>}</label>}
+        {mode !== 'reset' && <label className="block text-sm font-semibold" htmlFor="auth-password">Password<div className="relative"><input id="auth-password" required minLength={mode === 'sign-up' ? 8 : undefined} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass + ' pr-20'} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} className="absolute inset-y-2 right-1 min-w-14 text-sm text-[var(--rch-brand-accent-text)]">{showPassword ? 'Hide' : 'Show'}</button></div>{mode === 'sign-up' && <span className="mt-2 block text-xs font-normal text-[var(--rch-brand-copy)]">Use at least 8 characters.</span>}</label>}
         {mode === 'sign-up' && <label className="block text-sm font-semibold">Confirm password<input required minLength={8} type={showPassword ? 'text' : 'password'} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} className={inputClass} /></label>}
       </>}
 
       {mode === 'sign-up' && step === 2 && <div className="space-y-3">
-        <h2 className="text-lg font-bold">Who are you in RCL?</h2>
+        <h2 className="text-lg font-bold">How do you hoop?</h2>
         {([
           ['player','PLAYER','Build your basketball identity.'],
           ['coach','COACH','Lead, manage, scout and develop.'],
           ['fan','FAN','Follow the league, join the community and play fantasy.'],
-        ] as const).map(([value,label,copy]) => <button key={value} type="button" aria-pressed={profileType === value} onClick={() => setProfileType(value)} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-rcl-gold bg-rcl-gold/10' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-gray-400">{copy}</span>{value === 'coach' && <span className="mt-1 block text-xs uppercase text-rcl-gold">Coach access requires league approval</span>}</button>)}
+        ] as const).map(([value,label,copy]) => <button key={value} type="button" aria-pressed={profileType === value} onClick={() => setProfileType(value)} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-[var(--rch-brand-accent-text)] bg-[var(--rch-brand-raised)]' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-[var(--rch-brand-copy)]">{copy}</span>{value === 'coach' && <span className="mt-1 block text-xs uppercase text-[var(--rch-brand-accent-text)]">Coach access requires league approval</span>}</button>)}
       </div>}
 
       {mode === 'sign-up' && step === 3 && <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">First name<input required value={firstName} onChange={e=>setFirstName(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Last name<input required value={lastName} onChange={e=>setLastName(e.target.value)} className={inputClass}/></label></div>
-        <label className="block text-sm font-semibold">Date of birth <span className="font-normal text-gray-500">(used for age-appropriate access)</span><input required type="date" value={dateOfBirth} onChange={e=>setDateOfBirth(e.target.value)} className={inputClass}/></label>
+        <label className="block text-sm font-semibold">Date of birth <span className="font-normal text-[var(--rch-brand-muted)]">(used for age-appropriate access)</span><input required type="date" value={dateOfBirth} onChange={e=>setDateOfBirth(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">Username<input required placeholder="@yourname" value={username} onChange={e=>setUsername(e.target.value)} className={inputClass}/></label>
-        <label className="block text-sm font-semibold">Display name <span className="font-normal text-gray-500">(optional)</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} className={inputClass}/></label>
+        <label className="block text-sm font-semibold">Display name <span className="font-normal text-[var(--rch-brand-muted)]">(optional)</span><input value={displayName} onChange={e=>setDisplayName(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">City / location<input value={location} onChange={e=>setLocation(e.target.value)} className={inputClass}/></label>
-        <label className="block text-sm font-semibold">Bio<textarea rows={3} value={bio} onChange={e=>setBio(e.target.value)} className={inputClass}/></label>
-        {profileType === 'player' && <><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Position<input placeholder="PG, SG, SF..." value={position} onChange={e=>setPosition(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Height<input placeholder={'6\'5"'} value={height} onChange={e=>setHeight(e.target.value)} className={inputClass}/></label></div><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Jersey #<input value={jersey} onChange={e=>setJersey(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Experience<input placeholder="College, rec..." value={experience} onChange={e=>setExperience(e.target.value)} className={inputClass}/></label></div><p className="text-xs text-gray-500">RCL ratings, badges, stats and teammate grades are verified by league activity and cannot be self-entered.</p></>}
-        {profileType === 'coach' && <><label className="block text-sm font-semibold">Coaching role<input placeholder="Head coach, assistant..." value={coachRole} onChange={e=>setCoachRole(e.target.value)} className={inputClass}/></label><label className="block text-sm font-semibold">Coaching experience<textarea rows={3} value={coachExperience} onChange={e=>setCoachExperience(e.target.value)} className={inputClass}/></label></>}
-        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/70"><input required type="checkbox" checked={acceptedLegal} onChange={e=>setAcceptedLegal(e.target.checked)} className="mt-1"/><span>I agree to the <Link className="text-rcl-gold" href="/legal/terms">Terms of Service</Link> and acknowledge the <Link className="text-rcl-gold" href="/legal/privacy">Privacy Policy</Link> and <Link className="text-rcl-gold" href="/legal/community-guidelines">Community Guidelines</Link>.</span></label>
-        {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
+        <details className="rounded-xl border border-[var(--rch-brand-border)] bg-[var(--rch-brand-raised)] p-4">
+          <summary className="cursor-pointer text-sm font-bold text-[var(--rch-brand-ink)]">Add basketball details (optional — update later)</summary>
+          <div className="mt-4 space-y-4">
+            <label className="block text-sm font-semibold">Bio<textarea rows={3} value={bio} onChange={e=>setBio(e.target.value)} className={inputClass}/></label>
+            {profileType === 'player' && <><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Position<input placeholder="PG, SG, SF..." value={position} onChange={e=>setPosition(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Height<input placeholder={'6\'5"'} value={height} onChange={e=>setHeight(e.target.value)} className={inputClass}/></label></div><div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Jersey #<input value={jersey} onChange={e=>setJersey(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Experience<input placeholder="College, rec..." value={experience} onChange={e=>setExperience(e.target.value)} className={inputClass}/></label></div><p className="text-xs text-[var(--rch-brand-copy)]">Ratings, badges, stats and teammate grades require verified basketball activity.</p></>}
+            {profileType === 'coach' && <><label className="block text-sm font-semibold">Coaching role<input placeholder="Head coach, assistant..." value={coachRole} onChange={e=>setCoachRole(e.target.value)} className={inputClass}/></label><label className="block text-sm font-semibold">Coaching experience<textarea rows={3} value={coachExperience} onChange={e=>setCoachExperience(e.target.value)} className={inputClass}/></label></>}
+            {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
+          </div>
+        </details>
+        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/80"><input required type="checkbox" checked={acceptedLegal} onChange={e=>setAcceptedLegal(e.target.checked)} className="mt-1"/><span>I agree to the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/terms">Terms of Service</Link> and acknowledge the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/privacy">Privacy Policy</Link> and <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/community-guidelines">Community Guidelines</Link>.</span></label>
       </div>}
 
-      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.25em] text-rcl-gold">Welcome to Rich City Hoops</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-gray-400">{profileType} • {location || 'RCH Community'}</p><p className="mt-5 text-sm text-gray-400">{message}</p><Link href={mobileApp ? (signupHasSession ? "/discover" : "/auth/sign-in?next=/discover") : "/app"} className="mt-6 inline-block rounded-lg bg-rcl-gold px-6 py-3 font-bold text-rcl-black">{mobileApp ? 'Discover RCH' : 'Get the RCH mobile app'}</Link></div>}
+      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.18em] text-[var(--rch-brand-accent-text)]">Welcome to Rich City Hoops</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-[var(--rch-brand-copy)]">{profileType} • {location || 'RCH Community'}</p><p className="mt-5 text-sm text-[var(--rch-brand-copy)]" role="status">{message}</p><Link href={signupHasSession ? getBrowserPostAuthPath(signupDestination, '/runs') : '/runs'} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--rch-brand-accent)] px-6 py-3 font-bold text-white">{signupHasSession ? 'Explore basketball' : 'Browse public runs'}</Link>{!signupHasSession && <p className="mt-4 text-sm text-[var(--rch-brand-copy)]">Verified your email? <Link className="font-semibold text-[var(--rch-brand-accent-text)] underline" href={`/auth/sign-in?next=${encodeURIComponent(signupDestination)}`}>Sign in and continue</Link></p>}</div>}
 
-      {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-rcl-gold'}`}>{error ?? message}</p>}
-      {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-rcl-gold px-4 py-3 font-bold text-rcl-black disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
-      {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-gray-400">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-rcl-gold">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-rcl-gold">Forgot password?</Link></> : <Link href="/auth/sign-in" className="hover:text-rcl-gold">Back to sign in</Link>}</div>}
+      {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-[var(--rch-brand-accent-text)]'}`}>{error ?? message}</p>}
+      {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-[var(--rch-brand-accent)] px-4 py-3 font-bold text-white disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
+      {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-[var(--rch-brand-accent-text)]">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-[var(--rch-brand-accent-text)]">Forgot password?</Link></> : <Link href={mode === 'sign-up' ? `/auth/sign-in?next=${encodeURIComponent(signupDestination)}` : '/auth/sign-in'} className="hover:text-[var(--rch-brand-accent-text)]">Back to sign in</Link>}</div>}
     </form>
   );
 }
