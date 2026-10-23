@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { FaArrowTrendUp, FaBrain, FaChartLine, FaCircleInfo, FaShieldHalved } from 'react-icons/fa6';
-import { calculateFantasyPoints } from '@/lib/rcl-algorithms';
+import { calculateFantasyPoints } from '../../lib/rcl-algorithms';
 
 export type FantasyGameStat = {
   game_id: string;
