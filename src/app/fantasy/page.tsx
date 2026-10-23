@@ -293,10 +293,10 @@ export default function FantasyPage() {
         <Container maxWidth="xl" className="relative py-10 sm:py-14">
           <div className="max-w-4xl">
             <p className="flex items-center gap-2 text-xs font-black tracking-[.28em] text-rcl-gold"><FaBasketball /> RICH CITY LEAGUE · THE 804 DRAFT ROOM</p>
-            <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[.85] sm:text-7xl lg:text-8xl">RCL <span className="text-rcl-orange">Fantasy</span></h1>
+            <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[.85] sm:text-7xl lg:text-8xl">RCH <span className="text-rcl-orange">Fantasy</span></h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/65">Real players. Real games. Real bragging rights. Build your squad, watch official RCL stats update, and compete with the basketball community.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              {!team && <Link href={user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user ? 'Join League' : 'Sign in to play'}</Link>}
+              {!team && <Link href={user && !season ? '/news' : user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user && !season ? 'Follow league news' : user ? 'Build my franchise' : 'Sign in to play'}</Link>}
               <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-xs font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
             </div>
             <div className="mt-7 grid max-w-3xl grid-cols-3 gap-3">
@@ -313,6 +313,18 @@ export default function FantasyPage() {
         {user && profile?.role !== 'fan' && <Notice icon={<FaBolt />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
         {message && <Notice icon={<FaBolt />} tone="orange">{message}</Notice>}
         {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. This page is ready; once the league opens a fantasy season, the draft room will activate automatically.</Notice>}
+
+        <section aria-label="How RCH Fantasy works" className="mb-6 grid gap-3 md:grid-cols-3">
+          {[
+            { step: '01 / BUILD', title: 'Own the front office', description: 'Name your franchise. Draft eight real RCH players and set five position-eligible starters.' },
+            { step: '02 / SCOUT', title: 'Know your talent', description: 'Explore completed-game statistics and transparent player projections as official results come in.' },
+            { step: '03 / COMPETE', title: 'Run Virginia', description: 'Challenge your community in public or private leagues with verified scores and standings.' },
+          ].map(item => <article key={item.step} className="rounded-2xl border border-rcl-blue/20 bg-gradient-to-b from-[#0c2436] to-[#060d15] p-4">
+            <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">{item.step}</p>
+            <h2 className="mt-2 font-display text-xl font-black uppercase">{item.title}</h2>
+            <p className="mt-2 text-xs leading-5 text-white/50">{item.description}</p>
+          </article>)}
+        </section>
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,.65fr)]">
           <section className="space-y-5">
