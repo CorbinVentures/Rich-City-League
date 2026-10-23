@@ -11,7 +11,7 @@ if (!Number.isInteger(requests) || requests < 1 || requests > 100) {
 function renderedElementsWithClass(html, className, tag = '[a-z][a-z0-9-]*') {
   // Inspect rendered tags, not JSON/RSC payload strings that only mention a class.
   const tags = new RegExp('<' + tag + '\\b[^>]*\\bclass=(["\\\'])([^"\\\']*)\\1', 'gi');
-  return [...html.matchAll(tags)].filter((match) => match[2].split(/\\s+/).includes(className)).length;
+  return [...html.matchAll(tags)].filter((match) => match[2].split(/\s+/).includes(className)).length;
 }
 
 for (let i = 0; i < requests; i += 1) {
