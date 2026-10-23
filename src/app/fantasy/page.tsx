@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { FantasyRoster, FantasySeason, FantasyTeam, PublicPlayer } from '@/types/database';
 import { calculateFantasyPoints } from '@/lib/rcl-algorithms';
+import { FantasyIntelligencePanel, type FantasyGameStat } from '@/components/fantasy/FantasyIntelligencePanel';
 
 type RosterRow = FantasyRoster & { player?: PublicPlayer; fantasy_points?: number };
 type FantasyMatchupRow = {
@@ -37,15 +38,7 @@ type FantasyMatchupRow = {
   status: 'scheduled' | 'live' | 'final';
   winner_team_id: string | null;
 };
-type PlayerStatRow = {
-  player_id: string;
-  points: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-};
+type PlayerStatRow = FantasyGameStat;
 type FantasyTeamActivity = Pick<FantasyTeam, 'id' | 'name' | 'created_at'>;
 type ScoringRules = { points: number; rebounds: number; assists: number; steals: number; blocks: number; turnovers: number; [key: string]: number };
 
@@ -97,9 +90,18 @@ export default function FantasyPage() {
       return;
     }
 
+    // Projection data must use finalized games from this exact RCH season.
+    // In-progress box scores are intentionally excluded from scouting forecasts.
+    const completedGamesResult = await supabase.from('games')
+      .select('id').eq('season_id', activeSeason.season_id).eq('status', 'final');
+    const completedIds = (completedGamesResult.data ?? []).map(item => item.id);
     const [teamsResult, statsResult, activityResult, matchupResult] = await Promise.all([
       supabase.from('fantasy_teams').select('*').eq('fantasy_season_id', activeSeason.id).order('total_points', { ascending: false }).order('wins', { ascending: false }),
-      supabase.from('player_game_stats').select('player_id,points,rebounds,assists,steals,blocks,turnovers'),
+      completedIds.length
+        ? supabase.from('player_game_stats')
+          .select('player_id,game_id,points,rebounds,assists,steals,blocks,turnovers')
+          .in('game_id', completedIds)
+        : Promise.resolve({ data: [], error: null }),
       supabase.from('fantasy_teams').select('id,name,created_at').eq('fantasy_season_id', activeSeason.id).order('created_at', { ascending: false }).limit(8),
       supabase.from('fantasy_matchups').select('*').eq('fantasy_season_id', activeSeason.id).order('week_number').order('starts_at'),
     ]);
@@ -242,13 +244,15 @@ export default function FantasyPage() {
         fantasy_points: 0,
       }]);
       setSearch('');
-    }
+      setMessage(null);
+    } else setMessage('Unable to add player: ' + result.error.message);
   };
 
   const removePlayer = async (playerId: string) => {
     if (!supabase || !team) return;
     const result = await supabase.from('fantasy_rosters').delete().eq('fantasy_team_id', team.id).eq('player_id', playerId);
     if (!result.error) setRoster(current => current.filter(item => item.player_id !== playerId));
+    else setMessage('Unable to remove player: ' + result.error.message);
   };
 
   const setRosterSlot = async (playerId: string, rosterSlot: 'starter' | 'bench') => {
@@ -257,11 +261,23 @@ export default function FantasyPage() {
       setMessage('Your starting lineup is full. Move a starter to the bench first.');
       return;
     }
+    if (rosterSlot === 'starter') {
+      const moving = roster.find(item => item.player_id === playerId);
+      const position = moving?.player?.position?.toUpperCase();
+      if (!position || !starterPositions.includes(position)) {
+        setMessage('Only players with an official PG, SG, SF, PF or C position can start.');
+        return;
+      }
+      if (starters.some(item => item.player_id !== playerId && item.player?.position?.toUpperCase() === position)) {
+        setMessage('Bench your current ' + position + ' before moving another player into that starting position.');
+        return;
+      }
+    }
     const result = await supabase.from('fantasy_rosters').update({ roster_slot: rosterSlot } as never).eq('fantasy_team_id', team.id).eq('player_id', playerId);
     if (!result.error) {
       setRoster(current => current.map(item => item.player_id === playerId ? { ...item, roster_slot: rosterSlot } : item));
       setMessage(null);
-    }
+    } else setMessage('Unable to change lineup: ' + result.error.message);
   };
 
   if (authLoading || loading) {
@@ -362,6 +378,8 @@ export default function FantasyPage() {
                 </form>
               </Panel>
             )}
+
+            {team && <FantasyIntelligencePanel roster={roster} stats={playerStats} scoringRules={scoringRules} />}
 
             <div className="grid gap-5 md:grid-cols-2">
               <Panel>
