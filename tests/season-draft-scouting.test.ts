@@ -5,6 +5,20 @@ const athlete = (id:string, position:string, court:number|null, skill:number|nul
   id, name:'Prospect '+id, position, court, skill, games,
 });
 describe('official season draft intelligence', () => {
+  it('prioritizes independently evaluated tryout prospects ahead of stale player IQ when appropriate',()=>{
+    const evaluated=scoreDraftProspects([{
+      ...athlete('A','PG',55,55,0),tryoutAverage:91,tryoutEvaluations:2,
+    }],[]);
+    expect(evaluated[0].grade).toBe(91);
+    expect(evaluated[0].source).toBe('official tryouts');
+    expect(evaluated[0].sample).toBe('limited');
+  });
+  it('does not convert a single tryout evaluator into an official ranked grade',()=>{
+    const evaluated=scoreDraftProspects([{
+      ...athlete('A','PG',null,null,0),tryoutAverage:99,tryoutEvaluations:1,
+    }],[]);
+    expect(evaluated[0].grade).toBeNull();
+  });
   it('does not invent grades without three games and complete basketball scores',()=>{
     const graded=scoreDraftProspects([athlete('A','PG',90,90,1),athlete('B','PF',null,80,8)],[]);
     expect(graded.map(x=>x.grade)).toEqual([null,null]);
