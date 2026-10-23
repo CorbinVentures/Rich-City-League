@@ -11,10 +11,13 @@ export type DraftScout = {
   court: number | null;
   skill: number | null;
   games: number;
+  tryoutAverage?: number | null;
+  tryoutEvaluations?: number;
 };
 export type ScoutedProspect = DraftScout & {
   grade: number | null;
   sample: 'established' | 'limited' | 'unrated';
+  source: 'official tryouts' | 'verified games' | 'unrated';
   replacementEdge: number | null;
   availableAtPosition: number;
   positionalNeed: number;
@@ -39,8 +42,15 @@ export function scoreDraftProspects(prospects:DraftScout[], rosterPositions:(str
       && item.court !== null && item.skill !== null
       && item.court >= 0 && item.court <= 100 && item.skill>=0 && item.skill<=100
       && item.games>=3;
-    return {...item, grade:valid?round(item.court!*0.6+item.skill!*0.4):null,
-      sample:item.games>=8?'established' as const:item.games>=3?'limited' as const:'unrated' as const};
+    const tryoutValid=(item.tryoutEvaluations??0)>=2 && item.tryoutAverage!==null
+      && item.tryoutAverage!==undefined && Number.isFinite(item.tryoutAverage)
+      && item.tryoutAverage>=0 && item.tryoutAverage<=100;
+    const grade=tryoutValid?round(item.tryoutAverage!):valid?round(item.court!*0.6+item.skill!*0.4):null;
+    const source=tryoutValid?'official tryouts' as const:valid?'verified games' as const:'unrated' as const;
+    const sample=grade===null?'unrated' as const:tryoutValid
+      ?(item.tryoutEvaluations??0)>=4?'established' as const:'limited' as const
+      :item.games>=8?'established' as const:'limited' as const;
+    return {...item, grade, source, sample};
   });
   const byPosition=new Map<string,number[]>();
   for(const item of base) {
