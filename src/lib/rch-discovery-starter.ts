@@ -1,4 +1,4 @@
-import { gravityApproxCityMiles } from '@/lib/rch-gravity-location';
+import { gravityApproxCityMiles } from './rch-gravity-location';
 
 /** Discover-first actions are real routes, never mock experiences or promises of availability. */
 export const STARTER_ACTIONS = {
