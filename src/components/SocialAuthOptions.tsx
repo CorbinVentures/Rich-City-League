@@ -84,7 +84,7 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   async function continueWith(provider: SocialProvider) {
     const client = getSupabaseClient();
     if (!client) {
-      setError('RCL sign-in is temporarily unavailable.');
+      setError('RCH sign-in is temporarily unavailable.');
       return;
     }
 
@@ -118,13 +118,13 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   }
 
   return (
-    <section className="rounded-2xl border border-rcl-blue/25 bg-[#071522]/75 p-4 shadow-[0_18px_60px_rgba(0,0,0,.2)] sm:p-5">
+    <section className="rounded-2xl border border-[var(--rch-brand-border)] bg-[var(--rch-brand-surface)] p-4 shadow-[0_18px_60px_rgba(0,0,0,.2)] sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Fast access</p>
-          <p className="mt-1 text-sm text-white/45">{mode === 'sign-up' ? 'Create your RCL account in fewer steps.' : 'Use the account already on your device.'}</p>
+          <p className="text-[10px] font-black uppercase tracking-[.2em] text-[var(--rch-brand-accent-text)]">Fast access</p>
+          <p className="mt-1 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-up' ? 'Create your Rich City Hoops account with a secure provider.' : 'Use the account already on your device.'}</p>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white/35">Secure</span>
+        <span className="rounded-full border border-white/10 bg-white/[.035] px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[var(--rch-brand-muted)]">Secure</span>
       </div>
 
       <div className={`grid gap-2 ${providers.length > 1 ? 'sm:grid-cols-2' : ''}`}>
@@ -143,17 +143,17 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             type="button"
             disabled={busy !== null}
             onClick={() => void continueWith('google')}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[.055] px-4 text-sm font-black text-white transition hover:border-rcl-blue/45 hover:bg-rcl-blue/10 disabled:opacity-50"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[.055] px-4 text-sm font-black text-white transition hover:border-[var(--rch-brand-accent-text)] hover:bg-[var(--rch-brand-raised)] disabled:opacity-50"
           >
             <FaGoogle className="text-base" /> {busy === 'google' ? 'Connecting…' : 'Continue with Google'}
           </button>
         )}
       </div>
 
-      <p className="mt-3 text-[11px] leading-5 text-white/30">New members will finish the RCL 16+ identity screen after their secure provider sign-in.</p>
+      <p className="mt-3 text-[11px] leading-5 text-[var(--rch-brand-muted)]">New members complete the required age and identity screen after secure provider sign-in.</p>
       {error && <p role="alert" className="mt-3 text-xs font-semibold text-red-300">{error}</p>}
 
-      <div className="mt-4 flex items-center gap-3 text-[10px] font-black uppercase tracking-[.16em] text-white/20">
+      <div className="mt-4 flex items-center gap-3 text-[10px] font-black uppercase tracking-[.16em] text-[var(--rch-brand-muted)]">
         <span className="h-px flex-1 bg-white/10" />
         <span>or continue with email</span>
         <span className="h-px flex-1 bg-white/10" />
