@@ -18,6 +18,7 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 import { Neighborhood } from '@/components/social/Neighborhood';
+import { RCHFirstSessionDiscovery } from '@/components/social/RCHFirstSessionDiscovery';
 import { RCHPulseMoment } from '@/components/social/RCHPulseModules';
 import { Container } from '@/components/Container';
 import { ReferralCard } from '@/components/ReferralCard';
@@ -99,7 +100,7 @@ const leftNav = [
 ];
 
 export default function NetworkHome() {
-  const {location:gravityLocation} = useGravityLocation();
+  const {location:gravityLocation,city:gravityCity} = useGravityLocation();
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -715,7 +716,7 @@ export default function NetworkHome() {
         const post = item.post;
         const nativeScore = scoreSocialPost(
           {...post,created_at:item.feed_at},
-          {userId:user?.id,following,now:rankingNow}
+          {userId:user?.id,following,now:rankingNow,cityName:gravityCity?.name}
         );
         const gravity = scoreGravityCandidate({
           id:post.id,
@@ -739,7 +740,7 @@ export default function NetworkHome() {
       seen.add(item.post.id);
       return true;
     }).slice(0, 40);
-  }, [posts, reposts, mode, search, focusPostId, user?.id, following, saved, gravityIntent, gravityGoal]);
+  }, [posts, reposts, mode, search, focusPostId, user?.id, following, saved, gravityIntent, gravityGoal, gravityCity?.name]);
 
   // An optional city preference also shapes the local run opportunity panel,
   // without inferring private post author whereabouts from free-form text.
@@ -802,6 +803,7 @@ export default function NetworkHome() {
           <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
         </div>}
         <GravityLocationPicker compact className="mb-5" />
+        {!focusPostId && <RCHFirstSessionDiscovery />}
         {!focusPostId && <Link href="/world" className="rch-pulse-world-link" aria-label="Explore the RCH Living World"><span><strong><FaBolt aria-hidden="true"/> THE LIVING WORLD</strong><small>Territories · highlights · verified progress · your next Run</small></span><span>Explore <span aria-hidden="true">→</span></span></Link>}
         {!focusPostId && <RepPromotedPlacement />}
         <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">

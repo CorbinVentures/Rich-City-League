@@ -1,3 +1,5 @@
+import { cityForText } from './virginia-world';
+
 export type SocialFeedPost = {
   id: string;
   author_id: string;
@@ -12,6 +14,8 @@ type FeedContext = {
   userId?: string;
   following: string[];
   now?: number;
+  /** Explicit viewer city, never inferred author whereabouts. */
+  cityName?: string | null;
 };
 
 /**
@@ -43,8 +47,12 @@ export function scoreSocialPost(post: SocialFeedPost, context: FeedContext) {
   const media = (post.media_urls?.length ?? 0) > 0 ? 0.08 : 0;
 
   const body = post.body.toLowerCase();
-  const community =
-    /804|richmond|rva|southside|northside|east end|west end|court|pickup|hooping|community/.test(body) ? 0.12 : 0;
+  // City mentions are weak content relevance, not verified event locations.
+  const selectedCity = context.cityName?.trim().toLowerCase() || null;
+  const mentionedCity = cityForText(body)?.name.toLowerCase() || null;
+  const local = selectedCity && (mentionedCity === selectedCity
+    || (selectedCity === 'richmond' && /\b(?:rva|804)\b/.test(body))) ? 0.12 : 0;
+  const community = /\b(?:basketball|hoops?|hooping|pickup|courts?|scrimmage|tournament|runs?|league)\b/.test(body) ? 0.04 : 0;
 
   // Stable exploration value: changes every 30 minutes, but does not jump
   // randomly on every render. This creates discovery variety without making
@@ -61,6 +69,7 @@ export function scoreSocialPost(post: SocialFeedPost, context: FeedContext) {
     recency * 0.34 +
     engagement * 0.20 +
     following +
+    local +
     community +
     media +
     exploration
