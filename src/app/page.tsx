@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
+import { connection } from 'next/server';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { RCHBrowserHomepage } from '@/components/RCHBrowserHomepage';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
@@ -6,9 +8,11 @@ import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 
 export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Virginia Basketball Runs & Leagues' }, description: 'Find pickup basketball runs, 1v1 games, courts and competition in Richmond and across Virginia. Join Rich City Hoops free to connect with players and crews.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Virginia Basketball Runs & Leagues',description:'Find local pickup basketball runs, 1v1 challenges, courts, crews and leagues in Virginia. Free to join.'} };
 
-export const revalidate = 60;
+// The full HTML is resolved per request. Only the anonymous data below is cached.
 
-export default async function HomePage() {
+// Only anonymous public data can be reused between requests. This function
+// must not access cookies, authorization headers, or member session state.
+async function loadPublicHomepageData() {
   const { teams, games, standings, news, seasons, divisions } = await getLeagueSnapshot();
   const client = getPublicClient();
   const season = seasons.find(item=>item.status === 'active') ?? seasons.find(item=>item.status === 'registration') ?? seasons[0];
@@ -39,26 +43,59 @@ export default async function HomePage() {
     : { data: [] };
   const currentStats = statsRaw ?? [];
 
+  return {
+    teams,
+    games,
+    standings: previewStandings,
+    standingsLabel,
+    news,
+    players: playersRaw ?? [],
+    posts: postsRaw ?? [],
+    events: eventsRaw ?? [],
+    runs: runsRaw ?? [],
+    stats: currentStats,
+  };
+}
+
+const getCachedPublicHomepageData = unstable_cache(
+  loadPublicHomepageData,
+  ['rch-public-home-data-v1'],
+  { revalidate: 60, tags: ['rch-public-home'] },
+);
+
+export default async function HomePage() {
+  // Await a request before rendering: unlike ISR, this avoids persisting a
+  // pre-hydration browser-mode check as the public homepage's cached HTML.
+  // Unlike force-dynamic, connection() preserves explicit public data caching.
+  await connection();
+
+  let data: Awaited<ReturnType<typeof loadPublicHomepageData>>;
+  try {
+    data = await getCachedPublicHomepageData();
+  } catch (error) {
+    console.error('Public homepage data failed; displaying the branded landing page', error);
+    data = { teams: [], games: [], standings: [], standingsLabel: '', news: [], players: [], posts: [], events: [], runs: [], stats: [] };
+  }
   return (
     <>
       <div className="rch-browser-home-target">
         <RCHBrowserHomepage
-          news={news as any}
-          events={(eventsRaw ?? []) as any}
-          runs={(runsRaw ?? []) as any}
-          players={(playersRaw ?? []) as any}
+          news={data.news as any}
+          events={data.events as any}
+          runs={data.runs as any}
+          players={data.players as any}
         />
       </div>
       <MemberHomeRedirect />
       <RCLHomeExperience
-        teams={teams}
-        games={games}
-        standings={previewStandings}
-        standingsLabel={standingsLabel}
-        players={(playersRaw ?? []) as any}
-        stats={currentStats as any}
-        news={news}
-        posts={(postsRaw ?? []) as any}
+        teams={data.teams}
+        games={data.games}
+        standings={data.standings}
+        standingsLabel={data.standingsLabel}
+        players={data.players as any}
+        stats={data.stats as any}
+        news={data.news}
+        posts={data.posts as any}
       />
     </>
   );
