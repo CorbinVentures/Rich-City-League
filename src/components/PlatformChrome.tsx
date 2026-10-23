@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
 import { LegalFooter } from '@/components/LegalFooter';
 import { RCHContinueJourney } from '@/components/RCHContinueJourney';
+import { RCHDiscoveryStarter } from '@/components/RCHDiscoveryStarter';
 
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,7 +41,10 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
       <a className="rcl-skip-link" href="#rcl-content">Skip to content</a>
       <SiteHeader />
       <AdminControlShortcut />
-      <div id="rcl-content" tabIndex={-1} className="rcl-platform-root">{children}<RCHContinueJourney pathname={pathname}/></div>
+      <div id="rcl-content" tabIndex={-1} className="rcl-platform-root">
+        {(pathname === '/social' || pathname === '/today') && <RCHDiscoveryStarter mode="pwa" />}
+        {children}<RCHContinueJourney pathname={pathname}/>
+      </div>
       <LegalFooter />
     </>
   );
