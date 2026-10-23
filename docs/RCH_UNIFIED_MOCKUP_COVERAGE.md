@@ -202,5 +202,6 @@ This is a source coverage inventory, not a claim that every authenticated state 
 - Final suite: 710 tests passed across 97 files.
 - Existing suite: 707 tests passed with TZ=UTC; the default host timezone causes two pre-existing run-date expectations to fail.
 - Additional brand tests: actual token contrast, CSS parsing, unresolved brand variables and mutually exclusive four-tab navigation.
+- Deployed preview: Home and Runs inspected on desktop; fixed inherited 220px sidebar offset on public pages and themed the portal-mounted Runs rulebook. Mobile breakpoints and signed-in states are covered in source, but were not individually browser-tested.
 - Local browser preview: blocked because the managed supervisor appends Vite-only --host/--strictPort flags to this Next.js repository. Application scripts were not changed to accommodate the preview environment.
 - Authenticated data states require a configured deployment/session; no fabricated database records were added.

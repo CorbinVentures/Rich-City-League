@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import postcss from 'postcss';
-import { RCL_MEMBER_PRIMARY_NAV, isMemberNavigationActive } from '../src/lib/member-navigation';
+import { RCL_MEMBER_PRIMARY_NAV, RCL_GUEST_MOBILE_NAV, isMemberNavigationActive } from '../src/lib/member-navigation';
 const read = (p:string) => readFileSync(p,'utf8');
 const walk = (p:string):string[] => readdirSync(p,{withFileTypes:true}).flatMap(e => e.isDirectory()?walk(join(p,e.name)):[join(p,e.name)]);
 const tokens = Object.fromEntries([...read('src/app/rch-brand-tokens.css').matchAll(/(--rch-brand-[\w-]+):\s*(#[0-9a-f]{6});/g)].map(m=>[m[1],m[2]]));
@@ -32,6 +32,7 @@ describe('approved RCH charcoal/crimson system',()=>{
   });
   it('uses four real navigation destinations with mutually exclusive selected states',()=>{
     expect(RCL_MEMBER_PRIMARY_NAV.map(n=>n.label)).toEqual(['Home','Runs','Community','Profile']);
+    expect(RCL_GUEST_MOBILE_NAV.map(n=>n.label)).toEqual(['Home','Runs','Community','Profile']);
     for(const route of ['/social','/runs','/runs/123','/community','/crews','/social/profile/123']) {
       expect(RCL_MEMBER_PRIMARY_NAV.filter(n=>isMemberNavigationActive(route,n.href))).toHaveLength(1);
     }

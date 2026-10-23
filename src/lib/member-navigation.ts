@@ -15,6 +15,13 @@ export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Profile',href:'/social/profile/me',icon:FaUser},
 ];
 
+export const RCL_GUEST_MOBILE_NAV:RCLMemberNavItem[]=[
+  {label:'Home',href:'/',icon:FaHouse},
+  {label:'Runs',href:'/runs',icon:FaBasketball},
+  {label:'Community',href:'/community',icon:FaPeopleGroup},
+  {label:'Profile',href:'/auth/sign-up',icon:FaUser},
+];
+
 export const RCL_MEMBER_DESKTOP_NAV=RCL_MEMBER_PRIMARY_NAV;
 
 export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[

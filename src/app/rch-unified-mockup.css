@@ -128,3 +128,15 @@ html.rch-premium-root body.rch-premium-app :is(a,button)[class~="bg-rcl-blue"] {
 html.rch-premium-root body.rch-premium-app .rcl-universal-bottom a[aria-current="page"] svg {
   color:var(--rch-brand-accent-text)!important;
 }
+/* Browser shell has its own header, never the installed-app sidebar offset. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web {
+  margin:0!important;
+  padding-top:0!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+@media(max-width:767px) {
+  html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web {
+    padding-bottom:calc(64px + env(safe-area-inset-bottom))!important;
+  }
+}
