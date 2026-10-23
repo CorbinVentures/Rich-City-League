@@ -155,7 +155,8 @@ export default function LeagueOperationsPage() {
   async function updateDraft(id: string, status: Draft['status']) {
     if (!supabase) return;
     const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
-    const action = status === 'OPEN' ? 'OPEN' : status === 'PAUSED' ? 'PAUSE' : 'COMPLETE';
+    const oldStatus = drafts.find(item => item.id === id)?.status;
+    const action = status === 'OPEN' ? (oldStatus === 'PAUSED' ? 'RESUME' : 'OPEN') : status === 'PAUSED' ? 'PAUSE' : 'COMPLETE';
     const { error } = await db.rpc('manage_draft_clock' as never, {
       target_draft: id,
       target_action: action,
