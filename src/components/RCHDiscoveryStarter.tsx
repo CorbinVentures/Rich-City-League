@@ -75,7 +75,7 @@ export function RCHDiscoveryStarter({ mode, opportunities = [] }: Props) {
           <span>Only your selected city is saved on this device. Change it anytime.</span>
         </div>
         <fieldset className="rch-starter-intents">
-          <legend>I'M HERE TO</legend>
+          <legend>I&apos;M HERE TO</legend>
           <div className="rch-starter-options">
             {INTENT_ORDER.map(id => {
               const Icon = INTENT_ICONS[id];
