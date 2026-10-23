@@ -80,6 +80,7 @@ export default function DraftNightPage() {
   const [pool, setPool] = useState<PoolEntry[]>([]);
   const [coachTeams, setCoachTeams] = useState<string[]>([]);
   const [seasonRoster, setSeasonRoster] = useState<Array<{team_id:string;player_id:string}>>([]);
+  const [draftEvaluations, setDraftEvaluations] = useState<Array<{player_id:string;evaluation_count:number;average_evaluation:number}>>([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -98,7 +99,7 @@ export default function DraftNightPage() {
     if (draftResult.error) { setMessage('The draft feed is temporarily unavailable.'); setLoading(false); return; }
     const live = draftResult.data as Draft | null;
     setDraft(live);
-    if (!live) { setLoading(false); return; }
+    if (!live) { setDraftEvaluations([]); setSeasonRoster([]); setLoading(false); return; }
 
     const [teamsResult, orderResult, picksResult, poolResult, playersResult, iqResult] = await Promise.all([
       supabase.from('teams').select('*').eq('is_active', true).order('name'),
@@ -118,6 +119,15 @@ export default function DraftNightPage() {
       setPlayers((playersResult.data ?? []) as PublicPlayer[]);
       setIq((iqResult.data ?? []) as PublicPlayerIQ[]);
     }
+    // Restricted aggregate tryout data is used only for authorized coaches
+    // and league staff. Spectators never receive confidential evaluations.
+    if (user && ['coach','staff','admin'].includes(profile?.role ?? '')) {
+      const evaluationResult=await supabase.rpc('season_draft_scouting' as never,{target_draft:live.id} as never);
+      if(!evaluationResult.error && Array.isArray(evaluationResult.data)) {
+        setDraftEvaluations((evaluationResult.data as Array<{player_id:string;evaluation_count:number;average_evaluation:number}>)
+          .map(row=>({...row,evaluation_count:Number(row.evaluation_count),average_evaluation:Number(row.average_evaluation)})));
+      } else setDraftEvaluations([]);
+    } else setDraftEvaluations([]);
     if (user && profile?.role === 'coach') {
       const result = await supabase.from('team_coaches').select('team_id').eq('profile_id', user.id);
       setCoachTeams(((result.data ?? []) as TeamCoach[]).map((item) => item.team_id));
@@ -200,12 +210,16 @@ export default function DraftNightPage() {
     pool.some(entry=>entry.player_id===player.id && entry.eligible)
       && !picked.has(player.id) && !rosteredPlayerIds.has(player.id));
   const iqByPlayer=new Map(iq.map(entry=>[entry.player_id,entry]));
+  const evaluationByPlayer=new Map(draftEvaluations.map(entry=>[entry.player_id,entry]));
   const scouts=eligibleProspects.map(player=>{
     const metrics=iqByPlayer.get(player.id);
+    const evaluation=evaluationByPlayer.get(player.id);
     return {id:player.id,name:playerName(player),position:player.position,
       court:metrics?.court_performance_score??null,
       skill:metrics?.skill_profile_score??null,
-      games:metrics?.games_evaluated??0};
+      games:metrics?.games_evaluated??0,
+      tryoutAverage:evaluation?.average_evaluation??null,
+      tryoutEvaluations:evaluation?.evaluation_count??0};
   });
   const ratings = new Map(iq.map((entry) => [entry.player_id, entry.rcl_rating]));
   const available = eligibleProspects
