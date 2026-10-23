@@ -93,7 +93,7 @@ export default function FantasyPage() {
     // Projection data must use finalized games from this exact RCH season.
     // In-progress box scores are intentionally excluded from scouting forecasts.
     const completedGamesResult = await supabase.from('games')
-      .select('id').eq('season_id', activeSeason.season_id).eq('status', 'final');
+      .select('id').eq('season_id', activeSeason.season_id).eq('status', 'completed');
     const completedIds = (completedGamesResult.data ?? []).map(item => item.id);
     const [teamsResult, statsResult, activityResult, matchupResult] = await Promise.all([
       supabase.from('fantasy_teams').select('*').eq('fantasy_season_id', activeSeason.id).order('total_points', { ascending: false }).order('wins', { ascending: false }),
