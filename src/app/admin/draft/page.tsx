@@ -51,9 +51,24 @@ export default function DraftSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [readiness, setReadiness] = useState<string[] | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const selected = drafts.find(draft => draft.id === selectedId) ?? null;
   const editable = selected?.status === 'SETUP';
+
+  async function checkReadiness(id: string) {
+    if (!id || !supabase || profile?.role !== 'admin') return;
+    setChecking(true);
+    setReadiness(null);
+    const result = await db.rpc('season_draft_readiness', { target_draft: id });
+    if (result.error) {
+      setMessage('Preflight check failed: ' + result.error.message);
+    } else {
+      setReadiness(Array.isArray(result.data) ? result.data.map(String) : null);
+    }
+    setChecking(false);
+  }
 
   async function load(preferredId?: string) {
     if (!supabase || profile?.role !== 'admin') {
@@ -82,6 +97,7 @@ export default function DraftSettingsPage() {
         ? selectedId
         : rows.find(row => row.status === 'SETUP')?.id ?? rows[0]?.id ?? '';
     setSelectedId(nextId);
+    if (nextId) void checkReadiness(nextId);
     const next = rows.find(row => row.id === nextId);
     if (next) {
       setForm({
@@ -103,6 +119,7 @@ export default function DraftSettingsPage() {
   function selectDraft(id: string) {
     setSelectedId(id);
     setMessage('');
+    void checkReadiness(id);
     const draft = drafts.find(item => item.id === id);
     if (!draft) return;
     setForm({
@@ -166,6 +183,10 @@ export default function DraftSettingsPage() {
               {drafts.map(draft => <option key={draft.id} value={draft.id}>{draft.name} · {draft.status}</option>)}
             </select>
             {selected && <div className="mt-4 grid grid-cols-2 gap-2"><Metric label="Status" value={selected.status}/><Metric label="Current pick" value={`#${selected.current_pick}`}/><Metric label="Rounds" value={String(selected.rounds)}/><Metric label="Pick clock" value={`${selected.clock_duration_seconds}s`}/></div>}
+          </section>
+          <section aria-label="Official season draft preflight" className="rounded-3xl border border-white/10 bg-[#071522]/70 p-5">
+            <div className="flex items-center justify-between gap-3"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Season draft readiness</p><button type="button" onClick={()=>selectedId&&void checkReadiness(selectedId)} disabled={checking} className="min-h-10 rounded-lg border border-white/15 px-3 text-[10px] font-black uppercase disabled:opacity-50">{checking?'Checking…':'Recheck'}</button></div>
+            {readiness===null?<p className="mt-3 text-xs leading-5 text-white/55">Readiness has not been verified.</p>:readiness.length===0?<p className="mt-3 rounded-xl border border-emerald-300/20 bg-emerald-300/5 p-3 text-xs leading-5 text-emerald-200">Eligible pool, team slots, roster capacity and order pass the opening preflight. Recheck immediately before opening.</p>:<div className="mt-3"><p className="text-xs font-bold text-amber-200">Resolve {readiness.length} blocker{readiness.length!==1?'s':''} before opening:</p><ul className="mt-2 list-disc space-y-2 pl-4 text-xs leading-5 text-white/65">{readiness.map(item=><li key={item}>{item}</li>)}</ul></div>}
           </section>
           <section className="rounded-3xl border border-white/10 bg-white/[.025] p-5"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">Control boundary</p><p className="mt-3 text-sm leading-6 text-white/42">Settings lock when Draft Night opens. Pick order and player eligibility stay in League Operations. Coach selections continue through the protected live draft RPC and update every viewer in real time.</p></section>
         </aside>

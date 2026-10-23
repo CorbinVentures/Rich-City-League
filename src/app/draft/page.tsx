@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { DraftNightIntro } from '@/components/DraftNightIntro';
+import { SeasonDraftScouting } from '@/components/draft/SeasonDraftScouting';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
@@ -78,13 +79,15 @@ export default function DraftNightPage() {
   const [iq, setIq] = useState<PublicPlayerIQ[]>([]);
   const [pool, setPool] = useState<PoolEntry[]>([]);
   const [coachTeams, setCoachTeams] = useState<string[]>([]);
+  const [seasonRoster, setSeasonRoster] = useState<Array<{team_id:string;player_id:string}>>([]);
+  const [draftEvaluations, setDraftEvaluations] = useState<Array<{player_id:string;evaluation_count:number;average_evaluation:number}>>([]);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('ALL');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [now, setNow] = useState(Date.now());
-  const soundArmedRef = useRef(false);
   const draftInitializedRef = useRef(false);
   const knownPickIdsRef = useRef<Set<string>>(new Set());
   const previousSecondsRef = useRef<number | null>(null);
@@ -96,7 +99,7 @@ export default function DraftNightPage() {
     if (draftResult.error) { setMessage('The draft feed is temporarily unavailable.'); setLoading(false); return; }
     const live = draftResult.data as Draft | null;
     setDraft(live);
-    if (!live) { setLoading(false); return; }
+    if (!live) { setDraftEvaluations([]); setSeasonRoster([]); setLoading(false); return; }
 
     const [teamsResult, orderResult, picksResult, poolResult, playersResult, iqResult] = await Promise.all([
       supabase.from('teams').select('*').eq('is_active', true).order('name'),
@@ -116,10 +119,30 @@ export default function DraftNightPage() {
       setPlayers((playersResult.data ?? []) as PublicPlayer[]);
       setIq((iqResult.data ?? []) as PublicPlayerIQ[]);
     }
+    // Restricted aggregate tryout data is used only for authorized coaches
+    // and league staff. Spectators never receive confidential evaluations.
+    if (user && ['coach','staff','admin'].includes(profile?.role ?? '')) {
+      const evaluationResult=await supabase.rpc('season_draft_scouting' as never,{target_draft:live.id} as never);
+      if(!evaluationResult.error && Array.isArray(evaluationResult.data)) {
+        setDraftEvaluations((evaluationResult.data as Array<{player_id:string;evaluation_count:number;average_evaluation:number}>)
+          .map(row=>({...row,evaluation_count:Number(row.evaluation_count),average_evaluation:Number(row.average_evaluation)})));
+      } else setDraftEvaluations([]);
+    } else setDraftEvaluations([]);
     if (user && profile?.role === 'coach') {
       const result = await supabase.from('team_coaches').select('team_id').eq('profile_id', user.id);
       setCoachTeams(((result.data ?? []) as TeamCoach[]).map((item) => item.team_id));
     }
+    // Official playable-season roster assignments include any existing
+    // retained players, not merely picks made during this draft.
+    const seasonLinks=await supabase.from('team_seasons').select('id,team_id').eq('season_id',live.season_id);
+    if(!seasonLinks.error && seasonLinks.data?.length){
+      const keys=seasonLinks.data.map(item=>item.id);
+      const rosterResult=await supabase.from('rosters').select('team_season_id,player_id').in('team_season_id',keys).is('left_at',null);
+      if(!rosterResult.error){
+        const teamBySeason=new Map(seasonLinks.data.map(item=>[item.id,item.team_id]));
+        setSeasonRoster((rosterResult.data??[]).map(item=>({team_id:teamBySeason.get(item.team_season_id)??'',player_id:item.player_id})).filter(row=>row.team_id));
+      }
+    } else setSeasonRoster([]);
     setLoading(false);
   }, [profile?.role, supabase, user]);
 
@@ -139,34 +162,11 @@ export default function DraftNightPage() {
     return () => window.clearInterval(timer);
   }, [draft?.clock_deadline_at, draft?.status]);
 
-  // Draft Night sound design:
-  // 1) Attempt the opening chime on page load.
-  // 2) If the browser blocks autoplay, the first user interaction unlocks audio.
-  useEffect(() => {
-    if (soundArmedRef.current) return;
-    soundArmedRef.current = true;
-
-    const unlockAudio = () => {
-      void playDraftChime();
-      window.removeEventListener('pointerdown', unlockAudio);
-      window.removeEventListener('keydown', unlockAudio);
-    };
-
-    const attemptOpeningChime = async () => {
-      const played = await playDraftChime();
-      if (!played) {
-        window.addEventListener('pointerdown', unlockAudio, { once: true });
-        window.addEventListener('keydown', unlockAudio, { once: true });
-      }
-    };
-
-    void attemptOpeningChime();
-
-    return () => {
-      window.removeEventListener('pointerdown', unlockAudio);
-      window.removeEventListener('keydown', unlockAudio);
-    };
-  }, []);
+  // No surprise audio on mobile. Fans explicitly opt into draft sounds.
+  const toggleSound = () => {
+    setSoundEnabled(enabled => !enabled);
+    if (!soundEnabled) void playDraftChime();
+  };
 
   // A new official pick triggers the same broadcast-style chime for every viewer.
   useEffect(() => {
@@ -181,24 +181,48 @@ export default function DraftNightPage() {
 
     const hasNewPick = [...currentIds].some((id) => !knownPickIdsRef.current.has(id));
     knownPickIdsRef.current = currentIds;
-    if (hasNewPick) playDraftChime();
-  }, [draft, picks]);
+    if (hasNewPick && soundEnabled) void playDraftChime();
+  }, [draft, picks, soundEnabled]);
 
   // The clock crossing from a positive value to zero triggers a chime once.
   useEffect(() => {
     const previous = previousSecondsRef.current;
     if (seconds === 0 && previous !== null && previous > 0) {
-      playDraftChime();
+      if (soundEnabled) void playDraftChime();
     }
     previousSecondsRef.current = seconds;
-  }, [seconds]);
+  }, [seconds, soundEnabled]);
 
   const current = order.find((item) => item.pick_number === draft?.current_pick);
   const currentTeam = teams.find((team) => team.id === current?.team_id);
   const picked = new Set(picks.map((pick) => pick.player_id));
+  const rosteredPlayerIds = new Set(seasonRoster.map(row=>row.player_id));
+  const visibleTeam = (profile?.role === 'coach' && coachTeams.length
+    ? teams.find(t=>coachTeams.includes(t.id) && order.some(o=>o.team_id===t.id))
+    : undefined) ?? currentTeam;
+  const visibleRoster = seasonRoster.filter(row=>row.team_id===visibleTeam?.id);
+  const visibleRosterIds = new Set(visibleRoster.map(row=>row.player_id));
+  // Realtime pick data is a fallback if roster replication is momentarily behind.
+  const visiblePickPlayers = picks.filter(p=>p.team_id===visibleTeam?.id);
+  for(const pick of visiblePickPlayers) visibleRosterIds.add(pick.player_id);
+  const rosterPositions=[...visibleRosterIds].map(id=>players.find(p=>p.id===id)?.position??null);
+  const eligibleProspects=players.filter(player=>
+    pool.some(entry=>entry.player_id===player.id && entry.eligible)
+      && !picked.has(player.id) && !rosteredPlayerIds.has(player.id));
+  const iqByPlayer=new Map(iq.map(entry=>[entry.player_id,entry]));
+  const evaluationByPlayer=new Map(draftEvaluations.map(entry=>[entry.player_id,entry]));
+  const scouts=eligibleProspects.map(player=>{
+    const metrics=iqByPlayer.get(player.id);
+    const evaluation=evaluationByPlayer.get(player.id);
+    return {id:player.id,name:playerName(player),position:player.position,
+      court:metrics?.court_performance_score??null,
+      skill:metrics?.skill_profile_score??null,
+      games:metrics?.games_evaluated??0,
+      tryoutAverage:evaluation?.average_evaluation??null,
+      tryoutEvaluations:evaluation?.evaluation_count??0};
+  });
   const ratings = new Map(iq.map((entry) => [entry.player_id, entry.rcl_rating]));
-  const available = players
-    .filter((player) => pool.some((entry) => entry.player_id === player.id && entry.eligible) && !picked.has(player.id))
+  const available = eligibleProspects
     .filter((player) => filter === 'ALL' || player.position?.toUpperCase() === filter)
     .filter((player) => playerName(player).toLowerCase().includes(query.toLowerCase()));
   const isOnClock = Boolean(profile?.role === 'coach' && currentTeam && coachTeams.includes(currentTeam.id) && draft?.status === 'OPEN' && seconds !== 0);
@@ -223,7 +247,8 @@ export default function DraftNightPage() {
             <div>
               <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
               <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Follow the official Rich City League draft in real time—prospects, team turns, selections, scouting details and draft history in one place.</p>
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Real players. Real franchises. Real season rosters. Follow official team selections that determine who takes the court for Rich City League.</p>
+              <button type="button" onClick={toggleSound} aria-pressed={soundEnabled} className="mt-4 min-h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-xs font-black uppercase tracking-wider text-white/75">{soundEnabled ? 'Mute draft sounds' : 'Enable draft sounds'}</button>
             </div>
             <div className="rcl-draft-live-card">
               <span className="rcl-live">LIVE DRAFT BOARD</span>
@@ -239,7 +264,7 @@ export default function DraftNightPage() {
         <div className="rcl-draft-stat-strip">
           <div><span>NEXT PICK</span><strong>#{draft?.current_pick ?? '—'}</strong></div>
           <div><span>ROUND</span><strong>{current?.round_number ?? '—'}</strong></div>
-          <div><span>TEAMS</span><strong>{teams.length || '—'}</strong></div>
+          <div><span>SEASON TEAMS</span><strong>{new Set(order.map(row=>row.team_id)).size || '—'}</strong></div>
           <div><span>SELECTED</span><strong>{picks.length}</strong></div>
         </div>
 
@@ -258,10 +283,11 @@ export default function DraftNightPage() {
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search players..." aria-label="Search draft players" />
             <div className="rcl-filter-row">{(['ALL','PG','SG','SF','PF','C'] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setFilter(item)} className={filter === item ? 'active' : ''}>{item}</button>)}</div>
             <div className="rcl-prospect-list">
-              {available.slice(0, 8).map((player, index) => <button type="button" key={player.id} onClick={() => isOnClock && setSelected(player.id)} className={selected === player.id ? 'selected' : ''}>
-                <span className="rcl-rank">#{index + 1}</span><span className="rcl-prospect-avatar">{player.photo_url ? <img src={player.photo_url} alt="" /> : player.first_name?.[0]}</span><span className="rcl-prospect-name">{playerName(player)}<small>{player.position ?? '—'}</small></span><b>{ratings.get(player.id) ?? '—'}</b>
+              {available.slice(0, 8).map((player) => <button type="button" key={player.id} onClick={() => setSelected(player.id)} className={selected === player.id ? 'selected' : ''}>
+                <span className="rcl-rank" aria-label="Available prospect">•</span><span className="rcl-prospect-avatar">{player.photo_url ? <img src={player.photo_url} alt="" /> : player.first_name?.[0]}</span><span className="rcl-prospect-name">{playerName(player)}<small>{player.position ?? '—'}</small></span><b>{ratings.get(player.id) ?? '—'}</b>
               </button>)}
-              {!available.length && <p className="p-5 text-xs text-white/35">No eligible prospects are currently published.</p>}
+              {available.length > 8 && <p className="p-3 text-[11px] text-white/40">Showing 8 of {available.length}. Use search or position filters to explore the full eligible pool.</p>}
+              {!available.length && <p className="p-5 text-xs text-white/35">No unassigned eligible prospects match your filters.</p>}
             </div>
           </div>
 
@@ -279,13 +305,15 @@ export default function DraftNightPage() {
           </div>
 
           <div className="rcl-draft-module rcl-my-team">
-            <div className="rcl-module-heading"><span className="rcl-module-icon"><FaShieldHalved /></span><div><small>MY TEAM</small><h2>{currentTeam?.name ?? 'Roster'}</h2></div></div>
+            <div className="rcl-module-heading"><span className="rcl-module-icon"><FaShieldHalved /></span><div><small>{profile?.role==='coach'?'MY SEASON TEAM':'ON-CLOCK TEAM'}</small><h2>{visibleTeam?.name ?? 'Roster'}</h2></div></div>
             <p className="text-xs uppercase tracking-widest text-white/35">{profile?.role === 'coach' ? 'Coach war room' : 'Community view'}</p>
-            <div className="rcl-roster-mini">{order.slice(0, 5).map((slot) => { const pick = picks.find((item) => item.pick_number === slot.pick_number); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; return <div key={slot.id}><b>{slot.pick_number}</b><span>{player ? playerName(player) : '—'}</span><small>{player?.position ?? 'OPEN'}</small></div>; })}</div>
+            <div className="rcl-roster-mini">{order.filter(slot=>slot.team_id===visibleTeam?.id).slice(0, 8).map((slot) => { const pick = picks.find((item) => item.pick_number === slot.pick_number); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; return <div key={slot.id}><b>{slot.pick_number}</b><span>{player ? playerName(player) : '—'}</span><small>{player?.position ?? 'OPEN'}</small></div>; })}</div>
+            <p className="mt-3 text-xs text-white/50">{visibleRosterIds.size} players on this season roster (including selections).</p>
             <Link href="/teams" className="rcl-draft-secondary w-full">VIEW FULL ROSTER</Link>
           </div>
         </section>
 
+        {draft && <SeasonDraftScouting teamName={visibleTeam?.name??'this season team'} prospects={scouts} rosterPositions={rosterPositions} isCoach={profile?.role==='coach'} />}
         <section className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {([
             { title: 'PLAYER SCOUTING', detail: 'Profiles, stats, highlights', Icon: FaUserGroup },
