@@ -19,7 +19,7 @@ describe('RCH administration frontend parity', () => {
 
   it('loads the executive RCH visual system with responsive navigation', () => {
     const styles = admin('admin-theme.css');
-    expect(styles).toContain('--rch-admin-ice:#91cef2');
+    expect(styles).toContain('--rch-admin-ice:var(--rch-brand-accent-text)');
     expect(styles).toContain('.rch-admin-nav-item.is-active');
     expect(styles).toContain('@media (max-width:820px)');
     expect(styles).toContain('focus-visible');

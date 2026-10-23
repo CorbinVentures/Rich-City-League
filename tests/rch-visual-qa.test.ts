@@ -42,7 +42,7 @@ describe('RCH production UI fit and finish',()=>{
      expect(css).toContain(cls);
    }
    expect(actions).toContain('bg-rcl-blue');
-   expect(css).toContain('background:linear-gradient(135deg,#286fbd,#17559e)!important');
+   expect(css).toContain('background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))!important');
    expect(css).toContain('color:#fff!important');
    expect(css).toContain('opacity:1!important');
  });
@@ -52,8 +52,8 @@ describe('RCH production UI fit and finish',()=>{
    }
    expect(contrast('#bed5eb','#133858')).toBeGreaterThanOrEqual(4.5);
    expect(contrast('#e0eeff','#102a5d')).toBeGreaterThanOrEqual(4.5);
-   expect(components).toContain('linear-gradient(135deg,#286fbd,#17559e)');
-   expect(chrome).toContain('linear-gradient(150deg,#2876ce,#1253b3)');
+   expect(components).toContain('linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))');
+   expect(chrome).toContain('linear-gradient(150deg,var(--rch-brand-accent),var(--rch-brand-border))');
  });
  it('shows profile stats and badges against dark cards and exposes active tabs',()=>{
    expect(insights).toContain('rcl-profile-attention-caption');

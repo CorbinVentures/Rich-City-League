@@ -16,7 +16,7 @@ html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content {
   color:var(--rch-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-header {
-  background:#071727f5!important;
+  background:rgb(var(--rch-brand-surface-rgb) / 0.961)!important;
   border-color:var(--rch-line-soft)!important;
   color:var(--rch-ink)!important;
 }
@@ -29,21 +29,21 @@ html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-nav a:foc
   color:var(--rch-ink)!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-app-cta {
-  background:linear-gradient(135deg,#286fbd,#17559e)!important;
-  border:1px solid #80bdf7!important;
+  background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))!important;
+  border:1px solid var(--rch-brand-accent-text)!important;
   color:#fff!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-app-cta:hover {
-  background:linear-gradient(135deg,#307acb,#185ca9)!important;
+  background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer {
-  background:#061426!important;
+  background:var(--rch-brand-surface)!important;
   border-color:var(--rch-line-soft)!important;
   color:var(--rch-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer a {
-  color:#c3def5!important;
+  color:var(--rch-brand-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-footer a:hover {
   color:#fff!important;
@@ -72,14 +72,14 @@ body.rch-premium-app .rch-public-web #rch-public-content
 html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
   :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a) {
   border:1px solid var(--rch-line)!important;
-  background:linear-gradient(150deg,#153553,#0b243c)!important;
+  background:linear-gradient(150deg,var(--rch-brand-raised),var(--rch-brand-surface))!important;
   color:var(--rch-ink)!important;
-  box-shadow:0 12px 32px rgba(0,5,18,.27)!important;
+  box-shadow:0 12px 32px rgb(var(--rch-brand-canvas-rgb) / .27)!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
   :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a):hover {
-  border-color:#6daef0!important;
+  border-color:var(--rch-brand-accent-text)!important;
 }
 body.rch-premium-app .rch-public-web #rch-public-content
   :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-pulse-grid > a,.rcl-editorial-row > a)
@@ -96,31 +96,31 @@ body.rch-premium-app .rch-public-web #rch-public-content
 body.rch-premium-app .rch-public-web #rch-public-content
   :is(.rcl-person-card,.rcl-lifestyle-card,.rcl-editorial-row > a)
   :is(em,b:last-child) {
-  color:#8cc9ff!important;
+  color:var(--rch-brand-accent-text)!important;
 }
 /* Player placeholders / story avatars are intentional dark, not blank white. */
 body.rch-premium-app .rch-public-web .rcl-person-card > div,
 body.rch-premium-app .rch-public-web .rcl-landing-story-row > span {
-  background:#204361!important;
-  color:#9ed0ff!important;
-  border-color:#4e82ae!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-copy)!important;
+  border-color:var(--rch-brand-muted)!important;
 }
 body.rch-premium-app .rch-public-web .rcl-lifestyle-card > span,
 body.rch-premium-app .rch-public-web .rcl-pulse-grid > a > span {
-  background:#1b4a74!important;
-  color:#a2d6ff!important;
+  background:var(--rch-brand-border)!important;
+  color:var(--rch-brand-copy)!important;
 }
 /* Stable primary and secondary CTA contrast on the hero and league sections. */
 html.rch-premium-root body.rch-premium-app .rch-public-web .rcl-landing-primary {
-  background:linear-gradient(135deg,#286fbd,#17559e)!important;
-  border:1px solid #80bdf7!important;
+  background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))!important;
+  border:1px solid var(--rch-brand-accent-text)!important;
   color:#fff!important;
   opacity:1!important;
 }
 html.rch-premium-root body.rch-premium-app .rch-public-web .rcl-landing-secondary {
-  background:#123452!important;
-  border:1px solid #4a789d!important;
-  color:#e2f2ff!important;
+  background:var(--rch-brand-raised)!important;
+  border:1px solid var(--rch-brand-muted)!important;
+  color:var(--rch-brand-ink)!important;
   opacity:1!important;
 }
 /* Remaining light utility link cards across public detail routes. */
@@ -135,7 +135,7 @@ html.rch-premium-root body.rch-premium-app .rch-public-web #rch-public-content
 /* The white brand tile is intentional: dark R against white remains readable. */
 html.rch-premium-root body.rch-premium-app .rch-public-web .rch-public-brand-mark {
   background:#fff!important;
-  color:#07121e!important;
+  color:var(--rch-brand-canvas)!important;
 }
 /* Keep mobile text and cards within the screen, not clipped horizontally. */
 @media(max-width:767px) {

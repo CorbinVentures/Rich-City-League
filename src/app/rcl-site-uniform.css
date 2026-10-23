@@ -8,18 +8,18 @@
  */
 
 :root {
-  --rcl-uniform-canvas:#F6F9FC;
+  --rcl-uniform-canvas:var(--rch-brand-ink);
   --rcl-uniform-surface:#FFFFFF;
-  --rcl-uniform-soft:#EDF4FA;
-  --rcl-uniform-border:#D9E4EF;
-  --rcl-uniform-text:#0F2547;
-  --rcl-uniform-text-2:#64748B;
-  --rcl-uniform-muted:#8190A1;
-  --rcl-uniform-primary:#3B82F6;
-  --rcl-uniform-primary-deep:#2563EB;
+  --rcl-uniform-soft:var(--rch-brand-ink);
+  --rcl-uniform-border:var(--rch-brand-ink);
+  --rcl-uniform-text:var(--rch-brand-raised);
+  --rcl-uniform-text-2:var(--rch-brand-muted);
+  --rcl-uniform-muted:var(--rch-brand-muted);
+  --rcl-uniform-primary:var(--rch-brand-accent);
+  --rcl-uniform-primary-deep:var(--rch-brand-accent);
   --rcl-uniform-clay:var(--rcl-uniform-primary);
   --rcl-uniform-clay-deep:var(--rcl-uniform-primary-deep);
-  --rcl-uniform-slate:#64748B;
+  --rcl-uniform-slate:var(--rch-brand-muted);
   --rcl-uniform-gold:#D4AF37;
   --rcl-uniform-success:#2E8B70;
   --rcl-uniform-danger:#C65361;
@@ -119,7 +119,7 @@ html body,
 
 .rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-2xl"][class*="border"],
 .rcl-platform-root :where(section,article,aside,form,div)[class*="rounded-3xl"][class*="border"] {
-  box-shadow:0 10px 28px rgba(15,37,71,.07)!important;
+  box-shadow:0 10px 28px rgb(var(--rch-brand-raised-rgb) / .07)!important;
 }
 
 .rcl-platform-root [class*="hover:bg-white/"]:hover,
@@ -141,7 +141,7 @@ html body,
 }
 .rcl-platform-root input::placeholder,
 .rcl-platform-root textarea::placeholder {
-  color:#7D8C9A!important;
+  color:var(--rch-brand-muted)!important;
 }
 
 .rcl-platform-root :where(a,button)[class*="bg-rcl-orange"],
@@ -157,14 +157,14 @@ html body,
   color:#fff!important;
 }
 .rcl-platform-root :where(a,button)[class*="bg-rcl-blue"] {
-  border-color:#D6E0E9!important;
-  background:#E6EDF4!important;
-  color:#3E566C!important;
+  border-color:var(--rch-brand-copy)!important;
+  background:var(--rch-brand-ink)!important;
+  color:var(--rch-brand-border)!important;
   box-shadow:none!important;
 }
 .rcl-platform-root :where(a,button)[class*="bg-rcl-blue"]:hover {
-  background:#DCE6EF!important;
-  color:#2E465B!important;
+  background:var(--rch-brand-ink)!important;
+  color:var(--rch-brand-raised)!important;
 }
 
 /* Gold is a status color, not a general UI accent. */
@@ -181,10 +181,10 @@ html body,
 .rcl-social-secondary > section:first-child {
   border-color:var(--rcl-uniform-border)!important;
   background:
-    radial-gradient(circle at 88% 0%,rgba(59,130,246,.10),transparent 30%),
-    radial-gradient(circle at 8% 100%,rgba(83,120,154,.08),transparent 34%),
-    linear-gradient(140deg,#153653 0%,#071b2e 100%)!important;
-  color:#f5f9ff!important;
+    radial-gradient(circle at 88% 0%,rgb(var(--rch-brand-accent-rgb) / .10),transparent 30%),
+    radial-gradient(circle at 8% 100%,rgb(var(--rch-brand-muted-rgb) / .08),transparent 34%),
+    linear-gradient(140deg,var(--rch-brand-raised) 0%,var(--rch-brand-surface) 100%)!important;
+  color:var(--rch-brand-ink)!important;
 }
 .rcl-corporate-page-hero [class*="text-white/"],
 .rcl-client-page-hero [class*="text-white/"] {
@@ -246,7 +246,7 @@ a[aria-label="Open administrator control center"] {
   border-color:var(--rcl-uniform-border)!important;
   background:rgba(255,255,255,.96)!important;
   color:var(--rcl-uniform-slate)!important;
-  box-shadow:0 8px 24px rgba(15,37,71,.10)!important;
+  box-shadow:0 8px 24px rgb(var(--rch-brand-raised-rgb) / .10)!important;
 }
 
 /* ---------- Small-screen legibility ---------- */

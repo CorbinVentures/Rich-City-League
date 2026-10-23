@@ -1,0 +1,207 @@
+# Unified mockup route coverage
+
+188 page files inherit the root brand tokens and typography. The palette migration also updates route-local presentation styles for Runs, courts, identity, Discover, admin, Command Center and professional tools.
+
+This is a source coverage inventory, not a claim that every authenticated state has been visually tested. Database logic, permissions, user content and APIs were not changed.
+
+| Route | Source | Coverage |
+|---|---|---|
+| `/about` | `src/app/about/page.tsx` | Shared foundation; retained page behavior |
+| `/access` | `src/app/access/page.tsx` | Shared foundation; retained page behavior |
+| `/account/membership` | `src/app/account/membership/page.tsx` | Shared foundation; retained page behavior |
+| `/account/security` | `src/app/account/security/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/basketball-os` | `src/app/admin/basketball-os/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/control-center` | `src/app/admin/control-center/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/draft` | `src/app/admin/draft/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/governance` | `src/app/admin/governance/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/league-setup` | `src/app/admin/league-setup/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/leagueapps` | `src/app/admin/leagueapps/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/network/acquisition` | `src/app/admin/network/acquisition/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/network/campaigns` | `src/app/admin/network/campaigns/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/network/editorial` | `src/app/admin/network/editorial/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/network` | `src/app/admin/network/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/operations` | `src/app/admin/operations/page.tsx` | Shared foundation; retained page behavior |
+| `/admin` | `src/app/admin/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/rch-tv/acquisition` | `src/app/admin/rch-tv/acquisition/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/rch-tv/earnings` | `src/app/admin/rch-tv/earnings/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/rch-tv` | `src/app/admin/rch-tv/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/rch-tv/studio` | `src/app/admin/rch-tv/studio/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/recognition` | `src/app/admin/recognition/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/revenue` | `src/app/admin/revenue/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/runs/facility-sources` | `src/app/admin/runs/facility-sources/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/runs/map-quality` | `src/app/admin/runs/map-quality/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/runs/weekend-circuit` | `src/app/admin/runs/weekend-circuit/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/seasonal-themes` | `src/app/admin/seasonal-themes/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/shop` | `src/app/admin/shop/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/sponsors` | `src/app/admin/sponsors/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/staff` | `src/app/admin/staff/page.tsx` | Shared foundation; retained page behavior |
+| `/admin/staff/workspaces` | `src/app/admin/staff/workspaces/page.tsx` | Shared foundation; retained page behavior |
+| `/app` | `src/app/app/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/callback` | `src/app/auth/callback/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/complete-profile` | `src/app/auth/complete-profile/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/confirm` | `src/app/auth/confirm/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/forgot-password` | `src/app/auth/forgot-password/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/mfa` | `src/app/auth/mfa/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/sign-in` | `src/app/auth/sign-in/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/sign-up` | `src/app/auth/sign-up/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/update-password` | `src/app/auth/update-password/page.tsx` | Shared foundation; retained page behavior |
+| `/auth/verify-email` | `src/app/auth/verify-email/page.tsx` | Shared foundation; retained page behavior |
+| `/badges` | `src/app/badges/page.tsx` | Shared foundation; retained page behavior |
+| `/city` | `src/app/city/page.tsx` | Shared foundation; retained page behavior |
+| `/clips` | `src/app/clips/page.tsx` | Shared foundation; retained page behavior |
+| `/coaches/[id]` | `src/app/coaches/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/coaches` | `src/app/coaches/page.tsx` | Shared foundation; retained page behavior |
+| `/coaches/scouting` | `src/app/coaches/scouting/page.tsx` | Shared foundation; retained page behavior |
+| `/command/access` | `src/app/command/access/page.tsx` | Shared foundation; retained page behavior |
+| `/command` | `src/app/command/page.tsx` | Shared foundation; retained page behavior |
+| `/commonwealth` | `src/app/commonwealth/page.tsx` | Shared foundation; retained page behavior |
+| `/communities/[slug]` | `src/app/communities/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/communities` | `src/app/communities/page.tsx` | Shared foundation; retained page behavior |
+| `/community` | `src/app/community/page.tsx` | Shared foundation; retained page behavior |
+| `/connections` | `src/app/connections/page.tsx` | Shared foundation; retained page behavior |
+| `/create` | `src/app/create/page.tsx` | Shared foundation; retained page behavior |
+| `/create/social` | `src/app/create/social/page.tsx` | Shared foundation; retained page behavior |
+| `/crews/[id]/treasury` | `src/app/crews/[id]/treasury/page.tsx` | Shared foundation; retained page behavior |
+| `/crews` | `src/app/crews/page.tsx` | Shared foundation; retained page behavior |
+| `/dashboard` | `src/app/dashboard/page.tsx` | Shared foundation; retained page behavior |
+| `/discover/community` | `src/app/discover/community/page.tsx` | Shared foundation; retained page behavior |
+| `/discover` | `src/app/discover/page.tsx` | Shared foundation; retained page behavior |
+| `/discover/radar` | `src/app/discover/radar/page.tsx` | Shared foundation; retained page behavior |
+| `/divisions` | `src/app/divisions/page.tsx` | Shared foundation; retained page behavior |
+| `/draft` | `src/app/draft/page.tsx` | Shared foundation; retained page behavior |
+| `/explore` | `src/app/explore/page.tsx` | Shared foundation; retained page behavior |
+| `/fans/[username]` | `src/app/fans/[username]/page.tsx` | Shared foundation; retained page behavior |
+| `/fantasy/leagues/[id]` | `src/app/fantasy/leagues/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/fantasy` | `src/app/fantasy/page.tsx` | Shared foundation; retained page behavior |
+| `/faq` | `src/app/faq/page.tsx` | Shared foundation; retained page behavior |
+| `/friends` | `src/app/friends/page.tsx` | Shared foundation; retained page behavior |
+| `/game-iq` | `src/app/game-iq/page.tsx` | Shared foundation; retained page behavior |
+| `/games/[id]` | `src/app/games/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/games` | `src/app/games/page.tsx` | Shared foundation; retained page behavior |
+| `/join/[code]` | `src/app/join/[code]/page.tsx` | Shared foundation; retained page behavior |
+| `/join` | `src/app/join/page.tsx` | Shared foundation; retained page behavior |
+| `/leaderboards` | `src/app/leaderboards/page.tsx` | Shared foundation; retained page behavior |
+| `/league` | `src/app/league/page.tsx` | Shared foundation; retained page behavior |
+| `/league/royaltee/dashboard` | `src/app/league/royaltee/dashboard/page.tsx` | Shared foundation; retained page behavior |
+| `/league/royaltee/join` | `src/app/league/royaltee/join/page.tsx` | Shared foundation; retained page behavior |
+| `/league/royaltee/manage` | `src/app/league/royaltee/manage/page.tsx` | Shared foundation; retained page behavior |
+| `/league/royaltee` | `src/app/league/royaltee/page.tsx` | Shared foundation; retained page behavior |
+| `/legacy` | `src/app/legacy/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/community-guidelines` | `src/app/legal/community-guidelines/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/cookies` | `src/app/legal/cookies/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/dmca` | `src/app/legal/dmca/page.tsx` | Shared foundation; retained page behavior |
+| `/legal` | `src/app/legal/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/privacy` | `src/app/legal/privacy/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/safety` | `src/app/legal/safety/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/take-it-down` | `src/app/legal/take-it-down/page.tsx` | Shared foundation; retained page behavior |
+| `/legal/terms` | `src/app/legal/terms/page.tsx` | Shared foundation; retained page behavior |
+| `/media/creators/apply` | `src/app/media/creators/apply/page.tsx` | Shared foundation; retained page behavior |
+| `/media/creators/dashboard` | `src/app/media/creators/dashboard/page.tsx` | Shared foundation; retained page behavior |
+| `/media/creators` | `src/app/media/creators/page.tsx` | Shared foundation; retained page behavior |
+| `/media` | `src/app/media/page.tsx` | Shared foundation; retained page behavior |
+| `/media/submit` | `src/app/media/submit/page.tsx` | Shared foundation; retained page behavior |
+| `/member-access` | `src/app/member-access/page.tsx` | Shared foundation; retained page behavior |
+| `/membership` | `src/app/membership/page.tsx` | Shared foundation; retained page behavior |
+| `/messages/[conversationId]` | `src/app/messages/[conversationId]/page.tsx` | Shared foundation; retained page behavior |
+| `/messages` | `src/app/messages/page.tsx` | Shared foundation; retained page behavior |
+| `/missions` | `src/app/missions/page.tsx` | Shared foundation; retained page behavior |
+| `/more` | `src/app/more/page.tsx` | Shared foundation; retained page behavior |
+| `/my-hoops` | `src/app/my-hoops/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard/billing` | `src/app/network/dashboard/billing/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard/boost` | `src/app/network/dashboard/boost/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard/editorial` | `src/app/network/dashboard/editorial/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard` | `src/app/network/dashboard/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard/profile` | `src/app/network/dashboard/profile/page.tsx` | Shared foundation; retained page behavior |
+| `/network/dashboard/reach` | `src/app/network/dashboard/reach/page.tsx` | Shared foundation; retained page behavior |
+| `/network/events/[slug]` | `src/app/network/events/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/network` | `src/app/network/page.tsx` | Shared foundation; retained page behavior |
+| `/network/partners/apply` | `src/app/network/partners/apply/page.tsx` | Shared foundation; retained page behavior |
+| `/network/partners` | `src/app/network/partners/page.tsx` | Shared foundation; retained page behavior |
+| `/news/[slug]` | `src/app/news/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/news` | `src/app/news/page.tsx` | Shared foundation; retained page behavior |
+| `/notifications` | `src/app/notifications/page.tsx` | Shared foundation; retained page behavior |
+| `/orders/[id]` | `src/app/orders/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/orders` | `src/app/orders/page.tsx` | Shared foundation; retained page behavior |
+| `/organizations/[slug]/claim` | `src/app/organizations/[slug]/claim/page.tsx` | Shared foundation; retained page behavior |
+| `/organizations/[slug]` | `src/app/organizations/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/organizations` | `src/app/organizations/page.tsx` | Shared foundation; retained page behavior |
+| `/organizations/region/[region]` | `src/app/organizations/region/[region]/page.tsx` | Shared foundation; retained page behavior |
+| `/` | `src/app/page.tsx` | Shared foundation; retained page behavior |
+| `/pickem` | `src/app/pickem/page.tsx` | Shared foundation; retained page behavior |
+| `/players/[id]` | `src/app/players/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/players/[id]/passport` | `src/app/players/[id]/passport/page.tsx` | Shared foundation; retained page behavior |
+| `/players/compare` | `src/app/players/compare/page.tsx` | Shared foundation; retained page behavior |
+| `/players` | `src/app/players/page.tsx` | Shared foundation; retained page behavior |
+| `/portal/operations` | `src/app/portal/operations/page.tsx` | Shared foundation; retained page behavior |
+| `/portal/profile` | `src/app/portal/profile/page.tsx` | Shared foundation; retained page behavior |
+| `/portal/requests` | `src/app/portal/requests/page.tsx` | Shared foundation; retained page behavior |
+| `/portal/scorebook` | `src/app/portal/scorebook/page.tsx` | Shared foundation; retained page behavior |
+| `/portal/team` | `src/app/portal/team/page.tsx` | Shared foundation; retained page behavior |
+| `/professional` | `src/app/professional/page.tsx` | Shared foundation; retained page behavior |
+| `/profile/admin` | `src/app/profile/admin/page.tsx` | Shared foundation; retained page behavior |
+| `/profile` | `src/app/profile/page.tsx` | Shared foundation; retained page behavior |
+| `/profile/reset-password` | `src/app/profile/reset-password/page.tsx` | Shared foundation; retained page behavior |
+| `/pulse` | `src/app/pulse/page.tsx` | Shared foundation; retained page behavior |
+| `/radar` | `src/app/radar/page.tsx` | Shared foundation; retained page behavior |
+| `/rankings` | `src/app/rankings/page.tsx` | Shared foundation; retained page behavior |
+| `/referrals` | `src/app/referrals/page.tsx` | Shared foundation; retained page behavior |
+| `/register` | `src/app/register/page.tsx` | Shared foundation; retained page behavior |
+| `/registration` | `src/app/registration/page.tsx` | Shared foundation; retained page behavior |
+| `/rep/operations/crews` | `src/app/rep/operations/crews/page.tsx` | Shared foundation; retained page behavior |
+| `/rep/operations` | `src/app/rep/operations/page.tsx` | Shared foundation; retained page behavior |
+| `/rep` | `src/app/rep/page.tsx` | Shared foundation; retained page behavior |
+| `/richmond-basketball-league` | `src/app/richmond-basketball-league/page.tsx` | Shared foundation; retained page behavior |
+| `/richmond-basketball-runs` | `src/app/richmond-basketball-runs/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/[id]/highlight` | `src/app/runs/[id]/highlight/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/[id]` | `src/app/runs/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/courts/[slug]` | `src/app/runs/courts/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/hosts` | `src/app/runs/hosts/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/intelligence` | `src/app/runs/intelligence/page.tsx` | Shared foundation; retained page behavior |
+| `/runs` | `src/app/runs/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/partners/[slug]/hq` | `src/app/runs/partners/[slug]/hq/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/partners/[slug]` | `src/app/runs/partners/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/partners` | `src/app/runs/partners/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/partners/review` | `src/app/runs/partners/review/page.tsx` | Shared foundation; retained page behavior |
+| `/runs/world` | `src/app/runs/world/page.tsx` | Shared foundation; retained page behavior |
+| `/schedule` | `src/app/schedule/page.tsx` | Shared foundation; retained page behavior |
+| `/search` | `src/app/search/page.tsx` | Shared foundation; retained page behavior |
+| `/seasons/[slug]` | `src/app/seasons/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/seasons` | `src/app/seasons/page.tsx` | Shared foundation; retained page behavior |
+| `/settings/discovery` | `src/app/settings/discovery/page.tsx` | Shared foundation; retained page behavior |
+| `/settings/notifications` | `src/app/settings/notifications/page.tsx` | Shared foundation; retained page behavior |
+| `/settings` | `src/app/settings/page.tsx` | Shared foundation; retained page behavior |
+| `/settings/privacy` | `src/app/settings/privacy/page.tsx` | Shared foundation; retained page behavior |
+| `/shop/[slug]` | `src/app/shop/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/shop` | `src/app/shop/page.tsx` | Shared foundation; retained page behavior |
+| `/social/highlights` | `src/app/social/highlights/page.tsx` | Shared foundation; retained page behavior |
+| `/social/media` | `src/app/social/media/page.tsx` | Shared foundation; retained page behavior |
+| `/social` | `src/app/social/page.tsx` | Shared foundation; retained page behavior |
+| `/social/post/[id]` | `src/app/social/post/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/social/profile/[id]` | `src/app/social/profile/[id]/page.tsx` | Shared foundation; retained page behavior |
+| `/social/profile/me` | `src/app/social/profile/me/page.tsx` | Shared foundation; retained page behavior |
+| `/social/saved` | `src/app/social/saved/page.tsx` | Shared foundation; retained page behavior |
+| `/social/stories` | `src/app/social/stories/page.tsx` | Shared foundation; retained page behavior |
+| `/sponsors/campaigns/new` | `src/app/sponsors/campaigns/new/page.tsx` | Shared foundation; retained page behavior |
+| `/sponsors/dashboard` | `src/app/sponsors/dashboard/page.tsx` | Shared foundation; retained page behavior |
+| `/sponsors` | `src/app/sponsors/page.tsx` | Shared foundation; retained page behavior |
+| `/sponsors/start` | `src/app/sponsors/start/page.tsx` | Shared foundation; retained page behavior |
+| `/staff/desk/[role]` | `src/app/staff/desk/[role]/page.tsx` | Shared foundation; retained page behavior |
+| `/staff/franchise` | `src/app/staff/franchise/page.tsx` | Shared foundation; retained page behavior |
+| `/staff` | `src/app/staff/page.tsx` | Shared foundation; retained page behavior |
+| `/standings` | `src/app/standings/page.tsx` | Shared foundation; retained page behavior |
+| `/stats` | `src/app/stats/page.tsx` | Shared foundation; retained page behavior |
+| `/teams/[slug]` | `src/app/teams/[slug]/page.tsx` | Shared foundation; retained page behavior |
+| `/teams` | `src/app/teams/page.tsx` | Shared foundation; retained page behavior |
+| `/today` | `src/app/today/page.tsx` | Shared foundation; retained page behavior |
+| `/world` | `src/app/world/page.tsx` | Shared foundation; retained page behavior |
+
+## Verification
+
+- TypeScript: passed.
+- Production build: passed after a clean retry of a build-folder cleanup error; 169 static pages generated.
+- Final suite: 710 tests passed across 97 files.
+- Existing suite: 707 tests passed with TZ=UTC; the default host timezone causes two pre-existing run-date expectations to fail.
+- Additional brand tests: actual token contrast, CSS parsing, unresolved brand variables and mutually exclusive four-tab navigation.
+- Deployed preview: Home and Runs inspected on desktop; fixed inherited 220px sidebar offset on public pages and themed the portal-mounted Runs rulebook. Mobile breakpoints and signed-in states are covered in source, but were not individually browser-tested.
+- Local browser preview: blocked because the managed supervisor appends Vite-only --host/--strictPort flags to this Next.js repository. Application scripts were not changed to accommodate the preview environment.
+- Authenticated data states require a configured deployment/session; no fabricated database records were added.

@@ -3,11 +3,11 @@
  * .rcl-platform-root, and its surface must never inherit page-through contrast.
  */
 html body .rcl-pwa-install-card {
-  background: #0b2541 !important;
+  background: var(--rch-brand-surface) !important;
   background-image: none !important;
-  color: #f8fbff !important;
-  border: 1px solid #56738e !important;
-  box-shadow: 0 18px 55px rgba(4, 18, 38, .36) !important;
+  color: var(--rch-brand-ink) !important;
+  border: 1px solid var(--rch-brand-muted) !important;
+  box-shadow: 0 18px 55px rgb(var(--rch-brand-surface-rgb) / .36) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   opacity: 1 !important;
@@ -22,12 +22,12 @@ html body .rcl-pwa-ios-guide b {
 
 html body .rcl-pwa-kicker,
 html body .rcl-pwa-guide-title {
-  color: #b7e2ff !important;
+  color: var(--rch-brand-copy) !important;
   opacity: 1 !important;
 }
 
 html body .rcl-pwa-copy {
-  color: #d9e6f3 !important;
+  color: var(--rch-brand-ink) !important;
   font-size: 13px;
   line-height: 1.6;
   opacity: 1 !important;
@@ -35,8 +35,8 @@ html body .rcl-pwa-copy {
 
 html body .rcl-pwa-close,
 html body .rcl-pwa-secondary {
-  background: #183b5c !important;
-  border-color: #7392ad !important;
+  background: var(--rch-brand-raised) !important;
+  border-color: var(--rch-brand-muted) !important;
   color: #ffffff !important;
   opacity: 1 !important;
 }
@@ -47,9 +47,9 @@ html body .rcl-pwa-close {
 }
 
 html body .rcl-pwa-primary {
-  background: #bfe5ff !important;
-  border-color: #d6efff !important;
-  color: #071b30 !important;
+  background: var(--rch-brand-copy) !important;
+  border-color: var(--rch-brand-ink) !important;
+  color: var(--rch-brand-surface) !important;
   box-shadow: none !important;
   opacity: 1 !important;
 }
@@ -62,22 +62,22 @@ html body .rcl-pwa-close:focus-visible {
 }
 
 html body .rcl-pwa-ios-guide {
-  border-top-color: #496781 !important;
+  border-top-color: var(--rch-brand-border) !important;
 }
 
 html body .rcl-pwa-ios-guide li {
-  background: #153653 !important;
-  border-color: #56738e !important;
-  color: #f8fbff !important;
+  background: var(--rch-brand-raised) !important;
+  border-color: var(--rch-brand-muted) !important;
+  color: var(--rch-brand-ink) !important;
 }
 
 html body .rcl-pwa-ios-guide li > span {
-  background: #cceaff !important;
-  color: #08223c !important;
+  background: var(--rch-brand-ink) !important;
+  color: var(--rch-brand-surface) !important;
 }
 
 html body .rcl-pwa-ios-guide small {
-  color: #d9e6f3 !important;
+  color: var(--rch-brand-ink) !important;
   font-size: 12px;
   line-height: 1.45;
   opacity: 1 !important;

@@ -9,23 +9,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'rcl-black': '#0F2547',
-        'rcl-white': '#F6F9FC',
+        'rcl-black': '#0b0c0e',
+        'rcl-white': '#f5f5f3',
         // Legacy aliases resolve to the approved RCL mockup palette.
         // Keep these names because the application has many existing utility classes using them.
-        'rcl-gold': '#3B82F6',
+        'rcl-gold': '#c8102e',
         'rcl-red': '#E63946',
-        'rcl-blue': '#3B82F6',
-        'rcl-navy': '#0F2547',
+        'rcl-blue': '#c8102e',
+        'rcl-navy': '#0b0c0e',
         'rcl-teal': '#2E8B70',
-        'rcl-orange': '#3B82F6',
+        'rcl-orange': '#c8102e',
         'rcl-vip-gold': '#D4AF37',
         'rcl-purple': '#7209B7',
-        'rcl-gray': '#64748B',
+        'rcl-gray': '#a6a8ad',
+        'rcl-muted': '#a6a8ad',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['RCH Condensed', 'Arial Narrow', 'Impact', 'sans-serif'],
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1rem' }],

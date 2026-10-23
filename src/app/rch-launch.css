@@ -4,7 +4,7 @@ html body .rch-launch {
   width: 100%; height: 100vh; height: 100dvh;
   display: grid; place-items: center; overflow: hidden;
   /* Full-screen cinematic navy/gold setting without cropping the square film. */
-  background: radial-gradient(ellipse 72% 52% at 50% 53%, #273449 0%, #101c31 47%, #040b19 100%) !important;
+  background: radial-gradient(ellipse 72% 52% at 50% 53%, var(--rch-brand-raised) 0%, var(--rch-brand-surface) 47%, var(--rch-brand-canvas) 100%) !important;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .22s ease, visibility .22s;
   contain: layout paint;
@@ -42,7 +42,7 @@ html body .rch-launch-skip:focus-visible {
   top: calc(env(safe-area-inset-top) + 18px); right: 18px;
   width: auto; height: auto; padding: 10px 14px; clip-path: none;
   border: 2px solid #e8b64b; border-radius: 8px;
-  background: #fff !important; color: #07152b !important; z-index: 3;
+  background: #fff !important; color: var(--rch-brand-surface) !important; z-index: 3;
 }
 @keyframes rch-launch-failsafe {
   to { opacity: 0; visibility: hidden; pointer-events: none; }

@@ -10,10 +10,16 @@ export type RCLMemberNavItem={label:string;href:string;icon:IconType;action?:'cr
 
 export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
-  {label:'Discover',href:'/discover',icon:FaCompass},
-  {label:'Create',href:'/create',icon:FaPlus,action:'create'},
-  {label:'Runs',href:'/runs',icon:FaLocationDot},
+  {label:'Runs',href:'/runs',icon:FaBasketball},
+  {label:'Community',href:'/community',icon:FaPeopleGroup},
   {label:'Profile',href:'/social/profile/me',icon:FaUser},
+];
+
+export const RCL_GUEST_MOBILE_NAV:RCLMemberNavItem[]=[
+  {label:'Home',href:'/',icon:FaHouse},
+  {label:'Runs',href:'/runs',icon:FaBasketball},
+  {label:'Community',href:'/community',icon:FaPeopleGroup},
+  {label:'Profile',href:'/auth/sign-up',icon:FaUser},
 ];
 
 export const RCL_MEMBER_DESKTOP_NAV=RCL_MEMBER_PRIMARY_NAV;
@@ -24,6 +30,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'Your identity, people, conversations and personalized basketball world',
     items:[
       {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'Create',href:'/create',icon:FaPlus},
       {label:'Living World · Courts + legacy',href:'/world',icon:FaGlobe},
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
@@ -102,7 +109,7 @@ const LEAGUE=['/staff','/league','/schedule','/games','/standings','/stats','/ra
 export function isMemberNavigationActive(pathname:string,href:string){
   // A profile is a /social/* route, but only Profile should appear selected there.
   if(href==='/social')return pathname==='/social'||pathname==='/social/feed';
-  const family=href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  const family=href==='/community'?['/community','/communities','/crews','/friends']:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
   if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   const clean=href.split('?')[0];
   return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));

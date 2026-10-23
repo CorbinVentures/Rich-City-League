@@ -10,7 +10,7 @@
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(15,37,71,.34);
+  background: rgb(var(--rch-brand-raised-rgb) / .34);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -25,7 +25,7 @@
   border-radius: 24px;
   background: #fff;
   color: var(--rcl-v3-ink);
-  box-shadow: 0 24px 80px rgba(15,37,71,.2);
+  box-shadow: 0 24px 80px rgb(var(--rch-brand-raised-rgb) / .2);
 }
 
 .rcl-composer-header {
@@ -134,13 +134,13 @@
 }
 
 .rcl-composer-textarea::placeholder {
-  color: #8A99AA !important;
+  color: var(--rch-brand-muted) !important;
   opacity: 1;
 }
 
 .rcl-composer-textarea:focus {
-  border-color: rgba(59,130,246,.58) !important;
-  box-shadow: 0 0 0 4px rgba(59,130,246,.1) !important;
+  border-color: rgb(var(--rch-brand-accent-rgb) / .58) !important;
+  box-shadow: 0 0 0 4px rgb(var(--rch-brand-accent-rgb) / .1) !important;
 }
 
 .rcl-composer-media-drop {
@@ -151,9 +151,9 @@
   place-items: center;
   align-content: center;
   gap: 6px;
-  border: 1px dashed #B8CBE0;
+  border: 1px dashed var(--rch-brand-copy);
   border-radius: 18px;
-  background: #F7FAFD;
+  background: var(--rch-brand-ink);
   padding: 18px;
   color: var(--rcl-v3-slate);
   text-align: center;
@@ -161,8 +161,8 @@
 }
 
 .rcl-composer-media-drop:hover {
-  border-color: #9BBDE8;
-  background: #F1F6FD;
+  border-color: var(--rch-brand-accent-text);
+  background: var(--rch-brand-ink);
 }
 
 .rcl-composer-media-drop > span {
@@ -193,7 +193,7 @@
   margin-top: 14px;
   border: 1px solid var(--rcl-v3-border);
   border-radius: 18px;
-  background: #F4F7FA;
+  background: var(--rch-brand-ink);
 }
 
 .rcl-composer-preview > img,
@@ -202,7 +202,7 @@
   width: 100%;
   max-height: min(48dvh,440px);
   object-fit: contain;
-  background: #EEF3F7;
+  background: var(--rch-brand-ink);
 }
 
 .rcl-composer-preview-meta {
@@ -237,7 +237,7 @@
   gap: 6px;
   border: 0;
   border-radius: 9px;
-  background: #F6F8FA;
+  background: var(--rch-brand-ink);
   padding: 0 10px;
   color: var(--rcl-v3-slate);
   font-size: 9px;
@@ -257,7 +257,7 @@
   padding: 11px 14px calc(11px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--rcl-v3-border);
   background: rgba(255,255,255,.98);
-  box-shadow: 0 -10px 28px rgba(15,37,71,.045);
+  box-shadow: 0 -10px 28px rgb(var(--rch-brand-raised-rgb) / .045);
 }
 
 .rcl-composer-footer > div > button,
@@ -292,12 +292,12 @@
   font-weight: 900;
   letter-spacing: .06em;
   text-transform: uppercase;
-  box-shadow: 0 8px 20px rgba(59,130,246,.22);
+  box-shadow: 0 8px 20px rgb(var(--rch-brand-accent-rgb) / .22);
 }
 
 .rcl-composer-submit:disabled {
-  background: #E5EAF0;
-  color: #94A3B8;
+  background: var(--rch-brand-ink);
+  color: var(--rch-brand-muted);
   box-shadow: none;
 }
 
@@ -312,9 +312,9 @@
   margin-top: 14px;
   overflow: hidden;
   place-items: center;
-  border: 1px dashed #B8CBE0;
+  border: 1px dashed var(--rch-brand-copy);
   border-radius: 18px;
-  background: #F7FAFD;
+  background: var(--rch-brand-ink);
   padding: 0;
   color: var(--rcl-v3-slate);
   box-shadow: none;
@@ -325,7 +325,7 @@
   width: 100%;
   max-height: 52dvh;
   object-fit: contain;
-  background: #EEF3F7;
+  background: var(--rch-brand-ink);
 }
 
 .rcl-story-media-picker > span {
@@ -381,7 +381,7 @@
   gap: 4px !important;
   border: 1px solid var(--rcl-v3-border) !important;
   border-radius: 14px !important;
-  background: #F8FAFC !important;
+  background: var(--rch-brand-ink) !important;
   padding: 10px 8px !important;
   color: var(--rcl-v3-slate) !important;
   text-align: center;
@@ -392,7 +392,7 @@
 
 .rcl-composer-type-option:hover,
 .rcl-composer-link-option > button:hover {
-  border-color: #BFD4F3 !important;
+  border-color: var(--rch-brand-copy) !important;
   background: var(--rcl-v3-primary-soft) !important;
   color: var(--rcl-v3-primary) !important;
 }
@@ -439,9 +439,9 @@
 .rcl-composer-link-option:has(input) > div {
   width: 100%;
   margin: 0 !important;
-  border: 1px solid rgba(59,130,246,.28) !important;
+  border: 1px solid rgb(var(--rch-brand-accent-rgb) / .28) !important;
   border-radius: 14px !important;
-  background: #F5F9FF !important;
+  background: var(--rch-brand-ink) !important;
   color: var(--rcl-v3-slate) !important;
 }
 

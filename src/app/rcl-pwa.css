@@ -10,14 +10,14 @@
 .rcl-pwa-install-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(21,159,255,.26);
+  border: 1px solid rgb(var(--rch-brand-accent-rgb) / .26);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 8% 0%, rgba(21,159,255,.17), transparent 32%),
-    radial-gradient(circle at 98% 100%, rgba(59,130,246,.14), transparent 36%),
-    rgba(3,7,13,.97);
+    radial-gradient(circle at 8% 0%, rgb(var(--rch-brand-accent-rgb) / .17), transparent 32%),
+    radial-gradient(circle at 98% 100%, rgb(var(--rch-brand-accent-rgb) / .14), transparent 36%),
+    rgb(var(--rch-brand-canvas-rgb) / .97);
   padding: 17px;
-  color: #f6f8fb;
+  color: var(--rch-brand-ink);
   box-shadow: 0 24px 80px rgba(0,0,0,.48), 0 0 0 1px rgba(255,255,255,.025) inset;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -29,7 +29,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #159fff 25%, #3B82F6 72%, transparent);
+  background: linear-gradient(90deg, transparent, var(--rch-brand-accent) 25%, var(--rch-brand-accent) 72%, transparent);
   opacity: .9;
 }
 
@@ -44,7 +44,7 @@
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 50%;
   background: rgba(255,255,255,.04);
-  color: rgba(246,248,251,.52);
+  color: rgb(var(--rch-brand-ink-rgb) / .52);
 }
 
 .rcl-pwa-install-heading {
@@ -65,7 +65,7 @@
 .rcl-pwa-kicker {
   display: block;
   margin-bottom: 3px;
-  color: #3B82F6;
+  color: var(--rch-brand-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .22em;
@@ -82,7 +82,7 @@
 
 .rcl-pwa-copy {
   margin: 13px 0 0;
-  color: rgba(246,248,251,.58);
+  color: rgb(var(--rch-brand-ink-rgb) / .58);
   font-size: 12px;
   line-height: 1.55;
 }
@@ -111,16 +111,16 @@
 
 .rcl-pwa-primary {
   flex: 1;
-  border: 1px solid rgba(59,130,246,.9);
-  background: linear-gradient(135deg, #3B82F6, #ff6a34);
-  color: #03070d;
-  box-shadow: 0 9px 24px rgba(59,130,246,.18);
+  border: 1px solid rgb(var(--rch-brand-accent-rgb) / .9);
+  background: linear-gradient(135deg, var(--rch-brand-accent), #ff6a34);
+  color: var(--rch-brand-canvas);
+  box-shadow: 0 9px 24px rgb(var(--rch-brand-accent-rgb) / .18);
 }
 
 .rcl-pwa-secondary {
   border: 1px solid rgba(255,255,255,.09);
   background: rgba(255,255,255,.035);
-  color: rgba(246,248,251,.58);
+  color: rgb(var(--rch-brand-ink-rgb) / .58);
 }
 
 .rcl-pwa-ios-guide {
@@ -131,7 +131,7 @@
 
 .rcl-pwa-guide-title {
   margin: 0 0 10px;
-  color: #159fff;
+  color: var(--rch-brand-accent);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .16em;
@@ -153,7 +153,7 @@
   column-gap: 9px;
   border: 1px solid rgba(255,255,255,.07);
   border-radius: 14px;
-  background: rgba(7,21,34,.62);
+  background: rgb(var(--rch-brand-surface-rgb) / .62);
   padding: 10px;
 }
 
@@ -164,27 +164,27 @@
   height: 28px;
   place-items: center;
   border-radius: 9px;
-  background: rgba(21,159,255,.12);
-  color: #159fff;
+  background: rgb(var(--rch-brand-accent-rgb) / .12);
+  color: var(--rch-brand-accent);
   font-size: 11px;
   font-weight: 900;
 }
 
 .rcl-pwa-ios-guide b {
-  color: #f6f8fb;
+  color: var(--rch-brand-ink);
   font-size: 11px;
 }
 
 .rcl-pwa-ios-guide small {
   margin-top: 2px;
-  color: rgba(246,248,251,.42);
+  color: rgb(var(--rch-brand-ink-rgb) / .42);
   font-size: 10px;
   line-height: 1.35;
 }
 
 html,
 body {
-  background: #03070d;
+  background: var(--rch-brand-canvas);
 }
 
 button,

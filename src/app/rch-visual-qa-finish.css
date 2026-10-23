@@ -4,10 +4,10 @@
  * scorebook canvases, and printable documents retain intended styles.
  */
 html.rch-premium-root body.rch-premium-app {
-  --rch-interactive-blue:#286fbd;
-  --rch-interactive-blue-deep:#17559e;
-  --rch-readable-muted:#b9cfe5;
-  --rch-control-line:#487295;
+  --rch-interactive-blue:var(--rch-brand-accent);
+  --rch-interactive-blue-deep:var(--rch-brand-border);
+  --rch-readable-muted:var(--rch-brand-copy);
+  --rch-control-line:var(--rch-brand-muted);
 }
 body.rch-premium-app .rcl-platform-root :is(a,button):disabled,
 body.rch-premium-app .rcl-platform-root :is(a,button)[aria-disabled="true"]{
@@ -16,51 +16,51 @@ body.rch-premium-app .rcl-platform-root :is(a,button)[aria-disabled="true"]{
 /* Profile: undo the legacy light-theme layers causing invisible blue actions
    and white cards inside a midnight-navy identity surface. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-profile-finish {
-  background:radial-gradient(ellipse at 72% -6%,#1949714d,transparent 32rem),#071a2e!important;
-  color:#f5faff!important;
+  background:radial-gradient(ellipse at 72% -6%,rgb(var(--rch-brand-border-rgb) / 0.302),transparent 32rem),var(--rch-brand-surface)!important;
+  color:var(--rch-brand-ink)!important;
   max-width:100%;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-hero {
-  border:1px solid #345f82!important;
-  border-bottom:1px solid #46749c!important;
+  border:1px solid var(--rch-brand-border)!important;
+  border-bottom:1px solid var(--rch-brand-muted)!important;
   border-radius:0 0 20px 20px!important;
-  background:#102941!important;
+  background:var(--rch-brand-surface)!important;
   overflow:hidden;
   box-shadow:0 16px 38px #0004!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-cover {
   width:100%;
-  background:#07182b!important;
-  border-bottom:1px solid #2f5877;
+  background:var(--rch-brand-surface)!important;
+  border-bottom:1px solid var(--rch-brand-border);
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-cover img {
   display:block;width:100%;height:100%;object-fit:cover;object-position:center;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-identity {
   padding-top:0;padding-bottom:24px;
-  background:linear-gradient(180deg,#102941,#0c2339)!important;
-  color:#f5faff!important;
+  background:linear-gradient(180deg,var(--rch-brand-surface),var(--rch-brand-surface))!important;
+  color:var(--rch-brand-ink)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-ring{
-  box-shadow:0 9px 28px #0009,0 0 0 3px #72baff18!important;
+  box-shadow:0 9px 28px #0009,0 0 0 3px rgb(var(--rch-brand-accent-text-rgb) / 0.094)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-ring em{
-  border:2px solid #e8f6ff!important;
-  background:#305e88!important;color:#fff!important;
+  border:2px solid var(--rch-brand-ink)!important;
+  background:var(--rch-brand-border)!important;color:#fff!important;
   font-weight:900!important;
   box-shadow:0 3px 10px #0007!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-home-link {
   display:inline-flex;align-items:center;justify-content:center;
   min-height:42px;min-width:76px;gap:7px;
-  border:1px solid #477ba4!important;
+  border:1px solid var(--rch-brand-muted)!important;
   border-radius:11px!important;
-  background:#153d5e!important;
-  color:#e4f2ff!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
   box-shadow:none!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-home-link:hover{
-  border-color:#8cc9f8!important;background:#1e507b!important;
+  border-color:var(--rch-brand-accent-text)!important;background:var(--rch-brand-border)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish h1{
   color:#fff!important;
@@ -71,18 +71,18 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish h1{
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row,
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row span {
-  color:#c3d6e9!important;opacity:1!important;
+  color:var(--rch-brand-copy)!important;opacity:1!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-role-row > span:first-child{
-  border:1px solid #426b8c!important;
+  border:1px solid var(--rch-brand-muted)!important;
   border-radius:999px!important;
-  background:#213f5d!important;
-  color:#dbeafb!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
   padding:7px 12px!important;
   line-height:1.2!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-identity > p{
-  color:#c4d8eb!important;opacity:1!important;
+  color:var(--rch-brand-copy)!important;opacity:1!important;
 }
 /* Semantic, intentionally distinct action states: white-on-blue (>=4.5:1)
    rather than inherited white-on-ice from old light themes. */
@@ -92,18 +92,18 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-mes
   justify-content:center!important;align-items:center!important;
   min-height:44px!important;
   padding:11px 17px!important;
-  border:1px solid #74b6f1!important;
+  border:1px solid var(--rch-brand-accent-text)!important;
   border-radius:11px!important;
-  background:linear-gradient(135deg,#286fbd,#17559e)!important;
+  background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-border))!important;
   color:#fff!important;
-  box-shadow:0 7px 19px #154c9c57!important;
+  box-shadow:0 7px 19px rgb(var(--rch-brand-border-rgb) / 0.341)!important;
   opacity:1!important;
   font-weight:850!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-edit-action:hover,
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-message-action:hover{
-  background:linear-gradient(135deg,#3079c8,#1d60af)!important;
-  border-color:#a2d8ff!important;
+  background:linear-gradient(135deg,var(--rch-brand-accent),var(--rch-brand-accent))!important;
+  border-color:var(--rch-brand-copy)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-edit-action svg,
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-message-action svg {
@@ -115,9 +115,9 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-wal
   display:inline-flex!important;align-items:center!important;justify-content:center!important;
   min-height:44px!important;
   padding:10px 16px!important;
-  background:#12395a!important;
-  color:#e9f5ff!important;
-  border:1px solid #527fa7!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
+  border:1px solid var(--rch-brand-muted)!important;
   border-radius:11px!important;
   box-shadow:none!important;
 }
@@ -129,37 +129,37 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-fol
 /* Keep achievements and stats dark even though an old stylesheet forces white. */
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish
   :is(.rcl-profile-status-banner,.rcl-profile-rep-ledger,.rcl-profile-rep-badges,.rcl-rep-badge-grid article){
-  background:#11304b!important;
-  color:#f4faff!important;
-  border:1px solid #3d6c8d!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
+  border:1px solid var(--rch-brand-border)!important;
   border-radius:15px!important;
   box-shadow:0 8px 24px #0003!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-status-banner :where(small,span) {
-  color:#bdd7ee!important;
+  color:var(--rch-brand-copy)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-status-banner strong {
   color:#fff!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics {
-  background:#0e2942!important;
-  color:#eef7ff!important;
-  border:1px solid #376286!important;
+  background:var(--rch-brand-surface)!important;
+  color:var(--rch-brand-ink)!important;
+  border:1px solid var(--rch-brand-border)!important;
   border-radius:15px!important;
   overflow:hidden;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics :is(b,strong) {
-  color:#f3faff!important;
+  color:var(--rch-brand-ink)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-metrics :is(small,span){
-  color:#b3cfe9!important;
+  color:var(--rch-brand-copy)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-progress {
-  background:#244666!important;
+  background:var(--rch-brand-border)!important;
   border-radius:999px!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-rep-progress i {
-  background:linear-gradient(90deg,#2b85e8,#6db9ff)!important;
+  background:linear-gradient(90deg,var(--rch-brand-accent),var(--rch-brand-accent-text))!important;
 }
 /* Profile attention: two matching metric cards with truly legible support copy. */
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention {
@@ -169,10 +169,10 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish
   :is(.rcl-profile-attention-primary,.rcl-profile-attention-delta) {
   min-width:0;
   padding:17px!important;
-  border:1px solid #427198!important;
+  border:1px solid var(--rch-brand-muted)!important;
   border-radius:16px!important;
-  background:linear-gradient(145deg,#133858,#0d283f)!important;
-  color:#eff8ff!important;
+  background:linear-gradient(145deg,var(--rch-brand-raised),var(--rch-brand-surface))!important;
+  color:var(--rch-brand-ink)!important;
   box-shadow:0 9px 25px #0003!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention :is(strong,b) {
@@ -180,32 +180,32 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-att
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish
   :is(.rcl-profile-attention-label,.rcl-profile-attention-caption) {
-  color:#bed5eb!important;
+  color:var(--rch-brand-copy)!important;
   opacity:1!important;
   line-height:1.55!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rcl-profile-attention svg {
-  color:#82c3ff!important;opacity:1!important;
+  color:var(--rch-brand-accent-text)!important;opacity:1!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs {
-  background:#081c31f7!important;
-  border-color:#356087!important;
+  background:rgb(var(--rch-brand-surface-rgb) / 0.969)!important;
+  border-color:var(--rch-brand-border)!important;
   backdrop-filter:blur(16px);
   box-shadow:0 6px 18px #0005;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a {
-  color:#c0d7eb!important;opacity:1!important;
+  color:var(--rch-brand-copy)!important;opacity:1!important;
   white-space:nowrap!important;
   min-height:48px!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a[aria-current="page"]{
-  color:#fff!important;background:#19466e85!important;
+  color:#fff!important;background:rgb(var(--rch-brand-raised-rgb) / 0.522)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a:hover {
-  color:#fff!important;background:#17405f9c!important;
+  color:#fff!important;background:rgb(var(--rch-brand-raised-rgb) / 0.612)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-tabs a span:not(.absolute) {
-  color:#9bcfff!important;
+  color:var(--rch-brand-copy)!important;
 }
 /* VIP gold remains visually distinguished, but never sacrifices legibility. */
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish [title="RCL VIP verified member"]{
@@ -214,12 +214,12 @@ body.rch-premium-app .rcl-platform-root main.rch-profile-finish [title="RCL VIP 
   color:#f6d992!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish [title="RCL VIP verified member"] span{
-  background:#f3cd63!important;color:#182230!important;
+  background:#f3cd63!important;color:var(--rch-brand-surface)!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-profile-finish .rch-profile-official-chip{
-  border:1px solid #5686b2!important;
-  background:#204867!important;
-  color:#c5e5ff!important;
+  border:1px solid var(--rch-brand-muted)!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
 }
 
 /* Discover screenshot repair: keep overview control whole, make the map HUD
@@ -241,10 +241,10 @@ body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview 
   padding:10px 15px!important;
   gap:9px!important;
   white-space:nowrap!important;
-  border:1px solid #4a7ca5!important;
+  border:1px solid var(--rch-brand-muted)!important;
   border-radius:11px!important;
-  background:#173d5e!important;
-  color:#e6f3ff!important;
+  background:var(--rch-brand-raised)!important;
+  color:var(--rch-brand-ink)!important;
   font-size:12px!important;font-weight:850!important;
   box-shadow:none!important;
 }
@@ -252,7 +252,7 @@ body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-overview 
   width:15px;height:15px;flex:0 0 auto;
 }
 body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-commonwealth-banner small {
-  color:#e0eeff!important;
+  color:var(--rch-brand-ink)!important;
   opacity:1!important;
 }
 body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-hud-name {
@@ -276,7 +276,7 @@ body.rch-premium-app .rcl-platform-root main.rch-world-page .rch-world-map-shell
 /* One control border family, not overlapping double outlines. */
 body.rch-premium-app .rcl-platform-root :is(.rch-world-map-controls,.rch-live-atlas-toolbar,.rch-world-filters)
   :is(button,a):focus-visible {
-  outline:2px solid #a7daff!important;
+  outline:2px solid var(--rch-brand-copy)!important;
   outline-offset:2px!important;
 }
 @media(max-width:767px) {
@@ -314,9 +314,9 @@ body.rch-premium-app .rcl-platform-root :is(.rch-world-map-controls,.rch-live-at
   }
   body.rch-premium-app .rcl-universal-bottom a.active,
   body.rch-premium-app .rcl-universal-bottom a[aria-current="page"]{
-    border:1px solid #33608a!important;
+    border:1px solid var(--rch-brand-border)!important;
     border-radius:12px!important;
-    background:#17416d70!important;
+    background:rgb(var(--rch-brand-raised-rgb) / 0.439)!important;
   }
 }
 @media(max-width:375px){

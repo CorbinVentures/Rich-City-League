@@ -1,96 +1,96 @@
 /*
  * RCH ARENA / 2026 — sitewide premium basketball interface contract.
  * Imported after every legacy stylesheet. Every regular RCH route inherits
- * one midnight-navy / electric-blue hierarchy while retaining real behavior.
+ * one charcoal / crimson hierarchy while retaining real behavior.
  * Scope presentation only. Live video, scorebook canvases and installed-app
  * overlays keep their own controls and functional geometry.
  */
 html.rch-premium-root {
-  --rch-night:#061222;
-  --rch-deep:#041020;
-  --rch-canvas:#07172a;
-  --rch-card:#102841;
-  --rch-card-raised:#153451;
-  --rch-card-deep:#091d31;
-  --rch-line:#315b80;
-  --rch-line-soft:#254763;
-  --rch-ink:#f5f9ff;
-  --rch-copy:#bdcfe4;
-  --rch-muted:#9bb6d1;
-  --rch-blue:#348ffc;
-  --rch-blue-bright:#61adff;
-  --rch-blue-glow:rgba(46,146,255,.24);
+  --rch-night:var(--rch-brand-surface);
+  --rch-deep:var(--rch-brand-canvas);
+  --rch-canvas:var(--rch-brand-surface);
+  --rch-card:var(--rch-brand-surface);
+  --rch-card-raised:var(--rch-brand-raised);
+  --rch-card-deep:var(--rch-brand-surface);
+  --rch-line:var(--rch-brand-border);
+  --rch-line-soft:var(--rch-brand-raised);
+  --rch-ink:var(--rch-brand-ink);
+  --rch-copy:var(--rch-brand-copy);
+  --rch-muted:var(--rch-brand-copy);
+  --rch-blue:var(--rch-brand-accent);
+  --rch-blue-bright:var(--rch-brand-accent-text);
+  --rch-blue-glow:rgb(var(--rch-brand-accent-rgb) / .24);
   --rch-green:#70e0bf;
   --rch-gold:#e3bf71;
   --rch-danger:#ff899d;
   --rch-radius:16px;
   --rch-radius-card:20px;
-  --rch-shadow:0 18px 48px rgba(0,5,18,.37);
+  --rch-shadow:0 18px 48px rgb(var(--rch-brand-canvas-rgb) / .37);
   color-scheme:dark!important;
-  background:#061222!important;
+  background:var(--rch-brand-surface)!important;
   scroll-behavior:smooth;
   /* Existing page modules refer to multiple historic variable families. */
-  --rcl-canvas:#07172a!important;
-  --rcl-bg:#07172a!important;
-  --rcl-surface:#102841!important;
-  --rcl-surface-2:#153451!important;
-  --rcl-line:#315b80!important;
-  --rcl-text:#f5f9ff!important;
-  --rcl-text-2:#bdcfe4!important;
-  --rcl-muted:#9bb6d1!important;
-  --rcl-charcoal:#061222!important;
-  --rcl-cream:#e6f2ff!important;
-  --rcl-orange:#348ffc!important;
-  --rcl-gold:#348ffc!important;
-  --rcl-blue:#61adff!important;
-  --rcl-social-canvas:#07172a!important;
-  --rcl-social-surface:#102841!important;
-  --rcl-social-soft:#153451!important;
-  --rcl-social-border:#315b80!important;
-  --rcl-social-text:#f5f9ff!important;
-  --rcl-social-text-2:#bdcfe4!important;
-  --rcl-social-muted:#9bb6d1!important;
-  --rcl-social-primary:#348ffc!important;
-  --rcl-social-clay:#348ffc!important;
-  --rcl-social-primary-deep:#2876dd!important;
-  --rcl-v3-canvas:#07172a!important;
-  --rcl-v3-surface:#102841!important;
-  --rcl-v3-soft:#153451!important;
-  --rcl-v3-border:#315b80!important;
-  --rcl-v3-ink:#f5f9ff!important;
-  --rcl-v3-copy:#bdcfe4!important;
-  --rcl-v3-muted:#9bb6d1!important;
-  --rcl-v3-primary:#348ffc!important;
-  --rcl-v3-primary-soft:#153451!important;
-  --rcl-uniform-canvas:#07172a!important;
-  --rcl-uniform-surface:#102841!important;
-  --rcl-uniform-soft:#153451!important;
-  --rcl-uniform-border:#315b80!important;
-  --rcl-uniform-text:#f5f9ff!important;
-  --rcl-uniform-text-2:#bdcfe4!important;
-  --rcl-uniform-primary:#348ffc!important;
-  --rcl-prof-bg:#061222!important;
-  --rcl-prof-surface:#102841!important;
-  --rcl-prof-surface-2:#153451!important;
-  --rcl-prof-border:#315b80!important;
-  --rcl-prof-ice:#d6eaff!important;
-  --rcl-prof-ice-strong:#8cc9ff!important;
-  --rcl-psych-bg:#07172a!important;
-  --rcl-psych-bg-deep:#061222!important;
-  --rcl-psych-surface:#102841!important;
-  --rcl-psych-text:#f5f9ff!important;
-  --rcl-psych-muted:#bdcfe4!important;
+  --rcl-canvas:var(--rch-brand-surface)!important;
+  --rcl-bg:var(--rch-brand-surface)!important;
+  --rcl-surface:var(--rch-brand-surface)!important;
+  --rcl-surface-2:var(--rch-brand-raised)!important;
+  --rcl-line:var(--rch-brand-border)!important;
+  --rcl-text:var(--rch-brand-ink)!important;
+  --rcl-text-2:var(--rch-brand-copy)!important;
+  --rcl-muted:var(--rch-brand-copy)!important;
+  --rcl-charcoal:var(--rch-brand-surface)!important;
+  --rcl-cream:var(--rch-brand-ink)!important;
+  --rcl-orange:var(--rch-brand-accent)!important;
+  --rcl-gold:var(--rch-brand-accent)!important;
+  --rcl-blue:var(--rch-brand-accent-text)!important;
+  --rcl-social-canvas:var(--rch-brand-surface)!important;
+  --rcl-social-surface:var(--rch-brand-surface)!important;
+  --rcl-social-soft:var(--rch-brand-raised)!important;
+  --rcl-social-border:var(--rch-brand-border)!important;
+  --rcl-social-text:var(--rch-brand-ink)!important;
+  --rcl-social-text-2:var(--rch-brand-copy)!important;
+  --rcl-social-muted:var(--rch-brand-copy)!important;
+  --rcl-social-primary:var(--rch-brand-accent)!important;
+  --rcl-social-clay:var(--rch-brand-accent)!important;
+  --rcl-social-primary-deep:var(--rch-brand-accent)!important;
+  --rcl-v3-canvas:var(--rch-brand-surface)!important;
+  --rcl-v3-surface:var(--rch-brand-surface)!important;
+  --rcl-v3-soft:var(--rch-brand-raised)!important;
+  --rcl-v3-border:var(--rch-brand-border)!important;
+  --rcl-v3-ink:var(--rch-brand-ink)!important;
+  --rcl-v3-copy:var(--rch-brand-copy)!important;
+  --rcl-v3-muted:var(--rch-brand-copy)!important;
+  --rcl-v3-primary:var(--rch-brand-accent)!important;
+  --rcl-v3-primary-soft:var(--rch-brand-raised)!important;
+  --rcl-uniform-canvas:var(--rch-brand-surface)!important;
+  --rcl-uniform-surface:var(--rch-brand-surface)!important;
+  --rcl-uniform-soft:var(--rch-brand-raised)!important;
+  --rcl-uniform-border:var(--rch-brand-border)!important;
+  --rcl-uniform-text:var(--rch-brand-ink)!important;
+  --rcl-uniform-text-2:var(--rch-brand-copy)!important;
+  --rcl-uniform-primary:var(--rch-brand-accent)!important;
+  --rcl-prof-bg:var(--rch-brand-surface)!important;
+  --rcl-prof-surface:var(--rch-brand-surface)!important;
+  --rcl-prof-surface-2:var(--rch-brand-raised)!important;
+  --rcl-prof-border:var(--rch-brand-border)!important;
+  --rcl-prof-ice:var(--rch-brand-ink)!important;
+  --rcl-prof-ice-strong:var(--rch-brand-accent-text)!important;
+  --rcl-psych-bg:var(--rch-brand-surface)!important;
+  --rcl-psych-bg-deep:var(--rch-brand-surface)!important;
+  --rcl-psych-surface:var(--rch-brand-surface)!important;
+  --rcl-psych-text:var(--rch-brand-ink)!important;
+  --rcl-psych-muted:var(--rch-brand-copy)!important;
 }
 html.rch-premium-root body.rch-premium-app {
   min-height:100dvh;
-  background:radial-gradient(ellipse at 78% -12%,#15416c 0%,transparent 40rem),linear-gradient(180deg,#071b31,#07172a 40%,#041020 100%)!important;
+  background:radial-gradient(ellipse at 78% -12%,var(--rch-brand-raised) 0%,transparent 40rem),linear-gradient(180deg,var(--rch-brand-surface),var(--rch-brand-surface) 40%,var(--rch-brand-canvas) 100%)!important;
   background-attachment:fixed;
   color:var(--rch-ink)!important;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
   overflow-x:clip;
 }
 html.rch-premium-root body.rch-premium-app::before{display:none!important}
-html.rch-premium-root body.rch-premium-app ::selection{background:#387dda;color:white}
+html.rch-premium-root body.rch-premium-app ::selection{background:var(--rch-brand-accent);color:white}
 body.rch-premium-app :is(.rcl-platform-root,.rch-isolated-page) {
   --rcl-canvas:var(--rch-canvas)!important;
   --rcl-surface:var(--rch-card)!important;
@@ -129,7 +129,7 @@ body.rch-premium-app :is(.rcl-platform-root,.rch-isolated-page) {
   min-width:0;
 }
 body.rch-premium-app .rcl-platform-root:not(.rch-isolated-page):not(.rch-browser-only){
-  background:radial-gradient(ellipse at 84% -9%,rgba(52,143,252,.15),transparent 34rem),var(--rch-canvas)!important;
+  background:radial-gradient(ellipse at 84% -9%,rgb(var(--rch-brand-accent-rgb) / .15),transparent 34rem),var(--rch-canvas)!important;
   color:var(--rch-ink)!important;
 }
 body.rch-premium-app .rcl-platform-root > main:not(.rch-world-page):not(.rch-arena-shell):not(.rch-cw):not(.rch-broadcast-stage):not(.rch-tv-stage) {
@@ -164,7 +164,7 @@ body.rch-premium-app .rcl-platform-root [class*="text-rcl-orange"],
 body.rch-premium-app .rcl-platform-root [class*="text-blue-"]{color:var(--rch-blue-bright)!important}
 body.rch-premium-app .rcl-platform-root [class*="text-red-"]{color:var(--rch-danger)!important}
 body.rch-premium-app .rcl-platform-root :is(a,button,input,textarea,select):focus-visible{
-  outline:2px solid #a2d7ff!important;outline-offset:3px!important;
+  outline:2px solid var(--rch-brand-copy)!important;outline-offset:3px!important;
 }
 body.rch-premium-app .rcl-platform-root :where(button,a){-webkit-tap-highlight-color:transparent}
 body.rch-premium-app .rcl-platform-root :where(img,video,canvas,iframe){max-width:100%}

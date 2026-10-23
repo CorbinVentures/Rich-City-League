@@ -55,8 +55,8 @@ describe('Discover / The Scene mobile contrast guard', () => {
     expect(css).toContain('> input.rch-scene-native-control');
     expect(css).toContain('> select.rch-scene-native-control');
     expect(css).toContain('background:transparent!important');
-    expect(css).toContain('-webkit-text-fill-color:#153450!important');
-    expect(css).toContain('color-scheme:light!important');
+    expect(css).toContain('-webkit-text-fill-color:var(--rch-brand-ink)!important');
+    expect(css).toContain('color-scheme:dark!important');
   });
   it('does not present empty publication data as invented events', () => {
     expect(scene).toContain("items.length===0?'Your next play is waiting.'");

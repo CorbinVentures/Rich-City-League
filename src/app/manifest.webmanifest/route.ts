@@ -11,8 +11,8 @@ export function GET() {
     scope: '/',
     display: 'standalone',
     orientation: 'any',
-    background_color: '#FFFEFA',
-    theme_color: '#F6F9FC',
+    background_color: '#0b0c0e',
+    theme_color: '#0b0c0e',
     categories: ['sports','social','entertainment'],
     shortcuts: [
       { name:'RCH Home', short_name:'Home', description:'Open your basketball social feed.', url:'/social?source=pwa-shortcut', icons:[{src:'/icon?v=black-r-1',sizes:'512x512',type:'image/png'}] },

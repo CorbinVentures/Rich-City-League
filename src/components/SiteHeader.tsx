@@ -19,6 +19,7 @@ import {
 import {
   isMemberNavigationActive,
   RCL_MEMBER_DESKTOP_NAV,
+  RCL_GUEST_MOBILE_NAV,
   RCL_MEMBER_NAV_GROUPS,
   RCL_MEMBER_PRIMARY_NAV,
 } from '@/lib/member-navigation';
@@ -79,7 +80,7 @@ export function SiteHeader(){
   const groups=memberMode?RCL_MEMBER_NAV_GROUPS:RCL_NAV_GROUPS;
   const drawerGroups=isAdmin?[...groups,profile?.role==='admin'?RCL_ADMIN_NAV_GROUP:{...RCL_ADMIN_NAV_GROUP,items:RCL_ADMIN_NAV_GROUP.items.filter(item=>item.href!==RCL_COMMAND_NAV_ITEM.href)}]:groups;
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
-  const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_PRIMARY_NAV_ITEMS;
+  const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_GUEST_MOBILE_NAV;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
   const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';

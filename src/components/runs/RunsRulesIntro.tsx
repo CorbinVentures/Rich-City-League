@@ -105,59 +105,59 @@ export function RunsRulesIntro({open,onClose}:{open:boolean;onClose:()=>void}){
  const ChapterIcon=chapter.icon;
 
  return createPortal(
-  <div className="fixed inset-0 z-[2000] flex min-h-[100dvh] items-center justify-center bg-[#02070e]/95 px-3 py-[max(12px,env(safe-area-inset-top))] backdrop-blur-lg sm:p-6">
+  <div className="fixed inset-0 z-[2000] flex min-h-[100dvh] items-center justify-center bg-[var(--rch-brand-canvas)]/95 px-3 py-[max(12px,env(safe-area-inset-top))] backdrop-blur-lg sm:p-6">
    <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="rch-rules-title" aria-describedby="rch-rules-description" tabIndex={-1}
-    className="relative flex max-h-[calc(100dvh-24px)] w-full max-w-[810px] flex-col overflow-hidden rounded-[24px] border border-[#34658a] bg-[#081725] text-white shadow-[0_35px_110px_#000c] sm:rounded-[32px]">
+    className="relative flex max-h-[calc(100dvh-24px)] w-full max-w-[810px] flex-col overflow-hidden rounded-[10px] border border-[var(--rch-brand-border)] bg-[var(--rch-brand-surface)] text-white shadow-[0_35px_110px_#000c] sm:rounded-[10px]">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-     <div className="absolute -right-24 -top-48 h-[440px] w-[440px] rounded-full border border-[#5086aa]/25"/>
-     <div className="absolute -right-10 -top-36 h-[350px] w-[350px] rounded-full border border-dashed border-[#5086aa]/25"/>
-     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_15%,#18456675,transparent_55%)]"/>
+     <div className="absolute -right-24 -top-48 h-[440px] w-[440px] rounded-full border border-[var(--rch-brand-muted)]/25"/>
+     <div className="absolute -right-10 -top-36 h-[350px] w-[350px] rounded-full border border-dashed border-[var(--rch-brand-muted)]/25"/>
+     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_15%,var(--rch-brand-raised),transparent_55%)]"/>
     </div>
-    <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-b border-[#2c516c] px-5 py-4 sm:px-8">
+    <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-b border-[var(--rch-brand-raised)] px-5 py-4 sm:px-8">
      <div className="flex items-center gap-3">
-      <span className="grid h-10 w-10 place-items-center rounded-xl border border-[#7ac4f0]/50 bg-[#153b58] text-lg text-[#a4e1ff]"><FaBookOpen aria-hidden="true"/></span>
-      <div><p className="text-[10px] font-black uppercase tracking-[.19em] text-[#9bd5f5]">RCH · Runs World</p>
+      <span className="grid h-10 w-10 place-items-center rounded-xl border border-[var(--rch-brand-copy)]/50 bg-[var(--rch-brand-raised)] text-lg text-[var(--rch-brand-copy)]"><FaBookOpen aria-hidden="true"/></span>
+      <div><p className="text-[10px] font-black uppercase tracking-[.19em] text-[var(--rch-brand-copy)]">RCH · Runs World</p>
        <p className="text-sm font-black tracking-wide text-white">THE PLAYER RULEBOOK</p></div>
      </div>
-     <button type="button" onClick={onClose} className="flex min-h-11 items-center gap-2 rounded-xl border border-[#3b6583] px-3 text-xs font-bold text-[#d3e8f6] hover:bg-[#19394e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#c8f06d]">
+     <button type="button" onClick={onClose} className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--rch-brand-border)] px-3 text-xs font-bold text-[var(--rch-brand-copy)] hover:bg-[var(--rch-brand-raised)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--rch-brand-accent-text)]">
       Skip <FaXmark aria-hidden="true"/>
      </button>
     </header>
     <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-7">
-     <div className="flex items-center justify-between gap-3 text-[10px] font-black uppercase tracking-[.17em] text-[#acd5ed]">
+     <div className="flex items-center justify-between gap-3 text-[10px] font-black uppercase tracking-[.17em] text-[var(--rch-brand-copy)]">
       <span>How to play · {chapter.eyebrow}</span><span className="tabular-nums">{chapter.number} / 05</span>
      </div>
      <div className="mt-3 grid grid-cols-5 gap-2" role="progressbar" aria-label="Rules introduction progress" aria-valuenow={step+1} aria-valuemin={1} aria-valuemax={chapters.length}>
-      {chapters.map((item,index)=><span key={item.number} aria-hidden="true" className={'h-1.5 rounded-full '+(index<=step?'bg-[#c8f06d]':'bg-[#2b4e66]')}/>)}
+      {chapters.map((item,index)=><span key={item.number} aria-hidden="true" className={'h-1.5 rounded-full '+(index<=step?'bg-[var(--rch-brand-accent)]':'bg-[var(--rch-brand-raised)]')}/>)}
      </div>
      <div className="mt-6 flex flex-wrap items-start gap-5 sm:gap-7">
-      <div className="grid h-[86px] w-[86px] shrink-0 place-items-center rounded-2xl border border-[#89c7ed]/60 bg-gradient-to-br from-[#265f85] to-[#0c263d] text-[40px] text-[#d4f1ff] shadow-[0_0_35px_#3b91d329]">
+      <div className="grid h-[86px] w-[86px] shrink-0 place-items-center rounded-2xl border border-[var(--rch-brand-copy)]/60 bg-gradient-to-br from-[var(--rch-brand-border)] to-[var(--rch-brand-surface)] text-[40px] text-[var(--rch-brand-copy)] shadow-[0_0_35px_var(--rch-brand-muted)]">
        <ChapterIcon aria-hidden="true"/>
       </div>
       <div className="min-w-0 flex-1">
-       <p className="text-xs font-black uppercase tracking-[.16em] text-[#c8f06d]">Rule {chapter.number} · {chapter.short}</p>
+       <p className="text-xs font-black uppercase tracking-[.16em] text-[var(--rch-brand-accent-text)]">Rule {chapter.number} · {chapter.short}</p>
        <h2 ref={headingRef} tabIndex={-1} id="rch-rules-title" className="mt-2 max-w-[540px] text-3xl font-black uppercase leading-[1.02] tracking-[-.04em] text-white outline-none sm:text-[46px]">{chapter.title}</h2>
       </div>
      </div>
-     <p id="rch-rules-description" className="mt-5 text-sm leading-6 text-[#c7e0ef] sm:text-base sm:leading-7">{chapter.description}</p>
+     <p id="rch-rules-description" className="mt-5 text-sm leading-6 text-[var(--rch-brand-copy)] sm:text-base sm:leading-7">{chapter.description}</p>
      <div className="mt-5 space-y-3" aria-live="polite">
-      {chapter.rules.map((rule,index)=><div key={index} className="flex gap-3 rounded-xl border border-[#315873] bg-[#0c263a] px-4 py-3.5">
-       <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#c8f06d] text-xs font-black text-[#102014]">{index+1}</span>
-       <p className="text-[13px] leading-[1.55] text-[#e0eef7] sm:text-sm">{rule}</p>
+      {chapter.rules.map((rule,index)=><div key={index} className="flex gap-3 rounded-xl border border-[var(--rch-brand-border)] bg-[var(--rch-brand-surface)] px-4 py-3.5">
+       <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--rch-brand-accent)] text-xs font-black text-white">{index+1}</span>
+       <p className="text-[13px] leading-[1.55] text-[var(--rch-brand-copy)] sm:text-sm">{rule}</p>
       </div>)}
      </div>
-     <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-[.12em] text-[#c8f06d]"><FaBolt aria-hidden="true"/>{chapter.punchline}</div>
-     <p className="mt-3 text-[11px] leading-5 text-[#8db1ca]">Game progress reflects real-world play and verified records. Park access, schedules and eligibility can change.</p>
+     <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-[.12em] text-[var(--rch-brand-accent-text)]"><FaBolt aria-hidden="true"/>{chapter.punchline}</div>
+     <p className="mt-3 text-[11px] leading-5 text-[var(--rch-brand-muted)]">Game progress reflects real-world play and verified records. Park access, schedules and eligibility can change.</p>
     </div>
-    <footer className="relative z-10 flex shrink-0 items-center gap-2 border-t border-[#2c516c] bg-[#071522] px-5 py-4 sm:px-8">
+    <footer className="relative z-10 flex shrink-0 items-center gap-2 border-t border-[var(--rch-brand-raised)] bg-[var(--rch-brand-surface)] px-5 py-4 sm:px-8">
      <button type="button" onClick={()=>setStep(current=>Math.max(0,current-1))} disabled={step===0}
-      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#416e8b] px-4 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-35 sm:text-sm">
+      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--rch-brand-border)] px-4 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-35 sm:text-sm">
       <FaArrowLeft aria-hidden="true"/> Back
      </button>
-     <span className="ml-auto hidden text-xs font-semibold text-[#9fbed1] sm:inline">{chapter.short.toUpperCase()} · {chapters.length-step-1} TO GO</span>
+     <span className="ml-auto hidden text-xs font-semibold text-[var(--rch-brand-copy)] sm:inline">{chapter.short.toUpperCase()} · {chapters.length-step-1} TO GO</span>
      {step===chapters.length-1?
-      <button type="button" onClick={onClose} className="ml-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#e1ffa4] bg-[#c8f06d] px-5 text-xs font-black text-[#132418] sm:ml-0 sm:text-sm">ENTER RUNS WORLD <FaArrowRight aria-hidden="true"/></button>:
-      <button type="button" onClick={()=>setStep(current=>Math.min(chapters.length-1,current+1))} className="ml-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#e1ffa4] bg-[#c8f06d] px-5 text-xs font-black text-[#132418] sm:ml-0 sm:text-sm">NEXT RULE <FaArrowRight aria-hidden="true"/></button>}
+      <button type="button" onClick={onClose} className="ml-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--rch-brand-accent-text)] bg-[var(--rch-brand-accent)] px-5 text-xs font-black text-white sm:ml-0 sm:text-sm">ENTER RUNS WORLD <FaArrowRight aria-hidden="true"/></button>:
+      <button type="button" onClick={()=>setStep(current=>Math.min(chapters.length-1,current+1))} className="ml-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--rch-brand-accent-text)] bg-[var(--rch-brand-accent)] px-5 text-xs font-black text-white sm:ml-0 sm:text-sm">NEXT RULE <FaArrowRight aria-hidden="true"/></button>}
     </footer>
    </section>
   </div>,
