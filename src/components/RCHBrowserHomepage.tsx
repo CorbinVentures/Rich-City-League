@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { RCHDiscoveryStarter } from '@/components/RCHDiscoveryStarter';
 import { RCHBrowserAccountLink } from '@/components/RCHBrowserAccountLink';
 import {
   FaArrowRight, FaBasketball, FaCalendarDays, FaCamera,
@@ -80,6 +81,8 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       </div>
       <div className="rch-browser-hero-corner" aria-hidden="true">MORE THAN<br/>A GAME</div>
     </section>
+
+    <RCHDiscoveryStarter mode="web" opportunities={opportunities} />
 
     <section className="rch-browser-category-strip" aria-label="Explore RCH">
       <Link href="/community"><FaUserGroup/><b>COMMUNITY</b><small>Connect with hoopers</small></Link>
