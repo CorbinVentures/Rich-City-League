@@ -209,3 +209,53 @@ end;
 $$;
 revoke all on function public.manage_draft_clock(uuid,text,integer) from public, anon, authenticated;
 grant execute on function public.manage_draft_clock(uuid,text,integer) to authenticated;
+
+
+-- Protect against clients bypassing the RPC by writing directly to an
+-- otherwise staff-writable row. The official pick order freezes at opening.
+create or replace function private.enforce_draft_event_invariants()
+returns trigger language plpgsql security definer set search_path = ''
+as $$
+declare
+  draft_status text;
+  target_id uuid;
+  blockers jsonb;
+begin
+  if tg_table_name = 'draft_order' then
+    target_id := case when tg_op='DELETE' then old.draft_id else new.draft_id end;
+    select d.status into draft_status from public.drafts d where d.id=target_id;
+    if draft_status is distinct from 'SETUP' then
+      raise exception 'Draft order is locked after official Draft Night opens';
+    end if;
+    if tg_op='UPDATE' and new.draft_id<>old.draft_id then
+      raise exception 'Moving a draft slot to another event is not permitted';
+    end if;
+    if tg_op='DELETE' then return old; end if;
+    return new;
+  end if;
+  if tg_op='UPDATE' and old.status is distinct from new.status and new.status='OPEN' then
+    if old.status not in ('SETUP','PAUSED') then
+      raise exception 'Completed or cancelled drafts cannot reopen';
+    end if;
+    if new.clock_deadline_at is null then
+      raise exception 'An open draft must have an active, server-authored deadline';
+    end if;
+    if old.status='SETUP' then
+      blockers:=private.inspect_season_draft_readiness(new.id);
+      if jsonb_array_length(blockers)>0 then
+        raise exception 'Draft preflight failed: %',blockers::text;
+      end if;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+revoke all on function private.enforce_draft_event_invariants() from public,anon,authenticated;
+drop trigger if exists guard_official_draft_order on public.draft_order;
+create trigger guard_official_draft_order
+before insert or update or delete on public.draft_order
+for each row execute function private.enforce_draft_event_invariants();
+drop trigger if exists guard_official_draft_status on public.drafts;
+create trigger guard_official_draft_status
+before update of status on public.drafts
+for each row execute function private.enforce_draft_event_invariants();
