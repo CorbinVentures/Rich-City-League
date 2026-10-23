@@ -156,7 +156,7 @@ export default function FantasyPage() {
   }, [season]);
 
   const playerRankings = useMemo(() => {
-    const totals = new Map<string, PlayerStatRow>();
+    const totals = new Map<string, Omit<PlayerStatRow, 'game_id'>>();
     for (const stat of playerStats) {
       const current = totals.get(stat.player_id) ?? { player_id: stat.player_id, points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0, turnovers: 0 };
       current.points += Number(stat.points ?? 0);
