@@ -533,6 +533,19 @@ export default function RunsPage() {
           {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={soloOnly?'No solo spots open yet':runs.length?'No games match those filters':'THE COURT IS WAITING'} description={soloOnly?'No eligible Run has an open roster spot right now. Try All Runs or host a game.':runs.length?'Try another game format, style or city.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
+        {view==='runs'&&<>
+          {badges.length>0&&<section className="rch-run-badge-chase" aria-label="Run badges available to earn">
+            <div className="rch-run-badge-heading"><div><p>COLLECT YOUR LEGACY</p><h2>Badge chase</h2></div>
+              <Link href="/badges">All badges <FaArrowRight aria-hidden="true"/></Link></div>
+            <div className="rch-run-badge-grid">{badges.slice(0,3).map(badge=>
+              <Link href="/badges" key={badge.id} className="rch-run-badge">
+                <BadgeMedallion badge={badge} size="xs"/>
+                <div><strong>{badge.name}</strong><span>{badge.tier} · Available to earn</span>
+                  <small>{badge.description}</small></div>
+              </Link>)}</div>
+          </section>}
+          <RunCultureMoments/>
+        </>}
         {view==='runs'&&<section id="rch-competition" className="mt-9 scroll-mt-20">
           <RCHSectionHeader eyebrow="YOUR BASKETBALL LEGACY" title="Competition Center" description="Your verified history, court championships, and real player ladders."/>
           <div role="group" aria-label="Choose competition section" className="rch-ux-competition-tabs">
