@@ -58,6 +58,8 @@ import './rch-discovery-starter.css';
 // Browser-specific geometry; both shells consume the shared charcoal/crimson palette.
 import './rch-browser-sitewide.css';
 import './rch-unified-mockup.css';
+// Screenshot-verified last override: five tabs and dark high-contrast basketball product surfaces.
+import './rch-basketball-product-fit.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
