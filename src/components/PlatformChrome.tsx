@@ -42,8 +42,8 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
       <SiteHeader />
       <AdminControlShortcut />
       <div id="rcl-content" tabIndex={-1} className="rcl-platform-root">
-        {(pathname === '/social' || pathname === '/today') && <RCHDiscoveryStarter mode="pwa" />}
-        {children}<RCHContinueJourney pathname={pathname}/>
+        {pathname === '/today' && <RCHDiscoveryStarter mode="pwa" />}
+        {children}{pathname !== '/social' && <RCHContinueJourney pathname={pathname}/>}
       </div>
       <LegalFooter />
     </>
