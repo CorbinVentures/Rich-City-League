@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FaArrowRight, FaBasketball, FaCrown, FaFilm, FaGlobe, FaMicrophone, FaPlay, FaPlus, FaUsers } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
-import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
@@ -47,22 +46,27 @@ export default async function MediaPage() {
   const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? 'RCL Team';
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
-    <CorporatePageHero
-      eyebrow="RCH TV"
-      title="Your game. Your stories. Your screen."
-      accent="Live Games. The Pulse. Movies. Original Content."
-      description="Four ways to experience Virginia basketball: live competition, The Pulse weekly show and podcast, basketball movies, and original series. Discover the programming being built for the culture."
-      assetKey="media.cover"
-      actions={<><Link href="/media#live-games" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase tracking-wider text-black"><FaPlay/>Watch games</Link><Link href="/media/creators" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase tracking-wider">Creator program <FaArrowRight/></Link></>}
-      meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">RCH TV library</p><p className="mt-1 font-display text-3xl font-black">{curatedCount+highlights.length}<span className="ml-2 text-xs text-white/35">titles & clips</span></p><p className="mt-2 text-xs text-rcl-orange">Games stay free</p></div>}
-    />
+    <Container maxWidth="xl" className="pt-6 sm:pt-9">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div><h1 className="font-display text-3xl font-black uppercase">RCH TV</h1>
+          <p className="mt-1 text-sm text-white/60">{curatedCount+highlights.length} videos and clips</p></div>
+        <Link href="/media/creators" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-semibold">
+          Creators <FaArrowRight aria-hidden="true"/>
+        </Link>
+      </div>
+    </Container>
 
     <Container maxWidth="xl" className="py-10 sm:py-12">
-      <nav aria-label="RCH TV sections" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Link href="#live-games" className="group rounded-2xl border border-rcl-blue/20 bg-[#071522]/70 p-5 transition hover:border-rcl-blue/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-blue"><FaBasketball aria-hidden="true" className="mb-5 text-2xl text-rcl-blue"/><h2 className="font-display text-xl font-black uppercase">Live Games</h2><p className="mt-2 text-xs leading-5 text-white/55">Watch league competition live and revisit game replays.</p><span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore <FaArrowRight/></span></Link>
-        <Link href="#the-pulse" className="group rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.045] p-5 transition hover:border-rcl-orange/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-orange"><FaMicrophone aria-hidden="true" className="mb-5 text-2xl text-rcl-orange"/><h2 className="font-display text-xl font-black uppercase">The Pulse</h2><p className="mt-2 text-xs leading-5 text-white/55">Our weekly RCH TV show and basketball podcast.</p><span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-rcl-orange">Explore <FaArrowRight/></span></Link>
-        <Link href="#movies" className="group rounded-2xl border border-white/15 bg-[#071522]/60 p-5 transition hover:border-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-blue"><FaFilm aria-hidden="true" className="mb-5 text-2xl text-rcl-blue"/><h2 className="font-display text-xl font-black uppercase">Movies</h2><p className="mt-2 text-xs leading-5 text-white/55">Basketball films and features cleared for RCH TV.</p><span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore <FaArrowRight/></span></Link>
-        <Link href="#original-content" className="group rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 transition hover:border-rcl-blue/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rcl-blue"><FaCrown aria-hidden="true" className="mb-5 text-2xl text-rcl-orange"/><h2 className="font-display text-xl font-black uppercase">Original Content</h2><p className="mt-2 text-xs leading-5 text-white/55">RCH originals, creator projects, and documentaries.</p><span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore <FaArrowRight/></span></Link>
+      <nav aria-label="RCH TV sections" className="flex gap-2 overflow-x-auto pb-3">
+        {[
+          ['#live-games','Live games'],
+          ['#the-pulse','The Pulse'],
+          ['#movies','Movies'],
+          ['#original-content','Originals'],
+        ].map(([href,label])=><Link key={href} href={href}
+          className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold focus-visible:outline focus-visible:outline-2">
+          {label}
+        </Link>)}
       </nav>
 
       <section id="live-games" aria-labelledby="rch-tv-live-title" className="mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 shadow-[0_24px_70px_rgba(0,0,0,.22)]">
