@@ -94,12 +94,12 @@ export function FantasyLeagueNavigator() {
 
   if (authLoading || !user) return null;
 
-  return <section className="border-b border-white/10 bg-[#03070d] text-white">
+  return <section id="fantasy-leagues" className="rch-fantasy-leagues border-t border-white/10 bg-[#03070d] text-white">
     <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 sm:py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">Fantasy</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">Leagues</h2>
+          <h2 className="mt-1 font-display text-2xl font-semibold">My Fantasy Leagues</h2>
         </div>
         <Link href="/league" className="text-xs font-semibold text-white/40 hover:text-rcl-blue">League Center →</Link>
       </div>
