@@ -9,7 +9,7 @@ describe('RCH basketball world journey',()=>{
  it('makes the four core experiences reachable from one mobile tap',()=>{
   expect(RCL_MEMBER_PRIMARY_NAV.map(item=>item.href)).toEqual(['/social','/runs','/league','/draft','/fantasy']);
   expect(RCL_GUEST_MOBILE_NAV.map(item=>item.href)).toEqual(['/','/runs','/league','/draft','/fantasy']);
-  expect(RCL_PRIMARY_NAV_ITEMS.map(item=>item.href)).toEqual(['/social','/discover','/runs','/league','/draft','/fantasy'].filter(x=>x!=='/discover' || RCL_PRIMARY_NAV_ITEMS.some(y=>y.href==='/discover'))); // discover may be retained on browser
+  expect(RCL_PRIMARY_NAV_ITEMS.map(item=>item.href)).toEqual(['/social','/runs','/league','/draft','/fantasy']);
  });
  it('does not highlight League when Draft or Fantasy is active',()=>{
   for(const route of ['/draft','/draft/board','/fantasy','/fantasy/leagues/x']){
