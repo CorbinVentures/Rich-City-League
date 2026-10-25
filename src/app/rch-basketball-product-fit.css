@@ -180,3 +180,9 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-rea
  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card{min-height:0!important;padding:18px!important}
  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card strong{font-size:23px!important}
 }
+
+/* Admin has full access in the menu: floating desktop shortcut must never
+   obscure PWA content, Run hosting, Draft status or Fantasy controls. */
+@media (max-width:1199px), (min-width:1200px) and (max-width:1399px) and (pointer:coarse) {
+  html.rch-premium-root body.rch-premium-app .rch-admin-floating-shortcut {display:none!important;}
+}
