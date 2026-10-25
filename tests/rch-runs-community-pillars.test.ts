@@ -48,6 +48,10 @@ describe('Runs community pillars — real capacity and truthful share text',()=>
   expect(culture).toContain('An uploaded photo or community report is not proof of a celebrity appearance');
   expect(culture).toContain('with permission');
   expect(culture).not.toContain('is_celebrity: true');
+  const publish=fileText('src/app/runs/[id]/highlight/page.tsx');
+  expect(publish).toContain('type="checkbox" required checked={mediaPermission}');
+  expect(publish).toContain('!mediaPermission');
+  expect(publish).toContain('unverified guest or celebrity appearance');
  });
  it('provides a public, run-specific social preview rather than generic web links',()=>{
   const preview=fileText('src/app/runs/[id]/layout.tsx');
