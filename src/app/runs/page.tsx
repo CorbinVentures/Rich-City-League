@@ -507,7 +507,14 @@ export default function RunsPage() {
 
         {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
           <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Upcoming Runs" description="Real courts, real people. See who's hosting and find a place on the floor." action={{href:'/runs/partners',label:'Explore organizers'}}/>
-          <div className="mb-3 flex justify-end"><button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');}} className="min-h-11 text-xs font-bold text-[#9cd7ff]">Clear filters <FaArrowRight className="ml-1 inline"/></button></div>
+          <div className="rch-run-discovery-controls">
+            <button type="button" className="rch-run-solo-toggle" aria-pressed={soloOnly}
+              onClick={()=>setSoloOnly(value=>!value)}>
+              <FaBasketball aria-hidden="true"/>{soloOnly?'Solo spots only ✓':'Find a solo spot'}
+            </button>
+            <a href="#rch-competition" className="rch-run-passport-link"><FaMedal aria-hidden="true"/> My Passport</a>
+            <button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');setSoloOnly(false);}} className="rch-run-clear">Clear filters</button>
+          </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setTypeFilter('all')} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'}>All Runs</button>
             <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#315b86] bg-[#0a1d34] px-3 text-xs font-semibold text-white">
@@ -522,7 +529,8 @@ export default function RunsPage() {
               placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#315b86] bg-[#081a2e] px-4 text-sm text-white placeholder:text-[#97b3d1] outline-none focus:border-[#4b9fff]" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {soloOnly&&!loading&&visibleRuns.length>0&&<p className="rch-run-solo-explainer" role="status">{visibleRuns.length} open {visibleRuns.length===1?'Run':'Runs'} accepting individual RSVPs. No crew required to register; teams are organized at the court.</p>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={soloOnly?'No solo spots open yet':runs.length?'No games match those filters':'THE COURT IS WAITING'} description={soloOnly?'No eligible Run has an open roster spot right now. Try All Runs or host a game.':runs.length?'Try another game format, style or city.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
         </section>}
 
         {view==='runs'&&<section id="rch-competition" className="mt-9 scroll-mt-20">
