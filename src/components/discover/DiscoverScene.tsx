@@ -284,7 +284,7 @@ export default function DiscoverScene() {
         </div>
       </details>
 
-      <section className="rch-scene-content" id="scene-feed">
+      <section className="rch-scene-content rch-scene-content-simple" id="scene-feed">
         <div className="rch-scene-main-column">
           <div className="rch-scene-section-title rch-scene-feed-title">
             <div><h2>Upcoming</h2></div>
