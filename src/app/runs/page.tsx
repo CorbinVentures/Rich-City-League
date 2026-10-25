@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
-import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
 import { RunsRulesIntro } from '@/components/runs/RunsRulesIntro';
 import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
@@ -451,16 +450,15 @@ export default function RunsPage() {
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
-      <RunArenaHero
-        activeMode={typeFilter}
-        onHost={() => openCreateForCourt(selectedCourt ?? undefined)}
-        onFind={() => {setView('runs');document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});}}
-        onMode={mode => {
-          setTypeFilter(mode);
-          setView('runs');
-          document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-        }}
-      />
+      <Container maxWidth="xl" className="px-3 pt-6 sm:px-5">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-black">Runs</h1>
+          <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">
+            <FaPlus aria-hidden="true"/> Host a run
+          </button>
+        </header>
+      </Container>
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
           <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Court Map</Link>
@@ -477,7 +475,10 @@ export default function RunsPage() {
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        <details className="mb-4 rounded-xl border border-white/10 p-3">
+          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
+          {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        </details>
         {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>
