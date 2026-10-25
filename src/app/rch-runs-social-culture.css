@@ -1,0 +1,126 @@
+/* Runs: an accessible street-basketball community, not a wall of dashboard controls.
+   All selectors scoped to Runs or its concrete child components. */
+.rcl-platform-root main.rch-arena-shell .rch-run-discovery-controls {
+ display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-solo-toggle,.rch-run-passport-link,.rch-run-clear) {
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-height:44px;padding:9px 13px;border-radius:11px;border:1px solid #524652;
+ background:#201e29;color:#f8f5fb!important;font-size:12px;font-weight:800;line-height:1.25;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-solo-toggle[aria-pressed="true"] {
+ background:#a90f40;color:#fff!important;border-color:#fc7395;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-clear {
+ border-color:transparent;background:transparent;text-decoration:underline;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-solo-explainer {
+ margin:0 0 12px;border-left:3px solid #ec6a96;padding:10px 12px;
+ color:#f5deea!important;background:#271c2b;border-radius:0 9px 9px 0;
+ font-size:13px;line-height:1.45;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-availability {
+ color:#afe3c7!important;font-size:12px;font-weight:750;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-card-primary {
+ display:flex;flex-wrap:wrap;gap:9px;align-items:center;min-width:0;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-share-button {
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-height:44px;padding:10px 13px;border-radius:11px;border:1px solid #805266;
+ background:#2b1c2b;color:#f9d9e4!important;font-size:12px;font-weight:850;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge-chase,
+.rcl-platform-root main.rch-arena-shell .rch-run-culture {
+ margin-top:26px;padding-top:19px;border-top:1px solid #45404c;color:#f7f3f9;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-badge-heading,.rch-run-culture-head) {
+ display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px;margin-bottom:13px;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-badge-heading,.rch-run-culture-head) p {
+ color:#f68da9!important;font-size:11px;font-weight:900;letter-spacing:.13em;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-badge-heading,.rch-run-culture-head) h2 {
+ margin-top:3px;font-size:clamp(20px,5vw,27px)!important;font-weight:900;color:#fff!important;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-badge-heading,.rch-run-culture-head) a {
+ display:inline-flex;gap:7px;align-items:center;min-height:44px;
+ font-size:12px;font-weight:800;color:#ff9db8!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-head span {
+ display:block;margin-top:4px;font-size:12px;color:#c8c3d0;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge-grid {
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge {
+ display:flex;align-items:center;gap:10px;min-width:0;padding:12px;
+ background:#1b1b26;border:1px solid #514956;border-radius:13px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge>div:last-child{min-width:0}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge strong {
+ display:block;color:#fff!important;font-weight:850;font-size:13px;line-height:1.3;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge span {
+ display:block;color:#f4b1c4!important;font-size:11px;text-transform:capitalize;margin-top:3px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-badge small {
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+ font-size:11px;line-height:1.4;color:#c8c0cb!important;margin-top:5px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-grid {
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-card {
+ display:flex;flex-direction:column;justify-content:space-between;
+ min-height:155px;padding:15px;border:1px solid #554450;border-radius:13px;
+ background:linear-gradient(155deg,#2a1a29,#161720);color:#faf7fc!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-card>span {
+ display:inline-flex;align-items:center;gap:7px;color:#f98eac!important;
+ font-weight:900;font-size:11px;letter-spacing:.12em;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-card strong {
+ display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+ font-size:14px;font-weight:800;line-height:1.4;overflow-wrap:anywhere;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-card small {
+ display:inline-flex;gap:7px;align-items:center;color:#ffc1d1!important;font-weight:750;font-size:12px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-empty {
+ display:flex;align-items:center;gap:11px;flex-wrap:wrap;min-height:70px;
+ background:#1b1924;padding:14px;border:1px dashed #554653;border-radius:12px;color:#d6ccd5!important;
+ font-size:13px;line-height:1.5;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-empty p {flex:1 1 220px;min-width:0}
+.rcl-platform-root main.rch-arena-shell .rch-run-culture-empty a {
+ display:inline-flex;align-items:center;gap:6px;min-height:44px;color:#ff9fbd!important;font-weight:850;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-guest-note {
+ margin-top:10px;border:1px solid #47404c;border-radius:11px;background:#1a1a23;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-guest-note summary {
+ min-height:44px;padding:12px 13px;cursor:pointer;color:#e7dfeb!important;font-size:12px;font-weight:800;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-guest-note p{
+ padding:3px 13px 10px;color:#ccc3ce!important;font-size:12px;line-height:1.55;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-guest-note a{
+ display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 13px 8px;color:#ffa4bc!important;font-size:12px;font-weight:800;
+}
+.rcl-platform-root main.rch-arena-shell :is(.rch-run-solo-toggle,.rch-run-passport-link,.rch-run-share-button,.rch-run-culture-card):focus-visible,
+.rcl-platform-root main.rch-arena-shell .rch-run-guest-note summary:focus-visible {
+ outline:2px solid #ffbdcf!important;outline-offset:2px!important;
+}
+.rch-run-passport-actions {display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+@media(max-width:720px){
+ .rcl-platform-root main.rch-arena-shell .rch-run-badge-grid,
+ .rcl-platform-root main.rch-arena-shell .rch-run-culture-grid {grid-template-columns:1fr}
+ .rcl-platform-root main.rch-arena-shell .rch-run-badge{min-height:95px}
+ .rcl-platform-root main.rch-arena-shell .rch-run-culture-card{min-height:135px}
+ .rcl-platform-root main.rch-arena-shell .rch-run-clear{margin-left:auto}
+ .rcl-platform-root main.rch-arena-shell .rch-run-card-primary{width:100%;justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce){
+ .rcl-platform-root main.rch-arena-shell .rch-run-culture-card{transition:none!important;transform:none!important}
+}
