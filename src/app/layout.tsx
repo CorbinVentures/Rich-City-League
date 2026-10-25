@@ -62,6 +62,8 @@ import './rch-unified-mockup.css';
 import './rch-basketball-product-fit.css';
 // Scoped Runs community experiences: solo play, share, badges and real court moments.
 import './rch-runs-social-culture.css';
+// Official 3D identity for the four live basketball program pages.
+import './rch-program-emblems.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';

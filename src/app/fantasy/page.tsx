@@ -1,5 +1,7 @@
 'use client';
 
+import { ProgramEmblem } from '@/components/ProgramEmblem';
+
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -288,9 +290,12 @@ export default function FantasyPage() {
         <Container maxWidth="xl" className="py-6 sm:py-9">
           <p className="rch-fantasy-kicker">RICH CITY LEAGUE · OFFICIAL FANTASY</p>
           <div className="rch-fantasy-header-row">
-            <div>
+            <div className="rch-program-brand-lockup rch-program-fantasy-lockup">
+              <ProgramEmblem program="fantasy-league" className="rch-program-emblem-fantasy" priority/>
+              <div className="rch-program-brand-copy">
               <h1>RCH FANTASY</h1>
               <p>{season ? `Week ${currentWeek} · Official season scoring` : 'Follow the league. Build your fantasy franchise.'}</p>
+              </div>
             </div>
             <Link href={team?'#my-fantasy-team':user&&season?'#draft':user?'/fantasy':'/auth/sign-in?redirect=/fantasy'} className="rch-fantasy-main-action">
               {team?'My team':user&&season?'Build team':user?'My Fantasy':'Join Fantasy'} <FaArrowRight aria-hidden="true"/>
