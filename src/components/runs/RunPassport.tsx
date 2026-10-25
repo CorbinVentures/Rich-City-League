@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect,useMemo,useState} from 'react';
-import {FaChartLine,FaMedal,FaTrophy} from 'react-icons/fa6';
+import {FaChartLine,FaMedal,FaShareNodes,FaTrophy} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 import SkillMasteryCollection from '@/components/rep/SkillMasteryCollection';
@@ -18,6 +18,7 @@ export function RunPassport(){
  const [expanded,setExpanded]=useState(false);
  const [loading,setLoading]=useState(false);
  const [error,setError]=useState('');
+ const [shareStatus,setShareStatus]=useState('');
  useEffect(()=>{
   if(!db||!user?.id){setData(empty);return;}
   let active=true;
@@ -30,6 +31,14 @@ export function RunPassport(){
   });
   return()=>{active=false;};
  },[db,user?.id]);
+ async function shareMyPassport(){
+  if(loading||error||!user)return;
+  const text=`My RCH Run Passport: ${data.verified_games} verified games, ${data.run_rep} Run REP, ${data.badges.length} earned badges. Real games build the story. #RCHRuns`;
+  try{
+   if(navigator.share)await navigator.share({title:'My RCH Run Passport',text,url:window.location.origin+'/runs'});
+   else {await navigator.clipboard.writeText(text+' '+window.location.origin+'/runs');setShareStatus('Passport summary copied');}
+  }catch(e){if(!(e instanceof Error&&e.name==='AbortError'))setShareStatus('Sharing unavailable. Try again.');}
+ }
  if(!user)return null;
  const ladder=['1v1','2v2','3v3','4v4','5v5'];
  return <section aria-label="Your basketball Run Passport" className="my-6 overflow-hidden rounded-3xl border border-[#426c97] bg-[linear-gradient(135deg,#102c4d,#061727)] p-5 text-white sm:p-7">
@@ -37,9 +46,13 @@ export function RunPassport(){
    <div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-[#93d4ff]"><FaMedal/> Personal Basketball Identity</p>
     <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Your Run Passport</h2>
     <p className="mt-2 text-sm text-[#a7c4df]">Every verified game builds your basketball history, skill rating and badges — separate from your social reputation.</p></div>
-   <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black">{expanded?'Hide Passport':'View Passport'}</button>
+   <div className="rch-run-passport-actions">
+    <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black">{expanded?'Hide Passport':'View Passport'}</button>
+    <button type="button" disabled={loading||Boolean(error)} onClick={()=>void shareMyPassport()} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black disabled:opacity-50"><FaShareNodes className="mr-1 inline" aria-hidden="true"/> Share my stats</button>
+   </div>
   </div>
   {error&&<p role="status" className="mt-4 text-xs text-amber-200">{error}</p>}
+  {shareStatus&&<p role="status" className="mt-3 text-xs text-[#a7c7e5]">{shareStatus}</p>}
   {loading&&<p className="mt-3 text-xs text-[#aac9e2]">Loading verified history…</p>}
   {!loading&&<div className="mt-5 grid grid-cols-3 gap-2">
    {[['Run REP',data.run_rep],['Verified games',data.verified_games],['Earned badges',data.badges.length]].map(([label,value])=><div key={label} className="rounded-xl border border-[#42688c] bg-[#0b263d] p-3">
