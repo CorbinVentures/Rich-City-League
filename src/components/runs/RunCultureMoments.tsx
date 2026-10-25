@@ -8,7 +8,8 @@ import {getSupabaseClient} from '@/lib/supabase';
 type CourtMoment={id:string;run_id:string;body:string|null;media_urls:unknown;created_at:string};
 
 export function RunCultureMoments(){
- const db=useMemo(()=>getSupabaseClient(),[]);
+ // The live posts migration includes run_id; generated Database types have not caught up.
+ const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [moments,setMoments]=useState<CourtMoment[]>([]);
  const [loaded,setLoaded]=useState(false);
  useEffect(()=>{
