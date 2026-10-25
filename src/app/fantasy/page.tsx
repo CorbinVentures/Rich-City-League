@@ -301,6 +301,7 @@ export default function FantasyPage() {
             <a href="#matchups">Matchups</a>
             <a href="#standings">Standings</a>
             <a href="#fantasy-leagues">Leagues</a>
+            <Link href="/draft">Official Draft</Link>
           </nav>
           <div className="rch-fantasy-metrics">
             <div><span>Week</span><strong>{season?currentWeek:'—'}</strong></div>
