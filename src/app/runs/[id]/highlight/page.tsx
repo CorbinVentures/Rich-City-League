@@ -42,6 +42,7 @@ export default function RunHighlightPublisher() {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<Preview[]>([]);
   const [body, setBody] = useState('');
+  const [mediaPermission,setMediaPermission]=useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
@@ -109,6 +110,7 @@ export default function RunHighlightPublisher() {
       return;
     }
     setFiles(selected);
+    setMediaPermission(false);
     setError('');
   };
 
@@ -144,6 +146,10 @@ export default function RunHighlightPublisher() {
     }
     if (!files.length) {
       setError(mode === 'clip' ? 'Choose a video clip first.' : 'Choose at least one photo first.');
+      return;
+    }
+    if(!mediaPermission){
+      setError('Confirm that this media can be shared and everyone identifiable has given permission.');
       return;
     }
     const issue = socialMediaCollectionError(files);
@@ -252,10 +258,14 @@ export default function RunHighlightPublisher() {
 
             {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Verified participant.</b> If this post falls inside the Run highlight window and you have not already claimed it, RCL will automatically award the +35 REP highlight bonus after publishing.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. The REP highlight reward is reserved for the Run host or joined players.</div>}
 
+            <label className="flex min-h-12 items-start gap-3 rounded-xl border border-white/15 bg-white/[.03] p-3 text-xs leading-5 text-white/75">
+              <input type="checkbox" required checked={mediaPermission} onChange={e=>setMediaPermission(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#e65782]"/>
+              <span>I have permission to share this footage and any identifiable people shown. I will not present an unverified guest or celebrity appearance as confirmed, or expose someone&apos;s live location.</span>
+            </label>
             {error && <p className="rounded-2xl border border-red-400/20 bg-red-400/[.05] p-4 text-sm text-red-100">{error}</p>}
             {progress && <p className="text-xs font-black uppercase tracking-wider text-rcl-blue">{progress}</p>}
 
-            <button disabled={busy || !files.length} className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-rcl-orange px-5 py-4 text-sm font-black uppercase tracking-wider text-black disabled:opacity-45">{busy ? progress || 'Publishing…' : <><FaBasketball />Publish to Run Tape</>}</button>
+            <button disabled={busy || !files.length || !mediaPermission} className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-rcl-orange px-5 py-4 text-sm font-black uppercase tracking-wider text-black disabled:opacity-45">{busy ? progress || 'Publishing…' : <><FaBasketball />Publish to Run Tape</>}</button>
           </div>
         </form>
       </Container>

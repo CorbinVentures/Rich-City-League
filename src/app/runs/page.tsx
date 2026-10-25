@@ -12,6 +12,9 @@ import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/comp
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
 import { RunPassport } from '@/components/runs/RunPassport';
+import { RunCultureMoments } from '@/components/runs/RunCultureMoments';
+import { BadgeMedallion } from '@/components/BadgeMedallion';
+import { rankSoloRuns, isSoloJoinable, runShareText } from '@/lib/runs-social-discovery';
 import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
@@ -143,6 +146,8 @@ export default function RunsPage() {
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
+  const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
+  const [visibleLimit,setVisibleLimit]=useState(8);
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -426,7 +431,7 @@ export default function RunsPage() {
       const courtMatch = !courtParam || run.location_slug === courtParam;
       const words = runSearch.trim().toLowerCase();
       const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
-      return skillMatch && typeMatch && courtMatch && searchMatch;
+      return skillMatch && typeMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run));
     });
     // Registered availability always comes before filled/cancelled events;
     // a player-selected city/format makes this feed relevant without hiding other Virginia courts.
@@ -437,12 +442,15 @@ export default function RunsPage() {
       watchedCourts:dailyPrefs.watched_courts
     });
     const order = new Map(priorities.map((candidate,index)=>[candidate.id,index]));
+    if(soloOnly) return rankSoloRuns(matching);
     return [...matching].sort((a,b)=>{
       const capacityA=a.status === 'full' || (a.players?.length ?? 0) >= a.max_players ? 1 : 0;
       const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
-  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+
+  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,runSearch,courtParam,soloOnly]);
 
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
@@ -502,7 +510,11 @@ export default function RunsPage() {
 
         {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
           <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Upcoming Runs" description="Real courts, real people. See who's hosting and find a place on the floor." action={{href:'/runs/partners',label:'Explore organizers'}}/>
-          <div className="mb-3 flex justify-end"><button type="button" onClick={() => {setTypeFilter('all');setSkillFilter('all');setRunSearch('');}} className="min-h-11 text-xs font-bold text-[#9cd7ff]">Clear filters <FaArrowRight className="ml-1 inline"/></button></div>
+          <div className="rch-run-discovery-controls">
+            <button type="button" className="rch-run-solo-toggle" aria-pressed={soloOnly} onClick={()=>setSoloOnly(v=>!v)}><FaBasketball aria-hidden="true"/>{soloOnly?'Solo spots only ✓':'Find a solo spot'}</button>
+            <a href="#rch-competition" className="rch-run-passport-link"><FaMedal aria-hidden="true"/> My Passport</a>
+            <button type="button" className="rch-run-clear" onClick={()=>{setTypeFilter('all');setSkillFilter('all');setRunSearch('');setSoloOnly(false);}}>Clear filters</button>
+          </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setTypeFilter('all')} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'}>All Runs</button>
             <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#315b86] bg-[#0a1d34] px-3 text-xs font-semibold text-white">
@@ -517,9 +529,25 @@ export default function RunsPage() {
               placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#315b86] bg-[#081a2e] px-4 text-sm text-white placeholder:text-[#97b3d1] outline-none focus:border-[#4b9fff]" />
           </div>
 
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {soloOnly&&!loading&&visibleRuns.length>0&&<p role="status" className="rch-run-solo-explainer">{visibleRuns.length} open {visibleRuns.length===1?'Run':'Runs'} taking individual RSVPs. No crew required to register.</p>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.slice(0,visibleLimit).map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {view==='runs'&&visibleRuns.length>visibleLimit&&
+            <div className="rch-run-load-more">
+              <span>Showing {visibleLimit} of {visibleRuns.length} matching Runs</span>
+              <button type="button" onClick={()=>setVisibleLimit(n=>n+8)}>Show more Runs <FaArrowRight aria-hidden="true"/></button>
+            </div>}
         </section>}
 
+        {view==='runs'&&<>
+          {badges.length>0&&<section className="rch-run-badge-chase" aria-label="Run badges available to earn">
+            <div className="rch-run-badge-heading"><div><p>COLLECT YOUR LEGACY</p><h2>Badge chase</h2></div><Link href="/badges">All badges <FaArrowRight aria-hidden="true"/></Link></div>
+            <div className="rch-run-badge-grid">{badges.slice(0,3).map(badge=>
+              <Link href="/badges" key={badge.id} className="rch-run-badge"><BadgeMedallion badge={badge} size="xs"/>
+                <div><strong>{badge.name}</strong><span>{badge.tier} · Available to earn</span><small>{badge.description}</small></div>
+              </Link>)}</div>
+          </section>}
+          <RunCultureMoments/>
+        </>}
         {view==='runs'&&<section id="rch-competition" className="mt-9 scroll-mt-20">
           <RCHSectionHeader eyebrow="YOUR BASKETBALL LEGACY" title="Competition Center" description="Your verified history, court championships, and real player ladders."/>
           <div role="group" aria-label="Choose competition section" className="rch-ux-competition-tabs">
@@ -609,10 +637,14 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
+        {isSoloJoinable(run)&&<span className="rch-run-availability">{run.max_players-count} open {run.max_players-count===1?'spot':'spots'} · Solo RSVP</span>}
         {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
       </div>
       <div className="rch-ux-game-cta">
+        <div className="rch-run-card-primary">
         {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
           <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
@@ -621,7 +653,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <details className="group border-t border-[#315573] pt-3">
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
         <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
-        <div className="flex flex-wrap gap-2"><ShareRunButton id={run.id} title={run.title}/>
+        <div className="flex flex-wrap gap-2">
           {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
           {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
         </div>
@@ -701,18 +733,18 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
 }
 
 /** A native share sheet on mobile; copy-link fallback for desktop browsers. */
-function ShareRunButton({ id, title }: { id: string; title: string }) {
+function ShareRunButton({ id, title, location, startsAt, format }: { id: string; title: string; location?:string; startsAt?:string; format?:string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   async function share() {
     const url = runInviteUrl(window.location.origin, id);
     try {
       if (navigator.share) {
-        await navigator.share({ title, text: 'Join this basketball run on Rich City Hoops.', url });
+        await navigator.share({ title, text: location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format}) : 'Pull up to this basketball Run on Rich City Hoops.', url });
         setState('idle');
         return;
       }
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText((location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format})+'\n' : '')+url);
       setState('copied');
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
@@ -720,5 +752,5 @@ function ShareRunButton({ id, title }: { id: string; title: string }) {
     }
   }
 
-  return <button type="button" onClick={() => void share()} className="rounded-xl border border-rcl-blue/25 bg-rcl-blue/[.05] px-4 py-2.5 text-xs font-semibold text-rcl-blue">{state === 'copied' ? 'Link copied ✓' : state === 'error' ? 'Try sharing again' : 'Share invite'}</button>;
+  return <button type="button" onClick={() => void share()} aria-label={'Share '+title} className="rch-run-share-button">{state === 'copied' ? 'Copied ✓' : state === 'error' ? 'Retry share' : <><FaArrowUpRightFromSquare aria-hidden="true"/> Share</>}</button>;
 }
