@@ -47,6 +47,14 @@ describe('RCH PWA clarity and progressive disclosure',()=>{
     expect(runs).toContain('<RunsWorldGame');
     expect(runs).toContain('readPagedUpcomingRuns<Run>');
   });
+  it('prioritizes profile editing and notification content',()=>{
+    const profile=read('src/app/profile/page.tsx');
+    expect(profile.indexOf('>Public information</h2>')).toBeLessThan(profile.indexOf('>Photos and cover</summary>'));
+    expect(profile).toContain('>Profile music</summary>');
+    const notifications=read('src/app/notifications/page.tsx');
+    expect(notifications).toContain('>Notification settings</summary>');
+    expect(notifications).not.toContain('<ClientPageHero');
+  });
   it('keeps viewing categories and privacy/security destinations reachable',()=>{
     const tv=read('src/app/media/page.tsx');
     for(const heading of ['Live games','The Pulse','Movies','Originals'])expect(tv).toContain(heading);
