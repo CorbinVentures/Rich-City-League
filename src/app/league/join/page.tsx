@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FaArrowRight, FaBasketball, FaCrown, FaPeopleGroup, FaTrophy } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import { LeagueJoinRegistration } from '@/components/LeagueJoinRegistration';
 
 export const metadata: Metadata = {
   title:'Join Rich City League | Your Basketball Path | Rich City Hoops',
@@ -18,7 +19,7 @@ const worlds = [
 const path = [
   {number:'01',title:'Join the community',detail:'Create a free profile. Follow players, share moments, and find your people.',href:'/auth/sign-up?next=%2Fsocial',action:'Join free'},
   {number:'02',title:'Play Runs and challenge a crew',detail:'Play whenever it works for you. Record eligible games, share highlights and build your reputation.',href:'/runs',action:'Find Runs'},
-  {number:'03',title:'Check official tryouts',detail:'Explore league registration options and verify open dates, fees and eligibility.',href:'/register',action:'Registration options'},
+  {number:'03',title:'Check official tryouts',detail:'Explore league registration options and verify open dates, fees and eligibility.',href:'#official-registration',action:'Check registration'},
   {number:'04',title:'Compete and get evaluated',detail:'Official evaluations happen through announced league processes, not automatically from social activity.',href:'/league',action:'League Center'},
   {number:'05',title:'Follow the official Draft',detail:'See which eligible players are selected for real season rosters.',href:'/draft',action:'Draft Night'},
   {number:'06',title:'Play Fantasy and follow the season',detail:'Fans build fantasy teams using official Rich City League player statistics when a season is active.',href:'/fantasy',action:'Open Fantasy'},
@@ -50,6 +51,7 @@ export default function JoinRichCityLeaguePage(){
       </div>
     </li>)}
    </ol>
+   <LeagueJoinRegistration />
    <div className="mt-6 rounded-xl border border-white/15 p-4">
     <h2 className="font-semibold">Build your basketball identity anytime</h2>
     <p className="mt-1 text-xs leading-5 text-white/60">Post highlights, join conversations, and review XP, REP and badges. Verified results and other qualifying activity follow each system's existing rules. Playing Runs does not guarantee a tryout, draft selection or rewards.</p>
