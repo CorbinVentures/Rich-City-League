@@ -41,9 +41,9 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
       <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
       <nav className="grid grid-cols-2 gap-2 p-4" aria-label="Quick destinations">
         {[
-          {href:'/social',label:'Home'}, {href:'/discover',label:'Discover'},
-          {href:'/runs',label:'Runs'}, {href:'/create',label:'Create'},
-          {href:'/messages',label:'Messages'}, {href:'/media',label:'RCH TV'},
+          {href:'/social',label:'Home'}, {href:'/runs',label:'Runs'},
+          {href:'/league',label:'Rich City League'}, {href:'/draft',label:'Draft'},
+          {href:'/fantasy',label:'Fantasy'}, {href:'/league/join',label:'Join RCL'},
         ].map(item=><Link key={item.href} href={item.href} onClick={onClose}
           className="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-white/15 px-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
           {item.label}<FaArrowRight aria-hidden="true"/>
