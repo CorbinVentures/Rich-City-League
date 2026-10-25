@@ -70,7 +70,7 @@ export function LeagueCenterExperience(){
  },[operator,profile,role,supabase,user]);
 
  const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
- return <main className="min-h-screen bg-[#03070d] pb-28 text-white">
+ return <main className="rch-league-site min-h-screen bg-[#03070d] pb-28 text-white">
   <header className="rch-league-header">
    <Container maxWidth="xl" className="py-6 sm:py-9">
     <p className="rch-league-kicker">VIRGINIA BASKETBALL · OFFICIAL LEAGUE</p>
