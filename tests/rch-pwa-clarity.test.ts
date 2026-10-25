@@ -42,6 +42,8 @@ describe('RCH PWA clarity and progressive disclosure',()=>{
     const runs=read('src/app/runs/page.tsx');
     expect(runs).toContain("searchParams.get('view')!=='world'");
     expect(runs).toContain('href="/runs?view=world"');
+    expect(runs).toContain('My run recommendations');
+    expect(runs).not.toContain('<RunArenaHero');
     expect(runs).toContain('<RunsWorldGame');
     expect(runs).toContain('readPagedUpcomingRuns<Run>');
   });
