@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
-import { LegalFooter } from '@/components/LegalFooter';
 import { RCHDiscoveryStarter } from '@/components/RCHDiscoveryStarter';
 
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
@@ -44,7 +43,6 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
         {pathname === '/today' && <RCHDiscoveryStarter mode="pwa" />}
         {children}
       </div>
-      <LegalFooter />
     </>
   );
 }
