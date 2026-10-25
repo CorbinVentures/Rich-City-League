@@ -90,6 +90,8 @@ export function SiteHeader(){
     :pathname.startsWith('/world')?'Living World'
     :pathname.startsWith('/discover')?'Discover'
     :pathname.startsWith('/runs')?'Runs'
+    :pathname.startsWith('/draft')?'Draft'
+    :pathname.startsWith('/fantasy')?'Fantasy'
     :pathname.startsWith('/media')?'RCH TV'
     :pathname.startsWith('/league')||pathname.startsWith('/games')?'League'
     :pathname.startsWith('/communities')?'Communities'
@@ -155,6 +157,7 @@ export function SiteHeader(){
 
       <div className="rcl-universal-tools">
         {user&&<MessageQuickMenu userId={user.id} unreadCount={messageUnread}/>} 
+        {user&&<Link href={profileHref} aria-label="My profile" className="rcl-notification-button"><FaUser/></Link>}
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
         <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Find an action or browse RCH navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
