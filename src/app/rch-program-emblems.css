@@ -1,0 +1,57 @@
+/*
+ * Official Rich City Hoops program crest system.
+ * Designed for original 3D materials, not tiny tab icons.
+ * Header text remains real DOM text for readability, SEO, screen readers.
+ */
+.rch-program-brand-lockup {
+ display:flex;align-items:center;gap:clamp(10px,2vw,20px);min-width:0;
+}
+.rch-program-brand-copy {min-width:0;flex:1;}
+.rch-program-emblem {
+ flex:0 0 auto;display:block;
+ width:clamp(78px,11vw,138px);aspect-ratio:1/1;
+ position:relative;overflow:hidden;isolation:isolate;
+ background:transparent;
+ -webkit-mask-image:radial-gradient(circle,#000 49%,rgba(0,0,0,.97) 64%,transparent 79%);
+ mask-image:radial-gradient(circle,#000 49%,rgba(0,0,0,.97) 64%,transparent 79%);
+}
+.rch-program-emblem-image {
+ display:block;width:100%!important;height:100%!important;object-fit:contain;
+ image-rendering:auto;
+ filter:drop-shadow(0 6px 12px rgba(0,0,0,.35));
+}
+.rch-program-emblem-runs {width:clamp(72px,10vw,118px);}
+.rch-program-emblem-league {width:clamp(94px,14vw,156px);}
+.rch-program-emblem-draft {width:clamp(90px,11vw,132px);}
+.rch-program-emblem-fantasy {width:clamp(82px,11vw,128px);}
+.rch-program-league-lockup {align-items:center;}
+.rch-program-draft-lockup {align-items:center;max-width:710px;}
+.rch-program-fantasy-lockup {align-items:center;}
+.rch-program-draft-lockup .rcl-display {margin-top:7px;}
+/* Runs is short and action-oriented: avoid growing its top-of-page toolbar. */
+.rcl-platform-root main.rch-arena-shell header .rch-program-brand-lockup {gap:10px;}
+.rcl-platform-root main.rch-arena-shell header .rch-program-brand-lockup h1 {margin:0;}
+/* On narrow displays, preserve labels and primary CTAs, even when emblems shrink. */
+@media(max-width:560px) {
+ .rch-program-emblem-league {width:86px;}
+ .rch-program-emblem-draft {width:82px;}
+ .rch-program-emblem-fantasy {width:74px;}
+ .rch-program-emblem-runs {width:66px;}
+ .rch-program-brand-lockup {gap:9px;}
+ .rch-program-draft-lockup .rcl-display {font-size:clamp(31px,8vw,48px)!important;}
+ .rch-program-league-lockup .rch-league-header h1 {font-size:clamp(27px,8vw,40px)!important;}
+ .rch-program-fantasy-lockup h1 {font-size:clamp(25px,7vw,34px)!important;}
+ .rch-program-brand-copy {overflow-wrap:normal;}
+}
+@media(max-width:360px) {
+ .rch-program-emblem-league {width:72px;}
+ .rch-program-emblem-draft {width:66px;}
+ .rch-program-emblem-fantasy {width:64px;}
+ .rch-program-emblem-runs {width:60px;}
+ .rch-program-brand-lockup {gap:7px;}
+ .rch-program-draft-lockup .rcl-display {font-size:29px!important;}
+}
+/* No costly animation on essential headers. */
+@media(prefers-reduced-motion:reduce) {
+ .rch-program-emblem-image {animation:none!important;}
+}
