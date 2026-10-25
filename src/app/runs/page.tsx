@@ -115,7 +115,7 @@ export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
-  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
+  const showLegacyList=searchParams.get('view')!=='world'||createIntent||Boolean(courtParam);
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -445,8 +445,8 @@ export default function RunsPage() {
     });
   },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
-  // Runs World is the primary game. Existing competition, forms and list screens
-  // remain available via view=list, create intent, or deep court links.
+  // People looking for Runs land on upcoming real games. The cinematic court
+  // world remains available by explicit choice, without interrupting first use.
   if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
 
   return (
@@ -463,6 +463,7 @@ export default function RunsPage() {
       />
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
+          <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Court Map</Link>
           <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How to Play</button>
           <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
@@ -471,7 +472,7 @@ export default function RunsPage() {
         </nav>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<><Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link><Link href="/admin/runs/weekend-circuit" className="rounded-full border border-[#e8b96b]/60 bg-[#372b19] px-3 py-2 text-[11px] font-black text-[#ffe2ab]">Weekend Circuit HQ →</Link></>}</div>
+          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">Runs</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<><Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link><Link href="/admin/runs/weekend-circuit" className="rounded-full border border-[#e8b96b]/60 bg-[#372b19] px-3 py-2 text-[11px] font-black text-[#ffe2ab]">Weekend Circuit HQ →</Link></>}</div>
           <button type="button" onClick={() => setView(view === 'runs' ? 'rewards' : 'runs')} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#325f8d] bg-[#0d2b4a] px-3 text-[11px] font-bold text-[#b8dbff]">
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
