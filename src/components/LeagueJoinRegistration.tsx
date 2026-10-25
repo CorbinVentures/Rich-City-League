@@ -19,7 +19,12 @@ export function LeagueJoinRegistration(){
   async function load(){
    if(!db){if(live){setLoading(false);setError(true)}return;}
    try{
-    const result=await db.from('seasons').select('*').eq('registration_open',true).order('start_date',{ascending:true}).limit(10);
+    // A generic open season in another program must never appear as an RCL invitation.
+    const league=await db.from('leagues').select('id').eq('slug','rich-city-league').eq('is_active',true).maybeSingle();
+    if(league.error)throw league.error;
+    const result=league.data?.id
+      ? await db.from('seasons').select('*').eq('league_id',league.data.id).eq('registration_open',true).order('start_date',{ascending:true}).limit(10)
+      : {data:[] as Season[],error:null};
     if(result.error)throw result.error;
     const open=(result.data??[]) as Season[];
     const divisionsResult=open.length
