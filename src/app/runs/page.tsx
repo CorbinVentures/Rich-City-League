@@ -462,13 +462,13 @@ export default function RunsPage() {
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
           <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Court Map</Link>
-          <Link href="/crews?intent=mine" className="rch-ux-quicklink"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
+          <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
           <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How to Play</button>
         </nav>
         <details className="rch-run-extras">
           <summary>More run tools</summary>
           <div className="rch-run-extra-links">
-            <Link href="/runs/partners" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> Parks & Rec</Link>
+            <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> Parks & Rec</Link>
             <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badges</Link>
             <button type="button" className="rch-ux-quicklink" onClick={()=>{setCompetitionView('courts');document.getElementById('rch-competition')?.scrollIntoView({behavior:'auto',block:'start'});}}><FaTrophy aria-hidden="true"/> Court Crowns</button>
             <Link href="/runs/hosts" className="rch-ux-quicklink">Verified Hosts</Link>
