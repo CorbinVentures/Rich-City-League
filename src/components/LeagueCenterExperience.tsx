@@ -77,7 +77,7 @@ export function LeagueCenterExperience(){
     <h1>RICH CITY <span>LEAGUE</span></h1>
     <p className="rch-league-tagline">Teams. Games. Rivalries. Championships.</p>
     <div className="rch-league-header-actions">
-     <Link href="/league/join" className="rch-league-join">Join the league <FaArrowRight aria-hidden="true"/></Link>
+     <Link href="/league/join" aria-label="Join Rich City League" className="rch-league-join">Join the league <FaArrowRight aria-hidden="true"/></Link>
      <Link href="/schedule">Schedule</Link>
      <Link href="/teams">Teams</Link>
      <Link href="/draft">Draft Night</Link>
