@@ -124,3 +124,13 @@
 @media(prefers-reduced-motion:reduce){
  .rcl-platform-root main.rch-arena-shell .rch-run-culture-card{transition:none!important;transform:none!important}
 }
+
+.rcl-platform-root main.rch-arena-shell .rch-run-load-more {
+ display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;
+ color:#d1c5d3!important;font-size:12px;font-weight:750;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-load-more button {
+ display:inline-flex;align-items:center;gap:8px;justify-content:center;min-height:44px;
+ padding:10px 14px;border:1px solid #8b5a70;border-radius:10px;background:#2e1d2f;
+ color:#f4e5ec!important;font-size:12px;font-weight:850;
+}
