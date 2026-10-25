@@ -31,7 +31,6 @@ export function isPrimaryNavigationActive(pathname:string,href:string){
 
 export const RCL_PRIMARY_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
-  {label:'Discover',href:'/discover',icon:FaCompass},
   {label:'Runs',href:'/runs',icon:FaLocationDot},
   {label:'League',href:'/league',icon:FaBasketball},
   {label:'Draft',href:'/draft',icon:FaCrown},
