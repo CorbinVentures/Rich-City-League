@@ -54,7 +54,7 @@ export default function JoinRichCityLeaguePage(){
    <LeagueJoinRegistration />
    <div className="mt-6 rounded-xl border border-white/15 p-4">
     <h2 className="font-semibold">Build your basketball identity anytime</h2>
-    <p className="mt-1 text-xs leading-5 text-white/60">Post highlights, join conversations, and review XP, REP and badges. Verified results and other qualifying activity follow each system's existing rules. Playing Runs does not guarantee a tryout, draft selection or rewards.</p>
+    <p className="mt-1 text-xs leading-5 text-white/60">Post highlights, join conversations, and review XP, REP and badges. Verified results and other qualifying activity follow each system&apos;s existing rules. Playing Runs does not guarantee a tryout, draft selection or rewards.</p>
     <nav aria-label="Build basketball identity" className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
      <Link className="text-rcl-orange" href="/create/social?mode=clip">Post highlights</Link>
      <Link className="text-rcl-orange" href="/crews">Find a crew</Link>
