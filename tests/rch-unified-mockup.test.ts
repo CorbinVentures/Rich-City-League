@@ -30,11 +30,14 @@ describe('approved RCH charcoal/crimson system',()=>{
       for(const m of css.matchAll(/var\((--rch-brand-[\w-]+)/g)) expect(declared.has(m[1]),`${file}: ${m[1]}`).toBe(true);
     }
   });
-  it('uses four real navigation destinations with mutually exclusive selected states',()=>{
-    expect(RCL_MEMBER_PRIMARY_NAV.map(n=>n.label)).toEqual(['Home','Runs','Community','Profile']);
-    expect(RCL_GUEST_MOBILE_NAV.map(n=>n.label)).toEqual(['Home','Runs','Community','Profile']);
-    for(const route of ['/social','/runs','/runs/123','/community','/crews','/social/profile/123']) {
+  it('puts the four basketball worlds beside social Home without selection collisions',()=>{
+    expect(RCL_MEMBER_PRIMARY_NAV.map(n=>n.label)).toEqual(['Home','Runs','League','Draft','Fantasy']);
+    expect(RCL_GUEST_MOBILE_NAV.map(n=>n.label)).toEqual(['Home','Runs','League','Draft','Fantasy']);
+    for(const route of ['/social','/runs','/runs/123','/league','/league/join','/draft','/draft/rules','/fantasy']) {
       expect(RCL_MEMBER_PRIMARY_NAV.filter(n=>isMemberNavigationActive(route,n.href))).toHaveLength(1);
+    }
+    for(const route of ['/community','/crews','/social/profile/123']) {
+      expect(RCL_MEMBER_PRIMARY_NAV.filter(n=>isMemberNavigationActive(route,n.href))).toHaveLength(0);
     }
   });
 });

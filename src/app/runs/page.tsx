@@ -452,7 +452,7 @@ export default function RunsPage() {
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
       <Container maxWidth="xl" className="px-3 pt-6 sm:px-5">
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-black">Runs</h1>
+          <div><h1 className="text-3xl font-black">Runs</h1><Link href="/league/join" className="mt-1 inline-flex min-h-10 items-center gap-2 text-xs font-bold text-rcl-orange">Want to join Rich City League? <FaArrowRight aria-hidden="true"/></Link></div>
           <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">
             <FaPlus aria-hidden="true"/> Host a run

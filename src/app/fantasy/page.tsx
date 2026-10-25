@@ -297,6 +297,7 @@ export default function FantasyPage() {
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/65">Real players. Real games. Real bragging rights. Build your squad, watch official RCL stats update, and compete with the basketball community.</p>
             <div className="mt-7 flex flex-wrap gap-3">
               {!team && <Link href={user && !season ? '/news' : user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user && !season ? 'Follow league news' : user ? 'Build my franchise' : 'Sign in to play'}</Link>}
+              <Link href="/draft" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase text-white">Official Draft <FaArrowRight/></Link>
               <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-xs font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
             </div>
             <div className="mt-7 grid max-w-3xl grid-cols-3 gap-3">

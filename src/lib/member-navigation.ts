@@ -11,15 +11,17 @@ export type RCLMemberNavItem={label:string;href:string;icon:IconType;action?:'cr
 export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
   {label:'Runs',href:'/runs',icon:FaBasketball},
-  {label:'Community',href:'/community',icon:FaPeopleGroup},
-  {label:'Profile',href:'/social/profile/me',icon:FaUser},
+  {label:'League',href:'/league',icon:FaTrophy},
+  {label:'Draft',href:'/draft',icon:FaCrown},
+  {label:'Fantasy',href:'/fantasy',icon:FaStar},
 ];
 
 export const RCL_GUEST_MOBILE_NAV:RCLMemberNavItem[]=[
   {label:'Home',href:'/',icon:FaHouse},
   {label:'Runs',href:'/runs',icon:FaBasketball},
-  {label:'Community',href:'/community',icon:FaPeopleGroup},
-  {label:'Profile',href:'/auth/sign-up',icon:FaUser},
+  {label:'League',href:'/league',icon:FaTrophy},
+  {label:'Draft',href:'/draft',icon:FaCrown},
+  {label:'Fantasy',href:'/fantasy',icon:FaStar},
 ];
 
 export const RCL_MEMBER_DESKTOP_NAV=RCL_MEMBER_PRIMARY_NAV;
@@ -35,6 +37,8 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'RCH Today',href:'/today',icon:FaBolt},
       {label:'My Profile',href:'/social/profile/me',icon:FaUser},
+      {label:'Community',href:'/community',icon:FaPeopleGroup},
+      {label:'Join Rich City League',href:'/league/join',icon:FaBasketball},
       {label:'Professional Dashboard',href:'/professional',icon:FaChartSimple},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
       {label:'Notifications',href:'/notifications',icon:FaBell},
@@ -66,6 +70,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'The premier league and flagship competition property on RCL',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Join / Tryouts',href:'/league/join',icon:FaUserPlus},
       {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Games',href:'/games',icon:FaBasketball},
@@ -104,12 +109,12 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
 const DISCOVER=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends','/coaches'];
 const RUNS=['/runs','/richmond-basketball-runs'];
 const PROFILE=['/social/profile','/profile'];
-const LEAGUE=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
+const LEAGUE=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/game-iq','/leaderboards'];
 
 export function isMemberNavigationActive(pathname:string,href:string){
   // A profile is a /social/* route, but only Profile should appear selected there.
   if(href==='/social')return pathname==='/social'||pathname==='/social/feed';
-  const family=href==='/community'?['/community','/communities','/crews','/friends']:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
+  const family=href==='/draft'?['/draft']:href==='/fantasy'?['/fantasy']:href==='/community'?['/community','/communities','/crews','/friends']:href==='/discover'?DISCOVER:href==='/runs'?RUNS:href==='/profile'||href==='/social/profile/me'?PROFILE:href==='/league'?LEAGUE:href==='/create'?['/create']:null;
   if(family) return family.some(path=>pathname===path||pathname.startsWith(`${path}/`));
   const clean=href.split('?')[0];
   return pathname===clean||(clean!=='/'&&pathname.startsWith(`${clean}/`));

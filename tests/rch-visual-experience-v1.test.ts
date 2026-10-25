@@ -38,8 +38,8 @@ describe('RCH Visual Experience v1 product contract',()=>{
   expect(page).toContain('showTakeovers');
   expect(page).toContain('<RunRankedLadder/>');
  });
- it('keeps the approved four destinations and scopes the Runs geometry',()=>{
-  for(const route of ['/social','/runs','/community','/social/profile/me'])expect(nav).toContain("href:'"+route+"'");
+ it('keeps the social and competition destinations and scopes the Runs geometry',()=>{
+  for(const route of ['/social','/runs','/league','/draft','/fantasy'])expect(nav).toContain("href:'"+route+"'");
   expect(page).toContain("import './visual-experience.css'");
   expect(styles).toContain('.rch-arena-shell');
   expect(styles).not.toMatch(/(^|\n)(body|html|:root|main|button)\s*\{/m);

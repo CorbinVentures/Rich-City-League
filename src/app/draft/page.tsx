@@ -248,6 +248,10 @@ export default function DraftNightPage() {
               <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
               <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
               <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Real players. Real franchises. Real season rosters. Follow official team selections that determine who takes the court for Rich City League.</p>
+              <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                <Link href="/league/join" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-black">Join Rich City League <FaArrowRight/></Link>
+                <Link href="/fantasy" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Fan Fantasy <FaArrowRight/></Link>
+              </div>
               <button type="button" onClick={toggleSound} aria-pressed={soundEnabled} className="mt-4 min-h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-xs font-black uppercase tracking-wider text-white/75">{soundEnabled ? 'Mute draft sounds' : 'Enable draft sounds'}</button>
             </div>
             <div className="rcl-draft-live-card">
