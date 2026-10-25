@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SectionLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <><FantasyLeagueNavigator />{children}</>;
+  return <>{children}<FantasyLeagueNavigator /></>;
 }
