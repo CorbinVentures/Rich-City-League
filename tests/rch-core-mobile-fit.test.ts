@@ -12,6 +12,7 @@ describe('RCH screenshot-driven core product fit',()=>{
    expect(css).toContain('calc(68px + env(safe-area-inset-bottom))');
    expect(shared).not.toContain('grid-template-columns:repeat(4,minmax(0,1fr))!important');
    expect(layout.indexOf("import './rch-basketball-product-fit.css'")).toBeGreaterThan(layout.indexOf("import './rch-unified-mockup.css'"));
+   expect(css).toContain('.rch-admin-floating-shortcut {display:none!important;}');
  });
  it('prioritizes actual Runs and holds advanced and operator links behind More',()=>{
    const runs=read('src/app/runs/page.tsx');
