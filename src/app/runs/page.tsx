@@ -629,10 +629,14 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
+        {isSoloJoinable(run)&&<span className="rch-run-availability">{run.max_players-count} open {run.max_players-count===1?'spot':'spots'} · Solo RSVP</span>}
         {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
       </div>
       <div className="rch-ux-game-cta">
+        <div className="rch-run-card-primary">
         {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
           <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
@@ -641,7 +645,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <details className="group border-t border-[#315573] pt-3">
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
         <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
-        <div className="flex flex-wrap gap-2"><ShareRunButton id={run.id} title={run.title}/>
+        <div className="flex flex-wrap gap-2">
           {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
           {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
         </div>
