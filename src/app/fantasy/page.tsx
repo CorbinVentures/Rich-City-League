@@ -16,8 +16,6 @@ import {
   FaUsers,
 } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
-import { ContentAssetBackground } from '@/components/ContentAssetBackground';
-import { FantasyCinematicIntro } from '@/components/FantasyCinematicIntro';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { FantasyRoster, FantasySeason, FantasyTeam, PublicPlayer } from '@/types/database';
@@ -285,37 +283,40 @@ export default function FantasyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#05080d] pb-24 text-white"><FantasyCinematicIntro />
-      <section className="relative isolate overflow-hidden border-b border-white/10 bg-[#07111e]">
-        <ContentAssetBackground assetKey="draft.cover" opacity={0.34} className="object-[center_30%]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,7,12,.98)_0%,rgba(3,7,12,.83)_45%,rgba(3,7,12,.3)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_48%,rgba(34,133,220,.25),transparent_30rem)]" />
-        <Container maxWidth="xl" className="relative py-10 sm:py-14">
-          <div className="max-w-4xl">
-            <p className="flex items-center gap-2 text-xs font-black tracking-[.28em] text-rcl-gold"><FaBasketball /> RICH CITY LEAGUE · THE 804 DRAFT ROOM</p>
-            <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[.85] sm:text-7xl lg:text-8xl">RCH <span className="text-rcl-orange">Fantasy</span></h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/65">Real players. Real games. Real bragging rights. Build your squad, watch official RCL stats update, and compete with the basketball community.</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              {!team && <Link href={user && !season ? '/news' : user ? '#draft' : '/auth/sign-in?redirect=/fantasy'} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-widest text-black hover:bg-orange-400"><FaTrophy /> {user && !season ? 'Follow league news' : user ? 'Build my franchise' : 'Sign in to play'}</Link>}
-              <Link href="/draft" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase text-white">Official Draft <FaArrowRight/></Link>
-              <a href="#rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-black/25 px-5 text-xs font-black uppercase tracking-widest text-white hover:border-white/30"><FaBolt /> How it works</a>
+    <main className="rch-fantasy-workspace min-h-screen bg-[#070a10] pb-24 text-white">
+      <header className="rch-fantasy-header">
+        <Container maxWidth="xl" className="py-6 sm:py-9">
+          <p className="rch-fantasy-kicker">RICH CITY LEAGUE · OFFICIAL FANTASY</p>
+          <div className="rch-fantasy-header-row">
+            <div>
+              <h1>RCH FANTASY</h1>
+              <p>{season ? `Week ${currentWeek} · Official season scoring` : 'Follow the league. Build your fantasy franchise.'}</p>
             </div>
-            <div className="mt-7 grid max-w-3xl grid-cols-3 gap-3">
-              <Metric label="ROSTER" value={`${rosterLimit} spots`} />
-              <Metric label="STARTERS" value="5" />
-              <Metric label="SCORING" value="Official stats" />
-            </div>
+            <Link href={team?'#my-fantasy-team':user&&season?'#draft':user?'/fantasy':'/auth/sign-in?redirect=/fantasy'} className="rch-fantasy-main-action">
+              {team?'My team':user&&season?'Build team':user?'My Fantasy':'Join Fantasy'} <FaArrowRight aria-hidden="true"/>
+            </Link>
+          </div>
+          <nav className="rch-fantasy-subnav" aria-label="Fantasy navigation">
+            <a href="#my-fantasy-team">My team</a>
+            <a href="#matchups">Matchups</a>
+            <a href="#standings">Standings</a>
+            <a href="#fantasy-leagues">Leagues</a>
+            <Link href="/draft">Official Draft</Link>
+          </nav>
+          <div className="rch-fantasy-metrics">
+            <div><span>Week</span><strong>{season?currentWeek:'—'}</strong></div>
+            <div><span>Franchises</span><strong>{season?fantasyTeams.length:'—'}</strong></div>
+            <div><span>My record</span><strong>{team?`${team.wins}–${team.losses}`:'—'}</strong></div>
           </div>
         </Container>
-      </section>
-
-      <Container maxWidth="xl" className="py-7">
+      </header>
+      <Container maxWidth="xl" className="py-7" >
         {!user && <Notice icon={<FaUsers />} tone="blue">Sign in as a fan to create and manage your fantasy team. The player pool, rules and official scoring remain public.</Notice>}
         {user && profile?.role !== 'fan' && <Notice icon={<FaBolt />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
         {message && <Notice icon={<FaBolt />} tone="orange">{message}</Notice>}
         {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. This page is ready; once the league opens a fantasy season, the draft room will activate automatically.</Notice>}
 
-        <section aria-label="How RCH Fantasy works" className="mb-6 grid gap-3 md:grid-cols-3">
+        <details className="rch-fantasy-help mb-5 rounded-xl border border-white/10 p-3"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">How Fantasy works</summary><section aria-label="How RCH Fantasy works" className="mt-3 grid gap-3 md:grid-cols-3">
           {[
             { step: '01 / BUILD', title: 'Own the front office', description: 'Name your franchise. Draft eight real RCH players and set five position-eligible starters.' },
             { step: '02 / SCOUT', title: 'Know your talent', description: 'Explore completed-game statistics and transparent player projections as official results come in.' },
@@ -325,9 +326,9 @@ export default function FantasyPage() {
             <h2 className="mt-2 font-display text-xl font-black uppercase">{item.title}</h2>
             <p className="mt-2 text-xs leading-5 text-white/50">{item.description}</p>
           </article>)}
-        </section>
+        </section></details>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,.65fr)]">
+        <div id="my-fantasy-team" className="grid scroll-mt-24 gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,.65fr)]">
           <section className="space-y-5">
             {team ? (
               <Panel>

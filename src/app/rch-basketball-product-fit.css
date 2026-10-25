@@ -1,0 +1,188 @@
+/*
+ * Product-focused fit pass for the five-destination RCH basketball experience.
+ * Import LAST: older unified styles still contain a four-column mobile nav
+ * and an incompatible light-theme Draft Night override.
+ */
+@media (max-width:1199px), (min-width:1200px) and (max-width:1399px) and (pointer:coarse) {
+ html.rch-premium-root body.rch-premium-app .rcl-universal-bottom {
+   display:grid!important;
+   grid-template-columns:repeat(5,minmax(0,1fr))!important;
+   grid-auto-rows:1fr!important;
+   align-items:stretch!important;
+   gap:2px!important;
+   height:calc(68px + env(safe-area-inset-bottom))!important;
+   min-height:0!important;
+   max-height:calc(68px + env(safe-area-inset-bottom))!important;
+   padding:4px max(5px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left))!important;
+   box-sizing:border-box!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-universal-bottom a {
+   display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+   min-width:0!important;max-width:100%!important;min-height:0!important;height:60px!important;
+   gap:4px!important;padding:5px 1px!important;border-radius:10px!important;box-sizing:border-box!important;
+   line-height:1!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-universal-bottom a svg {
+   flex:none!important;width:21px!important;height:21px!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-universal-bottom a span {
+   display:block!important;font-size:clamp(9px,2.6vw,11px)!important;line-height:1.1!important;letter-spacing:0!important;
+   max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root{
+   padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;
+ }
+}
+@media(max-width:430px) {
+ html.rch-premium-root body.rch-premium-app .rcl-universal-topbar {
+   gap:5px!important;padding-inline:8px!important;min-width:0!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-universal-tools {gap:5px!important;min-width:0!important;}
+ html.rch-premium-root body.rch-premium-app .rcl-universal-tools :is(a,button){
+   min-width:40px!important;width:40px!important;height:42px!important;padding:6px!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-global-search{
+   min-width:39px!important;width:40px!important;max-width:40px!important;flex:0 0 40px!important;
+   padding-inline:9px!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rcl-universal-wordmark{flex:0 0 auto!important;}
+}
+/* Runs: three actions at useful widths; advanced operator links stay in More. */
+.rcl-platform-root main.rch-arena-shell .rch-run-primary-actions {
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-bottom:12px!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-primary-actions .rch-ux-quicklink {
+ min-width:0!important;min-height:48px!important;width:100%!important;padding:10px 6px!important;gap:5px!important;
+ font-size:clamp(10px,2.85vw,13px)!important;line-height:1.2!important;white-space:normal!important;text-align:center!important;
+ color:#f7f5f8!important;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-primary-actions svg {flex:none;width:15px;height:15px;}
+.rcl-platform-root main.rch-arena-shell .rch-run-extras {
+ border:1px solid #494550;border-radius:12px;background:#1b1923;margin-bottom:13px;color:#f5f1f6;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-extras>summary {
+ min-height:44px;display:flex;align-items:center;padding:10px 13px;cursor:pointer;
+ font-size:13px;font-weight:750;list-style:none;color:#f2eff4;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-extras>summary:after {content:'⌄';margin-left:auto;color:#f07696;}
+.rcl-platform-root main.rch-arena-shell .rch-run-extras>summary::-webkit-details-marker{display:none}
+.rcl-platform-root main.rch-arena-shell .rch-run-extra-links {
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 10px 12px;
+}
+.rcl-platform-root main.rch-arena-shell .rch-run-extra-links .rch-ux-quicklink{
+ min-width:0!important;width:100%;padding:8px!important;min-height:44px;
+ text-align:center;white-space:normal;font-size:12px!important;color:#f5f1f5!important;
+}
+@media(max-width:360px){
+ .rcl-platform-root main.rch-arena-shell .rch-run-primary-actions .rch-ux-quicklink{flex-direction:column!important;font-size:10px!important;}
+}
+/* League: official competition site, not a settings dashboard. */
+.rcl-platform-root main.rch-league-site{background:#090b11!important;color:#f6f6fa!important}
+.rch-league-header{background:radial-gradient(circle at 80% 20%,rgba(239,76,114,.17),transparent 45%),linear-gradient(130deg,#15151f,#080b11);border-bottom:1px solid #38313b}
+.rch-league-kicker{color:#fb819e!important;letter-spacing:.16em;font-size:11px;font-weight:850!important}
+.rch-league-header h1{margin-top:8px;font-weight:950!important;letter-spacing:-.04em;font-size:clamp(38px,9vw,68px)!important;line-height:.97!important;color:#fff!important}
+.rch-league-header h1 span{color:#f16c91!important}
+.rch-league-tagline{margin-top:11px;font-size:clamp(14px,3vw,19px)!important;line-height:1.4;color:#c9c5ce!important}
+.rch-league-header-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.rch-league-header-actions a{min-height:45px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border:1px solid #625560;border-radius:11px;padding:9px 13px;font-weight:760;font-size:13px;color:#f9f7fc}
+.rch-league-header-actions a.rch-league-join{background:#b70a39;color:#fff;border-color:#ed5b82}
+.rch-league-member-status{display:flex;flex-wrap:wrap;gap:12px;margin-top:17px;color:#d7cfd8;font-size:12px}
+.rch-league-member-status span{display:inline-flex;align-items:center;padding:5px 10px;border:1px solid #38313b;border-radius:20px}
+.rch-league-public-hub{min-width:0}
+.rch-league-section-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}
+.rch-league-section-heading p{font-size:10px!important;letter-spacing:.16em;color:#f6819e!important;font-weight:900!important}
+.rch-league-section-heading h2{font-size:clamp(22px,5vw,30px)!important;font-weight:900!important;color:#fff!important}
+.rch-league-section-heading>span{font-size:12px;color:#b9b4c0;text-align:right}
+.rch-league-score-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:13px}
+.rch-league-feature-game,.rch-league-standings{display:flex;flex-direction:column;min-width:0;border:1px solid #4c4350;border-radius:16px;background:#17171f;padding:18px}
+.rch-league-label{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:900;letter-spacing:.15em;color:#f681a0!important}
+.rch-league-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:11px;margin-top:20px}
+.rch-league-versus strong{font-size:clamp(15px,3.5vw,23px)!important;line-height:1.2;font-weight:850;color:#fff!important;overflow-wrap:anywhere}
+.rch-league-versus strong:last-child{text-align:right}
+.rch-league-versus span{font-size:15px;color:#f2819f;font-weight:900;white-space:nowrap}
+.rch-league-feature-game h3{margin-top:24px;font-weight:850;color:#fff}
+.rch-league-feature-game p,.rch-league-feedback{margin-top:12px;color:#c8c4cf!important;font-size:13px;line-height:1.6}
+.rch-league-feature-game a,.rch-league-standings>a{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:16px;min-height:44px;color:#ff8dab!important;font-size:13px;font-weight:850}
+.rch-league-table{margin-top:11px}
+.rch-league-table>div{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;padding:9px 0;border-bottom:1px solid #34313b}
+.rch-league-table span{color:#f48baa;font-size:12px}
+.rch-league-table strong{font-size:12px;font-weight:750;color:#f2f1f5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rch-league-section-links{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-top:13px;padding-bottom:4px}
+.rch-league-section-links a{display:inline-flex;align-items:center;flex:none;min-height:45px;padding:9px 13px;border:1px solid #4d4551;border-radius:10px;color:#e9e6ef;font-size:12px;font-weight:850}
+.rch-league-member-content{border-top:1px solid #33303b}
+@media(max-width:680px){.rch-league-score-grid{grid-template-columns:1fr}.rch-league-header-actions a{font-size:12px;padding:9px 11px}.rch-league-header-actions .rch-league-join{width:100%}}
+/* Fantasy: live league software, not an introductory marketing page. */
+.rcl-platform-root main.rch-fantasy-workspace{background:#0a0c12!important;color:#f8f7fb!important}
+.rch-fantasy-header{background:linear-gradient(165deg,#161924,#0a0c12);border-bottom:1px solid #393540}
+.rch-fantasy-kicker{font-size:10px;letter-spacing:.14em;font-weight:850;color:#f282a2!important}
+.rch-fantasy-header-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:9px}
+.rch-fantasy-header h1{font-size:clamp(29px,7vw,48px)!important;line-height:1!important;letter-spacing:-.035em;font-weight:950;color:#fff!important}
+.rch-fantasy-header-row p{font-size:13px;margin-top:7px;color:#d6d0d9!important}
+.rch-fantasy-main-action{flex:none;display:inline-flex;min-height:44px;align-items:center;gap:8px;padding:9px 12px;border-radius:11px;background:#bb0a3b;color:#fff!important;font-weight:800;font-size:12px}
+.rch-fantasy-subnav{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:18px;padding-bottom:5px}
+.rch-fantasy-subnav a{flex:none;min-height:44px;display:inline-flex;align-items:center;padding:9px 12px;border-radius:10px;border:1px solid #554853;color:#f7eef3!important;font-size:12px;font-weight:800}
+.rch-fantasy-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:15px}
+.rch-fantasy-metrics>div{padding:12px;border-radius:12px;border:1px solid #453a48;background:#1c1b26;min-width:0}
+.rch-fantasy-metrics span{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:10px;color:#c3b9c5}
+.rch-fantasy-metrics strong{display:block;font-size:22px;color:#fff;font-weight:900;margin-top:4px;white-space:nowrap}
+.rch-fantasy-workspace :is(.text-white\/30,.text-white\/35,.text-white\/40,.text-white\/45,.text-white\/50){color:#c2bbc9!important}
+.rch-fantasy-workspace :is(input,select){color:#fff!important;background:#1b1a26!important}
+.rch-fantasy-help>summary{color:#f1eaf2!important}
+.rch-fantasy-leagues{scroll-margin-top:90px}
+@media(max-width:400px){.rch-fantasy-header-row{align-items:start;flex-direction:column}.rch-fantasy-main-action{align-self:flex-start}.rch-fantasy-metrics strong{font-size:18px}}
+/* Draft: authoritative dark contrast, overriding the legacy white cards and pale typography. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable{
+ --rcl-v3-ink:#f8f7fc!important;--rcl-v3-copy:#c5bfca!important;--rcl-v3-muted:#bab3c0!important;
+ --rcl-v3-canvas:#0b0c12!important;--rcl-v3-surface:#161720!important;--rcl-v3-soft:#201d28!important;
+ --rcl-v3-border:#514651!important;--rcl-v3-slate:#eee7f0!important;
+ background:#0a0b11!important;color:#f8f7fc!important;color-scheme:dark;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable>.relative{color:#f8f7fc!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero {
+ background:linear-gradient(130deg,#171521 0%,#0a0b12 75%)!important;color:#f8f7fb!important;border-bottom:1px solid #49404e!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero-grid{opacity:.12!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero .rcl-display {
+ color:#fff!important;font-size:clamp(35px,9.5vw,68px)!important;line-height:1.04!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero .rcl-display span {color:#f16b90!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero p:not(.rcl-kicker) {
+ color:#d7d0dc!important;font-size:clamp(13px,3vw,16px)!important;line-height:1.55!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable :is(.rcl-draft-live-card,.rcl-draft-module,.rcl-draft-stat-strip,.rcl-draft-feature,.rcl-pick-history) {
+ background:#191923!important;background-image:none!important;border:1px solid #504651!important;box-shadow:none!important;color:#f8f6fa!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable :is(.rcl-draft-countdown,.rcl-on-clock,.rcl-empty-pick,.rcl-preview-empty,.rcl-player-metrics span,.rcl-prospect-avatar) {
+ background:#22212d!important;border-color:#514755!important;color:#f6f2f8!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable :is(.rcl-draft-live-card,.rcl-draft-module,.rcl-draft-stat-strip,.rcl-pick-history,.rcl-draft-feature) :is(h2,h3,b,strong) {
+ color:#f8f7fc!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable :is(.rcl-draft-live-card,.rcl-draft-module,.rcl-draft-stat-strip,.rcl-pick-history,.rcl-draft-feature) :is(p,small,span) {
+ color:#c9c3cf!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card .rcl-live,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-module-heading small,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-kicker {
+ color:#f18fa8!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-prospect-list>button{background:#1b1b25!important;color:#fff!important;border-color:#403744!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-prospect-list>button.selected{background:#38202f!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-board input {background:#11121c!important;color:#fff!important;border-color:#5a4e5b!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-board input::placeholder{color:#b9b3c1!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-secondary {background:#25212c!important;color:#fff!important;border-color:#675666!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable :is(.rcl-draft-primary,.rcl-filter-row button.active){background:#b9093a!important;color:white!important;border-color:#ef6489!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-primary:disabled{background:#24212b!important;color:#aca5b2!important;border-color:#4c4250!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-filter-row button:not(.active){background:#24212d!important;color:#f0eaf3!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip strong {color:#fff!important}
+@media(max-width:640px){
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero{padding-top:0!important}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card{min-height:0!important;padding:18px!important}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card strong{font-size:23px!important}
+}
+
+/* Admin has full access in the menu: floating desktop shortcut must never
+   obscure PWA content, Run hosting, Draft status or Fantasy controls. */
+@media (max-width:1199px), (min-width:1200px) and (max-width:1399px) and (pointer:coarse) {
+  html.rch-premium-root body.rch-premium-app .rch-admin-floating-shortcut {display:none!important;}
+}

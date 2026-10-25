@@ -31,7 +31,7 @@ describe('RCH basketball world journey',()=>{
   expect(league).toContain('Join Rich City League');
   expect(league).toContain('href="/league/join"');
   expect(runs).toContain('Want to join Rich City League?');
-  expect(league).toContain('XP <strong');
+  expect(league).toContain('XP {state.rep.xp.toLocaleString()}');
   expect(league).not.toContain('REP <strong className="ml-1 text-rcl-blue">{state.rep.xp');
  });
  it('connects Draft to Fantasy while keeping Home social',()=>{
