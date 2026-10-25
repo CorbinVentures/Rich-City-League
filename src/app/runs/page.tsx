@@ -147,6 +147,7 @@ export default function RunsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
   const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
+  const [visibleLimit,setVisibleLimit]=useState(8);
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -449,6 +450,8 @@ export default function RunsPage() {
     });
   },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
+  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,runSearch,courtParam,soloOnly]);
+
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
   if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
@@ -527,7 +530,12 @@ export default function RunsPage() {
           </div>
 
           {soloOnly&&!loading&&visibleRuns.length>0&&<p role="status" className="rch-run-solo-explainer">{visibleRuns.length} open {visibleRuns.length===1?'Run':'Runs'} taking individual RSVPs. No crew required to register.</p>}
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.slice(0,visibleLimit).map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {view==='runs'&&visibleRuns.length>visibleLimit&&
+            <div className="rch-run-load-more">
+              <span>Showing {visibleLimit} of {visibleRuns.length} matching Runs</span>
+              <button type="button" onClick={()=>setVisibleLimit(n=>n+8)}>Show more Runs <FaArrowRight aria-hidden="true"/></button>
+            </div>}
         </section>}
 
         {view==='runs'&&<>
