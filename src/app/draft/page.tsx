@@ -1,5 +1,6 @@
-import { ProgramEmblem } from '@/components/ProgramEmblem';
 'use client';
+
+import { ProgramEmblem } from '@/components/ProgramEmblem';
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
