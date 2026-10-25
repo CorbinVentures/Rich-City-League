@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBell, FaCheckDouble } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
-import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { SocialIdentity, type SocialIdentityAuthor } from '@/components/SocialIdentity';
@@ -73,18 +72,18 @@ export default function NotificationsPage() {
   };
 
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
-    <ClientPageHero
-      eyebrow="RCL Alerts"
-      title="Notifications"
-      accent="What needs your attention"
-      description="Friend requests, social activity, REP milestones, league updates, and account events—organized in one place."
-      assetKey="social.cover"
-      actions={unread > 0 ? <button type="button" disabled={busy} onClick={() => void markAllRead()} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider text-white transition hover:border-rcl-blue/60 disabled:opacity-50"><FaCheckDouble/>{busy ? 'Updating…' : 'Mark all read'}</button> : null}
-      meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Inbox</p><p className="mt-1 font-display text-3xl font-black">{unread}<span className="ml-2 text-xs text-white/35">unread</span></p><p className="mt-2 text-xs text-rcl-blue">{items.length} recent alerts</p></div>}
-    />
+    <Container maxWidth="lg" className="pt-6 sm:pt-9">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div><h1 className="text-2xl font-black">Notifications</h1>
+          {unread>0&&<p className="text-sm text-white/60">{unread} unread</p>}
+        </div>
+        {unread>0&&<button type="button" disabled={busy} onClick={() => void markAllRead()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-semibold disabled:opacity-50">
+          <FaCheckDouble aria-hidden="true"/>{busy?'Updating…':'Mark read'}
+        </button>}
+      </header>
+    </Container>
 
     <Container maxWidth="lg" className="py-8 sm:py-12">
-      <PWAAppAlertsCard />
       {error && <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-200"><p>{error}</p><button type="button" onClick={() => void load()} className="rounded-lg border border-red-300/20 px-3 py-2 text-xs font-black uppercase">Try again</button></div>}
 
       {!user && !authLoading ? <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-10 text-center"><FaBell className="mx-auto text-3xl text-rcl-blue"/><h2 className="mt-4 font-display text-2xl font-black uppercase">Sign in to see your alerts</h2><p className="mt-2 text-sm text-white/40">Notifications are tied to your RCL account.</p><a href="/auth/sign-in?next=/notifications" className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Sign in <FaArrowRight/></a></div> : <section className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/45">
@@ -100,6 +99,10 @@ export default function NotificationsPage() {
           </button>;
         })}</div> : <div className="p-12 text-center"><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rcl-blue/10 text-2xl text-rcl-blue"><FaCheckDouble/></span><h2 className="mt-5 font-display text-2xl font-black uppercase">You&apos;re all caught up</h2><p className="mt-2 text-sm text-white/35">New RCL activity will appear here.</p></div>}
       </section>}
+      <details className="mt-5 rounded-xl border border-white/15 p-3">
+        <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">Notification settings</summary>
+        <PWAAppAlertsCard />
+      </details>
     </Container>
   </main>;
 }

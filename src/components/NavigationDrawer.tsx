@@ -34,15 +34,27 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
       <div className="rcl-navigation-heading">
         <div>
           <p className="rcl-nav-eyebrow">RCH · Basketball Social</p>
-          <h2 id={headingId}>Find your way around RCH</h2>
-          <p>Pick what you want to do first. All the features are still here when you need them.</p>
+          <h2 id={headingId}>Menu</h2>
         </div>
         <button ref={closeRef} type="button" onClick={onClose} aria-label="Close navigation"><FaXmark aria-hidden="true"/></button>
       </div>
       <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
-      <RCHActionGuide variant="drawer" onNavigate={onClose}/>
-      <div className="rch-nav-directory" aria-label="All RCH features">
-        <div className="rch-nav-directory-head"><b>All features</b><span>More places to explore when you need them</span></div>
+      <nav className="grid grid-cols-2 gap-2 p-4" aria-label="Quick destinations">
+        {[
+          {href:'/social',label:'Home'}, {href:'/discover',label:'Discover'},
+          {href:'/runs',label:'Runs'}, {href:'/create',label:'Create'},
+          {href:'/messages',label:'Messages'}, {href:'/media',label:'RCH TV'},
+        ].map(item=><Link key={item.href} href={item.href} onClick={onClose}
+          className="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-white/15 px-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+          {item.label}<FaArrowRight aria-hidden="true"/>
+        </Link>)}
+      </nav>
+      <details className="mx-4 mb-3 rounded-xl border border-white/10 p-3">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold">Help me choose</summary>
+        <RCHActionGuide variant="drawer" onNavigate={onClose}/>
+      </details>
+      <details className="rch-nav-directory mx-4 rounded-xl border border-white/10 p-3" aria-label="All RCH features">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold">All features</summary>
         <nav aria-label="All RCH destinations" className="rcl-navigation-groups rch-nav-accordions">
           {groups.map(group=><details key={group.label} className="rcl-navigation-group rch-nav-group">
             <summary className="rch-nav-group-summary">
@@ -56,7 +68,7 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
             </div>
           </details>)}
         </nav>
-      </div>
+      </details>
       <div className="rcl-navigation-utility">
         <Link href="/membership" onClick={onClose}>RCL+ membership</Link>
         <Link href="/shop" onClick={onClose}>Shop RCL</Link>

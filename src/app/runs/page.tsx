@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
-import { RunArenaHero } from '@/components/runs/RunArenaHero';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
 import { RunsRulesIntro } from '@/components/runs/RunsRulesIntro';
 import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
@@ -115,7 +114,7 @@ export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
-  const showLegacyList=searchParams.get('view')==='list'||createIntent||Boolean(courtParam);
+  const showLegacyList=searchParams.get('view')!=='world'||createIntent||Boolean(courtParam);
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -445,24 +444,24 @@ export default function RunsPage() {
     });
   },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
-  // Runs World is the primary game. Existing competition, forms and list screens
-  // remain available via view=list, create intent, or deep court links.
+  // People looking for Runs land on upcoming real games. The cinematic court
+  // world remains available by explicit choice, without interrupting first use.
   if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
-      <RunArenaHero
-        activeMode={typeFilter}
-        onHost={() => openCreateForCourt(selectedCourt ?? undefined)}
-        onFind={() => {setView('runs');document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});}}
-        onMode={mode => {
-          setTypeFilter(mode);
-          setView('runs');
-          document.getElementById('rch-upcoming-runs')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-        }}
-      />
+      <Container maxWidth="xl" className="px-3 pt-6 sm:px-5">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-black">Runs</h1>
+          <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">
+            <FaPlus aria-hidden="true"/> Host a run
+          </button>
+        </header>
+      </Container>
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         <nav aria-label="Runs quick actions" className="rch-ux-quickbar">
+          <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Court Map</Link>
           <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How to Play</button>
           <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> The PARK & REC</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
@@ -471,12 +470,15 @@ export default function RunsPage() {
         </nav>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">The Park · Player Hub</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<><Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link><Link href="/admin/runs/weekend-circuit" className="rounded-full border border-[#e8b96b]/60 bg-[#372b19] px-3 py-2 text-[11px] font-black text-[#ffe2ab]">Weekend Circuit HQ →</Link></>}</div>
+          <div className="flex flex-wrap items-center gap-3"><span className="text-[11px] font-bold uppercase tracking-[.2em] text-[#88bffa]">Runs</span><Link href="/runs/hosts" className="rounded-full border border-[#4d8c84] bg-[#113a40] px-3 py-2 text-[11px] font-black text-[#bdece1]">Verified Hosts →</Link><Link href="/rep" className="rounded-full border border-[#6e6a4a] bg-[#3a3025] px-3 py-2 text-[11px] font-black text-[#ffe1a4]">REP Exchange →</Link>{staffIntelligence&&<><Link href="/runs/intelligence" className="rounded-full border border-[#5b8eaa] bg-[#123551] px-3 py-2 text-[11px] font-black text-[#c9f0ff]">Statewide Intelligence →</Link><Link href="/admin/runs/weekend-circuit" className="rounded-full border border-[#e8b96b]/60 bg-[#372b19] px-3 py-2 text-[11px] font-black text-[#ffe2ab]">Weekend Circuit HQ →</Link></>}</div>
           <button type="button" onClick={() => setView(view === 'runs' ? 'rewards' : 'runs')} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#325f8d] bg-[#0d2b4a] px-3 text-[11px] font-bold text-[#b8dbff]">
             <FaTrophy className="text-[#f8d078]"/> {view === 'runs' ? 'REP Rewards' : 'Back to Runs'}
           </button>
         </div>
-        {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        <details className="mb-4 rounded-xl border border-white/10 p-3">
+          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
+          {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        </details>
         {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>

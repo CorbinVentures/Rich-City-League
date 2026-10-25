@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FiArchive,
-  FiBellOff,
   FiCheckCircle,
   FiEdit3,
   FiMessageCircle,
@@ -310,37 +309,32 @@ export default function MessagesPage() {
   return (
     <main className="rcl-messages-shell">
       <Container maxWidth="xl" className="py-7 sm:py-10">
-        <section className="rcl-inbox-hero">
-          <div>
-            <p>RCH Messages</p>
-            <h1>Your basketball conversations.</h1>
-            <span>Private, realtime messaging built around the people, teams and communities in your basketball world.</span>
-          </div>
-          <button type="button" onClick={() => setComposeOpen(true)} className="rcl-message-primary-button"><FiEdit3 /> New message</button>
-        </section>
-
-        <section className="rcl-message-overview" aria-label="Messaging overview">
-          <div><span>Unread</span><strong>{unreadTotal}</strong><small>Messages waiting for you</small></div>
-          <div><span>Pinned</span><strong>{pinnedTotal}</strong><small>Priority conversations</small></div>
-          <div><span>Groups</span><strong>{groupTotal}</strong><small>Team and community threads</small></div>
-        </section>
+        <header className="mb-4 flex items-center justify-between gap-3">
+          <div><h1 className="text-2xl font-black">Messages</h1>{unreadTotal>0&&<p className="text-xs text-white/60">{unreadTotal} unread</p>}</div>
+          <button type="button" onClick={() => setComposeOpen(true)} className="rcl-message-primary-button"><FiEdit3/> New</button>
+        </header>
 
         <section className="rcl-inbox-workspace">
           <aside className="rcl-inbox-sidebar">
             <div className="rcl-inbox-sidebar-head">
               <strong>Messages</strong>
-              <button type="button" onClick={() => setComposeOpen(true)} aria-label="New message"><FiEdit3 /></button>
             </div>
             <nav aria-label="Message views">
-              {views.map(({ key, label, icon: Icon }) => {
+              {views.filter((item) => ['INBOX','UNREAD','GROUPS'].includes(item.key)).map(({ key, label, icon: Icon }) => {
                 const count = key === 'PRIORITY' ? priorityTotal : key === 'UNREAD' ? unreadTotal : key === 'PINNED' ? pinnedTotal : key === 'GROUPS' ? groupTotal : undefined;
                 return <button key={key} type="button" onClick={() => setView(key)} className={view === key ? 'active' : ''}><Icon /><span>{label}</span>{typeof count === 'number' && count > 0 ? <b>{count}</b> : null}</button>;
               })}
             </nav>
-            <div className="rcl-inbox-sidebar-note">
-              <FiBellOff />
-              <div><strong>Notification control</strong><p>Choose how message alerts reach you.</p><Link href="/settings/notifications">Open settings</Link></div>
-            </div>
+            <details className="border-t border-white/10 px-3 py-2">
+              <summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold">More filters</summary>
+              <nav aria-label="Other message views">
+                {views.filter((item) => ['PRIORITY','PINNED','ARCHIVED'].includes(item.key)).map(({key,label,icon:Icon})=>
+                  <button key={key} type="button" onClick={() => setView(key)} className={view === key ? 'active' : ''}>
+                    <Icon/><span>{label}</span>
+                  </button>)}
+              </nav>
+              <Link className="my-3 block text-xs underline" href="/settings/notifications">Message alerts</Link>
+            </details>
           </aside>
 
           <div className="rcl-inbox-main">
