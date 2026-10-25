@@ -39,7 +39,7 @@
  .rch-program-emblem-runs {width:66px;}
  .rch-program-brand-lockup {gap:9px;}
  .rch-program-draft-lockup .rcl-display {font-size:clamp(31px,8vw,48px)!important;}
- .rch-program-league-lockup .rch-league-header h1 {font-size:clamp(27px,8vw,40px)!important;}
+ .rch-league-header .rch-program-league-lockup h1 {font-size:clamp(27px,8vw,40px)!important;}
  .rch-program-fantasy-lockup h1 {font-size:clamp(25px,7vw,34px)!important;}
  .rch-program-brand-copy {overflow-wrap:normal;}
 }
