@@ -328,6 +328,7 @@ export default function RunRoomPage() {
           <nav aria-label="Game-day sections" className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
            {([{id:'rch-run-lobby',title:'01 · Lobby'},{id:'rch-game-day',title:'02 · Check in'},{id:'rch-next-up',title:'03 · Next Up'},{id:'rch-result-review',title:'04 · Results'}] as const).map(step=><a key={step.id} href={'#'+step.id} className="flex min-h-11 items-center justify-center rounded-lg border border-[#375f85] bg-[#061e34] px-2 text-center text-[11px] font-bold text-[#d0e9fb] hover:border-[#91d7ff]">{step.title}</a>)}
           </nav>
+          {canJoin&&!registered&&<p className="mt-3 text-xs font-semibold text-[#d6e9f4]">Pull up solo — you don&apos;t need a crew to reserve an open roster spot. The host arranges the game.</p>}
           {!user&&<p className="mt-3 text-xs text-[#b9d6eb]">Sign in to register, check in and save your verified basketball progression.</p>}
           <p className="mt-3 text-[10px] leading-5 text-[#9cbdd5]"><FaCircleCheck className="mr-1 inline"/> Registrations and check-ins are not verified game outcomes. Ranked results require opponent confirmation; official title matches require independent certification.</p>
         </section>
