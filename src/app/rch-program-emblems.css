@@ -12,7 +12,7 @@
  width:clamp(78px,11vw,138px);aspect-ratio:1/1;
  position:relative;overflow:hidden;isolation:isolate;
  background:transparent;
- -webkit-mask-image:radial-gradient(circle,#000 49%,rgba(0,0,0,.97) 64%,transparent 79%);
+ -webkit-mask-image:radial-gradient(circle farthest-corner at center,#000 77%,transparent 100%);
  mask-image:radial-gradient(circle,#000 49%,rgba(0,0,0,.97) 64%,transparent 79%);
 }
 .rch-program-emblem-image {
@@ -55,3 +55,5 @@
 @media(prefers-reduced-motion:reduce) {
  .rch-program-emblem-image {animation:none!important;}
 }
+
+.rch-program-emblem-journey{width:clamp(58px,9vw,84px);}
