@@ -56,11 +56,12 @@ describe('RCH Visual Experience v1 product contract',()=>{
   expect(components).toContain("status==='verified'");
   expect(components).toContain('Registration open');
  });
- it('brings real Today context above stories while preserving the timeline and composer',()=>{
-  expect(social).toContain('Your next move starts here.');
-  expect(social.indexOf('<TodayPanel')).toBeLessThan(social.indexOf('<StoryRail'));
+ it('keeps Home focused on posts, stories and the composer',()=>{
+  expect(social).not.toContain('<TodayPanel');
+  expect(social).not.toContain('RCHPulseMoment');
+  expect(social).not.toContain('RCHFirstSessionDiscovery');
+  expect(social).toContain('<StoryRail');
   expect(social).toContain('<NetworkPostCard');
   expect(social).toContain('rch-pulse-compose-strip');
-  expect(social).toContain('RCHPulseMoment');
  });
 });

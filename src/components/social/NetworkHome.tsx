@@ -6,33 +6,21 @@ import { createPortal } from 'react-dom';
 import {
   FaArrowLeft,
   FaBasketball,
-  FaBolt,
-  FaCompass,
-  FaHouse,
   FaImage,
   FaMagnifyingGlass,
-  FaPeopleGroup,
   FaPlus,
   FaPlay,
   FaVideo,
   FaXmark,
 } from 'react-icons/fa6';
-import { Neighborhood } from '@/components/social/Neighborhood';
-import { RCHFirstSessionDiscovery } from '@/components/social/RCHFirstSessionDiscovery';
-import { RCHPulseMoment } from '@/components/social/RCHPulseModules';
 import { Container } from '@/components/Container';
-import { ReferralCard } from '@/components/ReferralCard';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
-import { RepPromotedPlacement } from '@/components/rep/RepPromotedPlacement';
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { GravityLocationPicker } from '@/components/GravityLocationPicker';
 import { useGravityLocation } from '@/hooks/useGravityLocation';
-import { cityForText } from '@/lib/virginia-world';
-import { rankGravityCandidates } from '@/lib/rch-gravity';
 import { scoreSocialPost } from '@/lib/social-feed';
 import {
   isGravityGoal, isGravityIntent, scoreGravityCandidate,
@@ -67,40 +55,10 @@ type Story = {
   author?: NetworkAuthor;
 };
 
-type Community = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  community_type: string | null;
-};
-
-type Run = {
-  id: string;
-  title: string;
-  starts_at: string;
-  court_name: string | null;
-  location: string | null;
-  game_format: string | null;
-  max_players: number;
-  players?: string[];
-};
-
 type FeedMode = 'for-you' | 'following' | 'trending' | 'courtside';
 
-const leftNav = [
-  { href: '/social', label: 'Home', icon: FaHouse },
-  { href: '/world', label: 'Living World', icon: FaBolt },
-  { href: '/discover', label: 'Discover', icon: FaCompass },
-  { href: '/clips', label: 'RCH Clips', icon: FaPlay },
-  { href: '/create', label: 'Create', icon: FaPlus },
-  { href: '/runs', label: 'Runs', icon: FaBasketball },
-  { href: '/rep', label: 'REP Exchange', icon: FaBolt },
-  { href: '/league', label: 'League', icon: FaBasketball },
-];
-
 export default function NetworkHome() {
-  const {location:gravityLocation,city:gravityCity} = useGravityLocation();
+  const {city:gravityCity} = useGravityLocation();
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;
@@ -110,14 +68,11 @@ export default function NetworkHome() {
   const [reposts, setReposts] = useState<NetworkRepost[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const [currentProfile, setCurrentProfile] = useState<NetworkAuthor | null>(null);
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [runs, setRuns] = useState<Run[]>([]);
   const [following, setFollowing] = useState<string[]>([]);
   const [saved, setSaved] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [runBusy, setRunBusy] = useState<string | null>(null);
 
   const [mode, setMode] = useState<FeedMode>('for-you');
   const [gravityIntent, setGravityIntent] = useState<GravityIntent|null>(null);
@@ -240,7 +195,7 @@ export default function NetworkHome() {
 
     try {
       const nowIso = new Date().toISOString();
-      const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult, runsResult] = await Promise.all([
+      const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult] = await Promise.all([
         db.from('posts')
           .select('id,author_id,body,media_urls,created_at,is_automated,automation_type')
           .eq('status', 'published')
@@ -267,12 +222,6 @@ export default function NetworkHome() {
               .eq('id', user.id)
               .maybeSingle()
           : Promise.resolve({ data: null, error: null }),
-        db.from('runs')
-          .select('id,title,starts_at,court_name,location,game_format,max_players')
-          .eq('status', 'open')
-          .gt('starts_at', nowIso)
-          .order('starts_at', { ascending: true })
-          .limit(4),
       ]);
 
       if (requestId !== loadRequestRef.current) return;
@@ -346,16 +295,14 @@ export default function NetworkHome() {
       }));
       const coreReposts = repostRows.map((entry) => ({ ...entry, profile: authorMap.get(entry.profile_id) }));
       const coreStories = storyRows.map((entry) => ({ ...entry, author: authorMap.get(entry.author_id) }));
-      const runRows = (runsResult.data ?? []) as Run[];
 
-      // First paint: feed, identity, stories and the next run become usable here.
-      // Engagement and sidebar discovery hydrate below without blocking the UI.
+      // First paint: feed, identity and stories become usable here.
+      // Engagement details hydrate below without blocking the UI.
       setPosts(corePosts);
       setReposts(coreReposts);
       setStories(coreStories);
       setFollowing(((followsResult.data ?? []) as Array<{ following_id: string }>).map((entry) => entry.following_id));
       setSaved(((savedResult.data ?? []) as Array<{ post_id: string }>).map((entry) => entry.post_id));
-      setRuns(runRows.map((run) => ({ ...run, players: [] })));
       setCurrentProfile(
         user
           ? authorMap.get(user.id) ?? ((currentProfileResult.data ?? null) as NetworkAuthor | null)
@@ -366,7 +313,7 @@ export default function NetworkHome() {
 
       void (async () => {
         try {
-          const [commentsResult, reactionsResult, communitiesResult, runPlayersResult] = await Promise.all([
+          const [commentsResult, reactionsResult] = await Promise.all([
             postIds.length
               ? db.from('comments')
                   .select('id,post_id,author_id,body,created_at')
@@ -379,14 +326,6 @@ export default function NetworkHome() {
                   .select('post_id,user_id,type')
                   .in('post_id', postIds)
                   .limit(400)
-              : Promise.resolve({ data: [], error: null }),
-            db.from('communities')
-              .select('id,name,slug,description,community_type')
-              .eq('privacy', 'public')
-              .order('created_at', { ascending: false })
-              .limit(4),
-            runRows.length
-              ? db.from('run_players').select('run_id,profile_id').in('run_id', runRows.map((run) => run.id))
               : Promise.resolve({ data: [], error: null }),
           ]);
 
@@ -444,13 +383,6 @@ export default function NetworkHome() {
             reactions: reactionsByPost.get(post.id) ?? post.reactions ?? [],
           })));
 
-          setCommunities((communitiesResult.data ?? []) as Community[]);
-
-          const runPlayerMap = new Map<string, string[]>();
-          for (const entry of (runPlayersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
-            runPlayerMap.set(entry.run_id, [...(runPlayerMap.get(entry.run_id) ?? []), entry.profile_id]);
-          }
-          setRuns(runRows.map((run) => ({ ...run, players: runPlayerMap.get(run.id) ?? [] })));
         } catch (secondaryError) {
           console.warn('RCH Social background hydration skipped', secondaryError);
         }
@@ -643,41 +575,6 @@ export default function NetworkHome() {
     }
   };
 
-  const toggleRunParticipation = async (run: Run) => {
-    if (!db || !user) { signInForNetwork(); return; }
-    const joined = run.players?.includes(user.id) ?? false;
-    const playerCount = run.players?.length ?? 0;
-    if (!joined && playerCount >= run.max_players) {
-      setError('This run is full.');
-      return;
-    }
-
-    setRunBusy(run.id);
-    setError('');
-    const optimisticPlayers = joined
-      ? (run.players ?? []).filter((id) => id !== user.id)
-      : [...(run.players ?? []), user.id];
-    setRuns((current) => current.map((item) => item.id === run.id ? { ...item, players: optimisticPlayers } : item));
-
-    const result = joined
-      ? await db.from('run_players').delete().eq('run_id', run.id).eq('profile_id', user.id)
-      : await db.from('run_players').insert({ run_id: run.id, profile_id: user.id });
-
-    if (result.error) {
-      setError(result.error.message);
-      void load();
-    } else {
-      setNotice(joined ? `You left ${run.title}.` : `You’re in for ${run.title}.`);
-      window.setTimeout(() => setNotice(''), 2600);
-      void trackActivity(joined ? 'run_left' : 'run_joined', 'run', run.id, {
-        source: 'social_home',
-        starts_at: run.starts_at,
-      });
-      if (!joined) void refreshRep();
-    }
-    setRunBusy(null);
-  };
-
   const feedItems = useMemo(() => {
     const repostsByPost = new Map<string, NetworkRepost[]>();
     reposts.forEach((repost) => repostsByPost.set(repost.post_id, [...(repostsByPost.get(repost.post_id) ?? []), repost]));
@@ -742,59 +639,20 @@ export default function NetworkHome() {
     }).slice(0, 40);
   }, [posts, reposts, mode, search, focusPostId, user?.id, following, saved, gravityIntent, gravityGoal, gravityCity?.name]);
 
-  // An optional city preference also shapes the local run opportunity panel,
-  // without inferring private post author whereabouts from free-form text.
-  const relevantRuns = useMemo(() => {
-    if (!gravityLocation.cityId) return runs;
-    const candidates = rankGravityCandidates(runs.map(run => ({
-      id:run.id,category:'run' as const,title:run.title,
-      city:cityForText([run.location,run.court_name].join(' '))?.name || null,
-      startsAt:run.starts_at,
-    })), {cityId:gravityLocation.cityId,radiusMiles:gravityLocation.radiusMiles,userId:user?.id});
-    const order = new Map(candidates.map((item,index)=>[item.id,index]));
-    return [...runs].sort((a,b)=>(order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity));
-  },[runs,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
-
-  const officialActivity = useMemo(() => posts.filter((post) => post.author?.is_system_account).slice(0, 4), [posts]);
-  const trendingPosts = useMemo(() => posts.slice().sort((a,b) => trendScore({ key: b.id, post: b, feed_at: b.created_at }) - trendScore({ key: a.id, post: a, feed_at: a.created_at })).slice(0, 4), [posts]);
-
-  const todaySnapshot = useMemo(() => {
-    const now = new Date();
-    const sameLocalDay = (value: string) => {
-      const date = new Date(value);
-      return date.getFullYear() === now.getFullYear()
-        && date.getMonth() === now.getMonth()
-        && date.getDate() === now.getDate();
-    };
-    const postsToday = posts.filter((post) => sameLocalDay(post.created_at)).length;
-    const trendingPost = posts
-      .map((post) => ({ key: `today:${post.id}`, post, feed_at: post.created_at } as NetworkFeedItem))
-      .sort((a, b) => trendScore(b) - trendScore(a))[0]?.post ?? null;
-    return {
-      postsToday,
-      activeStories: stories.length,
-      nextRun: relevantRuns[0] ?? null,
-      trendingPost,
-      rep: currentProfile?.rep ?? 0,
-      level: currentProfile?.level ?? 1,
-    };
-  }, [posts, stories, relevantRuns, currentProfile?.rep, currentProfile?.level]);
-
   return (
-    <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page min-h-screen pb-24 lg:pb-0">
+    <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page rch-timeline-home min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
       {notice && <div className="fixed left-1/2 top-20 z-[79] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-blue/25 bg-[#071522] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
-      <Container maxWidth="xl" className="py-5 sm:py-7">
-        <section className="rch-pulse-masthead" aria-label="RCH Pulse timeline">
+      <Container maxWidth="xl" className="rch-timeline-container py-3 sm:py-4">
+        <section className="rch-pulse-masthead" aria-label="Home timeline">
           <div className="rch-pulse-masthead-brand">
-            <span>RICH CITY HOOPS · SOCIAL</span>
-            <h1>Pulse<span aria-hidden="true">.</span></h1>
+            <h1>Home</h1>
           </div>
           <div className="rch-pulse-masthead-actions">
-            <button type="button" onClick={() => setSearchOpen((open) => !open)} aria-expanded={searchOpen} aria-label="Search the Pulse feed" title="Search the Pulse feed"><FaMagnifyingGlass aria-hidden="true"/></button>
+            <button type="button" onClick={() => setSearchOpen((open) => !open)} aria-expanded={searchOpen} aria-label="Search the timeline" title="Search the timeline"><FaMagnifyingGlass aria-hidden="true"/></button>
             <Link href="/clips" aria-label="Watch RCH Clips" title="Watch RCH Clips"><FaPlay aria-hidden="true"/> <span>Clips</span></Link>
-            {user ? <button type="button" className="rch-pulse-primary-action" onClick={openComposer}><FaPlus aria-hidden="true"/> Post</button> : <Link className="rch-pulse-primary-action" href="/auth/sign-in?redirect=/social">Join free</Link>}
+            {user ? <button type="button" className="rch-pulse-primary-action" onClick={openComposer}><FaPlus aria-hidden="true"/> Post</button> : <Link className="rch-pulse-primary-action" href="/auth/sign-up?next=%2Fsocial">Join free</Link>}
           </div>
         </section>
         {searchOpen && <div className="rch-pulse-search-panel" role="search">
@@ -802,51 +660,37 @@ export default function NetworkHome() {
           <input aria-label="Search posts, people and topics" autoFocus type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search posts, people, topics..." />
           <button type="button" onClick={() => { setSearch(''); setSearchOpen(false); }} aria-label="Close search"><FaXmark/></button>
         </div>}
-        <GravityLocationPicker compact className="mb-5" />
-        {!focusPostId && <RCHFirstSessionDiscovery />}
-        {!focusPostId && <Link href="/world" className="rch-pulse-world-link" aria-label="Explore the RCH Living World"><span><strong><FaBolt aria-hidden="true"/> THE LIVING WORLD</strong><small>Territories · highlights · verified progress · your next Run</small></span><span>Explore <span aria-hidden="true">→</span></span></Link>}
-        {!focusPostId && <RepPromotedPlacement />}
-        <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-5 2xl:grid-cols-[170px_minmax(0,1fr)_270px]">
-          <aside className="rcl-network-left-rail hidden 2xl:block">
-            <div className="sticky top-24 space-y-1">
-              {leftNav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={`rcl-feed-left-link ${href === '/social' ? 'active' : ''} ${href === '/create' ? 'create' : ''}`}><Icon/><span>{label}</span></Link>)}
-              <div className="my-3 border-t border-white/10"/>
-              {user ? <Link href="/social/profile/me" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.02] p-3 hover:border-rcl-blue/25"><SocialIdentity author={currentProfile} compact/><span className="min-w-0"><b className="block truncate text-xs">{currentProfile?.display_name || currentProfile?.username || 'Your profile'}</b><small className="text-[10px] font-black uppercase tracking-wider text-white/25">View identity</small></span></Link> : <Link href="/auth/sign-in?redirect=/social" className="block rounded-xl border border-white/10 p-3 text-center text-xs font-black uppercase text-white/45">Join RCH</Link>}
-              <p className="px-3 pt-4 text-[10px] font-black uppercase leading-5 tracking-[.18em] text-white/20">Your city · Your court · Your rep</p>
-            </div>
-          </aside>
-
+        <div className="rcl-network-feed-grid grid min-w-0 grid-cols-1 gap-4">
           <div className="min-w-0 space-y-4">
             {focusPostId && <div className="flex items-center justify-between rounded-xl border border-rcl-blue/15 bg-rcl-blue/[.04] px-4 py-3"><span className="text-xs font-black uppercase tracking-wider text-rcl-blue">Post permalink</span><Link href="/social" className="inline-flex items-center gap-2 text-xs font-black uppercase text-white/45"><FaArrowLeft/> Back to feed</Link></div>}
 
-            {!focusPostId && <div className="rcl-feed-mode-tabs grid grid-cols-4"><FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton><FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton><FeedModeButton active={mode === 'trending'} onClick={() => { setMode('trending'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'trending' }); }}>Trending</FeedModeButton><FeedModeButton active={mode === 'courtside'} onClick={() => { setMode('courtside'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'courtside' }); }}>Courtside</FeedModeButton></div>}
-            {!focusPostId && !loading && <TodayPanel
-              postsToday={todaySnapshot.postsToday}
-              activeStories={todaySnapshot.activeStories}
-              rep={todaySnapshot.rep}
-              level={todaySnapshot.level}
-              nextRun={todaySnapshot.nextRun}
-              trendingPost={todaySnapshot.trendingPost}
-              userId={user?.id}
-              busyRunId={runBusy}
-              onRunToggle={(run) => void toggleRunParticipation(run)}
-            />}
+            {!focusPostId && <div className="rch-timeline-filters">
+              <div className="rcl-feed-mode-tabs grid grid-cols-2">
+                <FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton>
+                <FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton>
+              </div>
+              <select aria-label="More timeline filters" className="rch-timeline-more" value={mode === 'trending' || mode === 'courtside' ? mode : ''} onChange={event => {
+                const next = event.target.value;
+                if (next !== 'trending' && next !== 'courtside') return;
+                setMode(next);
+                void trackActivity('feed_mode_changed', 'feed', undefined, { mode: next });
+              }}>
+                <option value="" disabled>More</option>
+                <option value="trending">Trending</option>
+                <option value="courtside">Courtside</option>
+              </select>
+            </div>}
             {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
 
             {!focusPostId && <section className="rch-pulse-compose-strip" aria-label="Create a post">
               <button type="button" onClick={openComposer} aria-label="Open post composer"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCH Member' : 'Guest', username: null }} compact/></button>
-              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>What&apos;s happening in your world?</button>
+              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>Share something…</button>
               <button type="button" className="rch-pulse-compose-media" onClick={openComposer} aria-label="Create a photo or video post"><FaImage aria-hidden="true"/></button>
             </section>}
 
 
-
-
-
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
               <NetworkPostCard onCountView={onCountView} item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
-              {!focusPostId && index === Math.min(3, feedItems.length - 1) && <RCHPulseMoment nextRun={relevantRuns[0] ?? null} featuredPost={todaySnapshot.trendingPost} />}
-              {!focusPostId && index === Math.min(5, feedItems.length - 1) && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}
 
               {!focusPostId && (index === 4 || (index > 4 && (index - 4) % 14 === 0)) && <NetworkSponsoredPlacement
                 placement="social-feed"
@@ -859,27 +703,9 @@ export default function NetworkHome() {
                 brandLabel="Sponsored in RCH"
                 ctaLabel="View partner"
               />}
-            </div>) : <><FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />{!focusPostId && <><RCHPulseMoment nextRun={runs[0] ?? null} featuredPost={todaySnapshot.trendingPost} />{!focusPostId && <Neighborhood followingIds={following} onFollow={(id) => { setFollowing(current => current.includes(id) ? current : [...current, id]); void refreshRep(); }} />}</>}</>}
+            </div>) : <FeedEmpty user={Boolean(user)} followingMode={mode === 'following'} onCreate={openComposer} />}
           </div>
 
-          <aside className="rcl-network-right-rail hidden 2xl:block">
-            <div className="sticky top-24 space-y-4">
-              {runs.length > 0 && <SideCard title="On court soon" href="/runs"><div className="space-y-2">{runs.slice(0, 3).map((run) => {
-                const joined = Boolean(user?.id && run.players?.includes(user.id));
-                const count = run.players?.length ?? 0;
-                const full = count >= run.max_players;
-                return <div key={run.id} className="rounded-xl border border-white/[.06] p-3 hover:border-rcl-orange/25"><Link href={`/runs/${run.id}`} className="block"><b className="block text-xs">{run.title}</b><small className="mt-1 block text-[10px] font-bold uppercase tracking-wider text-rcl-orange">{formatRunTime(run.starts_at)} · {run.court_name || run.location || 'RCL court'}</small><small className="mt-1 block text-[10px] font-bold text-white/35">{count}/{run.max_players} joined · {Math.max(0, run.max_players - count)} spots left</small></Link><button type="button" disabled={runBusy === run.id || (!joined && full)} onClick={() => void toggleRunParticipation(run)} className="mt-2 w-full rounded-lg border border-rcl-blue/20 bg-rcl-blue/[.06] px-2 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue disabled:opacity-40">{runBusy === run.id ? 'Updating…' : joined ? '✓ You’re in · Leave' : full ? 'Run full' : 'Join run'}</button></div>;
-              })}</div></SideCard>}
-
-              {communities.length > 0 && <SideCard title="Communities" href="/communities"><div className="space-y-1">{communities.slice(0, 3).map((community) => <Link key={community.id} href={`/communities/${community.slug}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[.03]"><span className="grid h-8 w-8 place-items-center rounded-lg bg-rcl-blue/10 text-rcl-blue"><FaPeopleGroup/></span><span className="min-w-0"><b className="block truncate text-xs">{community.name}</b><small className="text-[10px] uppercase tracking-wider text-white/25">{community.community_type?.replace(/_/g, ' ') || 'Community'}</small></span></Link>)}</div></SideCard>}
-
-              {trendingPosts.length > 0 && <SideCard title="Trending on Pulse" href="/social"><ol className="space-y-2">{trendingPosts.map((post,index) => <li key={post.id}><Link href={`/social/post/${post.id}`} className="flex items-start gap-3 rounded-xl p-2 hover:bg-white/[.05]"><span className="rch-pulse-trend-number">{index+1}</span><span className="min-w-0"><b className="block line-clamp-2 text-xs">{post.body || 'Featured community post'}</b><small className="mt-1 block text-[10px] text-white/45">{post.comments?.length ?? 0} comments · {post.reactions?.length ?? 0} reactions</small></span></Link></li>)}</ol></SideCard>}
-
-              {officialActivity.length > 0 && <SideCard title="Official activity" href="/social"><div className="space-y-2">{officialActivity.slice(0, 3).map((post) => <Link key={post.id} href={`/social/post/${post.id}`} className="block rounded-xl border border-rcl-blue/10 bg-rcl-blue/[.025] p-3 hover:border-rcl-blue/30"><small className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">RCL Official</small><p className="mt-1 line-clamp-2 text-xs leading-5 text-white/40">{post.body}</p></Link>)}</div></SideCard>}
-
-              {user && <ReferralCard />}
-            </div>
-          </aside>
         </div>
       </Container>
 
@@ -890,95 +716,6 @@ export default function NetworkHome() {
   );
 }
 
-
-function TodayPanel({
-  postsToday,
-  activeStories,
-  rep,
-  level,
-  nextRun,
-  trendingPost,
-  userId,
-  busyRunId,
-  onRunToggle,
-}: {
-  postsToday: number;
-  activeStories: number;
-  rep: number;
-  level: number;
-  nextRun: Run | null;
-  trendingPost: NetworkPost | null;
-  userId?: string;
-  busyRunId: string | null;
-  onRunToggle: (run: Run) => void;
-}) {
-  const playerCount = nextRun?.players?.length ?? 0;
-  const joined = Boolean(nextRun && userId && nextRun.players?.includes(userId));
-  const full = Boolean(nextRun && playerCount >= nextRun.max_players);
-  const spotsLeft = nextRun ? Math.max(0, nextRun.max_players - playerCount) : 0;
-
-  return <section className="rch-pulse-today overflow-hidden rounded-2xl border border-[#D9E4EF] bg-white shadow-[0_8px_28px_rgba(15,37,71,.07)]">
-    <div className="flex items-start justify-between gap-4 border-b border-[#E7EEF6] px-4 py-4 sm:px-5">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">YOUR BASKETBALL · TODAY</p>
-        <h2 className="mt-1 text-xl font-black tracking-[-.025em] text-[#0F2547]">Your next move starts here.</h2>
-        <p className="mt-1 text-xs leading-5 text-[#60738D]">See your real next Run, new conversations and verified REP at a glance.</p>
-      </div>
-      <Link href="/discover" className="shrink-0 rounded-lg border border-[#D9E4EF] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-rcl-blue">Explore</Link>
-    </div>
-
-    <div className="grid grid-cols-3 border-b border-[#E7EEF6]">
-      <div className="px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{postsToday}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Recent posts today</span></div>
-      <div className="border-x border-[#E7EEF6] px-3 py-3 text-center sm:px-4"><strong className="block text-lg font-black text-[#0F2547]">{activeStories}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">Active stories</span></div>
-      <Link href="/social/profile/me" className="px-3 py-3 text-center transition hover:bg-[#F7FAFD]"><strong className="block text-lg font-black text-[#0F2547]">{formatRep(rep)}</strong><span className="text-[9px] font-black uppercase tracking-wider text-[#71839A]">REP · LVL {level}</span></Link>
-    </div>
-
-    <div className="grid gap-0 md:grid-cols-[1.15fr_.85fr]">
-      <div className="border-b border-[#E7EEF6] p-4 sm:p-5 md:border-b-0 md:border-r">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">🏀 Next run</p>
-          <Link href="/runs" className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">All runs</Link>
-        </div>
-        {nextRun ? <>
-          <Link href={`/runs/${nextRun.id}`} className="mt-3 block">
-            <h3 className="text-base font-black text-[#0F2547]">{nextRun.title}</h3>
-            <p className="mt-1 text-xs font-semibold text-[#60738D]">{formatRunTime(nextRun.starts_at)} · {nextRun.court_name || nextRun.location || 'RCH court'}</p>
-            <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#71839A]">{playerCount}/{nextRun.max_players} joined · {spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'} left</p>
-          </Link>
-          <button
-            type="button"
-            disabled={busyRunId === nextRun.id || (!joined && full)}
-            onClick={() => onRunToggle(nextRun)}
-            className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-rcl-blue px-4 text-xs font-black text-[#071018] disabled:opacity-45"
-          >
-            {busyRunId === nextRun.id ? 'Updating…' : joined ? '✓ You’re in · Leave run' : full ? 'Run full' : 'Join from Home'}
-          </button>
-        </> : <div className="mt-3 rounded-xl border border-dashed border-[#D9E4EF] bg-[#F7FAFD] p-4"><p className="text-sm font-bold text-[#0F2547]">No open run is scheduled yet.</p><Link href="/runs" className="mt-2 inline-block text-xs font-black text-rcl-blue">Find or create the next run →</Link></div>}
-      </div>
-
-      <div className="p-4 sm:p-5">
-        <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">🔥 Moving now</p>
-        {trendingPost ? <Link href={`/social/post/${trendingPost.id}`} className="mt-3 block rounded-xl border border-[#E7EEF6] bg-[#F7FAFD] p-3 transition hover:border-rcl-blue/30">
-          <strong className="block text-xs text-[#0F2547]">{trendingPost.author?.display_name || trendingPost.author?.username || 'RCH Member'}</strong>
-          <p className="mt-1 line-clamp-3 text-xs leading-5 text-[#60738D]">{trendingPost.body || 'Basketball activity is moving on RCH.'}</p>
-          <span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-rcl-blue">{trendingPost.reactions?.length ?? 0} reactions · {trendingPost.comments?.length ?? 0} comments</span>
-        </Link> : <div className="mt-3 rounded-xl border border-dashed border-[#D9E4EF] bg-[#F7FAFD] p-4 text-xs leading-5 text-[#60738D]">Fresh posts will surface here as the community gets active.</div>}
-      </div>
-    </div>
-    <NetworkSponsoredPlacement
-      placement="network-home"
-      surface="today-in-rch-presenting"
-      region="central-virginia"
-      variant="strip"
-      theme="light"
-      slotKey="today-in-rch"
-      dailyCap={4}
-      sessionCap={2}
-      brandLabel="Today in RCH partner"
-      ctaLabel="Visit sponsor"
-    />
-  </section>;
-}
 
 function storyTimeRemaining(expiresAt: string) {
   const ms = Math.max(0, new Date(expiresAt).getTime() - Date.now());
@@ -1000,7 +737,6 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
     <div className="rcl-story-rail-head">
       <div>
         <p>Stories</p>
-        <span>24-hour updates from the RCH community</span>
       </div>
       <small>{timeline.length ? `${timeline.length} active` : 'Start the timeline'}</small>
     </div>
@@ -1246,24 +982,9 @@ function FeedEmpty({ user, followingMode, onCreate }: { user: boolean; following
   return <div className="rounded-2xl border border-dashed border-rcl-blue/20 bg-rcl-blue/[.025] p-10 text-center"><FaBasketball className="mx-auto text-4xl text-rcl-blue/45"/><h2 className="mt-4 font-display text-2xl font-black uppercase">{followingMode ? 'Build your network' : 'The conversation starts here'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/35">{followingMode ? 'Follow people from Discover or People and their posts and reposts will collect here.' : 'Posts, official game moments, communities and basketball activity will appear here.'}</p>{user && <button onClick={onCreate} className="mt-5 rounded-xl bg-rcl-orange px-5 py-3 text-xs font-black uppercase text-black">Create a post</button>}</div>;
 }
 
-function SideCard({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
-  return <section className="rounded-2xl border border-[#D9E4EF] bg-white p-4 shadow-[0_8px_28px_rgba(15,37,71,.07)]"><div className="mb-3 flex items-center justify-between"><h3 className="text-[10px] font-black uppercase tracking-[.18em] text-white/35">{title}</h3><Link href={href} className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">See all</Link></div>{children}</section>;
-}
-
 function trendScore(item: NetworkFeedItem) {
   const ageHours = Math.max(0, (Date.now() - new Date(item.feed_at).getTime()) / 3_600_000);
   return (item.post.reactions?.length ?? 0) * 3 + (item.post.comments?.length ?? 0) * 5 + (item.post.reposts?.length ?? 0) * 4 + Math.max(0, 72 - ageHours);
-}
-
-function formatRep(value: number) {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1000) return `${(value / 1000).toFixed(value >= 10_000 ? 0 : 1)}K`;
-  return String(value);
-}
-
-function formatRunTime(value: string) {
-  const date = new Date(value);
-  return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
 function isVideoUrl(url: string) {
