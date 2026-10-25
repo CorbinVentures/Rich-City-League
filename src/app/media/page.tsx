@@ -58,15 +58,10 @@ export default async function MediaPage() {
 
     <Container maxWidth="xl" className="py-10 sm:py-12">
       <nav aria-label="RCH TV sections" className="flex gap-2 overflow-x-auto pb-3">
-        {[
-          ['#live-games','Live games'],
-          ['#the-pulse','The Pulse'],
-          ['#movies','Movies'],
-          ['#original-content','Originals'],
-        ].map(([href,label])=><Link key={href} href={href}
-          className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold focus-visible:outline focus-visible:outline-2">
-          {label}
-        </Link>)}
+        <Link href="#live-games" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Live games</Link>
+        <Link href="#the-pulse" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">The Pulse</Link>
+        <Link href="#movies" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Movies</Link>
+        <Link href="#original-content" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Originals</Link>
       </nav>
 
       <section id="live-games" aria-labelledby="rch-tv-live-title" className="mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 shadow-[0_24px_70px_rgba(0,0,0,.22)]">
