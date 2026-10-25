@@ -32,6 +32,8 @@ describe('Runs community pillars — real capacity and truthful share text',()=>
  it('keeps the listing focused and makes public, user-initiated sharing visible',()=>{
   const runs=fileText('src/app/runs/page.tsx');
   expect(runs).toContain('Find a solo spot');
+  expect(runs).toContain('visibleRuns.slice(0,visibleLimit)');
+  expect(runs).toContain('Show more Runs');
   expect(runs).toContain('rankSoloRuns(matching)');
   expect(runs).toContain('<ShareRunButton id={run.id}');
   expect(runs).toContain('My Passport');
