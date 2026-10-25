@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
-import { DraftNightIntro } from '@/components/DraftNightIntro';
 import { SeasonDraftScouting } from '@/components/draft/SeasonDraftScouting';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -239,15 +238,15 @@ export default function DraftNightPage() {
   if (loading) return <main className="min-h-screen"><Container maxWidth="xl" className="py-20"><div className="h-96 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
 
   return (
-    <main className="rcl-draft-platform relative min-h-screen overflow-hidden pb-24"><DraftNightIntro /><div className="relative z-10">
+    <main className="rcl-draft-platform rch-draft-readable relative min-h-screen overflow-hidden pb-24"><div className="relative z-10">
       <section className="rcl-draft-hero relative overflow-hidden">
         <div className="rcl-draft-hero-grid" aria-hidden="true" />
-        <Container maxWidth="xl" className="relative z-10 py-12 sm:py-16 lg:py-20">
+        <Container maxWidth="xl" className="relative z-10 py-7 sm:py-10 lg:py-12">
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div>
               <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
               <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Real players. Real franchises. Real season rosters. Follow official team selections that determine who takes the court for Rich City League.</p>
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Follow official Rich City League player selections, team rosters and the live draft board.</p>
               <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
                 <Link href="/league/join" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-black">Join Rich City League <FaArrowRight/></Link>
                 <Link href="/fantasy" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Fan Fantasy <FaArrowRight/></Link>
