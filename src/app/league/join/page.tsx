@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FaArrowRight, FaBasketball, FaCrown, FaPeopleGroup, FaTrophy } from 'react-icons/fa6';
+import { FaArrowRight } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import { ProgramEmblem, type ProgramEmblemId } from '@/components/ProgramEmblem';
 import { LeagueJoinRegistration } from '@/components/LeagueJoinRegistration';
 
 export const metadata: Metadata = {
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const worlds = [
-  {title:'Runs',subtitle:'Find games and crews',href:'/runs',icon:FaBasketball},
-  {title:'Rich City League',subtitle:'Your route to organized competition',href:'/league',icon:FaTrophy},
-  {title:'Draft Night',subtitle:'Watch official roster selections',href:'/draft',icon:FaCrown},
-  {title:'Fantasy',subtitle:'Build a team and follow the season',href:'/fantasy',icon:FaPeopleGroup},
+  {title:'Runs',subtitle:'Find games and crews',href:'/runs',program:'runs'},
+  {title:'Rich City League',subtitle:'Your route to organized competition',href:'/league',program:'rich-city-league'},
+  {title:'Draft Night',subtitle:'Watch official roster selections',href:'/draft',program:'draft-night'},
+  {title:'Fantasy',subtitle:'Build a team and follow the season',href:'/fantasy',program:'fantasy-league'},
 ] as const;
 
 const path = [
@@ -36,8 +37,9 @@ export default function JoinRichCityLeaguePage(){
     <Link href="/register" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Check league registration</Link>
    </div>
    <section aria-label="Four basketball destinations" className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {worlds.map(({title,subtitle,href,icon:Icon})=><Link href={href} key={href} className="flex min-h-28 flex-col gap-2 rounded-xl border border-white/15 bg-white/[.035] p-3 transition hover:border-rcl-orange/50 focus-visible:outline focus-visible:outline-2">
-      <Icon aria-hidden="true" className="text-xl text-rcl-orange"/><strong className="text-sm">{title}</strong><span className="text-xs leading-4 text-white/55">{subtitle}</span>
+    {worlds.map(({title,subtitle,href,program})=><Link href={href} key={href} className="flex min-h-28 flex-col gap-2 rounded-xl border border-white/15 bg-white/[.035] p-3 transition hover:border-rcl-orange/50 focus-visible:outline focus-visible:outline-2">
+      <ProgramEmblem program={program as ProgramEmblemId} className="rch-program-emblem-journey"/>
+      <strong className="text-sm">{title}</strong><span className="text-xs leading-4 text-white/55">{subtitle}</span>
     </Link>)}
    </section>
    <h2 className="mt-9 text-xl font-bold">How it works</h2>
