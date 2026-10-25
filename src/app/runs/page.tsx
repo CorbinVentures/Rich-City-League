@@ -731,18 +731,18 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
 }
 
 /** A native share sheet on mobile; copy-link fallback for desktop browsers. */
-function ShareRunButton({ id, title }: { id: string; title: string }) {
+function ShareRunButton({ id, title, location, startsAt, format }: { id: string; title: string; location?:string; startsAt?:string; format?:string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   async function share() {
     const url = runInviteUrl(window.location.origin, id);
     try {
       if (navigator.share) {
-        await navigator.share({ title, text: 'Join this basketball run on Rich City Hoops.', url });
+        await navigator.share({ title, text: location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format}) : 'Pull up to this basketball Run on Rich City Hoops.', url });
         setState('idle');
         return;
       }
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText((location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format})+'\n' : '')+url);
       setState('copied');
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
@@ -750,7 +750,7 @@ function ShareRunButton({ id, title }: { id: string; title: string }) {
     }
   }
 
-  return <button type="button" onClick={() => void share()} className="rounded-xl border border-rcl-blue/25 bg-rcl-blue/[.05] px-4 py-2.5 text-xs font-semibold text-rcl-blue">{state === 'copied' ? 'Link copied ✓' : state === 'error' ? 'Try sharing again' : 'Share invite'}</button>;
+  return <button type="button" onClick={() => void share()} aria-label={'Share '+title} className="rch-run-share-button">{state === 'copied' ? 'Copied ✓' : state === 'error' ? 'Retry share' : <><FaArrowUpRightFromSquare aria-hidden="true"/> Share</>}</button>;
 }
 +(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
       </div>
