@@ -18,7 +18,7 @@ const SOCIAL_FAMILY=['/social'];
 const DISCOVER_FAMILY=['/discover','/explore','/search','/players','/teams','/organizations','/network','/community','/news','/media','/communities','/friends','/coaches'];
 const CREATE_FAMILY=['/create'];
 const RUNS_FAMILY=['/runs','/richmond-basketball-runs'];
-const LEAGUE_FAMILY=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/fantasy','/draft','/game-iq','/leaderboards'];
+const LEAGUE_FAMILY=['/staff','/league','/schedule','/games','/standings','/stats','/rankings','/coaches','/pickem','/game-iq','/leaderboards'];
 
 export function isPrimaryNavigationActive(pathname:string,href:string){
   if(href==='/social') return SOCIAL_FAMILY.some(path=>pathname===path||pathname.startsWith(`${path}/`));
@@ -32,9 +32,10 @@ export function isPrimaryNavigationActive(pathname:string,href:string){
 export const RCL_PRIMARY_NAV_ITEMS:RCLNavItem[]=[
   {label:'Home',href:'/social',icon:FaHouse},
   {label:'Discover',href:'/discover',icon:FaCompass},
-  {label:'Create',href:'/create',icon:FaPlus},
   {label:'Runs',href:'/runs',icon:FaLocationDot},
   {label:'League',href:'/league',icon:FaBasketball},
+  {label:'Draft',href:'/draft',icon:FaCrown},
+  {label:'Fantasy',href:'/fantasy',icon:FaTrophy},
 ];
 
 export const RCL_NAV_GROUPS:RCLNavGroup[]=[
@@ -43,6 +44,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'Your identity, conversations and personalized basketball world',
     items:[
       {label:'Home Feed',href:'/social',icon:FaHouse},
+      {label:'Create',href:'/create',icon:FaPlus},
       {label:'Living World · Virginia basketball',href:'/world',icon:FaGlobe},
       {label:'Get the RCH App',href:'/app',icon:FaDownload},
       {label:'My Hoops',href:'/my-hoops',icon:FaBolt},
@@ -71,6 +73,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'The flagship competition property inside the RCL basketball world',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Join / Tryouts',href:'/league/join',icon:FaUser},
       {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
       {label:'Schedule',href:'/schedule',icon:FaCalendarDays},
