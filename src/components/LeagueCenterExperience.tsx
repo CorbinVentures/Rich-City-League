@@ -2,6 +2,7 @@
 
 import { LeagueVision } from '@/components/LeagueVision';
 import { LeaguePublicHub } from '@/components/LeaguePublicHub';
+import { ProgramEmblem } from '@/components/ProgramEmblem';
 import { ScorebookAppLink } from '@/components/ScorebookAppLink';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -73,9 +74,14 @@ export function LeagueCenterExperience(){
  return <main className="rch-league-site min-h-screen bg-[#03070d] pb-28 text-white">
   <header className="rch-league-header">
    <Container maxWidth="xl" className="py-6 sm:py-9">
-    <p className="rch-league-kicker">VIRGINIA BASKETBALL · OFFICIAL LEAGUE</p>
-    <h1>RICH CITY <span>LEAGUE</span></h1>
-    <p className="rch-league-tagline">Teams. Games. Rivalries. Championships.</p>
+    <div className="rch-program-brand-lockup rch-program-league-lockup">
+     <ProgramEmblem program="rich-city-league" className="rch-program-emblem-league" priority/>
+     <div className="rch-program-brand-copy">
+      <p className="rch-league-kicker">VIRGINIA BASKETBALL · OFFICIAL LEAGUE</p>
+      <h1>RICH CITY <span>LEAGUE</span></h1>
+      <p className="rch-league-tagline">Teams. Games. Rivalries. Championships.</p>
+     </div>
+    </div>
     <div className="rch-league-header-actions">
      <Link href="/league/join" aria-label="Join Rich City League" className="rch-league-join">Join the league <FaArrowRight aria-hidden="true"/></Link>
      <Link href="/schedule">Schedule</Link>
