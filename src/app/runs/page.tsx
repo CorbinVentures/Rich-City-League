@@ -12,6 +12,9 @@ import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/comp
 import { RunArenaLeaderboard } from '@/components/runs/RunArenaLeaderboard';
 import { RunRankedLadder } from '@/components/runs/RunRankedLadder';
 import { RunPassport } from '@/components/runs/RunPassport';
+import { RunCultureMoments } from '@/components/runs/RunCultureMoments';
+import { BadgeMedallion } from '@/components/BadgeMedallion';
+import { rankSoloRuns, isSoloJoinable, runShareText } from '@/lib/runs-social-discovery';
 import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
@@ -143,6 +146,7 @@ export default function RunsPage() {
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
+  const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -426,7 +430,7 @@ export default function RunsPage() {
       const courtMatch = !courtParam || run.location_slug === courtParam;
       const words = runSearch.trim().toLowerCase();
       const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
-      return skillMatch && typeMatch && courtMatch && searchMatch;
+      return skillMatch && typeMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run));
     });
     // Registered availability always comes before filled/cancelled events;
     // a player-selected city/format makes this feed relevant without hiding other Virginia courts.
@@ -437,12 +441,13 @@ export default function RunsPage() {
       watchedCourts:dailyPrefs.watched_courts
     });
     const order = new Map(priorities.map((candidate,index)=>[candidate.id,index]));
+    if(soloOnly) return rankSoloRuns(matching);
     return [...matching].sort((a,b)=>{
       const capacityA=a.status === 'full' || (a.players?.length ?? 0) >= a.max_players ? 1 : 0;
       const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
-  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
