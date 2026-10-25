@@ -635,10 +635,14 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
-        {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
+        {isSoloJoinable(run)&&<span className="rch-run-availability">{run.max_players-count} open {run.max_players-count===1?'spot':'spots'} · Solo RSVP</span>}
+        {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'
       </div>
       <div className="rch-ux-game-cta">
+        <div className="rch-run-card-primary">
         {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
           <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
@@ -647,7 +651,123 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <details className="group border-t border-[#315573] pt-3">
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
         <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
-        <div className="flex flex-wrap gap-2"><ShareRunButton id={run.id} title={run.title}/>
+        <div className="flex flex-wrap gap-2">
+          {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
+          {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
+        </div>
+      </details>
+    </div>
+  </article>;
+}
+
+function RewardRule({ icon, value, title, detail }: { icon: React.ReactNode; value: string; title: string; detail: string }) {
+  return <article className="rounded-2xl border border-rcl-blue/14 bg-[#09131d]/72 p-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/[.07] text-rcl-blue">{icon}</span><div><p className="text-xs font-semibold text-rcl-blue">{value}</p><h3 className="font-semibold">{title}</h3></div></div><p className="mt-3 text-sm leading-6 text-white/42">{detail}</p></article>;
+}
+
+function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onSubmit }: {
+  form: typeof emptyForm;
+  setForm: React.Dispatch<React.SetStateAction<typeof emptyForm>>;
+  courts: Court[];
+  onPickVenue: (venue: Court) => void;
+  busy: boolean;
+  onClose: () => void;
+  onSubmit: (event: React.FormEvent) => Promise<void>;
+}) {
+  // The Runs page is isolated for its arena theme. Portal outside that stacking
+  // context so the shared sticky header and bottom navigation cannot cover the form.
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => {
+    setPortalReady(true);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, []);
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  if (!portalReady) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[1200] flex h-[100dvh] items-center justify-center bg-black/80 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:p-6"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <section role="dialog" aria-modal="true" aria-labelledby="rch-create-run-title" className="rch-run-create-dialog flex max-h-full min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#28547d] bg-[#09121b] text-white shadow-2xl sm:rounded-3xl">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-[#28547d] px-5 py-4 sm:px-7">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[#91cef2]">Open Runs</p>
+            <h2 id="rch-create-run-title" className="mt-1 text-xl font-semibold leading-tight sm:text-2xl">Create basketball activity</h2>
+          </div>
+          <button type="button" aria-label="Close activity form" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#28547d] text-[#c5dbf1]"><FaXmark /></button>
+        </header>
+        <form id="rch-create-run-form" onSubmit={onSubmit} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7">
+          <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
+      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
+      <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
+      {!form.location_slug && <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Custom location</span><input value={form.custom_location} onChange={(event) => setForm({ ...form, custom_location: event.target.value })} placeholder="Court name and address" className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>}
+      <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>2v2</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
+      <label><span className="text-xs font-semibold text-white/42">Competition level</span><select value={form.skill_level} onChange={(event) => setForm({ ...form, skill_level: event.target.value as SkillLevel })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value="all">Everyone</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="elite">Elite</option></select></label>
+      <label><span className="text-xs font-semibold text-white/42">Capacity</span><input type="number" min={2} max={50} value={form.max_players} onChange={(event) => setForm({ ...form, max_players: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Schedule</span><select value={form.repeat_weeks} onChange={event=>setForm({...form,repeat_weeks:Number(event.target.value) as 1|4})} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value={1}>One run</option><option value={4}>Repeat weekly · 4 weeks</option></select><small className="mt-2 block text-xs text-white/40">Each date has its own RSVP.</small></label>
+      <label className="flex items-end"><span className="flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-white/10 bg-[#050b11] px-4 text-xs text-white/55"><input type="checkbox" checked={form.allow_fan_checkin} onChange={(event) => setForm({ ...form, allow_fan_checkin: event.target.checked })} className="accent-[#91cef2]" /> Allow fan check-ins</span></label>
+      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Details</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows={3} placeholder="Competition level, winners-stay rules, jerseys, parking, meetup details…" className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
+          </div>
+        </form>
+        <footer className="shrink-0 border-t border-[#28547d] bg-[#09121b] px-5 py-3 sm:px-7">
+          <button type="submit" form="rch-create-run-form" disabled={busy} className="min-h-12 w-full rounded-xl bg-[#217ef5] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
+        </footer>
+      </section>
+    </div>,
+    document.body
+  );
+}
+
+/** A native share sheet on mobile; copy-link fallback for desktop browsers. */
+function ShareRunButton({ id, title }: { id: string; title: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  async function share() {
+    const url = runInviteUrl(window.location.origin, id);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text: 'Join this basketball run on Rich City Hoops.', url });
+        setState('idle');
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setState('copied');
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      setState('error');
+    }
+  }
+
+  return <button type="button" onClick={() => void share()} className="rounded-xl border border-rcl-blue/25 bg-rcl-blue/[.05] px-4 py-2.5 text-xs font-semibold text-rcl-blue">{state === 'copied' ? 'Link copied ✓' : state === 'error' ? 'Try sharing again' : 'Share invite'}</button>;
+}
++(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
+      </div>
+      <div className="rch-ux-game-cta">
+        <div className="rch-run-card-primary">
+        {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
+          <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
+        </div>
+      </div>
+      <details className="group border-t border-[#315573] pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
+        <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
+        <div className="flex flex-wrap gap-2">
           {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
           {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
         </div>
