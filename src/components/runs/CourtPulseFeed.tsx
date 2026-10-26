@@ -104,7 +104,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
       </div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {moments.map((moment) => {
           const image = courtPulseImageUrl(moment.media_urls, process.env.NEXT_PUBLIC_SUPABASE_URL);
-          return <article key={moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#44484e] bg-[#141618]">
+          return <article key={moment.kind + ':' + moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#44484e] bg-[#141618]">
             {image && <Link href={moment.href} aria-label="Open published court post">
               <img src={image} alt="Published basketball moment" loading="lazy" className="aspect-video w-full object-cover"/>
             </Link>}
@@ -116,7 +116,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
               {moment.authorName ? <Link href={'/social/profile/' + moment.author_id} className="text-xs font-bold text-[#ff768c]">{moment.authorName}</Link>
                 : <span className="text-xs font-bold text-[#d0d1d4]">Community post</span>}
               {moment.body && <p className="mt-2 line-clamp-2 break-words text-sm text-[#f5f5f3]">{moment.body}</p>}
-              <Link href={'/social/post/' + moment.id} className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-[#f5f5f3]">
+              <Link href={moment.href} className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-[#f5f5f3]">
                 View moment <FaArrowRight aria-hidden="true"/>
               </Link>
             </div>
