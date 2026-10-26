@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { courtPulseImageUrl, courtPulseRunIds } from './court-pulse';
 
 describe('Court Pulse media and source integrity', () => {
-  it('uses HTTPS image assets only, without inventing thumbnails', () => {
-    expect(courtPulseImageUrl(['https://cdn.example.com/run/photo.WEBP?quality=80'])).toBe('https://cdn.example.com/run/photo.WEBP?quality=80');
-    expect(courtPulseImageUrl(['https://cdn.example.com/movie.mp4'])).toBe(null);
-    expect(courtPulseImageUrl(['http://cdn.example.com/photo.jpg'])).toBe(null);
-    expect(courtPulseImageUrl(['javascript:alert(1).jpg'])).toBe(null);
-    expect(courtPulseImageUrl(null)).toBe(null);
-    expect(courtPulseImageUrl(['https://cdn.example.com/video.mp4', 'https://cdn.example.com/photo.png'])).toBe('https://cdn.example.com/photo.png');
+  it('only previews first-party published Supabase images, never arbitrary tracking media', () => {
+    const origin = 'https://rch.supabase.co';
+    const image = origin + '/storage/v1/object/public/media/run/photo.WEBP?quality=80';
+    expect(courtPulseImageUrl([image], origin)).toBe(image);
+    expect(courtPulseImageUrl([image])).toBe(null);
+    expect(courtPulseImageUrl(['https://other.example.com/storage/v1/object/public/media/photo.jpg'], origin)).toBe(null);
+    expect(courtPulseImageUrl([origin + '/storage/v1/object/sign/media/private.jpg'], origin)).toBe(null);
+    expect(courtPulseImageUrl([origin + '/storage/v1/object/public/media/run/clip.mp4'], origin)).toBe(null);
+    expect(courtPulseImageUrl(['javascript:alert(1).jpg'], origin)).toBe(null);
+    expect(courtPulseImageUrl(null, origin)).toBe(null);
+    expect(courtPulseImageUrl(['http://rch.supabase.co/storage/v1/object/public/media/photo.jpg'], origin)).toBe(null);
   });
 
   it('only includes unique valid Run IDs from database-shaped rows', () => {
