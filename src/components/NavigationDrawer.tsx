@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useId, useRef } from 'react';
-import { FaArrowRight, FaChevronDown, FaCompass, FaPeopleGroup, FaPlay, FaPlus, FaUserPlus, FaUsers, FaXmark } from 'react-icons/fa6';
+import { FaArrowRight, FaChevronDown, FaCompass, FaPeopleGroup, FaPlay, FaPlus, FaUser, FaUserPlus, FaUsers, FaXmark } from 'react-icons/fa6';
 import { RCHActionGuide } from '@/components/RCHActionGuide';
 import { RoyalteeStaffShortcut } from '@/components/RoyalteeStaffShortcut';
 import { isNavigationActive, type RCLNavGroup } from '@/lib/rcl-navigation';
@@ -41,6 +41,8 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
       <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
       <nav className="rch-menu-destinations" aria-label="Quick destinations">
         {[
+          {href:'/social/profile/me',label:'My Profile',icon:FaUser},
+          {href:'/fantasy',label:'Fantasy',icon:FaUsers},
           {href:'/discover',label:'Discover',icon:FaCompass},
           {href:'/crews?intent=mine',label:'My Crew',icon:FaPeopleGroup},
           {href:'/create',label:'Create',icon:FaPlus},

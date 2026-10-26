@@ -13,7 +13,7 @@ export const RCL_MEMBER_PRIMARY_NAV:RCLMemberNavItem[]=[
   {label:'Runs',href:'/runs',icon:FaBasketball},
   {label:'League',href:'/league',icon:FaTrophy},
   {label:'Draft',href:'/draft',icon:FaCrown},
-  {label:'Fantasy',href:'/fantasy',icon:FaStar},
+  {label:'Profile',href:'/social/profile/me',icon:FaUser},
 ];
 
 export const RCL_GUEST_MOBILE_NAV:RCLMemberNavItem[]=[

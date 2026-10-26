@@ -7,14 +7,14 @@ const file=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 
 describe('RCH basketball world journey',()=>{
  it('makes the four core experiences reachable from one mobile tap',()=>{
-  expect(RCL_MEMBER_PRIMARY_NAV.map(item=>item.href)).toEqual(['/social','/runs','/league','/draft','/fantasy']);
+  expect(RCL_MEMBER_PRIMARY_NAV.map(item=>item.href)).toEqual(['/social','/runs','/league','/draft','/social/profile/me']);
   expect(RCL_GUEST_MOBILE_NAV.map(item=>item.href)).toEqual(['/','/runs','/league','/draft','/fantasy']);
   expect(RCL_PRIMARY_NAV_ITEMS.map(item=>item.href)).toEqual(['/social','/runs','/league','/draft','/fantasy']);
  });
  it('does not highlight League when Draft or Fantasy is active',()=>{
   for(const route of ['/draft','/draft/board','/fantasy','/fantasy/leagues/x']){
    const selected=RCL_MEMBER_PRIMARY_NAV.filter(item=>isMemberNavigationActive(route,item.href));
-   expect(selected.map(item=>item.label)).toEqual([route.startsWith('/draft')?'Draft':'Fantasy']);
+   expect(selected.map(item=>item.label)).toEqual(route.startsWith('/draft')?['Draft']:[]);
    expect(isPrimaryNavigationActive(route,'/league')).toBe(false);
   }
   expect(isMemberNavigationActive('/league/join','/league')).toBe(true);

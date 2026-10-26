@@ -31,12 +31,12 @@ describe('approved RCH charcoal/crimson system',()=>{
     }
   });
   it('puts the four basketball worlds beside social Home without selection collisions',()=>{
-    expect(RCL_MEMBER_PRIMARY_NAV.map(n=>n.label)).toEqual(['Home','Runs','League','Draft','Fantasy']);
+    expect(RCL_MEMBER_PRIMARY_NAV.map(n=>n.label)).toEqual(['Home','Runs','League','Draft','Profile']);
     expect(RCL_GUEST_MOBILE_NAV.map(n=>n.label)).toEqual(['Home','Runs','League','Draft','Fantasy']);
-    for(const route of ['/social','/runs','/runs/123','/league','/league/join','/draft','/draft/rules','/fantasy']) {
+    for(const route of ['/social','/runs','/runs/123','/league','/league/join','/draft','/draft/rules','/social/profile/123']) {
       expect(RCL_MEMBER_PRIMARY_NAV.filter(n=>isMemberNavigationActive(route,n.href))).toHaveLength(1);
     }
-    for(const route of ['/community','/crews','/social/profile/123']) {
+    for(const route of ['/community','/crews','/fantasy']) {
       expect(RCL_MEMBER_PRIMARY_NAV.filter(n=>isMemberNavigationActive(route,n.href))).toHaveLength(0);
     }
   });
