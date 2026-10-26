@@ -62,12 +62,29 @@ html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post-k
 html.rch-premium-root body.rch-premium-app main.rch-court-feed :is(button,a,input,select):focus-visible {outline:2px solid #ff768c!important;outline-offset:3px!important;}
 html.rch-premium-root body.rch-premium-app main.rch-court-feed button {transition:background-color .16s ease,transform .16s ease;}
 html.rch-premium-root body.rch-premium-app main.rch-court-feed button:active {transform:translateY(1px);}
+/* Mobile PWA fit: protect angled logo ink and keep posts inside symmetric timeline gutters.
+   Negative margins on the post card used to cancel the container padding and shifted the feed. */
 @media(max-width:640px){
- html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-timeline-container {padding-inline:12px!important;}
- html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post {margin-inline:-12px!important;border-inline:0!important;border-radius:0!important;box-shadow:none!important;}
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar {
+   padding-inline:max(14px,env(safe-area-inset-left)) max(10px,env(safe-area-inset-right))!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark {
+   flex:0 0 auto!important;min-width:0!important;overflow:visible!important;
+ }
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {
+   width:max-content!important;min-width:max-content!important;padding-inline:8px!important;
+   white-space:nowrap!important;overflow:visible!important;line-height:1.15!important;
+ }
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-timeline-container {
+   padding-inline:12px!important;
+ }
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post {
+   width:100%!important;max-width:100%!important;min-width:0!important;
+   box-sizing:border-box!important;margin-inline:0!important;
+ }
 }
 @media(max-width:380px){
- html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {font-size:28px!important;min-width:53px!important;}
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {font-size:28px!important;}
 }
 @media(prefers-reduced-motion:reduce){
  html.rch-premium-root body.rch-premium-app main.rch-court-feed button {transition:none!important;}
