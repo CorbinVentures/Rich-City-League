@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import {
@@ -6,9 +7,10 @@ import {
 } from 'react-icons/fa6';
 import { SPONSOR_INVENTORY } from '@/lib/sponsorship';
 
-export const metadata={
+export const metadata: Metadata={
   title:'Sponsor Rich City Hoops | RCH Sponsor Center',
   description:'Advertise across Rich City Hoops or build a presenting sponsorship around RCH social, community, runs, media and Virginia basketball audiences.',
+  alternates:{canonical:'/sponsors'},
 };
 
 export default function SponsorsPage(){
