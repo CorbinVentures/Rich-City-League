@@ -1,5 +1,6 @@
 import '../../../rch-identity.css';
-import { Neighborhood } from '@/components/social/Neighborhood';
+import { ProfileShowcase } from '@/components/ProfileShowcase';
+import { profilePresentation, profileSections } from '@/lib/profile-presentation';
 import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
 import { RepProfileFrame } from '@/components/rep/RepProfileFrame';
@@ -53,13 +54,13 @@ const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
 
 export default async function SocialPublicProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string|string[] }> }) {
   const [{ id }, query] = await Promise.all([params,searchParams]);
-  const activeTab = normalizeTab(query.tab);
+
   const client = await getServerSupabaseClient();
   if (!client) notFound();
 
   const { data: profile } = await client
     .from('profiles')
-    .select('id,display_name,username,avatar_url,cover_url,bio,location,role,profile_visibility,profile_song_url,created_at,is_vip,vip_label,is_system_account,system_account_key,qualified_referral_count')
+    .select('id,display_name,username,avatar_url,cover_url,bio,location,position,jersey_number,role,profile_visibility,profile_song_url,created_at,is_vip,vip_label,is_system_account,system_account_key,qualified_referral_count')
     .eq('id', id)
     .eq('is_active', true)
     .maybeSingle() as any;
@@ -93,6 +94,11 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
   const royalteeIdentity=royalteeIdentityRaw as {discipline:string}|null;
 
   const player = playerRaw as PlayerRow | null;
+  const presentation = profilePresentation(profile.role, Boolean(player), Boolean(coachIdentity));
+  const visibleTabs = profileSections(presentation, Boolean(player)) as ProfileTab[];
+  const requestedTab = normalizeTab(query.tab);
+  const activeTab = query.tab && (visibleTabs.includes(requestedTab) || requestedTab === 'followers' || requestedTab === 'following')
+    ? requestedTab : presentation === 'player' ? 'highlights' : presentation === 'coach' ? 'coach' : 'wall';
   let basketball: null | {
     team:{id:string;name:string;slug:string|null;logo_url:string|null}|null;
     seasonName:string|null;
@@ -235,18 +241,11 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
             {profile.is_system_account&&<span className="rch-profile-official-chip rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-2.5 py-1 text-xs font-black uppercase tracking-[.14em] text-rcl-blue">RCL Official</span>}
           </div>
           {profile.username && <p className="text-sm text-white/35">@{profile.username}</p>}
-          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{coachIdentity?'RCH Coach':profile.role || 'member'}</span>{royalteeIdentity&&<Link href="/league/royaltee" className="rounded-full border border-[#ec8e4d]/60 bg-[#c7682b]/15 px-3 py-1 font-black text-[#ffb586]">Royaltee · Official 18+ Cheer + Step</Link>}{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
+          <div className="rch-profile-role-row mt-3 flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-wider text-white/70"><span className="rounded-full bg-white/5 px-3 py-1">{presentation === 'coach' ? 'Coach' : presentation === 'player' ? 'Player' : profile.role === 'fan' ? 'Fan' : 'Member'}</span>{royalteeIdentity&&<Link href="/league/royaltee" className="rounded-full border border-[#ec8e4d]/60 bg-[#c7682b]/15 px-3 py-1 font-black text-[#ffb586]">Royaltee · Official 18+ Cheer + Step</Link>}{profile.location && <span className="flex items-center gap-1"><FaLocationDot />{profile.location}</span>}</div>
           {profile.bio && <p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{profile.bio}</p>}
-          <section className="rch-identity-player-passport" aria-label="Basketball identity quick view">
-            <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="rch-identity-eyebrow">RCH PLAYER IDENTITY</p><h2 className="mt-2 text-lg font-black text-white">{name}&apos;s Basketball World</h2></div><Link href={profileHref+'?tab=badges'} className="rch-identity-secondary">View achievements →</Link></div>
-            <div className="rch-identity-player-stats mt-4">
-              <div><strong>{allBadges.length}</strong><span>Earned league badges</span></div>
-              <div><strong>{basketball?.games??'—'}</strong><span>Official RCL games</span></div>
-              <div><strong>{repLabel}</strong><span>Social reputation</span></div>
-            </div>
-            <div className="rch-identity-actions mt-4"><Link href="/runs" className="rch-identity-primary">Find a real Run →</Link><Link href="/crews" className="rch-identity-secondary">Explore crews</Link></div>
-            <p className="mt-3 text-xs leading-5 text-[#b9d4e7]">Social reputation, official RCL games, spendable REP and verified Runs ratings are separate systems. This display does not infer unverified wins.</p>
-          </section>
+          <ProfileShowcase kind={presentation} name={name} avatar={profile.avatar_url} location={profile.location}
+            position={profile.position} jersey={profile.jersey_number} player={player} basketball={basketball}
+            coach={coachIdentity} href={profileHref} badges={allBadges.length}/>
           <PublicCrewShowcase profileId={profile.id} />
           <ProfileSoundtrack url={profile.profile_song_url} profileName={name} />
           {!profile.is_system_account && <PublicProfileActions profileId={profile.id} profileName={name} />}
@@ -272,35 +271,11 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         </div>
       </section>
 
-      {player && basketball && <section className="border-b border-white/10 bg-[#07111a] px-4 py-4">
-        <div className="flex flex-col gap-4 rounded-2xl border border-rcl-blue/15 bg-[#071522]/65 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Basketball identity</p>
-            <div className="mt-1 flex flex-wrap items-center gap-2"><b className="font-display text-xl uppercase">{player.position || 'Player'}{player.jersey_number?` · #${player.jersey_number}`:''}</b>{basketball.isCaptain&&<span className="rounded-full bg-rcl-orange/10 px-2 py-1 text-xs font-black uppercase text-rcl-orange">Captain</span>}</div>
-            <p className="mt-1 text-xs text-white/40">{[basketball.team?.name,basketball.seasonName].filter(Boolean).join(' · ') || 'RCL Player'}</p>
-          </div>
-          <div className="grid grid-cols-4 gap-1 sm:min-w-[360px]">
-            <MiniMetric label="PPG" value={basketball.ppg.toFixed(1)} />
-            <MiniMetric label="RPG" value={basketball.rpg.toFixed(1)} />
-            <MiniMetric label="APG" value={basketball.apg.toFixed(1)} />
-            <MiniMetric label="RCL" value={basketball.iq?.rcl_rating == null?'—':Math.round(basketball.iq.rcl_rating)} />
-          </div>
-        </div>
-      </section>}
-
-      {coachIdentity&&<section className="border-b border-[#38617f] bg-[#0b2840] px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#9bd1ff]">RCH COACHING IDENTITY · MEMBER PROFILE</p>
-            <p className="mt-1 text-sm font-bold text-white">{coachIdentity.headline||'Basketball coach'}{coachIdentity.city?' · '+coachIdentity.city:''}</p>
-            <p className="mt-1 text-xs text-[#c5d9e8]">Self-described background · Not an official RCL staff appointment</p></div>
-          <Link href={profileHref+'?tab=coach'} className="rounded-xl border border-[#75adce] bg-[#174e76] px-4 py-2.5 text-xs font-bold text-white">Coaching details →</Link>
-        </div>
-      </section>}
       <nav className="rch-profile-tabs sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
         <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {PROFILE_TABS.filter(tab=>tab!=='coach'||Boolean(coachIdentity)).map((tab)=>{
+          {visibleTabs.map((tab)=>{
             const active=activeTab===tab;
-            const href=tab==='wall'?profileHref:`${profileHref}?tab=${tab}`;
+            const href=`${profileHref}?tab=${tab}`;
             return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
               {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
               {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
@@ -310,8 +285,6 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
       </nav>
 
       <section className="px-4 py-6">
-        {activeTab==='wall' && <div className="mb-6"><Neighborhood excludeProfileId={id} /></div>}
-        {activeTab==='wall' && <PlaceBadgeVault profileId={id} />}
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {(activeTab==='followers'||activeTab==='following')&&<ProfileFollowDirectory profileId={id} profileName={name} mode={activeTab} />}

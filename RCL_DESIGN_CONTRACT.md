@@ -24,7 +24,7 @@ Cards use 10px corners, thin visible borders, and restrained shadows. Primary bu
 
 ## Navigation
 
-Mobile browser and installed-app navigation share Home, Runs, Community and Profile. Public Home opens `/`; signed-in app Home opens `/social`. Profile opens the real account/profile route or sign-up for guests. Discover, Create, League, media, messages and staff tools remain available through existing menus. Preserve account-aware links and route protections. Navigation active states must not mark Home selected while viewing a profile.
+Signed-in mobile navigation uses Home, Runs, League, Draft and Profile. Fantasy remains a quick menu destination; guests retain Home, Runs, League, Draft and Fantasy. Public Home opens `/`; signed-in app Home opens `/social`. Profile opens the real account/profile route or sign-up for guests. Discover, Create, Fantasy, media, messages and staff tools remain available through existing menus. Preserve account-aware links and route protections. Navigation active states must not mark Home selected while viewing a profile.
 
 Browser chrome includes the same persistent four-item mobile bar, safe-area padding and enough page clearance. Desktop retains its broader navigation. Preserve dedicated scorebook and production-studio controls.
 

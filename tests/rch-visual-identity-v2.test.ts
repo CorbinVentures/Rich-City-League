@@ -23,13 +23,13 @@ describe('RCH identity experience v2 product contract',()=>{
   expect(crew).toContain('commonwealth_register_crew_run');
  });
  it('presents player achievements, social rep and official RCL games without fake wins',()=>{
-  expect(profile).toContain('rch-identity-player-passport');
+  expect(profile).toContain('<ProfileShowcase');
   expect(profile).toContain('allBadges.length');
-  expect(profile).toContain("basketball?.games??'—'");
-  expect(profile).toContain('Social reputation');
+  expect(read('src/components/ProfileShowcase.tsx')).toContain('official RCL games');
+  expect(read('src/components/ProfileShowcase.tsx')).toContain('Social REP is separate');
   expect(profile).toContain('PublicCrewShowcase');
   expect(profile).toContain('PlaceBadgeVault');
-  expect(profile).toContain('verified Runs ratings are separate systems');
+  expect(read('src/components/ProfileShowcase.tsx')).toContain('rating==null');
  });
  it('shows detailed true medals with provenance, earning requirement and rarity filters',()=>{
   expect(badges).toContain('rch-place-collectibles');
