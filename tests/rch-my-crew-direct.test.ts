@@ -6,6 +6,7 @@ const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 const runs=read('src/app/runs/page.tsx');
 const crews=read('src/app/crews/page.tsx');
 const commonwealth=read('src/components/commonwealth/CommonwealthExperience.tsx');
+const creator=read('src/components/crews/CrewCreatorFlow.tsx');
 
 describe('My Crew shortcut direct navigation',()=>{
   it('uses a member-specific destination, not the public directory',()=>{
@@ -21,11 +22,15 @@ describe('My Crew shortcut direct navigation',()=>{
     expect(crews).toContain("if(captain.error)throw captain.error;");
     expect(crews).toContain("router.replace(crewId");
     expect(crews).toContain("'/crews?crew='+encodeURIComponent(crewId)+'#rch-crew-hq'");
-    expect(crews).toContain("'/commonwealth?found=1#rch-cw-my-crew'");
+    expect(crews).toContain("'/crews?create=1#rch-crew-create'");
     expect(crews).toContain('We could not check your crew membership.');
   });
 
-  it('opens the real existing crew creator, then returns captains to their dashboard',()=>{
+  it('opens the direct visual creator while retaining the existing Commonwealth flow',()=>{
+    expect(crews).toContain('<CrewCreatorFlow');
+    expect(creator).toContain("db.rpc('commonwealth_found_crew'");
+    expect(creator).toContain('saveCrewLogo');
+    expect(creator).toContain("router.replace('/crews?crew='");
     expect(commonwealth).toContain("new URLSearchParams(window.location.search).get('found')!=='1'");
     expect(commonwealth).toContain("setFoundingOpen(true)");
     expect(commonwealth).toContain("id=\"rch-cw-my-crew\"");
