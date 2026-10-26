@@ -17,6 +17,7 @@ import { Container } from '@/components/Container';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
+import { ConsentedPostCredits } from '@/components/media/ConsentedPostCredits';
 import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -699,6 +700,8 @@ export default function NetworkHome() {
 
             {loading ? <LoadingFeed /> : feedItems.length ? feedItems.map((item, index) => <div key={item.key} className="contents">
               <NetworkPostCard onCountView={onCountView} item={item} featured={index === 0 && Boolean(item.post.media_urls?.length)} userId={user?.id} following={following.includes(item.post.author_id)} saved={saved.includes(item.post.id)} openComments={openComments === item.post.id} comment={comment[item.post.id] ?? ''} reactionBurst={reactionBurst[item.post.id] ?? null} onCommentChange={(value) => setComment((current) => ({ ...current, [item.post.id]: value }))} onToggleComments={() => setOpenComments((current) => current === item.post.id ? null : item.post.id)} onComment={() => void addComment(item.post.id)} onReact={(type) => void react(item.post.id, type)} onSave={() => void toggleSave(item.post.id)} onShare={() => void sharePost(item.post)} onFollow={() => void toggleFollow(item.post.author_id)} onToggleRepost={() => void toggleRepost(item.post.id)} onDelete={item.post.author_id === user?.id ? () => void deletePost(item.post.id) : undefined} />
+
+              {focusPostId === item.post.id && <ConsentedPostCredits postId={item.post.id}/>}
 
               {!focusPostId && (index === 4 || (index > 4 && (index - 4) % 14 === 0)) && <NetworkSponsoredPlacement
                 placement="social-feed"
