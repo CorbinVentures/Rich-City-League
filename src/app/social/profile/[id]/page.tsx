@@ -11,6 +11,9 @@ import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { ProfileSoundtrack } from '@/components/ProfileSoundtrack';
 import { MixtapeStudio } from '@/components/media/MixtapeStudio';
+import { ConsentedMediaCredits } from '@/components/media/ConsentedMediaCredits';
+import { KicksAndFitsShowcase } from '@/components/social/KicksAndFitsShowcase';
+import { PrivateLabActivity } from '@/components/profile/PrivateLabActivity';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
@@ -267,12 +270,12 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {(activeTab==='followers'||activeTab==='following')&&<ProfileFollowDirectory profileId={id} profileName={name} mode={activeTab} />}
-        {activeTab==='highlights'&&<><MixtapeStudio profileId={id}/><ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." /></>}
-        {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
+        {activeTab==='highlights'&&<><MixtapeStudio profileId={id}/><ConsentedMediaCredits profileId={id}/><ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." /></>}
+        {activeTab==='stats'&&<><StatsTab player={player} basketball={basketball} profileLocation={profile.location} /><PrivateLabActivity profileId={id}/></>}
         {activeTab==='career'&&<CareerTab basketball={basketball} rows={careerRows} authorMap={authorMap} />}
         {activeTab==='badges'&&<BadgesTab name={name} username={profile.username} repLabel={repLabel} repStatus={repStatus.label} socialLevel={socialLevel} followers={followers ?? 0} latestAchievement={latestAchievement} allBadges={allBadges} repRows={repRows} nextLevelXp={nextLevelXp} rep={rep} />}
         {activeTab==='badges' && <PlaceBadgeVault profileId={id}/>}
-        {activeTab==='media'&&<MediaTab rows={mediaRows} />}
+        {activeTab==='media'&&<><MediaTab rows={mediaRows} /><KicksAndFitsShowcase profileId={id}/><ConsentedMediaCredits profileId={id}/></>}
         {activeTab==='coach'&&(coachIdentity?<CoachMemberTab identity={coachIdentity} awards={(earnedCoachBadges??[]) as any[]}/>:<EmptyTab title="Coaching details are not published" copy="Coach identity is optional and controlled by each member."/>)}
       </section>
     </div>
