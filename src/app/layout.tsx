@@ -64,6 +64,7 @@ import './rch-basketball-product-fit.css';
 import './rch-runs-social-culture.css';
 // Official 3D identity for the four live basketball program pages.
 import './rch-program-emblems.css';
+import './rch-court-flare.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';

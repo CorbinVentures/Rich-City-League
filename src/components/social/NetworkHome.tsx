@@ -640,7 +640,7 @@ export default function NetworkHome() {
   }, [posts, reposts, mode, search, focusPostId, user?.id, following, saved, gravityIntent, gravityGoal, gravityCity?.name]);
 
   return (
-    <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page rch-timeline-home min-h-screen pb-24 lg:pb-0">
+    <main data-rch-launch-pending={loading} className="rcl-social-world rch-pulse-page rch-timeline-home rch-court-feed min-h-screen pb-24 lg:pb-0">
       {error && <div className="fixed left-1/2 top-20 z-[80] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-orange/25 bg-[#10141a] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{error}</span><button onClick={() => setError('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
       {notice && <div className="fixed left-1/2 top-20 z-[79] w-[min(92vw,540px)] -translate-x-1/2 rounded-xl border border-rcl-blue/25 bg-[#071522] px-4 py-3 text-sm text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><FaXmark/></button></div></div>}
 
@@ -683,8 +683,8 @@ export default function NetworkHome() {
             {!focusPostId && <StoryRail stories={stories} user={user} currentProfile={currentProfile} onCreate={() => user ? setStoryComposerOpen(true) : signInForNetwork()} onOpen={(index) => void openStory(index)} />}
 
             {!focusPostId && <section className="rch-pulse-compose-strip" aria-label="Create a post">
-              <button type="button" onClick={openComposer} aria-label="Open post composer"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCH Member' : 'Guest', username: null }} compact/></button>
-              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>Share something…</button>
+              <button type="button" onClick={openComposer} aria-label="Open post composer"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCH Member' : 'Guest', username: null }} compact link={false}/></button>
+              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>Share your game…</button>
               <button type="button" className="rch-pulse-compose-media" onClick={openComposer} aria-label="Create a photo or video post"><FaImage aria-hidden="true"/></button>
             </section>}
 
