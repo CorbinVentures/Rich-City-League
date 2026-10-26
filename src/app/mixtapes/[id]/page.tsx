@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaFilm, FaShareNodes, FaTrash } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { pickRchClipUrl } from '@/lib/rch-clips';
+import { mixtapeOwnVideoUrl } from '@/lib/rch-mixtapes';
 
 type Mixtape = { id: string; owner_id: string; title: string; status: string; published_at: string | null };
 type Video = { id: string; body: string | null; clipUrl: string };
@@ -48,7 +48,7 @@ export default function MixtapeWatchPage() {
       (posts || []).forEach((post: { id: string; author_id: string; body: string | null; media_urls: unknown }) => {
         // Visibility is independently enforced by Post RLS, not just playlist RLS.
         if (post.author_id !== mixtape.owner_id) return;
-        const clipUrl = pickRchClipUrl(post.media_urls);
+        const clipUrl = mixtapeOwnVideoUrl(post.media_urls, mixtape.owner_id, process.env.NEXT_PUBLIC_SUPABASE_URL);
         if (clipUrl) eligible.set(post.id, { id: post.id, body: post.body, clipUrl });
       });
       if (live) {
@@ -117,7 +117,7 @@ export default function MixtapeWatchPage() {
           {notice && <p role="status" className="mt-4 text-sm text-[#d0d1d4]">{notice}</p>}
           {error && <p role="alert" className="mt-4 text-sm text-[#ff98aa]">{error}</p>}
           {active ? <section className="mt-6 overflow-hidden rounded-xl border border-[#44484e] bg-[#141618]" aria-label="Mixtape video player">
-            <video key={active.id} src={active.clipUrl} controls playsInline preload="metadata"
+            <video key={active.id} src={active.clipUrl} controls playsInline preload="none"
               className="mx-auto aspect-[9/14] max-h-[70dvh] w-full bg-black object-contain"
               aria-label={'Mixtape clip ' + (activeIndex + 1)}/>
             <div className="flex flex-wrap items-center justify-between gap-3 p-4">
