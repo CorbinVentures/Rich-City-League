@@ -57,7 +57,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
   let alive=true;
   const timer=setTimeout(()=>{
    const clean=search.trim().replace(/[^a-zA-Z0-9 _.'-]/g,'').slice(0,60);
-   let request=db.from('basketball_locations').select('slug,name,locality').eq('is_active',true).order('name').limit(120);
+   let request=db.from('rch_runs_outdoor_courts').select('slug,name,locality').eq('is_active',true).order('name').limit(120);
    if(clean)request=request.or('name.ilike.%'+clean+'%,locality.ilike.%'+clean+'%');
    void request.then(({data}: {data:Court[]|null})=>{if(alive)setCourts(data||[]);});
   },250);
@@ -66,7 +66,7 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
  useEffect(()=>{
   if(!db||!court){setSelectedCourt(null);return;}
   let alive=true;
-  void db.from('basketball_locations').select('slug,name,locality').eq('slug',court).maybeSingle()
+  void db.from('rch_runs_outdoor_courts').select('slug,name,locality').eq('slug',court).maybeSingle()
     .then(({data}: {data:Court|null})=>{if(alive)setSelectedCourt(data||null);});
   return()=>{alive=false;};
  },[db,court]);
