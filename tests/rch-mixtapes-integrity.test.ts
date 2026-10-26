@@ -16,6 +16,7 @@ describe('RCH Mixtapes v1 integration and consent boundaries', () => {
     expect(migration).toContain("p.status='published'::public.content_status");
     expect(migration).toContain("m.status='draft'");
     expect(migration).toContain('sort_order between 1 and 12');
+    expect(migration).toContain("'/posts/[^[:space:]]+[.](mp4|webm|mov|m4v|ogv)");
     expect(migration).toContain("private.can_view_social_profile(m.owner_id)");
     expect(migration).not.toContain('award_xp(');
     expect(migration).not.toContain('award_run_rep(');
@@ -34,7 +35,7 @@ describe('RCH Mixtapes v1 integration and consent boundaries', () => {
     expect(viewer).toContain("db.from('posts').select('id,author_id,body,media_urls')");
     expect(viewer).toContain("if (post.author_id !== mixtape.owner_id) return;");
     expect(viewer).toContain("db.from('rch_mixtapes').delete()");
-    expect(viewer).toContain('pickRchClipUrl(post.media_urls)');
+    expect(viewer).toContain('mixtapeOwnVideoUrl(post.media_urls, mixtape.owner_id');
     expect(profile).toContain("<MixtapeStudio profileId={id}/>");
     expect(migration).toContain("references public.posts(id) on delete cascade");
   });
