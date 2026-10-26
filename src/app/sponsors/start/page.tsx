@@ -1,11 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { SponsorInterestForm } from '@/components/sponsors/SponsorInterestForm';
 import { FaArrowLeft, FaCircleCheck } from 'react-icons/fa6';
 
-export const metadata={
+export const metadata: Metadata={
   title:'Start an RCH Sponsorship | Sponsor Center',
   description:'Tell Rich City Hoops what your business wants to grow and request advertising or sponsorship inventory across RCH.',
+  alternates:{canonical:'/sponsors/start'},
 };
 
 export default async function SponsorStartPage({searchParams}:{searchParams:Promise<{product?:string}>}){

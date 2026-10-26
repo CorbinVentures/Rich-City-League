@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { OrganizationDirectory, type DirectoryOrganization } from '@/components/network/OrganizationDirectory';
@@ -5,9 +6,10 @@ import { getPublicClient } from '@/lib/public-data';
 import { COMMUNITY_ORGANIZATION_TYPES } from '@/lib/network-taxonomy';
 import { FaArrowRight, FaCalendarDays, FaLocationDot } from 'react-icons/fa6';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'RCH Community | Richmond & Virginia Culture',
   description: 'Discover community partners, social clubs, car culture, run clubs, local events, businesses, and organizations connected to Rich City Hoops.',
+  alternates: { canonical: '/community' },
 };
 
 export const revalidate = 60;

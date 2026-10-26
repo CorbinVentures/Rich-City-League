@@ -10,6 +10,12 @@ const liveKitConnectSource = (() => {
 
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      // Route /join directly to signup rather than returning a streamed HTTP 200.
+      { source: '/join', destination: '/auth/sign-up', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
