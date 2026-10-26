@@ -71,13 +71,13 @@ export function RunVenuePicker({ selected, onSelect, onClear }: {
     setBusy(true);
     setError('');
     const timer = setTimeout(async () => {
-      if (!db) { if (!cancelled) { setError('Venue search is unavailable. You can enter a custom location.'); setBusy(false); } return; }
+      if (!db) { if (!cancelled) { setError('Outdoor park court search is currently unavailable.'); setBusy(false); } return; }
       try {
         const { data, error: lookupError } = await db.rpc('search_run_venues', { p_search: query.trim(), p_limit: 24 });
         if (lookupError) throw lookupError;
         if (!cancelled) setResults((data ?? []) as RunVenue[]);
       } catch {
-        if (!cancelled) { setResults([]); setError('Unable to search venues. You can still enter the venue manually.'); }
+        if (!cancelled) { setResults([]); setError('Unable to search outdoor park courts. Please retry.'); }
       } finally {
         if (!cancelled) setBusy(false);
       }
@@ -86,7 +86,7 @@ export function RunVenuePicker({ selected, onSelect, onClear }: {
   }, [db, query, isSearching]);
 
   return <div className="sm:col-span-2">
-    <p className="text-xs font-semibold text-white/70">Court / venue</p>
+    <p className="text-xs font-semibold text-white/70">Outdoor park court</p>
     {selected && <div className="mt-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/[.065] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -105,10 +105,10 @@ export function RunVenuePicker({ selected, onSelect, onClear }: {
         <FaMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/50"/>
         <input type="search" autoComplete="off" aria-label="Search basketball venues"
           value={query} onChange={event => setQuery(event.target.value)}
-          placeholder="Search a court, gym, park, or Virginia city"
+          placeholder="Search public park courts or Virginia cities"
           className="min-h-11 w-full rounded-lg border border-white/20 bg-[#030b13] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/45 outline-none focus:border-rcl-blue"/>
       </label>
-      <p className="mt-2 text-[11px] leading-5 text-white/55">{query.trim() ? 'Named venues that match your search' : 'Suggested venues · Type to search statewide'}</p>
+      <p className="mt-2 text-[11px] leading-5 text-white/55">{query.trim() ? 'Named venues that match your search' : 'Public outdoor parks · Search statewide'}</p>
       {busy && <p role="status" className="px-2 py-3 text-xs text-white/65">Finding venues…</p>}
       {error && <p role="alert" className="px-2 py-3 text-xs text-amber-200">{error}</p>}
       {!busy && !error && query.trim().length !== 1 && <div className="mt-2 max-h-52 space-y-1 overflow-y-auto" role="group" aria-label="Court search results">
@@ -122,17 +122,12 @@ export function RunVenuePicker({ selected, onSelect, onClear }: {
             </span>
           </span>
         </button>)}
-        {!results.length && <p className="px-2 py-3 text-xs leading-5 text-white/65">No named venues found. Try a city or another name—or type a custom location below.</p>}
+        {!results.length && <p className="px-2 py-3 text-xs leading-5 text-white/65">No public outdoor park courts found. Try another park or city.</p>}
       </div>}
     </div>}
-    <div className="mt-3 flex flex-wrap gap-3">
-      <button type="button" onClick={() => { onClear(); setQuery(''); setIsSearching(false); }} className="text-xs font-semibold text-rcl-blue">
-        Use my own address or an unlisted court
-      </button>
-      {!isSearching && <button type="button" onClick={() => { onClear(); setIsSearching(true); }} className="text-xs font-semibold text-white/80">
-        Search the venue database
-      </button>}
-    </div>
-    <p className="mt-2 text-[11px] leading-5 text-white/45">Court data is for choosing a location for a game, not a guarantee a facility is available to play.</p>
+    {!isSearching && <button type="button" onClick={() => { onClear(); setIsSearching(true); }} className="mt-3 min-h-11 text-xs font-semibold text-rcl-blue">
+      Search another park court
+    </button>}
+    <p className="mt-2 text-[11px] leading-5 text-white/45">Public Parks & Recreation basketball courts only. Check access, hours, and whether the court is open before planning a Run.</p>
   </div>;
 }
