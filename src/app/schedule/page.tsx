@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { formatDate, formatTime } from '@/utils/helpers';
 import { Container } from '@/components/Container';
 import { getLeagueSnapshot } from '@/lib/public-data';
+
+export const metadata: Metadata = {
+  title: { absolute: 'Rich City League Basketball Schedule | Richmond VA' },
+  description: 'Browse Rich City League basketball game dates, matchups, venues and upcoming competition across Richmond and Virginia.',
+  alternates: { canonical: '/schedule' },
+};
 
 export const revalidate=60;
 
