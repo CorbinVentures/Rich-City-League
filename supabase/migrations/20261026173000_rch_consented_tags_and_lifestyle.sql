@@ -62,6 +62,28 @@ create policy rch_tag_requests_remove on public.rch_post_tag_requests
   requester_id=(select auth.uid()) or tagged_profile_id=(select auth.uid())
  );
 
+-- Prevent mass requests and forged historical timestamps from browser callers.
+-- This runs in the caller's RLS context and only counts their own rows.
+create function private.rch_limit_tag_request_volume()
+returns trigger language plpgsql security invoker set search_path='' as $
+begin
+ if (select auth.uid()) is null or new.requester_id is distinct from (select auth.uid()) then
+   raise exception 'Only the post author can request tags' using errcode='42501';
+ end if;
+ if (select count(*) from public.rch_post_tag_requests t
+     where t.requester_id=(select auth.uid()) and t.created_at > now()-interval '24 hours') >= 10 then
+   raise exception 'Tag request limit reached; try again later' using errcode='42501';
+ end if;
+ new.created_at=now();
+ new.decided_at=null;
+ new.status='pending';
+ return new;
+end $;
+revoke execute on function private.rch_limit_tag_request_volume() from public,anon,authenticated;
+create trigger rch_limit_tag_request_volume
+before insert on public.rch_post_tag_requests
+for each row execute function private.rch_limit_tag_request_volume();
+
 -- Immutable participant/source records and single-use consent transitions.
 create function private.rch_guard_post_tag_decision()
 returns trigger language plpgsql security invoker set search_path='' as $$
