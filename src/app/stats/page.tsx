@@ -1,9 +1,16 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import type { PlayerGameStats, PublicPlayer, Team, TeamGameStats } from '@/types/database';
 import { FaArrowRight, FaChartSimple } from 'react-icons/fa6';
+
+export const metadata: Metadata = {
+  title: { absolute: 'Rich City League Basketball Stats | Richmond VA' },
+  description: 'Explore official Rich City League basketball statistics from completed games, including player scoring, rebounds, assists and team totals.',
+  alternates: { canonical: '/stats' },
+};
 
 export const revalidate = 60;
 
