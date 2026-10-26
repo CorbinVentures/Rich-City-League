@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FaArrowRight, FaFilm, FaPlus, FaXmark } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { pickRchClipUrl } from '@/lib/rch-clips';
+import { mixtapeOwnVideoUrl } from '@/lib/rch-mixtapes';
 
 type Mixtape = { id: string; title: string; published_at: string | null };
 type Clip = { id: string; body: string; created_at: string; url: string };
@@ -48,7 +48,7 @@ export function MixtapeStudio({ profileId }: { profileId: string }) {
         setClips((posts.data || []).flatMap((post: {
           id: string; body: string; created_at: string; media_urls: unknown
         }) => {
-          const url = pickRchClipUrl(post.media_urls);
+          const url = mixtapeOwnVideoUrl(post.media_urls, profileId, process.env.NEXT_PUBLIC_SUPABASE_URL);
           return url ? [{ id: post.id, body: post.body, created_at: post.created_at, url }] : [];
         }));
       }
