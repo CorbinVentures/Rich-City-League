@@ -16,7 +16,7 @@ One real basketball identity connects actual local games, public outdoor court c
 - New `ProfileSectionNavigation` replaces a long, horizontally scrolling row of profile sections with three role-specific primary actions plus **More**.
 - Player primary: Highlights / Stats / Wall. Coach: Coaching / Wall / Posts. Fan: Wall / Posts / Media.
 - Existing `?tab=` deep links, follower counts, badges, career, legacy profile sections and profile privacy remain usable via **More**.
-- Player showcase includes a direct route to the existing Runs World court finder.
+- Player showcase links into the existing `/runs?view=list&solo=1` solo-friendly Runs filter; game signups and any age restrictions remain with their existing controllers.
 - Existing basketball ratings and game statistics remain sourced from trusted data; there are no user-edited ratings, new REP awards or fictional player cards.
 
 ### Court Pulse (foundation)
@@ -36,21 +36,30 @@ One real basketball identity connects actual local games, public outdoor court c
 - Hidden-tab audio pauses, the UI uses the approved charcoal/crimson tokens, and provider failure is nonfatal.
 - No new copyrighted-audio ingestion or upload pipeline.
 
-## Next engineering slices — NOT YET IMPLEMENTED
+### RCH Mixtapes v1 — own published videos (source staged)
 
-### Slice A — Rights-safe Mixtapes + player tagging
+- `supabase/migrations/20261026162500_rch_own_media_mixtapes.sql` defines draft/published playlists, 1–12 ordered post references, owner-only post eligibility, rights attestation, atomic `rch_publish_own_mixtape`, public-profile visibility, and source-revocation filtering. **This migration is committed but has not been executed.**
+- `MixtapeStudio` is integrated within a player profile's existing Highlights tab. Owners select their own published video posts, confirm rights, and publish a collection with a simple title.
+- `/mixtapes/[id]` renders only individually readable source clips, with one video playing at a time, a share link, original-post attribution, and owner withdrawal.
+- No video duplication/transcoding, third-party license assumption, RCH TV earnings, REP farming, automatic player tagging, or new navigation tab.
+- `supabase/tests/rch_mixtapes_security_test.sql` and `tests/rch-mixtapes-integrity.test.ts` cover the intended constraints. **Database authorization tests must run in local Supabase before migration rollout.**
+- Preview deployments may build this source but will show no Mixtapes until the migration has been approved and applied. Do not apply it to production just to enable preview content.
 
-1. Design `rch_media_tag_requests`, `rch_media_permissions`, `rch_mixtapes`, `rch_mixtape_items` and supporting RLS.
+## Remaining engineering slices — future approvals required
+
+### Slice A — Future player-tag consent and cross-creator permissions
+
+1. Design `rch_media_tag_requests` and `rch_media_permissions` with explicit tagged-player approval and cross-creator licensing. Existing own-video playlist storage is already staged.
 2. Reuse published social media and RCH Clips. Do not copy video files. Resolve media visibility at every read.
 3. Require an affirmative tagged-player decision before cross-publishing to their profile. Allow revocation; remove derivative thumbnails and preview links on takedown.
-4. Mixtape v1 is an ordered playlist of permitted clips, **not** a rendered video editor. Maximum 12 items until pagination and usage budgets are validated.
+4. Maintain the staged Mixtape v1 ordered-playlist behavior and 12-item limit; future remixing or cross-author inclusion requires separate rights validation.
 5. Preserve existing highlight moderation, anti-REP-farming and verified game rules.
 
 **Gate:** two-account player tag accept/reject/revoke tests; deleted/private source media no longer renders anywhere; no duplicate progress payouts.
 
 ### Slice B — Solo Squad Finder
 
-1. Expose existing `rankSoloRuns` and `isSoloJoinable` in the Runs search rather than inventing a separate game.
+1. The existing `rankSoloRuns` and `isSoloJoinable` Runs search is already linked from MyPLAYER. Validate signups with real capacity and correct eligibility.
 2. Add opt-in, expiring preference records and private invitations; all RSVP operations still use existing `run_players` registration.
 3. Recheck status, capacity, age permissions, blocks and privacy atomically before acceptance.
 4. No continuous GPS tracking or public exposure of precise whereabouts.
@@ -100,4 +109,4 @@ One real basketball identity connects actual local games, public outdoor court c
 
 ## Release policy
 
-No merge, production promotion, database migration execution or Vercel deployment without a separate authorization. This document is a staged implementation record, not a statement that all eight features are live.
+No merge, production promotion or database migration execution without a separate authorization. GitHub commits can automatically generate non-production Vercel preview builds via the existing Git integration; no production deployment was initiated. This document is a staged implementation record, not a statement that all eight features are live.
