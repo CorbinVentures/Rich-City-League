@@ -144,7 +144,7 @@ export function SiteHeader(){
       </div>
     </aside>
 
-    <header className="rcl-universal-topbar rcl-social-world-topbar">
+    <header className="rcl-universal-topbar rcl-social-world-topbar rch-court-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCH social home">
         <span>RCH</span><b>RCH <i>{sectionLabel}</i></b>
       </Link>
@@ -164,7 +164,7 @@ export function SiteHeader(){
       </div>
     </header>
 
-    <nav className="rcl-universal-bottom rcl-social-world-bottom" aria-label="RCH mobile navigation">
+    <nav className="rcl-universal-bottom rcl-social-world-bottom rch-court-bottom" aria-label="RCH mobile navigation">
       {bottomItems.map(item=>{
         const Icon=item.icon;
         const selected=active(item.href);

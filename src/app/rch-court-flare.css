@@ -1,0 +1,78 @@
+/* Approved October 26 court-side Home concept. Real content supplies the imagery.
+   This layer is intentionally scoped to app chrome + the social Home timeline. */
+html.rch-premium-root body.rch-premium-app .rch-court-topbar {
+ background:#0b0c0e url('/brand/rch-court-atmosphere.svg') center right/cover no-repeat!important;
+ border-bottom:1px solid #44484e!important;box-shadow:0 4px 24px #0005!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {
+ width:auto!important;min-width:66px!important;padding:0 4px!important;border:0!important;border-radius:0!important;
+ background:linear-gradient(175deg,#fcfcfc 8%,#a6a8ad 35%,#e4e5e7 48%,#777b82 53%,#e4e5e7 77%,#95999f)!important;
+ background-clip:text!important;-webkit-background-clip:text!important;color:transparent!important;
+ font-family:var(--font-display),'Arial Black',sans-serif;font-size:34px!important;font-weight:950!important;letter-spacing:-2px!important;
+ filter:drop-shadow(0 2px 1px #000);transform:skew(-5deg);
+}
+html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>b {border-left:1px solid #55595f;padding-left:10px;}
+html.rch-premium-root body.rch-premium-app .rch-court-bottom {
+ background:linear-gradient(180deg,#16181a,#0b0c0e)!important;border-top:1px solid #44484e!important;box-shadow:0 -8px 28px #0004!important;
+}
+html.rch-premium-root body.rch-premium-app .rch-court-bottom>a.active {
+ color:#ff768c!important;background:radial-gradient(ellipse at bottom,#c8102e25,transparent 75%)!important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-court-feed {
+ background:radial-gradient(ellipse 600px 280px at 50% 0,#c8102e0c,transparent),#0b0c0e!important;color:#f5f5f3!important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-masthead {background:transparent!important;border:0!important;box-shadow:none!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-feed-mode-tabs {
+ display:flex!important;gap:24px!important;border:0!important;border-radius:0!important;background:transparent!important;padding:0!important;box-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-feed-mode-tabs button {
+ position:relative;min-height:48px;padding:10px 2px!important;border:0!important;border-radius:0!important;background:transparent!important;
+ color:#a6a8ad!important;font-size:16px!important;font-weight:750!important;text-transform:none!important;letter-spacing:0!important;box-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-feed-mode-tabs button[aria-pressed="true"] {color:#f5f5f3!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-feed-mode-tabs button[aria-pressed="true"]::after {
+ content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:3px;background:#ed2245;box-shadow:0 1px 9px #c8102e40;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-rail {
+ border:0!important;border-block:1px solid #303338!important;border-radius:0!important;background:transparent!important;padding:12px 0!important;box-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-rail-head {display:none!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-track {gap:16px!important;padding:5px 4px 8px!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-media {border-color:#e5425e!important;box-shadow:0 0 0 3px #0b0c0e,0 0 0 4px #5a3038!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-label strong {font-size:11px!important;font-weight:600!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-compose-strip {
+ border:0!important;border-radius:0!important;background:transparent!important;padding:4px 0 14px!important;gap:12px!important;box-shadow:none!important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-compose-strip>button:first-child {width:44px;height:44px;flex-basis:44px;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-compose-prompt {
+ min-height:48px!important;border:1px solid #55595f!important;border-radius:24px!important;background:linear-gradient(120deg,#202326,#141618)!important;
+ color:#d0d1d4!important;font-size:14px!important;font-weight:400!important;box-shadow:inset 0 1px #ffffff05;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-compose-media {min-width:44px;min-height:44px;border:0!important;background:transparent!important;font-size:22px!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post {
+ border:1px solid #383c41!important;border-radius:10px!important;background:linear-gradient(125deg,#17191c,#101214)!important;
+ box-shadow:0 6px 24px #0003!important;overflow:hidden;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post .rcl-dark-media {
+ background:#070809!important;border-block:1px solid #44484e!important;box-shadow:0 1px 0 #ffffff06;
+}
+/* Media keeps its natural composition; no generated headlines or filters on member photos. */
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post .rcl-dark-media :is(img,video) {filter:none!important;border-radius:0!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post-kicker {color:#d0d1d4!important;background:transparent!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed :is(button,a,input,select):focus-visible {outline:2px solid #ff768c!important;outline-offset:3px!important;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed button {transition:background-color .16s ease,transform .16s ease;}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed button:active {transform:translateY(1px);}
+@media(max-width:640px){
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-timeline-container {padding-inline:12px!important;}
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-post {margin-inline:-12px!important;border-inline:0!important;border-radius:0!important;box-shadow:none!important;}
+}
+@media(max-width:380px){
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {font-size:28px!important;min-width:53px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed button {transition:none!important;}
+ html.rch-premium-root body.rch-premium-app main.rch-court-feed button:active {transform:none!important;}
+}
+@media(forced-colors:active){
+ html.rch-premium-root body.rch-premium-app .rch-court-topbar .rcl-universal-wordmark>span {background:none!important;color:CanvasText!important;filter:none!important;}
+}
