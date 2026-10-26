@@ -40,18 +40,6 @@ type ProfilePost = { id:string; author_id:string; body:string; media_urls:string
 type ProfileTab = 'wall'|'posts'|'followers'|'following'|'highlights'|'stats'|'career'|'badges'|'media'|'coach';
 
 const PROFILE_TABS: ProfileTab[] = ['wall','posts','followers','following','highlights','stats','career','badges','media','coach'];
-const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
-  wall:'Wall',
-  posts:'Posts',
-  followers:'Followers',
-  following:'Following',
-  highlights:'Highlights',
-  stats:'Stats',
-  career:'Career',
-  badges:'Badges',
-  media:'Media',
-  coach:'Coaching',
-};
 
 export default async function SocialPublicProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string|string[] }> }) {
   const [{ id }, query] = await Promise.all([params,searchParams]);
