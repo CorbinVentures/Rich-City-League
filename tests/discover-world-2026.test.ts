@@ -18,7 +18,7 @@ describe('Discover Court Radar uses actual Virginia geography',()=>{
   expect(worldCss).toContain('rch-world-verified-map-placeholder');
  });
  it('retains court searching, selection and expanded map navigation',()=>{
-  expect(world).toContain('search_basketball_locations');
+  expect(world).toContain('search_rch_outdoor_park_courts');
   expect(world).toContain('setIsExpanded(v=>!v)');
   expect(world).toContain('document.body.style.overflow=previous');
   expect(world).toContain('mapRef.current?.resize()');
