@@ -1,15 +1,16 @@
 import Link from 'next/link';
 
 type ProfileKind = 'player' | 'coach' | 'fan';
+type ProfileSection = 'wall' | 'posts' | 'followers' | 'following' | 'highlights' | 'stats' | 'career' | 'badges' | 'media' | 'coach';
 type ProfileSectionNavigationProps = {
   kind: ProfileKind;
-  activeTab: string;
-  visibleTabs: readonly string[];
-  counts: Record<string, number>;
+  activeTab: ProfileSection;
+  visibleTabs: readonly ProfileSection[];
+  counts: Record<ProfileSection, number>;
   href: string;
 };
 
-const names: Record<string, string> = {
+const names: Record<ProfileSection, string> = {
   wall: 'Wall', posts: 'Posts', followers: 'Followers', following: 'Following',
   highlights: 'Highlights', stats: 'Stats', career: 'Career', badges: 'Badges',
   media: 'Media', coach: 'Coaching'
@@ -17,10 +18,10 @@ const names: Record<string, string> = {
 
 /** A focused social-first profile dock; existing ?tab= links remain canonical. */
 export function ProfileSectionNavigation({ kind, activeTab, visibleTabs, counts, href }: ProfileSectionNavigationProps) {
-  const primary = (kind === 'player' ? ['highlights', 'stats', 'wall'] :
-    kind === 'coach' ? ['coach', 'wall', 'posts'] : ['wall', 'posts', 'media'])
-    .filter((tab) => visibleTabs.includes(tab));
-  const more = Array.from(new Set([...visibleTabs.filter((tab) => !primary.includes(tab)), 'followers', 'following']))
+  const suggested: ProfileSection[] = kind === 'player' ? ['highlights', 'stats', 'wall'] :
+    kind === 'coach' ? ['coach', 'wall', 'posts'] : ['wall', 'posts', 'media'];
+  const primary = suggested.filter((tab) => visibleTabs.includes(tab));
+  const more = Array.from(new Set<ProfileSection>([...visibleTabs.filter((tab) => !primary.includes(tab)), 'followers', 'following']))
     .filter((tab) => !primary.includes(tab));
   const moreActive = !primary.includes(activeTab) && more.includes(activeTab);
 
