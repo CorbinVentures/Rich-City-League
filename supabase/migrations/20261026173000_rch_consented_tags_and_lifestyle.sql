@@ -30,7 +30,7 @@ returns boolean language sql stable security definer set search_path='' as $$
       where p.id=p_target and p.is_active
         and p.date_of_birth is not null
         and p.date_of_birth <= (current_date-interval '18 years')::date)
-$;
+$$;
 revoke all on function private.rch_can_request_adult_tag(uuid) from public,anon,authenticated;
 grant execute on function private.rch_can_request_adult_tag(uuid) to authenticated;
 
