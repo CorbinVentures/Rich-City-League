@@ -17,6 +17,7 @@ import { COMMONWEALTH_SEASON_SLUG,competitionRecord,formatCompetitionDate,pilotR
 import { CommonwealthCupPath,type CupGroupStanding } from './CommonwealthCupPath';
 import { CompetitiveCircuit } from '@/components/circuit/CompetitiveCircuit';
 import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
+import { CrewHomeCourtPicker, type CrewHomeCourt } from '@/components/crews/CrewHomeCourtPicker';
 import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import './commonwealth.css';
 
@@ -58,7 +59,7 @@ export default function CommonwealthExperience(){
   const [crewName,setCrewName]=useState('');
   const [motto,setMotto]=useState('');
   const [foundingLogo,setFoundingLogo]=useState<File|null>(null);
-  const [courtChoice,setCourtChoice]=useState('');
+  const [courtChoice,setCourtChoice]=useState<CrewHomeCourt|null>(null);
   const [opponent,setOpponent]=useState('');
   const [challengeCourt,setChallengeCourt]=useState('');
   const [scheduled,setScheduled]=useState('');
@@ -125,8 +126,6 @@ export default function CommonwealthExperience(){
       setChallenges((challengeRows.data??[]) as Challenge[]);
       setRequests(requestRows);
       setRuns(runRows.data??[]);
-      const firstSlug=((allSiteRows.data??[]) as CommonwealthSite[])[0]?.slug;
-      if(firstSlug)setCourtChoice(value=>value||firstSlug);
       setLoading(false);
     };
     void load().catch(()=>{if(!cancelled){setError('The Commonwealth could not be loaded. Try refreshing.');setLoading(false);}});
@@ -175,11 +174,11 @@ export default function CommonwealthExperience(){
   const foundCrew=async(event:FormEvent)=>{
     event.preventDefault();
     if(!user){signIn();return;}
-    if(!db||!courtChoice)return;
+    if(!db||!courtChoice?.slug)return;
     setBusy('founding');setError('');setNotice('');
     try{
       const {data:crewId,error:createError}=await db.rpc('commonwealth_found_crew',{
-        p_name:crewName.trim(),p_court_slug:courtChoice,p_motto:motto.trim()
+        p_name:crewName.trim(),p_court_slug:courtChoice.slug,p_motto:motto.trim()
       });
       if(createError)throw createError;
       // The crew exists even if logo storage fails; never issue a duplicate founding RPC.
@@ -360,11 +359,11 @@ export default function CommonwealthExperience(){
         {foundingOpen&&!myCrew&&<form className="rch-cw-form" onSubmit={foundCrew}>
           <div className="rch-cw-form-title"><h3>Claim your founding identity</h3><button type="button" onClick={()=>setFoundingOpen(false)} aria-label="Close form"><FaXmark/></button></div>
           <div className="rch-cw-fields"><label>Crew name<input required maxLength={36} minLength={3} value={crewName} onChange={e=>setCrewName(e.target.value)} placeholder="Your crew name"/></label>
-            <label>Home court<select required value={courtChoice} onChange={e=>setCourtChoice(e.target.value)}>{sites.map(s=><option key={s.slug} value={s.slug}>{s.name}</option>)}</select></label></div>
+            <div className="sm:col-span-2"><p className="mb-2 text-sm font-black">Home court</p><CrewHomeCourtPicker selected={courtChoice} onSelect={setCourtChoice}/></div></div>
           <label>Motto (optional)<input maxLength={160} value={motto} onChange={e=>setMotto(e.target.value)} placeholder="What does your crew stand for?"/></label>
           <CrewLogoStudio crewName={crewName} onChange={setFoundingLogo}/>
           <p className="rch-cw-fine-print">Your logo is optional. Build an original design, upload your own, or generate generic AI artwork before founding to save it with the crew. One crew per member per season. Court access must be arranged by participants.</p>
-          <button className="rch-cw-primary" disabled={!!busy||!courtChoice}><FaFlag/> {busy?'Creating crew and logo…':'Create founding crew'}</button>
+          <button className="rch-cw-primary" disabled={!!busy||!courtChoice?.slug}><FaFlag/> {busy?'Creating crew and logo…':'Create founding crew'}</button>
         </form>}
         <div className="rch-cw-crew-grid">
           {focusedCrews.length?focusedCrews.map(crew=>{
@@ -377,7 +376,7 @@ export default function CommonwealthExperience(){
               <h3>{crew.name}</h3><p>{crew.motto||'Founding crew · Ready to make history.'}</p><Link href={'/crews?crew='+crew.id} className="rch-cw-small-cta">Crew HQ · logo, invites &amp; top five <FaArrowRight/></Link>
               <div className="rch-cw-crew-stats"><span>{user?(rosterCount.get(crew.id)||0)+' / 12 PLAYERS':'ROSTER · MEMBERS ONLY'}</span><span>{standing?competitionRecord(standing):'0-0'} RECORD</span></div>
               {!myCrew&&user&&<button disabled={!!busy||asked} onClick={()=>void rpc('commonwealth_request_to_join',{p_crew:crew.id},'Roster request sent to the crew captain.')} className="rch-cw-small-cta">{asked?'Request pending':'Request roster spot'} <FaArrowRight/></button>}
-              {captainCrew&&crew.id!==captainCrew.id&&<button className="rch-cw-small-cta" onClick={()=>{setOpponent(crew.id);setChallengeCourt(crew.home_court_slug);document.getElementById('rch-cw-challenge-form')?.scrollIntoView({behavior:'smooth'});}}>Challenge this crew <FaArrowRight/></button>}
+              {captainCrew&&crew.id!==captainCrew.id&&<button className="rch-cw-small-cta" onClick={()=>{setOpponent(crew.id);setChallengeCourt(sites.some(site=>site.slug===crew.home_court_slug)?crew.home_court_slug:'');document.getElementById('rch-cw-challenge-form')?.scrollIntoView({behavior:'smooth'});}}>Challenge this crew <FaArrowRight/></button>}
             </article>;
           }):<div className="rch-cw-empty"><FaPeopleGroup/><strong>{selectedCourt?'No crews claim this court yet.':'The founding roster is open.'}</strong><p>Start the first crew, represent a real Richmond court and invite your people.</p></div>}
         </div>
