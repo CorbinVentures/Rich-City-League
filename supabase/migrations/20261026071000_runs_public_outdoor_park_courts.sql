@@ -21,7 +21,7 @@ where b.is_active=true
     and (b.name ~* '^ES[-_]' or coalesce(b.notes,'') ~* 'no court|hoop structure only')
   );
 revoke all on public.rch_runs_outdoor_courts from public,anon,authenticated;
-grant select on public.rch_runs_outdoor_courts to anon,authenticated;
+grant select on public.rch_runs_outdoor_courts to anon,authenticated,service_role;
 
 -- Autocomplete is the same eligible court set as the full Runs World map.
 create or replace function public.search_run_venues(
