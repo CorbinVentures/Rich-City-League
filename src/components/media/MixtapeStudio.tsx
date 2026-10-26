@@ -78,7 +78,7 @@ export function MixtapeStudio({ profileId }: { profileId: string }) {
       return;
     }
     setCreating(false); setTitle(''); setSelected([]); setRightsConfirmed(false);
-    router.push('/mixtapes/' + data);
+    router.push(`/mixtapes/${data}`);
   };
 
   if (loading || authLoading) return <section aria-label="RCH Mixtapes" className="mt-6 rounded-xl border border-white/10 bg-white/[.025] p-5 text-sm text-white/60">Loading mixtapes…</section>;
