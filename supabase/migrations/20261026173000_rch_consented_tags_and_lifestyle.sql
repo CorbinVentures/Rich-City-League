@@ -21,6 +21,19 @@ revoke all on public.rch_post_tag_requests from public,anon,authenticated;
 grant select on public.rch_post_tag_requests to anon,authenticated;
 grant insert,update,delete on public.rch_post_tag_requests to authenticated;
 
+-- Age eligibility is checked server-side; date_of_birth is not exposed to clients.
+create function private.rch_can_request_adult_tag(p_target uuid)
+returns boolean language sql stable security definer set search_path='' as $
+  select (select auth.uid()) is not null
+    and private.can_view_social_profile(p_target)
+    and exists(select 1 from public.profiles p
+      where p.id=p_target and p.is_active
+        and p.date_of_birth is not null
+        and p.date_of_birth <= (current_date-interval '18 years')::date)
+$;
+revoke all on function private.rch_can_request_adult_tag(uuid) from public,anon,authenticated;
+grant execute on function private.rch_can_request_adult_tag(uuid) to authenticated;
+
 -- Pending requests are visible only to their participants. Accepted tags are
 -- shown only when the source post is currently published and readable under its own RLS.
 create policy rch_tag_requests_read on public.rch_post_tag_requests
@@ -35,13 +48,10 @@ create policy rch_tag_requests_read on public.rch_post_tag_requests
 create policy rch_tag_requests_create on public.rch_post_tag_requests
  for insert to authenticated with check (
    requester_id=(select auth.uid()) and status='pending' and decided_at is null
-   and private.can_view_social_profile(tagged_profile_id)
+   and private.rch_can_request_adult_tag(tagged_profile_id)
    and exists(select 1 from public.posts p where p.id=post_id and p.author_id=(select auth.uid())
      and p.status='published'::public.content_status)
-   -- Conservative v1: no tags of minors, including accounts with missing DOB.
-   and exists(select 1 from public.profiles target
-     where target.id=tagged_profile_id and target.is_active
-       and target.date_of_birth <= (current_date-interval '18 years')::date)
+   -- No tags of minors or accounts with missing verified DOB in v1.
  );
 create policy rch_tag_requests_decide on public.rch_post_tag_requests
  for update to authenticated
