@@ -140,13 +140,13 @@ function CrewsView(){
         <div className="inline-flex items-center gap-2 text-xs font-black tracking-[.16em] text-[#ff768c]"><FaPeopleGroup/> RCH CREWS</div>
         <h1 className="mt-3 font-display text-4xl font-black uppercase leading-[.95] sm:text-6xl">YOUR SQUAD.<br/><span className="text-[#ff768c]">YOUR LEGACY.</span></h1>
         <p className="mt-3 text-sm text-[#d0d1d4]">Build a crew. Run your court. Earn your name.</p>
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+        <nav aria-label="Crew sections" className="mt-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
           {myCrew ? <a href="#rch-crew-hq" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#c8102e] px-5 text-sm font-black text-white"><FaPeopleGroup/> My Crew</a> :
            user ? <button type="button" onClick={()=>setCreating(true)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#c8102e] px-5 text-sm font-black text-white"><FaPeopleGroup/> Create Crew</button> :
            <Link href={'/auth/sign-up?redirect='+encodeURIComponent('/crews?create=1')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#c8102e] px-5 text-sm font-black text-white">Create Crew</Link>}
           <a href="#rch-crews-directory" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[#767b80] px-5 text-sm font-black text-white"><FaBasketball/> Find Crew</a>
           <Link href="/runs" className="col-span-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[#535860] px-5 text-sm font-black text-[#f5f5f3] sm:col-span-1"><FaArrowRight/> Play Runs</Link>
-        </div>
+        </nav>
       </header>
       {creating && !myCrew && user && <CrewCreatorFlow onClose={()=>setCreating(false)} onCreated={()=>{setCreating(false);refresh();}}/>}
       {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/40 bg-red-950/30 p-4 text-sm text-red-100">{error}</p>}
@@ -173,6 +173,7 @@ function CrewsView(){
           <div className="rch-identity-stat"><strong>{selected.city||'VA'}</strong><small>Home city</small></div>
         </div>
         {selected.home_court_slug&&<Link href={'/runs/courts/'+encodeURIComponent(selected.home_court_slug)} className="rch-identity-secondary relative mt-4">Visit our home court <FaArrowRight/></Link>}
+        {mine&&myCrew&&<Link href={'/crews/'+encodeURIComponent(myCrew.id)+'/treasury'} className="relative mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#827259] px-4 py-2 text-sm font-bold text-[#ffe1ad]"><FaTrophy/> Crew REP Treasury <FaArrowRight/></Link>}
         <h3 className="relative mt-6 text-lg font-black uppercase tracking-wide">Meet the roster</h3>
         <div className="relative mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{selectedMembers.map(member=><Link href={'/social/profile/'+member.profile_id} key={member.profile_id} className="rch-identity-member">
           <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[#194265]">{identity(member.profile_id)?.avatar_url?<img src={identity(member.profile_id)?.avatar_url||''} alt="" className="h-full w-full object-cover"/>:<FaBasketball/>}</span>
@@ -212,11 +213,11 @@ function CrewsView(){
       </section>
       <details id="rch-crew-rankings" className="mt-7 scroll-mt-24 rounded-xl border border-[#44484e] bg-[#141618] p-4">
         <summary className="flex min-h-11 cursor-pointer items-center gap-3 text-lg font-black"><FaTrophy className="text-[#ff768c]"/> Crew Power Rankings <FaArrowRight className="ml-auto"/></summary>
-        <CrewPowerBoard/>
+        <CrewPowerBoard />
       </details>
       <details id="rch-crew-courts" className="mt-3 scroll-mt-24 rounded-xl border border-[#44484e] bg-[#141618] p-4">
         <summary className="flex min-h-11 cursor-pointer items-center gap-3 text-lg font-black"><FaCrown className="text-[#ff768c]"/> Territory Battles <FaArrowRight className="ml-auto"/></summary>
-        <CourtDominion showTakeovers/>
+        <CourtDominion showTakeovers />
       </details>
 
     </div>
