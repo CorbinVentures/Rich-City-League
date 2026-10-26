@@ -56,7 +56,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
       if (postResult.error || communityPostsResult.error) throw postResult.error || communityPostsResult.error;
       const runMoments: CourtMoment[] = (postResult.data || []).map(
         (post: { id: string; author_id: string; body: string | null; media_urls: unknown; created_at: string }) =>
-          ({ ...post, authorName: null, href: '/social/post/' + post.id, kind: 'run' as const }));
+          ({ ...post, authorName: null, href: `/social/post/${post.id}`, kind: 'run' as const }));
       const communityMoments: CourtMoment[] = (communityPostsResult.data || []).map(
         (post: { id: string; author_id: string; body: string | null; created_at: string }) =>
           ({ ...post, media_urls: [], authorName: null, href: communityHref || '/communities', kind: 'community' as const }));
