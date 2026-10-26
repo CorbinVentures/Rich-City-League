@@ -39,10 +39,10 @@ One real basketball identity connects actual local games, public outdoor court c
 ### RCH Mixtapes v1 — own published videos (source staged)
 
 - `supabase/migrations/20261026162500_rch_own_media_mixtapes.sql` defines draft/published playlists, 1–12 ordered post references, owner-only post eligibility, rights attestation, atomic `rch_publish_own_mixtape`, public-profile visibility, and source-revocation filtering. **This migration is committed but has not been executed.**
-- `MixtapeStudio` is integrated within a player profile's existing Highlights tab. Owners select their own published video posts, confirm rights, and publish a collection with a simple title.
-- `/mixtapes/[id]` renders only individually readable source clips, with one video playing at a time, a share link, original-post attribution, and owner withdrawal.
+- `MixtapeStudio` is integrated within a player profile's existing Highlights tab. Owners select their own published video posts, confirm rights, and publish a collection with a simple title. Only first-party Supabase `media/{member-id}/posts` uploads are eligible for v1 playback.
+- `/mixtapes/[id]` renders only individually readable, first-party source clips, with one video playing at a time, a share link, original-post attribution, and owner withdrawal.
 - No video duplication/transcoding, third-party license assumption, RCH TV earnings, REP farming, automatic player tagging, or new navigation tab.
-- `supabase/tests/rch_mixtapes_security_test.sql` and `tests/rch-mixtapes-integrity.test.ts` cover the intended constraints. **Database authorization tests must run in local Supabase before migration rollout.**
+- `supabase/tests/rch_mixtapes_security_test.sql` `tests/rch-mixtapes-integrity.test.ts`, and `src/lib/rch-mixtapes.test.ts` cover the intended constraints. **Database authorization tests must run in local Supabase before migration rollout.**
 - Preview deployments may build this source but will show no Mixtapes until the migration has been approved and applied. Do not apply it to production just to enable preview content.
 
 ## Remaining engineering slices — future approvals required
