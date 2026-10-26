@@ -80,7 +80,7 @@ export default function MixtapeWatchPage() {
     const { error: failure } = await db.from('rch_mixtapes').delete().eq('id', mix.id).eq('owner_id', user.id);
     setDeleting(false);
     if (failure) { setError('Unable to withdraw this mixtape.'); return; }
-    router.push('/social/profile/' + user.id + '?tab=highlights');
+    router.push(`/social/profile/${user.id}?tab=highlights`);
   };
 
   const active = videos[activeIndex] ?? null;
