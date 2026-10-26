@@ -419,7 +419,7 @@ export default function VirginiaWorld() {
     const timer=window.setTimeout(async()=>{
       const db=getSupabaseClient() as any;
       if(!db)return;
-      const {data,error}=await db.rpc('search_basketball_locations',{
+      const {data,error}=await db.rpc('search_rch_outdoor_park_courts',{
         p_lat:null,p_lon:null,p_radius_miles:15,p_search:search,p_limit:100,p_offset:0
       });
       if(cancelled||error)return;
@@ -451,7 +451,7 @@ export default function VirginiaWorld() {
         const result:CourtRow[]=[];
         let full=false;
         for(let offset=0;offset<courtLimit;offset+=100){
-          const {data,error}=await db.rpc('search_basketball_locations',{
+          const {data,error}=await db.rpc('search_rch_outdoor_park_courts',{
             p_lat:center.lat,p_lon:center.lng,p_radius_miles:radius,
             p_search:'',p_limit:100,p_offset:offset
           });
