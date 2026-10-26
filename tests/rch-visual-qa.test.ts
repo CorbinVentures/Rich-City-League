@@ -10,6 +10,7 @@ const components=src('src/app/rch-premium-components.css');
 const actions=src('src/components/PublicProfileActions.tsx');
 const insights=src('src/components/ProfileViewInsights.tsx');
 const profile=src('src/app/social/profile/[id]/page.tsx');
+const profileNav=src('src/components/ProfileSectionNavigation.tsx');
 const discover=src('src/components/discover/VirginiaWorld.tsx');
 const chrome=src('src/app/rch-premium-navigation.css');
 const contrast=(a:string,b:string)=>{
@@ -59,8 +60,10 @@ describe('RCH production UI fit and finish',()=>{
    expect(insights).toContain('rcl-profile-attention-caption');
    expect(insights).toContain('rcl-profile-attention-delta');
    expect(profile).toContain('className="rch-profile-hero');
-   expect(profile).toContain('className="rch-profile-tabs');
-   expect(profile).toContain("aria-current={active?'page':undefined}");
+   expect(profile).toContain('<ProfileSectionNavigation');
+   expect(profileNav).toContain('className="rch-profile-tabs');
+   expect(profileNav).toContain("aria-current={activeTab === tab ? 'page' : undefined}");
+   expect(profileNav).toContain('More profile sections');
    expect(css).toContain('.rcl-profile-status-banner');
    expect(css).toContain('.rcl-profile-metrics');
    expect(css).toContain('.rcl-profile-attention-primary');
