@@ -103,7 +103,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
         <p className="text-sm text-[#d0d1d4]">No published court moments yet. Find the next game or join the court community.</p>
       </div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {moments.map((moment) => {
-          const image = courtPulseImageUrl(moment.media_urls);
+          const image = courtPulseImageUrl(moment.media_urls, process.env.NEXT_PUBLIC_SUPABASE_URL);
           return <article key={moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#44484e] bg-[#141618]">
             {image && <Link href={moment.href} aria-label="Open published court post">
               <img src={image} alt="Published basketball moment" loading="lazy" className="aspect-video w-full object-cover"/>
