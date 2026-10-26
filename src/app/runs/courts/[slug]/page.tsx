@@ -41,7 +41,7 @@ export default function RunCourtProfile(){
   void(async()=>{
    setLoading(true);setHistoryLoading(true);
    const [venue,crewBoard,events,setting,crowns,takeovers]=await Promise.all([
-    db.from('basketball_locations').select('slug,name,locality,address,venue_type,access_type,hours_text,open_gym_text,verification_status').eq('slug',slug).eq('is_active',true).maybeSingle(),
+    db.from('rch_runs_outdoor_courts').select('slug,name,locality,address,venue_type,access_type,hours_text,open_gym_text,verification_status').eq('slug',slug).eq('is_active',true).maybeSingle(),
     db.rpc('get_rch_court_crew_standings',{p_court:slug}),
     db.from('runs').select('id,title,starts_at,game_format,status,max_players').eq('location_slug',slug).in('status',['open','full'])
      .gte('starts_at',new Date().toISOString()).order('starts_at').limit(30),

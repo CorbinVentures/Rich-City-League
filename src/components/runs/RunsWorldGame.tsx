@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBookOpen,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
-import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
+import {AccurateVirginiaMap} from '@/components/runs/AccurateVirginiaMap';
 import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
@@ -16,7 +16,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
 import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
@@ -66,7 +66,6 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [introReplay,setIntroReplay]=useState(0);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
- const [communityLeads,setCommunityLeads]=useState<CommunityCourtLead[]>([]);
  const [runs,setRuns]=useState<WorldRun[]>([]);
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
@@ -85,25 +84,6 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [query,setQuery]=useState('');
  const [coverageWarning,setCoverageWarning]=useState('');
  const restoredCourt=useRef<string|null>(null);
- useEffect(()=>{
-  if(!db)return;
-  let active=true;
-  void (async()=>{
-   const collected:CommunityCourtLead[]=[];
-   for(let from=0;from<5500;from+=500){
-    const {data,error}=await db.from('basketball_locations')
-      .select('slug,name,locality,latitude,longitude')
-      .eq('is_active',true).eq('verification_status','community')
-      .not('latitude','is',null).not('longitude','is',null)
-      .order('slug').range(from,from+499);
-    if(error||!active)return;
-    collected.push(...((data||[]) as CommunityCourtLead[]));
-    if((data||[]).length<500)break;
-   }
-   if(active)setCommunityLeads(collected);
-  })();
-  return()=>{active=false;};
- },[db]);
  const city=runsAreaOptions.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
@@ -128,11 +108,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    if(!city){setLoading(false);return;}
    try{
     const [courtResult,runResult,featuredResult]=await Promise.all([
-     db.from('basketball_locations')
+     db.from('rch_runs_outdoor_courts')
       .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text,notes')
       .eq('is_active',true).in('locality',localityNames(city))
       .in('verification_status',['official','provider'])
-      .in('venue_type',['outdoor','indoor','mixed'])
       .order('name').range(0,299),
      readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
       .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
@@ -145,7 +124,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
     if(!alive)return;
     if(courtResult.error)throw courtResult.error;
     if(runResult.error)throw runResult.error;
-    const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(verifiedParksRecFacility);
+    const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(playableCourt);
     setCourts(nextCourts);
     const citySlugs=new Set(nextCourts.map(c=>c.slug));
     // Filter Runs by their canonical court relationship, not a fragile city
@@ -358,7 +337,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
      <div><small>PARKS & REC COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
-     <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
+     <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
     <div className="rwg-world-game-legend" aria-label="Runs World map marker guide"><span><FaLocationDot/> Sourced Court</span><span><FaCrown/> Crew Territory</span><span><FaBolt/> Active Challenge</span><span><FaGift/> 2× Verified REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
@@ -373,7 +352,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}

@@ -32,8 +32,9 @@ describe('RCH official 2026 Virginia geographic data',()=>{
   const runs=text('src/components/runs/RunsWorldGame.tsx');
   expect(map).toContain("'rch-unverified-leads'");
   expect(map).toContain('not a verified court');
-  expect(runs).toContain(".eq('verification_status','community')");
-  expect(runs).toContain('leads={communityLeads}');
+  expect(runs).not.toContain(".eq('verification_status','community')");
+  expect(runs).not.toContain('leads={communityLeads}');
+  expect(runs).toContain("db.from('rch_runs_outdoor_courts')");
   expect(runs).toContain('not approved courts');
  });
 });

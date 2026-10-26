@@ -186,10 +186,9 @@ export default function RunsPage() {
           .gte('starts_at', since)
           .order('starts_at', { ascending: true })
           .range(from,to)),
-        db.from('basketball_locations')
+        db.from('rch_runs_outdoor_courts')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('is_active', true)
-          .in('verification_status', ['official', 'provider'])
           .order('name')
           .limit(125),
         db.from('badges')
@@ -238,7 +237,7 @@ export default function RunsPage() {
       setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id), weekendMultiplier:weekendRunIds.has(run.id)?2:1 })));
       const courtRows = (courtsResult.data ?? []) as Court[];
       if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
-        const { data: selectedCourtRow } = await db.from('basketball_locations')
+        const { data: selectedCourtRow } = await db.from('rch_runs_outdoor_courts')
           .select('slug,name,address,locality,region,postal_code,area,venue_type,access_type,court_count,lights,latitude,longitude,hours_text,open_gym_text,source_label,source_url,last_verified_on,verification_status,notes')
           .eq('slug', courtParam).eq('is_active', true).maybeSingle();
         if (selectedCourtRow) courtRows.unshift(selectedCourtRow as Court);
@@ -303,9 +302,9 @@ export default function RunsPage() {
       return;
     }
     const court = courts.find(item => item.slug === form.location_slug);
-    const location = court ? runVenueLocation(court) : form.custom_location.trim();
+    const location = court ? runVenueLocation(court) : '';
     if (!form.title.trim() || !location || !form.date || !form.time) {
-      setError('Add a title, court or location, date, and start time.');
+      setError('Add a title, public outdoor park court, date, and start time.');
       return;
     }
     const startError = validateRunStart(form.date, form.time);
@@ -323,9 +322,9 @@ export default function RunsPage() {
         host_id: user.id,
         title: form.title.trim(),
         description: form.description.trim() || null,
-        court_name: court?.name ?? form.custom_location.trim().slice(0, 160),
+        court_name: court!.name,
         location,
-        location_slug: court?.slug ?? null,
+        location_slug: court!.slug,
         skill_level: form.skill_level,
         game_format: form.game_format.toLowerCase(),
         max_players: form.max_players,
@@ -715,7 +714,6 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
       <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
       <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
-      {!form.location_slug && <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Custom location</span><input value={form.custom_location} onChange={(event) => setForm({ ...form, custom_location: event.target.value })} placeholder="Court name and address" className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>}
       <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
       <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
       <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>2v2</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
