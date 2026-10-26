@@ -7,6 +7,7 @@ import {createCrewLogoSvg,initialLogoDesign,logoPresets,type CrewLogoDesign,type
 type Mode='builder'|'upload'|'ai';
 type Props={crewName:string;onChange:(file:File|null)=>void;initialLogoUrl?:string|null};
 const symbols:LogoSymbol[]=['basketball','crown','star','bolt','flame','wings'];
+const symbolIcons:Record<LogoSymbol,string>={basketball:'🏀',crown:'♛',star:'★',bolt:'⚡',flame:'🔥',wings:'🪽'};
 const styles=['Street','Championship','Minimal','Mascot','Bold'] as const;
 const mime=new Set(['image/png','image/jpeg','image/webp']);
 const maxSource=10*1024*1024;
@@ -97,27 +98,37 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
    {id:'upload',title:'Upload Logo',detail:'Bring your own original artwork'},
    {id:'ai',title:'AI Create',detail:'Generate an original generic emblem'}
  ];
- return <section aria-label="Crew logo studio" className="mt-5 overflow-hidden rounded-3xl border border-[#35749b] bg-[radial-gradient(ellipse_at_80%_0%,#164363,#071624_55%)] p-4 text-white sm:p-6">
+ return <section aria-label="Crew logo studio" className="mt-5 overflow-hidden rounded-xl border border-[#484d52] bg-[#141618] p-3 text-white sm:p-5">
    <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#83d8ff]">RCH Crew Identity Studio</p><h3 className="mt-1 text-xl font-black uppercase sm:text-2xl">Build your crew logo</h3></div>
      {selectedMethod&&<span className="rounded-full border border-emerald-500/50 bg-emerald-900/20 px-3 py-1.5 text-xs font-black text-emerald-300"><FaCheck className="mr-1 inline"/>{selectedMethod} · Ready</span>}
    </div>
-   <p className="mt-2 text-sm text-[#b6d2e9]">Make your mark with a custom builder, your own upload, or AI artwork. Your selected logo appears on crew cards, Run entries, and social profiles.</p>
-   <div className="mt-5 grid gap-2 sm:grid-cols-3">{modes.map(item=><button type="button" key={item.id} aria-pressed={mode===item.id}
-      onClick={()=>{setMode(item.id);setError('');}} className={'min-h-[74px] rounded-xl border p-3 text-left transition '+(mode===item.id?'border-[#24d8e7] bg-[#155070]/70 shadow-[0_0_18px_rgba(17,209,229,.15)]':'border-[#314d67] bg-[#071626]/80 hover:border-[#669bbb]')}>
+   <p className="mt-2 text-sm text-[#d0d1d4]">Tap a design to preview your emblem.</p>
+   <div className="mt-4 grid grid-cols-3 gap-2">{modes.map(item=><button type="button" key={item.id} aria-pressed={mode===item.id}
+      onClick={()=>{setMode(item.id);setError('');}} className={'min-h-14 rounded-lg border p-2 text-center transition '+(mode===item.id?'border-[#24d8e7] bg-[#155070]/70 shadow-[0_0_18px_rgba(17,209,229,.15)]':'border-[#314d67] bg-[#071626]/80 hover:border-[#669bbb]')}>
       <span className="flex items-center gap-2 text-sm font-black">{item.id==='builder'?<FaPaintbrush/>:item.id==='upload'?<FaCloudArrowUp/>:<FaWandMagicSparkles/>}{item.title}</span>
-      <span className="mt-1 block text-[11px] text-[#b0c8de]">{item.detail}</span></button>)}</div>
+      </button>)}</div>
    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-     <div className="rounded-2xl border border-[#34516b] bg-[#071522]/90 p-4">
+     <div className="order-2 rounded-xl border border-[#555b60] bg-[#202326] p-3 lg:order-1 sm:p-4">
        {mode==='builder'&&<>
         <div className="mb-3 flex items-center justify-between"><strong className="text-sm uppercase text-[#83d8ff]">Original logo builder</strong><button type="button" onClick={reset} className="flex items-center gap-2 text-xs font-bold text-[#b9d4e9]"><FaArrowRotateLeft/> Reset</button></div>
-        <p className="text-xs font-bold text-[#bddaf0]">Style presets</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">{logoPresets.map(p=><button type="button" key={p.name} onClick={()=>{setDesign(d=>({...d,shape:p.shape,symbol:p.symbol,primary:p.primary,secondary:p.secondary,ink:p.ink}));if(selectedMethod==='Custom-built')setStatus('Preset changed. Use custom logo to apply.');}} className={'min-h-12 rounded-xl border px-2 py-2 text-xs font-bold '+(design.shape===p.shape&&design.symbol===p.symbol?'border-[#36e4f5] bg-[#14506c]':'border-[#35526c] bg-[#0b2134]')}>{p.name}</button>)}</div>
-        <p className="mt-4 text-xs font-bold text-[#bddaf0]">Emblem layer</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">{symbols.map(s=><button type="button" key={s} aria-pressed={design.symbol===s} onClick={()=>update('symbol',s)} className={'min-h-10 rounded-lg border px-2 text-xs font-bold capitalize '+(design.symbol===s?'border-[#35deeb] bg-[#135070]':'border-[#33506a]')}>{s}</button>)}</div>
+        <p className="text-xs font-black uppercase tracking-wide text-[#d0d1d4]">Choose an emblem</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">{logoPresets.map(p=><button type="button" key={p.name}
+          aria-pressed={design.shape===p.shape&&design.symbol===p.symbol&&design.primary===p.primary}
+          onClick={()=>{setDesign(d=>({...d,shape:p.shape,symbol:p.symbol,primary:p.primary,secondary:p.secondary,ink:p.ink}));if(selectedMethod==='Custom-built')setStatus('Design changed. Tap Apply logo to use it.');}}
+          className={'flex flex-col items-center gap-2 rounded-lg border p-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white '+(design.shape===p.shape&&design.symbol===p.symbol&&design.primary===p.primary?'border-[#ff768c] bg-[#4f202b]':'border-[#575b60] bg-[#141618] hover:border-[#ff768c]')}>
+          <img loading="lazy" src={'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(createCrewLogoSvg({...design,name:crewName||'MY CREW',shape:p.shape,symbol:p.symbol,primary:p.primary,secondary:p.secondary,ink:p.ink}))}
+            alt={p.name+' emblem'} className="aspect-square w-full max-w-24 object-contain"/>
+          <span className="text-xs font-bold">{p.name}</span>
+        </button>)}</div>
+        <p className="mt-5 text-xs font-black uppercase tracking-wide text-[#d0d1d4]">Your symbol</p>
+        <div className="mt-2 grid grid-cols-6 gap-1.5">{symbols.map(s=><button type="button" key={s} aria-label={s} aria-pressed={design.symbol===s} onClick={()=>update('symbol',s)}
+          className={'flex min-h-12 items-center justify-center rounded-lg border text-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-white '+(design.symbol===s?'border-[#ff768c] bg-[#4f202b]':'border-[#575b60] bg-[#141618]')}>{symbolIcons[s]}</button>)}</div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs font-bold">Main color<input aria-label="Main logo color" type="color" value={design.primary} onChange={e=>update('primary',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Background color<input aria-label="Background logo color" type="color" value={design.secondary} onChange={e=>update('secondary',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Lettering color<input aria-label="Logo text color" type="color" value={design.ink} onChange={e=>update('ink',e.target.value)} className="mt-2 h-10 w-full cursor-pointer rounded-lg bg-transparent"/></label><label className="text-xs font-bold">Tagline<input maxLength={36} value={design.tagline} onChange={e=>update('tagline',e.target.value)} className={field}/></label></div>
+        <details className="mt-4 rounded-lg border border-[#555b60] bg-[#141618] p-3"><summary className="cursor-pointer text-sm font-bold">Fine-tune design</summary>
         <div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-xs font-bold">Emblem size <span className="text-[#98bedc]">{Math.round(design.symbolSize*100)}%</span><input type="range" min=".5" max="1.6" step=".1" value={design.symbolSize} onChange={e=>update('symbolSize',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Name size<input type="range" min="26" max="64" value={design.nameSize} onChange={e=>update('nameSize',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Emblem position<input type="range" min="140" max="285" value={design.symbolY} onChange={e=>update('symbolY',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label><label className="text-xs font-bold">Name position<input type="range" min="290" max="415" value={design.nameY} onChange={e=>update('nameY',Number(e.target.value))} className="mt-2 w-full accent-cyan-400"/></label></div>
         <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold"><label className="flex items-center gap-2"><input type="checkbox" checked={design.showSymbol} onChange={e=>update('showSymbol',e.target.checked)}/> Emblem layer</label><label className="flex items-center gap-2"><input type="checkbox" checked={design.showTagline} onChange={e=>update('showTagline',e.target.checked)}/> Tagline layer</label></div>
-        <button type="button" disabled={working||generating} onClick={()=>void handleBuilder()} className="mt-5 min-h-11 w-full rounded-xl bg-[#34d8ea] px-4 py-3 text-sm font-black text-[#041b28] disabled:opacity-40">{working?'Rendering…':'Use custom logo'}</button>
+        </details>
+        <button type="button" disabled={working||generating} onClick={()=>void handleBuilder()} className="mt-4 min-h-12 w-full rounded-lg bg-[#c8102e] px-4 py-3 text-sm font-black text-white disabled:opacity-40">{working?'Rendering…':'Apply logo'}</button>
        </>}
        {mode==='upload'&&<><h4 className="text-base font-black uppercase">Upload your own logo</h4><p className="mt-2 text-xs leading-5 text-[#b9d4e9]">PNG, JPG or WebP up to 10 MB. We automatically fit it into a 512 × 512 square and compress it for RCH. No SVG or animated images.</p>
         <label className="mt-5 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#3c769a] bg-[#0b2740] px-4 py-6 text-center hover:border-[#56ccf2]"><FaCloudArrowUp className="mb-3 text-4xl text-[#5fc7e7]"/><strong className="text-sm">Choose your logo file</strong><span className="mt-2 text-xs text-[#a9cbe1]">{uploadedName||'Choose an image from your device'}</span><input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={working||generating} onChange={e=>{void handleUpload(e.target.files?.[0]);e.target.value='';}}/></label>
@@ -132,9 +143,9 @@ export function CrewLogoStudio({crewName,onChange,initialLogoUrl}:Props){
          <p className="mt-3 text-xs leading-5 text-[#acbdd7]">Limit: 3 AI generations per account per day, with a short cooldown. Your selected result will be attached when you save your crew.</p>
        </>}
      </div>
-     <div className="flex flex-col rounded-2xl border border-[#34516b] bg-[#071321] p-4">
-       <div className="flex items-center justify-between"><strong className="text-sm uppercase text-[#8ccdf8]">Live logo preview</strong><span className="text-xs text-[#93b7d6]">512 × 512</span></div>
-       <div className="mt-3 flex min-h-64 flex-1 items-center justify-center overflow-hidden rounded-xl border border-[#2d4d68] bg-[radial-gradient(circle,#19334c,#030c18_75%)] p-5">
+     <div className="order-1 flex flex-col rounded-xl border border-[#555b60] bg-[#0b0c0e] p-3 lg:order-2 sm:p-4">
+       <div className="flex items-center justify-between"><strong className="text-sm uppercase text-[#ff768c]">Live preview</strong><span className="text-xs text-[#d0d1d4]">512 × 512</span></div>
+       <div className="mt-3 flex min-h-56 flex-1 items-center justify-center overflow-hidden rounded-lg border border-[#44484e] bg-[radial-gradient(circle,#303035,#0b0c0e_75%)] p-3">
          <img src={activePreview} alt={'Preview of '+(crewName||'your')+' crew logo'} className="aspect-square w-full max-w-[320px] object-contain"/>
        </div>
        <div className="mt-3 rounded-xl border border-[#31516f] bg-[#0a2137] p-3"><p className="text-xs font-black text-white">{selectedMethod?selectedMethod+' logo selected':'No logo selected yet'}</p><p className="mt-1 text-xs text-[#a9c6dd]">{selectedMethod?'Ready to save. You can always change it later from Crew HQ.':'Preview does not save automatically. Select or generate a logo and apply it.'}</p></div>
