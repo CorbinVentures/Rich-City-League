@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { FaArrowRight, FaBasketball, FaCamera, FaPlay } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaCamera } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { courtPulseImageUrl, courtPulseRunIds } from '@/lib/court-pulse';
 
@@ -110,7 +110,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
             </Link>}
             <div className="p-4">
               <div className="mb-2 flex items-center gap-2 text-xs text-[#a6a8ad]">
-                {moment.kind === 'community' ? <FaBasketball aria-hidden="true"/> : image ? <FaCamera aria-hidden="true"/> : <FaPlay aria-hidden="true"/>}
+                {image ? <FaCamera aria-hidden="true"/> : <FaBasketball aria-hidden="true"/>}
                 <span>{moment.kind === 'run' ? 'Run-linked post' : 'Court community'}</span>
               </div>
               {moment.authorName ? <Link href={'/social/profile/' + moment.author_id} className="text-xs font-bold text-[#ff768c]">{moment.authorName}</Link>
