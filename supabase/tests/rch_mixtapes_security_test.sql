@@ -9,6 +9,8 @@ select ok(not has_table_privilege('anon','public.rch_mixtape_items','INSERT'),'G
 select ok(not has_table_privilege('authenticated','public.rch_mixtape_items','UPDATE'),'Members cannot rewrite playlist source references');
 
 set role postgres;
+-- CI's minimal schema omits the production post SELECT grants; reproduce inside rollback-only fixtures.
+grant select on public.posts to anon, authenticated;
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
 values
 ('b1770000-0000-4000-8000-000000000001','authenticated','authenticated','mixtape-owner@example.test','{}'::jsonb),
