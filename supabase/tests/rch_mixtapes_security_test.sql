@@ -52,11 +52,8 @@ select throws_ok(
 select set_config('request.jwt.claim.sub','b1770000-0000-4000-8000-000000000002',true);
 select ok(not exists(select 1 from public.rch_mixtape_items where mixtape_id in
 (select id from public.rch_mixtapes where status='draft')),'Another account has no access to drafts');
-select throws_ok(
- $$delete from public.rch_mixtapes where owner_id='b1770000-0000-4000-8000-000000000001'$$,
- 'P0001',null,'No cross-account deletion is allowed'
-);
--- RLS deletes generally filter to zero rows, rather than throwing.
+delete from public.rch_mixtapes where owner_id='b1770000-0000-4000-8000-000000000001';
+-- RLS deletes generally filter to zero rows without throwing.
 select is((select count(*)::integer from public.rch_mixtapes),1,'Other member has not withdrawn owners mixtape');
 
 set role postgres;
