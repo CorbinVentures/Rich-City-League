@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaArrowRight, FaBasketball, FaCheck, FaFlag, FaLocationDot, FaPeopleGroup, FaXmark } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
-import { COMMONWEALTH_SEASON_SLUG } from '@/lib/commonwealth';
+import { CrewHomeCourtPicker, type CrewHomeCourt } from './CrewHomeCourtPicker';
 import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import { CrewLogoStudio } from './CrewLogoStudio';
 
-type Site = { slug: string; name: string; locality: string | null };
 type Props = { onClose: () => void; onCreated: () => void };
 const stages = ['Identity', 'Logo', 'Finish'] as const;
 
@@ -21,9 +20,7 @@ export function CrewCreatorFlow({ onClose, onCreated }: Props) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [motto, setMotto] = useState('');
-  const [court, setCourt] = useState('');
-  const [sites, setSites] = useState<Site[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedCourt, setSelectedCourt] = useState<CrewHomeCourt | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -36,42 +33,8 @@ export function CrewCreatorFlow({ onClose, onCreated }: Props) {
     return () => URL.revokeObjectURL(url);
   }, [logoFile]);
 
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      if (!db) { setError('Crew creator is unavailable.'); setLoading(false); return; }
-      try {
-        const { data: season, error: seasonError } = await db.from('commonwealth_seasons')
-          .select('id').eq('slug', COMMONWEALTH_SEASON_SLUG).maybeSingle();
-        if (seasonError) throw seasonError;
-        if (!season) throw new Error('The founding season is not ready yet.');
-        const { data: activeSites, error: sitesError } = await db.from('commonwealth_sites')
-          .select('court_slug').eq('season_id', season.id);
-        if (sitesError) throw sitesError;
-        const slugs = (activeSites || []).map((row: { court_slug: string }) => row.court_slug);
-        if (!slugs.length) throw new Error('No founding courts are available yet.');
-        const { data: courts, error: courtsError } = await db.from('basketball_locations')
-          .select('slug,name,locality').in('slug', slugs).eq('is_active', true);
-        if (courtsError) throw courtsError;
-        if (active) {
-          const choices = ((courts || []) as Site[]).sort((a,b) => a.name.localeCompare(b.name));
-          setSites(choices);
-          if (choices.length) setCourt(choices[0].slug);
-          else setError('Founding courts are not available right now.');
-        }
-      } catch (err) {
-        if (active) setError(err instanceof Error ? err.message : 'Could not load founding courts.');
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    void load();
-    return () => { active = false; };
-  }, [db]);
-
   const validName = name.trim().length >= 3 && name.trim().length <= 36;
-  const validCourt = sites.some(site => site.slug === court);
-  const selectedCourt = sites.find(site => site.slug === court);
+  const validCourt = Boolean(selectedCourt?.slug);
   const next = () => {
     if (step === 0 && (!validName || !validCourt)) return;
     setError('');
@@ -84,7 +47,7 @@ export function CrewCreatorFlow({ onClose, onCreated }: Props) {
     setSaving(true); setError('');
     try {
       const { data: crewId, error: createError } = await db.rpc('commonwealth_found_crew', {
-        p_name: name.trim(), p_court_slug: court, p_motto: motto.trim()
+        p_name: name.trim(), p_court_slug: selectedCourt!.slug, p_motto: motto.trim()
       });
       if (createError) throw createError;
       // Never retry the founding RPC after it succeeds, even if logo storage fails.
@@ -117,14 +80,7 @@ export function CrewCreatorFlow({ onClose, onCreated }: Props) {
         <label className="block text-sm font-black" htmlFor="rch-crew-name">Crew name</label>
         <input id="rch-crew-name" autoFocus required minLength={3} maxLength={36} value={name} onChange={e=>setName(e.target.value)} placeholder="Name your crew" className="mt-2 min-h-12 w-full rounded-lg border border-[#6c7075] bg-[#202326] px-4 text-base text-white placeholder:text-[#a6a8ad] focus:border-[#ff768c] focus:outline-none"/>
         <p className="mb-3 mt-6 text-sm font-black">Claim your home court</p>
-        {loading ? <p role="status" className="text-sm text-[#d0d1d4]">Loading courts…</p> :
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {sites.map(site => <button key={site.slug} type="button" aria-pressed={court === site.slug} onClick={()=>setCourt(site.slug)}
-              className={'flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border p-3 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ' + (court === site.slug ? 'border-[#ff768c] bg-[#50202a]' : 'border-[#484d52] bg-[#202326] hover:border-[#8b939b]')}>
-              <FaLocationDot className={court === site.slug ? 'text-2xl text-[#ff768c]' : 'text-2xl text-[#d0d1d4]'}/>
-              <strong className="text-sm leading-tight">{site.name}</strong><span className="text-xs text-[#c1c3c8]">{site.locality || 'Virginia'}</span>
-            </button>)}
-          </div>}
+        <CrewHomeCourtPicker selected={selectedCourt} onSelect={setSelectedCourt}/>
         <details className="mt-5 rounded-lg border border-[#484d52] bg-[#202326] px-4 py-3">
           <summary className="cursor-pointer text-sm font-bold">Add a motto <span className="font-normal text-[#bfc1c6]">(optional)</span></summary>
           <input aria-label="Crew motto" maxLength={160} value={motto} onChange={e=>setMotto(e.target.value)} placeholder="What do you stand for?" className="mt-3 min-h-11 w-full rounded-lg border border-[#666a70] bg-[#141618] px-3 text-white placeholder:text-[#a6a8ad]"/>
@@ -155,7 +111,7 @@ export function CrewCreatorFlow({ onClose, onCreated }: Props) {
       <div className="mt-6 flex items-center justify-between gap-3">
         <button type="button" onClick={()=>step ? setStep(current=>current-1) : onClose()} disabled={saving}
           className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-[#72767c] px-4 text-sm font-bold text-white disabled:opacity-50"><FaArrowLeft/>{step ? 'Back' : 'Cancel'}</button>
-        {step < 2 ? <button type="button" onClick={next} disabled={saving || (step === 0 && (!validName || !validCourt || loading))}
+        {step < 2 ? <button type="button" onClick={next} disabled={saving || (step === 0 && (!validName || !validCourt))}
           className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#c8102e] px-6 text-sm font-black text-white disabled:opacity-50">Next <FaArrowRight/></button> :
           <button type="submit" disabled={saving || !user || !validName || !validCourt}
             className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#c8102e] px-6 text-sm font-black text-white disabled:opacity-50"><FaFlag/>{saving ? 'Creating…' : 'Create Crew'}</button>}
