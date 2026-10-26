@@ -28,7 +28,7 @@ export default function MembershipPage() {
           <p className="text-xs font-black uppercase tracking-[.28em] text-rcl-orange">RCL Membership</p>
           <h1 className="mt-4 font-display text-5xl font-black uppercase leading-[.9] sm:text-7xl">More value from <span className="text-rcl-blue">Virginia basketball.</span></h1>
           <p className="mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg">The free RCL community stays useful. Paid membership is for people who want their basketball world organized, measurable and easier to act on—not a paywall around the community.</p>
-          <div className="mt-8 flex flex-wrap gap-3"><Link href="/account/membership" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">View my membership <FaArrowRight /></Link><Link href="/my-hoops" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider">Preview My Hoops</Link></div>
+          <div className="mt-8 flex flex-wrap gap-3"><Link href="/auth/sign-up" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Create a free RCH profile <FaArrowRight /></Link><Link href="/account/membership" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider">Manage membership</Link></div>
         </div>
       </Container>
     </section>
@@ -44,7 +44,7 @@ export default function MembershipPage() {
         <div className="mt-6 flex items-end gap-2"><b className="font-display text-4xl">{paid?formatMembershipPrice(plan.monthlyPriceCents):'Free'}</b>{paid&&<span className="pb-1 text-xs text-white/35">/ month</span>}</div>
         {paid&&<p className="mt-1 text-xs text-white/35">or {formatMembershipPrice(plan.annualPriceCents)} annually</p>}
         <div className="mt-7 space-y-3">{plan.benefits.map((benefit)=><div key={benefit} className="flex gap-3 text-sm leading-5 text-white/70"><FaCircleCheck className="mt-0.5 shrink-0 text-rcl-orange"/><span>{benefit}</span></div>)}</div>
-        <Link href="/account/membership" className={`mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider ${plan.highlighted?'bg-rcl-orange text-black':'border border-white/15 bg-white/[.04]'}`}>{code==='free'?'Use RCL free':billingReady?'Choose membership':'See membership'} <FaArrowRight /></Link>
+        <Link href={code==='free'?'/auth/sign-up':'/account/membership'} className={`mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl text-xs font-black uppercase tracking-wider ${plan.highlighted?'bg-rcl-orange text-black':'border border-white/15 bg-white/[.04]'}`}>{code==='free'?'Use RCL free':billingReady?'Choose membership':'See membership'} <FaArrowRight /></Link>
       </article>})}</section>
 
       <section className="mt-12 grid gap-5 lg:grid-cols-2">
