@@ -45,11 +45,34 @@ One real basketball identity connects actual local games, public outdoor court c
 - `supabase/tests/rch_mixtapes_security_test.sql` `tests/rch-mixtapes-integrity.test.ts`, and `src/lib/rch-mixtapes.test.ts` cover the intended constraints. **Database authorization tests must run in local Supabase before migration rollout.**
 - Preview deployments may build this source but will show no Mixtapes until the migration has been approved and applied. Do not apply it to production just to enable preview content.
 
+### Consented player + creator credits (code staged, migration NOT executed)
+
+- `supabase/migrations/20261026173000_rch_consented_tags_and_lifestyle.sql` adds `rch_post_tag_requests` and `rch_post_topics` with RLS, adult-only tag eligibility, request rate limiting and one-way acceptance/decline transitions.
+- A post author can request a player tag or community creator credit for their **own published post** by exact username. Only the tagged member can approve or decline it, and approved tags can be withdrawn. No public player tag is created by default.
+- The existing original-post detail (focus) view renders credits only after acceptance. A community creator credit is NOT an RCH TV license, media reuse grant, verified official roster, or right to compensation.
+- For this first release minors and profiles with unknown birthdate cannot be tagged. This restriction is server-authorized without exposing birthdays to the browser; a broader consent system requires a separate safeguarding review.
+- Existing `/media/creators/apply` remains the RCH TV application path. No new creator directory or payout logic is introduced.
+- Test coverage staged in `supabase/tests/rch_social_consent_security_test.sql` and `tests/rch-connected-culture-consent.test.ts`. Local RLS test execution is a merge prerequisite.
+
+### Kicks & Fits (code staged, migration NOT executed)
+
+- Home composer gains a single optional `Kicks & Fits` topic toggle; post publishing remains on the existing timeline.
+- Topic records point to genuine existing published posts. Member profiles display only visible, appropriately labeled lifestyle content in the existing Media section.
+- This is not a marketplace, store catalog, brand endorsement, or sixth PWA tab.
+- If the feature migration is not available, social publishing remains functional but topic association may not be saved.
+
+### The Lab profile integration (code staged)
+
+- The player Stats view adds a private, own-account-only list of completed `lab_sessions` from the existing training backend.
+- No new Lab route is invented: a standalone `/lab` route was not found on this branch.
+- The Lab panel does not expose workout details publicly, issue official scoring awards, or publish accomplishments to the timeline.
+- Completing training does not modify Game IQ, REP, league statistics or rankings.
+
 ## Remaining engineering slices — future approvals required
 
-### Slice A — Future player-tag consent and cross-creator permissions
+### Slice A — Future enhanced licensing, player tags for minors and third-party reuse
 
-1. Design `rch_media_tag_requests` and `rch_media_permissions` with explicit tagged-player approval and cross-creator licensing. Existing own-video playlist storage is already staged.
+1. Existing consented adult player/creator credit requests are staged. Build a separately approved `rch_media_permissions` contract for cross-author uploads, RCH TV licensing, and eligible youth safeguards before permitting further distribution.
 2. Reuse published social media and RCH Clips. Do not copy video files. Resolve media visibility at every read.
 3. Require an affirmative tagged-player decision before cross-publishing to their profile. Allow revocation; remove derivative thumbnails and preview links on takedown.
 4. Maintain the staged Mixtape v1 ordered-playlist behavior and 12-item limit; future remixing or cross-author inclusion requires separate rights validation.
@@ -67,18 +90,18 @@ One real basketball identity connects actual local games, public outdoor court c
 
 **Gate:** full/cancelled/past runs never joinable; races cannot overbook; blocked and nonconsenting accounts cannot be contacted.
 
-### Slice C — Creator directory + Kicks & Fits
+### Slice C — Moderated creator directory and deeper Kicks & Fits discovery
 
 1. Community creator portfolios reuse `profiles` and the established RCH TV application paths, but **never** confer compensated/approved/licensed creator status.
 2. Credited video tags require provenance and removal controls; existing creator accounting remains separate.
-3. Kicks & Fits launches as an optional social post topic and profile collection, not a new marketplace or top-level tab.
+3. Kicks & Fits already has a staged optional composer topic and profile collection; only add broader discovery after actual engagement is validated.
 4. Preserve existing post moderation, audience controls, trademark guidance, report flows and self-reported label treatment.
 
 **Gate:** unauthorized credits and rights unverified redistribution cannot publish; creator payouts are not implied by portfolio activation.
 
-### Slice D — The Lab showcase + contextual Home discovery
+### Slice D — Opt-in public Lab accomplishments + contextual Home discovery
 
-1. Reuse `lab_sessions` and `lab_program_enrollments`. Add only a private-by-default opt-in milestone view in the member profile.
+1. A private owner-only Lab history panel is staged. A future public opt-in accomplishment share needs a distinct permission schema and authoritative session reference.
 2. Do not convert a self-reported workout into Game IQ, official league rank or tournament qualification.
 3. Once real content is available, test one contextual card after several genuine organic Home posts, with frequency caps. Preserve For You and Following behavior.
 4. No artificial notifications, manufactured scarcity or exposure of sensitive fitness metrics.
