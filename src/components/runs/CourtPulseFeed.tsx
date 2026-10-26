@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCamera, FaPlay } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import { courtPulseImageUrl, courtPulseRunIds } from '@/lib/court-pulse';
 
 type CourtMoment = {
   id: string;
@@ -13,18 +14,6 @@ type CourtMoment = {
   created_at: string;
   authorName: string | null;
 };
-
-function publicImage(media: unknown): string | null {
-  if (!Array.isArray(media)) return null;
-  for (const source of media) {
-    if (typeof source !== 'string') continue;
-    try {
-      const url = new URL(source);
-      if (url.protocol === 'https:' && /\.(png|jpe?g|webp|avif)$/i.test(url.pathname)) return source;
-    } catch { /* Ignore invalid media references. */ }
-  }
-  return null;
-}
 
 /** Published posts attached to actual Runs at this outdoor court; never simulates attendance. */
 export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
@@ -43,7 +32,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
       const { data: runs, error: runError } = await db.from('runs').select('id')
         .eq('location_slug', courtSlug).order('starts_at', { ascending: false }).limit(100);
       if (runError) throw runError;
-      const ids: string[] = (runs || []).map((run: { id: string }) => run.id);
+      const ids = courtPulseRunIds(runs);
       if (ids.length === 0) { if (active) setMoments([]); return; }
       const { data: posts, error: postError } = await db.from('posts')
         .select('id,author_id,body,media_urls,created_at')
@@ -85,7 +74,7 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
         <p className="text-sm text-[#d0d1d4]">No published Run highlights from this court yet. Be part of the next game.</p>
       </div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {moments.map((moment) => {
-          const image = publicImage(moment.media_urls);
+          const image = courtPulseImageUrl(moment.media_urls);
           return <article key={moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#44484e] bg-[#141618]">
             {image && <Link href={'/social/post/' + moment.id} aria-label="Open published court post">
               <img src={image} alt="Published basketball moment" loading="lazy" className="aspect-video w-full object-cover"/>
