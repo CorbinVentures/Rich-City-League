@@ -462,7 +462,7 @@ export default function RunsPage() {
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="rch-program-brand-lockup">
             <ProgramEmblem program="runs" className="rch-program-emblem-runs" priority/>
-            <div><h1 className="text-3xl font-black">Runs</h1><Link href="/league/join" className="mt-1 inline-flex min-h-10 items-center gap-2 text-xs font-bold text-rcl-orange">Want to join Rich City League? <FaArrowRight aria-hidden="true"/></Link></div></div>
+            <div><h1 className="text-3xl font-black">Runs</h1><p className="mt-1 text-sm text-[#d3deef]">Find your next game.</p></div></div>
           <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">
             <FaPlus aria-hidden="true"/> Host a run
@@ -478,6 +478,7 @@ export default function RunsPage() {
         <details className="rch-run-extras">
           <summary>More run tools</summary>
           <div className="rch-run-extra-links">
+            <Link href="/league/join" className="rch-ux-quicklink">Join Rich City League</Link>
             <Link href="/runs/partners" aria-label="Runs Partner Network" className="rch-ux-quicklink"><FaBasketball aria-hidden="true"/> Parks & Rec</Link>
             <Link href="/badges" className="rch-ux-quicklink"><FaMedal aria-hidden="true"/> Badges</Link>
             <button type="button" className="rch-ux-quicklink" onClick={()=>{setCompetitionView('courts');document.getElementById('rch-competition')?.scrollIntoView({behavior:'auto',block:'start'});}}><FaTrophy aria-hidden="true"/> Court Crowns</button>
@@ -491,17 +492,6 @@ export default function RunsPage() {
           </div>
         </details>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
-        <details className="mb-4 rounded-xl border border-white/10 p-3">
-          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
-          {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
-        </details>
-        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>
-            <span className="rounded-xl bg-[#ffd47a] px-3 py-2 text-sm font-black text-[#182137]">2× VERIFIED REP</span>
-          </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.weekendMultiplier===2&&run.status!=='cancelled').slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}</span><FaArrowRight aria-hidden="true"/></Link>)}</div>
-        </section>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
@@ -538,6 +528,18 @@ export default function RunsPage() {
               <span>Showing {visibleLimit} of {visibleRuns.length} matching Runs</span>
               <button type="button" onClick={()=>setVisibleLimit(n=>n+8)}>Show more Runs <FaArrowRight aria-hidden="true"/></button>
             </div>}
+        </section>}
+
+        <details className="mb-4 rounded-xl border border-white/10 p-3">
+          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
+          {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
+        </details>
+        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>
+            <span className="rounded-xl bg-[#ffd47a] px-3 py-2 text-sm font-black text-[#182137]">2× VERIFIED REP</span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.weekendMultiplier===2&&run.status!=='cancelled').slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}</span><FaArrowRight aria-hidden="true"/></Link>)}</div>
         </section>}
 
         {view==='runs'&&<>

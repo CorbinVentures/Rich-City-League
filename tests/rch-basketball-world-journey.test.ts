@@ -30,7 +30,8 @@ describe('RCH basketball world journey',()=>{
   const runs=file('src/app/runs/page.tsx');
   expect(league).toContain('Join Rich City League');
   expect(league).toContain('href="/league/join"');
-  expect(runs).toContain('Want to join Rich City League?');
+  expect(runs).toContain('href="/league/join"');
+  expect(runs).toContain('Join Rich City League');
   expect(league).toContain('XP {state.rep.xp.toLocaleString()}');
   expect(league).not.toContain('REP <strong className="ml-1 text-rcl-blue">{state.rep.xp');
  });

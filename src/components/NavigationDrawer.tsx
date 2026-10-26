@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useId, useRef } from 'react';
-import { FaArrowRight, FaChevronDown, FaXmark } from 'react-icons/fa6';
+import { FaArrowRight, FaChevronDown, FaCompass, FaPeopleGroup, FaPlay, FaPlus, FaUserPlus, FaUsers, FaXmark } from 'react-icons/fa6';
 import { RCHActionGuide } from '@/components/RCHActionGuide';
 import { RoyalteeStaffShortcut } from '@/components/RoyalteeStaffShortcut';
 import { isNavigationActive, type RCLNavGroup } from '@/lib/rcl-navigation';
@@ -39,14 +39,18 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
         <button ref={closeRef} type="button" onClick={onClose} aria-label="Close navigation"><FaXmark aria-hidden="true"/></button>
       </div>
       <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
-      <nav className="grid grid-cols-2 gap-2 p-4" aria-label="Quick destinations">
+      <nav className="rch-menu-destinations" aria-label="Quick destinations">
         {[
-          {href:'/social',label:'Home'}, {href:'/runs',label:'Runs'},
-          {href:'/league',label:'Rich City League'}, {href:'/draft',label:'Draft'},
-          {href:'/fantasy',label:'Fantasy'}, {href:'/league/join',label:'Join RCL'},
-        ].map(item=><Link key={item.href} href={item.href} onClick={onClose}
-          className="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-white/15 px-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-          {item.label}<FaArrowRight aria-hidden="true"/>
+          {href:'/discover',label:'Discover',icon:FaCompass},
+          {href:'/crews?intent=mine',label:'My Crew',icon:FaPeopleGroup},
+          {href:'/create',label:'Create',icon:FaPlus},
+          {href:'/media',label:'RCH TV',icon:FaPlay},
+          {href:'/communities',label:'Communities',icon:FaUsers},
+          {href:'/league/join',label:'Join RCL',icon:FaUserPlus},
+        ].map(({href,label,icon:Icon})=><Link key={href} href={href} onClick={onClose}
+          aria-current={isNavigationActive(pathname,href.split('?')[0])?'page':undefined}
+          className="rch-menu-destination">
+          <Icon aria-hidden="true"/><span>{label}</span>
         </Link>)}
       </nav>
       <details className="mx-4 mb-3 rounded-xl border border-white/10 p-3">
