@@ -85,6 +85,7 @@ export default function NetworkHome() {
   const [reactionBurst, setReactionBurst] = useState<Record<string, string>>({});
 
   const [composerOpen, setComposerOpen] = useState(false);
+  const [postTopic, setPostTopic] = useState<'none' | 'kicks_fits'>('none');
   const [body, setBody] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
@@ -448,6 +449,13 @@ export default function NetworkHome() {
       const mediaUrl = mediaFile ? await uploadMedia(mediaFile, 'posts') : '';
       const { data, error: insertError } = await db.from('posts').insert({ author_id: user.id, body: composedBody, media_urls: mediaUrl ? [mediaUrl] : [], status: 'published' }).select('id,author_id,body,media_urls,created_at').single();
       if (insertError) throw insertError;
+      if (postTopic === 'kicks_fits' && data?.id) {
+        const topicResult = await db.from('rch_post_topics').insert({
+          post_id: data.id, author_id: user.id, topic: 'kicks_fits'
+        });
+        if (topicResult.error) setNotice('Post published. Lifestyle label could not be saved.');
+      }
+      setPostTopic('none');
       setBody(''); setLinkInput(''); setMediaFile(null); setMediaPreview(''); setComposerOpen(false);
       if (data) {
         setPosts((current) => [{ ...data, author: currentProfile ?? { id: user.id, display_name: 'RCL Member', username: null }, comments: [], reactions: [] }, ...current]);
@@ -709,7 +717,7 @@ export default function NetworkHome() {
         </div>
       </Container>
 
-      {composerOpen && <ComposerModal currentProfile={currentProfile} body={body} setBody={setBody} linkInput={linkInput} setLinkInput={setLinkInput} mediaFile={mediaFile} mediaPreview={mediaPreview} setMediaFile={setMediaFile} mediaInputRef={mediaInputRef} publishing={publishing} onClose={() => setComposerOpen(false)} onSubmit={(event) => void createPost(event)} />}
+      {composerOpen && <ComposerModal currentProfile={currentProfile} body={body} setBody={setBody} linkInput={linkInput} setLinkInput={setLinkInput} mediaFile={mediaFile} mediaPreview={mediaPreview} setMediaFile={setMediaFile} mediaInputRef={mediaInputRef} postTopic={postTopic} setPostTopic={setPostTopic} publishing={publishing} onClose={() => setComposerOpen(false)} onSubmit={(event) => void createPost(event)} />}
       {storyComposerOpen && <StoryComposer currentProfile={currentProfile} body={storyBody} setBody={setStoryBody} file={storyFile} preview={storyPreview} setFile={setStoryFile} inputRef={storyInputRef} publishing={publishingStory} onClose={() => setStoryComposerOpen(false)} onSubmit={(event) => void createStory(event)} />}
       {storyIndex !== null && stories[storyIndex] && <StoryViewer stories={stories} index={storyIndex} onClose={() => setStoryIndex(null)} onIndex={setStoryIndex} />}
     </main>
@@ -773,7 +781,7 @@ function StoryRail({ stories, user, currentProfile, onCreate, onOpen }: { storie
   </section>;
 }
 
-function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
+function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput, mediaFile, mediaPreview, setMediaFile, mediaInputRef, postTopic, setPostTopic, publishing, onClose, onSubmit }: { currentProfile: NetworkAuthor | null; body: string; setBody: (value: string) => void; linkInput: string; setLinkInput: (value: string) => void; mediaFile: File | null; mediaPreview: string; setMediaFile: (file: File | null) => void; mediaInputRef: React.RefObject<HTMLInputElement>; postTopic: 'none' | 'kicks_fits'; setPostTopic: (value:'none' | 'kicks_fits') => void; publishing: boolean; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const chooseFile = (file: File | null) => {
@@ -821,6 +829,16 @@ function ComposerModal({ currentProfile, body, setBody, linkInput, setLinkInput,
           placeholder="What is happening in Richmond basketball?"
           className="rcl-composer-textarea"
         />
+
+        <div className="mt-3 flex items-center gap-2">
+          <button type="button" onClick={() => setPostTopic(postTopic === 'kicks_fits' ? 'none' : 'kicks_fits')}
+            aria-pressed={postTopic === 'kicks_fits'}
+            className={'min-h-11 rounded-lg border px-4 text-xs font-bold ' +
+              (postTopic === 'kicks_fits' ? 'border-[#ff768c] bg-[#c8102e] text-white' : 'border-[#70747a] bg-[#141618] text-[#d0d1d4]')}>
+            Kicks &amp; Fits {postTopic === 'kicks_fits' ? '✓' : '+'}
+          </button>
+          <span className="text-xs text-[#a6a8ad]">Optional post topic</span>
+        </div>
 
         <section className="rcl-composer-type-section" aria-label="Choose post attachment type">
           <p>Add to your post</p>
