@@ -9,6 +9,8 @@ select ok(not has_table_privilege('anon','public.rch_post_topics','INSERT'),'Gue
 select ok(not has_table_privilege('authenticated','public.rch_post_topics','UPDATE'),'Post topic ownership cannot be reassigned');
 
 set role postgres;
+-- CI's minimal schema omits the production post SELECT grants; reproduce inside rollback-only fixtures.
+grant select on public.posts to anon, authenticated;
 insert into auth.users(id,aud,role,email,raw_user_meta_data)
 select ('b1880000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,
 'authenticated','authenticated','tag-qa-'||n||'@example.test','{}'::jsonb
