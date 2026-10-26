@@ -1,5 +1,6 @@
 import '../../../rch-identity.css';
 import { ProfileShowcase } from '@/components/ProfileShowcase';
+import { ProfileSectionNavigation } from '@/components/ProfileSectionNavigation';
 import { profilePresentation, profileSections } from '@/lib/profile-presentation';
 import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
@@ -271,18 +272,7 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         </div>
       </section>
 
-      <nav className="rch-profile-tabs sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
-        <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {visibleTabs.map((tab)=>{
-            const active=activeTab===tab;
-            const href=`${profileHref}?tab=${tab}`;
-            return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
-              {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
-              {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
-            </Link>;
-          })}
-        </div>
-      </nav>
+      <ProfileSectionNavigation kind={presentation} activeTab={activeTab} visibleTabs={visibleTabs} counts={tabCounts} href={profileHref} />
 
       <section className="px-4 py-6">
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
