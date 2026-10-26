@@ -23,7 +23,7 @@ grant insert,update,delete on public.rch_post_tag_requests to authenticated;
 
 -- Age eligibility is checked server-side; date_of_birth is not exposed to clients.
 create function private.rch_can_request_adult_tag(p_target uuid)
-returns boolean language sql stable security definer set search_path='' as $
+returns boolean language sql stable security definer set search_path='' as $$
   select (select auth.uid()) is not null
     and private.can_view_social_profile(p_target)
     and exists(select 1 from public.profiles p
@@ -65,7 +65,7 @@ create policy rch_tag_requests_remove on public.rch_post_tag_requests
 -- Prevent mass requests and forged historical timestamps from browser callers.
 -- This runs in the caller's RLS context and only counts their own rows.
 create function private.rch_limit_tag_request_volume()
-returns trigger language plpgsql security invoker set search_path='' as $
+returns trigger language plpgsql security invoker set search_path='' as $$
 begin
  if (select auth.uid()) is null or new.requester_id is distinct from (select auth.uid()) then
    raise exception 'Only the post author can request tags' using errcode='42501';
@@ -78,7 +78,7 @@ begin
  new.decided_at=null;
  new.status='pending';
  return new;
-end $;
+end $$;
 revoke execute on function private.rch_limit_tag_request_volume() from public,anon,authenticated;
 create trigger rch_limit_tag_request_volume
 before insert on public.rch_post_tag_requests
