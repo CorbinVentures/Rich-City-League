@@ -35,7 +35,7 @@ export function ProfileShowcase({kind,name,avatar,location,position,jersey,playe
       <p className={styles.note}>{isPlayer?(hasStats?`${basketball!.games} official RCL games · Social REP is separate`:'Official stats and rating appear as game records are added.'):'Experience and affiliations are self-reported.'}</p>
       {!isPlayer&&Boolean(coach?.specialties.length)&&<div className={styles.specialties}>{coach!.specialties.slice(0,3).map(s=><span key={s}>{s}</span>)}</div>}
       {!isPlayer&&coach?.availability==='open_to_opportunities'&&<p className={styles.team}>Open to coaching opportunities</p>}
-      <div className={styles.actions}><Link href={`${href}?tab=${isPlayer?'stats':'coach'}`}>{isPlayer?'View stats':'Coaching details'}</Link><Link href={`${href}?tab=${isPlayer?'highlights':'wall'}`}>{isPlayer?'Highlights':'View posts'}</Link></div>
+      <div className={styles.actions}><Link href={`${href}?tab=${isPlayer?'stats':'coach'}`}>{isPlayer?'View stats':'Coaching details'}</Link><Link href={`${href}?tab=${isPlayer?'highlights':'wall'}`}>{isPlayer?'Highlights':'View posts'}</Link>{isPlayer&&<Link href="/runs?view=list&solo=1">Find a solo game</Link>}</div>
     </div>
   </section>;
 }

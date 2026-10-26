@@ -27,15 +27,21 @@ export function ProfileSoundtrack({ url, profileName }: { url?: string | null; p
     return () => { controller.abort(); audioRef.current?.pause(); };
   }, [id]);
 
+  // Playback is always user initiated; iOS PWAs and visitors should never hear surprise audio.
   useEffect(() => {
     if (!track || !audioRef.current) return;
-    const audio = audioRef.current;
-    audio.muted = false;
+    audioRef.current.pause();
+    audioRef.current.muted = false;
     setStatus('ready');
-    // Best-effort autoplay. Safari/iOS normally requires a visitor's tap.
-    // Reflect the real audio element's playback events, not the request.
-    void audio.play().catch(() => setStatus('ready'));
   }, [track]);
+
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.visibilityState === 'hidden') audioRef.current?.pause();
+    };
+    document.addEventListener('visibilitychange', pauseWhenHidden);
+    return () => document.removeEventListener('visibilitychange', pauseWhenHidden);
+  }, []);
 
   if (!id) return null;
 
@@ -64,33 +70,33 @@ export function ProfileSoundtrack({ url, profileName }: { url?: string | null; p
     error: 'Unable to play · try again',
   } as const)[status];
 
-  return <section className="mt-5 rounded-2xl border border-[#D6E0EF] bg-white px-3 py-3 shadow-sm sm:px-4"
-    aria-label={`${profileName}'s profile song`} style={{ color: '#132947', backgroundColor: '#FFFFFF' }}>
+  return <section className="mt-4 rounded-lg border border-[#44484e] bg-[#141618] p-3 text-[#f5f5f3] sm:p-4"
+    aria-label={`${profileName}'s profile song`}>
     <div className="flex min-w-0 items-center gap-3">
       {track?.artworkUrl
-        ? <img src={track.artworkUrl} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
-        : <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#E8EFF8] text-[#225F9C]"><FaMusic /></span>}
+        ? <img src={track.artworkUrl} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-md object-cover" />
+        : <span className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-[#202326] text-[#ff768c]"><FaMusic /></span>}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-bold text-[#132947]">{track?.title || 'Profile song'}</p>
-        <p className="truncate text-xs text-[#566986]">{track?.artist || (status === 'error' ? 'Audius music unavailable' : 'Audius')}</p>
-        <p className="mt-0.5 text-[11px] font-semibold text-[#4774A5]" role="status">{statusLabel}</p>
+        <p className="truncate text-sm font-bold text-[#f5f5f3]">{track?.title || 'Profile song'}</p>
+        <p className="truncate text-xs text-[#d0d1d4]">{track?.artist || (status === 'error' ? 'Track unavailable' : 'Audius')}</p>
+        <p className="mt-0.5 text-xs text-[#a6a8ad]" role="status">{statusLabel}</p>
       </div>
       <button type="button" onClick={() => void togglePlayback()} disabled={!track}
         aria-label={status === 'playing' ? 'Pause profile song' : 'Play profile song'}
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#2677E6] text-white transition hover:brightness-110 disabled:opacity-40">
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#c8102e] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff768c] disabled:opacity-40">
         {status === 'playing' ? <FaPause /> : <FaPlay />}
       </button>
       <button type="button" onClick={toggleMuted} disabled={!track}
         aria-label={muted ? 'Unmute profile song' : 'Mute profile song'} aria-pressed={muted}
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#D6E0EF] text-[#132947] disabled:opacity-40">
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#44484e] text-[#f5f5f3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff768c] disabled:opacity-40">
         {muted ? <FaVolumeXmark /> : <FaVolumeHigh />}
       </button>
     </div>
-    {track && <div className="mt-2 flex items-center justify-between gap-3">
-      <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-[#E7EDF6]" aria-label="Song playback progress">
-        <div className="h-full rounded-full bg-[#2677E6]" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+    {track && <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-[#202326]" aria-label="Song playback progress">
+        <div className="h-full rounded-full bg-[#ff768c]" style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
       </div>
-      <a href={track.permalink} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold text-[#225F9C] underline">Audius ↗</a>
+      <a href={track.permalink} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold text-[#ff768c] underline">Song source</a>
     </div>}
     {track && <audio key={track.id} ref={audioRef} src={audiusStreamUrl(track.id)} preload="none"
       onPlaying={() => setStatus('playing')}

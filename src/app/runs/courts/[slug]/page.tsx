@@ -7,6 +7,7 @@ import {FaArrowRight,FaBasketball,FaCalendarDays,FaCrown,FaLocationDot,FaPeopleG
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {CourtMasterTitles} from '@/components/runs/CourtMasterTitles';
+import {CourtPulseFeed} from '@/components/runs/CourtPulseFeed';
 import {RCHEmptyState,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import '../../visual-experience.css';
 import './court-game-arena.css';
@@ -103,6 +104,7 @@ export default function RunCourtProfile(){
     </div>
    </section>
    <nav className="rch-court-section-nav" aria-label="Court Arena sections">
+    <a href="#rch-court-pulse"><FaBasketball/> Activity</a>
     <a href="#rch-court-territory"><FaCrown/> Territory</a><a href="#rch-court-masters"><FaTrophy/> Masters</a>
     <a href="#rch-court-schedule"><FaCalendarDays/> Runs</a><a href="#rch-court-history"><FaShieldHalved/> History</a>
     <a href="#rch-court-venue"><FaLocationDot/> Venue</a>
@@ -114,6 +116,7 @@ export default function RunCourtProfile(){
    </div>
    {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/40 p-4 text-sm text-red-200">{error}</p>}
    {notice&&<p role="status" className="mt-4 rounded-xl border border-emerald-400/40 p-4 text-sm text-emerald-200">{notice}</p>}
+   <CourtPulseFeed courtSlug={court.slug}/>
    <section id="rch-court-territory" className="mt-7 grid scroll-mt-32 gap-4 md:grid-cols-2" aria-label="Verified crew court control">
     <div className="rch-ux-court-card rch-ux-badge-luster">
      <p className="rch-ux-eyebrow"><FaCrown/> COURT DOMINION</p>

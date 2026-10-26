@@ -1,5 +1,6 @@
 import '../../../rch-identity.css';
 import { ProfileShowcase } from '@/components/ProfileShowcase';
+import { ProfileSectionNavigation } from '@/components/ProfileSectionNavigation';
 import { profilePresentation, profileSections } from '@/lib/profile-presentation';
 import { PublicCrewShowcase } from '@/components/commonwealth/PublicCrewShowcase';
 import PlaceBadgeVault from '@/components/rep/PlaceBadgeVault';
@@ -9,6 +10,10 @@ import { notFound } from 'next/navigation';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { FaBasketball, FaLocationDot } from 'react-icons/fa6';
 import { ProfileSoundtrack } from '@/components/ProfileSoundtrack';
+import { MixtapeStudio } from '@/components/media/MixtapeStudio';
+import { ConsentedMediaCredits } from '@/components/media/ConsentedMediaCredits';
+import { KicksAndFitsShowcase } from '@/components/social/KicksAndFitsShowcase';
+import { PrivateLabActivity } from '@/components/profile/PrivateLabActivity';
 import { PublicProfileActions } from '@/components/PublicProfileActions';
 import { SocialIdentity } from '@/components/SocialIdentity';
 import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
@@ -39,18 +44,6 @@ type ProfilePost = { id:string; author_id:string; body:string; media_urls:string
 type ProfileTab = 'wall'|'posts'|'followers'|'following'|'highlights'|'stats'|'career'|'badges'|'media'|'coach';
 
 const PROFILE_TABS: ProfileTab[] = ['wall','posts','followers','following','highlights','stats','career','badges','media','coach'];
-const PROFILE_TAB_LABELS: Record<ProfileTab,string> = {
-  wall:'Wall',
-  posts:'Posts',
-  followers:'Followers',
-  following:'Following',
-  highlights:'Highlights',
-  stats:'Stats',
-  career:'Career',
-  badges:'Badges',
-  media:'Media',
-  coach:'Coaching',
-};
 
 export default async function SocialPublicProfilePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string|string[] }> }) {
   const [{ id }, query] = await Promise.all([params,searchParams]);
@@ -271,29 +264,18 @@ export default async function SocialPublicProfilePage({ params, searchParams }: 
         </div>
       </section>
 
-      <nav className="rch-profile-tabs sticky top-16 z-30 border-b border-white/10 bg-[#05080d]/95 px-4 backdrop-blur-xl" aria-label="Profile sections">
-        <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {visibleTabs.map((tab)=>{
-            const active=activeTab===tab;
-            const href=`${profileHref}?tab=${tab}`;
-            return <Link key={tab} href={href} aria-current={active?'page':undefined} className={`relative shrink-0 px-4 py-4 text-xs font-black uppercase tracking-[.14em] transition ${active?'text-white':'text-white/35 hover:text-white/70'}`}>
-              {PROFILE_TAB_LABELS[tab]} <span className={`ml-1 ${active?'text-rcl-orange':'text-white/20'}`}>{tabCounts[tab]}</span>
-              {active&&<span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-rcl-orange"/>}
-            </Link>;
-          })}
-        </div>
-      </nav>
+      <ProfileSectionNavigation kind={presentation} activeTab={activeTab} visibleTabs={visibleTabs} counts={tabCounts} href={profileHref} />
 
       <section className="px-4 py-6">
         {activeTab==='wall'&&<ProfileWallFeed profileId={id} profileName={name} allowVisitorPosts={!profile.is_system_account} initialPosts={postRows.map(post => ({...post, author:(authorMap.get(post.author_id) ?? null) as WallPost['author']}))} />}
         {activeTab==='posts'&&<ProfilePostList rows={authoredPosts} authorMap={authorMap} emptyTitle="No posts yet" emptyCopy="Posts created by this RCL identity will appear here." />}
         {(activeTab==='followers'||activeTab==='following')&&<ProfileFollowDirectory profileId={id} profileName={name} mode={activeTab} />}
-        {activeTab==='highlights'&&<ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." />}
-        {activeTab==='stats'&&<StatsTab player={player} basketball={basketball} profileLocation={profile.location} />}
+        {activeTab==='highlights'&&<><MixtapeStudio profileId={id}/><ConsentedMediaCredits profileId={id}/><ProfilePostList rows={highlightRows} authorMap={authorMap} emptyTitle="No highlights yet" emptyCopy="Clips, media and official standout moments will build this highlight reel." /></>}
+        {activeTab==='stats'&&<><StatsTab player={player} basketball={basketball} profileLocation={profile.location} /><PrivateLabActivity profileId={id}/></>}
         {activeTab==='career'&&<CareerTab basketball={basketball} rows={careerRows} authorMap={authorMap} />}
         {activeTab==='badges'&&<BadgesTab name={name} username={profile.username} repLabel={repLabel} repStatus={repStatus.label} socialLevel={socialLevel} followers={followers ?? 0} latestAchievement={latestAchievement} allBadges={allBadges} repRows={repRows} nextLevelXp={nextLevelXp} rep={rep} />}
         {activeTab==='badges' && <PlaceBadgeVault profileId={id}/>}
-        {activeTab==='media'&&<MediaTab rows={mediaRows} />}
+        {activeTab==='media'&&<><MediaTab rows={mediaRows} /><KicksAndFitsShowcase profileId={id}/><ConsentedMediaCredits profileId={id}/></>}
         {activeTab==='coach'&&(coachIdentity?<CoachMemberTab identity={coachIdentity} awards={(earnedCoachBadges??[]) as any[]}/>:<EmptyTab title="Coaching details are not published" copy="Coach identity is optional and controlled by each member."/>)}
       </section>
     </div>
