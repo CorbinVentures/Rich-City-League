@@ -22,9 +22,9 @@ values
 
 insert into public.posts(id,author_id,body,media_urls,status)
 values
-('b1771000-0000-4000-8000-000000000001','b1770000-0000-4000-8000-000000000001','Owner video','["https://cdn.example.test/clip.mp4"]'::jsonb,'published'),
-('b1771000-0000-4000-8000-000000000002','b1770000-0000-4000-8000-000000000002','Other video','["https://cdn.example.test/other.mp4"]'::jsonb,'published'),
-('b1771000-0000-4000-8000-000000000003','b1770000-0000-4000-8000-000000000001','Photo only','["https://cdn.example.test/photo.jpg"]'::jsonb,'published');
+('b1771000-0000-4000-8000-000000000001','b1770000-0000-4000-8000-000000000001','Owner video','["https://rch.supabase.co/storage/v1/object/public/media/b1770000-0000-4000-8000-000000000001/posts/clip.mp4"]'::jsonb,'published'),
+('b1771000-0000-4000-8000-000000000002','b1770000-0000-4000-8000-000000000002','Other video','["https://rch.supabase.co/storage/v1/object/public/media/b1770000-0000-4000-8000-000000000002/posts/other.mp4"]'::jsonb,'published'),
+('b1771000-0000-4000-8000-000000000003','b1770000-0000-4000-8000-000000000001','Photo only','["https://rch.supabase.co/storage/v1/object/public/media/b1770000-0000-4000-8000-000000000001/posts/photo.jpg"]'::jsonb,'published');
 
 set role authenticated;
 select set_config('request.jwt.claim.sub','b1770000-0000-4000-8000-000000000001',true);
