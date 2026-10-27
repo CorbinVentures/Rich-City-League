@@ -40,6 +40,10 @@ export function RCHExperienceGate({ children, publicContent }: { children: React
     }) ? 'mobile-app' : 'browser');
   }, []);
 
+  // Organization microsites keep their independent tenant branding in browser and PWA.
+  // Public server components and RLS decide visibility; this is only presentation.
+  if (pathname.startsWith('/sites/')) return <>{publicContent}</>;
+
   // Public pages are server-rendered in normal browsers, without mounting member
   // app chrome or background social/notification effects. PWA mode is unchanged.
   if (isBrowserPublicRoute(pathname) && mode !== 'mobile-app') {
