@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { FaArrowRight, FaMagnifyingGlass } from 'react-icons/fa6';
+import { FaArrowRight, FaMagnifyingGlass, FaPlay } from 'react-icons/fa6';
 import { rchMediaKind } from '@/lib/rch-tv-media';
 
 type TeamItem = { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; division: string | null; season: string | null; wins: number | null; losses: number | null };
 type CoachItem = { id: string; profileId: string; name: string; title: string; team: string | null; teamSlug: string | null; wins: number | null; losses: number | null };
 type NewsItem = { id: string; slug: string; title: string; excerpt: string | null; category: string; publishedAt: string | null; coverImageUrl: string | null };
-type MediaItem = { id: string; title: string; description: string | null; type: string; url: string; createdAt: string };
+type MediaItem = { id: string; title: string; description: string | null; type: string; url: string; createdAt: string; posterUrl?: string | null };
 
 const inputClass = 'h-12 w-full rounded-xl border border-rcl-blue/15 bg-[#071522]/70 px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-rcl-blue/60 focus:ring-2 focus:ring-rcl-blue/10';
 const selectClass = 'h-12 rounded-xl border border-rcl-blue/15 bg-[#071522] px-4 text-sm font-bold text-white outline-none transition focus:border-rcl-blue/60 focus:ring-2 focus:ring-rcl-blue/10';
@@ -51,13 +51,20 @@ export function NewsDirectory({ items }: { items: NewsItem[] }) {
 
 function MediaVideo({ item }: { item: MediaItem }) {
   const [failed, setFailed] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const isMov = /\.mov(?:\?|$)/i.test(item.url);
+  if (!playing) return <button type="button" onClick={() => setPlaying(true)}
+    aria-label={`Play ${item.title}`} className="group relative h-full w-full overflow-hidden bg-[#020408] text-white">
+    {item.posterUrl?<img src={item.posterUrl} loading="lazy" alt="" className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.025]"/>:
+      <div className="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_center,rgba(26,155,220,.13),#020408_68%)]"><span className="text-xs font-bold uppercase tracking-wide text-white/45">RCH TV</span></div>}
+    <span className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid h-14 w-14 place-items-center rounded-full border border-white/40 bg-black/65 text-white shadow-xl"><FaPlay aria-hidden="true"/></span></span>
+  </button>;
   if (failed) return <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center">
     <p className="text-sm text-white/75">{isMov ? 'Your browser cannot play this MOV recording.' : 'This video could not be played in your browser.'}</p>
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-rcl-blue">Open original video file</a>
     {isMov&&<p className="text-xs text-white/40">For broad compatibility, an MP4 (H.264/AAC) version is recommended.</p>}
   </div>;
-  return <video src={item.url} controls preload="metadata" playsInline onError={() => setFailed(true)}
+  return <video src={item.url} controls autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline onError={() => setFailed(true)}
     className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>;
 }
 
