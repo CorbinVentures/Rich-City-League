@@ -20,12 +20,15 @@ describe('RCH Sites Phase 1: staged website subscription + booking quotas',()=>{
     expect(migration).toContain('rch_site_subscription_paid_requires_reference');
   });
   it('locks down both new sensitive tables and guards mutation at the database',()=>{
-    for(const name of ['rch_site_subscriptions','rch_site_plan_limits']){
+    for(const name of ['rch_site_subscriptions','rch_site_plan_limits','rch_site_booking_quota_rollout']){
       expect(migration).toContain('alter table public.'+name+' enable row level security');
       expect(migration).toContain('revoke all on public.'+name+' from public,anon,authenticated');
       expect(migration).not.toContain('grant select on public.'+name+' to anon');
     }
     expect(migration).toContain('security invoker');
+    expect(migration).toContain('enforce_booking boolean not null default false');
+    expect(migration).toContain('if not coalesce((select enforce_booking');
+    expect(pgTap).toContain('Migration leaves strict quotas disabled by default');
     expect(migration).not.toContain('security definer');
     expect(migration).toContain('for update');
     expect(migration).toContain('on conflict (organization_id) do nothing');
@@ -53,11 +56,14 @@ describe('RCH Sites Phase 1: staged website subscription + booking quotas',()=>{
     expect(api).toContain("from('rch_site_plan_limits')");
     expect(api).toContain("from('rch_site_services').select('id',{head:true,count:'exact'})");
     expect(api).toContain('confirmedBookingsMonthly');
-    expect(api).not.toContain('20-service limit');
-    expect(api).not.toContain('120 upcoming appointment slots reached');
+    expect(api).toContain("if(!strictQuota)");
+    expect(api).toContain('20-service limit');
+    expect(api).toContain('120 upcoming appointment slots reached');
+    expect(api).toContain('bookingQuotaEnabled(admin)');
     expect(ui).toContain('websitePlan.usage.services');
     expect(ui).toContain('websitePlan.usage.confirmedBookingsMonthly');
     expect(ui).toContain('Paid plan enrollment is not available yet.');
+    expect(ui).toContain('websitePlan.quotaEnforced');
     expect(plans).toContain('evaluateRchSiteFeature');
   });
 });
