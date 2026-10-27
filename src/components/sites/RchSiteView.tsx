@@ -10,7 +10,7 @@ export type RchSiteOrganization = {
   instagram_url?:string|null;youtube_url?:string|null;
 };
 export type RchSiteEvent = {id:string;title:string;slug:string;starts_at:string;city:string|null};
-type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean};
+type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean};
 
 function safeUrl(value:string|null|undefined){
   if(!value)return null;
@@ -25,7 +25,7 @@ const siteNames:Record<RchSiteDraft['siteType'],string>={
   aau:'Youth basketball program',organizer:'Basketball events',
 };
 
-export function RchSiteView({organization,config,events=[],preview=false}:Props){
+export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false}:Props){
   const colors=RCH_SITE_THEMES[config.theme];
   const cover=safeUrl(organization.cover_url);
   const logo=safeUrl(organization.logo_url);
@@ -34,6 +34,7 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
     {label:'YouTube',url:safeUrl(organization.youtube_url)},
   ].filter((v):v is {label:string;url:string}=>Boolean(v.url));
   const BodyTag=preview?'div':'main';
+  const bookingPath='/sites/'+encodeURIComponent(organization.slug)+'/book';
   const sections=config.sections;
   const show=(key:RchSiteSectionKey)=>sections.includes(key);
   return <div className="rch-site-surface min-h-svh" style={{backgroundColor:colors.canvas,color:colors.ink}}>
@@ -45,7 +46,8 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
           <span className="min-w-0 text-sm font-black tracking-tight sm:text-lg">{organization.name}</span>
         </div>
         <nav aria-label="Organization website" className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
-          {sections.filter(k=>k!=='hero'&&k!=='roster').slice(0,4).map(key=><a key={key} href={'#'+key} className="hover:underline">{sectionNames[key]}</a>)}
+          {sections.filter(k=>k!=='hero'&&k!=='roster').slice(0,3).map(key=><a key={key} href={'#'+key} className="hover:underline">{sectionNames[key]}</a>)}
+          {bookingAvailable&&<Link href={bookingPath} className="font-black" style={{color:colors.accent}}>Book</Link>}
         </nav>
       </div>
     </header>
@@ -56,7 +58,8 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
           <p className="rounded-full border border-white/25 bg-black/30 px-3 py-1 text-xs uppercase tracking-wider">{siteNames[config.siteType]}</p>
           <h1 className="max-w-3xl text-4xl font-black leading-tight sm:text-6xl">{config.tagline||organization.name}</h1>
           <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-lg">{[organization.city,organization.state].filter(Boolean).join(', ')||'Part of the RCH basketball community'}</p>
-          <a href="#contact" className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>{config.callToAction}</a>
+          {bookingAvailable?<Link href={bookingPath} className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>Book a session</Link>:
+            <a href="#contact" className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>{config.callToAction}</a>}
         </div>
       </section>}
       {show('about')&&<section id="about" className="scroll-mt-24 border-b border-current/15 py-10">
@@ -68,7 +71,8 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
         <p className="text-xs font-black uppercase tracking-widest" style={{color:colors.accent}}>Development</p>
         <h2 className="mt-2 text-3xl font-black">Training & coaching</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 opacity-75">Interested in working together? Get in touch about upcoming training, availability and programs.</p>
-        <a href="#contact" className="mt-5 inline-block rounded-xl border border-current/30 px-5 py-3 text-sm font-bold">Ask about sessions</a>
+        {bookingAvailable?<Link href={bookingPath} className="mt-5 inline-block rounded-xl border border-current/30 px-5 py-3 text-sm font-bold">Choose a session</Link>:
+          <a href="#contact" className="mt-5 inline-block rounded-xl border border-current/30 px-5 py-3 text-sm font-bold">Ask about sessions</a>}
       </section>}
       {show('roster')&&<section id="roster" className="scroll-mt-24 border-b border-current/15 py-10">
         <p className="text-xs font-black uppercase tracking-widest" style={{color:colors.accent}}>The program</p>
