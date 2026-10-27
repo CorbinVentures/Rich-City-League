@@ -113,7 +113,7 @@ export async function POST(request:Request){
       return respond({error:'Only an approved organization owner or manager can update this inquiry.'},403);
     const {data,error}=await admin.from('rch_site_inquiries').update({
       status:input.status,reviewed_at:new Date().toISOString(),reviewed_by:context.user.id,
-    }).eq('id',input.inquiryId).eq('organization_id',input.organizationId).eq('status','new')
+    }).eq('id',input.inquiryId).eq('organization_id',input.organizationId).neq('status','closed')
       .select('id').maybeSingle();
     if(error)return respond({error:'Unable to update this inquiry.'},503);
     return data?respond({status:input.status}):respond({error:'New inquiry not found or already handled.'},409);
