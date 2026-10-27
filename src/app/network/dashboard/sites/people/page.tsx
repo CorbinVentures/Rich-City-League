@@ -113,9 +113,9 @@ export default function OrganizationInbox(){
                 {item.status==='new'&&<>
                   <button type="button" disabled={Boolean(busy)} onClick={()=>void mark(item.id,'contacted')}
                     className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 px-4 text-xs font-bold disabled:opacity-40"><FaCheck/> Mark contacted</button>
-                  <button type="button" disabled={Boolean(busy)} onClick={()=>void mark(item.id,'closed')}
-                    className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-4 text-xs font-bold text-white/65 disabled:opacity-40">Close</button>
                 </>}
+                {item.status!=='closed'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void mark(item.id,'closed')}
+                  className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-4 text-xs font-bold text-white/65 disabled:opacity-40">Close</button>}
               </div>
             </article>)}
           </section>
