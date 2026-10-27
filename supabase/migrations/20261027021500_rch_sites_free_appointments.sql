@@ -67,7 +67,7 @@ create index if not exists rch_site_bookings_org_idx
 
 -- Serialize booking vs closing under a row lock. Keep this INVOKER trigger, not an exposed SECURITY DEFINER RPC.
 create or replace function public.rch_site_booking_validate()
-returns trigger language plpgsql set search_path=public,pg_temp as $
+returns trigger language plpgsql set search_path=public,pg_temp as $$
 declare v_slot public.rch_site_slots%rowtype;
 begin
   if tg_op = 'INSERT' and new.status='confirmed' then
@@ -87,14 +87,14 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function public.rch_site_booking_validate() from public,anon,authenticated;
 drop trigger if exists rch_site_booking_guard on public.rch_site_bookings;
 create trigger rch_site_booking_guard before insert on public.rch_site_bookings
 for each row execute function public.rch_site_booking_validate();
 
 create or replace function public.rch_site_slot_close_validate()
-returns trigger language plpgsql set search_path=public,pg_temp as $
+returns trigger language plpgsql set search_path=public,pg_temp as $$
 begin
   if new.status='closed' and old.status='open' and exists (
     select 1 from public.rch_site_bookings b where b.slot_id=old.id and b.status='confirmed'
@@ -103,7 +103,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 revoke all on function public.rch_site_slot_close_validate() from public,anon,authenticated;
 drop trigger if exists rch_site_slot_close_guard on public.rch_site_slots;
 create trigger rch_site_slot_close_guard before update of status on public.rch_site_slots
