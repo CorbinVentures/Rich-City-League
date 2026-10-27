@@ -92,7 +92,7 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
       </section>}
       {show('contact')&&<section id="contact" className="scroll-mt-24 py-12">
         <p className="text-xs font-black uppercase tracking-widest" style={{color:colors.accent}}>Get connected</p>
-        <h2 className="mt-2 text-3xl font-black">Let's talk basketball</h2>
+        <h2 className="mt-2 text-3xl font-black">Let&apos;s talk basketball</h2>
         <p className="mt-3 max-w-xl text-sm leading-7 opacity-75">Ready to learn more about {organization.name}? Visit our RCH organization listing or connect through our social channels.</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={'/organizations/'+encodeURIComponent(organization.slug)} className="inline-flex min-h-12 items-center rounded-xl px-5 text-sm font-black text-white" style={{backgroundColor:colors.accent}}>View RCH listing</Link>
