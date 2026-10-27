@@ -1,4 +1,4 @@
-import { RCH_TV_VIDEO_BUCKET, RCH_TV_VIDEO_STORAGE_PREFIX } from '@/lib/rch-tv-media';
+import { RCH_TV_VIDEO_BUCKET, RCH_TV_VIDEO_STORAGE_PREFIX } from './rch-tv-media';
 
 // First-party Supabase TUS upload in 6 MiB chunks, no external storage subscription.
 export const RCH_TV_VIDEO_MAX_BYTES = 5 * 1024 * 1024 * 1024;
