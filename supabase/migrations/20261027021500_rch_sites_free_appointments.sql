@@ -64,6 +64,50 @@ create index if not exists rch_site_bookings_client_idx
 create index if not exists rch_site_bookings_org_idx
   on public.rch_site_bookings(organization_id,status);
 
+-- Serialize booking vs closing under a row lock. Keep this INVOKER trigger, not an exposed SECURITY DEFINER RPC.
+create or replace function public.rch_site_booking_validate()
+returns trigger language plpgsql set search_path=public,pg_temp as $
+declare v_slot public.rch_site_slots%rowtype;
+begin
+  if tg_op = 'INSERT' and new.status='confirmed' then
+    select * into v_slot from public.rch_site_slots where id=new.slot_id for update;
+    if not found or v_slot.status <> 'open' or v_slot.organization_id <> new.organization_id
+       or v_slot.service_id <> new.service_id or v_slot.starts_at <= now()+interval '1 hour' then
+      raise exception 'This appointment is unavailable' using errcode='23514';
+    end if;
+    if not exists (
+      select 1 from public.rch_site_services svc
+      join public.rch_sites site on site.organization_id=svc.organization_id
+      where svc.id=new.service_id and svc.organization_id=new.organization_id
+        and svc.status='active' and site.status='published'
+    ) then
+      raise exception 'This service is not published' using errcode='23514';
+    end if;
+  end if;
+  return new;
+end;
+$;
+revoke all on function public.rch_site_booking_validate() from public,anon,authenticated;
+drop trigger if exists rch_site_booking_guard on public.rch_site_bookings;
+create trigger rch_site_booking_guard before insert on public.rch_site_bookings
+for each row execute function public.rch_site_booking_validate();
+
+create or replace function public.rch_site_slot_close_validate()
+returns trigger language plpgsql set search_path=public,pg_temp as $
+begin
+  if new.status='closed' and old.status='open' and exists (
+    select 1 from public.rch_site_bookings b where b.slot_id=old.id and b.status='confirmed'
+  ) then
+    raise exception 'Booked appointments must not be closed' using errcode='23514';
+  end if;
+  return new;
+end;
+$;
+revoke all on function public.rch_site_slot_close_validate() from public,anon,authenticated;
+drop trigger if exists rch_site_slot_close_guard on public.rch_site_slots;
+create trigger rch_site_slot_close_guard before update of status on public.rch_site_slots
+for each row execute function public.rch_site_slot_close_validate();
+
 drop trigger if exists rch_site_services_updated on public.rch_site_services;
 create trigger rch_site_services_updated before update on public.rch_site_services
 for each row execute function public.set_updated_at();
