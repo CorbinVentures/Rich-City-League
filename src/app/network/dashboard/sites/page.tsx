@@ -189,7 +189,7 @@ export default function RchSitesBuilderPage(){
         </section>
         <section className="rounded-2xl border border-white/15 bg-white/5 p-5">
           <Heading number="03" icon={<FaEye/>} title="Choose sections"/>
-          <p className="mt-2 text-xs text-white/60">Your live website uses approved RCH layouts. Empty events and media won't show publicly.</p>
+          <p className="mt-2 text-xs text-white/60">Your live website uses approved RCH layouts. Empty events and media do not appear publicly.</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             {(Object.keys(sectionLabels) as RchSiteSectionKey[]).map(section=><label key={section} className="flex min-h-11 items-center gap-2 text-sm">
               <input type="checkbox" checked={config.sections.includes(section)} onChange={()=>toggleSection(section)}
