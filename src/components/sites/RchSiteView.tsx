@@ -10,7 +10,7 @@ export type RchSiteOrganization = {
   instagram_url?:string|null;youtube_url?:string|null;
 };
 export type RchSiteEvent = {id:string;title:string;slug:string;starts_at:string;city:string|null};
-type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean};
+type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean;paypalAvailable?:boolean;siteSlug?:string};
 
 function safeUrl(value:string|null|undefined){
   if(!value)return null;
@@ -25,7 +25,7 @@ const siteNames:Record<RchSiteDraft['siteType'],string>={
   aau:'Youth basketball program',organizer:'Basketball events',
 };
 
-export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false}:Props){
+export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false,paypalAvailable=false,siteSlug}:Props){
   const colors=RCH_SITE_THEMES[config.theme];
   const cover=safeUrl(organization.cover_url);
   const logo=safeUrl(organization.logo_url);
@@ -34,7 +34,8 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
     {label:'YouTube',url:safeUrl(organization.youtube_url)},
   ].filter((v):v is {label:string;url:string}=>Boolean(v.url));
   const BodyTag=preview?'div':'main';
-  const bookingPath='/sites/'+encodeURIComponent(organization.slug)+'/book';
+  const bookingPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/book';
+  const paypalPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/pay';
   const sections=config.sections;
   const show=(key:RchSiteSectionKey)=>sections.includes(key);
   return <div className="rch-site-surface min-h-svh" style={{backgroundColor:colors.canvas,color:colors.ink}}>
@@ -48,6 +49,7 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
         <nav aria-label="Organization website" className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
           {sections.filter(k=>k!=='hero'&&k!=='roster').slice(0,3).map(key=><a key={key} href={'#'+key} className="hover:underline">{sectionNames[key]}</a>)}
           {bookingAvailable&&<Link href={bookingPath} className="font-black" style={{color:colors.accent}}>Book</Link>}
+          {paypalAvailable&&<Link href={paypalPath} className="font-black" style={{color:colors.accent}}>Pay</Link>}
         </nav>
       </div>
     </header>
@@ -101,6 +103,7 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
         <p className="mt-3 max-w-xl text-sm leading-7 opacity-75">Ready to learn more about {organization.name}? Visit our RCH organization listing or connect through our social channels.</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={'/organizations/'+encodeURIComponent(organization.slug)} className="inline-flex min-h-12 items-center rounded-xl px-5 text-sm font-black text-white" style={{backgroundColor:colors.accent}}>View RCH listing</Link>
+          {paypalAvailable&&<Link href={paypalPath} className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">Pay via PayPal</Link>}
           {socials[0]&&<a href={socials[0].url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">Contact on {socials[0].label}</a>}
         </div>
       </section>}
