@@ -29,7 +29,8 @@ create table if not exists public.rch_site_slots (
   constraint rch_site_slots_service_organization foreign key (service_id,organization_id)
     references public.rch_site_services(id,organization_id) on delete restrict,
   constraint rch_site_slots_range check (ends_at > starts_at and ends_at <= starts_at + interval '2 hours'),
-  constraint rch_site_slots_start_unique unique (service_id,starts_at)
+  constraint rch_site_slots_start_unique unique (service_id,starts_at),
+  constraint rch_site_slots_id_org_unique unique (id,organization_id)
 );
 -- Prevent organizers from creating overlapping bookable sessions, even across services.
 alter table public.rch_site_slots add constraint rch_site_slots_org_no_overlap
