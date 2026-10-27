@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "supabase/**"
+      - "scripts/test-rch-sites-booking-concurrency.sh"
       - ".github/workflows/supabase.yml"
   pull_request:
     paths:
@@ -58,6 +59,8 @@ jobs:
         run: supabase db lint --local
       - name: Run database authorization tests
         run: supabase test db --local
+      - name: Verify parallel booking quota contention (isolated local DB)
+        run: bash scripts/test-rch-sites-booking-concurrency.sh
       - name: Capture Supabase diagnostics
         if: failure()
         run: |
