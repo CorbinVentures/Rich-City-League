@@ -9,6 +9,8 @@ import {FaArrowLeft,FaCalendarDays,FaCircleCheck,FaClock,FaPlus,FaXmark} from 'r
 type Org={id:string;name:string;eligible:boolean;member_role:string};
 type Service={id:string;name:string;description:string;duration_minutes:number;status:string};
 type Slot={id:string;service_id:string;starts_at:string;ends_at:string;status:string;booked:boolean};
+type PlanSummary={tier:string;billingStatus:string;limits:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}|null;
+  usage:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}};
 const field='mt-2 w-full min-h-11 rounded-xl border border-white/15 bg-[#141822] px-3 py-2.5 text-sm text-white focus:border-rose-400 focus:outline-none';
 function localDate(value:string){return new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));}
 export default function AppointmentsManager(){
@@ -17,6 +19,7 @@ export default function AppointmentsManager(){
   const [selected,setSelected]=useState('');
   const [services,setServices]=useState<Service[]>([]);
   const [slots,setSlots]=useState<Slot[]>([]);
+  const [websitePlan,setWebsitePlan]=useState<PlanSummary|null>(null);
   const [busy,setBusy]=useState('');
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
@@ -37,6 +40,7 @@ export default function AppointmentsManager(){
     if(!response.ok)throw Error(data.error||'Could not load appointments.');
     setServices(data.services||[]);
     setSlots(data.slots||[]);
+    setWebsitePlan(data.websitePlan??null);
   },[]);
   useEffect(()=>{
     if(authLoading)return;
@@ -45,7 +49,7 @@ export default function AppointmentsManager(){
       .finally(()=>setLoading(false));
   },[authLoading,user,loadOrgs]);
   useEffect(()=>{
-    if(!selected){setServices([]);setSlots([]);return;}
+    if(!selected){setServices([]);setSlots([]);setWebsitePlan(null);return;}
     void loadSchedule(selected).catch(e=>setError(e instanceof Error?e.message:'Unable to load appointments.'));
   },[selected,loadSchedule]);
   const act=async(action:'createService'|'createSlot'|'closeSlot',slotId?:string)=>{
@@ -86,6 +90,15 @@ export default function AppointmentsManager(){
     <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Create a free service. Add session times. Clients book the available slots through your published website. Payments are not enabled yet.</p>
     {!orgs.length&&<div className="mt-8 rounded-2xl border border-white/20 p-5 text-sm">You need an approved basketball organization and owner/manager access to manage bookings. <Link href="/organizations" className="underline">Find your organization</Link>.</div>}
     {!!orgs.length&&<>
+      {websitePlan?.limits&&<div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/75">
+        <p className="font-black text-white">Website plan: {websitePlan.tier.charAt(0).toUpperCase()+websitePlan.tier.slice(1)}</p>
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs">
+          <span>Active services {websitePlan.usage.services}/{websitePlan.limits.services}</span>
+          <span>Upcoming slots {websitePlan.usage.upcomingSlots}/{websitePlan.limits.upcomingSlots}</span>
+          <span>Bookings this month {websitePlan.usage.confirmedBookingsMonthly}/{websitePlan.limits.confirmedBookingsMonthly}</span>
+        </div>
+        <p className="mt-2 text-xs text-white/50">Usage is enforced by the website plan. Paid plan enrollment is not available yet.</p>
+      </div>}
       <label className="mt-7 block max-w-md text-xs font-bold">Manage organization
         <select className={field} value={selected} onChange={e=>{setSelected(e.target.value);setMessage('');setError('');}}>
           {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
