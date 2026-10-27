@@ -210,7 +210,7 @@ export interface Comment { id: string; post_id: string; author_id: string; body:
 export interface Like { post_id: string; user_id: string; created_at: string; }
 export interface Follow { follower_id: string; following_id: string; created_at: string; }
 export interface News { id: string; author_id: string | null; title: string; slug: string; excerpt: string | null; body: string; cover_image_url: string | null; status: Database['public']['Enums']['content_status']; published_at: string | null; created_at: string; updated_at: string; }
-export interface Media { id: string; uploader_id: string | null; title: string; description: string | null; storage_path: string; media_type: string; status: Database['public']['Enums']['content_status']; created_at: string; }
+export interface Media { id: string; uploader_id: string | null; title: string; description: string | null; storage_path: string; thumbnail_path?: string | null; media_type: string; status: Database['public']['Enums']['content_status']; created_at: string; }
 export interface Award { id: string; season_id: string; player_id: string | null; team_id: string | null; name: string; description: string | null; awarded_at: string; created_at: string; }
 export interface Staff { id: string; profile_id: string; title: string; permissions: Json; created_at: string; }
 export interface Notification { id: string; recipient_id: string; actor_id: string | null; type: string; title: string; body: string | null; link: string | null; read_at: string | null; created_at: string; }
