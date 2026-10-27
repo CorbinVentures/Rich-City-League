@@ -17,14 +17,14 @@ This phase builds on Phase 0 (PR #617) with staged plan records, serialized book
 
 1. Prepare verified production backup and explicit rollback window; do not apply migration to production from this draft PR.
 2. First run all migrations plus full pgTAP suite (including new quota test and existing RCH Sites tests) against isolated local/staging Supabase.
-3. The staged SQL currently enforces new Free limits immediately if applied. Existing users over 2 active services / 30 future slots retain records and cancellation access, but cannot add resources until below limits. Inventory and notify affected customers; consider grandfathering/release flag before actual production rollout.
-4. Coordinate database and application changes. API code depends on new tables and should not deploy first. Migration-first temporarily exposes the stricter database cap without the improved application error message.
+3. The staged SQL installs the new Free limit definitions but leaves the **booking enforcement switch OFF by default**. Existing API legacy 20-service / 120-slot ceilings remain while it is off. Audit usage, inform affected owners, and deliberately enable the server-only switch only after a controlled pilot and any grandfathering decision. Enabling the switch then blocks new over-limit writes, without deleting existing records.
+4. Coordinate database and application changes. API code depends on new tables and should not deploy first. Migration-first is safe while the rollout switch remains disabled; enable it only after the new API error mapping and manager UI are deployed.
 5. Run parallel creation tests for services/slots/bookings at quota boundaries (SQL row lock must serialize); also verify idempotency, cancellation and UTC rollover.
 6. Test unauthorized users, revoked members, other organizations and role escalations. Plans cannot be assigned by Network tier or public tier-interest forms.
 7. Verify the existing organization-wide no-overlap booking rule remains; multi-staff simultaneous calendar support is deferred.
 8. Paid RCH Sites subscription checkout, billing webhook verification, youth portals and organization PayPal integrations remain **disabled**. Customer PayPal links are still external and unverified by RCH.
 9. Verify existing Website Studio, published subsites, PWA social home, cancellations and account rights are unaffected.
-10. Explicitly approve any merge, production migration and prices only after QA results and customer-impact audit.
+10. Confirm an authorized operator can deliberately enable / disable the private rollout flag, test both states, and approve any merge, production migration and prices only after QA results and customer-impact audit.
 
 ## Rollback
 
