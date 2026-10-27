@@ -81,7 +81,7 @@ export default function RchTvAdminPage() {
     if (!file || !title.trim()) return setError('Provide a title and choose a media file.');
     const fileError = rchTvFileError(file);
     if (fileError) return setError(fileError);
-    if (!rightsConfirmed) return setError('Confirm you have distribution rights to this production, including audio and footage.');
+    if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
     const selected = file;
     const isVideo = rchTvIsVideo(selected);
     const controller = new AbortController();
