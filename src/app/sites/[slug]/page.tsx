@@ -52,6 +52,9 @@ export default async function RchPublishedSite({params}:Params){
     .select('id').eq('organization_id',record.site.organization_id)
     .eq('status','active').limit(1);
   const bookingAvailable=Boolean(bookableServices?.length);
+  const {data:paypalLinks}=await record.db.from('rch_site_paypal_offerings')
+    .select('id').eq('organization_id',record.site.organization_id).eq('active',true).limit(1);
+  const paypalAvailable=Boolean(paypalLinks?.length);
   const jsonld={
     '@context':'https://schema.org','@type':'Organization',
     name:record.organization.name,
@@ -60,7 +63,7 @@ export default async function RchPublishedSite({params}:Params){
     parentOrganization:{'@type':'Organization',name:'Rich City Hoops',url:siteOrigin},
   };
   return <>
-    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]} bookingAvailable={bookingAvailable}/>
+    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]} bookingAvailable={bookingAvailable} paypalAvailable={paypalAvailable}/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(jsonld).replace(/</g,'\\u003c')}}/>
   </>;
 }
