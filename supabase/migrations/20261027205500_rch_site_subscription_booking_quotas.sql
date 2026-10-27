@@ -82,17 +82,22 @@ begin
     if tg_table_name='rch_site_services' and (old.status='active' or new.status<>'active') then
       return new;
     end if;
-    if tg_table_name='rch_site_slots' and
-       (new.status<>'open' or (old.status='open' and
-         (old.starts_at>now() or new.starts_at<=now()))) then
-      return new;
+    -- IMPORTANT: PL/pgSQL can evaluate all AND/OR operands. Never reference
+    -- starts_at on the service or booking record type.
+    if tg_table_name='rch_site_slots' then
+      if new.status<>'open' or (old.status='open' and
+         (old.starts_at>now() or new.starts_at<=now())) then
+        return new;
+      end if;
     end if;
     if tg_table_name='rch_site_bookings' and (old.status='confirmed' or new.status<>'confirmed') then
       return new;
     end if;
   else
     if tg_table_name='rch_site_services' and new.status<>'active' then return new; end if;
-    if tg_table_name='rch_site_slots' and (new.status<>'open' or new.starts_at<=now()) then return new; end if;
+    if tg_table_name='rch_site_slots' then
+      if new.status<>'open' or new.starts_at<=now() then return new; end if;
+    end if;
     if tg_table_name='rch_site_bookings' and new.status<>'confirmed' then return new; end if;
   end if;
 
