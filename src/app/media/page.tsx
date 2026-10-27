@@ -6,7 +6,7 @@ import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsored
 import { getPublicClient, getLeagueSnapshot } from '@/lib/public-data';
 import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
-import { resolveRchMediaUrl } from '@/lib/rch-tv-media';
+import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
 import { RchLiveViewer } from '@/components/media/RchLiveViewer';
 
 export const revalidate = 60;
@@ -31,7 +31,7 @@ export default async function MediaPage() {
     title: item.title,
     description: item.description,
     type: item.media_type,
-    url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl),
+    url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl, (path) => client!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(path).data.publicUrl),
     createdAt: item.created_at,
     category: (item as Media & { rch_tv_category?: string }).rch_tv_category ?? 'general',
   })).filter((item) => item.url !== null) as Array<{ id: string; title: string; description: string | null; type: string; url: string; createdAt: string; category: string }>;
