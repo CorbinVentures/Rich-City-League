@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RCH_TV_VIDEO_BUCKET, RCH_TV_VIDEO_STORAGE_PREFIX, resolveRchMediaUrl } from './rch-tv-media';
-import { RCH_TV_VIDEO_MAX_BYTES, rchTvFileError, rchTvIsVideo } from './rch-tv-upload';
+import { RCH_TV_VIDEO_MAX_BYTES, rchTvFileError, rchTvIsVideo, rchTvVideoMimeType } from './rch-tv-upload';
 
 describe('RCH TV full-game upload compatibility', () => {
   const legacy = (path:string) => `https://storage.example/media/${path}`;
@@ -12,6 +12,8 @@ describe('RCH TV full-game upload compatibility', () => {
     expect(resolveRchMediaUrl(`legacy/video.mp4`,legacy,video)).toEqual(legacy('legacy/video.mp4'));
     const key = `${uuid}/rch-tv/${objectId}.mp4`;
     expect(resolveRchMediaUrl(RCH_TV_VIDEO_STORAGE_PREFIX + key,legacy,video)).toEqual(video(key));
+    const movKey = `${uuid}/rch-tv/${objectId}.mov`;
+    expect(resolveRchMediaUrl(RCH_TV_VIDEO_STORAGE_PREFIX + movKey,legacy,video)).toEqual(video(movKey));
   });
   it('rejects traversal and unexpected bucket/path schemes', () => {
     expect(resolveRchMediaUrl(RCH_TV_VIDEO_STORAGE_PREFIX + '../evil.mp4',legacy,video)).toBeNull();
@@ -25,6 +27,16 @@ describe('RCH TV full-game upload compatibility', () => {
     expect(rchTvFileError({type:'video/mp4',size:RCH_TV_VIDEO_MAX_BYTES})).toBeNull();
     expect(rchTvFileError({type:'video/mp4',size:RCH_TV_VIDEO_MAX_BYTES+1})).toMatch(/5 GB/);
     expect(rchTvFileError({type:'image/png',size:51*1024*1024})).toMatch(/50 MB/);
-    expect(rchTvFileError({type:'video/quicktime',size:1024})).not.toBeNull();
+    expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime'})).toBe('video/quicktime');
+    expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.MOV',type:'video/x-quicktime'})).toBe('video/quicktime');
+    expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:'application/octet-stream'})).toBe('video/quicktime');
+    expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:''})).toBe('video/quicktime');
+    expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/mp4'})).toBe('video/quicktime');
+    expect(rchTvIsVideo({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime'})).toBe(true);
+    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime',size:Math.ceil(72.6*1024*1024)})).toBeNull();
+    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.MOV',type:'',size:Math.ceil(72.6*1024*1024)})).toBeNull();
+    expect(rchTvFileError({name:'clip.mov',type:'video/quicktime',size:RCH_TV_VIDEO_MAX_BYTES+1})).toMatch(/5 GB/);
+    expect(rchTvFileError({name:'not-really-a-video.mov',type:'image/jpeg',size:1000})).toMatch(/unexpected format/);
+    expect(rchTvFileError({name:'photo.jpg',type:'video/quicktime',size:1000})).not.toBeNull();
   });
 });

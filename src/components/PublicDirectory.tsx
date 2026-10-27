@@ -49,6 +49,18 @@ export function NewsDirectory({ items }: { items: NewsItem[] }) {
   return <div><div className="mb-5 flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row"><SearchField value={query} onChange={setQuery} placeholder="Search RCL News..." label="Search RCL News"/><select aria-label="Category filter" value={category} onChange={(event) => setCategory(event.target.value)} className={selectClass}><option value="ALL">All categories</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>{!items.length ? <EmptyState title="No stories yet." body="Official RCL news will appear here once the league begins publishing." /> : !filtered.length ? <EmptyState title="No stories found." body="Try another search or category." /> : <div className="grid gap-5 md:grid-cols-2">{filtered.map((item) => <Link key={item.id} href={`/news/${item.slug}`} className="group overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 transition hover:-translate-y-1 hover:border-rcl-blue/45">{item.coverImageUrl && <div className="relative h-48 w-full overflow-hidden"><Image src={item.coverImageUrl} alt={item.title} fill sizes="(max-width: 768px) 100vw, 50vw" unoptimized={item.coverImageUrl.startsWith('/api/news-cover/')} className="object-cover transition duration-300 group-hover:scale-[1.03]" /></div>}<div className="p-6"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.category}</p><div className="mt-3 flex items-start justify-between gap-4"><h2 className="font-display text-2xl font-black uppercase leading-tight group-hover:text-rcl-blue">{item.title}</h2><FaArrowRight className="mt-1 shrink-0 text-xs text-white/20 group-hover:text-rcl-orange"/></div>{item.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/45">{item.excerpt}</p>}<p className="mt-5 border-t border-white/10 pt-4 text-xs uppercase tracking-wider text-white/30">{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'RCL News'}</p></div></Link>)}</div>}</div>;
 }
 
+function MediaVideo({ item }: { item: MediaItem }) {
+  const [failed, setFailed] = useState(false);
+  const isMov = /\.mov(?:\?|$)/i.test(item.url);
+  if (failed) return <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center">
+    <p className="text-sm text-white/75">{isMov ? 'Your browser cannot play this MOV recording.' : 'This video could not be played in your browser.'}</p>
+    <a href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-rcl-blue">Open original video file</a>
+    {isMov&&<p className="text-xs text-white/40">For broad compatibility, an MP4 (H.264/AAC) version is recommended.</p>}
+  </div>;
+  return <video src={item.url} controls preload="metadata" playsInline onError={() => setFailed(true)}
+    className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>;
+}
+
 export function MediaDirectory({ items }: { items: MediaItem[] }) {
   const [category, setCategory] = useState('ALL');
   const categories = [...new Set(items.map((item) => item.type))];
@@ -67,7 +79,7 @@ export function MediaDirectory({ items }: { items: MediaItem[] }) {
             return <article key={item.id} className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55">
               <div className="flex aspect-video items-center justify-center overflow-hidden bg-black">
                 {kind === 'video' ? (
-                  <video src={item.url} controls preload="metadata" playsInline className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>
+                  <MediaVideo item={item} />
                 ) : kind === 'image' ? (
                   <img src={item.url} alt={item.title} loading="lazy" className="h-full w-full object-contain" />
                 ) : kind === 'audio' ? (

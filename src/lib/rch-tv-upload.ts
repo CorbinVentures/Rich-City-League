@@ -5,17 +5,34 @@ export const RCH_TV_VIDEO_MAX_BYTES = 5 * 1024 * 1024 * 1024;
 export const RCH_TV_SMALL_MAX_BYTES = 50 * 1024 * 1024;
 const CHUNK_SIZE = 6 * 1024 * 1024;
 const RETRY = [0, 3000, 5000, 10000, 20000];
-const VIDEOS = new Set(['video/mp4', 'video/webm']);
 const OTHERS = new Set(['image/jpeg', 'image/png', 'image/webp', 'audio/mpeg', 'audio/mp4', 'audio/wav']);
+type VideoMimeType = 'video/mp4' | 'video/webm' | 'video/quicktime';
+type FileIdentity = Pick<File, 'type'> & { name?: string };
 
-export function rchTvFileError(file: Pick<File, 'type'|'size'>): string | null {
-  if (!VIDEOS.has(file.type) && !OTHERS.has(file.type)) return 'Choose MP4, WebM, JPEG, PNG, WebP, MP3, M4A or WAV.';
-  if (file.size < 1) return 'Choose a nonempty file.';
-  if (VIDEOS.has(file.type) && file.size > RCH_TV_VIDEO_MAX_BYTES) return 'Videos must be 5 GB or smaller.';
-  if (!VIDEOS.has(file.type) && file.size > RCH_TV_SMALL_MAX_BYTES) return 'Images and audio must be 50 MB or smaller.';
+// iOS Photos/Safari may report .mov as video/quicktime, video/x-quicktime,
+// application/octet-stream or no MIME type. Only trust .mov for known/ambiguous
+// video types; reject incompatible declarations such as image/jpeg.
+export function rchTvVideoMimeType(file: FileIdentity): VideoMimeType | null {
+  const mime = file.type.trim().toLowerCase();
+  const name = file.name || '';
+  if (/\.mov$/i.test(name)) {
+    return ['', 'application/octet-stream', 'video/quicktime', 'video/x-quicktime', 'video/mov', 'video/mp4'].includes(mime)
+      ? 'video/quicktime' : null;
+  }
+  if (mime === 'video/mp4' || mime === 'video/webm') return mime;
   return null;
 }
-export const rchTvIsVideo = (file: Pick<File,'type'>) => VIDEOS.has(file.type);
+
+export function rchTvFileError(file: Pick<File, 'type'|'size'> & { name?: string }): string | null {
+  const isVideo = Boolean(rchTvVideoMimeType(file));
+  if (file.name && /\.mov$/i.test(file.name) && !isVideo) return 'This MOV file has an unexpected format. Export it as a video and try again.';
+  if (!isVideo && !OTHERS.has(file.type)) return 'Choose MP4, MOV, WebM, JPEG, PNG, WebP, MP3, M4A or WAV.';
+  if (file.size < 1) return 'Choose a nonempty file.';
+  if (isVideo && file.size > RCH_TV_VIDEO_MAX_BYTES) return 'Videos must be 5 GB or smaller.';
+  if (!isVideo && file.size > RCH_TV_SMALL_MAX_BYTES) return 'Images and audio must be 50 MB or smaller.';
+  return null;
+}
+export const rchTvIsVideo = (file: FileIdentity) => rchTvVideoMimeType(file) !== null;
 
 type Checkpoint = { path: string; url: string };
 type Options = {
@@ -73,11 +90,12 @@ export async function uploadRchTvVideo({file,userId,projectUrl,token,signal,prog
     if (offset===null) checkpoint=null;
   }
   if (!checkpoint) {
-    const ext=file.type==='video/webm'?'webm':'mp4';
+    const mime = rchTvVideoMimeType(file)!;
+    const ext = mime === 'video/quicktime' ? 'mov' : mime === 'video/webm' ? 'webm' : 'mp4';
     const path=`${userId}/rch-tv/${crypto.randomUUID()}.${ext}`;
     const metadata=[
       ['bucketName',RCH_TV_VIDEO_BUCKET],['objectName',path],
-      ['contentType',file.type],['cacheControl','3600'],
+      ['contentType',mime],['cacheControl','3600'],
     ].map(([k,v])=>`${k} ${btoa(v)}`).join(',');
     const started=await fetch(endpoint,{
       method:'POST',headers:{...(await headers()),'Upload-Length':String(file.size),'Upload-Metadata':metadata},signal,
