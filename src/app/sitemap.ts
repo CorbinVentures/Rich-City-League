@@ -70,15 +70,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const client: any = publicClient;
     if (client) {
-      const [{ data: players }, { data: organizations }, { data: events }] = await Promise.all([
+      const [{ data: players }, { data: organizations }, { data: events }, { data: sites }] = await Promise.all([
         client.from('public_players').select('id').eq('is_active', true).limit(1000),
         client.from('network_organizations').select('slug,updated_at').eq('status', 'active').limit(2000),
         client.from('network_events').select('slug,starts_at').eq('status', 'published').limit(2000),
+        client.from('rch_sites').select('slug,updated_at').eq('status', 'published').limit(2000),
       ]);
 
       for (const player of players ?? []) entries.push({ url: `${SITE}/players/${player.id}`, changeFrequency: 'weekly', priority: .65 });
       for (const organization of organizations ?? []) if (organization.slug) entries.push({ url: `${SITE}/organizations/${organization.slug}`, lastModified: organization.updated_at ? new Date(organization.updated_at) : undefined, changeFrequency: 'weekly', priority: .75 });
       for (const event of events ?? []) if (event.slug) entries.push({ url: `${SITE}/network/events/${event.slug}`, changeFrequency: 'daily', priority: .7 });
+      for (const site of sites ?? []) if (site.slug) entries.push({url: `${SITE}/sites/${site.slug}`,lastModified:site.updated_at?new Date(site.updated_at):undefined,changeFrequency:'weekly',priority:.65});
     }
   } catch {
     // Core launch URLs remain available even if a dynamic data source is degraded.
