@@ -63,7 +63,7 @@ export default async function RchPublishedSite({params}:Params){
     parentOrganization:{'@type':'Organization',name:'Rich City Hoops',url:siteOrigin},
   };
   return <>
-    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]} bookingAvailable={bookingAvailable} paypalAvailable={paypalAvailable}/>
+    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]} bookingAvailable={bookingAvailable} paypalAvailable={paypalAvailable} siteSlug={slug}/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(jsonld).replace(/</g,'\\u003c')}}/>
   </>;
 }
