@@ -115,7 +115,7 @@ export async function GET(request:Request){
     const {data:{user}}=await client.auth.getUser();
     if(user){
       const {data:mineData}=await (client as any).from('rch_site_bookings')
-        .select('id,slot_id,service_id,status,booked_at')
+        .select('id,slot_id,service_id,status,booked_at,slot:rch_site_slots!slot_id(starts_at,ends_at)')
         .eq('organization_id',site.organization_id).eq('client_id',user.id)
         .order('booked_at',{ascending:false}).limit(25);
       mine=mineData??[];
