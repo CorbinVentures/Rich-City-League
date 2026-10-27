@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { FaArrowRight, FaCircleCheck, FaFilm, FaRotate, FaUpload, FaUsers, FaVideo } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import type { IconType } from 'react-icons';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getSupabaseConfig } from '@/lib/supabase-config';
+import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
+import { uploadRchTvVideo, clearRchTvCheckpoint, rchTvFileError, rchTvIsVideo } from '@/lib/rch-tv-upload';
 
 type MediaRecord = {
   id: string; title: string; media_type: string; status: string; rch_tv_category: string;
@@ -17,8 +20,6 @@ type CreatorApplication = {
   instagram_url: string | null; goals: string | null; status: string; created_at: string;
 };
 type Acquisition = { id: string; status: string };
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-const ALLOWED_TYPES = ['video/mp4','video/webm','image/jpeg','image/png','image/webp','audio/mpeg','audio/mp4','audio/wav'];
 const CREATOR_STAGES = ['new','in_review','contacted','selected','declined'] as const;
 const TV_CATEGORIES = [
   { value:'live_games', label:'Live Games & Replays' },
@@ -43,6 +44,8 @@ export default function RchTvAdminPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const uploadAbortRef = useRef<AbortController | null>(null);
   const [publishNow, setPublishNow] = useState(false);
   const [category, setCategory] = useState<(typeof TV_CATEGORIES)[number]['value']>('original_content');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
@@ -76,36 +79,70 @@ export default function RchTvAdminPage() {
     event.preventDefault();
     if (!supabase || !db || !user) return;
     if (!file || !title.trim()) return setError('Provide a title and choose a media file.');
-    if (!ALLOWED_TYPES.includes(file.type) || file.size > MAX_UPLOAD_BYTES || file.size < 1) {
-      return setError('Use an MP4, WebM, JPEG, PNG, WebP, MP3, M4A or WAV file up to 50 MB.');
-    }
-    if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
-    setBusy('upload'); setError(''); setNotice('');
-    const safeExt = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
-    const path = `${user.id}/rch-tv/${crypto.randomUUID()}.${safeExt}`;
-    const stored = await supabase.storage.from('media').upload(path,file,{
-      upsert:false, contentType:file.type, cacheControl:'3600',
-    });
-    if (stored.error) { setError(stored.error.message); setBusy(''); return; }
-    const mediaType = file.type.startsWith('video/') ? 'video'
-      : file.type.startsWith('audio/') ? 'audio' : 'image';
-    const inserted = await db.from('media').insert({
-      uploader_id:user.id,title:title.trim(),description:description.trim()||null,
-      storage_path:stored.data?.path || path,media_type:mediaType,rch_tv_category:category,
-      status:publishNow ? 'published' : 'draft',
-    });
-    if (inserted.error) {
-      // The owner/admin can clean up the otherwise orphaned upload.
-      await supabase.storage.from('media').remove([stored.data?.path || path]);
-      setError(inserted.error.message);
-    } else {
-      setNotice(publishNow ? 'Media published to RCH TV. Allow up to 60 seconds for the public archive to refresh.' : 'Media uploaded as a draft. Publish it from the library below.');
-      setFile(null); setTitle(''); setDescription(''); setPublishNow(false); setRightsConfirmed(false); setCategory('original_content');
+    const fileError = rchTvFileError(file);
+    if (fileError) return setError(fileError);
+    if (!rightsConfirmed) return setError('Confirm you have distribution rights to this production, including audio and footage.');
+    const selected = file;
+    const isVideo = rchTvIsVideo(selected);
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
+    setBusy('upload'); setError(''); setNotice(''); setUploadPercent(0);
+    const extension = selected.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
+    let bucket = 'media';
+    let objectPath = `${user.id}/rch-tv/${crypto.randomUUID()}.${extension}`;
+    let storagePath = objectPath;
+    try {
+      if (isVideo) {
+        const config = getSupabaseConfig();
+        if (config.status !== 'configured' || !config.url) throw new Error('Supabase configuration is unavailable.');
+        const uploaded = await uploadRchTvVideo({
+          file: selected, userId: user.id, projectUrl: config.url, signal: controller.signal,
+          progress: setUploadPercent,
+          token: async () => {
+            const { data, error } = await supabase.auth.getSession();
+            if (error || !data.session?.access_token) throw new Error('Your session expired. Sign in again before uploading.');
+            return data.session.access_token;
+          },
+        });
+        bucket = RCH_TV_VIDEO_BUCKET;
+        objectPath = uploaded.objectPath;
+        storagePath = uploaded.storagePath;
+      } else {
+        const stored = await supabase.storage.from('media').upload(objectPath, selected, {
+          upsert:false, contentType:selected.type, cacheControl:'3600',
+        });
+        if (stored.error) throw stored.error;
+        objectPath = stored.data?.path || objectPath;
+        storagePath = objectPath;
+        setUploadPercent(100);
+      }
+      const mediaType = isVideo ? 'video' : selected.type.startsWith('audio/') ? 'audio' : 'image';
+      const inserted = await db.from('media').insert({
+        uploader_id:user.id,title:title.trim(),description:description.trim()||null,
+        storage_path:storagePath,media_type:mediaType,rch_tv_category:category,
+        status:publishNow ? 'published' : 'draft',
+      });
+      if (inserted.error) {
+        // Keep the uploaded video and its checkpoint so the same file can be retried.
+        if (!isVideo) await supabase.storage.from(bucket).remove([objectPath]);
+        throw inserted.error;
+      }
+      if (isVideo) clearRchTvCheckpoint(user.id,selected);
+      setNotice(publishNow ? 'Media published to RCH TV. The public archive can take up to 60 seconds to refresh.' : 'Media uploaded as a draft.');
+      setFile(null); setTitle(''); setDescription(''); setPublishNow(false);
+      setRightsConfirmed(false); setCategory('original_content');
       await load();
+    } catch (cause) {
+      if (controller.signal.aborted) {
+        setNotice('Upload paused. Select the same video and tap Upload to resume.');
+      } else {
+        setError(cause instanceof Error ? cause.message : 'Upload failed. Select the same video to retry.');
+      }
+    } finally {
+      uploadAbortRef.current = null;
+      setBusy(''); 
     }
-    setBusy('');
   }
-
   async function changeMediaStatus(id: string, status: 'published'|'draft'|'archived') {
     if (!db) return;
     setBusy(id);setError('');setNotice('');
@@ -174,15 +211,18 @@ export default function RchTvAdminPage() {
       <div className="mt-8 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
         <section className="rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
           <h2 className="text-xl font-bold">Upload RCH TV media</h2>
-          <p className="mt-2 text-xs text-white/55">Upload your own or properly licensed media. The public media bucket accepts files up to 50 MB; longer programs require a streaming provider.</p>
+          <p className="mt-2 text-xs text-white/55">Upload full games and videos up to 5 GB, directly to Supabase with resumable transfers. Images and audio remain limited to 50 MB.</p>
           <form onSubmit={upload} className="mt-5 space-y-4">
             <label className="block text-xs font-bold text-white/70">Title<input required value={title} maxLength={180} onChange={e=>setTitle(e.target.value)} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Show, interview or highlight title"/></label>
             <label className="block text-xs font-bold text-white/70">Description<textarea value={description} maxLength={2000} onChange={e=>setDescription(e.target.value)} rows={3} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Tell viewers what this piece is about."/></label>
-            <label className="block text-xs font-bold text-white/70">Media file<input type="file" accept="video/mp4,video/webm,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/wav" onChange={e=>setFile(e.target.files?.[0]||null)} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] p-3 text-sm text-white"/></label>
+            <label className="block text-xs font-bold text-white/70">Media file<input type="file" accept="video/mp4,video/webm,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/wav" onChange={e=>{setFile(e.target.files?.[0]||null);setUploadPercent(0);}} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] p-3 text-sm text-white"/></label>
+            {file&&<p className="text-xs text-white/55">{(file.size/1024/1024).toFixed(1)} MB · {rchTvIsVideo(file)?'Resumable full-length video':'Image / audio upload'}</p>}
+            {busy==='upload'&&<div role="status" aria-label="Upload progress" className="rounded-xl border border-white/10 p-3"><p className="mb-2 text-xs text-white/70">{uploadPercent}% uploaded</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-blue" style={{width:uploadPercent+'%'}} /></div></div>}
             <label className="block text-xs font-bold text-white/70">RCH TV section<select value={category} onChange={e=>setCategory(e.target.value as (typeof TV_CATEGORIES)[number]['value'])} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white">{TV_CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
             <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I own this production or have permission to distribute it on RCH TV, including its audio and footage.</span></label>
             <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)}/>Publish immediately instead of saving as draft</label>
-            <button disabled={busy==='upload'} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading…':publishNow?'Upload & publish':'Upload as draft'}</button>
+            <button disabled={busy==='upload'} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
+            {busy==='upload'&&<button type="button" onClick={()=>uploadAbortRef.current?.abort()} className="w-full rounded-lg border border-white/20 px-4 py-3 text-xs text-white/70">Pause upload</button>}
           </form>
         </section>
 
@@ -194,7 +234,7 @@ export default function RchTvAdminPage() {
             {media.map(item=><article key={item.id} className="rounded-xl border border-white/15 bg-black/15 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
-                <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={supabase?.storage.from('media').getPublicUrl(item.storage_path).data.publicUrl}>Open file ↗</a>
+                <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={resolveRchMediaUrl(item.storage_path, p=>supabase!.storage.from('media').getPublicUrl(p).data.publicUrl, p=>supabase!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl) || '#'}>Open file ↗</a>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2"><label htmlFor={`rch-tv-category-${item.id}`} className="text-xs text-white/60">Section</label><select id={`rch-tv-category-${item.id}`} disabled={busy===item.id} value={TV_CATEGORY_OPTIONS.some(option=>option.value===item.rch_tv_category)?item.rch_tv_category:'general'} onChange={e=>void changeCategory(item.id,e.target.value)} className="min-h-9 max-w-full rounded-lg border border-white/20 bg-[#0b1724] px-2 text-xs text-white">{TV_CATEGORY_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>
                 {(['draft','published','archived'] as const).filter(status=>status!==item.status).map(status=><button key={status} type="button" disabled={busy===item.id} onClick={()=>void changeMediaStatus(item.id,status)} className="min-h-9 rounded-lg border border-white/20 px-3 text-xs font-semibold capitalize text-white/80 disabled:opacity-50">{status==='published'?'Publish':status==='draft'?'Unpublish':'Archive'}</button>)}
