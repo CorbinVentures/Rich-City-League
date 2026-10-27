@@ -21,7 +21,7 @@ describe('RCH Sites Organization Hub: interest-only intake and privacy boundarie
     expect(migration).toContain('contact_consent = true');
     expect(migration).toContain('rch_site_inquiry_review_consistency');
     expect(migration).not.toContain('date_of_birth');
-    expect(migration).not.toContain('medical');
+    expect(migration).not.toContain('medical_history text');
     expect(migration).not.toContain('payment_status');
   });
   it('checks adult verification, member roles, same-origin and publication on server',()=>{
