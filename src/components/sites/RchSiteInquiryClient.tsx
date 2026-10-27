@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
-import {FaArrowLeft,FaCheckCircle,FaEnvelope,FaShieldHalved} from 'react-icons/fa6';
+import {FaArrowLeft,FaCircleCheck,FaEnvelope,FaShieldHalved} from 'react-icons/fa6';
 
 type Purpose='training'|'program'|'event'|'general';
 const options:ReadonlyArray<{id:Purpose;label:string;detail:string}>=[
@@ -43,7 +43,7 @@ export function RchSiteInquiryClient({slug,organizationName}:{slug:string;organi
       <h1 className="mt-3 text-4xl font-black">Get connected.</h1>
       <p className="mt-3 text-sm leading-7 text-white/65">Tell {organizationName} what you&apos;re interested in. They can reply to the email address verified on your RCH account.</p>
       {sent?<section role="status" className="mt-8 rounded-2xl border border-emerald-400/30 bg-emerald-900/10 p-6">
-        <FaCheckCircle size={30} className="text-emerald-300"/>
+        <FaCircleCheck size={30} className="text-emerald-300"/>
         <h2 className="mt-4 text-2xl font-black">Inquiry received</h2>
         <p className="mt-2 text-sm leading-7 text-white/70">{organizationName} can now follow up by email. This is not a confirmed registration, reservation, or payment.</p>
         <Link href={'/sites/'+slug} className="mt-5 inline-flex rounded-xl border border-white/25 px-5 py-3 text-sm font-bold">Return to website</Link>
