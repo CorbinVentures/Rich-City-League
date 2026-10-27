@@ -6,7 +6,7 @@ import {FaArrowLeft,FaCalendarCheck,FaCalendarDays,FaCheck,FaClock,FaLock,FaXmar
 
 type Service={id:string;name:string;description:string;duration_minutes:number;price_cents:number};
 type Slot={id:string;service_id:string;starts_at:string;ends_at:string};
-type Booking={id:string;slot_id:string;service_id:string;status:string;booked_at:string};
+type Booking={id:string;slot_id:string;service_id:string;status:string;booked_at:string;slot?:{starts_at:string;ends_at:string}|null};
 type Catalog={organizationId:string;services:Service[];slots:Slot[];myBookings:Booking[];error?:string};
 
 function when(value:string){return new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value));}
@@ -73,7 +73,7 @@ export function RchSiteBookingClient({slug}:{slug:string}){
                 className="rounded-xl bg-rose-600 px-5 py-3 text-sm font-black">Sign in / Join Free</Link>
             </div>:null}
           <h2 className="mt-8 text-xl font-black">Available times</h2>
-          <p className="mt-2 text-xs text-white/50">Times shown in your device time zone: {Intl.DateTimeFormat().resolvedOptions().timeZone}.</p>
+          <p suppressHydrationWarning className="mt-2 text-xs text-white/50">Times shown in your device time zone: {Intl.DateTimeFormat().resolvedOptions().timeZone}.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {!slots.length&&<p className="text-sm text-white/60">No open slots for this service. Check back for upcoming sessions.</p>}
             {slots.map(slot=><div key={slot.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/[.035] p-4">
@@ -88,7 +88,7 @@ export function RchSiteBookingClient({slug}:{slug:string}){
           <div className="mt-4 space-y-3">
             {catalog.myBookings.filter(b=>b.status==='confirmed').map(b=><div key={b.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/15 p-4">
               <div><span className="text-sm font-bold">{catalog.services.find(s=>s.id===b.service_id)?.name||'Reserved session'}</span>
-                <p className="mt-1 text-xs text-emerald-300">Confirmed · Reservation #{b.id.slice(0,8)}</p></div>
+                <p className="mt-1 text-xs text-white/70">{b.slot?.starts_at?when(b.slot.starts_at):"Scheduled session"}</p><p className="mt-1 text-xs text-emerald-300">Confirmed · Reservation #{b.id.slice(0,8)}</p></div>
               <button type="button" disabled={Boolean(busy)} onClick={()=>void act('cancelBooking',b.id)}
                 className="inline-flex min-h-11 items-center gap-2 text-xs text-rose-300 underline disabled:opacity-40"><FaXmark/> Cancel</button>
             </div>)}
