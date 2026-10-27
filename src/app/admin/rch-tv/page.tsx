@@ -9,10 +9,11 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { getSupabaseConfig } from '@/lib/supabase-config';
 import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
 import { uploadRchTvVideo, clearRchTvCheckpoint, rchTvFileError, rchTvIsVideo } from '@/lib/rch-tv-upload';
+import { captureRchTvPoster, validateRchTvPosterImage } from '@/lib/rch-tv-thumbnail';
 
 type MediaRecord = {
   id: string; title: string; media_type: string; status: string; rch_tv_category: string;
-  storage_path: string; description: string | null; created_at: string;
+  storage_path: string; thumbnail_path: string | null; description: string | null; created_at: string;
 };
 type CreatorApplication = {
   id: string; organization_name: string; contact_name: string;
@@ -46,6 +47,11 @@ export default function RchTvAdminPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadPercent, setUploadPercent] = useState(0);
   const uploadAbortRef = useRef<AbortController | null>(null);
+  const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
+  const [posterPreview, setPosterPreview] = useState('');
+  const [posterLoading, setPosterLoading] = useState(false);
+  const [posterError, setPosterError] = useState('');
+  const manualPosterRef = useRef(false);
   const [publishNow, setPublishNow] = useState(false);
   const [category, setCategory] = useState<(typeof TV_CATEGORIES)[number]['value']>('original_content');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
@@ -54,7 +60,7 @@ export default function RchTvAdminPage() {
     if (!authorized || !db) return;
     setLoading(true); setError('');
     const [m,a,c] = await Promise.all([
-      db.from('media').select('id,title,media_type,status,storage_path,description,created_at,rch_tv_category')
+      db.from('media').select('id,title,media_type,status,storage_path,thumbnail_path,description,created_at,rch_tv_category')
         .order('created_at',{ascending:false}).limit(60),
       db.from('network_partner_inquiries')
         .select('id,organization_name,contact_name,contact_email,city,region,website_url,instagram_url,goals,status,created_at')
@@ -75,6 +81,72 @@ export default function RchTvAdminPage() {
     if (!authLoading) { if (authorized) void load(); else setLoading(false); }
   }, [authLoading, authorized, load]);
 
+  useEffect(() => {
+    let active = true;
+    manualPosterRef.current = false;
+    setPosterBlob(null); setPosterError('');
+    setPosterLoading(Boolean(file && rchTvIsVideo(file)));
+    if (file && rchTvIsVideo(file)) {
+      void captureRchTvPoster(file).then(blob => {
+        if (active && !manualPosterRef.current) setPosterBlob(blob);
+      }).catch(cause => {
+        if (active && !manualPosterRef.current) setPosterError(cause instanceof Error ? cause.message : 'Choose a thumbnail image.');
+      }).finally(() => { if (active) setPosterLoading(false); });
+    }
+    return () => { active = false; };
+  }, [file]);
+
+  useEffect(() => {
+    if (!posterBlob) { setPosterPreview(''); return; }
+    const url = URL.createObjectURL(posterBlob);
+    setPosterPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [posterBlob]);
+
+  function choosePosterImage(image: File | null) {
+    if (!image) return;
+    const invalid = validateRchTvPosterImage(image);
+    if (invalid) { setPosterError(invalid); return; }
+    manualPosterRef.current = true;
+    setPosterBlob(image); setPosterError(''); setPosterLoading(false);
+  }
+
+  async function storePoster(image: Blob, ownerId: string): Promise<string> {
+    if (!supabase) throw new Error('Storage unavailable.');
+    const mime = image.type || 'image/jpeg';
+    const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
+    const path = `${ownerId}/rch-tv-thumbnails/${crypto.randomUUID()}.${ext}`;
+    const saved = await supabase.storage.from('media').upload(path, image, {
+      upsert: false, contentType: mime, cacheControl: '3600',
+    });
+    if (saved.error) throw saved.error;
+    return saved.data?.path || path;
+  }
+
+  async function saveExistingPoster(item: MediaRecord, image?: File) {
+    if (!user || !supabase || !db || item.media_type !== 'video') return;
+    setBusy(item.id); setError(''); setNotice('');
+    let path: string | null = null;
+    try {
+      if (image) {
+        const invalid = validateRchTvPosterImage(image);
+        if (invalid) throw new Error(invalid);
+      }
+      const url = resolveRchMediaUrl(item.storage_path,
+        p => supabase.storage.from('media').getPublicUrl(p).data.publicUrl,
+        p => supabase.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl);
+      if (!image && !url) throw new Error('Could not locate the existing video.');
+      path = await storePoster(image || await captureRchTvPoster(url!), user.id);
+      const updated = await db.from('media').update({ thumbnail_path: path }).eq('id', item.id).eq('media_type', 'video');
+      if (updated.error) throw updated.error;
+      setNotice('Video thumbnail saved.');
+      await load();
+    } catch (cause) {
+      if (path) await supabase.storage.from('media').remove([path]);
+      setError(cause instanceof Error ? cause.message : 'Thumbnail generation failed. Upload an image instead.');
+    } finally { setBusy(''); }
+  }
+
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!supabase || !db || !user) return;
@@ -84,6 +156,8 @@ export default function RchTvAdminPage() {
     if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
     const selected = file;
     const isVideo = rchTvIsVideo(selected);
+    if (isVideo && !posterBlob) return setError('Choose a thumbnail or wait for automatic preview generation.');
+    const selectedPoster = isVideo ? posterBlob : null;
     const controller = new AbortController();
     uploadAbortRef.current = controller;
     setBusy('upload'); setError(''); setNotice(''); setUploadPercent(0);
@@ -91,6 +165,7 @@ export default function RchTvAdminPage() {
     let bucket = 'media';
     let objectPath = `${user.id}/rch-tv/${crypto.randomUUID()}.${extension}`;
     let storagePath = objectPath;
+    let thumbnailPath: string | null = null;
     try {
       if (isVideo) {
         const config = getSupabaseConfig();
@@ -116,20 +191,22 @@ export default function RchTvAdminPage() {
         storagePath = objectPath;
         setUploadPercent(100);
       }
+      if (selectedPoster) thumbnailPath = await storePoster(selectedPoster, user.id);
       const mediaType = isVideo ? 'video' : selected.type.startsWith('audio/') ? 'audio' : 'image';
       const inserted = await db.from('media').insert({
         uploader_id:user.id,title:title.trim(),description:description.trim()||null,
-        storage_path:storagePath,media_type:mediaType,rch_tv_category:category,
+        storage_path:storagePath,thumbnail_path:thumbnailPath,media_type:mediaType,rch_tv_category:category,
         status:publishNow ? 'published' : 'draft',
       });
       if (inserted.error) {
         // Keep the uploaded video and its checkpoint so the same file can be retried.
         if (!isVideo) await supabase.storage.from(bucket).remove([objectPath]);
+        if (thumbnailPath) await supabase.storage.from('media').remove([thumbnailPath]);
         throw inserted.error;
       }
       if (isVideo) clearRchTvCheckpoint(user.id,selected);
       setNotice(publishNow ? 'Media published to RCH TV. The public archive can take up to 60 seconds to refresh.' : 'Media uploaded as a draft.');
-      setFile(null); setTitle(''); setDescription(''); setPublishNow(false);
+      setFile(null); setPosterBlob(null); setTitle(''); setDescription(''); setPublishNow(false);
       setRightsConfirmed(false); setCategory('original_content');
       await load();
     } catch (cause) {
@@ -218,11 +295,17 @@ export default function RchTvAdminPage() {
             <label className="block text-xs font-bold text-white/70">Media file<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-quicktime,.mov,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/wav" onChange={e=>{setFile(e.target.files?.[0]||null);setUploadPercent(0);}} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] p-3 text-sm text-white"/></label>
             {file&&<p className="text-xs text-white/55">{(file.size/1024/1024).toFixed(1)} MB · {rchTvIsVideo(file)?'Resumable full-length video':'Image / audio upload'}</p>}
             {file&&/\.mov$/i.test(file.name)&&<p className="text-xs text-amber-200/80">MOV files upload without conversion. Some browsers cannot play them; MP4 is recommended for the widest playback support.</p>}
+            {file&&rchTvIsVideo(file)&&<div className="rounded-xl border border-white/15 bg-black/25 p-3">
+              <p className="mb-2 text-xs font-bold text-white/75">Video thumbnail · 16:9</p>
+              {posterPreview?<img src={posterPreview} alt="Selected video thumbnail" className="aspect-video w-full max-w-sm rounded-lg object-cover"/>:<div className="grid aspect-video w-full max-w-sm place-items-center rounded-lg bg-white/5 text-xs text-white/55">{posterLoading?'Generating thumbnail…':'No preview yet'}</div>}
+              {posterError&&<p className="mt-2 text-xs text-amber-200" role="alert">{posterError}</p>}
+              <label className="mt-3 block text-xs text-white/70">Choose a different thumbnail (or one if automatic capture fails)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>choosePosterImage(e.target.files?.[0]||null)} className="mt-1 block w-full text-xs"/></label>
+            </div>}
             {busy==='upload'&&<div role="status" aria-label="Upload progress" className="rounded-xl border border-white/10 p-3"><p className="mb-2 text-xs text-white/70">{uploadPercent}% uploaded</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-blue" style={{width:uploadPercent+'%'}} /></div></div>}
             <label className="block text-xs font-bold text-white/70">RCH TV section<select value={category} onChange={e=>setCategory(e.target.value as (typeof TV_CATEGORIES)[number]['value'])} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white">{TV_CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
             <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I own this production or have permission to distribute it on RCH TV, including its audio and footage.</span></label>
             <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)}/>Publish immediately instead of saving as draft</label>
-            <button disabled={busy==='upload'} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
+            <button disabled={busy==='upload' || Boolean(file && rchTvIsVideo(file) && !posterBlob)} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
             {busy==='upload'&&<button type="button" onClick={()=>uploadAbortRef.current?.abort()} className="w-full rounded-lg border border-white/20 px-4 py-3 text-xs text-white/70">Pause upload</button>}
           </form>
         </section>
@@ -237,6 +320,11 @@ export default function RchTvAdminPage() {
                 <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
                 <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={resolveRchMediaUrl(item.storage_path, p=>supabase!.storage.from('media').getPublicUrl(p).data.publicUrl, p=>supabase!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl) || '#'}>Open file ↗</a>
               </div>
+              {item.media_type==='video'&&<div className="mt-3 flex flex-wrap items-center gap-3">
+                {item.thumbnail_path?<img className="aspect-video w-28 rounded-md object-cover" alt={`Preview for ${item.title}`} src={supabase!.storage.from('media').getPublicUrl(item.thumbnail_path).data.publicUrl}/>:<div className="grid aspect-video w-28 place-items-center rounded-md bg-white/5 text-xs text-white/40">No thumbnail</div>}
+                <button type="button" disabled={Boolean(busy)} onClick={()=>void saveExistingPoster(item)} className="min-h-9 rounded-lg border border-rcl-blue/40 px-3 text-xs font-bold text-rcl-blue disabled:opacity-50">{busy===item.id?'Generating…':item.thumbnail_path?'Regenerate':'Generate preview'}</button>
+                <label className="text-xs font-semibold text-white/70">Upload image<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(busy)} onChange={e=>{const image=e.target.files?.[0];if(image)void saveExistingPoster(item,image);e.target.value='';}} className="mt-1 block w-40 text-xs"/></label>
+              </div>}
               <div className="mt-3 flex flex-wrap items-center gap-2"><label htmlFor={`rch-tv-category-${item.id}`} className="text-xs text-white/60">Section</label><select id={`rch-tv-category-${item.id}`} disabled={busy===item.id} value={TV_CATEGORY_OPTIONS.some(option=>option.value===item.rch_tv_category)?item.rch_tv_category:'general'} onChange={e=>void changeCategory(item.id,e.target.value)} className="min-h-9 max-w-full rounded-lg border border-white/20 bg-[#0b1724] px-2 text-xs text-white">{TV_CATEGORY_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>
                 {(['draft','published','archived'] as const).filter(status=>status!==item.status).map(status=><button key={status} type="button" disabled={busy===item.id} onClick={()=>void changeMediaStatus(item.id,status)} className="min-h-9 rounded-lg border border-white/20 px-3 text-xs font-semibold capitalize text-white/80 disabled:opacity-50">{status==='published'?'Publish':status==='draft'?'Unpublish':'Archive'}</button>)}
               </div>
