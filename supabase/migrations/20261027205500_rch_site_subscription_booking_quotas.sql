@@ -30,6 +30,9 @@ create table public.rch_site_subscriptions (
 );
 create index rch_site_subscriptions_status_idx
 on public.rch_site_subscriptions(tier,billing_status);
+-- Monthly quota counts use booking creation time, not appointment time.
+create index rch_site_bookings_org_booked_at_idx
+on public.rch_site_bookings(organization_id,booked_at);
 
 -- Seed eligible orgs with free entitlement; never derive website subscriptions
 -- from network_tier or public website tier-interest forms.
@@ -79,7 +82,9 @@ begin
     if tg_table_name='rch_site_services' and (old.status='active' or new.status<>'active') then
       return new;
     end if;
-    if tg_table_name='rch_site_slots' and (new.status<>'open' or old.status='open') then
+    if tg_table_name='rch_site_slots' and
+       (new.status<>'open' or (old.status='open' and
+         (old.starts_at>now() or new.starts_at<=now()))) then
       return new;
     end if;
     if tg_table_name='rch_site_bookings' and (old.status='confirmed' or new.status<>'confirmed') then
@@ -155,7 +160,7 @@ before insert or update of status,organization_id on public.rch_site_services
 for each row execute function public.rch_site_booking_plan_quota_guard();
 
 create trigger rch_site_slots_plan_quota
-before insert or update of status,organization_id on public.rch_site_slots
+before insert or update of status,organization_id,starts_at on public.rch_site_slots
 for each row execute function public.rch_site_booking_plan_quota_guard();
 
 create trigger rch_site_bookings_plan_quota
