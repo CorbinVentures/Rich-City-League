@@ -48,6 +48,10 @@ export default async function RchPublishedSite({params}:Params){
       .eq('status','published').gte('starts_at',new Date().toISOString())
       .order('starts_at',{ascending:true}).limit(6)
     : {data:[]};
+  const {data:bookableServices}=await record.db.from('rch_site_services')
+    .select('id').eq('organization_id',record.site.organization_id)
+    .eq('status','active').limit(1);
+  const bookingAvailable=Boolean(bookableServices?.length);
   const jsonld={
     '@context':'https://schema.org','@type':'Organization',
     name:record.organization.name,
@@ -56,7 +60,7 @@ export default async function RchPublishedSite({params}:Params){
     parentOrganization:{'@type':'Organization',name:'Rich City Hoops',url:siteOrigin},
   };
   return <>
-    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]}/>
+    <RchSiteView organization={record.organization} config={record.config} events={(events??[]) as RchSiteEvent[]} bookingAvailable={bookingAvailable}/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(jsonld).replace(/</g,'\\u003c')}}/>
   </>;
 }

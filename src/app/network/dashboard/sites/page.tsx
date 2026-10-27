@@ -198,6 +198,7 @@ export default function RchSitesBuilderPage(){
             </label>)}
           </div>
         </section>
+        {canPublish&&<Link href="/network/dashboard/sites/appointments" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Calendar &amp; bookings <FaArrowRight/></Link>}
         <div className="flex flex-wrap gap-2">
           <button disabled={!valid||Boolean(busy)} onClick={()=>void submit('save')} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-black disabled:opacity-40"><FaFloppyDisk/> {busy==='save'?'Saving…':'Save draft'}</button>
           <button disabled={!valid||!canPublish||Boolean(busy)} onClick={()=>void submit('publish')} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40"><FaRocket/> {busy==='publish'?'Publishing…':published?'Publish changes':'Publish website'}</button>
