@@ -10,7 +10,7 @@ export type RchSiteOrganization = {
   instagram_url?:string|null;youtube_url?:string|null;
 };
 export type RchSiteEvent = {id:string;title:string;slug:string;starts_at:string;city:string|null};
-type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean;paypalAvailable?:boolean;siteSlug?:string};
+type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean;paypalAvailable?:boolean;inquiryAvailable?:boolean;siteSlug?:string};
 
 function safeUrl(value:string|null|undefined){
   if(!value)return null;
@@ -25,7 +25,7 @@ const siteNames:Record<RchSiteDraft['siteType'],string>={
   aau:'Youth basketball program',organizer:'Basketball events',
 };
 
-export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false,paypalAvailable=false,siteSlug}:Props){
+export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false,paypalAvailable=false,inquiryAvailable=false,siteSlug}:Props){
   const colors=RCH_SITE_THEMES[config.theme];
   const cover=safeUrl(organization.cover_url);
   const logo=safeUrl(organization.logo_url);
@@ -36,6 +36,7 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
   const BodyTag=preview?'div':'main';
   const bookingPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/book';
   const paypalPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/pay';
+  const inquiryPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/inquire';
   const sections=config.sections;
   const show=(key:RchSiteSectionKey)=>sections.includes(key);
   return <div className="rch-site-surface min-h-svh" style={{backgroundColor:colors.canvas,color:colors.ink}}>
@@ -50,6 +51,7 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
           {sections.filter(k=>k!=='hero'&&k!=='roster').slice(0,3).map(key=><a key={key} href={'#'+key} className="hover:underline">{sectionNames[key]}</a>)}
           {bookingAvailable&&<Link href={bookingPath} className="font-black" style={{color:colors.accent}}>Book</Link>}
           {paypalAvailable&&<Link href={paypalPath} className="font-black" style={{color:colors.accent}}>Pay</Link>}
+          {inquiryAvailable&&<Link href={inquiryPath} className="font-black" style={{color:colors.accent}}>Ask</Link>}
         </nav>
       </div>
     </header>
@@ -61,7 +63,7 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
           <h1 className="max-w-3xl text-4xl font-black leading-tight sm:text-6xl">{config.tagline||organization.name}</h1>
           <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-lg">{[organization.city,organization.state].filter(Boolean).join(', ')||'Part of the RCH basketball community'}</p>
           {bookingAvailable?<Link href={bookingPath} className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>Book a session</Link>:
-            <a href="#contact" className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>{config.callToAction}</a>}
+            <Link href={inquiryAvailable?inquiryPath:'#contact'} className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-white" style={{backgroundColor:colors.accent}}>{inquiryAvailable?'Get in touch':config.callToAction}</Link>}
         </div>
       </section>}
       {show('about')&&<section id="about" className="scroll-mt-24 border-b border-current/15 py-10">
@@ -102,7 +104,8 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
         <h2 className="mt-2 text-3xl font-black">Let&apos;s talk basketball</h2>
         <p className="mt-3 max-w-xl text-sm leading-7 opacity-75">Ready to learn more about {organization.name}? Visit our RCH organization listing or connect through our social channels.</p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={'/organizations/'+encodeURIComponent(organization.slug)} className="inline-flex min-h-12 items-center rounded-xl px-5 text-sm font-black text-white" style={{backgroundColor:colors.accent}}>View RCH listing</Link>
+          {inquiryAvailable&&<Link href={inquiryPath} className="inline-flex min-h-12 items-center rounded-xl px-5 text-sm font-black text-white" style={{backgroundColor:colors.accent}}>Send an inquiry</Link>}
+          <Link href={'/organizations/'+encodeURIComponent(organization.slug)} className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">View RCH listing</Link>
           {paypalAvailable&&<Link href={paypalPath} className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">Pay via PayPal</Link>}
           {socials[0]&&<a href={socials[0].url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">Contact on {socials[0].label}</a>}
         </div>
