@@ -33,7 +33,7 @@ export type RchSiteDraft = {
 const MAX_TAGLINE_LENGTH=110;
 const MAX_ABOUT_LENGTH=1000;
 const MAX_ACTION_LENGTH=32;
-const VALID_SLUG=/^[a-z0-9](?:[a-z0-9-]{1,46}[a-z0-9])$/;
+const VALID_SLUG=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const RESERVED = new Set(['admin','api','auth','billing','dashboard','login','register','rch','richcityhoops','support','www']);
 const allowedType=(value:unknown):value is RchSiteType=>RCH_SITE_TYPES.some(type=>type===value);
 const allowedTheme=(value:unknown):value is RchSiteThemeKey=>RCH_SITE_THEME_KEYS.some(key=>key===value);

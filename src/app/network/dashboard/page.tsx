@@ -60,13 +60,22 @@ export default function NetworkDashboardPage() {
   const ctr = totals.impressions ? ((totals.clicks/totals.impressions)*100).toFixed(1) : '0.0';
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_80%_10%,rgba(44,166,255,.12),transparent_26%),linear-gradient(145deg,#071522,#03070d)]"><Container maxWidth="xl" className="py-12 sm:py-16"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCH Network · Operator console</p><h1 className="mt-3 font-display text-5xl font-black uppercase tracking-[-.04em] sm:text-7xl">Exposure you can <span className="text-rcl-blue">operate.</span></h1><p className="mt-4 max-w-3xl text-sm leading-6 text-white/50">Manage what RCH publishes about your organization, request distribution inventory, and see the audience RCH sends your way. Your registration, payments, schedules, teams, and standings remain in your own systems.</p></Container></section>
+    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_80%_10%,rgba(44,166,255,.12),transparent_26%),linear-gradient(145deg,#071522,#03070d)]"><Container maxWidth="xl" className="py-12 sm:py-16"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCH Network · Operator console</p><h1 className="mt-3 font-display text-5xl font-black uppercase tracking-[-.04em] sm:text-7xl">Exposure you can <span className="text-rcl-blue">operate.</span></h1><p className="mt-4 max-w-3xl text-sm leading-6 text-white/50">Manage your Network listing and measurable reach. Build an optional branded RCH Site without granting access to RCH league operations. Registration, payments, rosters, and booking tools remain outside this first release.</p></Container></section>
 
     <Container maxWidth="xl" className="py-8">
       {message && <div className="mb-6 rounded-xl border border-emerald-400/25 bg-emerald-400/[.05] p-3 text-xs text-emerald-200">{message}</div>}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><Metric label="Impressions" value={totals.impressions}/><Metric label="Views" value={totals.views}/><Metric label="Outbound clicks" value={totals.clicks}/><Metric label="CTR" value={`${ctr}%`}/><Metric label="Media views" value={totals.media}/></section>
 
       <section className="mt-8 grid gap-4 lg:grid-cols-3">{memberships.map(m=><article key={m.organization_id} className="rounded-2xl border border-rcl-blue/20 bg-[#071522]/65 p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">{m.member_role} access</p><h2 className="mt-1 font-display text-3xl font-black uppercase">{m.organization.name}</h2></div>{m.organization.is_verified&&<FaCircleCheck className="text-rcl-blue"/>}</div><p className="mt-3 text-xs uppercase tracking-wide text-white/35">{m.organization.network_tier} · verified operator</p><Link href={`/organizations/${m.organization.slug}`} className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">Public page <FaArrowRight/></Link></article>)}</section>
+
+      <section className="mt-8 rounded-3xl border border-rose-400/25 bg-rose-500/[.055] p-6">
+        <p className="text-xs font-black uppercase tracking-[.15em] text-rose-300">New · RCH Sites</p>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
+          <div><h2 className="font-display text-3xl font-black uppercase">Your organization. Your website.</h2>
+          <p className="mt-2 max-w-2xl text-sm text-white/60">Create a branded website with secure editing, approved templates and your own public link. Existing RCH Network listings stay unchanged.</p></div>
+          <Link href="/network/dashboard/sites" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black text-white">Open Website Studio <FaArrowRight/></Link>
+        </div>
+      </section>
 
       <section className="mt-10 grid gap-6 xl:grid-cols-2">
         <EventSubmissionForm organizations={memberships.map(m=>m.organization)} userId={user.id} db={db} onSuccess={()=>{setMessage('Event submitted for RCH review.');void load();}}/>
@@ -78,7 +87,7 @@ export default function NetworkDashboardPage() {
         <Panel eyebrow="Distribution queue" title="Campaign requests" icon={<FaBullhorn/>}>{campaigns.length?campaigns.map(item=><QueueRow key={item.id} title={item.name} meta={`${item.package} · ${item.requested_placement}`} status={item.status}/>):<Empty text="No exposure campaigns requested yet."/>}</Panel>
       </section>
 
-      <section className="mt-10 rounded-3xl border border-white/10 bg-white/[.025] p-6"><div className="flex items-start gap-3"><FaPeopleGroup className="mt-1 text-rcl-orange"/><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">Operating boundary</p><h2 className="mt-1 font-display text-3xl font-black uppercase">RCH distributes. You operate.</h2><p className="mt-3 max-w-4xl text-sm leading-6 text-white/45">This console intentionally does not contain registration, payments, rosters, scheduling, standings, or team administration for partner organizations. Public CTAs and campaign traffic point back to destinations you control.</p></div></div></section>
+      <section className="mt-10 rounded-3xl border border-white/10 bg-white/[.025] p-6"><div className="flex items-start gap-3"><FaPeopleGroup className="mt-1 text-rcl-orange"/><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">Operating boundary</p><h2 className="mt-1 font-display text-3xl font-black uppercase">RCH distributes. You operate.</h2><p className="mt-3 max-w-4xl text-sm leading-6 text-white/45">The Network continues to distribute your public listings. RCH Sites is a separate, opt-in website builder with independent tenant permissions. Registration, payments, rosters, scheduling, and league operations are not part of the current Site Builder release.</p></div></div></section>
     </Container>
   </main>;
 }
