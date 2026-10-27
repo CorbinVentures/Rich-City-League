@@ -22,6 +22,12 @@ values
 ('b6170000-0000-4000-8000-000000000001','sites-ent-one','{"siteType":"trainer"}','published'),
 ('b6170000-0000-4000-8000-000000000002','sites-ent-two','{"siteType":"trainer"}','published');
 
+select is((select enforce_booking from public.rch_site_booking_quota_rollout where id=true),
+false,'Migration leaves strict quotas disabled by default');
+update public.rch_site_booking_quota_rollout set enforce_booking=true where id=true;
+select is((select enforce_booking from public.rch_site_booking_quota_rollout where id=true),
+true,'Authorized operator may enable atomic booking quotas for pilot');
+
 -- Keep local fixture small; real proposed tiers are 2/30/25 and 15/150/150.
 update public.rch_site_plan_limits
 set booking_services=1,upcoming_slots=1,confirmed_bookings_monthly=1
