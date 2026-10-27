@@ -10,7 +10,7 @@ export type RchSiteOrganization = {
   instagram_url?:string|null;youtube_url?:string|null;
 };
 export type RchSiteEvent = {id:string;title:string;slug:string;starts_at:string;city:string|null};
-type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean;paypalAvailable?:boolean};
+type Props={organization:RchSiteOrganization;config:RchSiteDraft;events?:RchSiteEvent[];preview?:boolean;bookingAvailable?:boolean;paypalAvailable?:boolean;siteSlug?:string};
 
 function safeUrl(value:string|null|undefined){
   if(!value)return null;
@@ -25,7 +25,7 @@ const siteNames:Record<RchSiteDraft['siteType'],string>={
   aau:'Youth basketball program',organizer:'Basketball events',
 };
 
-export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false,paypalAvailable=false}:Props){
+export function RchSiteView({organization,config,events=[],preview=false,bookingAvailable=false,paypalAvailable=false,siteSlug}:Props){
   const colors=RCH_SITE_THEMES[config.theme];
   const cover=safeUrl(organization.cover_url);
   const logo=safeUrl(organization.logo_url);
@@ -34,8 +34,8 @@ export function RchSiteView({organization,config,events=[],preview=false,booking
     {label:'YouTube',url:safeUrl(organization.youtube_url)},
   ].filter((v):v is {label:string;url:string}=>Boolean(v.url));
   const BodyTag=preview?'div':'main';
-  const bookingPath='/sites/'+encodeURIComponent(organization.slug)+'/book';
-  const paypalPath='/sites/'+encodeURIComponent(organization.slug)+'/pay';
+  const bookingPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/book';
+  const paypalPath='/sites/'+encodeURIComponent(siteSlug||organization.slug)+'/pay';
   const sections=config.sections;
   const show=(key:RchSiteSectionKey)=>sections.includes(key);
   return <div className="rch-site-surface min-h-svh" style={{backgroundColor:colors.canvas,color:colors.ink}}>
