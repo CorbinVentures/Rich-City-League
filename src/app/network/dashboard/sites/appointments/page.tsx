@@ -9,7 +9,7 @@ import {FaArrowLeft,FaCalendarDays,FaCircleCheck,FaClock,FaPlus,FaXmark} from 'r
 type Org={id:string;name:string;eligible:boolean;member_role:string};
 type Service={id:string;name:string;description:string;duration_minutes:number;status:string};
 type Slot={id:string;service_id:string;starts_at:string;ends_at:string;status:string;booked:boolean};
-type PlanSummary={tier:string;billingStatus:string;limits:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}|null;
+type PlanSummary={tier:string;billingStatus:string;quotaEnforced:boolean;limits:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}|null;
   usage:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}};
 const field='mt-2 w-full min-h-11 rounded-xl border border-white/15 bg-[#141822] px-3 py-2.5 text-sm text-white focus:border-rose-400 focus:outline-none';
 function localDate(value:string){return new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));}
@@ -97,7 +97,9 @@ export default function AppointmentsManager(){
           <span>Upcoming slots {websitePlan.usage.upcomingSlots}/{websitePlan.limits.upcomingSlots}</span>
           <span>Bookings this month {websitePlan.usage.confirmedBookingsMonthly}/{websitePlan.limits.confirmedBookingsMonthly}</span>
         </div>
-        <p className="mt-2 text-xs text-white/50">Usage is enforced by the website plan. Paid plan enrollment is not available yet.</p>
+        <p className="mt-2 text-xs text-white/50">{websitePlan.quotaEnforced
+          ?'Website plan quotas are active. Paid plan enrollment is not available yet.'
+          :'Proposed plan limits shown for reference. Existing booking limits remain in effect during the pilot.'}</p>
       </div>}
       <label className="mt-7 block max-w-md text-xs font-bold">Manage organization
         <select className={field} value={selected} onChange={e=>{setSelected(e.target.value);setMessage('');setError('');}}>
