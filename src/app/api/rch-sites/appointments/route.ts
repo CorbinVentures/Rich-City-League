@@ -58,6 +58,13 @@ async function managedOrg(context:NonNullable<Awaited<ReturnType<typeof signedIn
     .eq('id',id).maybeSingle();
   return isApproved(org)?org:null;
 }
+// False preserves the legacy soft caps until the operator approves strict
+// per-plan enforcement. Null means rollout state could not be verified.
+async function bookingQuotaEnabled(admin:any):Promise<boolean|null>{
+  const {data,error}=await admin.from('rch_site_booking_quota_rollout')
+    .select('enforce_booking').eq('id',true).maybeSingle();
+  return error||!data?null:data.enforce_booking===true;
+}
 async function approvedPublished(admin:any,organizationId:string){
   const [{data:site},{data:org}]=await Promise.all([
     admin.from('rch_sites').select('status').eq('organization_id',organizationId).maybeSingle(),
@@ -76,7 +83,8 @@ export async function GET(request:Request){
     const context=await signedInContext();
     if(!context)return json({error:'Sign in with a completed account to manage availability.'},401);
     if(!await managedOrg(context,organizationId,admin))return json({error:'Organization manager access required.'},403);
-    const [{data:services,error:se},{data:slots,error:sl},{data:subscription,error:subError},{data:planLimits,error:planError}]=await Promise.all([
+    const [{data:services,error:se},{data:slots,error:sl},{data:subscription,error:subError},{data:planLimits,error:planError},
+      {data:rollout,error:rolloutError}]=await Promise.all([
       admin.from('rch_site_services').select('id,name,description,duration_minutes,price_cents,status')
         .eq('organization_id',organizationId).order('created_at',{ascending:false}).limit(25),
       admin.from('rch_site_slots').select('id,service_id,starts_at,ends_at,status')
@@ -85,8 +93,9 @@ export async function GET(request:Request){
       admin.from('rch_site_subscriptions').select('tier,billing_status')
         .eq('organization_id',organizationId).maybeSingle(),
       admin.from('rch_site_plan_limits').select('tier,booking_services,upcoming_slots,confirmed_bookings_monthly'),
+      admin.from('rch_site_booking_quota_rollout').select('enforce_booking').eq('id',true).maybeSingle(),
     ]);
-    if(se||sl||subError||planError)return json({error:'Unable to load appointment scheduling.'},503);
+    if(se||sl||subError||planError||rolloutError||!rollout)return json({error:'Unable to load appointment scheduling.'},503);
     const period=new Date();
     const monthStart=new Date(Date.UTC(period.getUTCFullYear(),period.getUTCMonth(),1)).toISOString();
     const [{count:serviceCount,error:serviceCountError},{count:slotCount,error:slotCountError},
@@ -108,6 +117,7 @@ export async function GET(request:Request){
     const plan=(planLimits??[]).find((value:any)=>value.tier===(subscription?.tier??'free'));
     return json({services:services??[],slots:(slots??[]).map((slot:any)=>({...slot,booked:bookedIds.has(slot.id)})),
       websitePlan:{tier:subscription?.tier??'free',billingStatus:subscription?.billing_status??'none',
+        quotaEnforced:rollout.enforce_booking===true,
         limits:plan?{services:plan.booking_services,upcomingSlots:plan.upcoming_slots,
           confirmedBookingsMonthly:plan.confirmed_bookings_monthly}:null,
         usage:{services:serviceCount??0,upcomingSlots:slotCount??0,confirmedBookingsMonthly:bookingCount??0}}});
@@ -179,8 +189,15 @@ export async function POST(request:Request){
     const description=typeof raw.description==='string'?raw.description.replace(/<[^>]*>/g,'').trim():'';
     if(name.length<3||name.length>90||description.length>500||!durations.has(Number(raw.durationMinutes)))
       return json({error:'Enter a service name, optional description, and approved duration.'},400);
-    // No API-only count check: the database trigger locks the subscription row
-    // and counts active services atomically with this insertion.
+    const strictQuota=await bookingQuotaEnabled(admin);
+    if(strictQuota===null)return json({error:'Website quota settings are unavailable.'},503);
+    if(!strictQuota){
+      // Retain existing safety ceiling until the operator enables DB quotas.
+      const {count,error}=await admin.from('rch_site_services')
+        .select('id',{head:true,count:'exact'}).eq('organization_id',organizationId);
+      if(error)return json({error:'Unable to check legacy service allowance.'},503);
+      if((count??0)>=20)return json({error:'This organization has reached its current 20-service limit.'},409);
+    }
     const {data,error}=await admin.from('rch_site_services').insert({
       organization_id:organizationId,name,description,duration_minutes:Number(raw.durationMinutes),price_cents:0,
     }).select('id').single();
@@ -204,7 +221,16 @@ export async function POST(request:Request){
       .select('id,duration_minutes,status').eq('id',raw.serviceId)
       .eq('organization_id',organizationId).maybeSingle();
     if(!service||service.status!=='active')return json({error:'Select an active service.'},404);
-    // The DB quota trigger counts future open slots under a per-org row lock.
+    const strictQuota=await bookingQuotaEnabled(admin);
+    if(strictQuota===null)return json({error:'Website quota settings are unavailable.'},503);
+    if(!strictQuota){
+      // Legacy 120-slot cap remains until serialized quotas are switched on.
+      const {count,error}=await admin.from('rch_site_slots')
+        .select('id',{head:true,count:'exact'}).eq('organization_id',organizationId)
+        .eq('status','open').gte('starts_at',new Date().toISOString());
+      if(error)return json({error:'Unable to check legacy calendar capacity.'},503);
+      if((count??0)>=120)return json({error:'Current limit of 120 upcoming appointment slots reached.'},409);
+    }
     const {data,error}=await admin.from('rch_site_slots').insert({
       organization_id:organizationId,service_id:raw.serviceId,
       starts_at:begins.toISOString(),
