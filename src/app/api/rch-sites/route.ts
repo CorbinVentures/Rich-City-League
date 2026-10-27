@@ -87,6 +87,11 @@ export async function POST(request:Request){
     return send({error:'Select a valid organization and site action.'},400);
 
   const db=client as any;
+  const {data:profile,error:profileError}=await db.from('profiles')
+    .select('is_active,onboarding_complete').eq('id',user.id).maybeSingle();
+  if(profileError)return send({error:'Account security could not be checked.'},503);
+  if(!profile || profile.is_active!==true || profile.onboarding_complete!==true)
+    return send({error:'Complete your active RCH account before editing websites.'},403);
   const {data:member,error:memberError}=await db.from('network_organization_members')
     .select('member_role,status').eq('organization_id',organizationId).eq('profile_id',user.id).eq('status','active').maybeSingle();
   if(memberError)return send({error:'Unable to check site permissions.'},503);
