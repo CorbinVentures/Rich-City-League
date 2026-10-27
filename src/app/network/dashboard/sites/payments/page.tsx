@@ -72,7 +72,7 @@ export default function PayPalPaymentLinksManager(){
     <h1 className="mt-2 text-4xl font-black">Your PayPal. Your earnings.</h1>
     <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">Create your payment link in your own PayPal Business account. Add it here so visitors can pay you directly on PayPal. RCH never asks for your password, links its merchant account, or receives those payments.</p>
     <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-400/5 p-4 text-xs leading-6 text-amber-100">
-      <b>Important:</b> Your RCH website subscription is a separate bill paid to RCH, not to your PayPal account. Links on this screen cannot verify payments, confirm paid bookings, or issue refunds. Confirm all funds, recipient and prices in your own PayPal account.
+      <b>Important:</b> Any RCH website subscription will be billed separately by RCH, not through your PayPal account. Links on this screen cannot verify payments, confirm paid bookings, or issue refunds. Confirm all funds, recipient and prices in your own PayPal account.
     </div>
     {orgs.length===0?<p className="mt-8 text-sm text-white/70">An approved organization owner or manager must sign in to add PayPal links.</p>:<>
       <label className="mt-7 block max-w-lg text-sm font-bold">Organization
