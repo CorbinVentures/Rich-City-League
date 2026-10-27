@@ -22,6 +22,7 @@ const nav = [
   { name: 'Social', href: '/pulse' },
   { name: 'News', href: '/news' },
   { name: 'RCH TV', href: '/media' },
+  { name: 'Build a Site', href: '/website-creator' },
 ];
 
 function browserNavHref(href: string, signedIn: boolean) {
@@ -200,6 +201,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           <Link href="/discover"><FaCompass/> Discover</Link>
           <Link href="/runs">Runs</Link>
           <Link href="/league">Rich City League</Link>
+          <Link href="/website-creator">Website Creator</Link>
           <Link href={user ? '/social' : '/pulse'}>Social</Link>
           <Link href="/news">News</Link>
           <a href="https://www.instagram.com/richcityhoops/" target="_blank" rel="noopener noreferrer" aria-label="Rich City Hoops on Instagram">Instagram</a>

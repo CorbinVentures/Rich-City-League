@@ -15,6 +15,7 @@ const core = [
   ['/organizations',.95,'daily'],
   ['/network/partners',.85,'weekly'],
   ['/network/partners/apply',.8,'weekly'],
+  ['/website-creator',.9,'weekly'],
   ['/organizations/region/central-virginia',.8,'daily'],
   ['/organizations/region/tri-cities',.8,'daily'],
   ['/organizations/region/hampton-roads',.8,'daily'],

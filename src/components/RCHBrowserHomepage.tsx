@@ -116,6 +116,15 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       </div>
     </section>
 
+    <section className="mx-auto mt-7 flex w-[calc(100%-28px)] max-w-[1450px] flex-col items-start justify-between gap-5 rounded-3xl border border-sky-400/30 bg-[linear-gradient(120deg,#102b40,#081322)] p-6 text-white sm:flex-row sm:items-center sm:p-9" aria-labelledby="rch-sites-title">
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase tracking-[.19em] text-sky-300">RCH Sites · Website Creator</p>
+        <h2 id="rch-sites-title" className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Your basketball business. Your website.</h2>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">For coaches, trainers, teams and organizers. Free, Amateur and Professional subscription options.</p>
+      </div>
+      <Link href="/website-creator" className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-black text-[#071522] hover:bg-sky-300">Build a website <FaArrowRight aria-hidden="true"/></Link>
+    </section>
+
     <section className="rch-browser-app-promo" aria-labelledby="rch-browser-app-title">
       <div className="rch-browser-phone-art" aria-hidden="true">
         <div className="rch-browser-phone"><div className="rch-browser-phone-notch"/><div className="rch-browser-phone-screen">
