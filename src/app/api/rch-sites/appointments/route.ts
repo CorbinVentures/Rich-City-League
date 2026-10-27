@@ -87,6 +87,19 @@ export async function GET(request:Request){
       admin.from('rch_site_plan_limits').select('tier,booking_services,upcoming_slots,confirmed_bookings_monthly'),
     ]);
     if(se||sl||subError||planError)return json({error:'Unable to load appointment scheduling.'},503);
+    const period=new Date();
+    const monthStart=new Date(Date.UTC(period.getUTCFullYear(),period.getUTCMonth(),1)).toISOString();
+    const [{count:serviceCount,error:serviceCountError},{count:slotCount,error:slotCountError},
+      {count:bookingCount,error:bookingCountError}]=await Promise.all([
+      admin.from('rch_site_services').select('id',{head:true,count:'exact'})
+        .eq('organization_id',organizationId).eq('status','active'),
+      admin.from('rch_site_slots').select('id',{head:true,count:'exact'})
+        .eq('organization_id',organizationId).eq('status','open').gt('starts_at',new Date().toISOString()),
+      admin.from('rch_site_bookings').select('id',{head:true,count:'exact'})
+        .eq('organization_id',organizationId).gte('booked_at',monthStart),
+    ]);
+    if(serviceCountError||slotCountError||bookingCountError)
+      return json({error:'Unable to load plan usage.'},503);
     const ids=(slots??[]).map((slot:any)=>slot.id);
     const {data:bookings,error:be}=ids.length?await admin.from('rch_site_bookings')
       .select('slot_id').in('slot_id',ids).eq('status','confirmed'):{data:[],error:null};
@@ -96,7 +109,8 @@ export async function GET(request:Request){
     return json({services:services??[],slots:(slots??[]).map((slot:any)=>({...slot,booked:bookedIds.has(slot.id)})),
       websitePlan:{tier:subscription?.tier??'free',billingStatus:subscription?.billing_status??'none',
         limits:plan?{services:plan.booking_services,upcomingSlots:plan.upcoming_slots,
-          confirmedBookingsMonthly:plan.confirmed_bookings_monthly}:null}});
+          confirmedBookingsMonthly:plan.confirmed_bookings_monthly}:null,
+        usage:{services:serviceCount??0,upcomingSlots:slotCount??0,confirmedBookingsMonthly:bookingCount??0}}});
   }
 
   const slug=url.searchParams.get('slug');
