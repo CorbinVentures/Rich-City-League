@@ -31,7 +31,7 @@ function originVerified(request:Request){
     const value=new URL(origin);
     const requestHost=request.headers.get('host');
     return (value.protocol==='https:' || (value.protocol==='http:' && value.hostname==='localhost'))
-      && Boolean(requestHost) && value.host.toLowerCase()===requestHost.toLowerCase();
+      && requestHost!==null && value.host.toLowerCase()===requestHost.toLowerCase();
   }catch{return false;}
 }
 function eligible(org:Org){
