@@ -24,7 +24,7 @@ const PUBLIC_BROWSER_PAGES = new Set([
   '/league', '/richmond-basketball-league',
   '/richmond-basketball-runs', '/network', '/community', '/sponsors',
   '/sponsors/start', '/organizations', '/network/partners',
-  '/network/partners/apply', '/membership', '/news', '/players',
+  '/network/partners/apply', '/website-creator', '/membership', '/news', '/players',
   '/teams', '/games', '/standings', '/leaderboards', '/schedule',
   '/stats', '/rankings', '/coaches', '/runs', '/draft', '/media',
   '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse', '/world',
