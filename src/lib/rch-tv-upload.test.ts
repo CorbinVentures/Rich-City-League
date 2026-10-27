@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { RCH_TV_VIDEO_BUCKET, RCH_TV_VIDEO_STORAGE_PREFIX, resolveRchMediaUrl } from '@/lib/rch-tv-media';
-import { RCH_TV_VIDEO_MAX_BYTES, rchTvFileError, rchTvIsVideo } from '@/lib/rch-tv-upload';
+import { RCH_TV_VIDEO_BUCKET, RCH_TV_VIDEO_STORAGE_PREFIX, resolveRchMediaUrl } from './rch-tv-media';
+import { RCH_TV_VIDEO_MAX_BYTES, rchTvFileError, rchTvIsVideo } from './rch-tv-upload';
 
 describe('RCH TV full-game upload compatibility', () => {
   const legacy = (path:string) => `https://storage.example/media/${path}`;
