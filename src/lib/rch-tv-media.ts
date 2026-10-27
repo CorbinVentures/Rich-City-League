@@ -15,7 +15,7 @@ export function resolveRchMediaUrl(
 
   if (value.startsWith(RCH_TV_VIDEO_STORAGE_PREFIX)) {
     const objectPath = value.slice(RCH_TV_VIDEO_STORAGE_PREFIX.length);
-    if (!getRchTvPublicUrl || !/^[a-f0-9-]{36}\/rch-tv\/[a-f0-9-]{36}\.(?:mp4|webm)$/i.test(objectPath)) return null;
+    if (!getRchTvPublicUrl || !/^[a-f0-9-]{36}\/rch-tv\/[a-f0-9-]{36}\.(?:mp4|webm|mov)$/i.test(objectPath)) return null;
     return getRchTvPublicUrl(objectPath);
   }
   if (/^https?:\/\//i.test(value)) {
