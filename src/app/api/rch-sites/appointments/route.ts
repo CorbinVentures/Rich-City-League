@@ -12,6 +12,13 @@ const bookingTypes=new Set(['training','program','team','tournament','league','f
 const durations=new Set([30,45,60,90,120]);
 const managerRoles=new Set(['owner','manager']);
 const headers={'Cache-Control':'private, no-store'};
+// Database trigger serializes per-organization creates; these messages never expose
+// merchant account details or a tenant's private booking totals.
+function bookingWriteError(error:{code?:string},fallback:string){
+  return error.code==='P0001'?{error:'This organization has reached its booking allowance for the current website plan.',status:409}
+    :error.code==='23514'?{error:'This website subscription or appointment is not available.',status:409}
+    :{error:fallback,status:503};
+}
 function json(data:Record<string,unknown>,status=200){return NextResponse.json(data,{status,headers});}
 function safeOrigin(request:Request){
   try{
@@ -69,20 +76,27 @@ export async function GET(request:Request){
     const context=await signedInContext();
     if(!context)return json({error:'Sign in with a completed account to manage availability.'},401);
     if(!await managedOrg(context,organizationId,admin))return json({error:'Organization manager access required.'},403);
-    const [{data:services,error:se},{data:slots,error:sl}]=await Promise.all([
+    const [{data:services,error:se},{data:slots,error:sl},{data:subscription,error:subError},{data:planLimits,error:planError}]=await Promise.all([
       admin.from('rch_site_services').select('id,name,description,duration_minutes,price_cents,status')
         .eq('organization_id',organizationId).order('created_at',{ascending:false}).limit(25),
       admin.from('rch_site_slots').select('id,service_id,starts_at,ends_at,status')
         .eq('organization_id',organizationId).gte('starts_at',new Date().toISOString())
         .order('starts_at',{ascending:true}).limit(200),
+      admin.from('rch_site_subscriptions').select('tier,billing_status')
+        .eq('organization_id',organizationId).maybeSingle(),
+      admin.from('rch_site_plan_limits').select('tier,booking_services,upcoming_slots,confirmed_bookings_monthly'),
     ]);
-    if(se||sl)return json({error:'Unable to load appointment scheduling.'},503);
+    if(se||sl||subError||planError)return json({error:'Unable to load appointment scheduling.'},503);
     const ids=(slots??[]).map((slot:any)=>slot.id);
     const {data:bookings,error:be}=ids.length?await admin.from('rch_site_bookings')
       .select('slot_id').in('slot_id',ids).eq('status','confirmed'):{data:[],error:null};
     if(be)return json({error:'Unable to read slot reservations.'},503);
     const bookedIds=new Set((bookings??[]).map((item:any)=>item.slot_id));
-    return json({services:services??[],slots:(slots??[]).map((slot:any)=>({...slot,booked:bookedIds.has(slot.id)}))});
+    const plan=(planLimits??[]).find((value:any)=>value.tier===(subscription?.tier??'free'));
+    return json({services:services??[],slots:(slots??[]).map((slot:any)=>({...slot,booked:bookedIds.has(slot.id)})),
+      websitePlan:{tier:subscription?.tier??'free',billingStatus:subscription?.billing_status??'none',
+        limits:plan?{services:plan.booking_services,upcomingSlots:plan.upcoming_slots,
+          confirmedBookingsMonthly:plan.confirmed_bookings_monthly}:null}});
   }
 
   const slug=url.searchParams.get('slug');
@@ -151,14 +165,13 @@ export async function POST(request:Request){
     const description=typeof raw.description==='string'?raw.description.replace(/<[^>]*>/g,'').trim():'';
     if(name.length<3||name.length>90||description.length>500||!durations.has(Number(raw.durationMinutes)))
       return json({error:'Enter a service name, optional description, and approved duration.'},400);
-    const {count,error:countError}=await admin.from('rch_site_services').select('id',{head:true,count:'exact'})
-      .eq('organization_id',organizationId);
-    if(countError)return json({error:'Unable to check service limits.'},503);
-    if((count??0)>=20)return json({error:'This organization has reached its 20-service limit.'},409);
+    // No API-only count check: the database trigger locks the subscription row
+    // and counts active services atomically with this insertion.
     const {data,error}=await admin.from('rch_site_services').insert({
       organization_id:organizationId,name,description,duration_minutes:Number(raw.durationMinutes),price_cents:0,
     }).select('id').single();
-    return error?json({error:'Unable to create service.'},503):json({status:'created',id:data.id});
+    if(error){const failure=bookingWriteError(error,'Unable to create service.');return json({error:failure.error},failure.status);}
+    return json({status:'created',id:data.id});
   }
 
   if(action==='createSlot'){
@@ -177,18 +190,17 @@ export async function POST(request:Request){
       .select('id,duration_minutes,status').eq('id',raw.serviceId)
       .eq('organization_id',organizationId).maybeSingle();
     if(!service||service.status!=='active')return json({error:'Select an active service.'},404);
-    const {count,error:countError}=await admin.from('rch_site_slots')
-      .select('id',{head:true,count:'exact'}).eq('organization_id',organizationId)
-      .eq('status','open').gte('starts_at',new Date().toISOString());
-    if(countError)return json({error:'Unable to check calendar capacity.'},503);
-    if((count??0)>=120)return json({error:'Limit of 120 upcoming appointment slots reached.'},409);
+    // The DB quota trigger counts future open slots under a per-org row lock.
     const {data,error}=await admin.from('rch_site_slots').insert({
       organization_id:organizationId,service_id:raw.serviceId,
       starts_at:begins.toISOString(),
       ends_at:new Date(starts+service.duration_minutes*60000).toISOString(),
     }).select('id').single();
-    if(error)return json({error:['23P01','23505'].includes(error.code)?'This time overlaps another available session.':'Could not add this appointment time.'},
-      ['23P01','23505'].includes(error.code)?409:503);
+    if(error){
+      if(['23P01','23505'].includes(error.code))return json({error:'This time overlaps another available session.'},409);
+      const failure=bookingWriteError(error,'Could not add this appointment time.');
+      return json({error:failure.error},failure.status);
+    }
     return json({status:'created',id:data.id});
   }
 
@@ -239,7 +251,8 @@ export async function POST(request:Request){
         if(retry&&retry.slot_id===raw.slotId)return json({status:retry.status,bookingId:retry.id});
         return json({error:'This appointment was just booked by someone else.'},409);
       }
-      return json({error:error.code==='23514'?'This appointment is no longer available.':'Unable to confirm booking.'},error.code==='23514'?409:503);
+      const failure=bookingWriteError(error,'Unable to confirm booking.');
+      return json({error:failure.error},failure.status);
     }
     return json({status:'confirmed',bookingId:data.id});
   }
