@@ -1,7 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {
   isRchSiteSlug,normalizeRchSiteDraft,rchSitePath,rchSiteSectionsFor,RCH_SITE_THEMES,
-} from '@/lib/rch-site-builder';
+} from '../src/lib/rch-site-builder';
 
 describe('RCH Sites safe builder contract',()=>{
   it('only allows canonical tenant slugs (not platform/admin routes)',()=>{
