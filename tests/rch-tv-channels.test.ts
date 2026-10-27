@@ -18,6 +18,13 @@ describe('RCH TV — four editorial destinations', () => {
     expect(hub).toContain('RCH TV weekly show + podcast');
   });
 
+  it('makes published game replays directly discoverable', () => {
+    expect(hub).toContain('href="#game-replays"');
+    expect(hub).toContain('id="game-replays"');
+    expect(hub).toContain('Replays ({gameReplays.length})');
+    expect(hub).toContain("gameReplays.length>0");
+  });
+
   it('separates curated titles without silently including general uploads', () => {
     expect(hub).toContain("item.category==='live_games'");
     expect(hub).toContain("item.category==='the_pulse'");

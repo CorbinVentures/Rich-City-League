@@ -59,6 +59,7 @@ export default async function MediaPage() {
     <Container maxWidth="xl" className="py-10 sm:py-12">
       <nav aria-label="RCH TV sections" className="flex gap-2 overflow-x-auto pb-3">
         <Link href="#live-games" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Live games</Link>
+        {gameReplays.length>0&&<Link href="#game-replays" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-4 text-sm font-semibold text-rcl-orange">Replays ({gameReplays.length})</Link>}
         <Link href="#the-pulse" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">The Pulse</Link>
         <Link href="#movies" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Movies</Link>
         <Link href="#original-content" className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/15 px-4 text-sm font-semibold">Originals</Link>
@@ -70,7 +71,7 @@ export default async function MediaPage() {
         <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">{nextGame ? 'Next free broadcast' : 'RCH TV Live'}</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">{nextGame ? `${teamName(nextGame.away_team_id)} vs ${teamName(nextGame.home_team_id)}` : 'Broadcast schedule coming soon'}</h3>{nextGame && <p className="mt-1 text-sm text-white/40">{new Date(nextGame.scheduled_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>}</div><div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No subscription required for games.</p></div></div>
       </section>
 
-      {gameReplays.length>0&&<section aria-label="Recent game replays" className="mt-8"><h3 className="mb-5 font-display text-2xl font-black uppercase">Game Replays</h3><MediaDirectory items={gameReplays}/></section>}
+      {gameReplays.length>0&&<section id="game-replays" aria-label="Recent game replays" className="mt-8 scroll-mt-24"><h3 className="mb-5 font-display text-2xl font-black uppercase">Game Replays</h3><MediaDirectory items={gameReplays}/></section>}
 
       <NetworkSponsoredPlacement
         placement="media-feature"
