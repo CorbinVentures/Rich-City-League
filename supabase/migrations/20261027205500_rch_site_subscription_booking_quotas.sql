@@ -13,6 +13,15 @@ create table public.rch_site_plan_limits (
 insert into public.rch_site_plan_limits(tier,booking_services,upcoming_slots,confirmed_bookings_monthly)
 values ('free',2,30,25),('amateur',15,150,150),('professional',60,600,600);
 
+-- Operator-only staged enablement; installing this migration must NOT
+-- immediately impose smaller Free limits on existing live organizers.
+create table public.rch_site_booking_quota_rollout (
+  id boolean primary key default true check (id=true),
+  enforce_booking boolean not null default false
+);
+insert into public.rch_site_booking_quota_rollout(id,enforce_booking)
+values(true,false);
+
 create table public.rch_site_subscriptions (
   organization_id uuid primary key references public.network_organizations(id) on delete cascade,
   tier text not null default 'free'
@@ -51,8 +60,10 @@ for each row execute function public.set_updated_at();
 -- Only server-only service_role may read/assign website billing entitlements.
 alter table public.rch_site_plan_limits enable row level security;
 alter table public.rch_site_subscriptions enable row level security;
+alter table public.rch_site_booking_quota_rollout enable row level security;
 revoke all on public.rch_site_plan_limits from public,anon,authenticated;
 revoke all on public.rch_site_subscriptions from public,anon,authenticated;
+revoke all on public.rch_site_booking_quota_rollout from public,anon,authenticated;
 
 -- Called as a regular INVOKER trigger during the already-authorized server
 -- write; no SECURITY DEFINER, no exposed RPC and no client bypass.
@@ -74,6 +85,11 @@ declare
   v_key text;
   v_month_start timestamptz;
 begin
+  -- Quotas activate only after staging tests and an affected-tenant audit.
+  -- Until then, legacy API ceilings continue protecting booking creates.
+  if not coalesce((select enforce_booking from public.rch_site_booking_quota_rollout where id=true),false) then
+    return new;
+  end if;
   if tg_op='UPDATE' then
     if new.organization_id is distinct from old.organization_id then
       raise exception 'Cannot transfer site resource ownership'
@@ -174,6 +190,8 @@ for each row execute function public.rch_site_booking_plan_quota_guard();
 
 comment on table public.rch_site_subscriptions is
   'Dedicated RCH Sites plans. No connection to Network advertising or merchant PayPal proceeds.';
+comment on table public.rch_site_booking_quota_rollout is
+  'Internal emergency kill switch: false by default. Turn on after staged validation and owner review.';
 comment on table public.rch_site_plan_limits is
   'Server-only, proposed booking quota limits; validated atomically via booking write triggers.';
 comment on function public.rch_site_booking_plan_quota_guard() is
