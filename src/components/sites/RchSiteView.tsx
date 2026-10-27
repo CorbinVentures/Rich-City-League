@@ -33,6 +33,7 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
     {label:'Instagram',url:safeUrl(organization.instagram_url)},
     {label:'YouTube',url:safeUrl(organization.youtube_url)},
   ].filter((v):v is {label:string;url:string}=>Boolean(v.url));
+  const BodyTag=preview?'div':'main';
   const sections=config.sections;
   const show=(key:RchSiteSectionKey)=>sections.includes(key);
   return <div className="rch-site-surface min-h-svh" style={{backgroundColor:colors.canvas,color:colors.ink}}>
@@ -48,7 +49,7 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
         </nav>
       </div>
     </header>
-    <main className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-7">
+    <BodyTag className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-7">
       {show('hero')&&<section className="relative my-5 overflow-hidden rounded-3xl border border-current/10" id="hero" style={{backgroundColor:colors.canvas}}>
         {cover&&<Image src={cover} alt="" width={1400} height={600} unoptimized className="absolute inset-0 h-full w-full object-cover opacity-25" />}
         <div className="relative flex min-h-72 flex-col items-start justify-center gap-5 bg-gradient-to-r from-black/50 to-transparent p-7 text-white sm:min-h-96 sm:p-12">
@@ -99,7 +100,7 @@ export function RchSiteView({organization,config,events=[],preview=false}:Props)
           {socials[0]&&<a href={socials[0].url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl border border-current/30 px-5 text-sm font-bold">Contact on {socials[0].label}</a>}
         </div>
       </section>}
-    </main>
+    </BodyTag>
     <footer className="border-t border-current/15 px-4 py-6">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 text-xs opacity-75">
         <span>© {new Date().getFullYear()} {organization.name}</span>
