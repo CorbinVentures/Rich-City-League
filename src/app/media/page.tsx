@@ -33,8 +33,10 @@ export default async function MediaPage() {
     type: item.media_type,
     url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl, (path) => client!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(path).data.publicUrl),
     createdAt: item.created_at,
+    posterUrl: item.thumbnail_path ? resolveRchMediaUrl(item.thumbnail_path,
+      path => client!.storage.from('media').getPublicUrl(path).data.publicUrl) : null,
     category: (item as Media & { rch_tv_category?: string }).rch_tv_category ?? 'general',
-  })).filter((item) => item.url !== null) as Array<{ id: string; title: string; description: string | null; type: string; url: string; createdAt: string; category: string }>;
+  })).filter((item) => item.url !== null) as Array<{ id: string; title: string; description: string | null; type: string; url: string; createdAt: string; category: string; posterUrl: string | null }>;
   const highlights=(highlightResult.data??[]) as Highlight[];
   const gameReplays=items.filter(item=>item.category==='live_games');
   const pulseEpisodes=items.filter(item=>item.category==='the_pulse');
