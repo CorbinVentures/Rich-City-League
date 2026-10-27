@@ -52,7 +52,7 @@ describe('RCH Sites Phase 1 release boundaries',()=>{
   });
   it('renders safe predefined templates rather than embedded user code or youth rosters',()=>{
     expect(site).toContain('RCH_SITE_THEMES[config.theme]');
-    expect(site).toContain("config.sections.includes(key)");
+    expect(site).toContain("sections.includes(key)");
     expect(site).toContain('Athlete and family records remain private.');
     expect(site).toContain("Powered by Rich City Hoops");
     expect(site).toContain('safeUrl(');
