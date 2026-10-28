@@ -136,7 +136,8 @@ create trigger rch_site_amateur_registration_guard_trigger
  for each row execute function public.rch_site_amateur_registration_guard();
 
 create function public.rch_site_amateur_session_guard()
-returns trigger language plpgsql security invoker set search_path=public,pg_temp as $$
+returns trigger language plpgsql security invoker set search_path=public,pg_temp as $
+declare t text; used bigint; allowed integer;
 begin
  if tg_op='UPDATE' then
   if new.id<>old.id or new.organization_id<>old.organization_id or new.program_id<>old.program_id
@@ -145,7 +146,13 @@ begin
     raise exception 'Session identity is immutable' using errcode='23514'; end if;
   if old.status='scheduled' and new.status='cancelled' then return new; end if;
  end if;
- perform public.rch_site_amateur_verify_paid(new.organization_id);
+ t:=public.rch_site_amateur_verify_paid(new.organization_id);
+ -- Serialize scheduled-session quotas with the website subscription row lock.
+ allowed:=case when t='amateur' then 150 else 600 end;
+ select count(*) into used from public.rch_site_amateur_sessions
+   where organization_id=new.organization_id and status='scheduled'
+     and starts_at>now() and id<>new.id;
+ if used>=allowed then raise exception 'Future session allowance reached' using errcode='P0001'; end if;
  if new.starts_at<=now()+interval '2 hours'
   or new.starts_at>now()+interval '180 days' then
   raise exception 'Sessions must be scheduled 2 hours to 180 days ahead' using errcode='23514';
