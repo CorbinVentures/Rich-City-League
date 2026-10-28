@@ -54,6 +54,7 @@ export default function AdultBasketballRegistration(){
     }catch(e){setError(e instanceof Error?e.message:'Unable to update registration.');}
     finally{setBusy('');}
   }
+  const closedRegistrations=(data.myPrograms??[]).filter(p=>!data.programs.some(open=>open.id===p.id));
   return <main className="min-h-screen bg-[#090b11] pb-28 text-white">
     <Container maxWidth="lg" className="py-10 sm:py-16">
       <Link href={'/sites/'+encodeURIComponent(slug)} className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-white/60">
@@ -69,12 +70,12 @@ export default function AdultBasketballRegistration(){
         <p className="mt-6 rounded-2xl border border-white/15 p-5 text-sm text-white/65">
           {data.available?'This organization has no open adult programs right now.':'This organization is not currently accepting online program registrations.'}
         </p>}
-      {!authLoading&&!loading&&loadedIdentity===identity&&Boolean(data.myPrograms?.length)&&
+      {!authLoading&&!loading&&loadedIdentity===identity&&closedRegistrations.length>0&&
         <section className="mt-6 rounded-2xl border border-sky-300/30 p-5" aria-label="Your existing adult registrations">
           <h2 className="text-lg font-black">Your existing registrations</h2>
           <p className="mt-2 text-xs text-white/60">You can withdraw even if this organization has stopped accepting new registrations.</p>
           <div className="mt-4 grid gap-2">
-            {(data.myPrograms??[]).map(p=><div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/15 px-3 py-2">
+            {closedRegistrations.map(p=><div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/15 px-3 py-2">
               <span className="text-sm font-semibold">{p.name}</span>
               <button type="button" disabled={Boolean(busy)} onClick={()=>void act(p.id,'withdraw')}
                 className="min-h-11 rounded-lg border border-white/25 px-4 text-xs font-bold disabled:opacity-40">Withdraw</button>
