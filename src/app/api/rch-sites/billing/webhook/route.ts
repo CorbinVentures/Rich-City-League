@@ -1,126 +1,174 @@
 import {NextResponse} from 'next/server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
-import {parseRchSitesSubscription,retrieveRchSitesSubscription,verifyRchSitesWebhook} from '@/lib/rch-sites-stripe';
+import {isRchSiteUuid} from '@/lib/rch-sites-billing-auth';
+import {
+  fetchRchSitesSubscription,stripeRefId,stripeSiteSubscriptionState,
+  verifyRchSitesStripeSignature,verifyRchSitesStripePrice,
+} from '@/lib/rch-sites-stripe-billing';
 
-export const runtime='nodejs';export const dynamic='force-dynamic';
-type Event={id?:string;type?:string;data?:{object?:Record<string,any>}};
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-function invoiceSubscriptionId(invoice:Record<string,any>={}):string|null{
-  const direct=invoice.subscription, nested=invoice.parent?.subscription_details?.subscription;
-  const value=direct||nested;
-  return typeof value==='string'?value:value?.id||null;
+export const runtime='nodejs';
+export const dynamic='force-dynamic';
+const headers={'Cache-Control':'private, no-store'};
+const response=(body:Record<string,unknown>,status=200)=>NextResponse.json(body,{status,headers});
+type StripeEvent={id?:string;type?:string;data?:{object?:any}};
+const allowed=new Set([
+  'checkout.session.completed','customer.subscription.created','customer.subscription.updated',
+  'customer.subscription.deleted','invoice.paid','invoice.payment_failed',
+]);
+function invoiceSubscriptionId(invoice:any):string|null{
+  return stripeRefId(invoice?.subscription)
+    ||stripeRefId(invoice?.parent?.subscription_details?.subscription);
 }
-function eventSubscriptionId(event:Event):string|null{
-  const obj=event.data?.object||{};
-  if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded')
-    return obj.mode==='subscription'?(typeof obj.subscription==='string'?obj.subscription:obj.subscription?.id||null):null;
-  if(event.type?.startsWith('customer.subscription.'))return typeof obj.id==='string'?obj.id:null;
+function eventSubscriptionId(event:StripeEvent){
+  const object=event.data?.object;
+  if(event.type==='checkout.session.completed')return stripeRefId(object?.subscription);
+  if(event.type?.startsWith('customer.subscription.'))return typeof object?.id==='string'?object.id:null;
   if(event.type==='invoice.paid'||event.type==='invoice.payment_failed')
-    return invoiceSubscriptionId(obj);
+    return invoiceSubscriptionId(object);
   return null;
 }
+
 export async function POST(request:Request){
-  const payload=await request.text();
-  if(!verifyRchSitesWebhook(payload,request.headers.get('stripe-signature')))
-    return NextResponse.json({error:'Invalid Stripe webhook signature.'},{status:400});
-  let event:Event;
-  try{event=JSON.parse(payload);}catch{return NextResponse.json({error:'Invalid Stripe JSON.'},{status:400});}
-  if(typeof event.id!=='string'||typeof event.type!=='string')
-    return NextResponse.json({error:'Missing Stripe event identity.'},{status:400});
+  const body=await request.text();
+  if(!verifyRchSitesStripeSignature(body,request.headers.get('stripe-signature')))
+    return response({error:'Invalid webhook signature.'},400);
+  let event:StripeEvent;
+  try{event=JSON.parse(body);}catch{return response({error:'Invalid JSON.'},400);}
+  if(!event.id||!/^evt_[a-zA-Z0-9_]+$/.test(event.id)||!event.type)
+    return response({error:'Missing event identity.'},400);
   const db=getSupabaseAdminClient() as any;
-  if(!db)return NextResponse.json({error:'Billing database is unavailable.'},{status:503});
-  const {data:prior,error:lookupError}=await db.from('rch_site_billing_events')
-    .select('processing_status').eq('id',event.id).maybeSingle();
-  if(lookupError)return NextResponse.json({error:'Could not read billing event.'},{status:500});
-  if(prior&&['processed','ignored'].includes(prior.processing_status))
-    return NextResponse.json({received:true,duplicate:true});
-  if(!prior){
-    const {error}=await db.from('rch_site_billing_events').insert({
-      id:event.id,event_type:event.type,processing_status:'processing'});
-    if(error&&error.code!=='23505')return NextResponse.json({error:'Unable to register event.'},{status:500});
-  }else{
-    const {error}=await db.from('rch_site_billing_events').update({
-      processing_status:'processing',error_message:null}).eq('id',event.id);
-    if(error)return NextResponse.json({error:'Unable to retry event.'},{status:500});
+  if(!db)return response({error:'Billing database is not configured.'},503);
+
+  // Event insert is unique; processed/ignored IDs cannot grant twice. Failed
+  // events may retry, and a crashed processing row can be reclaimed after 5m.
+  const {data:created,error:createError}=await db.from('rch_site_billing_events')
+    .upsert({event_id:event.id,event_type:event.type,processing_status:'processing'},
+      {onConflict:'event_id',ignoreDuplicates:true}).select('event_id');
+  if(createError)return response({error:'Could not record billing event.'},503);
+  if(!created?.length){
+    const {data:stored,error:readError}=await db.from('rch_site_billing_events')
+      .select('processing_status,received_at').eq('event_id',event.id).maybeSingle();
+    if(readError||!stored)return response({error:'Could not verify billing event.'},503);
+    if(['processed','ignored'].includes(stored.processing_status))
+      return response({received:true,duplicate:true});
+    if(stored.processing_status==='processing'&&
+      Date.now()-new Date(stored.received_at).getTime()<300000)
+      return response({error:'Webhook is already processing; retry later.'},503);
+    const {error:resumeError}=await db.from('rch_site_billing_events')
+      .update({processing_status:'processing',error_code:null,received_at:new Date().toISOString()})
+      .eq('event_id',event.id);
+    if(resumeError)return response({error:'Cannot retry billing event.'},503);
   }
-  async function record(status:'processed'|'ignored',orgId:string|null,reason:string|null){
+  async function finish(status:'processed'|'ignored'|'failed',reason?:string,subscriptionId?:string){
     const {error}=await db.from('rch_site_billing_events').update({
-      processing_status:status,organization_id:orgId,error_message:reason,
-      processed_at:new Date().toISOString()}).eq('id',event.id);
-    if(error)throw error;
+      processing_status:status,error_code:reason??null,
+      stripe_subscription_id:subscriptionId??null,processed_at:new Date().toISOString(),
+    }).eq('event_id',event.id);
+    if(error)throw new Error('Cannot finalize billing event.');
   }
   try{
+    if(!allowed.has(event.type)){
+      await finish('ignored','event_type_not_used');
+      return response({received:true,ignored:true});
+    }
     const subscriptionId=eventSubscriptionId(event);
-    if(!subscriptionId){await record('ignored',null,'Not an RCH Sites subscription event.');
-      return NextResponse.json({received:true,ignored:true});}
-    // Always fetch current Stripe state to avoid out-of-order events resurrecting a canceled plan.
-    const subscription=await retrieveRchSitesSubscription(subscriptionId);
-    const parsed=parseRchSitesSubscription(subscription);
-    if(parsed.family!=='rch_sites'||!parsed.mapping||!uuid.test(parsed.organizationId||'')){
-      // If Stripe moved an existing RCH website subscription to an unrecognized
-      // product/price, immediately revoke paid access rather than leaving stale
-      // entitlements in place. Never assign premium access from metadata alone.
-      const {data:priorLink,error:linkError}=await db.from('rch_site_subscriptions')
-        .select('organization_id,provider_customer_ref')
-        .eq('provider_subscription_ref',subscriptionId).maybeSingle();
-      if(linkError)throw linkError;
-      if(priorLink){
-        const {error:revokeError}=await db.from('rch_site_subscriptions').update({
-          tier:'free',billing_status:'none',provider_subscription_ref:null,
-          provider_price_ref:null,billing_interval:null,current_period_end:null,
-          cancel_at_period_end:false,
-        }).eq('organization_id',priorLink.organization_id).eq('provider_subscription_ref',subscriptionId);
-        if(revokeError)throw revokeError;
+    if(!subscriptionId){
+      // Checkout can complete without an immediate subscription. Reconcile
+      // when Stripe sends invoice/subscription events, never grant from redirect.
+      await finish('ignored','no_subscription_reference');
+      return response({received:true,ignored:true});
+    }
+    // Stripe sends all account-level subscription/invoice events to a subscribed
+    // endpoint, including RCH memberships and Network advertising. Skip those
+    // before Stripe API calls so a missing/rotating Sites key cannot turn
+    // unrelated product events into retry storms.
+    const object=event.data?.object;
+    const productHint=object?.metadata?.rch_product
+      ??object?.parent?.subscription_details?.metadata?.rch_product
+      ??object?.subscription_details?.metadata?.rch_product;
+    if(productHint!==undefined&&productHint!=='sites'){
+      await finish('ignored','unrelated_product',subscriptionId);
+      return response({received:true,ignored:true});
+    }
+    if(productHint!=='sites'){
+      if(event.type?.startsWith('customer.subscription.')||
+        event.type==='checkout.session.completed'){
+        // All RCH Sites Checkouts and subscription records are tagged.
+        await finish('ignored','untagged_subscription',subscriptionId);
+        return response({received:true,ignored:true});
       }
-      await record('ignored',priorLink?.organization_id||null,'Unrecognized Stripe product, price or family; paid access revoked when linked.');
-      return NextResponse.json({received:true,ignored:true});
+      // Some Stripe API versions omit subscription metadata from invoice events.
+      // Only retrieve an untagged invoice if a prior verified Sites event has
+      // already linked this subscription to our private intent or ledger.
+      const [{data:knownSite,error:knownError},{data:knownIntent,error:intentLookupError}]
+        =await Promise.all([
+          db.from('rch_site_subscriptions').select('organization_id')
+            .eq('provider_subscription_ref',subscriptionId).maybeSingle(),
+          db.from('rch_site_billing_intents').select('id')
+            .eq('stripe_subscription_id',subscriptionId).maybeSingle(),
+        ]);
+      if(knownError||intentLookupError)
+        throw new Error('Unable to verify whether invoice belongs to RCH Sites.');
+      if(!knownSite&&!knownIntent){
+        await finish('ignored','unlinked_untagged_invoice',subscriptionId);
+        return response({received:true,ignored:true});
+      }
     }
-    const orgId=parsed.organizationId!;
-    const {data:org,error:orgError}=await db.from('network_organizations')
-      .select('id,status,is_verified,is_claimed,network_tier,organization_type')
-      .eq('id',orgId).maybeSingle();
-    if(orgError)throw orgError;
-    const types=new Set(['training','program','team','tournament','league','facility']);
-    if(!org||org.status!=='active'||org.is_verified!==true||org.is_claimed!==true||
-      org.network_tier==='flagship'||!types.has(org.organization_type)){
-      await record('ignored',null,'Unverified or ineligible organization.');
-      return NextResponse.json({received:true,ignored:true});
+    const subscription=await fetchRchSitesSubscription(subscriptionId);
+    if(subscription.metadata?.rch_product!=='sites'){
+      await finish('ignored','not_an_rch_sites_subscription',subscriptionId);
+      return response({received:true,ignored:true});
     }
-    const {data:existing,error:readError}=await db.from('rch_site_subscriptions')
-      .select('provider_subscription_ref,provider_customer_ref').eq('organization_id',orgId).maybeSingle();
-    if(readError)throw readError;
-    // Never reassign another active subscription or Stripe customer to a different org.
-    if(existing?.provider_subscription_ref&&existing.provider_subscription_ref!==subscriptionId){
-      await record('ignored',orgId,'Organization already linked to a different subscription.');
-      return NextResponse.json({received:true,ignored:true});
-    }
-    if(existing?.provider_customer_ref&&existing.provider_customer_ref!==parsed.customerId){
-      await record('ignored',orgId,'Organization customer ownership mismatch.');
-      return NextResponse.json({received:true,ignored:true});
-    }
-    if(!parsed.customerId)throw Error('Stripe customer is missing.');
-    const canceled=parsed.status==='canceled'||parsed.status==='incomplete_expired';
-    // Preserve paid tier for past_due only as a record; plan gates still deny premium features.
-    const status=parsed.status==='active'?'active':parsed.status==='trialing'?'trialing':
-      parsed.status==='past_due'?'past_due':'canceled';
-    const row=canceled?{
-      organization_id:orgId,tier:'free',billing_status:'none',provider_subscription_ref:null,
-      provider_customer_ref:parsed.customerId,provider_price_ref:null,billing_interval:null,
-      current_period_end:null,cancel_at_period_end:false,
-    }:{
-      organization_id:orgId,tier:parsed.mapping.tier,billing_status:status,
-      provider_subscription_ref:subscriptionId,provider_customer_ref:parsed.customerId,
-      provider_price_ref:parsed.priceId,billing_interval:parsed.mapping.interval,
-      current_period_end:parsed.periodEnd,cancel_at_period_end:parsed.cancelAtPeriodEnd,
-    };
-    const {error:saveError}=await db.from('rch_site_subscriptions').upsert(row,{onConflict:'organization_id'});
-    if(saveError)throw saveError;
-    await record('processed',orgId,null);
-    return NextResponse.json({received:true,synced:true});
+    const intentId=subscription.metadata.site_billing_intent_id;
+    if(!isRchSiteUuid(intentId))throw new Error('Unrecognized website checkout lineage.');
+    const {data:intent,error:intentError}=await db.from('rch_site_billing_intents')
+      .select('id,organization_id,tier,billing_interval,stripe_price_id,stripe_session_id,status,stripe_subscription_id')
+      .eq('id',intentId).maybeSingle();
+    if(intentError||!intent||!intent.stripe_session_id||!['checkout_ready','completed'].includes(intent.status))
+      throw new Error('Website checkout lineage not ready.');
+    if(event.type==='checkout.session.completed'&&
+      event.data?.object?.id!==intent.stripe_session_id)
+      throw new Error('Checkout session does not match the organization intent.');
+    const plan=verifyRchSitesStripePrice(subscription);
+    if(!plan||plan.tier!==intent.tier||plan.interval!==intent.billing_interval||
+      subscription.items?.data?.[0]?.price?.id!==intent.stripe_price_id)
+      throw new Error('Stripe plan, interval or payment amount did not match the original checkout.');
+    const customer=stripeRefId(subscription.customer);
+    if(!customer||!/^cus_[a-zA-Z0-9_]+$/.test(customer))
+      throw new Error('Stripe customer identity is missing.');
+    if(intent.stripe_subscription_id&&intent.stripe_subscription_id!==subscriptionId)
+      throw new Error('Checkout already linked to another subscription.');
+
+    const {data:prior,error:priorError}=await db.from('rch_site_subscriptions')
+      .select('provider_subscription_ref,billing_status,provider_customer_id')
+      .eq('organization_id',intent.organization_id).maybeSingle();
+    if(priorError)throw new Error('Cannot verify current organization billing.');
+    if(prior?.provider_subscription_ref&&prior.provider_subscription_ref!==subscriptionId
+      &&prior.billing_status!=='canceled')
+      throw new Error('Organization already has a different website subscription.');
+
+    const state=stripeSiteSubscriptionState(subscription);
+    // Stripe is the source of truth. A paid invoice is required for access.
+    const period=plan.currentPeriodEnd&&Number.isSafeInteger(plan.currentPeriodEnd)
+      ?new Date(plan.currentPeriodEnd*1000).toISOString():null;
+    const {error:writeError}=await db.from('rch_site_subscriptions').upsert({
+      organization_id:intent.organization_id,tier:plan.tier,billing_status:state,
+      provider_subscription_ref:subscriptionId,provider_customer_id:customer,
+      provider_price_id:intent.stripe_price_id,billing_interval:plan.interval,
+      current_period_end:period,
+      cancel_at_period_end:subscription.cancel_at_period_end===true,
+      last_reconciled_at:new Date().toISOString(),
+    },{onConflict:'organization_id'});
+    if(writeError)throw new Error('Unable to update the RCH Sites entitlement ledger.');
+    const {error:finishIntentError}=await db.from('rch_site_billing_intents')
+      .update({status:'completed',stripe_customer_id:customer,stripe_subscription_id:subscriptionId})
+      .eq('id',intent.id).in('status',['checkout_ready','completed']);
+    if(finishIntentError)throw new Error('Unable to mark the checkout lineage complete.');
+    await finish('processed',undefined,subscriptionId);
+    return response({received:true,synced:true});
   }catch(error){
-    console.error('RCH Sites webhook reconciliation failed',error);
-    await db.from('rch_site_billing_events').update({processing_status:'failed',
-      error_message:'Retry required. Check server logs.'}).eq('id',event.id);
-    return NextResponse.json({error:'Subscription reconciliation failed; Stripe should retry.'},{status:500});
+    console.error('RCH Sites Stripe subscription reconciliation failed',error);
+    try{await finish('failed','reconciliation_failed');}catch{/* Preserve 500 for Stripe retry. */}
+    return response({error:'Subscription reconciliation failed. Stripe may retry.'},500);
   }
 }

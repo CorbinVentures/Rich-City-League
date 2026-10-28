@@ -1,40 +1,45 @@
 import 'server-only';
 import {getServerSupabaseClient} from '@/lib/supabase-server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
+
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const kinds=new Set(['training','program','team','tournament','league','facility']);
-export function rchBillingOriginIsValid(request:Request){
+const orgTypes=new Set(['training','program','team','tournament','league','facility']);
+export function isRchSiteUuid(v:unknown):v is string{return typeof v==='string'&&uuid.test(v);}
+export function rchSitesBillingOriginAllowed(request:Request){
   const origin=request.headers.get('origin'),host=request.headers.get('host');
   if(!origin||!host)return false;
-  try{const url=new URL(origin);
-    return (url.protocol==='https:'||(url.protocol==='http:'&&url.hostname==='localhost'))
-      &&url.host.toLowerCase()===host.toLowerCase();
+  try{
+    const parsed=new URL(origin);
+    return parsed.host.toLowerCase()===host.toLowerCase()
+      && (parsed.protocol==='https:'||(parsed.protocol==='http:'&&parsed.hostname==='localhost'));
   }catch{return false;}
 }
-export async function rchBillingAccount(){
+export async function getRchSitesBillingPrincipal(){
   const client=await getServerSupabaseClient();
-  if(!client)return null;
+  const admin=getSupabaseAdminClient() as any;
+  if(!client||!admin)return null;
   const {data:{user}}=await client.auth.getUser();
-  if(!user?.email||!user.email_confirmed_at)return null;
-  const {data:assurance,error:mfaError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
-  if(mfaError||!assurance||(assurance.nextLevel==='aal2'&&assurance.currentLevel!=='aal2'))return null;
+  if(!user||!user.email||!user.email_confirmed_at)return null;
+  const {data:mfa,error:mfaError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(mfaError||!mfa||(mfa.nextLevel==='aal2'&&mfa.currentLevel!=='aal2'))return null;
   const {data:profile,error}=await (client as any).from('profiles')
     .select('is_active,onboarding_complete').eq('id',user.id).maybeSingle();
   if(error||profile?.is_active!==true||profile?.onboarding_complete!==true)return null;
-  return {client,user,admin:getSupabaseAdminClient() as any};
+  return {client,admin,user};
 }
-export async function rchBillingManagedOrganization(
-  context:NonNullable<Awaited<ReturnType<typeof rchBillingAccount>>>,id:unknown
+export async function verifiedRchSiteBillingOrg(
+  principal:NonNullable<Awaited<ReturnType<typeof getRchSitesBillingPrincipal>>>,
+  orgId:string,
 ){
-  if(typeof id!=='string'||!uuid.test(id)||!context.admin)return null;
-  const {data:member,error}=await (context.client as any).from('network_organization_members')
-    .select('member_role,status').eq('organization_id',id).eq('profile_id',context.user.id)
-    .eq('status','active').maybeSingle();
-  if(error||!member||!['owner','manager'].includes(member.member_role))return null;
-  const {data:org,error:orgError}=await context.admin.from('network_organizations')
-    .select('id,name,status,is_verified,is_claimed,network_tier,organization_type')
-    .eq('id',id).maybeSingle();
-  if(orgError||!org||org.status!=='active'||org.is_verified!==true||
-    org.is_claimed!==true||org.network_tier==='flagship'||!kinds.has(org.organization_type))return null;
-  return org as {id:string;name:string};
+  if(!isRchSiteUuid(orgId))return null;
+  const {data:membership,error}=await (principal.client as any).from('network_organization_members')
+    .select('member_role,status').eq('organization_id',orgId)
+    .eq('profile_id',principal.user.id).eq('status','active').maybeSingle();
+  if(error||!membership||!['owner','manager'].includes(membership.member_role))return null;
+  const {data:organization,error:orgError}=await principal.admin.from('network_organizations')
+    .select('id,name,organization_type,status,is_verified,is_claimed,network_tier').eq('id',orgId).maybeSingle();
+  if(orgError||!organization||organization.status!=='active'
+    ||organization.is_verified!==true||organization.is_claimed!==true
+    ||organization.network_tier==='flagship'||!orgTypes.has(organization.organization_type))return null;
+  return organization;
 }

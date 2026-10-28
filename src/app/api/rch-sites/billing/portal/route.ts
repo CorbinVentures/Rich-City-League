@@ -1,20 +1,36 @@
 import {NextResponse} from 'next/server';
-import {rchBillingAccount,rchBillingManagedOrganization,rchBillingOriginIsValid} from '@/lib/rch-sites-billing-auth';
-import {createRchSitesPortal} from '@/lib/rch-sites-stripe';
-export const runtime='nodejs';export const dynamic='force-dynamic';
+import {getRchSitesBillingPrincipal,verifiedRchSiteBillingOrg,
+  isRchSiteUuid,rchSitesBillingOriginAllowed} from '@/lib/rch-sites-billing-auth';
+import {createRchSitesPortal} from '@/lib/rch-sites-stripe-billing';
+
+export const runtime='nodejs';
+export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store'};
+const reply=(body:Record<string,unknown>,status=200)=>NextResponse.json(body,{status,headers});
+
 export async function POST(request:Request){
-  if(!rchBillingOriginIsValid(request))return NextResponse.json({error:'Invalid billing request.'},{status:403,headers});
-  const context=await rchBillingAccount();
-  if(!context)return NextResponse.json({error:'Sign in to manage billing.'},{status:401,headers});
-  const input=await request.json().catch(()=>null);
-  const org=await rchBillingManagedOrganization(context,input?.organizationId);
-  if(!org)return NextResponse.json({error:'Verified organization manager access required.'},{status:403,headers});
-  const {data:sub,error}=await context.admin.from('rch_site_subscriptions')
-    .select('provider_customer_ref').eq('organization_id',org.id).maybeSingle();
-  if(error||!sub?.provider_customer_ref)return NextResponse.json({error:'No RCH Sites subscription customer exists.'},{status:409,headers});
-  try{const session=await createRchSitesPortal(sub.provider_customer_ref);
-    return NextResponse.json({url:session.url},{headers});}
-  catch(err){console.error('RCH Sites portal failed',err);
-    return NextResponse.json({error:'Unable to open subscription management.'},{status:502,headers});}
+  if(!rchSitesBillingOriginAllowed(request))return reply({error:'Use the RCH website to manage billing.'},403);
+  if(Number(request.headers.get('content-length')||0)>1200)return reply({error:'Request too large.'},413);
+  const principal=await getRchSitesBillingPrincipal();
+  if(!principal)return reply({error:'Sign in with a verified account.'},401);
+  let input:{organizationId?:unknown};
+  try{input=await request.json();}catch{return reply({error:'Valid JSON is required.'},400);}
+  if(!isRchSiteUuid(input?.organizationId)||
+    !await verifiedRchSiteBillingOrg(principal,input.organizationId))
+    return reply({error:'Verified organization owner or manager required.'},403);
+  const {data:subscription,error}=await principal.admin.from('rch_site_subscriptions')
+    .select('provider_customer_id,provider_subscription_ref')
+    .eq('organization_id',input.organizationId).maybeSingle();
+  if(error)return reply({error:'Unable to inspect your website subscription.'},503);
+  if(!subscription?.provider_customer_id||!subscription?.provider_subscription_ref)
+    return reply({error:'No active website billing account is linked.'},409);
+  try{
+    const session=await createRchSitesPortal(subscription.provider_customer_id);
+    if(!session.url?.startsWith('https://billing.stripe.com/'))
+      throw new Error('Stripe did not provide a valid customer portal.');
+    return reply({url:session.url});
+  }catch(error){
+    console.error('RCH Sites portal failed',error);
+    return reply({error:'Website billing portal is unavailable.'},502);
+  }
 }

@@ -2,115 +2,141 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useState} from 'react';
+import {useAuth} from '@/hooks/useAuth';
 import {Container} from '@/components/Container';
-import {RCH_SITE_PLANS,type RchSiteBillingInterval,type RchSitePlanTier} from '@/lib/rch-sites-plans';
+import {RCH_SITE_PLANS,type RchSiteBillingInterval} from '@/lib/rch-sites-plans';
+import {FaArrowLeft,FaCreditCard,FaLock,FaArrowRight} from 'react-icons/fa6';
 
-type Org={id:string;name:string;eligible:boolean};
-type Billing={checkoutOpen:boolean;organization:{id:string;name:string};
-  subscription:{tier:RchSitePlanTier;status:string;interval:string|null;
-    currentPeriodEnd:string|null;cancelAtPeriodEnd:boolean;canManage:boolean;hasSubscription:boolean}};
-const plans=['amateur','professional'] as const;
+type Organization={id:string;name:string;eligible:boolean;member_role:string};
+type Subscription={tier:string;status:string;interval:string|null;currentPeriodEnd:string|null;cancelAtPeriodEnd:boolean};
+type Billing={available:boolean;subscription:Subscription};
+const levels=['amateur','professional'] as const;
+
 export default function RchSitesBillingPage(){
-  const [orgs,setOrgs]=useState<Org[]>([]);
+  const {user,loading:authLoading}=useAuth();
+  const [organizations,setOrganizations]=useState<Organization[]>([]);
   const [selected,setSelected]=useState('');
   const [billing,setBilling]=useState<Billing|null>(null);
   const [interval,setInterval]=useState<RchSiteBillingInterval>('monthly');
+  const [loading,setLoading]=useState(true);
   const [busy,setBusy]=useState('');
+  const [message,setMessage]=useState('');
   const [error,setError]=useState('');
-  const [loaded,setLoaded]=useState(false);
+
   useEffect(()=>{
-    let open=true;
+    if(authLoading)return;
+    if(!user){setLoading(false);return;}
+    let active=true;
     void fetch('/api/rch-sites',{cache:'no-store'}).then(async r=>{
-      const result=await r.json();
-      if(!r.ok)throw Error(result.error||'Could not load organizations.');
-      if(!open)return;
-      const list=(result.organizations||[]) as Org[];
-      setOrgs(list.filter(org=>org.eligible));
-      setSelected(current=>current||list.find(org=>org.eligible)?.id||'');
-    }).catch(e=>{if(open)setError(e instanceof Error?e.message:'Unable to load websites.');})
-      .finally(()=>{if(open)setLoaded(true)});
-    return()=>{open=false;};
-  },[]);
+      const payload=await r.json();
+      if(!r.ok)throw Error(payload.error||'Could not load your organizations.');
+      if(!active)return;
+      const eligible=(payload.organizations||[]).filter((org:Organization)=>
+        org.eligible&&['owner','manager'].includes(org.member_role));
+      setOrganizations(eligible);
+      setSelected(eligible[0]?.id||'');
+    }).catch(err=>{if(active)setError(err instanceof Error?err.message:'Unable to load organizations.');})
+      .finally(()=>{if(active)setLoading(false);});
+    return()=>{active=false;};
+  },[authLoading,user]);
+
   const refresh=useCallback(async(id:string)=>{
     if(!id)return;
-    setError('');setBilling(null);
-    try{
-      const r=await fetch('/api/rch-sites/billing/status?organizationId='+encodeURIComponent(id),{cache:'no-store'});
-      const data=await r.json();
-      if(!r.ok)throw Error(data.error||'Cannot read billing.');
-      setBilling(data as Billing);
-    }catch(e){setError(e instanceof Error?e.message:'Unable to load billing.');}
+    const response=await fetch('/api/rch-sites/billing/checkout?organizationId='+encodeURIComponent(id),{cache:'no-store'});
+    const payload=await response.json();
+    if(!response.ok)throw Error(payload.error||'Could not read website billing.');
+    setBilling(payload);
   },[]);
-  useEffect(()=>{void refresh(selected);},[selected,refresh]);
-  async function action(kind:'checkout'|'portal',tier?:typeof plans[number]){
+  useEffect(()=>{
+    if(!selected){setBilling(null);return;}
+    let active=true;
+    setBilling(null);setError('');
+    void refresh(selected).catch(err=>{if(active)setError(err instanceof Error?err.message:'Cannot load subscription.');});
+    return()=>{active=false;};
+  },[selected,refresh]);
+
+  async function act(action:'portal'|'amateur'|'professional'){
     if(!selected||busy)return;
-    setBusy(kind);setError('');
+    setBusy(action);setError('');setMessage('');
+    const endpoint=action==='portal'?'/api/rch-sites/billing/portal':'/api/rch-sites/billing/checkout';
     try{
-      const r=await fetch('/api/rch-sites/billing/'+kind,{
+      const result=await fetch(endpoint,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({organizationId:selected,...(tier?{tier,interval}:{})})
+        body:JSON.stringify(action==='portal'?{organizationId:selected}:{organizationId:selected,tier:action,interval}),
       });
-      const body=await r.json();
-      if(!r.ok)throw Error(body.message||body.error||'Billing is temporarily unavailable.');
-      if(typeof body.url!=='string')throw Error('Billing destination is unavailable.');
-      const u=new URL(body.url);
-      if(u.protocol!=='https:'||!(u.hostname==='stripe.com'||u.hostname.endsWith('.stripe.com')))
-        throw Error('Invalid billing destination.');
-      window.location.assign(u.toString());
-    }catch(e){setError(e instanceof Error?e.message:'Unable to open billing.');setBusy('');}
+      const payload=await result.json();
+      if(!result.ok)throw Error(payload.message||payload.error||'Billing is unavailable.');
+      if(typeof payload.url!=='string'||!/^https:\/\/(checkout|billing)\.stripe\.com\//.test(payload.url))
+        throw Error('Invalid payment provider URL.');
+      window.location.assign(payload.url);
+    }catch(err){setError(err instanceof Error?err.message:'Cannot open secure Stripe billing.');}
+    finally{setBusy('');}
   }
-  const sub=billing?.subscription;
-  return <main className="min-h-screen bg-[#071522] py-12 text-white">
-    <Container maxWidth="xl">
-      <Link className="text-sm font-bold text-sky-300" href="/network/dashboard/sites">← Website Studio</Link>
-      <p className="mt-9 text-xs font-black uppercase tracking-[.2em] text-sky-300">RCH Sites · Billing</p>
-      <h1 className="mt-3 font-display text-4xl font-black uppercase">Your website plan</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-7 text-white/65">Your website membership is separate from RCH Network advertising and your organization&apos;s own PayPal Business payments.</p>
-      {!loaded?<p role="status" className="mt-7">Loading organizations…</p>:orgs.length===0?
-        <p className="mt-7 rounded-xl border border-white/20 p-5">A verified and claimed basketball organization is required to manage website billing.</p>:
-        <>
-          <label className="mt-8 block max-w-lg text-sm font-semibold">Your organization
-            <select value={selected} onChange={e=>setSelected(e.target.value)}
-              className="mt-2 block min-h-12 w-full rounded-xl border border-white/25 bg-[#162b3c] p-3">
-              {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
-            </select>
-          </label>
-          {sub&&<section className="mt-6 rounded-2xl border border-sky-400/30 bg-sky-400/[.05] p-6">
-            <p className="text-xs font-bold uppercase tracking-wide text-sky-300">Current website plan</p>
-            <p className="mt-2 text-2xl font-black">{RCH_SITE_PLANS[sub.tier]?.name||'Free'} <span className="text-sm font-normal text-white/60">· {sub.status==='none'?'Free':sub.status.replace('_',' ')}</span></p>
-            {sub.currentPeriodEnd&&<p className="mt-2 text-xs text-white/60">{sub.cancelAtPeriodEnd?'Access scheduled to end':'Current billing period ends'} {new Date(sub.currentPeriodEnd).toLocaleDateString()}</p>}
-            {sub.canManage&&<button type="button" disabled={!!busy} onClick={()=>void action('portal')}
-              className="mt-5 min-h-12 rounded-xl border border-sky-400/50 px-5 text-sm font-black disabled:opacity-50">
-              Manage payments, plan or cancellation
-            </button>}
-          </section>}
-          <div className="mt-9 flex gap-2" role="group" aria-label="Billing interval">
-            {(['monthly','annual'] as const).map(v=><button key={v} type="button" onClick={()=>setInterval(v)}
-              aria-pressed={interval===v} className={'min-h-11 rounded-xl border px-5 text-sm font-bold '+(interval===v?'border-sky-400 bg-sky-400 text-[#071522]':'border-white/20 text-white/70')}>
-              {v==='monthly'?'Monthly':'Annual · save 2 months'}
-            </button>)}
+
+  if(authLoading||loading)return <Shell><p role="status" className="text-white/60">Opening website billing…</p></Shell>;
+  if(!user)return <Shell><h1 className="font-display text-3xl font-black uppercase">Sign in to manage your website</h1><Link className="mt-5 inline-flex rounded-xl bg-sky-400 px-5 py-3 font-bold text-[#071522]" href="/auth/sign-in?next=/network/dashboard/sites/billing">Sign in</Link></Shell>;
+  return <Shell>
+    <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-xs font-bold text-white/60"><FaArrowLeft/> Website Studio</Link>
+    <p className="mt-7 text-xs font-black uppercase tracking-[.2em] text-sky-300">RCH Sites · Subscriptions</p>
+    <h1 className="mt-2 font-display text-4xl font-black uppercase">Your website. Your plan.</h1>
+    <p className="mt-3 max-w-2xl text-sm leading-7 text-white/65">Choose how your organization grows. Website subscriptions are separate from RCH Network advertising and from payments your customers send to your own PayPal Business account.</p>
+    {!organizations.length&&<section className="mt-8 rounded-2xl border border-white/15 bg-white/[.04] p-5">
+      <p className="text-sm text-white/70">Website billing is for verified organization owners or managers. Start designing your site for free while your organization is reviewed.</p>
+      <Link href="/website-creator/start" className="mt-4 inline-flex text-sm font-bold text-sky-300 underline">Start a free website</Link>
+    </section>}
+    {organizations.length>0&&<>
+      <label className="mt-7 block max-w-md text-xs font-bold text-white/65">Organization
+        <select value={selected} onChange={e=>setSelected(e.target.value)}
+          className="mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#121e2b] p-3 text-sm text-white">
+          {organizations.map(org=><option key={org.id} value={org.id}>{org.name}</option>)}
+        </select>
+      </label>
+      {error&&<p role="alert" className="mt-5 rounded-xl border border-amber-300/25 p-4 text-sm text-amber-200">{error}</p>}
+      {message&&<p role="status" className="mt-5 text-sm text-sky-300">{message}</p>}
+      <section className="mt-6 rounded-2xl border border-white/15 bg-white/[.04] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-wider text-white/50">Current website level</p>
+            <h2 className="mt-2 text-2xl font-black capitalize">{billing?.subscription?.tier||'Free'}</h2>
+            <p className="mt-2 text-xs text-white/55">Status: {billing?.subscription?.status||'No paid subscription'}</p>
+            {billing?.subscription?.currentPeriodEnd&&<p className="mt-1 text-xs text-white/55">Current period ends: {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString()}</p>}
+            {billing?.subscription?.cancelAtPeriodEnd&&<p className="mt-1 text-xs text-amber-200">Set to cancel at period end</p>}
           </div>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/20 p-6">
-              <h2 className="text-lg font-black">Free</h2><p className="mt-2 text-3xl font-black">$0</p>
-              <p className="mt-5 text-sm leading-6 text-white/60">Start designing at no cost. Organization verification is required to publish.</p>
-            </div>
-            {plans.map(tier=><div key={tier} className="rounded-2xl border border-sky-400/30 bg-sky-400/[.05] p-6">
-              <h2 className="text-lg font-black">{RCH_SITE_PLANS[tier].name}</h2>
-              <p className="mt-2 text-3xl font-black">
-                ${interval==='annual'?RCH_SITE_PLANS[tier].proposedAnnualUsd:RCH_SITE_PLANS[tier].proposedMonthlyUsd}
-                <span className="text-sm font-normal text-white/60">/{interval==='annual'?'year':'month'}</span>
-              </p>
-              <p className="mt-5 text-sm leading-6 text-white/60">Premium website plan. Additional features roll out as they become available; check the feature list before subscribing.</p>
-              <button type="button" disabled={!!busy||!sub||sub.hasSubscription||!billing?.checkoutOpen} onClick={()=>void action('checkout',tier)}
-                className="mt-6 min-h-12 w-full rounded-xl bg-sky-400 px-4 text-sm font-black text-[#071522] disabled:cursor-not-allowed disabled:opacity-40">
-                {sub?.hasSubscription?'Manage existing plan':!billing?.checkoutOpen?'Enrollment not open':busy?'Opening checkout…':'Choose '+RCH_SITE_PLANS[tier].name}
-              </button>
-            </div>)}
-          </div>
-          {error&&<p role="alert" className="mt-6 rounded-xl border border-rose-400/40 p-4 text-sm text-rose-200">{error}</p>}
-          <p className="mt-7 text-xs leading-6 text-white/55">Paid checkout is enabled only after RCH completes billing validation. Selecting a plan cannot charge you until you confirm payment on Stripe. Founder pricing and add-ons are not yet available.</p>
-        </>}
-    </Container>
+          {billing?.subscription?.status!=='none'&&billing?.subscription?.status!==undefined&&
+            <button disabled={!!busy} onClick={()=>void act('portal')}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 px-4 text-sm font-bold disabled:opacity-50"><FaCreditCard/> Manage billing</button>}
+        </div>
+      </section>
+      <div className="mt-7 inline-flex gap-1 rounded-xl border border-white/15 p-1" role="group" aria-label="Billing period">
+        {(['monthly','annual'] as const).map(option=>
+          <button key={option} type="button" aria-pressed={interval===option} onClick={()=>setInterval(option)}
+            className={'min-h-11 rounded-lg px-4 text-sm font-bold '+(interval===option?'bg-sky-400 text-[#071522]':'text-white/65')}>
+            {option==='monthly'?'Monthly':'Annual · save two months'}
+          </button>)}
+      </div>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {levels.map(tier=>{
+          const plan=RCH_SITE_PLANS[tier];
+          const amount=interval==='annual'?plan.proposedAnnualUsd:plan.proposedMonthlyUsd;
+          const current=billing?.subscription?.tier===tier&&billing?.subscription?.status==='active';
+          return <article key={tier} className="rounded-2xl border border-white/15 bg-white/[.04] p-6">
+            <p className="font-display text-2xl font-black uppercase">{plan.name}</p>
+            <p className="mt-3 text-3xl font-black">{'$'}{amount}<span className="text-xs font-normal text-white/60">/{interval==='monthly'?'month':'year'}</span></p>
+            <p className="mt-3 text-xs leading-6 text-white/60">{tier==='amateur'?'For active trainers and developing programs.':'For clubs, academies, leagues and tournament organizers.'} Additional capabilities are being released in phases.</p>
+            <button type="button" onClick={()=>void act(tier)} disabled={!billing?.available||!!busy||current}
+              className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 text-sm font-black text-[#061521] disabled:opacity-40">
+              <FaArrowRight/> {current?'Current plan':!billing?.available?'Enrollment not open':busy===tier?'Opening Checkout…':'Choose '+plan.name}
+            </button>
+          </article>;
+        })}
+      </div>
+      {!billing?.available&&<p className="mt-5 flex items-start gap-2 text-sm text-amber-200"><FaLock className="mt-1 shrink-0"/> Payments are not yet open. Your current site and saved preferences remain available, and no charges will be initiated.</p>}
+      <p className="mt-5 text-xs leading-6 text-white/55">Founding rates and optional add-ons are not enrolled automatically. No plan change can be inferred from visiting the payment confirmation page: subscription status updates only after Stripe verifies payment through RCH.</p>
+    </>}
+  </Shell>;
+}
+function Shell({children}:{children:React.ReactNode}){
+  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
+    <Container maxWidth="xl" className="py-10 sm:py-14">{children}</Container>
   </main>;
 }
