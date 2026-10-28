@@ -74,8 +74,17 @@ async function run(){
       await page.waitForURL(/\/auth\/sign-up/,{timeout:15000});
       await verify(!(await page.getByText(/install the app to continue/i).isVisible().catch(()=>false)),
         'Browser sign-up should not be blocked by PWA installation prompt');
-      const signupHeading=await page.locator('h1,h2').allTextContents();
-      assert.ok(signupHeading.length>0,'Signup route should render actual form');
+      try{
+        await page.getByRole('heading',{level:1}).first()
+          .waitFor({state:'visible',timeout:20000});
+        await page.locator('#auth-email').waitFor({state:'visible',timeout:20000});
+      }catch(error){
+        await page.screenshot({path:artifacts+'/failed-signup-'+device.name+'.png',fullPage:true});
+        console.error('DEBUG signup route:',page.url());
+        console.error('DEBUG signup page:',(await page.locator('body').innerText()).slice(0,1000));
+        console.error('DEBUG page errors:',runtimeErrors);
+        throw error;
+      }
       assert.deepEqual(runtimeErrors,[],'No uncaught browser Javascript errors');
       console.log('PASS '+device.name+': public creator → Get Started → account sign-up; redirect intact');
       await context.close();
