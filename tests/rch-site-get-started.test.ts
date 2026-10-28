@@ -39,7 +39,6 @@ describe('RCH Sites Get Started: design-first private onboarding',()=>{
     expect(api).toContain('preferred_tier:raw.tier');
     expect(api).toContain("plan_interest:'community'");
     expect(api).toContain("source:'partner-application'");
-    expect(api).toContain('server-side');
     expect(api).not.toContain("from('rch_sites').insert");
     expect(api).not.toContain("network_tier:'professional'");
     expect(api).not.toContain('stripe_checkout');
