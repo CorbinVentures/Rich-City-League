@@ -200,7 +200,8 @@ export default function RchSitesBuilderPage(){
         </section>
         {canPublish&&<Link href="/network/dashboard/sites/people" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Organization inbox <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/payments" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Independent PayPal links <FaArrowRight/></Link>}
-        {canPublish&&<Link href="/network/dashboard/sites/appointments" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Calendar &amp; bookings <FaArrowRight/></Link>}
+        {canPublish&&<Link href="/network/dashboard/sites/appointments" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Calendar &amp; bookings <FaArrowRight/></Link>}
+        {canPublish&&<Link href="/network/dashboard/sites/billing" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sky-400/40 px-5 text-sm font-black text-sky-200">Website plan &amp; billing <FaArrowRight/></Link>}
         <div className="flex flex-wrap gap-2">
           <button disabled={!valid||Boolean(busy)} onClick={()=>void submit('save')} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-black disabled:opacity-40"><FaFloppyDisk/> {busy==='save'?'Saving…':'Save draft'}</button>
           <button disabled={!valid||!canPublish||Boolean(busy)} onClick={()=>void submit('publish')} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40"><FaRocket/> {busy==='publish'?'Publishing…':published?'Publish changes':'Publish website'}</button>
