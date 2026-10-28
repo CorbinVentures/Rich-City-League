@@ -10,7 +10,7 @@ export async function GET(request:Request){
   const org=await rchBillingManagedOrganization(context,organizationId);
   if(!org)return NextResponse.json({error:'Verified organization manager access required.'},{status:403,headers});
   const {data:sub,error}=await context.admin.from('rch_site_subscriptions')
-    .select('tier,billing_status,billing_interval,current_period_end,cancel_at_period_end,provider_customer_ref')
+    .select('tier,billing_status,billing_interval,current_period_end,cancel_at_period_end,provider_customer_ref,provider_subscription_ref')
     .eq('organization_id',org.id).maybeSingle();
   if(error)return NextResponse.json({error:'Could not read website billing.'},{status:503,headers});
   return NextResponse.json({checkoutOpen:([
@@ -18,5 +18,5 @@ export async function GET(request:Request){
     ] as const).every(([tier,interval])=>rchSiteStripeReady(tier,interval)),organization:{id:org.id,name:org.name},
     subscription:{tier:sub?.tier||'free',status:sub?.billing_status||'none',interval:sub?.billing_interval||null,
       currentPeriodEnd:sub?.current_period_end||null,
-      cancelAtPeriodEnd:sub?.cancel_at_period_end||false,canManage:!!sub?.provider_customer_ref}},{headers});
+      cancelAtPeriodEnd:sub?.cancel_at_period_end||false,canManage:!!sub?.provider_customer_ref,hasSubscription:!!sub?.provider_subscription_ref}},{headers});
 }
