@@ -12,7 +12,7 @@ const descriptions:Record<RchSitePlanTier,{subtitle:string;live:string[];planned
   professional:{subtitle:'Run your organization',live:['Everything currently available on Free'],planned:['20 pages and 10 staff accounts','60 booking services · 600 bookings/month','Advanced registration and client tools','Custom domain and advanced SEO','Tournament brackets and marketing automation']},
 };
 
-export function RchSitePricingCards(){
+export function RchSitePricingCards({billingOpen=false}:{billingOpen?:boolean}){
   const [interval,setInterval]=useState<'monthly'|'annual'>('monthly');
   return <>
     <div className="mt-6 inline-flex gap-1 rounded-xl border border-white/20 bg-[#071522] p-1" role="group" aria-label="Website subscription billing frequency">
@@ -42,7 +42,9 @@ export function RchSitePricingCards(){
           Get Started <FaArrowRight aria-hidden="true"/>
         </Link>
         <p className="mt-3 text-xs leading-5 text-white/55">
-          {id==='free'?'Free to start; verify your organization before publishing.':'Price announced, not charged. Save your preference; start designing on Free.'}
+          {id==='free'?'Free to start; verify your organization before publishing.':
+            billingOpen?'Paid plans can be purchased after organization verification in Website Studio. No charge is taken during setup.':
+              'Paid enrollment is not open yet. Save your preference; start designing on Free.'}
         </p>
       </article>;
     })}</div>

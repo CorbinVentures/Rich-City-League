@@ -50,6 +50,27 @@ describe('RCH Sites announced prices without early billing activation',()=>{
     expect(starter).toContain('preferred_billing_interval:raw.billingInterval');
     expect(starter).not.toContain("from('rch_site_subscriptions').update");
   });
+  it('keeps public pricing and setup copy in sync with the real release switch',()=>{
+    const page=code('src/app/website-creator/page.tsx');
+    const pricing=code('src/components/sites/RchSitePricingCards.tsx');
+    const starterPage=code('src/app/website-creator/start/page.tsx');
+    const starterClient=code('src/components/sites/RchSiteStarterClient.tsx');
+    for(const serverPage of [page,starterPage]){
+      expect(serverPage).toContain("rchSitesBillingEnabled()");
+      expect(serverPage).toContain("export const dynamic='force-dynamic'");
+    }
+    expect(page).toContain('<RchSitePricingCards billingOpen={billingOpen}/>');
+    expect(starterPage).toContain('billingOpen={rchSitesBillingEnabled()}');
+    expect(pricing).toContain("billingOpen?'Paid plans can be purchased after organization verification");
+    expect(starterClient).toContain('billingOpen&&plan.id');
+    expect(pricing).not.toContain('Price announced, not charged.');
+    expect(page).not.toContain('These are announced RCH Sites prices, not active paid subscriptions.');
+    // Marketing and template selection never create a Checkout without an
+    // authenticated organization owner or manager explicitly confirming it.
+    expect(pricing).not.toContain('/api/rch-sites/billing/checkout');
+    expect(starterClient).not.toContain('/api/rch-sites/billing/checkout');
+  });
+
   it('keeps optional revenue items unbundled and not checkout-ready',()=>{
     expect(RCH_SITE_ADDONS.map(a=>a.priceUsd)).toEqual([99,29,15,10,5]);
     expect(RCH_SITE_ADDONS.find(a=>a.id==='discover_featured')).toMatchObject({priceUsd:10,maximumPriceUsd:20});

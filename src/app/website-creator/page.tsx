@@ -3,6 +3,9 @@ import Link from 'next/link';
 import {Container} from '@/components/Container';
 import {FaArrowRight,FaBasketball,FaGlobe,FaLock} from 'react-icons/fa6';
 import {RchSitePricingCards} from '@/components/sites/RchSitePricingCards';
+import {rchSitesBillingEnabled} from '@/lib/rch-sites-stripe-billing';
+
+export const dynamic='force-dynamic';
 
 export const metadata:Metadata={
   title:'Website Creator | RCH Sites',
@@ -13,6 +16,7 @@ export const metadata:Metadata={
 const audiences=['Trainers','Coaches','AAU programs','Teams & leagues','Basketball organizers'];
 
 export default function WebsiteCreatorPage(){
+  const billingOpen=rchSitesBillingEnabled();
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="border-b border-sky-400/20 bg-[radial-gradient(ellipse_at_85%_20%,rgba(35,129,184,.27),transparent_55%),linear-gradient(140deg,#10263a,#03070d_75%)]">
       <Container maxWidth="xl" className="py-14 sm:py-20">
@@ -39,8 +43,10 @@ export default function WebsiteCreatorPage(){
         <p className="text-xs font-black uppercase tracking-[.18em] text-sky-300">Website subscriptions</p>
         <h2 id="plan-heading" className="mt-2 font-display text-3xl font-black uppercase">Find your level.</h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">Free, Amateur and Professional are website subscription levels, not RCH Network advertising plans.</p>
-        <RchSitePricingCards/>
-        <p className="mt-5 max-w-3xl text-xs leading-6 text-white/50">These are announced RCH Sites prices, not active paid subscriptions. Current features are marked separately from the development roadmap. Checkout, annual billing, founding discounts and paid upgrades will activate only after payment verification, release gates and final terms are ready.</p>
+        <RchSitePricingCards billingOpen={billingOpen}/>
+        <p className="mt-5 max-w-3xl text-xs leading-6 text-white/50">{billingOpen
+          ?'Amateur and Professional subscriptions are available to verified organization owners and managers in Website Studio. Choosing a plan here saves your preference—it does not charge you. Features marked planned are not yet released, and founding discounts are not open.'
+          :'Paid website enrollment is not open yet. You can create and save a free website draft now. Current features are shown separately from upcoming modules and future paid plans.'}</p>
       </section>
       <section className="mt-16 grid gap-7 rounded-3xl border border-white/15 bg-[#0d2030] p-6 sm:p-10 md:grid-cols-2 md:items-center">
         <div><p className="text-xs font-black uppercase tracking-[.17em] text-sky-300">Your organization. Your rules.</p><h2 className="mt-3 font-display text-3xl font-black uppercase">Build with RCH. Stay independent.</h2><p className="mt-4 text-sm leading-7 text-white/65">Anyone operating a basketball business can start designing immediately. RCH verifies the applicant’s authorization before transferring a draft into organization Website Studio or publishing.</p><Link href="/website-creator/start?tier=free" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-[#071522]">Get Started <FaArrowRight aria-hidden="true"/></Link></div>
