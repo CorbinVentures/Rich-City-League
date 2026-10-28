@@ -194,6 +194,19 @@ export function isVerifiedRchSitesCheckoutLineage(
     &&checkout.metadata?.site_billing_intent_id===expected.intentId;
 }
 
+/**
+ * Initial payment failures often occur before Checkout is complete.
+ * A signed failed invoice for an unpaid/abandoned Checkout must not create a
+ * paid entitlement or enter an infinite Stripe retry loop. Renewal failures
+ * differ: their original Checkout was completed and paid, so reconcile them.
+ */
+export function isUnpaidInitialRchSitesInvoiceFailure(
+  eventType:string,checkout:Pick<RchSitesCheckoutSession,'status'|'payment_status'>,
+){
+  return eventType==='invoice.payment_failed'
+    &&(checkout.status!=='complete'||checkout.payment_status!=='paid');
+}
+
 export async function retrieveRchSitesCheckout(id:string){
   if(!/^cs_(test_)?[a-zA-Z0-9_]+$/.test(id))throw new Error('Invalid checkout session reference.');
   return requestStripe<RchSitesCheckoutSession>(
