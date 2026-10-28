@@ -44,6 +44,8 @@ describe('RCH Sites self-service launch experience',()=>{
     expect(normalizeOrganizationPayPalLink(valid)).toBe(valid);
     expect(normalizeOrganizationPayPalLink('https://paypal.me/example')).toBeNull();
     expect(paypal).toContain('normalizeOrganizationPayPalLink(form.paymentUrl)');
+    expect(paypal).toContain('request!==linkRequest.current||orgId!==selectedOrganization.current');
+    expect(paypal).toContain('if(actingFor!==selectedOrganization.current)return;');
     expect(paypal).toContain('!verifiedLink');
     expect(paypal).toContain('Verify recipient and item on PayPal');
     expect(paypal).toContain('rel="noopener noreferrer"');
