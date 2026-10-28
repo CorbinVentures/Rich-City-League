@@ -8,9 +8,9 @@ organization-owned PayPal merchant payments.
 
 1. Create or connect a **general Stripe sandbox** under the Richcityhoops
    account (Stripe Dashboard account selector > Sandboxes). Sandbox objects
-   and API keys are separate from live ones. The current ChatGPT Stripe
-   connection exposes the **live** account only, so sandbox API operations
-   cannot yet run through that connection. Authorize the sandbox separately.
+   and API keys are separate from live ones. The connected **general** sandbox
+   is now available for test-mode operations. Always verify the sandbox
+   account and livemode=false before any Stripe action; never use live mode.
 2. Use an isolated Vercel preview deployment and **separate Supabase staging
    project/branch** with disposable adult test users and a verified disposable
    organization. Do **not** target the production database or domain.
@@ -56,6 +56,8 @@ enabled webhook events, and an isolated HTTPS destination. It creates no
 Checkout Sessions or charges.
 
 A preflight PASS is not evidence that a customer completed a checkout.
+
+See [2026-10-28 billing acceptance results](./RCH_SITES_BILLING_ACCEPTANCE_RESULTS_20261028.md) for current verified tests and unresolved release blockers.
 
 ## Genuine end-to-end acceptance (isolated preview only)
 
