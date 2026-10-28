@@ -6,7 +6,7 @@ import {Container} from '@/components/Container';
 import {RCH_SITE_PLANS,type RchSiteBillingInterval,type RchSitePlanTier} from '@/lib/rch-sites-plans';
 
 type Org={id:string;name:string;eligible:boolean};
-type Billing={organization:{id:string;name:string};
+type Billing={checkoutOpen:boolean;organization:{id:string;name:string};
   subscription:{tier:RchSitePlanTier;status:string;interval:string|null;
     currentPeriodEnd:string|null;cancelAtPeriodEnd:boolean;canManage:boolean}};
 const plans=['amateur','professional'] as const;
@@ -102,9 +102,9 @@ export default function RchSitesBillingPage(){
                 <span className="text-sm font-normal text-white/60">/{interval==='annual'?'year':'month'}</span>
               </p>
               <p className="mt-5 text-sm leading-6 text-white/60">Premium website plan. Additional features roll out as they become available; check the feature list before subscribing.</p>
-              <button type="button" disabled={!!busy||!sub||sub.canManage} onClick={()=>void action('checkout',tier)}
+              <button type="button" disabled={!!busy||!sub||sub.canManage||!billing?.checkoutOpen} onClick={()=>void action('checkout',tier)}
                 className="mt-6 min-h-12 w-full rounded-xl bg-sky-400 px-4 text-sm font-black text-[#071522] disabled:cursor-not-allowed disabled:opacity-40">
-                {sub?.canManage?'Manage existing plan':busy?'Opening checkout…':'Choose '+RCH_SITE_PLANS[tier].name}
+                {sub?.canManage?'Manage existing plan':!billing?.checkoutOpen?'Enrollment not open':busy?'Opening checkout…':'Choose '+RCH_SITE_PLANS[tier].name}
               </button>
             </div>)}
           </div>
