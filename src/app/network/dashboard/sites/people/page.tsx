@@ -78,7 +78,7 @@ export default function OrganizationInbox(){
   };
   return <main className="min-h-screen bg-[#0b0c10] pb-24 text-white">
     <Container maxWidth="xl" className="py-8 sm:py-12">
-      <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Website Studio</Link>
+      <Link href={'/network/dashboard/sites/overview'+(organizationId?'?organizationId='+encodeURIComponent(organizationId):'')} className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Organization HQ</Link>
       <p className="mt-7 text-xs font-black uppercase tracking-widest text-rose-400">RCH Sites · Organization Hub</p>
       <h1 className="mt-2 text-4xl font-black">Your inbox.</h1>
       <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Follow up on training, program, and event interest. Inquiries come from verified adult RCH members who agree to share their email.</p>
