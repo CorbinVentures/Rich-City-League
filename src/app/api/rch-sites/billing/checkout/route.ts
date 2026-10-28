@@ -21,7 +21,7 @@ export async function POST(request:Request){
     .select('tier,billing_status,provider_subscription_ref,provider_customer_ref')
     .eq('organization_id',org.id).maybeSingle();
   if(error)return response({error:'Could not validate organization billing.'},503);
-  if(existing?.provider_subscription_ref&&existing.billing_status!=='canceled')
+  if(existing?.provider_subscription_ref)
     return response({error:'manage_existing',message:'Manage the existing website subscription instead of starting another.'},409);
   if(!rchSiteStripeReady(input.tier,input.interval))
     return response({error:'billing_not_configured',message:'Website paid checkout is not available yet.'},503);
