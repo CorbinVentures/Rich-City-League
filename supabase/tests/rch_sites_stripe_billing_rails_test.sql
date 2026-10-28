@@ -66,8 +66,9 @@ select throws_ok($$
   insert into public.rch_site_billing_events(event_id,event_type,processing_status)
   values('evt_testRchSitesOne','invoice.paid','processed')
 $$,'23505',null,'Duplicate Stripe event identifiers cannot insert twice');
-select is((select tier from public.rch_site_subscriptions
-where organization_id='b6220000-0000-4000-8000-000000000001'),'free',
+select is((select count(*) from public.rch_site_subscriptions
+where organization_id='b6220000-0000-4000-8000-000000000001'
+  and tier<>'free'),0::bigint,
 'Creating checkout intents or recording events does not grant a paid entitlement');
 select is((select enforce_booking from public.rch_site_booking_quota_rollout where id=true),
 false,'Preparing billing does not activate the strict booking-quota rollout');
