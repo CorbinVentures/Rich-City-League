@@ -1,7 +1,7 @@
 import 'server-only';
 import crypto from 'node:crypto';
 import {
-  isRchSiteBillingInterval,isRchSitePlanTier,
+  isRchSiteBillingInterval,isRchSitePlanTier,RCH_SITE_PLANS,
   type RchSiteBillingInterval,type RchSitePlanTier,
 } from '@/lib/rch-sites-plans';
 
@@ -9,7 +9,6 @@ export type PaidRchSiteTier=Exclude<RchSitePlanTier,'free'>;
 const stripeApi='https://api.stripe.com/v1';
 const stripeVersion='2026-08-26.dahlia';
 const stripePricePattern=/^price_[a-zA-Z0-9_]+$/;
-const stripeIdPattern=/^(sub|cus|cs)_[a-zA-Z0-9_]+$/;
 const productionUrl='https://richcityhoops.com';
 
 function secret(){return process.env.STRIPE_SECRET_KEY?.trim()||'';}
@@ -87,7 +86,7 @@ export type RchStripeSubscription={
   id:string;status:string;customer:StripeRef;
   metadata?:Record<string,string>;
   cancel_at_period_end?:boolean;
-  items?:{data?:Array<{price?:{id?:string;currency?:string;unit_amount?:number|null;recurring?:{interval?:string}}}>};
+  items?:{data?:Array<{current_period_start?:number;current_period_end?:number;price?:{id?:string;currency?:string;unit_amount?:number|null;recurring?:{interval?:string}}}>};
   latest_invoice?:{id?:string;status?:string;paid?:boolean}|string|null;
   current_period_end?:number;
 };
@@ -109,6 +108,7 @@ export async function createRchSitesCheckout(input:{
   const site=(process.env.NEXT_PUBLIC_SITE_URL||productionUrl).replace(/\/$/,'');
   const body=new URLSearchParams();
   body.set('mode','subscription');
+  body.set('expires_at',String(Math.floor(Date.now()/1000)+1800));
   body.set('success_url',site+'/network/dashboard/sites/billing?checkout=success');
   body.set('cancel_url',site+'/network/dashboard/sites/billing?checkout=cancelled');
   body.set('line_items[0][price]',priceId);
@@ -126,7 +126,7 @@ export async function createRchSitesCheckout(input:{
   });
 }
 export async function createRchSitesPortal(customerId:string){
-  if(!rchSitesBillingEnabled())throw new Error('Website subscription management is not available.');
+  if(!secret())throw new Error('Stripe customer portal is not configured.');
   if(!/^cus_[a-zA-Z0-9_]+$/.test(customerId))throw new Error('Invalid Stripe customer reference.');
   const site=(process.env.NEXT_PUBLIC_SITE_URL||productionUrl).replace(/\/$/,'');
   const form=new URLSearchParams();
@@ -140,4 +140,20 @@ export function stripeSiteSubscriptionState(sub:RchStripeSubscription){
   const invoicePaid=invoice?.status==='paid'||invoice?.paid===true;
   const active=sub.status==='active'&&invoicePaid;
   return active?'active':sub.status==='canceled'?'canceled':'past_due';
+}
+
+export async function retrieveRchSitesCheckout(id:string){
+  if(!/^cs_(test_)?[a-zA-Z0-9_]+$/.test(id))throw new Error('Invalid checkout session reference.');
+  return requestStripe<{id:string;status:'open'|'complete'|'expired';url:string|null}>(
+    '/checkout/sessions/'+encodeURIComponent(id));
+}
+export function verifyRchSitesStripePrice(sub:RchStripeSubscription){
+  const items=sub.items?.data??[];
+  if(items.length!==1)return null;
+  const p=items[0]?.price;
+  const plan=rchSitesTierForPrice(p?.id);
+  if(!p||!plan||p.currency!=='usd'
+     ||p.unit_amount!==RCH_SITE_PLANS[plan.tier][plan.interval==='annual'?'proposedAnnualUsd':'proposedMonthlyUsd']*100
+     ||p.recurring?.interval!==(plan.interval==='annual'?'year':'month'))return null;
+  return {...plan,currentPeriodEnd:items[0].current_period_end??sub.current_period_end};
 }
