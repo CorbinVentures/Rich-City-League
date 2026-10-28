@@ -23,6 +23,7 @@ export default function AmateurProgramsPage(){
   const [organizationId,setOrganizationId]=useState('');
   const [data,setData]=useState<Data>(empty);
   const [loading,setLoading]=useState(true);
+  const [loadedFor,setLoadedFor]=useState('');
   const [busy,setBusy]=useState('');
   const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
@@ -51,15 +52,17 @@ export default function AmateurProgramsPage(){
     if(authLoading)return;
     if(!user){setLoading(false);return;}
     let alive=true;
+    setLoading(true);setError('');setOrgs([]);setOrganizationId('');setData(empty);
     void fetch('/api/rch-sites',{cache:'no-store'}).then(async r=>{
       const json=await r.json().catch(()=>({}));
       if(!r.ok)throw Error(json.error||'Unable to load organizations.');
       if(!alive)return;
       const allowed:Org[]=(json.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
+      setLoadedFor(user.id);
       setOrgs(allowed);
       const requested=new URLSearchParams(window.location.search).get('organizationId');
       setOrganizationId(allowed.find(o=>o.id===requested)?.id||allowed[0]?.id||'');
-    }).catch(e=>{if(alive)setError(e instanceof Error?e.message:'Unable to load organizations.');})
+    }).catch(e=>{if(alive){setLoadedFor(user.id);setError(e instanceof Error?e.message:'Unable to load organizations.');}})
       .finally(()=>{if(alive)setLoading(false);});
     return()=>{alive=false;};
   },[authLoading,user]);
@@ -103,7 +106,7 @@ export default function AmateurProgramsPage(){
   const active=data.programs.filter(p=>p.status==='open');
   const chosen=active.find(p=>p.id===programId);
   const registered=(p:Program)=>data.registrations.filter(r=>r.program_id===p.id&&r.status==='registered');
-  if(authLoading||loading)return <Shell><p role="status">Opening basketball programs…</p></Shell>;
+  if(authLoading||loading||Boolean(user&&loadedFor!==user.id))return <Shell><p role="status">Opening basketball programs…</p></Shell>;
   if(!user)return <Shell>
     <h1 className="text-3xl font-black">Sign in to manage your programs.</h1>
     <Link className="mt-5 inline-flex rounded-xl bg-rose-600 px-5 py-3 font-bold" href="/auth/sign-in?next=/network/dashboard/sites/programs">Sign in</Link>
