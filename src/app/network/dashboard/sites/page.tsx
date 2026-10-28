@@ -233,6 +233,8 @@ export default function RchSitesBuilderPage(){
         </section>
         <div id="site-tools" className="scroll-mt-24 space-y-3">
           <RchSitesBasketballTools siteType={config.siteType} tier="free" mode="builder" limit={4}/>
+        {canPublish&&<Link href="/network/dashboard/sites/people" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Organization inbox <FaArrowRight/></Link>}
+        {canPublish&&<Link href="/network/dashboard/sites/appointments" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Calendar &amp; bookings <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/payments" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Independent PayPal links <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/billing" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sky-400/40 px-5 text-sm font-black text-sky-200">Website plan &amp; billing <FaArrowRight/></Link>}
         </div>
