@@ -31,7 +31,8 @@ describe('RCH Sites self-service launch experience',()=>{
   });
   it('never carries appointment service IDs and schedule results across organizations',()=>{
     expect(bookings).toContain('const scheduleRequest=useRef(0)');
-    expect(bookings).toContain('requestId!==scheduleRequest.current');
+    expect(bookings).toContain('requestId!==scheduleRequest.current||orgId!==selectedOrganization.current');
+    expect(bookings).toContain('if(actingFor!==selectedOrganization.current)return;');
     expect(bookings).toContain("setForm(f=>({...f,serviceId:'',startsAt:''}))");
     expect(bookings).toContain('const activeServices=services.filter');
     expect(bookings).toContain('payload.serviceId=serviceId');
