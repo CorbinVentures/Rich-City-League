@@ -26,6 +26,8 @@ async function signin(ctx,label){
   const page=await ctx.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  const consoleErrors=[];
+  page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text().slice(0,200));});
   await page.goto(origin+'/website-creator/start',{waitUntil:'domcontentloaded',timeout:45000});
   await page.getByRole('link',{name:/i already have an account/i})
     .waitFor({state:'visible',timeout:25000});
@@ -46,7 +48,7 @@ async function signin(ctx,label){
   try{
     await page.waitForURL(/\/website-creator\/start/,{timeout:25000});
   }catch(error){
-    console.error('DEBUG after sign-in:',{url:page.url(),authStatuses,failedRequests,
+    console.error('DEBUG after sign-in:',{url:page.url(),authStatuses,failedRequests,consoleErrors,
       page:(await page.locator('body').innerText()).slice(0,1200),
       pageErrors:errors});
     throw error;
@@ -77,6 +79,15 @@ async function main(){
     " on conflict(id) do update set is_active=true,onboarding_complete=true";
   execFileSync('docker',['exec',db,'psql','-X','-U','postgres','-d','postgres',
     '-v','ON_ERROR_STOP=1','-c',sql],{encoding:'utf8'});
+  // Validate the real temporary credentials directly with LOCAL GoTrue first,
+  // isolating fixture failures from browser routing/cookie regressions.
+  const publicKey=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if(!publicKey)throw Error('Local anon key is missing');
+  const verifier=createClient(url,publicKey,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {error:authError}=await verifier.auth.signInWithPassword({email,password});
+  if(authError)throw Error('Local GoTrue credential preflight failed: '+authError.status+' '+authError.message);
+  await verifier.auth.signOut();
+  console.log('PASS local GoTrue credential preflight');
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const first=await browser.newContext({viewport:{width:390,height:844}});
   let page=await signin(first,'first session');
