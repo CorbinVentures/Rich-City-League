@@ -7,6 +7,8 @@ on:
       - "scripts/test-rch-sites-isolated-browser.cjs"
       - "src/app/api/rch-sites/starter/**"
       - "src/components/sites/RchSiteStarterClient.tsx"
+      - "src/app/network/dashboard/sites/overview/**"
+      - "src/lib/rch-sites-overview.ts"
       - "supabase/migrations/**"
   workflow_dispatch:
 
