@@ -3,6 +3,7 @@ import {getServerSupabaseClient} from '@/lib/supabase-server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
 import {getPublicClient} from '@/lib/public-data';
 import {isRchSiteSlug} from '@/lib/rch-site-builder';
+import {effectiveRchSiteBillingStatus,type RchSiteBillingStatus} from '@/lib/rch-sites-plans';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -90,7 +91,7 @@ export async function GET(request:Request){
       admin.from('rch_site_slots').select('id,service_id,starts_at,ends_at,status')
         .eq('organization_id',organizationId).gte('starts_at',new Date().toISOString())
         .order('starts_at',{ascending:true}).limit(200),
-      admin.from('rch_site_subscriptions').select('tier,billing_status')
+      admin.from('rch_site_subscriptions').select('tier,billing_status,current_period_end')
         .eq('organization_id',organizationId).maybeSingle(),
       admin.from('rch_site_plan_limits').select('tier,booking_services,upcoming_slots,confirmed_bookings_monthly'),
       admin.from('rch_site_booking_quota_rollout').select('enforce_booking').eq('id',true).maybeSingle(),
@@ -115,8 +116,11 @@ export async function GET(request:Request){
     if(be)return json({error:'Unable to read slot reservations.'},503);
     const bookedIds=new Set((bookings??[]).map((item:any)=>item.slot_id));
     const plan=(planLimits??[]).find((value:any)=>value.tier===(subscription?.tier??'free'));
+    const effectiveStatus=effectiveRchSiteBillingStatus(
+      subscription?.tier??'free',(subscription?.billing_status??'none') as RchSiteBillingStatus,
+      subscription?.current_period_end);
     return json({services:services??[],slots:(slots??[]).map((slot:any)=>({...slot,booked:bookedIds.has(slot.id)})),
-      websitePlan:{tier:subscription?.tier??'free',billingStatus:subscription?.billing_status??'none',
+      websitePlan:{tier:subscription?.tier??'free',billingStatus:effectiveStatus,
         quotaEnforced:rollout.enforce_booking===true,
         limits:plan?{services:plan.booking_services,upcomingSlots:plan.upcoming_slots,
           confirmedBookingsMonthly:plan.confirmed_bookings_monthly}:null,
