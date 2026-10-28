@@ -169,6 +169,30 @@ async function main(){
     return {status:resp.status,json:await resp.json()};
   });
   assert.equal(attempted.status,403,'Import must deny an account without verified org ownership');
+
+  // Organization HQ is tenant-private. An authenticated user with no owned
+  // organization must see only the verification/start message, not other
+  // organizations' inbox, bookings, prices, customer emails or activity.
+  await page.goto(origin+'/network/dashboard/sites/overview',{waitUntil:'domcontentloaded'});
+  await page.getByRole('heading',{name:/your day, at a glance/i})
+    .waitFor({state:'visible',timeout:30000});
+  await page.getByRole('heading',{name:/your website starts here/i})
+    .waitFor({state:'visible',timeout:20000});
+  assert.equal(await page.getByText('New inquiries',{exact:true}).count(),0,
+    'An unverified account must not see private organization metrics');
+  const rejected=await page.evaluate(async()=>{
+    const org='b6220000-0000-4000-8000-000000000099';
+    const endpoints=[
+      '/api/rch-sites/inquiries?organizationId='+org,
+      '/api/rch-sites/appointments?organizationId='+org,
+      '/api/rch-sites/paypal?organizationId='+org,
+    ];
+    return Promise.all(endpoints.map(async url=>(await fetch(url)).status));
+  });
+  assert.ok(rejected.every(status=>status===401||status===403),
+    'Private organization activity APIs must deny unapproved users: '+rejected);
+  console.log('PASS local organization HQ: unapproved operator sees no private data; all APIs deny');
+
   await second.close();
   console.log('PASS local authorization: unauthorized import rejected with HTTP 403');
   console.log('Isolated RCH Sites save/resume browser lifecycle passed.');
