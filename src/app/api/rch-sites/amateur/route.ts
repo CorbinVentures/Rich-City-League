@@ -93,7 +93,26 @@ export async function GET(request:Request){
   const orgId=await publishedOrganization(admin,slug);
   if(!orgId)return send({error:'Published organization website not found.'},404);
   const gate=await activeOperations(admin,orgId);
-  if(!gate.ready)return send({available:false,reason:gate.reason,programs:[],sessions:[]});
+  // An adult must retain access to their own withdrawal controls after
+  // the paid subscription ends or the pilot is paused.
+  const principal=await getRchSitesBillingPrincipal();
+  let mine:string[]=[];
+  let myPrograms:Array<{id:string;name:string}>=[];
+  if(principal&&gate.reason!=='unavailable'){
+    const {data,error:mineError}=await admin.from('rch_site_amateur_registrations')
+      .select('program_id').eq('organization_id',orgId)
+      .eq('profile_id',principal.user.id).eq('status','registered').limit(100);
+    if(mineError)return send({error:'Could not load your registrations.'},503);
+    mine=(data??[]).map((x:any)=>x.program_id);
+    if(mine.length){
+      const {data:owned,error:ownedError}=await admin.from('rch_site_amateur_programs')
+        .select('id,name').eq('organization_id',orgId).in('id',mine);
+      if(ownedError)return send({error:'Could not load your registrations.'},503);
+      myPrograms=owned??[];
+    }
+  }
+  if(!gate.ready)return send({available:false,reason:gate.reason,programs:[],sessions:[],
+    myProgramIds:mine,myPrograms});
   const [{data:programs,error:pErr},{data:sessions,error:sErr}]=await Promise.all([
     admin.from('rch_site_amateur_programs').select('id,name,kind,capacity')
       .eq('organization_id',orgId).eq('status','open').order('created_at',{ascending:false}).limit(60),
@@ -102,15 +121,8 @@ export async function GET(request:Request){
       .gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(100),
   ]);
   if(pErr||sErr)return send({error:'Unable to list basketball programs.'},503);
-  // Only the currently logged-in adult sees their own registration state.
-  let mine:string[]=[];
-  const principal=await getRchSitesBillingPrincipal();
-  if(principal){
-    const {data}=await admin.from('rch_site_amateur_registrations').select('program_id')
-      .eq('organization_id',orgId).eq('profile_id',principal.user.id).eq('status','registered').limit(100);
-    mine=(data??[]).map((x:any)=>x.program_id);
-  }
-  return send({available:true,programs:programs??[],sessions:sessions??[],myProgramIds:mine});
+  return send({available:true,programs:programs??[],sessions:sessions??[],
+    myProgramIds:mine,myPrograms});
 }
 
 export async function POST(request:Request){
