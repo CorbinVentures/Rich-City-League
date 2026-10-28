@@ -33,9 +33,10 @@ export default function AppointmentsManager(){
     const response=await fetch('/api/rch-sites',{cache:'no-store'});
     const body=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(body.error||'Could not load your organizations.');
-    const valid=(body.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
+    const valid:Org[]=(body.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
     setOrgs(valid);
-    setSelected(s=>s||valid[0]?.id||'');
+    const requested=new URLSearchParams(window.location.search).get('organizationId');
+    setSelected(s=>valid.some(o=>o.id===s)?s:valid.find(o=>o.id===requested)?.id||valid[0]?.id||'');
   },[]);
   const loadSchedule=useCallback(async(orgId:string)=>{
     if(orgId!==selectedOrganization.current)return;
@@ -101,7 +102,7 @@ export default function AppointmentsManager(){
   if(!user)return <Shell><h1 className="text-3xl font-black">Sign in to manage your schedule.</h1>
     <Link className="mt-5 inline-flex rounded-xl bg-rose-600 px-5 py-3 font-bold" href="/auth/sign-in?next=/network/dashboard/sites/appointments">Sign in</Link></Shell>;
   return <Shell>
-    <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Website Studio</Link>
+    <Link href={'/network/dashboard/sites/overview'+(selected?'?organizationId='+encodeURIComponent(selected):'')} className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Organization HQ</Link>
     <p className="mt-7 text-xs font-black uppercase tracking-widest text-rose-400">RCH Sites · Calendar</p>
     <h1 className="mt-2 text-4xl font-black">Bookings made simple.</h1>
     <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Add a session, choose available times, and let visitors reserve for free on your published site. If you charge for training, create a separate PayPal link; paying does not automatically confirm a booking.</p>

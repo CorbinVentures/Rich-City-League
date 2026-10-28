@@ -53,7 +53,10 @@ export default function RchSitesBuilderPage(){
       const body=await response.json() as Payload & {error?:string};
       if(!response.ok)throw Error(body.error||'Could not load your websites.');
       setData({organizations:body.organizations||[],drafts:body.drafts||[],published:body.published||[]});
-      setSelected(current=>current||body.organizations?.find(o=>o.eligible)?.id||body.organizations?.[0]?.id||'');
+      const requested=new URLSearchParams(window.location.search).get('organizationId');
+      setSelected(current=>(body.organizations??[]).some(o=>o.id===current)?current:
+        body.organizations?.find(o=>o.id===requested&&o.eligible)?.id||
+        body.organizations?.find(o=>o.eligible)?.id||body.organizations?.[0]?.id||'');
     }catch(e){setError(e instanceof Error?e.message:'Site builder is temporarily unavailable.');}
     finally{setLoading(false);}
   },[]);
@@ -133,7 +136,10 @@ export default function RchSitesBuilderPage(){
   const canPublish=organization?.member_role==='owner'||organization?.member_role==='manager';
   const valid=isRchSiteSlug(slug)&&config.tagline.trim().length>0&&config.about.trim().length>0;
   return <Shell>
-    <Link href="/network/dashboard" className="inline-flex items-center gap-2 text-xs font-bold text-white/60"><FaArrowLeft/> Partner dashboard</Link>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <Link href="/network/dashboard" className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-white/60"><FaArrowLeft/> Partner dashboard</Link>
+      <Link href={'/network/dashboard/sites/overview'+(selected?'?organizationId='+encodeURIComponent(selected):'')} className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-rose-300">Organization HQ <FaArrowRight/></Link>
+    </div>
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
       <div><p className="text-xs font-bold uppercase tracking-[.2em] text-rose-400">RCH Sites · Website Studio</p>
         <h1 className="mt-2 text-4xl font-black">Build your own website.</h1>

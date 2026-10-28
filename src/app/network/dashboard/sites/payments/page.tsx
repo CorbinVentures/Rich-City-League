@@ -27,9 +27,11 @@ export default function PayPalPaymentLinksManager(){
     const res=await fetch('/api/rch-sites',{cache:'no-store'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw Error(data.error||'Unable to load organizations.');
-    const approved=(data.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
+    const approved:Org[]=(data.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
     setOrgs(approved);
-    setSelected(current=>current||approved[0]?.id||'');
+    const requested=new URLSearchParams(window.location.search).get('organizationId');
+    setSelected(current=>approved.some(o=>o.id===current)?current:
+      approved.find(o=>o.id===requested)?.id||approved[0]?.id||'');
   },[]);
   const loadLinks=useCallback(async(orgId:string)=>{
     if(orgId!==selectedOrganization.current)return;
@@ -79,7 +81,7 @@ export default function PayPalPaymentLinksManager(){
   if(!user)return <Shell><h1 className="text-3xl font-black">Sign in to manage your links.</h1>
     <Link href="/auth/sign-in?next=/network/dashboard/sites/payments" className="mt-5 inline-block rounded-xl bg-rose-600 px-5 py-3 font-black">Sign in</Link></Shell>;
   return <Shell>
-    <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Website Studio</Link>
+    <Link href={'/network/dashboard/sites/overview'+(selected?'?organizationId='+encodeURIComponent(selected):'')} className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Organization HQ</Link>
     <p className="mt-7 text-xs font-black uppercase tracking-[.15em] text-rose-400">RCH Sites · Independent payments</p>
     <h1 className="mt-2 text-4xl font-black">Your PayPal. Your earnings.</h1>
     <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">Make a Payment Link in your own PayPal Business account, then paste it here. Visitors pay you directly on PayPal—not Rich City Hoops.</p>
