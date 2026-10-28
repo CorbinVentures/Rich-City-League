@@ -27,7 +27,7 @@
 
 1. The manager must have a confirmed RCH identity, completed active profile, appropriate MFA and **active owner/manager membership** in a verified claimed organization.
 2. The server reads the **RCH Sites subscription** and Stripe-derived end of the paid period; it does not trust client tier or Network advertising tier.
-3. The private `rch_site_amateur_rollout.enabled` value must be `true`. The migration sets this to **false**.
+3. The private `rch_site_amateur_rollout.enabled` value must be `true` **and** `pilot_organization_id` must equal the requested organization. The migration sets `enabled=false` and the pilot ID to null.
 4. The service-role API checks the organization on every read and write; the new `public` tables enable RLS, grant no browser Data API permissions and contain no permissive RLS policies.
 5. An invoker DB trigger locks the private subscription and program rows for quota/capacity checks and rejects underage registrations and unauthorized coach assignments. A composite FK rejects cross-tenant program associations.
 
@@ -38,7 +38,7 @@
 3. Confirm the existing registration/booking tables and RCH Sites subscriptions are unaffected.
 4. Run TypeScript, lint, Next.js build, Vitest, and authenticated owner/member browser tests on a Vercel preview. Verify mobile, mixed organization accounts, subscription expiry and revoked staff.
 5. After separately approving migration in production, keep `rch_site_amateur_rollout.enabled=false`. Deploy application code safely; default routes report the pilot as not yet enabled.
-6. Pilot only an explicitly approved verified organization: an authorized operator sets `enabled=true` in the private table **after** staging validation and production migration review. This is a global flag; ensure the intended customers are informed before turning it on. Do not enable in this PR.
+6. Pilot only an explicitly approved verified organization: an authorized operator sets `enabled=true` **and** `pilot_organization_id` to that organization's UUID **after** staging validation and production migration review. All other organizations remain blocked. Do not enable in this PR.
 7. Monitor platform queries, capacity conflicts and cost. Revoke the rollout flag immediately to stop new enrollments/session creations if issues occur. Keep existing records and participants' withdrawal path intact.
 
 ## QA for merge readiness
