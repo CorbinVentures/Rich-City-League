@@ -27,7 +27,7 @@ export default function PayPalPaymentLinksManager(){
     const res=await fetch('/api/rch-sites',{cache:'no-store'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw Error(data.error||'Unable to load organizations.');
-    const approved=(data.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
+    const approved:Org[]=(data.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
     setOrgs(approved);
     const requested=new URLSearchParams(window.location.search).get('organizationId');
     setSelected(current=>approved.some(o=>o.id===current)?current:
