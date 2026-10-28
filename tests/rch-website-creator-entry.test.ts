@@ -6,6 +6,7 @@ describe('Public RCH Sites entry',()=>{
   it('opens the creator marketing page without opening private studio routes',()=>{
     expect(isBrowserPublicRoute('/website-creator')).toBe(true);
     expect(isBrowserPublicRoute('/website-creator/')).toBe(true);
+    expect(isBrowserPublicRoute('/website-creator/start')).toBe(true);
     expect(isBrowserPublicRoute('/network/dashboard/sites')).toBe(false);
   });
   it('places the entry in browser navigation, the homepage, Network and the sitemap',()=>{
@@ -18,12 +19,11 @@ describe('Public RCH Sites entry',()=>{
     const page=read('src/app/website-creator/page.tsx');
     for(const tier of ['free','amateur','professional'])expect(page).toContain("id:'"+tier+"'");
     expect(page).toContain('not yet available for purchase');
-    expect(page).toContain('/network/partners/apply?siteTier=');
+    expect(page).toContain('/website-creator/start?tier=');
+    expect(page).not.toContain('Register interest');
+    expect(page).not.toContain('Request free access');
     const application=read('src/app/network/partners/apply/page.tsx');
-    const form=read('src/components/network/PartnerInterestForm.tsx');
+    expect(application).toContain("redirect('/website-creator/start?tier='+siteTier)");
     expect(application).toContain('initialSiteTier={siteTier}');
-    expect(form).toContain('Preferred website subscription');
-    expect(form).toContain("plan_interest:websiteRequest?'community':form.planInterest");
-    expect(form).toContain("source:'partner-application'");
   });
 });
