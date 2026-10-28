@@ -27,10 +27,10 @@ update public.rch_site_starter_drafts set preferred_billing_interval='annual'
 select is((select preferred_billing_interval from public.rch_site_starter_drafts
   where profile_id='a6190000-0000-4000-8000-000000000001'),'annual',
   'Annual billing preference can be saved without paid enrollment');
-select throws_ok($
+select throws_ok($$
  update public.rch_site_starter_drafts set preferred_billing_interval='weekly'
  where profile_id='a6190000-0000-4000-8000-000000000001'
-$,'23514',null,'Unsupported billing frequencies are rejected');
+$$,'23514',null,'Unsupported billing frequencies are rejected');
 
 select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','SELECT'),
 'Server role can read private starter drafts in clean installs');
