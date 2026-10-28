@@ -133,7 +133,7 @@ export default function RchSitesBuilderPage(){
         <h1 className="mt-2 text-4xl font-black">Build your own website.</h1>
         <p className="mt-2 text-sm text-white/65">Your brand. Your visitors. Powered by Rich City Hoops.</p>
       </div>
-      <div className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs text-white/70"><FaLock/> Only your organization can edit</div>
+      <div className="flex flex-wrap items-center gap-3"><Link href="/network/dashboard/sites/billing" className="inline-flex min-h-11 items-center rounded-xl border border-sky-400/45 bg-sky-400/10 px-4 text-xs font-black text-sky-200">Website plan &amp; billing</Link><div className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs text-white/70"><FaLock/> Only your organization can edit</div></div>
     </div>
     <div className="mt-6 grid gap-3 rounded-2xl border border-white/15 bg-white/5 p-4 md:grid-cols-[1fr_auto] md:items-end">
       <label className="text-xs font-bold">Your organization
