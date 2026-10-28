@@ -108,7 +108,7 @@ export default function OrganizationInbox(){
           {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-400/25 p-4 text-sm text-emerald-200">{notice}</p>}
           {error&&<p role="alert" className="mt-5 rounded-xl border border-rose-400/25 p-4 text-sm text-rose-200">{error}</p>}
           <section className="mt-6 grid gap-3 md:grid-cols-2">
-            {inquiryLoading&&<p role="status" className="text-sm text-white/60">Loading this organization's inquiries…</p>}
+            {inquiryLoading&&<p role="status" className="text-sm text-white/60">Loading this organization&apos;s inquiries…</p>}
             {!inquiryLoading&&!filtered.length&&<div className="rounded-2xl border border-white/15 bg-white/5 p-7">
               <FaInbox className="text-rose-300" size={24}/>
               <h2 className="mt-3 text-lg font-black">Nothing here yet</h2>
