@@ -68,6 +68,8 @@ describe('RCH Sites Stripe billing readiness — staged, not silently enabled',(
     expect(stripe).toContain('validPeriod');
     expect(webhook).toContain('verifyRchSitesStripeSignature');
     expect(webhook).toContain('fetchRchSitesSubscription');
+    expect(webhook).toContain('unrelated_product');
+    expect(webhook).toContain('unlinked_untagged_invoice');
     expect(webhook).toContain("subscription.metadata?.rch_product!=='sites'");
     expect(webhook).toContain('site_billing_intent_id');
     expect(webhook).toContain('verifyRchSitesStripePrice');

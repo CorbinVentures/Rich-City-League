@@ -78,6 +78,42 @@ export async function POST(request:Request){
       await finish('ignored','no_subscription_reference');
       return response({received:true,ignored:true});
     }
+    // Stripe sends all account-level subscription/invoice events to a subscribed
+    // endpoint, including RCH memberships and Network advertising. Skip those
+    // before Stripe API calls so a missing/rotating Sites key cannot turn
+    // unrelated product events into retry storms.
+    const object=event.data?.object;
+    const productHint=object?.metadata?.rch_product
+      ??object?.parent?.subscription_details?.metadata?.rch_product
+      ??object?.subscription_details?.metadata?.rch_product;
+    if(productHint!==undefined&&productHint!=='sites'){
+      await finish('ignored','unrelated_product',subscriptionId);
+      return response({received:true,ignored:true});
+    }
+    if(productHint!=='sites'){
+      if(event.type?.startsWith('customer.subscription.')||
+        event.type==='checkout.session.completed'){
+        // All RCH Sites Checkouts and subscription records are tagged.
+        await finish('ignored','untagged_subscription',subscriptionId);
+        return response({received:true,ignored:true});
+      }
+      // Some Stripe API versions omit subscription metadata from invoice events.
+      // Only retrieve an untagged invoice if a prior verified Sites event has
+      // already linked this subscription to our private intent or ledger.
+      const [{data:knownSite,error:knownError},{data:knownIntent,error:intentLookupError}]
+        =await Promise.all([
+          db.from('rch_site_subscriptions').select('organization_id')
+            .eq('provider_subscription_ref',subscriptionId).maybeSingle(),
+          db.from('rch_site_billing_intents').select('id')
+            .eq('stripe_subscription_id',subscriptionId).maybeSingle(),
+        ]);
+      if(knownError||intentLookupError)
+        throw new Error('Unable to verify whether invoice belongs to RCH Sites.');
+      if(!knownSite&&!knownIntent){
+        await finish('ignored','unlinked_untagged_invoice',subscriptionId);
+        return response({received:true,ignored:true});
+      }
+    }
     const subscription=await fetchRchSitesSubscription(subscriptionId);
     if(subscription.metadata?.rch_product!=='sites'){
       await finish('ignored','not_an_rch_sites_subscription',subscriptionId);

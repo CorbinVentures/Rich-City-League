@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import {
   isRchSiteBillingInterval,isRchSitePlanTier,RCH_SITE_PLANS,
   type RchSiteBillingInterval,type RchSitePlanTier,
-} from '@/lib/rch-sites-plans';
+} from './rch-sites-plans';
 
 export type PaidRchSiteTier=Exclude<RchSitePlanTier,'free'>;
 const stripeApi='https://api.stripe.com/v1';
@@ -11,7 +11,15 @@ const stripeVersion='2026-08-26.dahlia';
 const stripePricePattern=/^price_[a-zA-Z0-9_]+$/;
 const productionUrl='https://richcityhoops.com';
 
-function secret(){return process.env.STRIPE_SECRET_KEY?.trim()||'';}
+function secret(){
+  // Dedicated, least-privilege Stripe API key for RCH Sites. A restricted key
+  // may be used; never reuse organization-owned PayPal or client credentials.
+  return process.env.RCH_SITES_STRIPE_API_KEY?.trim()
+    ||process.env.STRIPE_SECRET_KEY?.trim()||'';
+}
+function validStripeServerKey(){
+  return /^(sk|rk)_(test|live)_[A-Za-z0-9_]+$/.test(secret());
+}
 function webhookSecret(){return process.env.RCH_SITES_STRIPE_WEBHOOK_SECRET?.trim()||'';}
 function price(tier:PaidRchSiteTier,interval:RchSiteBillingInterval){
   const map={
@@ -27,7 +35,7 @@ export function isPaidRchSiteTier(v:unknown):v is PaidRchSiteTier{
 export function rchSitesBillingEnabled(){
   // A second explicit release switch is required in addition to verified pricing.
   return process.env.RCH_SITES_BILLING_ENABLED==='true'
-    &&secret().startsWith('sk_')
+    &&validStripeServerKey()
     &&Boolean(webhookSecret())
     &&/^bpc_[a-zA-Z0-9_]+$/.test(process.env.RCH_SITES_STRIPE_PORTAL_CONFIGURATION_ID?.trim()||'')
     &&(['amateur','professional'] as const).every(t=>
