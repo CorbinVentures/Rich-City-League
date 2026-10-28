@@ -3,6 +3,7 @@ import {
   RCH_SITE_FEATURE_KEYS,RCH_SITE_PLAN_TIERS,RCH_SITE_PLANS,
   RCH_SITE_QUOTA_KEYS,RCH_SITE_QUOTA_FEATURE,RCH_SITE_RELEASED_FEATURES,
   evaluateRchSiteFeature,evaluateRchSiteQuota,isRchSitePlanTier,
+  effectiveRchSiteBillingStatus,
   type RchSiteEntitlementContext,
 } from '../src/lib/rch-sites-plans';
 
@@ -11,6 +12,7 @@ const free:RchSiteEntitlementContext={
 };
 const paid:RchSiteEntitlementContext={
   ...free,tier:'amateur',billingStatus:'active',
+  currentPeriodEnd:'2099-01-01T00:00:00.000Z',
 };
 
 describe('RCH Sites Phase 0: proposed plans and default-deny release gates',()=>{
@@ -67,6 +69,29 @@ describe('RCH Sites Phase 0: proposed plans and default-deny release gates',()=>
         .toEqual({allowed:false,reason:'inactive_subscription'});
     }
     expect(evaluateRchSiteFeature(paid,'site.publish')).toEqual({allowed:true});
+  });
+
+  it('expires paid feature and quota access even if the webhook still says active',()=>{
+    const expiration='2026-10-28T19:00:00.000Z';
+    expect(effectiveRchSiteBillingStatus('professional','active',expiration,
+      Date.parse('2026-10-28T18:59:59.999Z'))).toBe('active');
+    expect(effectiveRchSiteBillingStatus('professional','active',expiration,
+      Date.parse(expiration))).toBe('past_due');
+    expect(effectiveRchSiteBillingStatus('professional','active',expiration,
+      Date.parse('2026-10-29T01:00:00.000Z'))).toBe('past_due');
+    for(const missing of [null,undefined,'','unparseable','1970-01-01T00:00:00.000Z']){
+      expect(effectiveRchSiteBillingStatus('amateur','active',missing)).toBe('past_due');
+      expect(evaluateRchSiteFeature({...paid,currentPeriodEnd:missing},'booking.basic'))
+        .toEqual({allowed:false,reason:'inactive_subscription'});
+      expect(evaluateRchSiteQuota({...paid,currentPeriodEnd:missing},'booking_services',0,1))
+        .toEqual({allowed:false,reason:'inactive_subscription'});
+    }
+    expect(effectiveRchSiteBillingStatus('free','none',null)).toBe('none');
+    expect(evaluateRchSiteFeature(free,'booking.basic')).toEqual({allowed:true});
+    expect(effectiveRchSiteBillingStatus('professional','canceled','2099-01-01T00:00:00Z'))
+      .toBe('canceled');
+    expect(effectiveRchSiteBillingStatus('professional','past_due','2099-01-01T00:00:00Z'))
+      .toBe('past_due');
   });
 
   it('does not mistake planned features for live functionality',()=>{
