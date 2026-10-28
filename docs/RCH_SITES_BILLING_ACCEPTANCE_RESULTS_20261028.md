@@ -1,0 +1,56 @@
+# RCH Sites — sandbox billing acceptance evidence (2026-10-28)
+
+**Scope:** Rich City Hoops Website Creator SaaS subscriptions. Organization-owned PayPal customer payments, RCH membership and Network advertising remain separate. No live customer payments were made.
+
+**Isolation:** Stripe "general" sandbox; draft GitHub PR #623 on branch feat/rch-sites-stripe-subscriptions-20261028; protected Vercel Preview; Supabase staging branch xrnmguuchatgllxwiper. Never copy sandbox API keys or test identities to production.
+
+## Confirmed end-to-end purchases
+
+| Test | Stripe result | Staging entitlement |
+|---|---|---|
+| Amateur monthly $19 | Paid, active | Amateur, monthly, active |
+| Amateur annual $190 | Paid, active | Amateur, annual, active |
+| Professional monthly $49 | Paid, then intentionally canceled | Professional, monthly, canceled |
+| Professional annual $490 | Paid, active | Professional, annual, active |
+
+Sandbox subscription references (not credentials): Amateur monthly sub_1UVbJFEHXWVaGmOhBjyTZKMq; Amateur annual sub_1UVbZCEHXWVaGmOhcryv0bJv; Professional monthly sub_1UVXBqEHXWVaGmOhodUgFIWu; Professional annual sub_1UVbakEHXWVaGmOhnLZds0W3.
+
+All four completed purchases reconciled Checkout completion, subscription creation and paid invoice events in the staging ledger. A mistakenly selected $19 monthly subscription on the Professional Annual test organization was canceled; a later $490 annual checkout activated the correct plan.
+
+## Other verified checks
+
+- End-of-period cancellation and reversal; immediate cancellation and processing of its webhook.
+- Customer Portal session creation with invoices, payment-method changes and cancellation. Direct self-service tier switching remains disabled.
+- Signed-in staging user could read its three authorized organization memberships but not another organization's memberships.
+- Temporary manager revocation test denied active owner/manager access. The transaction was rolled back and the manager membership restored.
+- Authenticated users have no direct access to private website billing subscription, intent or webhook tables.
+- Second pending Checkout intent was rejected by the real staging unique index in a rolled-back transaction.
+- Duplicate webhook event ID was rejected by the real staging primary key in a rolled-back transaction.
+- Unrelated sandbox subscription and cancellation webhook events were safely ignored.
+- Draft code now distinguishes initial failed invoices from failed renewals. Automated tests cover unpaid, incomplete, canceled, expired-period and renewal failure states without granting paid access.
+
+## Paid-period fail-closed guard — added October 28
+
+- Added `effectiveRchSiteBillingStatus` to validate the current paid-through timestamp, not merely `billing_status='active'`. Missing or expired paid periods return `past_due` in the Website Creator billing and appointment-management API responses.
+- Updated paid feature/quota preflight to deny access when the paid-through date is absent or expired. The Free tier remains unaffected. The UI labels past-due plans correctly and directs owners to Stripe billing management.
+- Added the draft forward-only migration `20261028192630_rch_sites_paid_period_quota_guard.sql` so that, **once the operator deliberately enables strict booking quotas**, the DB trigger also rejects expired or missing paid-through dates under a per-organization lock.
+- **Transactional staging validation passed:** an expired paid period was rejected, a missing period was rejected, and a valid future period allowed an eligible service write. All simulated writes, rollout changes and temporary function changes were rolled back. Follow-up verification showed zero added services, original paid period preserved and `enforce_booking=false`.
+- The migration is **committed but not applied** to either live or staging schema pending migration-history reconciliation. The Vercel preview and application unit tests do not replace this deployment gate.
+
+## Unverified release gates
+
+1. A provider-generated failed renewal event on a previously successful linked Website Creator Checkout is still untested. Mocked tests alone are not end-to-end verification.
+2. Two simultaneous authenticated HTTP Checkout requests across browser tabs and real cross-organization API access attempts remain untested, though the database guards passed.
+3. Actual billing-period expiry via Stripe simulation has not yet been tested.
+4. The Supabase staging branch currently reports MIGRATIONS_FAILED despite billing tables existing. Production already has the billing tables, duplicate-Checkout indexes and trigger, with the rails recorded under migration version 20261028033138, while this draft branch also contains 20261028031000 for the billing rails. Reconcile migration naming, history, and safe repeatability before merging; do not run the draft DDL blindly against production. See [the complete 16-mismatch migration-drift audit](./RCH_SITES_MIGRATION_DRIFT_20261028.md) for the verified histories, schema comparison, and safe reconciliation sequence.
+5. The booking-quota rollout remains off. Enforce the current paid period end as well as active billing status before paid-tier quota enforcement; a missed webhook must not leave indefinite entitlement.
+6. Review operational failed-payment notices, support, recovery, tax and cancellation policies before public launch.
+
+## Provider-level failed-payment attempts (additional October 28 check)
+
+- On the previously paid Amateur Monthly sandbox subscription, cleared its subscription payment method and used a sandbox-only Stripe billing-cycle-anchor reset with proration disabled. Stripe returned active, did **not** generate a new invoice or `invoice.payment_failed`; this is **not a successful failed-renewal test**. Restored the original payment method; existing paid invoice, active status and period end (November 28, 2026) remained unchanged. Stripe's billing-cycle-anchor timestamp shifted during the reset.
+- Created a disposable, unrelated sandbox customer (`cus_VWfg8eYINn81N9`) and attempted a subscription with no payment method. Stripe refused to create an immediately billed subscription without a saved payment source. A short-lived trial was created, but Stripe also refused immediate trial expiration without a payment method; that trial (`sub_1UVcLiEHXWVaGmOhd3JPJK6I`) was **canceled** without charges.
+- Stripe's Customer update rejected attaching a legacy test card token because the account disallows legacy card-token usage. The connected Stripe API tool does not expose the PaymentMethod Attach or test-clock Advance operations. No sandbox failed-renewal invoice was produced; the needed event remains a release gate.
+- These experiments used the `general` Stripe sandbox only. No live resources were changed.
+
+**Release gate:** Keep the production RCH_SITES_BILLING_ENABLED flag false, live Stripe webhook disabled and PR #623 in draft until outstanding tests pass and an explicit release is approved.

@@ -4,6 +4,8 @@ import {isRchSiteUuid} from '@/lib/rch-sites-billing-auth';
 import {
   fetchRchSitesSubscription,stripeRefId,stripeSiteSubscriptionState,
   verifyRchSitesStripeSignature,verifyRchSitesStripePrice,
+  retrieveRchSitesCheckout,isVerifiedRchSitesCheckoutLineage,
+  isUnpaidInitialRchSitesInvoiceFailure,
 } from '@/lib/rch-sites-stripe-billing';
 
 export const runtime='nodejs';
@@ -129,6 +131,20 @@ export async function POST(request:Request){
     if(event.type==='checkout.session.completed'&&
       event.data?.object?.id!==intent.stripe_session_id)
       throw new Error('Checkout session does not match the organization intent.');
+    // Reconcile against Stripe's canonical Checkout session for every Sites
+    // event, including subscription/invoice events delivered out of order.
+    // Metadata on a separately created subscription is not proof of payment.
+    const checkout=await retrieveRchSitesCheckout(intent.stripe_session_id);
+    if(isUnpaidInitialRchSitesInvoiceFailure(event.type,checkout)){
+      // No paid Checkout exists yet, so there is no entitlement to revoke.
+      // A later successful Checkout/invoice event will reconcile normally.
+      await finish('ignored','initial_payment_not_completed',subscriptionId);
+      return response({received:true,ignored:true});
+    }
+    if(!isVerifiedRchSitesCheckoutLineage(checkout,{
+      intentId:intent.id,organizationId:intent.organization_id,
+      sessionId:intent.stripe_session_id,subscriptionId,
+    }))throw new Error('Subscription is not linked to a completed paid website Checkout.');
     const plan=verifyRchSitesStripePrice(subscription);
     if(!plan||plan.tier!==intent.tier||plan.interval!==intent.billing_interval||
       subscription.items?.data?.[0]?.price?.id!==intent.stripe_price_id)

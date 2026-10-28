@@ -8,7 +8,7 @@ import {
   isValidRchBillingSelection,rchSitesBillingEnabled,rchSitesPrice,
   type PaidRchSiteTier,
 } from '@/lib/rch-sites-stripe-billing';
-import {type RchSiteBillingInterval} from '@/lib/rch-sites-plans';
+import {effectiveRchSiteBillingStatus,type RchSiteBillingInterval,type RchSiteBillingStatus} from '@/lib/rch-sites-plans';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -25,9 +25,11 @@ export async function GET(request:Request){
     .select('tier,billing_status,billing_interval,current_period_end,cancel_at_period_end')
     .eq('organization_id',orgId).maybeSingle();
   if(error)return send({error:'Website billing is temporarily unavailable.'},503);
+  const effectiveStatus=data?effectiveRchSiteBillingStatus(
+    data.tier,data.billing_status as RchSiteBillingStatus,data.current_period_end):'none';
   return send({available:rchSitesBillingEnabled(),
     subscription:data?{
-      tier:data.tier,status:data.billing_status,interval:data.billing_interval,
+      tier:data.tier,status:effectiveStatus,interval:data.billing_interval,
       currentPeriodEnd:data.current_period_end,cancelAtPeriodEnd:data.cancel_at_period_end,
     }:{tier:'free',status:'none',interval:null,currentPeriodEnd:null,cancelAtPeriodEnd:false}});
 }

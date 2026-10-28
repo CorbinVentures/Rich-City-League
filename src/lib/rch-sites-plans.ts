@@ -147,6 +147,22 @@ export const RCH_SITE_QUOTA_FEATURE:Readonly<Record<RchSiteQuota,RchSiteFeature>
 };
 
 export type RchSiteBillingStatus='none'|'active'|'trialing'|'past_due'|'canceled';
+
+/**
+ * Always validate the recorded paid-through date at the point of access.
+ * A missed renewal webhook must never leave paid Website Creator access
+ * active indefinitely merely because the last persisted status was "active".
+ * Free plans are unaffected by the paid-period check.
+ */
+export function effectiveRchSiteBillingStatus(
+  tier:unknown,status:RchSiteBillingStatus,periodEnd:unknown,
+  nowMs=Date.now(),
+):RchSiteBillingStatus{
+  if(tier==='free'||status!=='active')return status;
+  if(typeof periodEnd!=='string'||!periodEnd.trim())return 'past_due';
+  const expires=Date.parse(periodEnd);
+  return Number.isFinite(expires)&&expires>nowMs?'active':'past_due';
+}
 export type RchSiteEntitlementContext={
   /** Must come from server-authenticated organization records, not request bodies. */
   readonly organizationEligible:boolean;
@@ -154,6 +170,8 @@ export type RchSiteEntitlementContext={
   /** Must come from the dedicated future RCH Sites subscription, never Network tier. */
   readonly tier:unknown;
   readonly billingStatus:RchSiteBillingStatus;
+  /** Server-derived Stripe billing period; mandatory to grant paid features. */
+  readonly currentPeriodEnd?:string|null;
 };
 export type RchSiteDenyReason=
   'invalid_tier'|'ineligible_organization'|'inactive_membership'|
@@ -176,7 +194,8 @@ export function evaluateRchSiteFeature(context:RchSiteEntitlementContext,feature
   if(!isRchSitePlanTier(context.tier))return {allowed:false,reason:'invalid_tier'};
   if(!context.organizationEligible)return {allowed:false,reason:'ineligible_organization'};
   if(!context.membershipActive)return {allowed:false,reason:'inactive_membership'};
-  if(context.tier!=='free'&&context.billingStatus!=='active')
+  if(context.tier!=='free'&&effectiveRchSiteBillingStatus(
+    context.tier,context.billingStatus,context.currentPeriodEnd)!=='active')
     return {allowed:false,reason:'inactive_subscription'};
   if(!isRchSiteFeature(feature))return {allowed:false,reason:'unknown_feature'};
   if(!RCH_SITE_PLANS[context.tier].features.includes(feature))
