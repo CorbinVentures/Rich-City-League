@@ -19,6 +19,18 @@ values
  'Future Richmond Trainer','future-richmond-trainer','free',
  '{"siteType":"trainer","theme":"courtside","tagline":"Grow your game","about":"Adult training"}');
 
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','SELECT'),
+'Server role can read private starter drafts in clean installs');
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','INSERT'),
+'Server role can save private starter drafts in clean installs');
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','UPDATE'),
+'Server role can update account-owned website drafts');
+select ok(has_table_privilege('service_role','public.rch_site_subscriptions','SELECT'),
+'Server role can inspect website entitlements');
+select ok(has_table_privilege('service_role','public.rch_site_plan_limits','SELECT'),
+'Server role can inspect internal plan capacity');
+select ok(has_table_privilege('service_role','public.rch_site_booking_quota_rollout','SELECT'),
+'Server role can read phased quota rollout status');
 select ok(has_table_privilege('authenticated','public.rch_site_starter_drafts','SELECT'),
 'Authenticated owner has RLS-protected read permission');
 select ok(not has_table_privilege('authenticated','public.rch_site_starter_drafts','INSERT'),
