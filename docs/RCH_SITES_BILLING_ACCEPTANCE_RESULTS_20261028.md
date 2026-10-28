@@ -29,6 +29,14 @@ All four completed purchases reconciled Checkout completion, subscription creati
 - Unrelated sandbox subscription and cancellation webhook events were safely ignored.
 - Draft code now distinguishes initial failed invoices from failed renewals. Automated tests cover unpaid, incomplete, canceled, expired-period and renewal failure states without granting paid access.
 
+## Paid-period fail-closed guard — added October 28
+
+- Added `effectiveRchSiteBillingStatus` to validate the current paid-through timestamp, not merely `billing_status='active'`. Missing or expired paid periods return `past_due` in the Website Creator billing and appointment-management API responses.
+- Updated paid feature/quota preflight to deny access when the paid-through date is absent or expired. The Free tier remains unaffected. The UI labels past-due plans correctly and directs owners to Stripe billing management.
+- Added the draft forward-only migration `20261028192630_rch_sites_paid_period_quota_guard.sql` so that, **once the operator deliberately enables strict booking quotas**, the DB trigger also rejects expired or missing paid-through dates under a per-organization lock.
+- **Transactional staging validation passed:** an expired paid period was rejected, a missing period was rejected, and a valid future period allowed an eligible service write. All simulated writes, rollout changes and temporary function changes were rolled back. Follow-up verification showed zero added services, original paid period preserved and `enforce_booking=false`.
+- The migration is **committed but not applied** to either live or staging schema pending migration-history reconciliation. The Vercel preview and application unit tests do not replace this deployment gate.
+
 ## Unverified release gates
 
 1. A provider-generated failed renewal event on a previously successful linked Website Creator Checkout is still untested. Mocked tests alone are not end-to-end verification.
