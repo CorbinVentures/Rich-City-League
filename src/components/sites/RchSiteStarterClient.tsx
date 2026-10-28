@@ -9,7 +9,8 @@ import {
   isRchSiteSlug,normalizeRchSiteDraft,RCH_SITE_THEMES,RCH_SITE_TYPES,
   rchSiteSectionsFor,type RchSiteDraft,type RchSiteType,
 } from '@/lib/rch-site-builder';
-import {isRchSitePlanTier,type RchSitePlanTier} from '@/lib/rch-sites-plans';
+import {RCH_SITE_PLANS,isRchSitePlanTier,isRchSiteBillingInterval,
+  type RchSitePlanTier,type RchSiteBillingInterval} from '@/lib/rch-sites-plans';
 import {NETWORK_REGIONS} from '@/lib/network-taxonomy';
 import {
   FaArrowLeft,FaArrowRight,FaBasketball,FaCalendarDays,FaCircleCheck,
@@ -17,7 +18,7 @@ import {
 } from 'react-icons/fa6';
 
 type ExistingOrg={id:string;name:string;eligible:boolean;member_role:string};
-type Starter={organizationName:string;slug:string;tier:RchSitePlanTier;
+type Starter={organizationName:string;slug:string;tier:RchSitePlanTier;billingInterval:RchSiteBillingInterval;
   config:RchSiteDraft;verificationRequested:boolean;verificationStatus:string|null};
 const templates=[
   {type:'trainer',label:'Trainer',detail:'Sessions & skills',icon:FaBasketball},
@@ -26,9 +27,9 @@ const templates=[
   {type:'organizer',label:'Organizer',detail:'Events & tournaments',icon:FaGlobe},
 ] as const;
 const tiers=[
-  {id:'free',name:'Free',price:'$0',copy:'Start building now'},
-  {id:'amateur',name:'Amateur',price:'Coming later',copy:'Use Free while we finish this level'},
-  {id:'professional',name:'Professional',price:'Coming later',copy:'Use Free while we finish this level'},
+  {id:'free',name:'Free',copy:'Start building now'},
+  {id:'amateur',name:'Amateur',copy:'Paid features in development'},
+  {id:'professional',name:'Professional',copy:'Paid features in development'},
 ] as const;
 const field='mt-2 w-full min-h-12 rounded-xl border border-white/20 bg-[#111e2b] p-3 text-sm text-white outline-none focus:border-sky-400';
 const states=['Your site','Make it yours','Finish setup'];
@@ -60,7 +61,7 @@ async function postAction(payload:Record<string,unknown>):Promise<ResponseData>{
   return json;
 }
 
-export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string}){
+export function RchSiteStarterClient({initialTier='free',initialBilling='monthly'}:{initialTier?:string;initialBilling?:string}){
   const {user,loading:authLoading}=useAuth();
   const [loading,setLoading]=useState(true);
   const [step,setStep]=useState(0);
@@ -71,6 +72,7 @@ export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string})
   const [slug,setSlug]=useState('');
   const [slugTouched,setSlugTouched]=useState(false);
   const [tier,setTier]=useState<RchSitePlanTier>(isRchSitePlanTier(initialTier)?initialTier:'free');
+  const [billingInterval,setBillingInterval]=useState<RchSiteBillingInterval>(isRchSiteBillingInterval(initialBilling)?initialBilling:'monthly');
   const [config,setConfig]=useState<RchSiteDraft>(()=>initialConfig());
   const [saved,setSaved]=useState(false);
   const [requested,setRequested]=useState(false);
@@ -97,6 +99,7 @@ export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string})
         const d=savedData.draft;
         setName(d.organizationName);setSlug(d.slug);setSlugTouched(true);
         setTier(isRchSitePlanTier(d.tier)?d.tier:'free');
+        setBillingInterval(isRchSiteBillingInterval(d.billingInterval)?d.billingInterval:'monthly');
         setConfig(normalizeRchSiteDraft(d.config));setSaved(true);
         setRequested(d.verificationRequested);setVerificationStatus(d.verificationStatus);
         setStep(1);
@@ -133,7 +136,7 @@ export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string})
     if(!valid){setError('Add your business name, a valid site address, headline and description.');return false;}
     setBusy(true);setError('');setMessage('');
     try{
-      await postAction({action:'save',organizationName:name,slug,tier,config});
+      await postAction({action:'save',organizationName:name,slug,tier,billingInterval,config});
       setSaved(true);setMessage('Your private website draft is saved.');return true;
     }catch(e){setError(e instanceof Error?e.message:'Could not save your website.');return false;}
     finally{setBusy(false);}
@@ -171,7 +174,8 @@ export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string})
     finally{setBusy(false);}
   }
 
-  const path='/website-creator/start'+(isRchSitePlanTier(initialTier)?'?tier='+initialTier:'');
+  const path='/website-creator/start?tier='+(isRchSitePlanTier(initialTier)?initialTier:'free')+
+    '&billing='+(isRchSiteBillingInterval(initialBilling)?initialBilling:'monthly');
   if(authLoading||loading)return <Shell><p role="status" className="text-white/65">Opening your website setup…</p></Shell>;
   if(!user)return <Shell>
     <div className="mx-auto max-w-xl rounded-3xl border border-sky-400/25 bg-[#0a2030] p-7 sm:p-10">
@@ -214,12 +218,20 @@ export function RchSiteStarterClient({initialTier='free'}:{initialTier?:string})
       </section>
       <section>
         <h2 className="text-xl font-black">Choose your starting level</h2>
-        <p className="mt-2 text-xs text-white/60">Everyone begins on Free. Paid plans are being developed; your selection just saves your preference.</p>
+        <p className="mt-2 text-xs text-white/60">All website setup starts on Free. Choosing a paid level saves a preference; no payment is taken or reserved.</p>
+        <div className="mt-3 inline-flex gap-1 rounded-xl border border-white/15 p-1" role="group" aria-label="Preferred billing frequency">
+          {(['monthly','annual'] as const).map(value=><button key={value} type="button" aria-pressed={billingInterval===value}
+            className={'min-h-11 rounded-lg px-4 text-xs font-bold '+(billingInterval===value?'bg-sky-400 text-[#071522]':'text-white/65')}
+            onClick={()=>{setBillingInterval(value);setSaved(false);}}>{value==='monthly'?'Monthly':'Yearly · save 2 months'}</button>)}
+        </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">{tiers.map(plan=>
           <button key={plan.id} type="button" aria-pressed={tier===plan.id}
             onClick={()=>{setTier(plan.id);setSaved(false);}}
             className={'rounded-xl border p-4 text-left '+(tier===plan.id?'border-sky-300 bg-sky-400/15':'border-white/15 bg-white/[.03]')}>
-            <b className="block text-base">{plan.name}</b><span className="mt-1 block text-xl font-black">{plan.price}</span>
+            <b className="block text-base">{plan.name}</b>
+            <span className="mt-1 block text-xl font-black">{'$'}{billingInterval==='annual'?RCH_SITE_PLANS[plan.id].proposedAnnualUsd:RCH_SITE_PLANS[plan.id].proposedMonthlyUsd}
+              <span className="ml-1 text-xs font-normal text-white/60">/{billingInterval==='annual'?'year':'month'}</span>
+            </span>
             <span className="mt-2 block text-xs text-white/55">{plan.copy}</span>
           </button>)}</div>
       </section>

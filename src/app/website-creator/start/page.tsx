@@ -9,7 +9,7 @@ export const metadata:Metadata={
 
 export default async function WebsiteCreatorStartPage({
   searchParams,
-}:{searchParams:Promise<{tier?:string}>}){
-  const {tier}=await searchParams;
-  return <RchSiteStarterClient initialTier={tier}/>;
+}:{searchParams:Promise<{tier?:string;billing?:string}>}){
+  const {tier,billing}=await searchParams;
+  return <RchSiteStarterClient initialTier={tier} initialBilling={billing}/>;
 }

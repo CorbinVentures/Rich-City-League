@@ -5,7 +5,7 @@ import {getSupabaseAdminClient} from '@/lib/supabase-admin';
 import {
   isRchSiteSlug,normalizeRchSiteDraft,RCH_SITE_TYPES,type RchSiteType,
 } from '@/lib/rch-site-builder';
-import {isRchSitePlanTier} from '@/lib/rch-sites-plans';
+import {isRchSitePlanTier,isRchSiteBillingInterval} from '@/lib/rch-sites-plans';
 import {NETWORK_REGIONS} from '@/lib/network-taxonomy';
 
 export const runtime='nodejs';
@@ -63,7 +63,7 @@ export async function GET(){
   const admin=getSupabaseAdminClient() as any;
   if(!admin)return reply({error:'Website setup is temporarily unavailable.'},503);
   const {data:draft,error}=await admin.from('rch_site_starter_drafts')
-    .select('organization_name,desired_slug,preferred_tier,config,verification_inquiry_id,updated_at')
+    .select('organization_name,desired_slug,preferred_tier,preferred_billing_interval,config,verification_inquiry_id,updated_at')
     .eq('profile_id',context.user.id).maybeSingle();
   if(error)return reply({error:'Could not load your saved website.'},503);
   let verificationStatus:null|string=null;
@@ -73,7 +73,7 @@ export async function GET(){
     verificationStatus=inquiry?.status??'submitted';
   }
   return reply({draft:draft?{organizationName:draft.organization_name,slug:draft.desired_slug,
-    tier:draft.preferred_tier,config:draft.config,
+    tier:draft.preferred_tier,billingInterval:draft.preferred_billing_interval,config:draft.config,
     verificationRequested:!!draft.verification_inquiry_id,verificationStatus,
     updatedAt:draft.updated_at}:null});
 }
@@ -92,7 +92,7 @@ export async function POST(request:Request){
     raw=body as Record<string,unknown>;
   }catch{return reply({error:'Valid setup details are required.'},400);}
   const {data:starter,error:starterError}=await admin.from('rch_site_starter_drafts')
-    .select('profile_id,organization_name,desired_slug,preferred_tier,config,verification_inquiry_id')
+    .select('profile_id,organization_name,desired_slug,preferred_tier,preferred_billing_interval,config,verification_inquiry_id')
     .eq('profile_id',context.user.id).maybeSingle();
   if(starterError)return reply({error:'Could not check your saved website.'},503);
 
@@ -101,6 +101,7 @@ export async function POST(request:Request){
     if(organizationName.length<2)return reply({error:'Enter your basketball business or program name.'},400);
     if(!isRchSiteSlug(raw.slug))return reply({error:'Choose a website address with 3–48 letters, numbers or hyphens.'},400);
     if(!isRchSitePlanTier(raw.tier))return reply({error:'Select a website plan.'},400);
+    if(!isRchSiteBillingInterval(raw.billingInterval))return reply({error:'Select monthly or yearly billing preference.'},400);
     const config=normalizeRchSiteDraft(raw.config);
     if(!RCH_SITE_TYPES.includes(config.siteType))return reply({error:'Choose a website template.'},400);
     if(!config.tagline||!config.about)return reply({error:'Add a headline and short description to save.'},400);
@@ -108,7 +109,7 @@ export async function POST(request:Request){
         starter.organization_name.toLowerCase()!==organizationName.toLowerCase())
       return reply({error:'This name is attached to your pending verification. Contact RCH to change the organization.'},409);
     const values={organization_name:organizationName,desired_slug:raw.slug,
-      preferred_tier:raw.tier,config};
+      preferred_tier:raw.tier,preferred_billing_interval:raw.billingInterval,config};
     const result=starter
       ?await admin.from('rch_site_starter_drafts').update(values)
         .eq('profile_id',context.user.id)

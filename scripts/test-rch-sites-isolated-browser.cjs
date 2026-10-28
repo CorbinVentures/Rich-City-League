@@ -98,6 +98,8 @@ async function main(){
   // solely for the disposable local browser fixture, never in the website.
   const first=await browser.newContext({viewport:{width:390,height:844},bypassCSP:true});
   let page=await signin(first,'first session');
+  await page.getByRole('button',{name:/professional/i}).click();
+  await page.getByRole('button',{name:/yearly.*save 2 months/i}).click();
   await page.getByRole('button',{name:/customize my site/i}).click();
   const org='CI Trainer '+crypto.randomBytes(4).toString('hex');
   await page.getByRole('textbox',{name:/basketball business/i}).fill(org);
@@ -105,11 +107,16 @@ async function main(){
   await page.getByText('Your private website draft is saved.')
     .waitFor({state:'visible',timeout:20000});
   let {data:draft,error:draftErr}=await admin.from('rch_site_starter_drafts')
-    .select('organization_name,desired_slug,preferred_tier,config')
+    .select('organization_name,desired_slug,preferred_tier,preferred_billing_interval,config')
     .eq('profile_id',userId).maybeSingle();
   if(draftErr||!draft)throw Error('Private draft was not written to database: '+draftErr?.message);
   assert.equal(draft.organization_name,org);
-  assert.equal(draft.preferred_tier,'free');
+  assert.equal(draft.preferred_tier,'professional');
+  assert.equal(draft.preferred_billing_interval,'annual');
+  const {count:paidRecords,error:subscriptionError}=await admin.from('rch_site_subscriptions')
+    .select('organization_id',{count:'exact',head:true}).eq('tier','professional');
+  if(subscriptionError)throw Error('Could not inspect paid entitlements');
+  assert.equal(paidRecords,0,'Choosing a price must never create an active paid subscription');
   assert.equal(draft.config.siteType,'trainer');
   console.log('PASS local authenticated save: actual server/API/Postgres persists private draft');
 
@@ -122,6 +129,10 @@ async function main(){
     .waitFor({state:'visible',timeout:15000});
   assert.equal(await page.getByRole('textbox',{name:/basketball business/i}).inputValue(),org);
   assert.equal(await page.getByRole('textbox',{name:/your website address/i}).inputValue(),draft.desired_slug);
+  await page.getByRole('button',{name:/1\. Your site/i}).click();
+  await page.getByRole('button',{name:/professional/i}).waitFor({state:'visible'});
+  assert.equal(await page.getByRole('button',{name:/professional/i}).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.getByRole('button',{name:/yearly.*save 2 months/i}).getAttribute('aria-pressed'),'true');
   console.log('PASS local save/resume: fresh authenticated session restores original organization draft');
 
   // Production/other-tenant URLs must never be available to an unapproved user.
