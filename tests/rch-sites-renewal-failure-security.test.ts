@@ -119,7 +119,7 @@ describe('RCH Sites payment failure, renewal and entitlement safety',()=>{
     expect(b.isVerifiedRchSitesCheckoutLineage(checkout,expected)).toBe(true);
     const invalid=[
       {...checkout,payment_status:'unpaid'},
-      {...checkout,status:'expired'},
+      {...checkout,status:'expired' as const},
       {...checkout,subscription:'sub_otherTenant'},
       {...checkout,client_reference_id:'another-tenant'},
       {...checkout,metadata:{...checkout.metadata,rch_product:'network'}},
