@@ -97,6 +97,9 @@ describe('RCH Sites Organization HQ honest activity',()=>{
     expect(view).toContain('Promise.allSettled(');
     expect(view).toContain('controller.abort()');
     expect(view).toContain("activity?.organizationId===selected");
+    expect(view).toContain('ownerSnapshot?.userId===userId');
+    expect(view).toContain('activity.forUserId===userId');
+    expect(view).toContain('authLoading||loading||!accountLoaded');
     expect(view).toContain("['owner','manager'].includes(org.member_role)");
     expect(view).toContain("if(!userId)");
     expect(view).toContain('Website page-view analytics aren');
