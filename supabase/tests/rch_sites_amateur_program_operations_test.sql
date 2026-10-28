@@ -43,7 +43,7 @@ select throws_ok($$
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id) values
 ('b6300000-0000-4000-8000-000000000002','c6300000-0000-4000-8000-000000000001',
 'a6300000-0000-4000-8000-000000000001')
-$$,'23503',null,'Program registration cannot cross organization boundaries');
+$,'23514',null,'Program registration cannot cross organization boundaries');
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id)
 values('b6300000-0000-4000-8000-000000000001','c6300000-0000-4000-8000-000000000001',
 'a6300000-0000-4000-8000-000000000001');
