@@ -49,6 +49,6 @@ describe('RCH Sites self-service launch experience',()=>{
     expect(paypal).not.toContain('STRIPE_SECRET_KEY');
     expect(paypal).not.toContain('PAYPAL_CLIENT_SECRET');
     expect(paypal).not.toContain('connected_account');
-    expect(paypal).toContain('paying does not automatically confirm');
+    expect(paypal).toContain('cannot verify payments, confirm paid bookings');
   });
 });
