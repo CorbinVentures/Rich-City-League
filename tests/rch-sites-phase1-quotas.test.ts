@@ -62,7 +62,7 @@ describe('RCH Sites Phase 1: staged website subscription + booking quotas',()=>{
     expect(api).toContain('bookingQuotaEnabled(admin)');
     expect(ui).toContain('websitePlan.usage.services');
     expect(ui).toContain('websitePlan.usage.confirmedBookingsMonthly');
-    expect(ui).toContain('Paid plan enrollment is not available yet.');
+    expect(ui).toContain('Visit Website Billing to manage your subscription.');
     expect(ui).toContain('websitePlan.quotaEnforced');
     expect(plans).toContain('evaluateRchSiteFeature');
   });
