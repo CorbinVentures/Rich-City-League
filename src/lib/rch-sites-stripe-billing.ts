@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import {
   isRchSiteBillingInterval,isRchSitePlanTier,RCH_SITE_PLANS,
   type RchSiteBillingInterval,type RchSitePlanTier,
-} from '@/lib/rch-sites-plans';
+} from './rch-sites-plans';
 
 export type PaidRchSiteTier=Exclude<RchSitePlanTier,'free'>;
 const stripeApi='https://api.stripe.com/v1';
