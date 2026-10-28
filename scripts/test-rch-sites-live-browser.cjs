@@ -47,8 +47,16 @@ async function run(){
       await startLink.waitFor({timeout:15000});
       await startLink.click();
       await page.waitForURL(/\/website-creator\/start(?:\?|$)/,{timeout:15000});
-      await verify(page.getByText('Your website starts here.').isVisible(),
-        'Guests must reach the account-first website creation screen');
+      try{
+        await page.getByRole('heading',{name:/your website starts here/i})
+          .waitFor({state:'visible',timeout:20000});
+      }catch(error){
+        await page.screenshot({path:artifacts+'/failed-get-started-'+device.name+'.png',fullPage:true});
+        console.error('DEBUG route:',page.url());
+        console.error('DEBUG visible page:',(await page.locator('body').innerText()).slice(0,1200));
+        console.error('DEBUG page errors:',runtimeErrors);
+        throw error;
+      }
       await verify(page.getByRole('link',{name:/create a free account/i}).isVisible(),
         'Guests must have a create-account action');
       await verify(page.getByRole('link',{name:/i already have an account/i}).isVisible(),
