@@ -1,4 +1,5 @@
 import {NextResponse} from 'next/server';
+import {createHash} from 'node:crypto';
 import {getServerSupabaseClient} from '@/lib/supabase-server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
 import {
@@ -30,6 +31,14 @@ function validOrigin(request:Request){
     return url.host.toLowerCase()===host.toLowerCase()
       && (url.protocol==='https:'||(url.protocol==='http:'&&url.hostname==='localhost'));
   }catch{return false;}
+}
+// One stable request identity per user prevents double-click/racing submissions
+// from creating duplicate verification inbox records.
+function verificationId(userId:string){
+  const hex=createHash('sha256').update('rch-sites-starter-verification:'+userId)
+    .digest('hex');
+  return hex.slice(0,8)+'-'+hex.slice(8,12)+'-4'+hex.slice(13,16)
+    +'-8'+hex.slice(17,20)+'-'+hex.slice(20,32);
 }
 function safeText(value:unknown,max:number){
   return typeof value==='string'?value.replace(/<[^>]*>/g,'')
@@ -134,7 +143,9 @@ export async function POST(request:Request){
     const existing=(listings??[]).find((o:any)=>o.name.toLowerCase()===starter.organization_name.toLowerCase());
     if(existing)return reply({status:'existing_listing',slug:existing.slug},409);
     const siteType=normalizeRchSiteDraft(starter.config).siteType;
+    const requestId=verificationId(context.user.id);
     const {data:inquiry,error}=await admin.from('network_partner_inquiries').insert({
+      id:requestId,
       organization_name:starter.organization_name,
       organization_type:typeToOrg[siteType],
       contact_name:contactName,contact_email:context.user.email,
@@ -144,9 +155,15 @@ export async function POST(request:Request){
       goals:'RCH Sites publishing verification: private starter website completed. Preferred website tier: '
         +starter.preferred_tier+'. Proposed address: '+starter.desired_slug+'.',
     }).select('id').single();
-    if(error||!inquiry)return reply({error:'Could not request website verification.'},503);
+    let submitted=inquiry;
+    if(error?.code==='23505'){
+      const {data:existingRequest}=await admin.from('network_partner_inquiries')
+        .select('id').eq('id',requestId).eq('submitted_by',context.user.id).maybeSingle();
+      submitted=existingRequest;
+    }
+    if(!submitted)return reply({error:'Could not request website verification.'},503);
     const {error:updateError}=await admin.from('rch_site_starter_drafts')
-      .update({verification_inquiry_id:inquiry.id,verification_requested_at:new Date().toISOString()})
+      .update({verification_inquiry_id:submitted.id,verification_requested_at:new Date().toISOString()})
       .eq('profile_id',context.user.id).is('verification_inquiry_id',null);
     if(updateError)return reply({error:'Your verification request was received, but we could not update your draft. Contact RCH support.'},503);
     return reply({status:'verification_requested'});
