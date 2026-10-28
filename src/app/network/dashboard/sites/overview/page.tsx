@@ -5,6 +5,9 @@ import {useEffect,useMemo,useState} from 'react';
 import {Container} from '@/components/Container';
 import {useAuth} from '@/hooks/useAuth';
 import {isRchSiteSlug} from '@/lib/rch-site-builder';
+import {basketballSiteTypeForOrganization} from '@/lib/rch-sites-basketball-tools';
+import {RchSitesBasketballTools} from '@/components/sites/RchSitesBasketballTools';
+import {isRchSitePlanTier} from '@/lib/rch-sites-plans';
 import {
   summarizeRchSitesOverview,
   type RchSitesOverviewInquiry,
@@ -17,7 +20,7 @@ import {
   FaCircleCheck,FaClock,FaEnvelope,FaGlobe,FaLink,FaRotate,
 } from 'react-icons/fa6';
 
-type Org={id:string;name:string;eligible:boolean;member_role:string};
+type Org={id:string;name:string;eligible:boolean;member_role:string;organization_type:string};
 type Published={organization_id:string;slug:string;status:string};
 type SitesResponse={organizations:Org[];published:Published[]};
 type InquiryResponse={inquiries:RchSitesOverviewInquiry[]};
@@ -276,6 +279,16 @@ export default function RchSitesOverviewPage(){
               </div>)}</div>}
           </div>
         </section>
+        {!pending&&current?.plan&&isRchSitePlanTier(current.plan.tier)&&organization&&
+          <div className="mt-5">
+            <RchSitesBasketballTools
+              siteType={basketballSiteTypeForOrganization(organization.organization_type)}
+              tier={current.plan.tier}
+              paidSubscriptionActive={current.plan.billingStatus==='active'}
+              organizationId={selected}
+              mode="owner"
+            />
+          </div>}
         <section className="mt-5" aria-label="Website tools">
           <h2 className="mb-3 text-lg font-black">Manage your website</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

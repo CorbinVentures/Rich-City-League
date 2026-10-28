@@ -37,7 +37,8 @@ export default function RchSitesBillingPage(){
       const eligible=(payload.organizations||[]).filter((org:Organization)=>
         org.eligible&&['owner','manager'].includes(org.member_role));
       setOrganizations(eligible);
-      setSelected(eligible[0]?.id||'');
+      const requested=new URLSearchParams(window.location.search).get('organizationId');
+      setSelected(eligible.find((org:Organization)=>org.id===requested)?.id||eligible[0]?.id||'');
     }).catch(err=>{if(active)setError(err instanceof Error?err.message:'Unable to load organizations.');})
       .finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
