@@ -39,6 +39,11 @@ create index rch_site_billing_intents_org_time
 create unique index rch_site_billing_intents_subscription_unique
   on public.rch_site_billing_intents(stripe_subscription_id)
   where stripe_subscription_id is not null;
+-- Only one open checkout per organization; prevents duplicate subscriptions
+-- from two browser tabs, stale retries and different organization managers.
+create unique index rch_site_billing_intents_one_open_checkout
+  on public.rch_site_billing_intents(organization_id)
+  where status in ('pending','checkout_ready');
 create trigger rch_site_billing_intents_updated_at
   before update on public.rch_site_billing_intents
   for each row execute function public.set_updated_at();
