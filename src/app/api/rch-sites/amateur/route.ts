@@ -22,12 +22,13 @@ function problem(err:{code?:string}|null,defaultMessage:string){
 /** Paid website entitlement is never inferred from the starter wizard or Network tier. */
 async function activeOperations(admin:any,organizationId:string){
   const [{data:flag,error:flagError},{data:plan,error:planError}]=await Promise.all([
-    admin.from('rch_site_amateur_rollout').select('enabled').eq('id',true).maybeSingle(),
+    admin.from('rch_site_amateur_rollout').select('enabled,pilot_organization_id').eq('id',true).maybeSingle(),
     admin.from('rch_site_subscriptions').select('tier,billing_status,current_period_end')
       .eq('organization_id',organizationId).maybeSingle(),
   ]);
   if(flagError||planError||!flag)return {ready:false,reason:'unavailable' as const};
-  if(!flag.enabled)return {ready:false,reason:'pilot' as const};
+  if(!flag.enabled||flag.pilot_organization_id!==organizationId)
+    return {ready:false,reason:'pilot' as const};
   const active=plan&&['amateur','professional'].includes(plan.tier)&&
     effectiveRchSiteBillingStatus(plan.tier,
       plan.billing_status as RchSiteBillingStatus,plan.current_period_end)==='active';
