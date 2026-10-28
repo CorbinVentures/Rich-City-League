@@ -98,6 +98,31 @@ async function main(){
   // solely for the disposable local browser fixture, never in the website.
   const first=await browser.newContext({viewport:{width:390,height:844},bypassCSP:true});
   let page=await signin(first,'first session');
+  // Billing must never authorize an unverified/non-owned organization, even
+  // from a valid paid-plan-interested user with a complete RCH profile.
+  const deniedBilling=await page.evaluate(async()=>{
+    const org='b6220000-0000-4000-8000-000000000099';
+    const [checkout,portal,summary]=await Promise.all([
+      fetch('/api/rch-sites/billing/checkout',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({organizationId:org,tier:'professional',interval:'annual'}),
+      }),
+      fetch('/api/rch-sites/billing/portal',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({organizationId:org}),
+      }),
+      fetch('/api/rch-sites/billing/checkout?organizationId='+org),
+    ]);
+    return {checkout:checkout.status,portal:portal.status,summary:summary.status};
+  });
+  assert.deepEqual(deniedBilling,{checkout:403,portal:403,summary:403},
+    'Completed user without organization ownership must never access billing routes');
+  const unsignedWebhook=await page.request.post(origin+'/api/rch-sites/billing/webhook',{
+    data:JSON.stringify({id:'evt_untrusted',type:'invoice.paid'}),
+    headers:{'Content-Type':'application/json'},
+  });
+  assert.equal(unsignedWebhook.status(),400,'Unsigned payment webhooks cannot alter entitlements');
+  console.log('PASS isolated billing authorization and unsigned-webhook rejection');
   await page.getByRole('button',{name:/professional/i}).click();
   await page.getByRole('button',{name:/yearly.*save 2 months/i}).click();
   await page.getByRole('button',{name:/customize my site/i}).click();
