@@ -57,8 +57,22 @@ export async function POST(request:Request){
     const subscription=await retrieveRchSitesSubscription(subscriptionId);
     const parsed=parseRchSitesSubscription(subscription);
     if(parsed.family!=='rch_sites'||!parsed.mapping||!uuid.test(parsed.organizationId||'')){
-      // Unrecognized product/price cannot unlock a website tier.
-      await record('ignored',null,'Wrong product family, unknown price or missing organization.');
+      // If Stripe moved an existing RCH website subscription to an unrecognized
+      // product/price, immediately revoke paid access rather than leaving stale
+      // entitlements in place. Never assign premium access from metadata alone.
+      const {data:priorLink,error:linkError}=await db.from('rch_site_subscriptions')
+        .select('organization_id,provider_customer_ref')
+        .eq('provider_subscription_ref',subscriptionId).maybeSingle();
+      if(linkError)throw linkError;
+      if(priorLink){
+        const {error:revokeError}=await db.from('rch_site_subscriptions').update({
+          tier:'free',billing_status:'none',provider_subscription_ref:null,
+          provider_price_ref:null,billing_interval:null,current_period_end:null,
+          cancel_at_period_end:false,
+        }).eq('organization_id',priorLink.organization_id).eq('provider_subscription_ref',subscriptionId);
+        if(revokeError)throw revokeError;
+      }
+      await record('ignored',priorLink?.organization_id||null,'Unrecognized Stripe product, price or family; paid access revoked when linked.');
       return NextResponse.json({received:true,ignored:true});
     }
     const orgId=parsed.organizationId!;
