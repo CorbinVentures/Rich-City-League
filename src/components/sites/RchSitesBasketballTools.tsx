@@ -13,6 +13,7 @@ type Props={
   mode:'owner'|'builder'|'starter';
   organizationId?:string;
   paidSubscriptionActive?:boolean;
+  limit?:number;
 };
 
 function accessText(tool:BasketballToolView,mode:Props['mode']){
@@ -24,8 +25,8 @@ function accessText(tool:BasketballToolView,mode:Props['mode']){
     :'Planned for '+tool.firstPlan+'+';
 }
 
-export function RchSitesBasketballTools({siteType,tier,mode,organizationId,paidSubscriptionActive=false}:Props){
-  const items=basketballToolsFor(siteType,tier,paidSubscriptionActive);
+export function RchSitesBasketballTools({siteType,tier,mode,organizationId,paidSubscriptionActive=false,limit=6}:Props){
+  const items=basketballToolsFor(siteType,tier,paidSubscriptionActive,limit);
   const template=RCH_BASKETBALL_TEMPLATES[siteType];
   return <section aria-label="Basketball tools by website level" className="rounded-2xl border border-white/15 bg-white/[.04] p-4 sm:p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
