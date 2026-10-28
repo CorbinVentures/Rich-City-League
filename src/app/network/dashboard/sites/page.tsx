@@ -133,7 +133,10 @@ export default function RchSitesBuilderPage(){
   const canPublish=organization?.member_role==='owner'||organization?.member_role==='manager';
   const valid=isRchSiteSlug(slug)&&config.tagline.trim().length>0&&config.about.trim().length>0;
   return <Shell>
-    <Link href="/network/dashboard" className="inline-flex items-center gap-2 text-xs font-bold text-white/60"><FaArrowLeft/> Partner dashboard</Link>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <Link href="/network/dashboard" className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-white/60"><FaArrowLeft/> Partner dashboard</Link>
+      <Link href="/network/dashboard/sites/overview" className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-rose-300">Organization HQ <FaArrowRight/></Link>
+    </div>
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
       <div><p className="text-xs font-bold uppercase tracking-[.2em] text-rose-400">RCH Sites · Website Studio</p>
         <h1 className="mt-2 text-4xl font-black">Build your own website.</h1>
