@@ -41,7 +41,8 @@ The connected **Richcityhoops** Stripe account (`acct_1UVN7sE7q3pkDeRU`) now con
 The following variables are **server-only** and must never be `NEXT_PUBLIC_`:
 
 ```text
-STRIPE_SECRET_KEY=<existing correct Stripe account key>
+RCH_SITES_STRIPE_API_KEY=<dedicated restricted Stripe server key; never commit a value>
+# STRIPE_SECRET_KEY is legacy fallback; prefer the dedicated key above.
 RCH_SITES_BILLING_ENABLED=false
 RCH_SITES_STRIPE_WEBHOOK_SECRET=<whsec_... for NEW dedicated endpoint>
 RCH_SITES_STRIPE_PORTAL_CONFIGURATION_ID=<bpc_... restricted portal>
