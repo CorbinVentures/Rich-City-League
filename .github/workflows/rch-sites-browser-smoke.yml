@@ -1,0 +1,39 @@
+name: RCH Sites live browser onboarding smoke
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/rch-sites-browser-smoke.yml"
+      - "scripts/test-rch-sites-live-browser.cjs"
+      - "src/app/website-creator/**"
+      - "src/components/sites/RchSiteStarterClient.tsx"
+      - "src/app/auth/**"
+      - "src/lib/auth-redirect.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guest-onboarding-browser:
+    name: Check public onboarding on mobile and desktop
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RCH_E2E_BASE_URL: https://richcityhoops.com
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned standalone Playwright browser tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/rch-browser-test" --no-audit --no-fund --save-exact playwright@1.64.1
+          "$RUNNER_TEMP/rch-browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Test publicly deployed website (no user accounts or production writes)
+        run: NODE_PATH="$RUNNER_TEMP/rch-browser-test/node_modules" node scripts/test-rch-sites-live-browser.cjs
+      - name: Save anonymous screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rch-sites-anonymous-browser-screenshots
+          path: artifacts/rch-sites-browser/
+          retention-days: 3
+          if-no-files-found: ignore
