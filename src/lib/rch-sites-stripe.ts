@@ -29,6 +29,7 @@ export function rchSitePriceMapping(priceId:unknown):PriceMapping|null{
 export function rchSiteStripeReady(tier:PaidRchSiteTier,interval:RchSiteBillingInterval){
   return process.env.RCH_SITES_BILLING_ENABLED==='true'&&!!secret()
     &&!!process.env.STRIPE_RCH_SITES_WEBHOOK_SECRET?.trim()
+    &&!!process.env.STRIPE_RCH_SITES_PORTAL_CONFIGURATION_ID?.trim()
     &&!!rchSitePriceId(tier,interval);
 }
 async function stripe<T>(path:string,body?:URLSearchParams,idempotencyKey?:string):Promise<T>{
@@ -83,7 +84,8 @@ export async function createRchSitesPortal(customerId:string){
   body.set('customer',customerId);
   body.set('return_url',siteUrl()+'/network/dashboard/sites/billing');
   const config=process.env.STRIPE_RCH_SITES_PORTAL_CONFIGURATION_ID?.trim();
-  if(config)body.set('configuration',config);
+  if(!config)throw Error('A dedicated RCH Sites Stripe portal must be configured.');
+  body.set('configuration',config);
   return stripe<{url:string}>('/billing_portal/sessions',body);
 }
 export async function retrieveRchSitesSubscription(id:string){
