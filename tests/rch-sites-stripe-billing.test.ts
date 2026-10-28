@@ -11,6 +11,7 @@ describe('RCH Website Creator payment separation and launch guard',()=>{
   it('uses unique keys and approved subscription intervals instead of Network or membership billing',()=>{
     expect(stripe).toContain('STRIPE_RCH_SITES_SECRET_KEY');
     expect(stripe).toContain('STRIPE_RCH_SITES_WEBHOOK_SECRET');
+    expect(stripe).toContain("if(!config)throw Error('A dedicated RCH Sites Stripe portal must be configured.');");
     for(const key of ['AMATEUR_MONTHLY','AMATEUR_ANNUAL','PROFESSIONAL_MONTHLY','PROFESSIONAL_ANNUAL'])
       expect(stripe).toContain('STRIPE_RCH_SITES_PRICE_'+key);
     expect(stripe).not.toContain('STRIPE_NETWORK_WEBHOOK_SECRET');
