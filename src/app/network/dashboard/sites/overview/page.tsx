@@ -69,8 +69,8 @@ export default function RchSitesOverviewPage(){
   const [activityLoading,setActivityLoading]=useState(false);
   const [refreshToken,setRefreshToken]=useState(0);
   const userId=user?.id;
-  const organizations=useMemo(()=>ownerSnapshot?.userId===userId?ownerSnapshot.organizations:[],[ownerSnapshot,userId]);
-  const published=useMemo(()=>ownerSnapshot?.userId===userId?ownerSnapshot.published:[],[ownerSnapshot,userId]);
+  const organizations=useMemo(()=>ownerSnapshot&&ownerSnapshot.userId===userId?ownerSnapshot.organizations:[],[ownerSnapshot,userId]);
+  const published=useMemo(()=>ownerSnapshot&&ownerSnapshot.userId===userId?ownerSnapshot.published:[],[ownerSnapshot,userId]);
   const accountLoaded=!userId||ownerSnapshot?.userId===userId;
 
   // Only organization memberships returned by the existing authenticated Site API
