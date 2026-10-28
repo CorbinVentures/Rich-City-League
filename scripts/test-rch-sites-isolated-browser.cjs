@@ -88,6 +88,10 @@ async function main(){
   if(authError)throw Error('Local GoTrue credential preflight failed: '+authError.status+' '+authError.message);
   await verifier.auth.signOut();
   console.log('PASS local GoTrue credential preflight');
+  const {data:starterProbe,error:starterError}=await admin.from('rch_site_starter_drafts')
+    .select('profile_id').eq('profile_id',userId).maybeSingle();
+  if(starterError)throw Error('Local RCH starter DB privilege preflight: '+starterError.code+' '+starterError.message);
+  console.log('PASS local starter draft table access',starterProbe===null?'empty':'existing');
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   // Local Supabase uses http://127.0.0.1:54321, which is intentionally not
   // allowed by RCH production CSP (https://*.supabase.co only). Disable CSP
