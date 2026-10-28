@@ -62,7 +62,10 @@ describe('RCH Sites Stripe billing readiness — staged, not silently enabled',(
     expect(stripe).toContain('Math.abs(nowSeconds-epoch)>300');
     expect(stripe).toContain("p.currency!=='usd'");
     expect(stripe).toContain('p.unit_amount!==RCH_SITE_PLANS');
+    expect(stripe).toContain("stripePrice.unit_amount!==approvedCents");
+    expect(stripe).toContain("stripePrice.active!==true");
     expect(stripe).toContain("invoice?.status==='paid'");
+    expect(stripe).toContain('validPeriod');
     expect(webhook).toContain('verifyRchSitesStripeSignature');
     expect(webhook).toContain('fetchRchSitesSubscription');
     expect(webhook).toContain("subscription.metadata?.rch_product!=='sites'");
