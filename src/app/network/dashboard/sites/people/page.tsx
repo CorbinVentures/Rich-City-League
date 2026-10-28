@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Container} from '@/components/Container';
 import {useAuth} from '@/hooks/useAuth';
 import {FaArrowLeft,FaEnvelope,FaCheck,FaInbox,FaLock} from 'react-icons/fa6';
@@ -24,17 +24,25 @@ export default function OrganizationInbox(){
   const [error,setError]=useState('');
   const [notice,setNotice]=useState('');
   const [filter,setFilter]=useState('new');
+  const [inquiryLoading,setInquiryLoading]=useState(false);
+  const selectedOrganization=useRef('');
+  const requestId=useRef(0);
   const loadOrganizations=useCallback(async()=>{
     const response=await fetch('/api/rch-sites',{cache:'no-store'});
     const result=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(result.error||'Could not load organizations.');
     const approved=(result.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
     setOrgs(approved);
-    setOrganizationId(value=>value||approved[0]?.id||'');
+    const requested=new URLSearchParams(window.location.search).get('organizationId');
+    setOrganizationId(value=>approved.some(o=>o.id===value)?value:
+      approved.find(o=>o.id===requested)?.id||approved[0]?.id||'');
   },[]);
   const loadInquiries=useCallback(async(id:string)=>{
+    if(id!==selectedOrganization.current)return;
+    const request=++requestId.current;
     const response=await fetch('/api/rch-sites/inquiries?organizationId='+encodeURIComponent(id),{cache:'no-store'});
     const result=await response.json().catch(()=>({}));
+    if(request!==requestId.current||id!==selectedOrganization.current)return;
     if(!response.ok)throw Error(result.error||'Could not load inquiries.');
     setInquiries(result.inquiries??[]);
   },[]);
@@ -44,23 +52,28 @@ export default function OrganizationInbox(){
     void loadOrganizations().catch(e=>setError(e instanceof Error?e.message:'Unable to load organizations.'))
       .finally(()=>setLoading(false));
   },[authLoading,user,loadOrganizations]);
+  useEffect(()=>{selectedOrganization.current=organizationId;},[organizationId]);
   useEffect(()=>{
-    if(!organizationId){setInquiries([]);return;}
-    setError('');setInquiries([]);
-    void loadInquiries(organizationId).catch(e=>setError(e instanceof Error?e.message:'Unable to load inquiries.'));
+    if(!organizationId){requestId.current++;setInquiries([]);setInquiryLoading(false);return;}
+    setError('');setInquiries([]);setInquiryLoading(true);
+    void loadInquiries(organizationId)
+      .catch(e=>{if(organizationId===selectedOrganization.current)setError(e instanceof Error?e.message:'Unable to load inquiries.');})
+      .finally(()=>{if(organizationId===selectedOrganization.current)setInquiryLoading(false);});
   },[organizationId,loadInquiries]);
   const filtered=useMemo(()=>filter==='all'?inquiries:inquiries.filter(i=>i.status===filter),[inquiries,filter]);
   const mark=async(id:string,status:'contacted'|'closed')=>{
     if(busy||!organizationId)return;
+    const actingFor=organizationId;
     setBusy(id);setError('');setNotice('');
     try{
       const response=await fetch('/api/rch-sites/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({action:'setStatus',inquiryId:id,organizationId,status})});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw Error(data.error||'Unable to update inquiry.');
+      if(actingFor!==selectedOrganization.current)return;
       setNotice(status==='contacted'?'Marked as contacted.':'Inquiry closed.');
       await loadInquiries(organizationId);
-    }catch(e){setError(e instanceof Error?e.message:'Unable to update inquiry.');}
+    }catch(e){if(actingFor===selectedOrganization.current)setError(e instanceof Error?e.message:'Unable to update inquiry.');}
     finally{setBusy('');}
   };
   return <main className="min-h-screen bg-[#0b0c10] pb-24 text-white">
@@ -76,15 +89,15 @@ export default function OrganizationInbox(){
         </section>:<>
         {!orgs.length?<p className="mt-7 rounded-xl border border-white/20 p-5 text-sm text-white/70">You need an active, verified organization and owner or manager access to open an inbox.</p>:<>
           <label className="mt-7 block max-w-md text-xs font-bold">Organization
-            <select value={organizationId} onChange={e=>{setOrganizationId(e.target.value);setNotice('');}}
+            <select value={organizationId} onChange={e=>{selectedOrganization.current=e.target.value;setOrganizationId(e.target.value);setNotice('');}}
               className="mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#191b24] p-3 text-sm text-white">
               {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
             </select>
           </label>
           <div className="mt-6 grid grid-cols-3 gap-3">
-            <Summary label="New" value={inquiries.filter(i=>i.status==='new').length}/>
-            <Summary label="Contacted" value={inquiries.filter(i=>i.status==='contacted').length}/>
-            <Summary label="Closed" value={inquiries.filter(i=>i.status==='closed').length}/>
+            <Summary label="New" value={inquiryLoading?'—':inquiries.filter(i=>i.status==='new').length}/>
+            <Summary label="Contacted" value={inquiryLoading?'—':inquiries.filter(i=>i.status==='contacted').length}/>
+            <Summary label="Closed" value={inquiryLoading?'—':inquiries.filter(i=>i.status==='closed').length}/>
           </div>
           <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter inquiries">
             {['new','contacted','closed','all'].map(status=><button key={status} type="button" onClick={()=>setFilter(status)}
@@ -95,7 +108,8 @@ export default function OrganizationInbox(){
           {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-400/25 p-4 text-sm text-emerald-200">{notice}</p>}
           {error&&<p role="alert" className="mt-5 rounded-xl border border-rose-400/25 p-4 text-sm text-rose-200">{error}</p>}
           <section className="mt-6 grid gap-3 md:grid-cols-2">
-            {!filtered.length&&<div className="rounded-2xl border border-white/15 bg-white/5 p-7">
+            {inquiryLoading&&<p role="status" className="text-sm text-white/60">Loading this organization's inquiries…</p>}
+            {!inquiryLoading&&!filtered.length&&<div className="rounded-2xl border border-white/15 bg-white/5 p-7">
               <FaInbox className="text-rose-300" size={24}/>
               <h2 className="mt-3 text-lg font-black">Nothing here yet</h2>
               <p className="mt-2 text-sm text-white/60">When adults contact your published RCH website, their requests appear here.</p>
@@ -125,7 +139,7 @@ export default function OrganizationInbox(){
     </Container>
   </main>;
 }
-function Summary({label,value}:{label:string;value:number}){
+function Summary({label,value}:{label:string;value:number|string}){
   return <div className="rounded-xl border border-white/15 bg-white/5 p-4">
     <span className="text-xs font-bold text-white/60">{label}</span>
     <div className="mt-2 text-3xl font-black tabular-nums">{value}</div>
