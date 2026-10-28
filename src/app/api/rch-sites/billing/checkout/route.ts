@@ -58,7 +58,7 @@ export async function POST(request:Request){
     return send({error:'manage_existing',message:'Manage your existing website subscription.'},409);
 
   const {data:open,error:openError}=await db.from('rch_site_billing_intents')
-    .select('id,stripe_session_id,status').eq('organization_id',orgId)
+    .select('id,stripe_session_id,status,created_at').eq('organization_id',orgId)
     .in('status',['pending','checkout_ready']).order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(openError)return send({error:'Unable to verify current checkout.'},503);
   if(open){
@@ -77,7 +77,18 @@ export async function POST(request:Request){
       }catch{
         return send({error:'Unable to verify the previous checkout. No new checkout was started.'},503);
       }
-    }else return send({error:'checkout_processing',message:'An earlier checkout is being created.'},409);
+    }else{
+      // A crashed process may leave a pending intent before Stripe returned
+      // a session. No Checkout URL was ever handed to the customer.
+      const oldPending=open.status==='pending'&&!open.stripe_session_id
+        &&Date.now()-new Date(open.created_at).getTime()>10*60*1000;
+      if(!oldPending)
+        return send({error:'checkout_processing',message:'An earlier checkout is being created.'},409);
+      const {error:abandonError}=await db.from('rch_site_billing_intents')
+        .update({status:'expired'}).eq('id',open.id).eq('status','pending')
+        .is('stripe_session_id',null);
+      if(abandonError)return send({error:'Cannot recover the earlier checkout.'},503);
+    }
   }
 
   const priceId=rchSitesPrice(tier,interval);
