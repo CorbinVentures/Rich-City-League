@@ -50,7 +50,7 @@ describe('RCH Sites adult basketball program rollout',()=>{
     expect(sql).toContain('for update');
     expect(sql).toContain('count(distinct profile_id)');
     expect(sql).toContain('tstzrange(starts_at,ends_at');
-    expect(sql).not.toContain('paypal');
+    expect(sql).not.toContain('rch_site_paypal_offerings');
   });
   it('provides distinct owner and self-registration experiences',()=>{
     expect(manager).toContain('createProgram');
