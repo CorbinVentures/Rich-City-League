@@ -35,10 +35,10 @@ select is((select pilot_organization_id from public.rch_site_amateur_rollout whe
 insert into public.rch_site_amateur_programs(id,organization_id,name,kind,capacity)
 values('c6300000-0000-4000-8000-000000000001',
  'b6300000-0000-4000-8000-000000000001','Thursday clinic','training',1);
-select throws_ok($
+select throws_ok($$
 insert into public.rch_site_amateur_programs(organization_id,name,kind,capacity)
 values('b6300000-0000-4000-8000-000000000002','Other organization blocked','team',2)
-$,'23514',null,'Enabling pilot cannot expose operations to another paid organization');
+$$,'23514',null,'Enabling pilot cannot expose operations to another paid organization');
 
 select throws_ok($$
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id) values
@@ -49,7 +49,7 @@ select throws_ok($$
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id) values
 ('b6300000-0000-4000-8000-000000000002','c6300000-0000-4000-8000-000000000001',
 'a6300000-0000-4000-8000-000000000001')
-$,'23514',null,'Program registration cannot cross organization boundaries');
+$$,'23514',null,'Program registration cannot cross organization boundaries');
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id)
 values('b6300000-0000-4000-8000-000000000001','c6300000-0000-4000-8000-000000000001',
 'a6300000-0000-4000-8000-000000000001');
