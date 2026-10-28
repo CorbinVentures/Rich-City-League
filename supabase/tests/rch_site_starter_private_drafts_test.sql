@@ -49,7 +49,7 @@ select throws_ok($$update public.rch_site_starter_drafts
 '42501',null,'Other users cannot change a private starter');
 select set_config('request.jwt.claim.sub','a6190000-0000-4000-8000-000000000001',true);
 select is((select count(*) from public.rch_site_starter_drafts),1::bigint,
-'The starter owner can resume their private website');
+'The draft owner can resume the private website');
 
 select * from finish();
 rollback;
