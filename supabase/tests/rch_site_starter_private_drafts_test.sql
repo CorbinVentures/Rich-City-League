@@ -43,7 +43,7 @@ select throws_ok($$select * from public.rch_site_starter_drafts$$,
 set role authenticated;
 select set_config('request.jwt.claim.sub','a6190000-0000-4000-8000-000000000002',true);
 select is((select count(*) from public.rch_site_starter_drafts),0::bigint,
-'Another signed-in profile cannot see the owner's website');
+'Another signed-in profile cannot see the private website');
 select throws_ok($$update public.rch_site_starter_drafts
   set organization_name='Impersonated'$$,
 '42501',null,'Other users cannot change a private starter');
