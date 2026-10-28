@@ -16,6 +16,8 @@ export default function AdultBasketballRegistration(){
   const {user,loading:authLoading}=useAuth();
   const [data,setData]=useState<Listing>({available:false,programs:[],sessions:[]});
   const [loading,setLoading]=useState(true);
+  const [loadedIdentity,setLoadedIdentity]=useState('');
+  const identity=slug+'|'+(user?.id||'guest');
   const [busy,setBusy]=useState('');
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
@@ -28,15 +30,15 @@ export default function AdultBasketballRegistration(){
   useEffect(()=>{
     if(authLoading)return;
     let active=true;
-    setLoading(true);setError('');
+    setLoading(true);setData({available:false,programs:[],sessions:[]});setError('');
     void fetch('/api/rch-sites/amateur?slug='+encodeURIComponent(slug),{cache:'no-store'})
       .then(async r=>{const json=await r.json().catch(()=>({}));
         if(!r.ok)throw Error(json.error||'Could not load adult programs.');
-        if(active)setData(json as Listing);
-      }).catch(e=>{if(active)setError(e instanceof Error?e.message:'Unable to load programs.');})
+        if(active){setData(json as Listing);setLoadedIdentity(identity);}
+      }).catch(e=>{if(active){setLoadedIdentity(identity);setError(e instanceof Error?e.message:'Unable to load programs.');}})
       .finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
-  },[slug,authLoading,user?.id]);
+  },[slug,authLoading,user?.id,identity]);
   async function act(programId:string,action:'register'|'withdraw'){
     if(busy)return;
     setBusy(programId);setError('');setMessage('');
@@ -60,14 +62,14 @@ export default function AdultBasketballRegistration(){
       <p className="mt-7 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-rose-300"><FaBasketball/> RCH Sites</p>
       <h1 className="mt-2 text-3xl font-black sm:text-5xl">Adult basketball programs</h1>
       <p className="mt-3 max-w-xl text-sm leading-6 text-white/60">Register with your RCH account for an independently operated basketball training group, team, camp or tryout. Participants must be at least 18.</p>
-      {(authLoading||loading)&&<p role="status" className="mt-6">Opening basketball programs…</p>}
+      {(authLoading||loading||loadedIdentity!==identity)&&<p role="status" className="mt-6">Opening basketball programs…</p>}
       {error&&<p role="alert" className="mt-5 rounded-xl border border-rose-400/30 p-4 text-sm text-rose-200">{error}</p>}
       {message&&<p role="status" className="mt-5 rounded-xl border border-emerald-400/30 p-4 text-sm text-emerald-200">{message}</p>}
-      {!authLoading&&!loading&&(!data.available||data.programs.length===0)&&
+      {!authLoading&&!loading&&loadedIdentity===identity&&(!data.available||data.programs.length===0)&&
         <p className="mt-6 rounded-2xl border border-white/15 p-5 text-sm text-white/65">
           {data.available?'This organization has no open adult programs right now.':'This organization is not currently accepting online program registrations.'}
         </p>}
-      {!authLoading&&!loading&&data.available&&<section className="mt-7 grid gap-3">
+      {!authLoading&&!loading&&loadedIdentity===identity&&data.available&&<section className="mt-7 grid gap-3">
         {data.programs.map(p=>{
           const enrolled=(data.myProgramIds??[]).includes(p.id);
           return <article key={p.id} className="rounded-2xl border border-white/15 bg-white/[.04] p-5">
