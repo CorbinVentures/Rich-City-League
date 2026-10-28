@@ -31,7 +31,7 @@ export default function OrganizationInbox(){
     const response=await fetch('/api/rch-sites',{cache:'no-store'});
     const result=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(result.error||'Could not load organizations.');
-    const approved=(result.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
+    const approved:Org[]=(result.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
     setOrgs(approved);
     const requested=new URLSearchParams(window.location.search).get('organizationId');
     setOrganizationId(value=>approved.some(o=>o.id===value)?value:
