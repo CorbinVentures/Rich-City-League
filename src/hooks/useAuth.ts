@@ -10,8 +10,14 @@ const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 function getAuthSiteUrl() {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
   if (configuredSiteUrl === PRODUCTION_SITE_URL) return configuredSiteUrl;
-  if (typeof window !== 'undefined' && LOCAL_HOSTNAMES.has(window.location.hostname)) {
-    return window.location.origin.replace(/\/$/, '');
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin.replace(/\/$/, '');
+    if (LOCAL_HOSTNAMES.has(window.location.hostname)) return origin;
+    // Only use the current protected Preview origin when it is *exactly*
+    // the environment's configured site URL. Never trust a supplied redirect.
+    if (window.location.hostname.endsWith('.vercel.app') && configuredSiteUrl === origin) {
+      return origin;
+    }
   }
   return PRODUCTION_SITE_URL;
 }
@@ -26,7 +32,12 @@ function getSupabaseUnavailableMessage() {
 function getAuthErrorMessage(error: unknown, fallback: string) {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
   const message = error instanceof Error ? error.message.toLowerCase() : '';
-  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) return 'Invalid email or password.';
+  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
+    if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
+      return 'This test site has separate accounts from live Rich City Hoops. Use your staging credentials or create a test account below.';
+    }
+    return 'Invalid email or password.';
+  }
   if (code === 'email_not_confirmed' || message.includes('email not confirmed')) return 'Please confirm your email before signing in.';
   if (code === 'user_banned') return 'This account is unavailable. Contact the league administrator.';
   if (code === 'unexpected_failure' || message.includes('timeout') || message.includes('context canceled') || message.includes('connection')) {
