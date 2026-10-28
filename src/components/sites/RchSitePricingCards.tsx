@@ -6,10 +6,22 @@ import {FaArrowRight,FaCircleCheck} from 'react-icons/fa6';
 import {RCH_SITE_ADDONS,RCH_SITE_FOUNDING_OFFER,RCH_SITE_PLAN_TIERS,
   RCH_SITE_PLANS,getRchSitePlanDisplayPrice,type RchSitePlanTier} from '@/lib/rch-sites-plans';
 
-const descriptions:Record<RchSitePlanTier,{subtitle:string;live:string[];planned:string[]}>={
-  free:{subtitle:'Make your mark',live:['Branded RCH website and templates','Basic SEO and inquiries','Free booking tools'],planned:['1 page and registration form','2 booking services · 25 bookings/month','1 administrator']},
-  amateur:{subtitle:'Build your business',live:['Everything currently available on Free'],planned:['6 pages and 3 staff accounts','15 booking services · 150 bookings/month','5 registration forms and client tools','Local SEO and marketing','Media gallery and team rosters']},
-  professional:{subtitle:'Run your organization',live:['Everything currently available on Free'],planned:['20 pages and 10 staff accounts','60 booking services · 600 bookings/month','Advanced registration and client tools','Custom domain and advanced SEO','Tournament brackets and marketing automation']},
+const descriptions:Record<RchSitePlanTier,{subtitle:string;outcome:string;live:string[];planned:string[]}>={
+  free:{
+    subtitle:'Get discovered',outcome:'A home for your basketball brand',
+    live:['Branded basketball website','Player and client inquiries','Basic free training bookings'],
+    planned:['Public basketball events','1 page and 1 registration form','2 booking services · 25 monthly bookings after quota rollout'],
+  },
+  amateur:{
+    subtitle:'Run your program',outcome:'For trainers, coaches and growing AAU teams',
+    live:['Includes the currently released Free tools'],
+    planned:['Group sessions and multi-coach scheduling','Adult registrations, tryouts and team rosters','Basketball media gallery and program outreach','6 pages · 3 staff · 15 services · 150 monthly bookings'],
+  },
+  professional:{
+    subtitle:'Run your organization',outcome:'For leagues, academies and tournament directors',
+    live:['Includes the currently released Free tools'],
+    planned:['Tournament brackets and multiple divisions','Court/resource scheduling and automated communication','Advanced SEO, custom domain and media collections','20 pages · 10 staff · 60 services · 600 monthly bookings'],
+  },
 };
 
 export function RchSitePricingCards({billingOpen=false}:{billingOpen?:boolean}){
@@ -22,11 +34,13 @@ export function RchSitePricingCards({billingOpen=false}:{billingOpen?:boolean}){
           {value==='monthly'?'Monthly':'Yearly · 2 months free'}
         </button>)}
     </div>
+    <p className="mt-4 max-w-3xl text-sm leading-6 text-white/65">Free gives your basketball program a home. Amateur is designed for running workouts and teams. Professional is designed for managing competitions. Tools marked planned cannot be used until they are released and your organization has the required website subscription.</p>
     <div className="mt-6 grid gap-4 lg:grid-cols-3">{RCH_SITE_PLAN_TIERS.map(id=>{
       const plan=RCH_SITE_PLANS[id],detail=descriptions[id],amount=getRchSitePlanDisplayPrice(id,interval);
       return <article key={id} className={'flex min-w-0 flex-col rounded-3xl border p-6 '+(id==='amateur'?'border-sky-400/65 bg-[#10283a]':'border-white/15 bg-[#0b1723]')}>
         <p className="text-xs font-black uppercase tracking-[.17em] text-sky-300">{plan.name}</p>
         <h3 className="mt-3 font-display text-2xl font-black uppercase">{detail.subtitle}</h3>
+        <p className="mt-2 text-sm leading-6 text-white/65">{detail.outcome}</p>
         <p className="mt-5 font-display text-4xl font-black">{'$'}{amount}<span className="ml-1 text-sm font-normal text-white/65">/{interval==='monthly'?'month':'year'}</span></p>
         {id!=='free'&&<p className="mt-1 text-xs text-white/55">{interval==='annual'?'Equivalent to $'+(amount/12).toFixed(2)+'/month, billed annually':'Yearly option available'}</p>}
         <div className="mt-6 flex-1 space-y-5">
