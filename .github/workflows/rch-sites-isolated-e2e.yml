@@ -1,0 +1,83 @@
+name: RCH Sites isolated authenticated browser lifecycle
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/rch-sites-isolated-e2e.yml"
+      - "scripts/test-rch-sites-isolated-browser.cjs"
+      - "src/app/api/rch-sites/starter/**"
+      - "src/components/sites/RchSiteStarterClient.tsx"
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-account-lifecycle:
+    name: Sign in, save website, sign out, sign in, resume (local only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.115.0
+      - name: Pin Docker Hub registry for disposable Supabase stack
+        run: |
+          echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+          echo "SUPABASE_USE_SLIM_IMAGES=true" >> "$GITHUB_ENV"
+      - name: Start LOCAL Postgres, GoTrue and PostgREST
+        run: |
+          supabase start --exclude realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          supabase db reset --local
+      - name: Configure local-only test URLs and keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          test -n "$API_URL"
+          test -n "$ANON_KEY"
+          test -n "$SERVICE_ROLE_KEY"
+          case "$API_URL" in
+            http://127.0.0.1:*|http://localhost:*) ;;
+            *) echo "Refusing non-local Supabase URL"; exit 1 ;;
+          esac
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000" >> "$GITHUB_ENV"
+          echo "RCH_LOCAL_E2E_ORIGIN=http://localhost:3000" >> "$GITHUB_ENV"
+      - name: Install Next.js app and pinned Chromium browser tooling
+        run: |
+          npm ci
+          npm install --prefix "$RUNNER_TEMP/rch-e2e-browser" --no-audit --no-fund --save-exact playwright@1.64.1
+          "$RUNNER_TEMP/rch-e2e-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start local Next.js server
+        shell: bash
+        run: |
+          nohup npm run dev > /tmp/rch-sites-local-next.log 2>&1 &
+          echo $! > /tmp/rch-sites-local-next.pid
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:3000/website-creator/start >/dev/null; then
+              echo "Local RCH Website Creator ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Local Next.js server never started"
+          tail -80 /tmp/rch-sites-local-next.log
+          exit 1
+      - name: Real authenticated browser save and resume, isolated fixture
+        run: NODE_PATH="$RUNNER_TEMP/rch-e2e-browser/node_modules" node scripts/test-rch-sites-isolated-browser.cjs
+      - name: Capture local diagnostics (no production credentials)
+        if: failure()
+        run: |
+          echo "Local Next.js log (last 100 lines)"
+          tail -100 /tmp/rch-sites-local-next.log || true
+          echo "Local Supabase container status"
+          docker ps -a || true
