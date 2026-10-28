@@ -1,19 +1,14 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {Container} from '@/components/Container';
-import {FaArrowRight,FaBasketball,FaCircleCheck,FaGlobe,FaLock} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaGlobe,FaLock} from 'react-icons/fa6';
+import {RchSitePricingCards} from '@/components/sites/RchSitePricingCards';
 
 export const metadata:Metadata={
   title:'Website Creator | RCH Sites',
   description:'Create your own basketball website with Rich City Hoops. Start designing immediately: trainers, coaches, teams, leagues, AAU programs and organizers. Free, Amateur and Professional website plans.',
   alternates:{canonical:'/website-creator'},
 };
-
-const plans=[
-  {id:'free',name:'Free',price:'$0 / month',subtitle:'Make your mark',features:['Branded RCH subsite','Customizable approved templates','Program info, media and contact details'],footnote:'Build and save your design now; verify before public publishing.'},
-  {id:'amateur',name:'Amateur',price:'Pricing to be announced',subtitle:'Build your business',features:['Expanded appointment and service tools','More client and media capabilities','Growing program workflows'],footnote:'Save your preferred level; begin designing on Free with no checkout.'},
-  {id:'professional',name:'Professional',price:'Pricing to be announced',subtitle:'Scale your program',features:['Advanced program and team tools','Expanded reporting and site customization','Optional local SEO support'],footnote:'Save your preferred level; begin designing on Free with no checkout.'},
-] as const;
 
 const audiences=['Trainers','Coaches','AAU programs','Teams & leagues','Basketball organizers'];
 
@@ -44,15 +39,8 @@ export default function WebsiteCreatorPage(){
         <p className="text-xs font-black uppercase tracking-[.18em] text-sky-300">Website subscriptions</p>
         <h2 id="plan-heading" className="mt-2 font-display text-3xl font-black uppercase">Find your level.</h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">Free, Amateur and Professional are website subscription levels, not RCH Network advertising plans.</p>
-        <div className="mt-7 grid gap-4 lg:grid-cols-3">{plans.map(plan=><article key={plan.id} className={'flex min-w-0 flex-col rounded-3xl border p-6 '+(plan.id==='amateur'?'border-sky-400/55 bg-[#10283a]':'border-white/15 bg-[#0b1723]')}>
-          <p className="text-xs font-black uppercase tracking-[.17em] text-sky-300">{plan.name}</p>
-          <h3 className="mt-3 font-display text-2xl font-black uppercase">{plan.subtitle}</h3>
-          <p className="mt-5 text-lg font-black">{plan.price}</p>
-          <ul className="mt-6 flex-1 space-y-3">{plan.features.map(item=><li key={item} className="flex gap-2 text-sm leading-6 text-white/75"><FaCircleCheck className="mt-1 shrink-0 text-sky-300" aria-hidden="true"/>{item}</li>)}</ul>
-          <Link href={'/website-creator/start?tier='+plan.id} className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 py-3 text-sm font-black text-[#071522]">Get Started <FaArrowRight aria-hidden="true"/></Link>
-          <p className="mt-3 text-xs leading-5 text-white/50">{plan.footnote}</p>
-        </article>)}</div>
-        <p className="mt-5 text-xs leading-6 text-white/50">Amateur and Professional subscriptions are not yet available for purchase. You can start on Free, save a preferred tier and design your site now. No paid enrollment or automatic charges.</p>
+        <RchSitePricingCards/>
+        <p className="mt-5 max-w-3xl text-xs leading-6 text-white/50">These are announced RCH Sites prices, not active paid subscriptions. Current features are marked separately from the development roadmap. Checkout, annual billing, founding discounts and paid upgrades will activate only after payment verification, release gates and final terms are ready.</p>
       </section>
       <section className="mt-16 grid gap-7 rounded-3xl border border-white/15 bg-[#0d2030] p-6 sm:p-10 md:grid-cols-2 md:items-center">
         <div><p className="text-xs font-black uppercase tracking-[.17em] text-sky-300">Your organization. Your rules.</p><h2 className="mt-3 font-display text-3xl font-black uppercase">Build with RCH. Stay independent.</h2><p className="mt-4 text-sm leading-7 text-white/65">Anyone operating a basketball business can start designing immediately. RCH verifies the applicant’s authorization before transferring a draft into organization Website Studio or publishing.</p><Link href="/website-creator/start?tier=free" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-[#071522]">Get Started <FaArrowRight aria-hidden="true"/></Link></div>
