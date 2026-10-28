@@ -138,7 +138,7 @@ create trigger rch_site_amateur_registration_guard_trigger
  for each row execute function public.rch_site_amateur_registration_guard();
 
 create function public.rch_site_amateur_session_guard()
-returns trigger language plpgsql security invoker set search_path=public,pg_temp as $
+returns trigger language plpgsql security invoker set search_path=public,pg_temp as $$
 declare t text; used bigint; allowed integer;
 begin
  if tg_op='UPDATE' then
