@@ -72,6 +72,7 @@ describe('RCH Sites payment failure, renewal and entitlement safety',()=>{
   it('revokes paid-tier feature and quota access during a failed renewal, then restores it on payment',()=>{
     const base:RchSiteEntitlementContext={
       organizationEligible:true,membershipActive:true,tier:'professional',billingStatus:'active',
+      currentPeriodEnd:'2099-01-01T00:00:00.000Z',
     };
     expect(evaluateRchSiteFeature(base,'booking.basic')).toEqual({allowed:true});
     expect(evaluateRchSiteQuota(base,'booking_services',0,1)).toMatchObject({allowed:true});
@@ -83,6 +84,19 @@ describe('RCH Sites payment failure, renewal and entitlement safety',()=>{
         .toEqual({allowed:false,reason:'inactive_subscription'});
     }
     expect(evaluateRchSiteFeature({...base,billingStatus:'active'},'booking.basic'))
+      .toEqual({allowed:true});
+  });
+
+  it('expires paid access even when the Stripe renewal webhook is delayed',()=>{
+    const stale:RchSiteEntitlementContext={
+      organizationEligible:true,membershipActive:true,tier:'professional',billingStatus:'active',
+      currentPeriodEnd:'2026-10-01T00:00:00.000Z',
+    };
+    expect(evaluateRchSiteFeature(stale,'booking.basic'))
+      .toEqual({allowed:false,reason:'inactive_subscription'});
+    expect(evaluateRchSiteQuota(stale,'booking_services',1,1))
+      .toEqual({allowed:false,reason:'inactive_subscription'});
+    expect(evaluateRchSiteFeature({...stale,currentPeriodEnd:'2099-01-01T00:00:00.000Z'},'booking.basic'))
       .toEqual({allowed:true});
   });
 
