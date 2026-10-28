@@ -86,6 +86,9 @@ describe('RCH Sites Organization HQ honest activity',()=>{
     const appointments=src('src/app/api/rch-sites/appointments/route.ts');
     const paypal=src('src/app/api/rch-sites/paypal/route.ts');
     const partner=src('src/app/network/dashboard/page.tsx');
+    const inboxPage=src('src/app/network/dashboard/sites/people/page.tsx');
+    const calendarPage=src('src/app/network/dashboard/sites/appointments/page.tsx');
+    const paymentsPage=src('src/app/network/dashboard/sites/payments/page.tsx');
     const studio=src('src/app/network/dashboard/sites/page.tsx');
     expect(view).toContain("getData<SitesResponse>('/api/rch-sites'");
     expect(view).toContain('/api/rch-sites/inquiries?organizationId=');
@@ -104,5 +107,14 @@ describe('RCH Sites Organization HQ honest activity',()=>{
     expect(paypal).toContain('await owner(organizationId)');
     expect(studio).toContain('/network/dashboard/sites/overview');
     expect(partner).toContain('/network/dashboard/sites/overview');
+    expect(view).toContain('href={forOrganization(a.href)}');
+    expect(studio).toContain('new URLSearchParams(window.location.search)');
+    for(const page of [view,inboxPage,calendarPage,paymentsPage]){
+      expect(page).toContain("new URLSearchParams(window.location.search).get('organizationId')");
+      expect(page).toContain('.find(o=>o.id===requested)');
+    }
+    expect(inboxPage).toContain('selectedOrganization.current');
+    expect(inboxPage).toContain('request!==requestId.current||id!==selectedOrganization.current');
+    expect(inboxPage).toContain('if(actingFor!==selectedOrganization.current)return;');
   });
 });
