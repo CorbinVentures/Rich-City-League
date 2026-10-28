@@ -17,7 +17,7 @@ import {
 } from '@/lib/rch-sites-overview';
 import {
   FaArrowLeft,FaArrowRight,FaArrowUpRightFromSquare,FaCalendarDays,
-  FaCircleCheck,FaClock,FaEnvelope,FaGlobe,FaLink,FaRotate,
+  FaCircleCheck,FaClock,FaEnvelope,FaGlobe,FaLink,FaRotate,FaUsers,
 } from 'react-icons/fa6';
 
 type Org={id:string;name:string;eligible:boolean;member_role:string;organization_type:string};
@@ -153,6 +153,7 @@ export default function RchSitesOverviewPage(){
   const links=[
     {name:'Website Studio',description:'Edit & publish',href:endpoint,icon:<FaGlobe/>},
     {name:'Calendar',description:'Services & availability',href:endpoint+'/appointments',icon:<FaCalendarDays/>},
+    {name:'Basketball programs',description:'Adult rosters & sessions · Amateur+ pilot',href:endpoint+'/programs',icon:<FaUsers/>},
     {name:'Inbox',description:'Follow up with members',href:endpoint+'/people',icon:<FaEnvelope/>},
     {name:'PayPal links',description:'Your own business payments',href:endpoint+'/payments',icon:<FaLink/>},
   ];
