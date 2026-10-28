@@ -10,6 +10,7 @@ const screen=file('src/components/sites/RchSiteStarterClient.tsx');
 const start=file('src/app/website-creator/start/page.tsx');
 const marketing=file('src/app/website-creator/page.tsx');
 const legacy=file('src/app/network/partners/apply/page.tsx');
+const intervalMigration=file('supabase/migrations/20261028024000_rch_sites_starter_billing_preference.sql');
 
 describe('RCH Sites Get Started: design-first private onboarding',()=>{
   it('opens the builder in the normal browser without unlocking private dashboard URLs',()=>{
@@ -37,6 +38,12 @@ describe('RCH Sites Get Started: design-first private onboarding',()=>{
   it('never conflates a tier preference with payment or automatically publishes',()=>{
     expect(api).toContain('isRchSitePlanTier(raw.tier)');
     expect(api).toContain('preferred_tier:raw.tier');
+    expect(api).toContain('isRchSiteBillingInterval(raw.billingInterval)');
+    expect(api).toContain('preferred_billing_interval:raw.billingInterval');
+    expect(api).toContain('billingInterval:draft.preferred_billing_interval');
+    expect(intervalMigration).toContain("preferred_billing_interval in ('monthly','annual')");
+    expect(screen).toContain('billingInterval,config');
+    expect(screen).toContain('setBillingInterval');
     expect(api).toContain("plan_interest:'community'");
     expect(api).toContain("source:'partner-application'");
     expect(api).not.toContain("from('rch_sites').insert");
