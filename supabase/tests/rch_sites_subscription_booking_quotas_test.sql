@@ -129,19 +129,19 @@ update public.rch_site_subscriptions
 set billing_status='active',current_period_end=now()-interval '1 second'
 where organization_id='b6170000-0000-4000-8000-000000000001';
 
-select throws_ok($
+select throws_ok($$
 insert into public.rch_site_services(organization_id,name,duration_minutes)
 values('b6170000-0000-4000-8000-000000000001','Expired paid plan',60)
-$,'23514',null,'Expired paid period rejects booking service despite active ledger status');
+$$,'23514',null,'Expired paid period rejects booking service despite active ledger status');
 
 update public.rch_site_subscriptions
 set current_period_end=null
 where organization_id='b6170000-0000-4000-8000-000000000001';
 
-select throws_ok($
+select throws_ok($$
 insert into public.rch_site_services(organization_id,name,duration_minutes)
 values('b6170000-0000-4000-8000-000000000001','Unknown paid period',60)
-$,'23514',null,'Missing Stripe paid-through period fails closed');
+$$,'23514',null,'Missing Stripe paid-through period fails closed');
 
 update public.rch_site_subscriptions
 set current_period_end=now()+interval '30 days'
