@@ -26,6 +26,7 @@ type CalendarResponse={slots:RchSitesOverviewSlot[];services:RchSitesOverviewSer
 type PaymentResponse={offerings:RchSitesOverviewOffering[]};
 type Activity={
   organizationId:string;
+  forUserId:string;
   inquiries:RchSitesOverviewInquiry[]|null;
   slots:RchSitesOverviewSlot[]|null;
   services:RchSitesOverviewService[]|null;
@@ -56,8 +57,11 @@ async function getData<T>(url:string,signal:AbortSignal):Promise<T>{
 
 export default function RchSitesOverviewPage(){
   const {user,loading:authLoading}=useAuth();
-  const [organizations,setOrganizations]=useState<Org[]>([]);
-  const [published,setPublished]=useState<Published[]>([]);
+  // The snapshot is tied to the signed-in account to avoid ever rendering
+  // the previous account's organization details during an auth transition.
+  const [ownerSnapshot,setOwnerSnapshot]=useState<{
+    userId:string;organizations:Org[];published:Published[];
+  }|null>(null);
   const [selected,setSelected]=useState('');
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
@@ -65,6 +69,9 @@ export default function RchSitesOverviewPage(){
   const [activityLoading,setActivityLoading]=useState(false);
   const [refreshToken,setRefreshToken]=useState(0);
   const userId=user?.id;
+  const organizations=useMemo(()=>ownerSnapshot?.userId===userId?ownerSnapshot.organizations:[],[ownerSnapshot,userId]);
+  const published=useMemo(()=>ownerSnapshot?.userId===userId?ownerSnapshot.published:[],[ownerSnapshot,userId]);
+  const accountLoaded=!userId||ownerSnapshot?.userId===userId;
 
   // Only organization memberships returned by the existing authenticated Site API
   // can populate this picker. Each private activity endpoint independently checks
@@ -72,23 +79,25 @@ export default function RchSitesOverviewPage(){
   useEffect(()=>{
     if(authLoading)return;
     if(!userId){
-      setLoading(false);setOrganizations([]);setPublished([]);setSelected('');setActivity(null);
+      setLoading(false);setOwnerSnapshot(null);setSelected('');setActivity(null);
       return;
     }
     const controller=new AbortController();
-    setLoading(true);setError('');
+    setLoading(true);setError('');setActivity(null);
     void getData<SitesResponse>('/api/rch-sites',controller.signal)
       .then(data=>{
         if(controller.signal.aborted)return;
         const allowed=(data.organizations??[]).filter(inManagerRole);
-        setOrganizations(allowed);
-        setPublished(data.published??[]);
+        setOwnerSnapshot({userId,organizations:allowed,published:data.published??[]});
         const requested=new URLSearchParams(window.location.search).get('organizationId');
         setSelected(prev=>allowed.some(o=>o.id===prev)?prev:
           allowed.find(o=>o.id===requested)?.id??allowed[0]?.id??'');
       })
       .catch(()=>{
-        if(!controller.signal.aborted)setError('Could not load your organizations. Refresh the page to retry.');
+        if(!controller.signal.aborted){
+          setOwnerSnapshot({userId,organizations:[],published:[]});
+          setError('Could not load your organizations. Refresh the page to retry.');
+        }
       })
       .finally(()=>{if(!controller.signal.aborted)setLoading(false);});
     return ()=>controller.abort();
@@ -112,6 +121,7 @@ export default function RchSitesOverviewPage(){
       const payments=results[2].status==='fulfilled'?results[2].value:null;
       setActivity({
         organizationId:selected,
+        forUserId:userId,
         inquiries:inbox?.inquiries??null,
         slots:calendar?.slots??null,
         services:calendar?.services??null,
@@ -126,7 +136,7 @@ export default function RchSitesOverviewPage(){
   const organization=organizations.find(o=>o.id===selected);
   const liveRecord=published.find(x=>x.organization_id===selected);
   const isLive=liveRecord?.status==='published'&&isRchSiteSlug(liveRecord.slug);
-  const current=activity?.organizationId===selected?activity:null;
+  const current=activity?.organizationId===selected&&activity.forUserId===userId?activity:null;
   const summary=useMemo(()=>summarizeRchSitesOverview({
     siteStatus:isLive?'published':liveRecord?.status??null,
     inquiries:current?.inquiries??null,
@@ -157,7 +167,7 @@ export default function RchSitesOverviewPage(){
           Edit website <FaArrowRight/>
         </Link>
       </header>
-      {authLoading||loading?<p role="status" className="mt-8 text-sm text-white/60">Opening your organization dashboard…</p>:!userId?
+      {authLoading||loading||!accountLoaded?<p role="status" className="mt-8 text-sm text-white/60">Opening your organization dashboard…</p>:!userId?
         <section className={card+' mt-8'}>
           <p className="text-sm text-white/70">Sign in to view your organization&apos;s private activity.</p>
           <Link href="/auth/sign-in?next=/network/dashboard/sites/overview"
