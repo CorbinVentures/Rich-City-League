@@ -5,6 +5,7 @@
  */
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
 const {chromium}=require('playwright');
 const {createClient}=require('@supabase/supabase-js');
 
@@ -48,12 +49,19 @@ async function main(){
   });
   if(create.error||!create.data.user)throw Error('Cannot provision local user: '+create.error?.message);
   userId=create.data.user.id;
-  const {error:pError}=await admin.from('profiles').upsert({
-    id:userId,role:'player',is_active:true,onboarding_complete:true,
-    first_name:'RCH',last_name:'Browser Test',
-    username:'rch-test-'+crypto.randomBytes(6).toString('hex'),
-  },{onConflict:'id'});
-  if(pError)throw Error('Cannot complete isolated test profile: '+pError.message);
+  // Profile grants are intentionally restrictive in RCH. Only the ephemeral
+  // local Postgres test fixture (never app-level or production service_role)
+  // may complete the synthetic account's onboarding in this test.
+  assert.match(userId,/^[0-9a-f-]{36}$/i);
+  const containers=execFileSync('docker',['ps','--format','{{.Names}}'],{encoding:'utf8'});
+  const db=containers.split('\n').find(name=>/^supabase_db_[a-z0-9_-]+$/.test(name));
+  if(!db)throw Error('No disposable local Supabase container found');
+  const username='rch-test-'+crypto.randomBytes(6).toString('hex');
+  const sql="insert into public.profiles(id,role,is_active,onboarding_complete,first_name,last_name,username)"+
+    " values('"+userId+"','player',true,true,'RCH','Browser Test','"+username+"')"+
+    " on conflict(id) do update set is_active=true,onboarding_complete=true";
+  execFileSync('docker',['exec',db,'psql','-X','-U','postgres','-d','postgres',
+    '-v','ON_ERROR_STOP=1','-c',sql],{encoding:'utf8'});
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const first=await browser.newContext({viewport:{width:390,height:844}});
   let page=await signin(first,'first session');
