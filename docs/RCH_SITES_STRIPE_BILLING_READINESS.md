@@ -32,7 +32,7 @@ The connected **Richcityhoops** Stripe account (`acct_1UVN7sE7q3pkDeRU`) now con
 - Restricted Stripe billing portal `bpc_1UVNSUE7q3pkDeRUkKHPkrNk`: invoice history, payment-method edits and end-of-term cancellation; self-service plan-switch disabled.
 - All four price IDs, dedicated webhook secret, portal ID and `RCH_SITES_BILLING_ENABLED=false` stored in Vercel **production** settings.
 
-**Remaining activation blocker:** `STRIPE_SECRET_KEY` is **not configured** for the Vercel production project. It must be added securely by an account administrator through Vercel's encrypted environment-variable settings and tested in a separate Stripe sandbox; it must never be pasted into support chats or client-side code. Do not enable checkout merely because the price catalogue exists.
+**Remaining activation blocker:** no Stripe server-side API key is configured for the Vercel production project. Prefer a dedicated `RCH_SITES_STRIPE_API_KEY` (restricted `rk_live_...`) rather than broad `STRIPE_SECRET_KEY`. It must be added securely by an account administrator through Vercel's encrypted environment-variable settings and tested in a separate Stripe sandbox; it must never be pasted into support chats or client-side code. Do not enable checkout merely because the price catalogue exists.
 
 ## Production environment configuration
 
