@@ -29,6 +29,7 @@ export function rchSitesBillingEnabled(){
   return process.env.RCH_SITES_BILLING_ENABLED==='true'
     &&secret().startsWith('sk_')
     &&Boolean(webhookSecret())
+    &&/^bpc_[a-zA-Z0-9_]+$/.test(process.env.RCH_SITES_STRIPE_PORTAL_CONFIGURATION_ID?.trim()||'')
     &&(['amateur','professional'] as const).every(t=>
       (['monthly','annual'] as const).every(interval=>Boolean(price(t,interval))));
 }
@@ -108,7 +109,7 @@ export async function createRchSitesCheckout(input:{
   const site=(process.env.NEXT_PUBLIC_SITE_URL||productionUrl).replace(/\/$/,'');
   const body=new URLSearchParams();
   body.set('mode','subscription');
-  body.set('expires_at',String(Math.floor(Date.now()/1000)+1800));
+  body.set('expires_at',String(Math.floor(Date.now()/1000)+3600));
   body.set('success_url',site+'/network/dashboard/sites/billing?checkout=success');
   body.set('cancel_url',site+'/network/dashboard/sites/billing?checkout=cancelled');
   body.set('line_items[0][price]',priceId);
