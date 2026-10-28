@@ -61,7 +61,7 @@ async function postAction(payload:Record<string,unknown>):Promise<ResponseData>{
   return json;
 }
 
-export function RchSiteStarterClient({initialTier='free',initialBilling='monthly'}:{initialTier?:string;initialBilling?:string}){
+export function RchSiteStarterClient({initialTier='free',initialBilling='monthly',billingOpen=false}:{initialTier?:string;initialBilling?:string;billingOpen?:boolean}){
   const {user,loading:authLoading}=useAuth();
   const [loading,setLoading]=useState(true);
   const [step,setStep]=useState(0);
@@ -218,7 +218,7 @@ export function RchSiteStarterClient({initialTier='free',initialBilling='monthly
       </section>
       <section>
         <h2 className="text-xl font-black">Choose your starting level</h2>
-        <p className="mt-2 text-xs text-white/60">All website setup starts on Free. Choosing a paid level saves a preference; no payment is taken or reserved.</p>
+        <p className="mt-2 text-xs text-white/60">{billingOpen?'All websites begin on Free. Paid subscriptions are available after organization verification through Website Studio. Choosing a plan here does not charge you.':'All website setup starts on Free. Choosing a paid level saves a preference; no payment is taken or reserved.'}</p>
         <div className="mt-3 inline-flex gap-1 rounded-xl border border-white/15 p-1" role="group" aria-label="Preferred billing frequency">
           {(['monthly','annual'] as const).map(value=><button key={value} type="button" aria-pressed={billingInterval===value}
             className={'min-h-11 rounded-lg px-4 text-xs font-bold '+(billingInterval===value?'bg-sky-400 text-[#071522]':'text-white/65')}
@@ -232,7 +232,7 @@ export function RchSiteStarterClient({initialTier='free',initialBilling='monthly
             <span className="mt-1 block text-xl font-black">{'$'}{billingInterval==='annual'?RCH_SITE_PLANS[plan.id].proposedAnnualUsd:RCH_SITE_PLANS[plan.id].proposedMonthlyUsd}
               <span className="ml-1 text-xs font-normal text-white/60">/{billingInterval==='annual'?'year':'month'}</span>
             </span>
-            <span className="mt-2 block text-xs text-white/55">{plan.copy}</span>
+            <span className="mt-2 block text-xs text-white/55">{billingOpen&&plan.id!=='free'?'Subscribe after verification · Additional tools rolling out':plan.copy}</span>
           </button>)}</div>
       </section>
       <button type="button" onClick={()=>{setError('');setStep(1);}}
