@@ -34,7 +34,7 @@ All four completed purchases reconciled Checkout completion, subscription creati
 1. A provider-generated failed renewal event on a previously successful linked Website Creator Checkout is still untested. Mocked tests alone are not end-to-end verification.
 2. Two simultaneous authenticated HTTP Checkout requests across browser tabs and real cross-organization API access attempts remain untested, though the database guards passed.
 3. Actual billing-period expiry via Stripe simulation has not yet been tested.
-4. The Supabase staging branch currently reports MIGRATIONS_FAILED despite billing tables existing; migration history and repeatability require reconciliation before production release.
+4. The Supabase staging branch currently reports MIGRATIONS_FAILED despite billing tables existing. Production already has the billing tables, duplicate-Checkout indexes and trigger, with the rails recorded under migration version 20261028033138, while this draft branch also contains 20261028031000 for the billing rails. Reconcile migration naming, history, and safe repeatability before merging; do not run the draft DDL blindly against production.
 5. The booking-quota rollout remains off. Enforce the current paid period end as well as active billing status before paid-tier quota enforcement; a missed webhook must not leave indefinite entitlement.
 6. Review operational failed-payment notices, support, recovery, tax and cancellation policies before public launch.
 
