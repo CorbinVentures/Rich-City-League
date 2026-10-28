@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {useCallback,useEffect,useState} from 'react';
 import {Container} from '@/components/Container';
 import {useAuth} from '@/hooks/useAuth';
+import {normalizeOrganizationPayPalLink} from '@/lib/rch-site-paypal';
 import {FaArrowLeft,FaArrowUpRightFromSquare,FaCircleCheck,FaCreditCard,FaLink,FaPlus,FaXmark} from 'react-icons/fa6';
 
 type Org={id:string;name:string;member_role:string;eligible:boolean};
@@ -19,6 +20,7 @@ export default function PayPalPaymentLinksManager(){
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
+  const verifiedLink=normalizeOrganizationPayPalLink(form.paymentUrl);
   const loadOrgs=useCallback(async()=>{
     const res=await fetch('/api/rch-sites',{cache:'no-store'});
     const data=await res.json().catch(()=>({}));
@@ -47,6 +49,7 @@ export default function PayPalPaymentLinksManager(){
     if(busy||!selected)return;
     setBusy(action);setError('');setMessage('');
     try{
+      if(action==='create'&&!verifiedLink)throw Error('Paste a valid PayPal Business Payment Link, not a personal transfer URL.');
       const decimal=Number(form.amount);
       const cents=Math.round(decimal*100);
       if(action==='create'&&(!Number.isFinite(decimal)||decimal<=0||Math.abs(decimal*100-cents)>0.001))
@@ -57,7 +60,7 @@ export default function PayPalPaymentLinksManager(){
           :{offeringId})})});
       const data=await res.json().catch(()=>({}));
       if(!res.ok)throw Error(data.error||'Unable to save changes.');
-      setMessage(action==='create'?'Your link is now visible on your published site.':'Payment link disabled.');
+      setMessage(action==='create'?'Payment link saved. Visitors will see it on your published website.':'Payment link disabled.');
       if(action==='create')setForm({title:'',description:'',amount:'',paymentUrl:''});
       await loadLinks(selected);
     }catch(e){setError(e instanceof Error?e.message:'Unable to save payment link.');}
@@ -70,7 +73,7 @@ export default function PayPalPaymentLinksManager(){
     <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Website Studio</Link>
     <p className="mt-7 text-xs font-black uppercase tracking-[.15em] text-rose-400">RCH Sites · Independent payments</p>
     <h1 className="mt-2 text-4xl font-black">Your PayPal. Your earnings.</h1>
-    <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">Create your payment link in your own PayPal Business account. Add it here so visitors can pay you directly on PayPal. RCH never asks for your password, links its merchant account, or receives those payments.</p>
+    <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">Make a Payment Link in your own PayPal Business account, then paste it here. Visitors pay you directly on PayPal—not Rich City Hoops.</p>
     <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-400/5 p-4 text-xs leading-6 text-amber-100">
       <b>Important:</b> Any RCH website subscription will be billed separately by RCH, not through your PayPal account. Links on this screen cannot verify payments, confirm paid bookings, or issue refunds. Confirm all funds, recipient and prices in your own PayPal account.
     </div>
@@ -102,8 +105,15 @@ export default function PayPalPaymentLinksManager(){
           <label className="mt-4 block text-xs font-bold">Your PayPal Business Payment Link
             <input className={field} type="url" maxLength={240} autoComplete="off" value={form.paymentUrl} placeholder="https://www.paypal.com/ncp/payment/..." onChange={e=>setForm(f=>({...f,paymentUrl:e.target.value}))}/>
           </label>
-          <p className="mt-3 text-xs leading-6 text-white/55">Set the exact same price and item details in PayPal. RCH does not control the PayPal checkout amount or verify the receiving account.</p>
-          <button type="button" disabled={Boolean(busy)||!form.title||!form.amount||!form.paymentUrl}
+          {form.paymentUrl&&<p role={verifiedLink?'status':'alert'} className={'mt-2 text-xs '+(verifiedLink?'text-emerald-300':'text-amber-200')}>
+            {verifiedLink?'✓ Valid PayPal Business link format':'Use a secure www.paypal.com/ncp/payment/ link with no extra parameters.'}
+          </p>}
+          {verifiedLink&&<a href={verifiedLink} target="_blank" rel="noopener noreferrer"
+            className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-sky-300 underline">
+            Verify recipient and item on PayPal <FaArrowUpRightFromSquare/>
+          </a>}
+          <p className="mt-3 text-xs leading-6 text-white/55">Confirm that the PayPal recipient and checkout price match your own business before saving. RCH never sees or verifies PayPal payments.</p>
+          <button type="button" disabled={Boolean(busy)||form.title.trim().length<3||!form.amount||!verifiedLink}
             className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40"
             onClick={()=>void act('create')}><FaPlus/> {busy==='create'?'Saving…':'Add link'}</button>
         </section>
