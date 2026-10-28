@@ -17,9 +17,14 @@ describe('Public RCH Sites entry',()=>{
   });
   it('keeps Free, Amateur and Professional site tiers distinct from live advertising plans',()=>{
     const page=read('src/app/website-creator/page.tsx');
-    for(const tier of ['free','amateur','professional'])expect(page).toContain("id:'"+tier+"'");
-    expect(page).toContain('not yet available for purchase');
-    expect(page).toContain('/website-creator/start?tier=');
+    expect(page).toContain('<RchSitePricingCards/>');
+    expect(page).toContain('not active paid subscriptions');
+    const pricing=read('src/components/sites/RchSitePricingCards.tsx');
+    expect(pricing).toContain('RCH_SITE_PLAN_TIERS.map');
+    expect(pricing).toContain('/website-creator/start?tier=');
+    expect(pricing).toContain('Planned for this level');
+    expect(pricing).toContain('Available now');
+    expect(pricing).toContain('Yearly · 2 months free');
     expect(page).not.toContain('Register interest');
     expect(page).not.toContain('Request free access');
     const application=read('src/app/network/partners/apply/page.tsx');
