@@ -171,9 +171,32 @@ export function stripeSiteSubscriptionState(sub:RchStripeSubscription){
   return active?'active':sub.status==='canceled'?'canceled':'past_due';
 }
 
+export type RchSitesCheckoutSession={
+  id:string;status:'open'|'complete'|'expired';url:string|null;
+  mode?:string;payment_status?:string;subscription?:StripeRef;
+  client_reference_id?:string|null;metadata?:Record<string,string>|null;
+};
+
+// Never grant a website subscription solely because a Stripe subscription
+// contains our metadata. It must originate from the specific paid Checkout
+// session created and stored by the server for this organization.
+export function isVerifiedRchSitesCheckoutLineage(
+  checkout:RchSitesCheckoutSession,
+  expected:{intentId:string;organizationId:string;sessionId:string;subscriptionId:string},
+){
+  return checkout.id===expected.sessionId
+    &&checkout.status==='complete'
+    &&checkout.mode==='subscription'
+    &&checkout.payment_status==='paid'
+    &&stripeRefId(checkout.subscription)===expected.subscriptionId
+    &&checkout.client_reference_id===expected.organizationId
+    &&checkout.metadata?.rch_product==='sites'
+    &&checkout.metadata?.site_billing_intent_id===expected.intentId;
+}
+
 export async function retrieveRchSitesCheckout(id:string){
   if(!/^cs_(test_)?[a-zA-Z0-9_]+$/.test(id))throw new Error('Invalid checkout session reference.');
-  return requestStripe<{id:string;status:'open'|'complete'|'expired';url:string|null}>(
+  return requestStripe<RchSitesCheckoutSession>(
     '/checkout/sessions/'+encodeURIComponent(id));
 }
 export function verifyRchSitesStripePrice(sub:RchStripeSubscription){
