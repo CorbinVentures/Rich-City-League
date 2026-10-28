@@ -61,7 +61,8 @@ export default function RchSitesBillingPage(){
   const selectedOrganization=organizations.find(org=>org.id===selected);
   const hasExistingSubscription=Boolean(billing?.subscription&&
     !['none','canceled'].includes(billing.subscription.status));
-  const activePaidTier=billing?.subscription?.status==='active'?
+  const currentTier=billing?.subscription&&
+    ['active','past_due'].includes(billing.subscription.status)?
     billing.subscription.tier:'free';
   const matchingReview=review?.organizationId===selected&&review.interval===interval?review:null;
 
@@ -115,8 +116,13 @@ export default function RchSitesBillingPage(){
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-wider text-white/50">Current website level</p>
-            <h2 className="mt-2 text-2xl font-black capitalize">{activePaidTier}</h2>
+            <h2 className="mt-2 text-2xl font-black capitalize">{currentTier}</h2>
             <p className="mt-2 text-xs text-white/55">Status: {billing?.subscription?.status||'No paid subscription'}</p>
+            {billing?.subscription?.status==='past_due'&&
+              <p role="alert" className="mt-3 max-w-md text-xs leading-5 text-amber-200">
+                Paid features are paused. Your payment or paid-through date needs attention.
+                Use Manage billing to update your payment method and review invoices.
+              </p>
             {billing?.subscription?.status==='canceled'&&<p className="mt-1 text-xs text-white/55">Previous {billing.subscription.tier} subscription ended.</p>}
             {billing?.subscription?.currentPeriodEnd&&<p className="mt-1 text-xs text-white/55">Current period ends: {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString()}</p>}
             {billing?.subscription?.cancelAtPeriodEnd&&<p className="mt-1 text-xs text-amber-200">Set to cancel at period end</p>}
