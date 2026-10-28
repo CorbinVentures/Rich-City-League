@@ -29,7 +29,9 @@ export default function PayPalPaymentLinksManager(){
     if(!res.ok)throw Error(data.error||'Unable to load organizations.');
     const approved=(data.organizations??[]).filter((org:Org)=>org.eligible&&['owner','manager'].includes(org.member_role));
     setOrgs(approved);
-    setSelected(current=>current||approved[0]?.id||'');
+    const requested=new URLSearchParams(window.location.search).get('organizationId');
+    setSelected(current=>approved.some(o=>o.id===current)?current:
+      approved.find(o=>o.id===requested)?.id||approved[0]?.id||'');
   },[]);
   const loadLinks=useCallback(async(orgId:string)=>{
     if(orgId!==selectedOrganization.current)return;
