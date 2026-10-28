@@ -85,7 +85,8 @@ export function basketballToolsFor(type:RchSiteType,tier:RchSitePlanTier,
       let access:BasketballToolAccess;
       if(!released)access=included?'planned':'planned_higher_plan';
       else if(!included)access='upgrade';
-      else if(tier!=='free'&&!paidSubscriptionActive)access='inactive_subscription';
+      else if(tier!=='free'&&!paidSubscriptionActive
+        &&!RCH_SITE_PLANS.free.features.includes(tool.feature))access='inactive_subscription';
       else access='available';
       return {...tool,access};
     }).slice(0,maxItems);
