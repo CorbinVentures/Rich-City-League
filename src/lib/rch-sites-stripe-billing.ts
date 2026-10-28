@@ -127,9 +127,14 @@ export async function createRchSitesCheckout(input:{
 }
 export async function createRchSitesPortal(customerId:string){
   if(!secret())throw new Error('Stripe customer portal is not configured.');
+  // Dedicated portal config MUST disable switching website pricing tiers until
+  // server-side plan-change reconciliation and proration policy are reviewed.
+  const config=process.env.RCH_SITES_STRIPE_PORTAL_CONFIGURATION_ID?.trim()||'';
+  if(!/^bpc_[a-zA-Z0-9_]+$/.test(config))throw new Error('Restricted RCH Sites portal has not been configured.');
   if(!/^cus_[a-zA-Z0-9_]+$/.test(customerId))throw new Error('Invalid Stripe customer reference.');
   const site=(process.env.NEXT_PUBLIC_SITE_URL||productionUrl).replace(/\/$/,'');
   const form=new URLSearchParams();
+  form.set('configuration',config);
   form.set('customer',customerId);
   form.set('return_url',site+'/network/dashboard/sites/billing');
   return requestStripe<{url:string}>('/billing_portal/sessions',{method:'POST',body:form});
