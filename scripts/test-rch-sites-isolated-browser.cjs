@@ -34,8 +34,23 @@ async function signin(ctx,label){
   await page.locator('#auth-email').waitFor({state:'visible',timeout:25000});
   await page.locator('#auth-email').fill(email);
   await page.locator('#auth-password').fill(password);
+  const authStatuses=[];
+  const failedRequests=[];
+  page.on('response',response=>{
+    if(response.url().includes('/auth/v1/token'))authStatuses.push(response.status());
+  });
+  page.on('requestfailed',request=>{
+    if(request.url().includes(':54321'))failedRequests.push(request.failure()?.errorText||'unknown');
+  });
   await page.getByRole('button',{name:'Sign in',exact:true}).click();
-  await page.waitForURL(/\/website-creator\/start/,{timeout:25000});
+  try{
+    await page.waitForURL(/\/website-creator\/start/,{timeout:25000});
+  }catch(error){
+    console.error('DEBUG after sign-in:',{url:page.url(),authStatuses,failedRequests,
+      page:(await page.locator('body').innerText()).slice(0,1200),
+      pageErrors:errors});
+    throw error;
+  }
   await page.getByRole('heading',{name:/let.s build your website/i})
     .waitFor({state:'visible',timeout:30000});
   assert.equal(errors.length,0,label+' uncaught page errors: '+errors.join('; '));
