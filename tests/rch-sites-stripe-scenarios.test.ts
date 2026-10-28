@@ -90,6 +90,35 @@ describe('RCH Sites isolated Stripe payment scenarios (no payment provider calls
     expect(calls).toEqual(['/v1/prices/'+env.RCH_SITES_PRICE_AMATEUR_MONTHLY]);
   });
 
+  it('links every paid entitlement to the exact completed Stripe Checkout and organization',async()=>{
+    const billing=await importBilling();
+    const expected={
+      intentId:'11111111-1111-4111-8111-111111111111',
+      organizationId:'22222222-2222-4222-8222-222222222222',
+      sessionId:'cs_test_fixture',
+      subscriptionId:'sub_fixture',
+    };
+    const checkout={
+      id:expected.sessionId,status:'complete' as const,mode:'subscription',
+      payment_status:'paid',url:null,subscription:expected.subscriptionId,
+      client_reference_id:expected.organizationId,
+      metadata:{rch_product:'sites',site_billing_intent_id:expected.intentId},
+    };
+    expect(billing.isVerifiedRchSitesCheckoutLineage(checkout,expected)).toBe(true);
+    for(const altered of [
+      {...checkout,status:'open' as const},
+      {...checkout,mode:'payment'},
+      {...checkout,payment_status:'unpaid'},
+      {...checkout,subscription:'sub_unrelated'},
+      {...checkout,client_reference_id:'other-organization'},
+      {...checkout,metadata:{...checkout.metadata,rch_product:'network'}},
+      {...checkout,metadata:{...checkout.metadata,site_billing_intent_id:'other-intent'}},
+      {...checkout,id:'cs_test_unrelated'},
+    ]){
+      expect(billing.isVerifiedRchSitesCheckoutLineage(altered,expected)).toBe(false);
+    }
+  });
+
   it('rejects unsigned, tampered, replayed and future-signed webhook payloads',async()=>{
     const b=await importBilling();
     const at=1800000000,body=JSON.stringify({id:'evt_fixture',type:'invoice.paid'});
