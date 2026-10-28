@@ -155,7 +155,7 @@ export default function RchSitesOverviewPage(){
       </header>
       {authLoading||loading?<p role="status" className="mt-8 text-sm text-white/60">Opening your organization dashboard…</p>:!userId?
         <section className={card+' mt-8'}>
-          <p className="text-sm text-white/70">Sign in to view your organization's private activity.</p>
+          <p className="text-sm text-white/70">Sign in to view your organization&apos;s private activity.</p>
           <Link href="/auth/sign-in?next=/network/dashboard/sites/overview"
             className="mt-4 inline-flex min-h-12 items-center rounded-xl bg-rose-600 px-5 text-sm font-black">Sign in</Link>
         </section>:error?<p role="alert" className="mt-8 rounded-xl border border-rose-400/30 p-5 text-sm text-rose-200">{error}</p>:
@@ -229,7 +229,7 @@ export default function RchSitesOverviewPage(){
               <HealthRow label="PayPal Business links" status={pending?'Checking…':summary.activePayPalLinks===null?'Unavailable':String(summary.activePayPalLinks)+' active'} ok={Boolean(summary.activePayPalLinks)}/>
               <HealthRow label="Website plan" status={pending?'Checking…':current?.plan?current.plan.tier+' · '+current.plan.billingStatus:'Unavailable'} ok={current?.plan?.billingStatus==='active'||current?.plan?.tier==='free'}/>
             </div>
-            <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/50">Website page-view analytics aren't available yet. These figures show operational activity, not visitor traffic or PayPal earnings.</p>
+            <p className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/50">Website page-view analytics aren&apos;t available yet. These figures show operational activity, not visitor traffic or PayPal earnings.</p>
           </section>
         </div>
         <section className="mt-5 grid gap-5 lg:grid-cols-2" aria-label="Recent organization activity">
@@ -273,7 +273,7 @@ export default function RchSitesOverviewPage(){
             </Link>)}
           </div>
         </section>
-        <p className="mt-5 text-xs leading-5 text-white/45">Bookings and inquiries are RCH activity. PayPal payments, refunds, and account balances remain in each organization's own PayPal Business account.</p>
+        <p className="mt-5 text-xs leading-5 text-white/45">Bookings and inquiries are RCH activity. PayPal payments, refunds, and account balances remain in each organization&apos;s own PayPal Business account.</p>
       </>}
     </Container>
   </main>;
