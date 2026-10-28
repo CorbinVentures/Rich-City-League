@@ -33,7 +33,7 @@ export default function AppointmentsManager(){
     const response=await fetch('/api/rch-sites',{cache:'no-store'});
     const body=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(body.error||'Could not load your organizations.');
-    const valid=(body.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
+    const valid:Org[]=(body.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
     setOrgs(valid);
     const requested=new URLSearchParams(window.location.search).get('organizationId');
     setSelected(s=>valid.some(o=>o.id===s)?s:valid.find(o=>o.id===requested)?.id||valid[0]?.id||'');
