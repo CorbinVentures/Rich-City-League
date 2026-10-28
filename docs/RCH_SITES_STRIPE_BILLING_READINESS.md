@@ -22,6 +22,18 @@
 
 No Network subscriptions, Network `network_tier`, RCH members, RCH TV payouts, free booking cap rollout, customer PayPal accounts or homepage are changed by this migration.
 
+## Stripe live-account provisioning status (October 28, 2026)
+
+The connected **Richcityhoops** Stripe account (`acct_1UVN7sE7q3pkDeRU`) now contains two standalone website products and exactly four recurring standard prices:
+
+- Amateur: USD $19/month (`price_1UVNRBE7q3pkDeRU5fIX1a5p`), $190/year (`price_1UVNRDE7q3pkDeRURMdSPH4R`).
+- Professional: USD $49/month (`price_1UVNRFE7q3pkDeRU3oU8aaHY`), $490/year (`price_1UVNRHE7q3pkDeRUPFqmVtcJ`).
+- Dedicated Stripe webhook endpoint `we_1UVNVME7q3pkDeRULeCoKwKd`, URL `https://richcityhoops.com/api/rch-sites/billing/webhook`; its **secret was transferred directly to encrypted Vercel production settings without being included in this document**.
+- Restricted Stripe billing portal `bpc_1UVNSUE7q3pkDeRUkKHPkrNk`: invoice history, payment-method edits and end-of-term cancellation; self-service plan-switch disabled.
+- All four price IDs, dedicated webhook secret, portal ID and `RCH_SITES_BILLING_ENABLED=false` stored in Vercel **production** settings.
+
+**Remaining activation blocker:** `STRIPE_SECRET_KEY` is **not configured** for the Vercel production project. It must be added securely by an account administrator through Vercel's encrypted environment-variable settings and tested in a separate Stripe sandbox; it must never be pasted into support chats or client-side code. Do not enable checkout merely because the price catalogue exists.
+
 ## Production environment configuration
 
 The following variables are **server-only** and must never be `NEXT_PUBLIC_`:
