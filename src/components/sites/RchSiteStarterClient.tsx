@@ -228,7 +228,10 @@ export function RchSiteStarterClient({initialTier='free',initialBilling='monthly
           <button key={plan.id} type="button" aria-pressed={tier===plan.id}
             onClick={()=>{setTier(plan.id);setSaved(false);}}
             className={'rounded-xl border p-4 text-left '+(tier===plan.id?'border-sky-300 bg-sky-400/15':'border-white/15 bg-white/[.03]')}>
-            <b className="block text-base">{plan.name}</b><span className="mt-1 block text-xl font-black">{'
+            <b className="block text-base">{plan.name}</b>
+            <span className="mt-1 block text-xl font-black">{'$'}{billingInterval==='annual'?RCH_SITE_PLANS[plan.id].proposedAnnualUsd:RCH_SITE_PLANS[plan.id].proposedMonthlyUsd}
+              <span className="ml-1 text-xs font-normal text-white/60">/{billingInterval==='annual'?'year':'month'}</span>
+            </span>
             <span className="mt-2 block text-xs text-white/55">{plan.copy}</span>
           </button>)}</div>
       </section>
