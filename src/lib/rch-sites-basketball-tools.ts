@@ -75,7 +75,10 @@ export function basketballToolsFor(type:RchSiteType,tier:RchSitePlanTier,
   paidSubscriptionActive=false,maxItems=6):BasketballToolView[]{
   const priority=priorities[type];
   return RCH_BASKETBALL_TOOLS.filter(tool=>tool.audiences.includes(type))
-    .sort((a,b)=>priority.indexOf(a.id)-priority.indexOf(b.id))
+    .sort((a,b)=>{
+      const aIndex=priority.indexOf(a.id),bIndex=priority.indexOf(b.id);
+      return (aIndex<0?999:aIndex)-(bIndex<0?999:bIndex);
+    })
     .map(tool=>{
       const included=RCH_SITE_PLANS[tier].features.includes(tool.feature);
       const released=RCH_SITE_RELEASED_FEATURES.has(tool.feature)&&Boolean(tool.href);
