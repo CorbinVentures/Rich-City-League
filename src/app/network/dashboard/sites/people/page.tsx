@@ -89,7 +89,7 @@ export default function OrganizationInbox(){
         </section>:<>
         {!orgs.length?<p className="mt-7 rounded-xl border border-white/20 p-5 text-sm text-white/70">You need an active, verified organization and owner or manager access to open an inbox.</p>:<>
           <label className="mt-7 block max-w-md text-xs font-bold">Organization
-            <select value={organizationId} onChange={e=>{selectedOrganization.current=e.target.value;setOrganizationId(e.target.value);setNotice('');}}
+            <select value={organizationId} onChange={e=>{selectedOrganization.current=e.target.value;setOrganizationId(e.target.value);setInquiries([]);setInquiryLoading(true);setNotice('');}}
               className="mt-2 min-h-12 w-full rounded-xl border border-white/20 bg-[#191b24] p-3 text-sm text-white">
               {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
             </select>
