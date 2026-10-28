@@ -62,6 +62,7 @@ export default function RchSitesBuilderPage(){
   const organization=useMemo(()=>data.organizations.find(o=>o.id===selected)||null,[data.organizations,selected]);
   const draft=useMemo(()=>data.drafts.find(d=>d.organization_id===selected)||null,[data.drafts,selected]);
   const published=useMemo(()=>data.published.find(d=>d.organization_id===selected)||null,[data.published,selected]);
+  const isLive=published?.status==='published';
 
   useEffect(()=>{
     if(!organization)return;
@@ -112,7 +113,7 @@ export default function RchSitesBuilderPage(){
     finally{setBusy('');}
   };
   const copyLink=async()=>{
-    if(!published)return;
+    if(!isLive||!published)return;
     try{await navigator.clipboard.writeText(window.location.origin+'/sites/'+published.slug);setMessage('Public link copied.');}
     catch{setMessage('Public link: '+window.location.origin+'/sites/'+published.slug);}
   };
@@ -141,12 +142,32 @@ export default function RchSitesBuilderPage(){
           {data.organizations.map(o=><option key={o.id} value={o.id}>{o.name}{o.eligible?'':' — verification required'}</option>)}
         </select>
       </label>
-      <span className="text-xs text-white/60">{published?'Published':'Not published'} {dirty?'· Unsaved changes':''}</span>
+      <span className="text-xs text-white/60">{isLive?'Published':'Not published'} {dirty?'· Unsaved changes':''}</span>
     </div>
+    {organization?.eligible&&<section className="mt-5 rounded-2xl border border-white/15 bg-white/[.04] p-4 sm:p-5" aria-labelledby="launch-checklist-title">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="launch-checklist-title" className="text-base font-black">Your launch checklist</h2>
+        <span className="text-xs text-white/55">{isLive?'Website is live':'Private until you publish'}</span>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <a href="#site-design" className="flex min-h-16 items-center gap-3 rounded-xl border border-white/15 px-3 py-3 text-sm hover:border-sky-400/50">
+          <span aria-hidden="true" className={'grid h-8 w-8 shrink-0 place-items-center rounded-full '+(draft&&!dirty?'bg-emerald-500/20 text-emerald-200':'bg-white/10 text-white/80')}>{draft&&!dirty?'✓':'1'}</span>
+          <span><b className="block">Design</b><span className="block text-xs text-white/55">{draft&&!dirty?'Draft saved':'Save your draft'}</span></span>
+        </a>
+        <a href="#site-publish" className="flex min-h-16 items-center gap-3 rounded-xl border border-white/15 px-3 py-3 text-sm hover:border-sky-400/50">
+          <span aria-hidden="true" className={'grid h-8 w-8 shrink-0 place-items-center rounded-full '+(isLive?'bg-emerald-500/20 text-emerald-200':'bg-white/10 text-white/80')}>{isLive?'✓':'2'}</span>
+          <span><b className="block">Publish</b><span className="block text-xs text-white/55">{isLive?'Public website ready':'Owner approval required'}</span></span>
+        </a>
+        <a href="#site-tools" className="flex min-h-16 items-center gap-3 rounded-xl border border-white/15 px-3 py-3 text-sm hover:border-sky-400/50">
+          <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-white/80">3</span>
+          <span><b className="block">Add tools</b><span className="block text-xs text-white/55">Bookings · PayPal · Inbox</span></span>
+        </a>
+      </div>
+    </section>}
     {organization&&!organization.eligible&&<div role="alert" className="mt-5 rounded-2xl border border-amber-300/30 p-5 text-sm text-amber-100">RCH Sites requires an active, verified and claimed basketball organization. Your listing must be approved before you can create a site.</div>}
     {organization?.eligible&&<div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-[minmax(300px,420px)_minmax(0,1fr)]">
       <div className="min-w-0 space-y-5">
-        <section className="rounded-2xl border border-white/15 bg-white/5 p-5">
+        <section id="site-design" className="scroll-mt-24 rounded-2xl border border-white/15 bg-white/5 p-5">
           <Heading number="01" icon={<FaPalette/>} title="Choose your style"/>
           <div className="mt-4 grid grid-cols-2 gap-2">
             {RCH_SITE_TYPES.map(type=><button key={type} type="button" onClick={()=>setTemplate(type)}
@@ -198,15 +219,18 @@ export default function RchSitesBuilderPage(){
             </label>)}
           </div>
         </section>
+        <div id="site-tools" className="scroll-mt-24 space-y-2">
         {canPublish&&<Link href="/network/dashboard/sites/people" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Organization inbox <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/payments" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Independent PayPal links <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/appointments" className="mb-3 inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/40 px-5 text-sm font-black text-rose-200">Calendar &amp; bookings <FaArrowRight/></Link>}
         {canPublish&&<Link href="/network/dashboard/sites/billing" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sky-400/40 px-5 text-sm font-black text-sky-200">Website plan &amp; billing <FaArrowRight/></Link>}
-        <div className="flex flex-wrap gap-2">
-          <button disabled={!valid||Boolean(busy)} onClick={()=>void submit('save')} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-black disabled:opacity-40"><FaFloppyDisk/> {busy==='save'?'Saving…':'Save draft'}</button>
-          <button disabled={!valid||!canPublish||Boolean(busy)} onClick={()=>void submit('publish')} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40"><FaRocket/> {busy==='publish'?'Publishing…':published?'Publish changes':'Publish website'}</button>
         </div>
-        {published&&<div className="rounded-xl border border-emerald-400/30 bg-emerald-600/10 p-4 text-sm">
+        <div id="site-publish" className="scroll-mt-24 flex flex-wrap gap-2">
+          <a href="#site-preview" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-black xl:hidden"><FaEye/> Preview</a>
+          <button disabled={!valid||Boolean(busy)} onClick={()=>void submit('save')} className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-black disabled:opacity-40"><FaFloppyDisk/> {busy==='save'?'Saving…':'Save draft'}</button>
+          <button disabled={!valid||!canPublish||Boolean(busy)} onClick={()=>void submit('publish')} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40"><FaRocket/> {busy==='publish'?'Publishing…':isLive?'Publish changes':'Publish website'}</button>
+        </div>
+        {isLive&&published&&<div className="rounded-xl border border-emerald-400/30 bg-emerald-600/10 p-4 text-sm">
           <div className="flex flex-wrap items-center gap-3"><FaCircleCheck className="text-emerald-300"/> Your public website is live.
             <Link className="underline" href={'/sites/'+published.slug} target="_blank" rel="noopener noreferrer">Open site <FaArrowRight className="inline"/></Link>
             <button onClick={()=>void copyLink()} className="inline-flex items-center gap-1 underline"><FaCopy/> Copy</button>
@@ -217,7 +241,7 @@ export default function RchSitesBuilderPage(){
         {message&&<p role="status" className="rounded-xl border border-emerald-400/25 p-4 text-sm text-emerald-200">{message}</p>}
         {error&&<p role="alert" className="rounded-xl border border-rose-400/30 p-4 text-sm text-rose-200">{error}</p>}
       </div>
-      <section className="min-w-0">
+      <section id="site-preview" className="min-w-0 scroll-mt-24">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-black">Live preview</h2>
           <button type="button" onClick={()=>setPreview(p=>!p)} className="rounded-xl border border-white/25 px-4 py-2 text-xs font-bold">{preview?'Show full':'Compact view'}</button>
