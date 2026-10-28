@@ -41,7 +41,7 @@ function verificationId(userId:string){
     +'-8'+hex.slice(17,20)+'-'+hex.slice(20,32);
 }
 function safeText(value:unknown,max:number){
-  return typeof value==='string'?value.replace(/<[^>]*>/g,'')
+  return typeof value==='string'?value.replace(/[<>]/g,' ')
     .replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
 }
 async function account(){
