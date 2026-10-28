@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {Container} from '@/components/Container';
 import {useAuth} from '@/hooks/useAuth';
 import {normalizeOrganizationPayPalLink} from '@/lib/rch-site-paypal';
@@ -20,6 +20,8 @@ export default function PayPalPaymentLinksManager(){
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
+  const linkRequest=useRef(0);
+  const selectedOrganization=useRef('');
   const verifiedLink=normalizeOrganizationPayPalLink(form.paymentUrl);
   const loadOrgs=useCallback(async()=>{
     const res=await fetch('/api/rch-sites',{cache:'no-store'});
@@ -30,8 +32,11 @@ export default function PayPalPaymentLinksManager(){
     setSelected(current=>current||approved[0]?.id||'');
   },[]);
   const loadLinks=useCallback(async(orgId:string)=>{
+    if(orgId!==selectedOrganization.current)return;
+    const request=++linkRequest.current;
     const res=await fetch('/api/rch-sites/paypal?organizationId='+encodeURIComponent(orgId),{cache:'no-store'});
     const data=await res.json().catch(()=>({}));
+    if(request!==linkRequest.current||orgId!==selectedOrganization.current)return;
     if(!res.ok)throw Error(data.error||'Unable to load links.');
     setOfferings(data.offerings??[]);
   },[]);
@@ -41,12 +46,15 @@ export default function PayPalPaymentLinksManager(){
     void loadOrgs().catch(e=>setError(e instanceof Error?e.message:'Unable to load organizations.'))
       .finally(()=>setLoading(false));
   },[authLoading,user,loadOrgs]);
+  useEffect(()=>{selectedOrganization.current=selected;},[selected]);
   useEffect(()=>{
-    if(!selected){setOfferings([]);return;}
-    void loadLinks(selected).catch(e=>setError(e instanceof Error?e.message:'Unable to load payment links.'));
+    if(!selected){linkRequest.current++;setOfferings([]);return;}
+    setOfferings([]);
+    void loadLinks(selected).catch(e=>{if(selectedOrganization.current===selected)setError(e instanceof Error?e.message:'Unable to load payment links.');});
   },[selected,loadLinks]);
   const act=async(action:'create'|'deactivate',offeringId?:string)=>{
     if(busy||!selected)return;
+    const actingFor=selected;
     setBusy(action);setError('');setMessage('');
     try{
       if(action==='create'&&!verifiedLink)throw Error('Paste a valid PayPal Business Payment Link, not a personal transfer URL.');
@@ -60,10 +68,11 @@ export default function PayPalPaymentLinksManager(){
           :{offeringId})})});
       const data=await res.json().catch(()=>({}));
       if(!res.ok)throw Error(data.error||'Unable to save changes.');
+      if(actingFor!==selectedOrganization.current)return;
       setMessage(action==='create'?'Payment link saved. Visitors will see it on your published website.':'Payment link disabled.');
       if(action==='create')setForm({title:'',description:'',amount:'',paymentUrl:''});
       await loadLinks(selected);
-    }catch(e){setError(e instanceof Error?e.message:'Unable to save payment link.');}
+    }catch(e){if(actingFor===selectedOrganization.current)setError(e instanceof Error?e.message:'Unable to save payment link.');}
     finally{setBusy('');}
   };
   if(loading||authLoading)return <Shell><p role="status" className="text-white/70">Loading your payment links…</p></Shell>;
@@ -79,7 +88,7 @@ export default function PayPalPaymentLinksManager(){
     </div>
     {orgs.length===0?<p className="mt-8 text-sm text-white/70">An approved organization owner or manager must sign in to add PayPal links.</p>:<>
       <label className="mt-7 block max-w-lg text-sm font-bold">Organization
-        <select className={field} value={selected} onChange={e=>{setSelected(e.target.value);setError('');setMessage('');}}>
+        <select className={field} value={selected} onChange={e=>{selectedOrganization.current=e.target.value;setSelected(e.target.value);setError('');setMessage('');}}>
           {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
       </label>
