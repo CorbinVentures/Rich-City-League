@@ -4,8 +4,8 @@
  * The authenticated API + RLS must separately enforce each capability.
  */
 import {RCH_SITE_PLANS,RCH_SITE_RELEASED_FEATURES,
-  type RchSiteFeature,type RchSitePlanTier} from '@/lib/rch-sites-plans';
-import {rchSiteSectionsFor,type RchSiteType} from '@/lib/rch-site-builder';
+  type RchSiteFeature,type RchSitePlanTier} from './rch-sites-plans';
+import {rchSiteSectionsFor,type RchSiteType} from './rch-site-builder';
 
 export type BasketballTool={
   id:string;name:string;description:string;feature:RchSiteFeature;
