@@ -104,6 +104,18 @@ export async function createRchSitesCheckout(input:{
   if(!rchSitesBillingEnabled())throw new Error('Website subscriptions are not accepting checkout.');
   const priceId=rchSitesPrice(input.tier,input.interval);
   if(!priceId)throw new Error('Website plan is unavailable.');
+  // Fail before the customer is charged if an environment price ID is stale,
+  // belongs to another product/currency, or points to the wrong amount.
+  const stripePrice=await requestStripe<{
+    id:string;active:boolean;currency:string;unit_amount:number|null;
+    recurring?:{interval:string};
+  }>('/prices/'+encodeURIComponent(priceId));
+  const approvedCents=RCH_SITE_PLANS[input.tier][
+    input.interval==='annual'?'proposedAnnualUsd':'proposedMonthlyUsd']*100;
+  if(stripePrice.id!==priceId||stripePrice.active!==true||stripePrice.currency!=='usd'
+    ||stripePrice.unit_amount!==approvedCents
+    ||stripePrice.recurring?.interval!==(input.interval==='annual'?'year':'month'))
+    throw new Error('Stripe price does not match the approved RCH Sites plan.');
   if(input.customerId&&!/^cus_[a-zA-Z0-9_]+$/.test(input.customerId))
     throw new Error('Invalid existing Stripe customer reference.');
   const site=(process.env.NEXT_PUBLIC_SITE_URL||productionUrl).replace(/\/$/,'');
@@ -144,7 +156,10 @@ export function stripeSiteSubscriptionState(sub:RchStripeSubscription){
   const invoice=typeof sub.latest_invoice==='object'?sub.latest_invoice:null;
   // Do not grant paid access while first/renewal invoice is still unpaid.
   const invoicePaid=invoice?.status==='paid'||invoice?.paid===true;
-  const active=sub.status==='active'&&invoicePaid;
+  const period=sub.items?.data?.[0]?.current_period_end??sub.current_period_end;
+  const validPeriod=typeof period==='number'&&Number.isSafeInteger(period)
+    &&period*1000>Date.now();
+  const active=sub.status==='active'&&invoicePaid&&validPeriod;
   return active?'active':sub.status==='canceled'?'canceled':'past_due';
 }
 
