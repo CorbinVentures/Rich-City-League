@@ -115,13 +115,37 @@ where organization_id='b6170000-0000-4000-8000-000000000001'
 $$,'23514',null,'Paid entitlement requires a provider subscription reference');
 
 update public.rch_site_subscriptions
-set tier='amateur',billing_status='active',provider_subscription_ref='test-provider-subscription'
+set tier='amateur',billing_status='active',provider_subscription_ref='test-provider-subscription',
+    current_period_end=now()+interval '30 days'
 where organization_id='b6170000-0000-4000-8000-000000000001';
 
 select lives_ok($$
 update public.rch_site_services set status='active'
 where id='c6170000-0000-4000-8000-000000000003'
 $$,'A valid active paid subscription can expand service allowance');
+
+-- A delayed renewal webhook must not leave paid quotas available after expiration.
+update public.rch_site_subscriptions
+set billing_status='active',current_period_end=now()-interval '1 second'
+where organization_id='b6170000-0000-4000-8000-000000000001';
+
+select throws_ok($
+insert into public.rch_site_services(organization_id,name,duration_minutes)
+values('b6170000-0000-4000-8000-000000000001','Expired paid plan',60)
+$,'23514',null,'Expired paid period rejects booking service despite active ledger status');
+
+update public.rch_site_subscriptions
+set current_period_end=null
+where organization_id='b6170000-0000-4000-8000-000000000001';
+
+select throws_ok($
+insert into public.rch_site_services(organization_id,name,duration_minutes)
+values('b6170000-0000-4000-8000-000000000001','Unknown paid period',60)
+$,'23514',null,'Missing Stripe paid-through period fails closed');
+
+update public.rch_site_subscriptions
+set current_period_end=now()+interval '30 days'
+where organization_id='b6170000-0000-4000-8000-000000000001';
 
 update public.rch_site_subscriptions set billing_status='past_due'
 where organization_id='b6170000-0000-4000-8000-000000000001';
