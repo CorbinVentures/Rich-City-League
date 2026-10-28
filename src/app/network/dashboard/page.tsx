@@ -60,7 +60,7 @@ export default function NetworkDashboardPage() {
   const ctr = totals.impressions ? ((totals.clicks/totals.impressions)*100).toFixed(1) : '0.0';
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_80%_10%,rgba(44,166,255,.12),transparent_26%),linear-gradient(145deg,#071522,#03070d)]"><Container maxWidth="xl" className="py-12 sm:py-16"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCH Network · Operator console</p><h1 className="mt-3 font-display text-5xl font-black uppercase tracking-[-.04em] sm:text-7xl">Exposure you can <span className="text-rcl-blue">operate.</span></h1><p className="mt-4 max-w-3xl text-sm leading-6 text-white/50">Manage your Network listing and measurable reach. Build an optional branded RCH Site without granting access to RCH league operations. Registration, payments, rosters, and booking tools remain outside this first release.</p></Container></section>
+    <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_80%_10%,rgba(44,166,255,.12),transparent_26%),linear-gradient(145deg,#071522,#03070d)]"><Container maxWidth="xl" className="py-12 sm:py-16"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCH Network · Operator console</p><h1 className="mt-3 font-display text-5xl font-black uppercase tracking-[-.04em] sm:text-7xl">Exposure you can <span className="text-rcl-blue">operate.</span></h1><p className="mt-4 max-w-3xl text-sm leading-6 text-white/50">Manage your Network listing and measurable reach. Your separate Organization HQ brings website bookings, inquiries, and your own PayPal Business links together without granting access to RCH league operations.</p></Container></section>
 
     <Container maxWidth="xl" className="py-8">
       {message && <div className="mb-6 rounded-xl border border-emerald-400/25 bg-emerald-400/[.05] p-3 text-xs text-emerald-200">{message}</div>}
@@ -72,8 +72,11 @@ export default function NetworkDashboardPage() {
         <p className="text-xs font-black uppercase tracking-[.15em] text-rose-300">New · RCH Sites</p>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
           <div><h2 className="font-display text-3xl font-black uppercase">Your organization. Your website.</h2>
-          <p className="mt-2 max-w-2xl text-sm text-white/60">Create a branded website with secure editing, approved templates and your own public link. Existing RCH Network listings stay unchanged.</p></div>
-          <Link href="/network/dashboard/sites" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black text-white">Open Website Studio <FaArrowRight/></Link>
+          <p className="mt-2 max-w-2xl text-sm text-white/60">See bookings and inquiries in one simple dashboard, then manage your independent website and payment links. RCH Network metrics are separate from website traffic.</p></div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/network/dashboard/sites/overview" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black text-white">Organization HQ <FaArrowRight/></Link>
+            <Link href="/network/dashboard/sites" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-300/30 px-5 text-sm font-bold text-rose-200">Website Studio</Link>
+          </div>
         </div>
       </section>
 
