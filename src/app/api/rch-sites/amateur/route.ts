@@ -167,7 +167,12 @@ export async function POST(request:Request){
   const manager=await entitledManager(raw.organizationId);
   if(!manager)return send({error:'Verified organization manager access required.'},403);
   const gate=await activeOperations(admin,raw.organizationId);
-  if(!gate.ready)return send({error:'Amateur basketball operations are not enabled for this website plan.'},403);
+  // Keep safety-critical closure/cancellation available to verified managers
+  // after a paid-period lapse or pilot rollback. DB triggers allow only
+  // open→closed and scheduled→cancelled in those circumstances.
+  const safeClosure=action==='closeProgram'||action==='cancelSession';
+  if(!gate.ready&&!safeClosure)
+    return send({error:'Amateur basketball operations are not enabled for this website plan.'},403);
   const organizationId=raw.organizationId;
   if(action==='createProgram'){
     const name=normalizedName(raw.name),kind=raw.kind;
