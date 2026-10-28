@@ -146,8 +146,17 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   const inputClass = "mt-2 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 font-normal outline-none transition focus:border-[var(--rch-brand-accent-text)]";
   const title = mode === 'sign-in' ? 'Welcome back' : mode === 'sign-up' ? 'Join Rich City Hoops' : 'Reset your password';
 
+  const isolatedPreview = /^https:\/\/[^/]+\.vercel\.app\/?$/.test(process.env.NEXT_PUBLIC_SITE_URL ?? '');
+
   return (
     <form onSubmit={submit} className="space-y-5 rounded-2xl border border-[var(--rch-brand-border)] bg-white/[0.04] p-6">
+      {isolatedPreview && mode === 'sign-in' && (
+        <div role="note" className="rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 py-3 text-sm leading-6 text-sky-100">
+          <strong className="block">Website Creator testing site</strong>
+          This Preview has separate login accounts. Your regular Rich City Hoops password does not sign you in here.
+          Use an existing staging login or choose Create account below.
+        </div>
+      )}
       <div>
         <h1 className="font-display text-3xl font-bold uppercase">{title}</h1>
         <p className="mt-2 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-up' ? 'Create a free profile. Find runs, connect with players and stay in the game.' : mode === 'reset' ? 'Enter your email and we’ll send you a password recovery link.' : 'Use your Rich City Hoops account to pick up where you left off.'}</p>
