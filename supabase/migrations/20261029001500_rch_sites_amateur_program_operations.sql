@@ -5,7 +5,8 @@ create extension if not exists btree_gist with schema extensions;
 
 create table public.rch_site_amateur_rollout (
  id boolean primary key default true check (id=true),
- enabled boolean not null default false
+ enabled boolean not null default false,
+ pilot_organization_id uuid references public.network_organizations(id)
 );
 insert into public.rch_site_amateur_rollout(id,enabled) values(true,false);
 
@@ -57,7 +58,8 @@ create function public.rch_site_amateur_verify_paid(p_org uuid)
 returns text language plpgsql security invoker set search_path=public,pg_temp as $$
 declare t text; s text; paid_until timestamptz;
 begin
- if not coalesce((select enabled from public.rch_site_amateur_rollout where id=true),false) then
+ if not coalesce((select enabled and pilot_organization_id=p_org
+  from public.rch_site_amateur_rollout where id=true),false) then
    raise exception 'Amateur operations are not yet enabled' using errcode='23514';
  end if;
  select tier,billing_status,current_period_end into t,s,paid_until
@@ -195,6 +197,6 @@ grant execute on function public.rch_site_amateur_registration_guard() to servic
 grant execute on function public.rch_site_amateur_session_guard() to service_role;
 
 comment on table public.rch_site_amateur_rollout is
- 'Private enable switch OFF by default pending staging tests and release approval.';
+ 'Private switch OFF by default; when enabled it applies only to the selected approved pilot organization.';
 comment on table public.rch_site_amateur_registrations is
  'Adults-only registrations; no DOB stored here, private roster visible solely to an authorized manager.';
