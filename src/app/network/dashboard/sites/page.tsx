@@ -121,9 +121,14 @@ export default function RchSitesBuilderPage(){
   if(authLoading||loading)return <Shell><p className="text-sm text-white/70" role="status">Loading your sites…</p></Shell>;
   if(!user)return <Shell><p className="text-white/80">Sign in to build an organization website.</p>
     <Link href="/auth/sign-in?next=/network/dashboard/sites" className="mt-5 inline-flex rounded-xl bg-rose-600 px-5 py-3 font-black">Sign in</Link></Shell>;
-  if(!data.organizations.length)return <Shell><h1 className="text-3xl font-black">Claim your organization first.</h1>
-    <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">RCH Sites is for verified representatives of basketball organizations. Once your organization is approved, you can build its website here.</p>
-    <Link href="/organizations" className="mt-5 inline-flex rounded-xl bg-rose-600 px-5 py-3 font-black">Find your organization</Link></Shell>;
+  if(!data.organizations.length)return <Shell>
+    <h1 className="text-3xl font-black">Start with your own website.</h1>
+    <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Design and save a free website draft now. You'll verify or claim your basketball organization before publishing.</p>
+    <div className="mt-5 flex flex-wrap gap-3">
+      <Link href="/website-creator/start" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black">Continue website setup <FaArrowRight/></Link>
+      <Link href="/organizations" className="inline-flex min-h-12 items-center rounded-xl border border-white/30 px-5 text-sm font-bold">Find or claim your organization</Link>
+    </div>
+  </Shell>;
 
   const canPublish=organization?.member_role==='owner'||organization?.member_role==='manager';
   const valid=isRchSiteSlug(slug)&&config.tagline.trim().length>0&&config.about.trim().length>0;
