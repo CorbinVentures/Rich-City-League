@@ -111,6 +111,11 @@ export const RCH_SITE_ADDONS=[
 ] as const;
 
 /** Inclusion means a future capability, not that an upgrade can be purchased. */
+export type RchSiteBillingInterval='monthly'|'annual';
+export function isRchSiteBillingInterval(value:unknown):value is RchSiteBillingInterval{
+  return value==='monthly'||value==='annual';
+}
+
 export function getRchSitePlanDisplayPrice(tier:RchSitePlanTier,interval:'monthly'|'annual'){
   const plan=RCH_SITE_PLANS[tier];
   return interval==='annual'?plan.proposedAnnualUsd:plan.proposedMonthlyUsd;
