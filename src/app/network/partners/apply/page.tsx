@@ -1,3 +1,4 @@
+import {redirect} from 'next/navigation';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { PartnerInterestForm } from '@/components/network/PartnerInterestForm';
@@ -10,6 +11,9 @@ export const metadata = {
 
 export default async function PartnerApplyPage({searchParams}:{searchParams:Promise<{plan?:string;siteTier?:string}>}) {
   const {plan,siteTier}=await searchParams;
+  // Previously-shared website links must enter the real builder, not an inquiry.
+  if(siteTier&&['free','amateur','professional'].includes(siteTier))
+    redirect('/website-creator/start?tier='+siteTier);
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_12%,rgba(21,159,255,.12),transparent_30%),linear-gradient(145deg,#071522,#03070d)]">
       <Container maxWidth="lg" className="py-12 sm:py-16">
