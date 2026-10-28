@@ -83,7 +83,9 @@ export default function RchSitesOverviewPage(){
         const allowed=(data.organizations??[]).filter(inManagerRole);
         setOrganizations(allowed);
         setPublished(data.published??[]);
-        setSelected(prev=>allowed.some(o=>o.id===prev)?prev:allowed[0]?.id??'');
+        const requested=new URLSearchParams(window.location.search).get('organizationId');
+        setSelected(prev=>allowed.some(o=>o.id===prev)?prev:
+          allowed.find(o=>o.id===requested)?.id??allowed[0]?.id??'');
       })
       .catch(()=>{
         if(!controller.signal.aborted)setError('Could not load your organizations. Refresh the page to retry.');
@@ -133,6 +135,8 @@ export default function RchSitesOverviewPage(){
     offerings:current?.offerings??null,
   }),[isLive,liveRecord?.status,current]);
   const pending=activityLoading||!current;
+  const forOrganization=(href:string)=>selected&&href.startsWith(endpoint)
+    ?href+'?organizationId='+encodeURIComponent(selected):href;
   const links=[
     {name:'Website Studio',description:'Edit & publish',href:endpoint,icon:<FaGlobe/>},
     {name:'Calendar',description:'Services & availability',href:endpoint+'/appointments',icon:<FaCalendarDays/>},
@@ -149,7 +153,7 @@ export default function RchSitesOverviewPage(){
           <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-5xl">Your day, at a glance.</h1>
           <p className="mt-3 max-w-2xl text-sm text-white/60">Your website, your people, your next move. Everything in one place.</p>
         </div>
-        <Link href={endpoint} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black">
+        <Link href={forOrganization(endpoint)} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black">
           Edit website <FaArrowRight/>
         </Link>
       </header>
@@ -192,18 +196,18 @@ export default function RchSitesOverviewPage(){
           {isLive&&liveRecord?
             <Link className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-emerald-300 underline"
               target="_blank" rel="noopener noreferrer" href={'/sites/'+liveRecord.slug}>Visit public site <FaArrowUpRightFromSquare/></Link>:
-            <Link href={endpoint} className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-rose-300">Finish website <FaArrowRight/></Link>}
+            <Link href={forOrganization(endpoint)} className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-rose-300">Finish website <FaArrowRight/></Link>}
         </section>
         {current?.failed? <p role="alert" className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/5 p-3 text-xs leading-5 text-amber-100">
           Some updates could not load. A dash means unavailable data, not zero activity. Refresh to retry.
         </p>:null}
         <section aria-label="Organization activity" className="mt-5 grid gap-3 sm:grid-cols-3">
           <Metric label="New inquiries" value={pending?null:summary.newInquiries}
-            hint="Most recent 100 requests" href={endpoint+'/people'} icon={<FaEnvelope/>}/>
+            hint="Most recent 100 requests" href={forOrganization(endpoint+'/people')} icon={<FaEnvelope/>}/>
           <Metric label="Booked upcoming" value={pending?null:summary.upcomingBooked}
-            hint="Among next 200 times" href={endpoint+'/appointments'} icon={<FaCalendarDays/>}/>
+            hint="Among next 200 times" href={forOrganization(endpoint+'/appointments')} icon={<FaCalendarDays/>}/>
           <Metric label="Open times" value={pending?null:summary.availableSlots}
-            hint="Among next 200 times" href={endpoint+'/appointments'} icon={<FaClock/>}/>
+            hint="Among next 200 times" href={forOrganization(endpoint+'/appointments')} icon={<FaClock/>}/>
         </section>
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <section className={card} aria-labelledby="next-actions">
@@ -215,7 +219,7 @@ export default function RchSitesOverviewPage(){
             summary.actions.length===0?
               <p className="mt-5 text-sm text-white/60">{current?.failed?'Some information is unavailable. Try refreshing.':'Nothing urgent here. Keep your website and availability current.'}</p>:
             <div className="mt-4 space-y-2">{summary.actions.map((a,index)=>
-              <Link key={a.id} href={a.href} className="flex min-h-16 items-center gap-3 rounded-xl border border-white/15 bg-black/20 p-3 hover:border-rose-400/50">
+              <Link key={a.id} href={forOrganization(a.href)} className="flex min-h-16 items-center gap-3 rounded-xl border border-white/15 bg-black/20 p-3 hover:border-rose-400/50">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-rose-500/15 text-sm font-black text-rose-200">{index+1}</span>
                 <span className="min-w-0 flex-1"><b className="block text-sm">{a.title}</b><span className="mt-1 block text-xs text-white/55">{a.description}</span></span>
                 <FaArrowRight className="shrink-0 text-white/55"/>
@@ -236,7 +240,7 @@ export default function RchSitesOverviewPage(){
           <div className={card}>
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-black">Latest new inquiries</h2>
-              <Link href={endpoint+'/people'} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-rose-300">Open inbox <FaArrowRight/></Link>
+              <Link href={forOrganization(endpoint+'/people')} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-rose-300">Open inbox <FaArrowRight/></Link>
             </div>
             {pending?<p className="mt-3 text-sm text-white/50">Loading…</p>:
             summary.newInquiries===null?<p className="mt-3 text-sm text-amber-200">Inbox unavailable right now.</p>:
@@ -250,7 +254,7 @@ export default function RchSitesOverviewPage(){
           <div className={card}>
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-black">Next booked sessions</h2>
-              <Link href={endpoint+'/appointments'} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-rose-300">Calendar <FaArrowRight/></Link>
+              <Link href={forOrganization(endpoint+'/appointments')} className="inline-flex min-h-11 items-center gap-1 text-xs font-bold text-rose-300">Calendar <FaArrowRight/></Link>
             </div>
             {pending?<p className="mt-3 text-sm text-white/50">Loading…</p>:
             summary.upcomingBooked===null?<p className="mt-3 text-sm text-amber-200">Calendar unavailable right now.</p>:
@@ -265,7 +269,7 @@ export default function RchSitesOverviewPage(){
         <section className="mt-5" aria-label="Website tools">
           <h2 className="mb-3 text-lg font-black">Manage your website</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {links.map(link=><Link href={link.href} key={link.name}
+            {links.map(link=><Link href={forOrganization(link.href)} key={link.name}
               className="flex min-h-24 items-center gap-3 rounded-2xl border border-white/15 bg-white/[.04] p-4 hover:border-rose-400/40">
               <span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-500/15 text-rose-200">{link.icon}</span>
               <span className="min-w-0 flex-1"><b className="block text-sm">{link.name}</b><span className="mt-1 block text-xs text-white/55">{link.description}</span></span>
