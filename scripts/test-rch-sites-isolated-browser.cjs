@@ -89,7 +89,10 @@ async function main(){
   await verifier.auth.signOut();
   console.log('PASS local GoTrue credential preflight');
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
-  const first=await browser.newContext({viewport:{width:390,height:844}});
+  // Local Supabase uses http://127.0.0.1:54321, which is intentionally not
+  // allowed by RCH production CSP (https://*.supabase.co only). Disable CSP
+  // solely for the disposable local browser fixture, never in the website.
+  const first=await browser.newContext({viewport:{width:390,height:844},bypassCSP:true});
   let page=await signin(first,'first session');
   await page.getByRole('button',{name:/customize my site/i}).click();
   const org='CI Trainer '+crypto.randomBytes(4).toString('hex');
@@ -109,7 +112,7 @@ async function main(){
   // A completely fresh browser context is signed out by default. Sign in
   // again to simulate a returning real user without relying on localStorage.
   await first.close();
-  const second=await browser.newContext({viewport:{width:1440,height:900}});
+  const second=await browser.newContext({viewport:{width:1440,height:900},bypassCSP:true});
   page=await signin(second,'returning session');
   await page.getByRole('textbox',{name:/basketball business/i})
     .waitFor({state:'visible',timeout:15000});
