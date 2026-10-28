@@ -11,7 +11,7 @@ const sandboxVariables=[
 ];
 
 function run(key:string,enabled='false'){
-  const env={...process.env,RCH_SITES_SANDBOX_API_KEY:key,
+  const env:NodeJS.ProcessEnv={...process.env,RCH_SITES_SANDBOX_API_KEY:key,
     RCH_SITES_BILLING_ENABLED:enabled};
   for(const name of sandboxVariables)env[name]='';
   return spawnSync(process.execPath,['scripts/rch-sites-sandbox-preflight.mjs'],{
