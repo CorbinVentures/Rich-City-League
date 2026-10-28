@@ -153,40 +153,14 @@ export default function RchSitesBillingPage(){
               aria-expanded={isReviewing}
               className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 text-sm font-black text-[#061521] disabled:opacity-40">
               <FaArrowRight/> {current?'Current plan':hasExistingSubscription?'Manage existing subscription':
-                !billing?.available?'Enrollment not open':'Review 
-        })}
-      </div>
-      {!billing?.available&&<p className="mt-5 flex items-start gap-2 text-sm text-amber-200"><FaLock className="mt-1 shrink-0"/> Payments are not yet open. Your current site and saved preferences remain available, and no charges will be initiated.</p>}
-      <p className="mt-5 text-xs leading-6 text-white/55">Founding rates and optional add-ons are not enrolled automatically. No plan change can be inferred from visiting the payment confirmation page: subscription status updates only after Stripe verifies payment through RCH.</p>
-    </>}
-  </Shell>;
-}
-function Shell({children}:{children:React.ReactNode}){
-  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <Container maxWidth="xl" className="py-10 sm:py-14">{children}</Container>
-  </main>;
-}
-+amount+'/'+unit}
+                !billing?.available?'Enrollment not open':'Review $'+amount+'/'+unit}
             </button>
             {isReviewing&&<section aria-label="Review subscription before checkout" className="mt-4 rounded-xl border border-sky-300/40 bg-sky-300/[.07] p-4">
               <h3 className="text-sm font-black uppercase tracking-wide text-sky-200">Review before Stripe</h3>
               <dl className="mt-3 grid gap-2 text-sm">
                 <div><dt className="text-xs text-white/55">Organization</dt><dd className="font-semibold">{selectedOrganization?.name}</dd></div>
                 <div><dt className="text-xs text-white/55">Plan</dt><dd className="font-semibold">{plan.name} · {interval==='monthly'?'Monthly':'Annual'}</dd></div>
-                <div><dt className="text-xs text-white/55">Subscription price (USD)</dt><dd className="text-xl font-black">{'
-        })}
-      </div>
-      {!billing?.available&&<p className="mt-5 flex items-start gap-2 text-sm text-amber-200"><FaLock className="mt-1 shrink-0"/> Payments are not yet open. Your current site and saved preferences remain available, and no charges will be initiated.</p>}
-      <p className="mt-5 text-xs leading-6 text-white/55">Founding rates and optional add-ons are not enrolled automatically. No plan change can be inferred from visiting the payment confirmation page: subscription status updates only after Stripe verifies payment through RCH.</p>
-    </>}
-  </Shell>;
-}
-function Shell({children}:{children:React.ReactNode}){
-  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <Container maxWidth="xl" className="py-10 sm:py-14">{children}</Container>
-  </main>;
-}
-}{amount}/{unit}</dd></div>
+                <div><dt className="text-xs text-white/55">Subscription price (USD)</dt><dd className="text-xl font-black">{'$'}{amount}/{unit}</dd></div>
               </dl>
               {mismatchedSandboxSelection&&
                 <p role="alert" className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-xs leading-5 text-amber-100">
@@ -200,20 +174,7 @@ function Shell({children}:{children:React.ReactNode}){
                   className="min-h-11 rounded-lg border border-white/25 px-4 text-xs font-bold text-white/80">Change</button>
                 <button type="button" onClick={()=>void act(tier)} disabled={!!busy||mismatchedSandboxSelection}
                   className="min-h-11 flex-1 rounded-lg bg-sky-400 px-4 text-xs font-black text-[#061521] disabled:opacity-40">
-                  {busy===tier?'Opening secure checkout…':'Confirm '+plan.name+' · 
-        })}
-      </div>
-      {!billing?.available&&<p className="mt-5 flex items-start gap-2 text-sm text-amber-200"><FaLock className="mt-1 shrink-0"/> Payments are not yet open. Your current site and saved preferences remain available, and no charges will be initiated.</p>}
-      <p className="mt-5 text-xs leading-6 text-white/55">Founding rates and optional add-ons are not enrolled automatically. No plan change can be inferred from visiting the payment confirmation page: subscription status updates only after Stripe verifies payment through RCH.</p>
-    </>}
-  </Shell>;
-}
-function Shell({children}:{children:React.ReactNode}){
-  return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
-    <Container maxWidth="xl" className="py-10 sm:py-14">{children}</Container>
-  </main>;
-}
-+amount+'/'+unit}
+                  {busy===tier?'Opening secure checkout…':'Confirm '+plan.name+' · $'+amount+'/'+unit}
                 </button>
               </div>
             </section>}
