@@ -62,7 +62,7 @@ export function RchSitesBasketballTools({siteType,tier,mode,organizationId,paidS
         </div>;
       })}
     </div>
-    {mode==='owner'&&<Link href="/network/dashboard/sites/billing"
+    {mode==='owner'&&<Link href={'/network/dashboard/sites/billing'+(organizationId?'?organizationId='+encodeURIComponent(organizationId):'')}
       className="mt-4 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-sky-300">
       View website plans <FaArrowRight aria-hidden="true"/>
     </Link>}
