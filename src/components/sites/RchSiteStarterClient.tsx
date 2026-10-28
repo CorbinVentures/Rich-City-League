@@ -5,6 +5,8 @@ import {useCallback,useEffect,useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
 import {Container} from '@/components/Container';
 import {RchSiteView} from '@/components/sites/RchSiteView';
+import {RchSitesBasketballTools} from '@/components/sites/RchSitesBasketballTools';
+import {RCH_BASKETBALL_TEMPLATES} from '@/lib/rch-sites-basketball-tools';
 import {
   isRchSiteSlug,normalizeRchSiteDraft,RCH_SITE_THEMES,RCH_SITE_TYPES,
   rchSiteSectionsFor,type RchSiteDraft,type RchSiteType,
@@ -35,16 +37,13 @@ const field='mt-2 w-full min-h-12 rounded-xl border border-white/20 bg-[#111e2b]
 const states=['Your site','Make it yours','Finish setup'];
 
 function startingText(type:RchSiteType){
-  return type==='aau'?'Where our team grows together':
-    type==='organizer'?'Your next basketball experience starts here':
-    type==='coach'?'Develop your game. Build your future.':
-    'Train harder. Take your game further.';
+  return RCH_BASKETBALL_TEMPLATES[type].headline;
 }
 function initialConfig(type:RchSiteType='trainer'){
   return normalizeRchSiteDraft({
     siteType:type,theme:'courtside',sections:rchSiteSectionsFor(type),
-    tagline:startingText(type),about:'Basketball training, development and opportunities.',
-    callToAction:'Get in touch',
+    tagline:startingText(type),about:RCH_BASKETBALL_TEMPLATES[type].about,
+    callToAction:RCH_BASKETBALL_TEMPLATES[type].callToAction,
   });
 }
 function slugify(name:string){
@@ -121,8 +120,14 @@ export function RchSiteStarterClient({initialTier='free',initialBilling='monthly
     setConfig(previous=>({...previous,[key]:value}));setSaved(false);setMessage('');
   }
   function changeType(type:RchSiteType){
-    setConfig(previous=>({...previous,siteType:type,sections:rchSiteSectionsFor(type),
-      tagline:previous.tagline===startingText(previous.siteType)?startingText(type):previous.tagline}));
+    setConfig(previous=>{
+      const oldTemplate=RCH_BASKETBALL_TEMPLATES[previous.siteType];
+      const nextTemplate=RCH_BASKETBALL_TEMPLATES[type];
+      return {...previous,siteType:type,sections:rchSiteSectionsFor(type),
+        tagline:previous.tagline===oldTemplate.headline?nextTemplate.headline:previous.tagline,
+        about:previous.about===oldTemplate.about?nextTemplate.about:previous.about,
+        callToAction:previous.callToAction===oldTemplate.callToAction?nextTemplate.callToAction:previous.callToAction};
+    });
     setSaved(false);
   }
   function updateName(value:string){
@@ -235,6 +240,7 @@ export function RchSiteStarterClient({initialTier='free',initialBilling='monthly
             <span className="mt-2 block text-xs text-white/55">{billingOpen&&plan.id!=='free'?'Subscribe after verification · Additional tools rolling out':plan.copy}</span>
           </button>)}</div>
       </section>
+      <RchSitesBasketballTools siteType={config.siteType} tier={tier} mode="starter" limit={4}/>
       <button type="button" onClick={()=>{setError('');setStep(1);}}
         className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-sky-400 px-6 text-sm font-black text-[#061321]">Customize my site <FaArrowRight/></button>
     </div>}
