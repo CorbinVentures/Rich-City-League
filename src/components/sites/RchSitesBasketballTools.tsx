@@ -35,11 +35,12 @@ export function RchSitesBasketballTools({siteType,tier,mode,organizationId,paidS
         <h2 className="mt-2 text-lg font-black">{template.label} toolkit</h2>
         <p className="mt-1 text-xs leading-5 text-white/60">{template.summary}</p>
       </div>
-      <span className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/75">{mode==='owner'?'Website level: ':'Previewing: '}{tier}</span>
+      <span className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/75">{mode==='owner'?'Website level: '+tier:mode==='builder'?'Free baseline preview':'Previewing: '+tier}</span>
     </div>
     <p className="mt-4 text-xs leading-5 text-white/55">
       {mode==='owner'
         ?'Only currently released tools open here. Upcoming basketball modules remain previews and do not change your subscription.'
+        :mode==='builder'?'A preview of basic tools and future basketball modules. Your actual website subscription appears in Organization HQ; this editor does not change it.'
         :'These are basketball-focused tools for your website. Plan choices during setup do not activate paid tools; planned modules cannot be used yet.'}
     </p>
     <div className="mt-4 grid gap-2 sm:grid-cols-2">
