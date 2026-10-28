@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {Container} from '@/components/Container';
 import {useAuth} from '@/hooks/useAuth';
-import {FaArrowLeft,FaCalendarDays,FaCircleCheck,FaClock,FaPlus,FaXmark} from 'react-icons/fa6';
+import {FaArrowLeft,FaArrowRight,FaCalendarDays,FaCircleCheck,FaClock,FaPlus,FaXmark} from 'react-icons/fa6';
 
 type Org={id:string;name:string;eligible:boolean;member_role:string};
 type Service={id:string;name:string;description:string;duration_minutes:number;status:string};
@@ -13,6 +13,7 @@ type PlanSummary={tier:string;billingStatus:string;quotaEnforced:boolean;limits:
   usage:{services:number;upcomingSlots:number;confirmedBookingsMonthly:number}};
 const field='mt-2 w-full min-h-11 rounded-xl border border-white/15 bg-[#141822] px-3 py-2.5 text-sm text-white focus:border-rose-400 focus:outline-none';
 function localDate(value:string){return new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));}
+function localInputTime(date:Date){return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);}
 export default function AppointmentsManager(){
   const {user,loading:authLoading}=useAuth();
   const [orgs,setOrgs]=useState<Org[]>([]);
@@ -24,6 +25,7 @@ export default function AppointmentsManager(){
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
   const [loading,setLoading]=useState(true);
+  const scheduleRequest=useRef(0);
   const [form,setForm]=useState({name:'',description:'',duration:60,serviceId:'',startsAt:''});
   const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'Your local time';
   const loadOrgs=useCallback(async()=>{
@@ -35,8 +37,10 @@ export default function AppointmentsManager(){
     setSelected(s=>s||valid[0]?.id||'');
   },[]);
   const loadSchedule=useCallback(async(orgId:string)=>{
+    const requestId=++scheduleRequest.current;
     const response=await fetch('/api/rch-sites/appointments?organizationId='+encodeURIComponent(orgId),{cache:'no-store'});
     const data=await response.json().catch(()=>({}));
+    if(requestId!==scheduleRequest.current)return;
     if(!response.ok)throw Error(data.error||'Could not load appointments.');
     setServices(data.services||[]);
     setSlots(data.slots||[]);
@@ -49,9 +53,17 @@ export default function AppointmentsManager(){
       .finally(()=>setLoading(false));
   },[authLoading,user,loadOrgs]);
   useEffect(()=>{
-    if(!selected){setServices([]);setSlots([]);setWebsitePlan(null);return;}
+    // Do not show the previous organization's services or accept its selected
+    // service ID while the newly selected organization's schedule is loading.
+    if(!selected){scheduleRequest.current++;setServices([]);setSlots([]);setWebsitePlan(null);return;}
+    setServices([]);setSlots([]);setWebsitePlan(null);
+    setForm(f=>({...f,serviceId:'',startsAt:''}));
+    setError('');
     void loadSchedule(selected).catch(e=>setError(e instanceof Error?e.message:'Unable to load appointments.'));
   },[selected,loadSchedule]);
+  const activeServices=services.filter(s=>s.status==='active');
+  const serviceId=activeServices.some(s=>s.id===form.serviceId)?form.serviceId:activeServices[0]?.id||'';
+  const availableCount=slots.filter(s=>s.status==='open'&&!s.booked).length;
   const act=async(action:'createService'|'createSlot'|'closeSlot',slotId?:string)=>{
     if(!selected||busy)return;
     setBusy(action);setError('');setMessage('');
@@ -63,7 +75,7 @@ export default function AppointmentsManager(){
       if(action==='createSlot'){
         const date=new Date(form.startsAt);
         if(!form.startsAt||!Number.isFinite(date.getTime()))throw Error('Choose a valid local appointment date and time.');
-        payload.serviceId=form.serviceId||services.find(s=>s.status==='active')?.id;
+        payload.serviceId=serviceId;
         payload.startsAt=date.toISOString();
       }
       if(action==='closeSlot')payload.slotId=slotId;
@@ -74,7 +86,7 @@ export default function AppointmentsManager(){
       if(!response.ok)throw Error(body.error||'Unable to update appointments.');
       setMessage(action==='createService'?'Service created. Add some appointment times.':
         action==='createSlot'?'New appointment added.':'Unbooked time closed.');
-      if(action==='createService')setForm(f=>({...f,name:'',description:''}));
+      if(action==='createService')setForm(f=>({...f,name:'',description:'',serviceId:body.id||f.serviceId}));
       if(action==='createSlot')setForm(f=>({...f,startsAt:''}));
       await loadSchedule(selected);
     }catch(e){setError(e instanceof Error?e.message:'Unable to save appointment.');}
@@ -87,9 +99,14 @@ export default function AppointmentsManager(){
     <Link href="/network/dashboard/sites" className="inline-flex items-center gap-2 text-sm text-white/60"><FaArrowLeft/> Website Studio</Link>
     <p className="mt-7 text-xs font-black uppercase tracking-widest text-rose-400">RCH Sites · Calendar</p>
     <h1 className="mt-2 text-4xl font-black">Bookings made simple.</h1>
-    <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Create a free service. Add session times. Clients book the available slots through your published website. Payments are not enabled yet.</p>
+    <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">Add a session, choose available times, and let visitors reserve for free on your published site. If you charge for training, create a separate PayPal link; paying does not automatically confirm a booking.</p>
     {!orgs.length&&<div className="mt-8 rounded-2xl border border-white/20 p-5 text-sm">You need an approved basketball organization and owner/manager access to manage bookings. <Link href="/organizations" className="underline">Find your organization</Link>.</div>}
     {!!orgs.length&&<>
+      <section aria-label="Booking setup progress" className="mt-6 grid gap-2 sm:grid-cols-3">
+        <div className="rounded-xl border border-white/15 bg-white/[.035] p-3 text-sm"><b>{activeServices.length?'✓':'1'} · Service</b><span className="block text-xs text-white/55">{activeServices.length?activeServices.length+' active':'Create a service'}</span></div>
+        <div className="rounded-xl border border-white/15 bg-white/[.035] p-3 text-sm"><b>{availableCount?'✓':'2'} · Availability</b><span className="block text-xs text-white/55">{availableCount?availableCount+' open times':'Add available times'}</span></div>
+        <Link href="/network/dashboard/sites" className="rounded-xl border border-white/15 bg-white/[.035] p-3 text-sm hover:border-sky-400/50"><b>3 · Publish</b><span className="flex items-center gap-1 text-xs text-white/55">Open Website Studio <FaArrowRight/></span></Link>
+      </section>
       {websitePlan?.limits&&<div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/75">
         <p className="font-black text-white">Website plan: {websitePlan.tier.charAt(0).toUpperCase()+websitePlan.tier.slice(1)}</p>
         <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs">
@@ -98,7 +115,7 @@ export default function AppointmentsManager(){
           <span>Bookings this month {websitePlan.usage.confirmedBookingsMonthly}/{websitePlan.limits.confirmedBookingsMonthly}</span>
         </div>
         <p className="mt-2 text-xs text-white/50">{websitePlan.quotaEnforced
-          ?'Website plan quotas are active. Paid plan enrollment is not available yet.'
+          ?'Website plan quotas are active. Visit Website Billing to manage your subscription.'
           :'Proposed plan limits shown for reference. Existing booking limits remain in effect during the pilot.'}</p>
       </div>}
       <label className="mt-7 block max-w-md text-xs font-bold">Manage organization
@@ -131,16 +148,16 @@ export default function AppointmentsManager(){
         <section className="rounded-2xl border border-white/15 bg-white/5 p-5">
           <div className="flex items-center gap-2"><FaCalendarDays className="text-rose-400"/><h2 className="text-xl font-black">2 · Available times</h2></div>
           <label className="mt-5 block text-xs font-bold">Session type
-            <select className={field} value={form.serviceId&&services.some(s=>s.id===form.serviceId)?form.serviceId:services[0]?.id||''}
-              onChange={e=>setForm(f=>({...f,serviceId:e.target.value}))} disabled={!services.length}>
-              {services.filter(s=>s.status==='active').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+            <select className={field} value={serviceId}
+              onChange={e=>setForm(f=>({...f,serviceId:e.target.value}))} disabled={!activeServices.length}>
+              {activeServices.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </label>
           <label className="mt-4 block text-xs font-bold">Date & time
-            <input type="datetime-local" className={field} value={form.startsAt} onChange={e=>setForm(f=>({...f,startsAt:e.target.value}))}/>
+            <input type="datetime-local" className={field} min={localInputTime(new Date(Date.now()+2*3600000))} value={form.startsAt} onChange={e=>setForm(f=>({...f,startsAt:e.target.value}))}/>
           </label>
           <p className="mt-2 text-xs text-white/50">Entered in your device time zone: {timezone}. Add times at least 2 hours ahead.</p>
-          <button type="button" disabled={Boolean(busy)||!services.length||!form.startsAt}
+          <button type="button" disabled={Boolean(busy)||!activeServices.length||!form.startsAt}
             onClick={()=>void act('createSlot')} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-600 px-5 text-sm font-black disabled:opacity-40">
             <FaPlus/> Add time
           </button>
