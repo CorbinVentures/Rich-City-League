@@ -5,6 +5,7 @@ import {
   fetchRchSitesSubscription,stripeRefId,stripeSiteSubscriptionState,
   verifyRchSitesStripeSignature,verifyRchSitesStripePrice,
   retrieveRchSitesCheckout,isVerifiedRchSitesCheckoutLineage,
+  isUnpaidInitialRchSitesInvoiceFailure,
 } from '@/lib/rch-sites-stripe-billing';
 
 export const runtime='nodejs';
@@ -134,6 +135,12 @@ export async function POST(request:Request){
     // event, including subscription/invoice events delivered out of order.
     // Metadata on a separately created subscription is not proof of payment.
     const checkout=await retrieveRchSitesCheckout(intent.stripe_session_id);
+    if(isUnpaidInitialRchSitesInvoiceFailure(event.type,checkout)){
+      // No paid Checkout exists yet, so there is no entitlement to revoke.
+      // A later successful Checkout/invoice event will reconcile normally.
+      await finish('ignored','initial_payment_not_completed',subscriptionId);
+      return response({received:true,ignored:true});
+    }
     if(!isVerifiedRchSitesCheckoutLineage(checkout,{
       intentId:intent.id,organizationId:intent.organization_id,
       sessionId:intent.stripe_session_id,subscriptionId,
