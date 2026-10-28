@@ -38,4 +38,11 @@ All four completed purchases reconciled Checkout completion, subscription creati
 5. The booking-quota rollout remains off. Enforce the current paid period end as well as active billing status before paid-tier quota enforcement; a missed webhook must not leave indefinite entitlement.
 6. Review operational failed-payment notices, support, recovery, tax and cancellation policies before public launch.
 
+## Provider-level failed-payment attempts (additional October 28 check)
+
+- On the previously paid Amateur Monthly sandbox subscription, cleared its subscription payment method and used a sandbox-only Stripe billing-cycle-anchor reset with proration disabled. Stripe returned active, did **not** generate a new invoice or `invoice.payment_failed`; this is **not a successful failed-renewal test**. Restored the original payment method; existing paid invoice, active status and period end (November 28, 2026) remained unchanged. Stripe's billing-cycle-anchor timestamp shifted during the reset.
+- Created a disposable, unrelated sandbox customer (`cus_VWfg8eYINn81N9`) and attempted a subscription with no payment method. Stripe refused to create an immediately billed subscription without a saved payment source. A short-lived trial was created, but Stripe also refused immediate trial expiration without a payment method; that trial (`sub_1UVcLiEHXWVaGmOhd3JPJK6I`) was **canceled** without charges.
+- Stripe's Customer update rejected attaching a legacy test card token because the account disallows legacy card-token usage. The connected Stripe API tool does not expose the PaymentMethod Attach or test-clock Advance operations. No sandbox failed-renewal invoice was produced; the needed event remains a release gate.
+- These experiments used the `general` Stripe sandbox only. No live resources were changed.
+
 **Release gate:** Keep the production RCH_SITES_BILLING_ENABLED flag false, live Stripe webhook disabled and PR #623 in draft until outstanding tests pass and an explicit release is approved.
