@@ -17,8 +17,9 @@ describe('Public RCH Sites entry',()=>{
   });
   it('keeps Free, Amateur and Professional site tiers distinct from live advertising plans',()=>{
     const page=read('src/app/website-creator/page.tsx');
-    expect(page).toContain('<RchSitePricingCards/>');
-    expect(page).toContain('not active paid subscriptions');
+    expect(page).toContain('<RchSitePricingCards billingOpen={billingOpen}/>');
+    expect(page).toContain("billingOpen=rchSitesBillingEnabled()");
+    expect(page).toContain('Amateur and Professional subscriptions are available');
     const pricing=read('src/components/sites/RchSitePricingCards.tsx');
     expect(pricing).toContain('RCH_SITE_PLAN_TIERS.map');
     expect(pricing).toContain('/website-creator/start?tier=');
