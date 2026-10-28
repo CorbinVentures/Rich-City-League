@@ -12,7 +12,7 @@ export const metadata:Metadata={
 const plans=[
   {id:'free',name:'Free',price:'$0 / month',subtitle:'Make your mark',features:['Branded RCH subsite','Customizable approved templates','Program info, media and contact details'],footnote:'Build and save your design now; verify before public publishing.'},
   {id:'amateur',name:'Amateur',price:'Pricing to be announced',subtitle:'Build your business',features:['Expanded appointment and service tools','More client and media capabilities','Growing program workflows'],footnote:'Save your preferred level; begin designing on Free with no checkout.'},
-  {id:'professional',name:'Professional',price:'Pricing to be announced',subtitle:'Scale your program',features:['Advanced program and team tools','Expanded reporting and site customization','Optional local SEO support'],footnote:'Planned paid level. Register interest; no checkout yet.'},
+  {id:'professional',name:'Professional',price:'Pricing to be announced',subtitle:'Scale your program',features:['Advanced program and team tools','Expanded reporting and site customization','Optional local SEO support'],footnote:'Save your preferred level; begin designing on Free with no checkout.'},
 ] as const;
 
 const audiences=['Trainers','Coaches','AAU programs','Teams & leagues','Basketball organizers'];
