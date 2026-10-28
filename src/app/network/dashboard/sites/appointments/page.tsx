@@ -35,7 +35,8 @@ export default function AppointmentsManager(){
     if(!response.ok)throw Error(body.error||'Could not load your organizations.');
     const valid=(body.organizations??[]).filter((o:Org)=>o.eligible&&['owner','manager'].includes(o.member_role));
     setOrgs(valid);
-    setSelected(s=>s||valid[0]?.id||'');
+    const requested=new URLSearchParams(window.location.search).get('organizationId');
+    setSelected(s=>valid.some(o=>o.id===s)?s:valid.find(o=>o.id===requested)?.id||valid[0]?.id||'');
   },[]);
   const loadSchedule=useCallback(async(orgId:string)=>{
     if(orgId!==selectedOrganization.current)return;
