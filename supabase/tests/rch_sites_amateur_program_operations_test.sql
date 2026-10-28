@@ -27,12 +27,18 @@ select throws_ok($$
 insert into public.rch_site_amateur_programs(organization_id,name,kind,capacity)
 values('b6300000-0000-4000-8000-000000000001','Closed rollout training','training',1)
 $$,'23514',null,'No programs until private rollout enabled');
-update public.rch_site_amateur_rollout set enabled=true where id=true;
+update public.rch_site_amateur_rollout set enabled=true,
+ pilot_organization_id='b6300000-0000-4000-8000-000000000001' where id=true;
+select is((select pilot_organization_id from public.rch_site_amateur_rollout where id=true),
+ 'b6300000-0000-4000-8000-000000000001'::uuid,'Only the approved pilot organization is activated');
 
 insert into public.rch_site_amateur_programs(id,organization_id,name,kind,capacity)
-values
- ('c6300000-0000-4000-8000-000000000001','b6300000-0000-4000-8000-000000000001','Thursday clinic','training',1),
- ('c6300000-0000-4000-8000-000000000002','b6300000-0000-4000-8000-000000000002','Adult team','team',2);
+values('c6300000-0000-4000-8000-000000000001',
+ 'b6300000-0000-4000-8000-000000000001','Thursday clinic','training',1);
+select throws_ok($
+insert into public.rch_site_amateur_programs(organization_id,name,kind,capacity)
+values('b6300000-0000-4000-8000-000000000002','Other organization blocked','team',2)
+$,'23514',null,'Enabling pilot cannot expose operations to another paid organization');
 
 select throws_ok($$
 insert into public.rch_site_amateur_registrations(organization_id,program_id,profile_id) values
@@ -64,8 +70,8 @@ now()+interval '3 days 1 hour 30 minutes')
 $$,'23P01',null,'The same coach cannot be double booked');
 select throws_ok($$
 insert into public.rch_site_amateur_sessions(organization_id,program_id,coach_profile_id,starts_at,ends_at)
-values('b6300000-0000-4000-8000-000000000002','c6300000-0000-4000-8000-000000000002',
-'a6300000-0000-4000-8000-000000000002',now()+interval '4 days',now()+interval '4 days 1 hour')
+values('b6300000-0000-4000-8000-000000000001','c6300000-0000-4000-8000-000000000001',
+'a6300000-0000-4000-8000-000000000001',now()+interval '4 days',now()+interval '4 days 1 hour')
 $$,'23514',null,'Coaches require active membership in their own organization');
 
 select ok(not has_table_privilege('anon','public.rch_site_amateur_registrations','SELECT'),
