@@ -122,7 +122,7 @@ export default function RchSitesBillingPage(){
               <p role="alert" className="mt-3 max-w-md text-xs leading-5 text-amber-200">
                 Paid features are paused. Your payment or paid-through date needs attention.
                 Use Manage billing to update your payment method and review invoices.
-              </p>
+              </p>}
             {billing?.subscription?.status==='canceled'&&<p className="mt-1 text-xs text-white/55">Previous {billing.subscription.tier} subscription ended.</p>}
             {billing?.subscription?.currentPeriodEnd&&<p className="mt-1 text-xs text-white/55">Current period ends: {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString()}</p>}
             {billing?.subscription?.cancelAtPeriodEnd&&<p className="mt-1 text-xs text-amber-200">Set to cancel at period end</p>}
