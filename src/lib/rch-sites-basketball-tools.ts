@@ -63,10 +63,19 @@ export function basketballSiteTypeForOrganization(value:unknown):RchSiteType{
   return 'coach';
 }
 
+const priorities:Readonly<Record<RchSiteType,readonly string[]>>={
+  trainer:['bookings','inquiries','groups','staff','registrations','venues','media','marketing'],
+  coach:['bookings','inquiries','rosters','groups','registrations','venues','staff','events'],
+  aau:['inquiries','bookings','registrations','rosters','events','brackets','divisions','media'],
+  organizer:['inquiries','bookings','events','registrations','brackets','divisions','venues','marketing'],
+};
+
 /** UI only. Server-authoritative entitlement check still required on every action. */
 export function basketballToolsFor(type:RchSiteType,tier:RchSitePlanTier,
   paidSubscriptionActive=false,maxItems=6):BasketballToolView[]{
+  const priority=priorities[type];
   return RCH_BASKETBALL_TOOLS.filter(tool=>tool.audiences.includes(type))
+    .sort((a,b)=>priority.indexOf(a.id)-priority.indexOf(b.id))
     .map(tool=>{
       const included=RCH_SITE_PLANS[tier].features.includes(tool.feature);
       const released=RCH_SITE_RELEASED_FEATURES.has(tool.feature)&&Boolean(tool.href);
