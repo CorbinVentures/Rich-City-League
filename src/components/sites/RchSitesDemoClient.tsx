@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {useMemo,useState} from 'react';
+import {useMemo,useState,type ReactNode} from 'react';
 import {Container} from '@/components/Container';
 import {FaArrowLeft,FaArrowRight,FaBasketball,FaCalendarDays,FaCircleCheck,FaGlobe,
   FaPlus,FaRotate,FaShieldHalved,FaUsers} from 'react-icons/fa6';
@@ -273,7 +273,7 @@ export function RchSitesDemoClient(){
     </Container>
   </main>;
 }
-function Stat({icon,label,value}:{icon:React.ReactNode;label:string;value:string}){
+function Stat({icon,label,value}:{icon:ReactNode;label:string;value:string}){
   return <section className={card}><span className="text-sky-300">{icon}</span>
     <p className="mt-3 text-3xl font-black tabular-nums">{value}</p>
     <p className="mt-1 text-xs text-white/60">{label}</p>
