@@ -26,6 +26,7 @@ export default function AppointmentsManager(){
   const [message,setMessage]=useState('');
   const [loading,setLoading]=useState(true);
   const scheduleRequest=useRef(0);
+  const selectedOrganization=useRef('');
   const [form,setForm]=useState({name:'',description:'',duration:60,serviceId:'',startsAt:''});
   const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'Your local time';
   const loadOrgs=useCallback(async()=>{
@@ -37,10 +38,11 @@ export default function AppointmentsManager(){
     setSelected(s=>s||valid[0]?.id||'');
   },[]);
   const loadSchedule=useCallback(async(orgId:string)=>{
+    if(orgId!==selectedOrganization.current)return;
     const requestId=++scheduleRequest.current;
     const response=await fetch('/api/rch-sites/appointments?organizationId='+encodeURIComponent(orgId),{cache:'no-store'});
     const data=await response.json().catch(()=>({}));
-    if(requestId!==scheduleRequest.current)return;
+    if(requestId!==scheduleRequest.current||orgId!==selectedOrganization.current)return;
     if(!response.ok)throw Error(data.error||'Could not load appointments.');
     setServices(data.services||[]);
     setSlots(data.slots||[]);
@@ -52,6 +54,7 @@ export default function AppointmentsManager(){
     void loadOrgs().catch(e=>setError(e instanceof Error?e.message:'Unable to load organizations.'))
       .finally(()=>setLoading(false));
   },[authLoading,user,loadOrgs]);
+  useEffect(()=>{selectedOrganization.current=selected;},[selected]);
   useEffect(()=>{
     // Do not show the previous organization's services or accept its selected
     // service ID while the newly selected organization's schedule is loading.
@@ -66,6 +69,7 @@ export default function AppointmentsManager(){
   const availableCount=slots.filter(s=>s.status==='open'&&!s.booked).length;
   const act=async(action:'createService'|'createSlot'|'closeSlot',slotId?:string)=>{
     if(!selected||busy)return;
+    const actingFor=selected;
     setBusy(action);setError('');setMessage('');
     try{
       const payload:Record<string,unknown>={action,organizationId:selected};
@@ -84,12 +88,13 @@ export default function AppointmentsManager(){
       });
       const body=await response.json().catch(()=>({}));
       if(!response.ok)throw Error(body.error||'Unable to update appointments.');
+      if(actingFor!==selectedOrganization.current)return;
       setMessage(action==='createService'?'Service created. Add some appointment times.':
         action==='createSlot'?'New appointment added.':'Unbooked time closed.');
       if(action==='createService')setForm(f=>({...f,name:'',description:'',serviceId:body.id||f.serviceId}));
       if(action==='createSlot')setForm(f=>({...f,startsAt:''}));
       await loadSchedule(selected);
-    }catch(e){setError(e instanceof Error?e.message:'Unable to save appointment.');}
+    }catch(e){if(actingFor===selectedOrganization.current)setError(e instanceof Error?e.message:'Unable to save appointment.');}
     finally{setBusy('');}
   };
   if(authLoading||loading)return <Shell><p role="status" className="text-white/70">Opening appointments…</p></Shell>;
@@ -119,7 +124,7 @@ export default function AppointmentsManager(){
           :'Proposed plan limits shown for reference. Existing booking limits remain in effect during the pilot.'}</p>
       </div>}
       <label className="mt-7 block max-w-md text-xs font-bold">Manage organization
-        <select className={field} value={selected} onChange={e=>{setSelected(e.target.value);setMessage('');setError('');}}>
+        <select className={field} value={selected} onChange={e=>{selectedOrganization.current=e.target.value;setSelected(e.target.value);setMessage('');setError('');}}>
           {orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
       </label>
