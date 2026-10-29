@@ -153,6 +153,7 @@ export default function RchSitesOverviewPage(){
   const links=[
     {name:'Website Studio',description:'Edit & publish',href:endpoint,icon:<FaGlobe/>},
     {name:'Calendar',description:'Services & availability',href:endpoint+'/appointments',icon:<FaCalendarDays/>},
+    ...(process.env.NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED==='true' ? [{name:'Basketball Toolkit',description:'Free scheduling, rosters, registration, packets and budgets',href:endpoint+'/toolkit',icon:<FaCalendarDays/>}] : []),
     {name:'Basketball programs',description:'Adult rosters & sessions · Amateur+ pilot',href:endpoint+'/programs',icon:<FaUsers/>},
     {name:'Inbox',description:'Follow up with members',href:endpoint+'/people',icon:<FaEnvelope/>},
     {name:'PayPal links',description:'Your own business payments',href:endpoint+'/payments',icon:<FaLink/>},
