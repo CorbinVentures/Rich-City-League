@@ -102,6 +102,20 @@ export default function BasketballToolkitPage(){
     }catch(e){setError(e instanceof Error?e.message:'Unable to save.');}
     finally{setBusy(false);}
   };
+  const deleteRegistration=async(id:string)=>{
+    if(busy||!organizationId||!window.confirm('Delete this registration contact permanently?'))return;
+    setBusy(true);setError('');setMessage('');
+    try{
+      const r=await fetch('/api/rch-sites/toolkit',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({organizationId,action:'deleteRegistration',registrationId:id})});
+      const body=await r.json();
+      if(!r.ok)throw Error(body.error||'Delete failed');
+      setRegistrations(items=>items.filter(x=>x.id!==id));
+      setMessage('Registration contact deleted.');
+    }catch(e){setError(e instanceof Error?e.message:'Unable to delete.');}
+    finally{setBusy(false);}
+  };
   const addTeam=()=>{
     try{
       const teams=parseToolkitTeams([...data.teams,{id:freshId(),name:newTeam,players:[]}]);
@@ -238,8 +252,10 @@ export default function BasketballToolkitPage(){
           </div>}
           {!slug&&<p className="text-sm text-amber-200">Publish your organization&apos;s website to enable the public registration URL.</p>}
           <div className="space-y-2"><h3 className="font-semibold">Recent registrations ({registrations.length} shown)</h3>
-            {registrations.map(r=><div key={r.id} className="rounded-xl border border-white/15 p-3 text-sm">
-              <span>{r.name}</span><span className="ml-3 text-white/50">{r.email}</span>
+            {registrations.map(r=><div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/15 p-3 text-sm">
+              <div><span>{r.name}</span><span className="ml-3 text-white/50">{r.email}</span></div>
+              <button type="button" className="min-h-11 px-3 text-rose-300" disabled={busy}
+                onClick={()=>void deleteRegistration(r.id)}>Delete</button>
             </div>)}
             <button className="min-h-11 text-sky-300" onClick={()=>exportCsv('registrations.csv',
               ['Name','Email','Submitted'],registrations.map(r=>[r.name,r.email,r.created_at]))}>Export registrations CSV</button>
