@@ -29,10 +29,10 @@ values
  ('ae210000-0000-4000-8000-000000000001','player',true),
  ('ae210000-0000-4000-8000-000000000002','player',true),
  ('ae210000-0000-4000-8000-000000000003','player',true);
-insert into public.runs(id,host_id,title,location,starts_at,run_type,skill_level,game_format,max_players,capacity,status)
+insert into public.runs(id,host_id,title,location,starts_at,run_type,skill_level,game_format,max_players,status)
 values ('ae220000-0000-4000-8000-000000000001',
  'ae210000-0000-4000-8000-000000000001','Isolated test pickup',
- 'Local test outdoor court',now()+interval '15 minutes','competitive','all','1v1',2,2,'open');
+ 'Local test outdoor court',now()+interval '15 minutes','competitive','all','1v1',2,'open');
 insert into public.run_players(run_id,profile_id)
 values
  ('ae220000-0000-4000-8000-000000000001','ae210000-0000-4000-8000-000000000001'),
