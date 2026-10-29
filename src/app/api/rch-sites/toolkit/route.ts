@@ -46,6 +46,13 @@ export async function POST(request:Request){
   const context=await authorized(organizationId);
   if(!context)return reply({error:'Verified organization owner or manager access required.'},403);
   const action=input.action;
+  if(action==='deleteRegistration'){
+    if(!isRchSiteUuid(input.registrationId))
+      return reply({error:'Invalid registration identifier.'},400);
+    const {error}=await (context.principal.admin as any).from('rch_site_toolkit_registrations')
+      .delete().eq('organization_id',organizationId).eq('id',input.registrationId);
+    return error?reply({error:'Unable to delete this registration.'},503):reply({status:'deleted'});
+  }
   if(!['saveTeams','saveGames','saveForm','saveBudget','publishSchedule','unpublishSchedule'].includes(String(action)))
     return reply({error:'Unsupported toolkit action.'},400);
   if(typeof input.revision!=='number'||!Number.isSafeInteger(input.revision)||input.revision<0)
