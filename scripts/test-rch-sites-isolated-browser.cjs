@@ -193,6 +193,126 @@ async function main(){
     'Private organization activity APIs must deny unapproved users: '+rejected);
   console.log('PASS local organization HQ: unapproved operator sees no private data; all APIs deny');
 
+  // Free toolkit acceptance: real logged-in owner, real API and disposable DB.
+  // This runs only on localhost; never create any organization or submission in production.
+  const siteOrg=crypto.randomUUID();
+  const outsiderOrg=crypto.randomUUID();
+  const siteSlug='toolkit-test-'+crypto.randomBytes(5).toString('hex');
+  for(const [id,slugValue] of [[siteOrg,siteSlug],[outsiderOrg,siteSlug+'-other']]){
+    const {error:e}=await admin.from('network_organizations').insert({
+      id,slug:slugValue,name:'Toolkit E2E '+slugValue,organization_type:'training',
+      status:'active',is_claimed:true,is_verified:true,
+    });
+    if(e)throw Error('Local organization fixture failed: '+e.message);
+  }
+  const {error:memberError}=await admin.from('network_organization_members').insert({
+    organization_id:siteOrg,profile_id:userId,member_role:'owner',status:'active',
+  });
+  if(memberError)throw Error('Local organization owner fixture failed: '+memberError.message);
+  const {error:siteError}=await admin.from('rch_sites').insert({
+    organization_id:siteOrg,slug:siteSlug,
+    status:'published',config:{tagline:'Isolated basketball toolkit fixture'},
+  });
+  if(siteError)throw Error('Local published website fixture failed: '+siteError.message);
+  async function postToolkit(action,value,revision,extra={}){
+    return page.evaluate(async ({organizationId,action,value,revision,extra})=>{
+      const response=await fetch('/api/rch-sites/toolkit',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({organizationId,action,value,revision,...extra})});
+      return {status:response.status,body:await response.json()};
+    },{organizationId:siteOrg,action,value,revision,extra});
+  }
+  const deniedToolkit=await page.evaluate(async id=>
+    (await fetch('/api/rch-sites/toolkit?organizationId='+id)).status,outsiderOrg);
+  assert.equal(deniedToolkit,403,'Toolkit private data must reject owner from unrelated organization');
+  const initial=await page.evaluate(async id=>{
+    const r=await fetch('/api/rch-sites/toolkit?organizationId='+id);
+    return {status:r.status,body:await r.json()};
+  },siteOrg);
+  assert.equal(initial.status,200,'Verified Free owner can load toolkit without paying');
+  assert.equal(initial.body.project.revision,0);
+  const rosters=[
+    {id:'team1',name:'Test Lions',players:[{id:'adult1',name:'Test Adult',number:'7'}]},
+    {id:'team2',name:'Test Hawks',players:[]},
+    {id:'team3',name:'Test Storm',players:[]},
+    {id:'team4',name:'Test Thunder',players:[]},
+  ];
+  let saved=await postToolkit('saveTeams',rosters,0);
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  const games=[
+    {id:'game1',homeId:'team1',awayId:'team2',date:'2026-11-03',time:'18:30',court:'Main Court'},
+    {id:'game2',homeId:'team3',awayId:'team4',date:'2026-11-03',time:'19:30',court:'Main Court'},
+  ];
+  saved=await postToolkit('saveGames',[games[0],{...games[1],time:'19:00'}],1);
+  assert.equal(saved.status,400,'Half-hour court conflict must be rejected');
+  saved=await postToolkit('saveGames',games,1);
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  saved=await postToolkit('publishSchedule',null,2);
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  const publicSchedule=await page.request.get(
+    origin+'/api/rch-sites/toolkit/schedule?slug='+siteSlug);
+  assert.equal(publicSchedule.status(),200);
+  const publicGames=await publicSchedule.json();
+  assert.equal(publicGames.games.length,2);
+  assert.ok(!JSON.stringify(publicGames).includes('Test Adult'),
+    'Public schedule must not expose private player roster details');
+  saved=await postToolkit('saveForm',{title:'Adult Basketball Interest',open:true},3);
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  const formResponse=await page.request.get(
+    origin+'/api/rch-sites/toolkit/registration?slug='+siteSlug);
+  assert.equal(formResponse.status(),200,'The real published Free form is accessible');
+  const registrationHeaders={Origin:origin,'Content-Type':'application/json',
+    'x-forwarded-for':'203.0.113.123'};
+  async function submitContact(i){
+    return page.request.post(origin+'/api/rch-sites/toolkit/registration',{
+      headers:registrationHeaders,data:JSON.stringify({
+        slug:siteSlug,name:'Adult Interest '+i,email:'adult'+i+'@example.test',
+        isAdult:true,privacyConsent:true,website:'',
+      }),
+    });
+  }
+  for(let i=0;i<5;i++){
+    const submitted=await submitContact(i);
+    assert.equal(submitted.status(),200,'Interest submission '+i+' should pass');
+  }
+  const throttled=await submitContact(5);
+  assert.equal(throttled.status(),429,'Sixth attempt from one visitor must be throttled');
+  const invalidOrigin=await page.request.post(origin+'/api/rch-sites/toolkit/registration',{
+    headers:{...registrationHeaders,Origin:'https://attacker.example'},
+    data:JSON.stringify({slug:siteSlug,name:'Invalid Request',email:'bad@example.test',
+      isAdult:true,privacyConsent:true}),
+  });
+  assert.equal(invalidOrigin.status(),403,'CSRF origin mismatch must be rejected');
+  const contacts=await admin.from('rch_site_toolkit_registrations').select('id,name,email')
+    .eq('organization_id',siteOrg);
+  assert.ifError(contacts.error);
+  assert.equal(contacts.data.length,5);
+  const deleted=await postToolkit('deleteRegistration',null,4,
+    {registrationId:contacts.data[0].id});
+  assert.equal(deleted.status,200,'Owner must be able to delete a contact');
+  const {count:remaining,error:remainingError}=await admin.from('rch_site_toolkit_registrations')
+    .select('id',{head:true,count:'exact'}).eq('organization_id',siteOrg);
+  assert.ifError(remainingError);assert.equal(remaining,4);
+  const budget={gymHours:10,gymRateCents:7500,games:10,refsPerGame:2,
+    refereeFeeCents:4000,uniforms:0,uniformCostCents:0,otherCents:0,
+    teams:8,entryFeeCents:25000};
+  saved=await postToolkit('saveBudget',budget,4);
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  await page.goto(origin+'/network/dashboard/sites/toolkit?organizationId='+siteOrg,
+    {waitUntil:'domcontentloaded'});
+  await page.getByRole('heading',{name:'Basketball Toolkit'}).waitFor({timeout:30000});
+  await page.getByRole('tab',{name:'Game Day'}).click();
+  await page.getByRole('button',{name:'Print / Save as PDF'}).waitFor({state:'visible'});
+  assert.equal(await page.getByText('Test Lions vs Test Hawks').count(),1,
+    'Game Day Pack must render stored teams and schedule');
+  await page.getByRole('tab',{name:'Budget'}).click();
+  await page.getByText('Projected cost').waitFor({state:'visible'});
+  assert.ok((await page.locator('body').innerText()).includes('$1,550.00'),
+    'Budget should show computed expense totals');
+  await page.getByRole('tab',{name:'Registration'}).click();
+  assert.ok((await page.locator('svg').count())>0,
+    'Registration page should render QR code for published site');
+  console.log('PASS isolated Free toolkit: owner and tenant permissions, schedule, QR, adult intake throttling, contact deletion, Game Day Pack, and budget');
   await second.close();
   console.log('PASS local authorization: unauthorized import rejected with HTTP 403');
   console.log('Isolated RCH Sites save/resume browser lifecycle passed.');
