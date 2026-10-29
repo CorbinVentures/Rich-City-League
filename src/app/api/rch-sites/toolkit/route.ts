@@ -32,7 +32,8 @@ export async function GET(request:Request){
     admin.from('rch_sites').select('slug,status').eq('organization_id',organizationId).maybeSingle(),
   ]);
   if(error||regError)return reply({error:'Toolkit data is unavailable.'},503);
-  return reply({project:data??empty,registrations:registrations??[],
+  const project=data?{...data,budget:{...EMPTY_BUDGET,...(data.budget||{})}}:empty;
+  return reply({project,registrations:registrations??[],
     publicSlug:site?.status==='published'?site.slug:null,organizationName:context.org.name});
 }
 export async function POST(request:Request){
