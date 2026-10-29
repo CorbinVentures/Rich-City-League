@@ -6,6 +6,7 @@ import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { getLeagueSnapshot } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
+import { isRclProSeasonRecord } from '@/lib/rcl-pro-season';
 
 export const revalidate = 300;
 
@@ -19,16 +20,18 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
   const teamSeasons = snapshot.teamSeasons.filter((item) => item.season_id === season.id);
   const games = snapshot.games.filter((item) => item.season_id === season.id);
   const completedGames = games.filter((item) => item.status === 'completed').length;
-  const status = season.status.replace(/_/g, ' ').toUpperCase();
+  const isProSeason = isRclProSeasonRecord(season);
+  const canRegister = isProSeason && season.registration_open;
+  const status = isProSeason ? season.status.replace(/_/g, ' ').toUpperCase() : 'HISTORICAL RECORD';
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <CorporatePageHero
       eyebrow={`RCL SEASON · ${status}`}
       title={season.name}
-      accent={season.registration_open ? 'Registration open' : 'Season hub'}
+      accent={canRegister ? 'Registration open' : isProSeason ? 'Pro season hub' : 'Historical league record'}
       description="Follow the season from registration through the final result. Teams, divisions, games, standings, and official statistics stay connected here."
       assetKey="league.cover"
-      actions={<>{season.registration_open ? <Link href="/register" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Register now <FaArrowRight /></Link> : null}<Link href="/schedule" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider text-white">View schedule <FaCalendarDays /></Link></>}
+      actions={<>{canRegister ? <Link href="/register" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-xs font-black uppercase tracking-wider text-black">Register now <FaArrowRight /></Link> : null}<Link href="/schedule" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/30 bg-rcl-blue/10 px-5 text-xs font-black uppercase tracking-wider text-white">View schedule <FaCalendarDays /></Link></>}
       meta={<div className="min-w-64 rounded-2xl border border-rcl-blue/20 bg-[#071522]/80 p-5"><p className="text-xs font-black uppercase tracking-[.2em] text-rcl-blue">SEASON WINDOW</p><p className="mt-3 font-display text-xl font-black uppercase">{formatDate(season.start_date)}</p><p className="my-1 text-xs font-black uppercase tracking-wider text-white/30">through</p><p className="font-display text-xl font-black uppercase">{formatDate(season.end_date)}</p></div>}
     />
 
@@ -43,8 +46,8 @@ export default async function SeasonDetailPage({ params }: { params: Promise<{ s
       <section className="mt-10 grid gap-5 lg:grid-cols-[1.25fr_.75fr]">
         <div className="rounded-3xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#071522,#05090f)] p-6 sm:p-8">
           <p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">SEASON STATUS</p>
-          <h2 className="mt-3 font-display text-3xl font-black uppercase">{season.registration_open ? 'The door is open.' : status}</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/50">{season.registration_open ? 'Registration is currently open. Join the season, build your RCL identity, and follow official league activity from one platform.' : games.length ? 'Registration is closed. Follow the schedule, results, standings, and official player performance as the season develops.' : 'Registration is currently closed. League updates and the next competition window will appear across RCL when published.'}</p>
+          <h2 className="mt-3 font-display text-3xl font-black uppercase">{canRegister ? 'The door is open.' : status}</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/50">{canRegister ? 'Registration is currently open for this professional season. Applying does not guarantee selection.' : !isProSeason ? 'This season is part of the league history and is not registration for the professional season planned for November 2027.' : games.length ? 'Registration is closed. Follow the schedule, results, standings, and official player performance as the season develops.' : 'Registration is currently closed. League updates and the next competition window will appear across RCL when published.'}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/standings" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-4 text-xs font-black uppercase tracking-wider transition hover:border-rcl-blue/45">Standings <FaArrowRight /></Link>
             <Link href="/stats" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-4 text-xs font-black uppercase tracking-wider transition hover:border-rcl-blue/45">Official stats <FaArrowRight /></Link>
