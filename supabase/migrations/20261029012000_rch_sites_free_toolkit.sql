@@ -15,6 +15,8 @@ create table public.rch_site_toolkit_registrations (
   organization_id uuid not null references public.rch_site_toolkit(organization_id) on delete cascade,
   name text not null check (char_length(name) between 2 and 90),
   email text not null check (char_length(email) between 5 and 254),
+  adult_attested_at timestamptz not null default now(),
+  privacy_accepted_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 create unique index rch_site_toolkit_registration_email_unique
@@ -32,3 +34,21 @@ comment on table public.rch_site_toolkit is
   'Private basketball operations documents. No public Data API grants. Pilot-gated server access.';
 comment on table public.rch_site_toolkit_registrations is
   'Adult-only contact submissions; accessible only to verified organization managers.';
+
+-- Serialized per-organization monthly submissions; never allow concurrent writes past Free's 100 limit.
+create function public.rch_site_toolkit_registration_limit()
+returns trigger language plpgsql security invoker set search_path=public,pg_temp as $$
+declare used integer;
+begin
+  perform pg_advisory_xact_lock(hashtextextended(new.organization_id::text, 0));
+  select count(*) into used from public.rch_site_toolkit_registrations
+    where organization_id=new.organization_id
+      and created_at>=date_trunc('month',now());
+  if used>=100 then raise exception 'Monthly registration limit reached' using errcode='P0001'; end if;
+  return new;
+end; $$;
+create trigger rch_site_toolkit_registration_quota
+before insert on public.rch_site_toolkit_registrations
+for each row execute function public.rch_site_toolkit_registration_limit();
+revoke all on function public.rch_site_toolkit_registration_limit() from public, anon, authenticated;
+grant execute on function public.rch_site_toolkit_registration_limit() to service_role;
