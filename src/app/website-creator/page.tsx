@@ -25,6 +25,7 @@ export default function WebsiteCreatorPage(){
         <p className="mt-6 max-w-2xl text-base leading-7 text-white/70">A website for your basketball business. Share training, coaching, programs and events under your own name — powered by Rich City Hoops, operated by you.</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/website-creator/start" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-black text-[#071522]">Get Started <FaArrowRight aria-hidden="true"/></Link>
+          <Link href="/website-creator/demo" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sky-400/35 bg-sky-400/10 px-5 py-3 text-sm font-black text-sky-200">Explore an example <FaBasketball aria-hidden="true"/></Link>
           <Link href="#plans" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 py-3 text-sm font-black text-white">Compare plans</Link>
           <Link href="/network/dashboard/sites" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 py-3 text-sm font-black text-white">Already have a site? Open Studio</Link>
         </div>
