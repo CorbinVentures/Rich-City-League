@@ -18,6 +18,12 @@ values
  ('ae210000-0000-4000-8000-000000000001','authenticated','authenticated','run-host@example.test','{}'::jsonb),
  ('ae210000-0000-4000-8000-000000000002','authenticated','authenticated','run-player@example.test','{}'::jsonb),
  ('ae210000-0000-4000-8000-000000000003','authenticated','authenticated','run-outsider@example.test','{}'::jsonb);
+-- auth.users signup trigger may create profiles automatically in the local harness.
+delete from public.profiles where id in (
+ 'ae210000-0000-4000-8000-000000000001',
+ 'ae210000-0000-4000-8000-000000000002',
+ 'ae210000-0000-4000-8000-000000000003'
+);
 insert into public.profiles(id,role,is_active)
 values
  ('ae210000-0000-4000-8000-000000000001','player',true),
