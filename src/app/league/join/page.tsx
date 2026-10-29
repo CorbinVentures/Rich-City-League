@@ -21,7 +21,7 @@ const worlds = [
 const path = [
   {number:'01',title:'Join the community',detail:'Create a free profile. Follow players, share moments, and find your people.',href:'/auth/sign-up?next=%2Fsocial',action:'Join free'},
   {number:'02',title:'Play Runs and challenge a crew',detail:'Play whenever it works for you. Record eligible games, share highlights and build your reputation.',href:'/runs',action:'Find Runs'},
-  {number:'03',title:'Check official tryouts',detail:'Official tryouts are planned for summer 2027; dates, fees, and eligibility will be published once confirmed.',href:'#official-registration',action:'Check registration'},
+  {number:'03',title:'Check official tryouts',detail:'Official tryouts are planned for summer 2027; verify open dates, fees and eligibility only after an official announcement.',href:'#official-registration',action:'Check registration'},
   {number:'04',title:'Compete and get evaluated',detail:'Official evaluations happen through announced league processes, not automatically from social activity.',href:'/league',action:'League Center'},
   {number:'05',title:'Follow the official Draft',detail:'See which eligible players are selected for real season rosters.',href:'/draft',action:'Draft Night'},
   {number:'06',title:'Play Fantasy and follow the season',detail:'Fans build fantasy teams using official Rich City League player statistics when a season is active.',href:'/fantasy',action:'Open Fantasy'},
