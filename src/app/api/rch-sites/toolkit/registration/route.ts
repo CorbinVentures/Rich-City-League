@@ -8,6 +8,8 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const reply=(data:Record<string,unknown>,status=200)=>NextResponse.json(data,
   {status,headers:{'Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
+const registrationReady=()=>Boolean(process.env.RCH_SITES_REGISTRATION_RATE_SECRET &&
+  process.env.RCH_SITES_REGISTRATION_RATE_SECRET.length>=32);
 async function findRegistration(slug:string){
   if(!isRchSiteSlug(slug))return null;
   const admin=getSupabaseAdminClient() as any;
@@ -29,6 +31,7 @@ async function findRegistration(slug:string){
 }
 export async function GET(request:Request){
   if(process.env.RCH_SITES_TOOLKIT_ENABLED!=='true')return reply({error:'Not available'},404);
+  if(!registrationReady())return reply({error:'Registration is not yet available.'},503);
   const slug=new URL(request.url).searchParams.get('slug')||'';
   const target=await findRegistration(slug);
   return target?reply({title:target.form.title,organizationName:target.name}):
@@ -36,6 +39,7 @@ export async function GET(request:Request){
 }
 export async function POST(request:Request){
   if(process.env.RCH_SITES_TOOLKIT_ENABLED!=='true')return reply({error:'Not available'},404);
+  if(!registrationReady())return reply({error:'Registration is not yet available.'},503);
   if(!rchSitesBillingOriginAllowed(request))return reply({error:'Invalid origin'},403);
   if(Number(request.headers.get('content-length')||0)>3000)return reply({error:'Request too large'},413);
   let body:Record<string,unknown>;
