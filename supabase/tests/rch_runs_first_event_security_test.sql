@@ -1,6 +1,9 @@
 begin;
 select no_plan();
 set role postgres;
+-- Clean local schema misses legacy production membership SELECT grants.
+-- Match production in this rollback-only test to exercise the full caller path.
+grant select on public.run_players,public.runs,public.run_checkins to authenticated;
 
 select ok(not has_function_privilege('anon','public.check_in_to_run(uuid)','EXECUTE'),
  'Guest cannot call legacy attendance reward');
