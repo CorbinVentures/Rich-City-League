@@ -4,10 +4,11 @@ import { FaArrowRight } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
 import { ProgramEmblem, type ProgramEmblemId } from '@/components/ProgramEmblem';
 import { LeagueJoinRegistration } from '@/components/LeagueJoinRegistration';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 export const metadata: Metadata = {
   title:'Join Rich City League | Your Basketball Path | Rich City Hoops',
-  description:'Create a free RCH profile, play Runs, build your basketball identity, check Rich City League registration, follow Draft Night and play Fantasy.',
+  description:'Join Rich City Hoops free now. Rich City League professional play is planned for November 2027, with official summer 2027 tryouts and Draft Night beforehand.',
 };
 
 const worlds = [
@@ -20,7 +21,7 @@ const worlds = [
 const path = [
   {number:'01',title:'Join the community',detail:'Create a free profile. Follow players, share moments, and find your people.',href:'/auth/sign-up?next=%2Fsocial',action:'Join free'},
   {number:'02',title:'Play Runs and challenge a crew',detail:'Play whenever it works for you. Record eligible games, share highlights and build your reputation.',href:'/runs',action:'Find Runs'},
-  {number:'03',title:'Check official tryouts',detail:'Explore league registration options and verify open dates, fees and eligibility.',href:'#official-registration',action:'Check registration'},
+  {number:'03',title:'Check official tryouts',detail:'Official tryouts are planned for summer 2027; dates, fees, and eligibility will be published once confirmed.',href:'#official-registration',action:'Check registration'},
   {number:'04',title:'Compete and get evaluated',detail:'Official evaluations happen through announced league processes, not automatically from social activity.',href:'/league',action:'League Center'},
   {number:'05',title:'Follow the official Draft',detail:'See which eligible players are selected for real season rosters.',href:'/draft',action:'Draft Night'},
   {number:'06',title:'Play Fantasy and follow the season',detail:'Fans build fantasy teams using official Rich City League player statistics when a season is active.',href:'/fantasy',action:'Open Fantasy'},
@@ -31,7 +32,7 @@ export default function JoinRichCityLeaguePage(){
   <Container maxWidth="lg" className="py-7 sm:py-10">
    <p className="text-xs font-bold uppercase tracking-widest text-rcl-orange">Rich City Hoops · Your basketball world</p>
    <h1 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Your road to Rich City League</h1>
-   <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">Join the community today. Play Runs on your schedule. When you are ready, explore Rich City League competition.</p>
+   <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">Join the basketball community and play Runs today. The Rich City League professional season is planned to begin {RCL_PRO_SEASON.startLabel}; official tryouts are planned for summer 2027 and Draft Night follows.</p>
    <div className="mt-5 flex flex-wrap gap-3">
     <Link href="/auth/sign-up?next=%2Fsocial" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-sm font-bold text-black">Join RCH free <FaArrowRight aria-hidden="true"/></Link>
     <Link href="/register" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Check league registration</Link>
