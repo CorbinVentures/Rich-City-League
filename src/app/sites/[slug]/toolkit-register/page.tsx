@@ -65,7 +65,7 @@ export default function PublicToolkitRegistration(){
             I confirm I am at least 18 years old.</label>
           <label className="flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" required
             checked={consent} onChange={e=>setConsent(e.target.checked)} className="mt-1"/>
-            I agree that my name and email will be shared with this organization's authorized managers for program follow-up and removed after 90 days. I can request earlier deletion through the <Link href="/settings/privacy" className="text-sky-300 underline">Privacy Center</Link>, and I have reviewed the <Link href="/legal/privacy" className="text-sky-300 underline">privacy policy</Link>.</label>
+            I agree that my name and email will be shared with this organization&apos;s authorized managers for program follow-up and removed after 90 days. I can request earlier deletion through the <Link href="/settings/privacy" className="text-sky-300 underline">Privacy Center</Link>, and I have reviewed the <Link href="/legal/privacy" className="text-sky-300 underline">privacy policy</Link>.</label>
           <button className="min-h-12 w-full rounded-xl bg-rose-600 px-5 font-bold disabled:opacity-60"
             disabled={busy} type="submit">{busy?'Submitting…':'Submit interest'}</button>
           <p className="text-xs text-white/50">Powered by Rich City Hoops. The organization manages its own program; no payment is collected here.</p>
