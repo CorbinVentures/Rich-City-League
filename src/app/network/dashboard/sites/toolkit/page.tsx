@@ -11,9 +11,9 @@ import {EMPTY_BUDGET,TOOLKIT_FREE_LIMITS,generateRoundRobin,parseToolkitTeams,
 
 type Org={id:string;name:string;eligible:boolean;member_role:string};
 type Registration={id:string;name:string;email:string;created_at:string};
-type Project={teams:ToolkitTeam[];games:ToolkitGame[];budget:ToolkitBudget;form:ToolkitForm;revision:number};
+type Project={teams:ToolkitTeam[];games:ToolkitGame[];budget:ToolkitBudget;form:ToolkitForm;schedule_public:boolean;revision:number};
 type Result={project:Project;registrations:Registration[];publicSlug:string|null;organizationName:string;error?:string};
-const blank:Project={teams:[],games:[],budget:{...EMPTY_BUDGET},form:{title:'Basketball Registration',open:false},revision:0};
+const blank:Project={teams:[],games:[],budget:{...EMPTY_BUDGET},form:{title:'Basketball Registration',open:false},schedule_public:false,revision:0};
 const tabNames=['Schedule','Rosters','Registration','Game Day','Budget'] as const;
 type Tab=typeof tabNames[number];
 const input='min-h-11 w-full rounded-xl border border-white/20 bg-[#141923] px-3 py-2 text-white';
@@ -93,7 +93,9 @@ export default function BasketballToolkitPage(){
       if(!response.ok||typeof body.revision!=='number')throw Error(body.error||'Save failed');
       const key=action==='saveTeams'?'teams':action==='saveGames'?'games':
         action==='saveForm'?'form':'budget';
-      setData(current=>({...current,[key]:value,revision:body.revision!}));
+      setData(current=>action==='publishSchedule'||action==='unpublishSchedule'
+        ?{...current,schedule_public:action==='publishSchedule',revision:body.revision!}
+        :{...current,[key]:value,schedule_public:action==='saveGames'?false:current.schedule_public,revision:body.revision!});
       setMessage('Saved successfully.');
     }catch(e){setError(e instanceof Error?e.message:'Unable to save.');}
     finally{setBusy(false);}
@@ -208,6 +210,11 @@ export default function BasketballToolkitPage(){
               try{void save('saveGames',parseToolkitGames(data.games,data.teams));}
               catch(e){setError(e instanceof Error?e.message:'Schedule conflict');}
             }}>Save schedule changes</button>
+            {slug&&<button className="ml-3 min-h-11 text-sky-300" disabled={busy}
+              onClick={()=>void save(data.schedule_public?'unpublishSchedule':'publishSchedule',null)}>
+              {data.schedule_public?'Unpublish schedule':'Publish schedule'}</button>}
+            {slug&&data.schedule_public&&<a className="ml-3 inline-flex min-h-11 items-center text-sky-300"
+              href={'/sites/'+slug+'/toolkit-schedule'} target="_blank" rel="noopener noreferrer">View public schedule</a>}
             <button className="ml-3 min-h-11 text-sky-300" onClick={()=>exportCsv('basketball-schedule.csv',
               ['Date (ET)','Time (ET)','Home','Away','Court'],
               data.games.map(g=>[g.date,g.time,teamName(g.homeId),teamName(g.awayId),g.court]))}>Export CSV</button>
