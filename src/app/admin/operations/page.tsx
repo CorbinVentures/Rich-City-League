@@ -23,7 +23,7 @@ export default function LeagueOperationsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [tryoutRegistrations, setTryoutRegistrations] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
-  const [seasons, setSeasons] = useState<Array<{ id: string; name: string }>>([]);
+  const [seasons, setSeasons] = useState<Array<{ id: string; name: string; start_date: string }>>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamSeasonLinks, setTeamSeasonLinks] = useState<Array<{ team_id: string; season_id: string }>>([]);
   const [orderDraftId, setOrderDraftId] = useState('');
@@ -49,7 +49,7 @@ export default function LeagueOperationsPage() {
       db.from('league_transactions').select('*').order('updated_at', { ascending: false }),
       db.from('tryout_registrations').select('*, player:players(id,first_name,last_name), session:tryout_sessions(id,starts_at)').order('created_at', { ascending: false }).limit(100),
       db.from('registrations').select('*').order('submitted_at', { ascending: false }).limit(100),
-      db.from('seasons').select('id,name').order('start_date', { ascending: false }),
+      db.from('seasons').select('id,name,start_date').order('start_date', { ascending: false }),
       db.from('teams').select('*').eq('is_active', true).order('name'),
       db.from('team_seasons').select('team_id,season_id'),
       db.from('site_settings').select('value').eq('key', 'rcl_2027_inaugural_draft_order').maybeSingle(),
@@ -65,7 +65,7 @@ export default function LeagueOperationsPage() {
       setTransactions((transactionResult.data ?? []) as any[]);
       setTryoutRegistrations((registrationResult.data ?? []) as any[]);
       setRegistrations((registrationReviewResult.data ?? []) as any[]);
-      setSeasons((seasonResult.data ?? []) as Array<{ id: string; name: string }>);
+      setSeasons((seasonResult.data ?? []) as Array<{ id: string; name: string; start_date: string }>);
       setTeams((teamResult.data ?? []) as Team[]);
       setTeamSeasonLinks((teamSeasonResult.data ?? []) as Array<{ team_id: string; season_id: string }>);
       setPreseasonOrder(publishedOrderResult.error ? null : parsePreseasonDraftOrder(publishedOrderResult.data?.value, (teamResult.data ?? []).map(team => team.id)));
@@ -190,7 +190,11 @@ export default function LeagueOperationsPage() {
     return selectedDraft ? teamSeasonLinks.some((link) => link.team_id === team.id && link.season_id === selectedDraft.season_id) : false;
   });
 
-  const canApplyPreseasonOrder = Boolean(orderDraftId && preseasonOrder &&
+  const selectedDraft = drafts.find(item => item.id === orderDraftId);
+  const selectedSeason = seasons.find(item => item.id === selectedDraft?.season_id);
+  // Never apply the 2027 preseason allocation to the stale 2026 playable season.
+  const matchesInauguralSeason = Boolean(selectedSeason && selectedSeason.start_date >= '2027-11-01' && selectedSeason.start_date < '2028-01-01');
+  const canApplyPreseasonOrder = Boolean(matchesInauguralSeason && preseasonOrder &&
     availableOrderTeams.length === preseasonOrder.first_round_team_ids.length &&
     preseasonOrder.first_round_team_ids.every(id => availableOrderTeams.some(team => team.id === id)));
 
