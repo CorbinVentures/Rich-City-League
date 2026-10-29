@@ -8,6 +8,10 @@ values ('f2900000-0000-4000-8000-000000000001','toolkit-rate-fixture',
 insert into public.rch_site_toolkit(organization_id)
 values ('f2900000-0000-4000-8000-000000000001');
 
+select is(has_table_privilege('service_role','public.network_organizations','SELECT'),true,
+ 'Server can verify organization identity on a fresh local database');
+select is(has_table_privilege('service_role','public.network_organization_members','SELECT'),true,
+ 'Server can read organization membership metadata on a fresh local database');
 select has_table('public','rch_site_toolkit_registration_rate',
  'Private per-visitor attempt ledger exists');
 select is((select relrowsecurity from pg_class
