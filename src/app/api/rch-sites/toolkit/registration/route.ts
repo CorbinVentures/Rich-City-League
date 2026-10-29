@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
+import {toolkitPilotOrganizationAllowed} from '@/lib/rch-sites-toolkit-rollout';
 import {isRchSiteSlug} from '@/lib/rch-site-builder';
 import {cleanLabel,parseToolkitForm} from '@/lib/rch-sites-free-toolkit';
 import {registrationVisitorFingerprint} from '@/lib/rch-sites-registration-security';
@@ -16,7 +17,7 @@ async function findRegistration(slug:string){
   if(!admin)return null;
   const {data:site,error:siteError}=await admin.from('rch_sites').select('organization_id')
     .eq('slug',slug).eq('status','published').maybeSingle();
-  if(siteError||!site)return null;
+  if(siteError||!site||!toolkitPilotOrganizationAllowed(site.organization_id))return null;
   const [{data:org,error:orgError},{data:toolkit,error:toolkitError}]=await Promise.all([
     admin.from('network_organizations').select('name,status,is_verified,is_claimed,network_tier')
       .eq('id',site.organization_id).maybeSingle(),
