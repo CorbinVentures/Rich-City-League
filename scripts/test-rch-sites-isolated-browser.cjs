@@ -228,6 +228,18 @@ async function main(){
     const r=await fetch('/api/rch-sites/toolkit?organizationId='+id);
     return {status:r.status,body:await r.json()};
   },siteOrg);
+  if(initial.status!==200){
+    const viaSiteApi=await page.evaluate(async id=>{
+      const response=await fetch('/api/rch-sites',{cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      return {status:response.status,org:(data.organizations??[]).filter(o=>o.id===id)
+        .map(o=>({id:o.id,member_role:o.member_role,eligible:o.eligible,status:o.status,
+          network_tier:o.network_tier,is_verified:o.is_verified,is_claimed:o.is_claimed}))};
+    },siteOrg);
+    const ownerRow=execFileSync('docker',['exec',db,'psql','-X','-U','postgres',
+      '-d','postgres','-A','-t','-c',"select member_role||':'||status from public.network_organization_members where organization_id='"+siteOrg+"' and profile_id='"+userId+"'"],{encoding:'utf8'}).trim();
+    console.error('DEBUG Free toolkit owner authorization',{response:initial,siteApi:viaSiteApi,ownerRow});
+  }
   assert.equal(initial.status,200,'Verified Free owner can load toolkit without paying');
   assert.equal(initial.body.project.revision,0);
   const rosters=[
