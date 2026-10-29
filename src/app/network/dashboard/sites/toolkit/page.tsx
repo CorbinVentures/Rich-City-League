@@ -36,6 +36,7 @@ export default function BasketballToolkitPage(){
   const [slug,setSlug]=useState<string|null>(null);
   const [loaded,setLoaded]=useState(false);
   const [busy,setBusy]=useState(false);
+  const [scheduleDirty,setScheduleDirty]=useState(false);
   const [error,setError]=useState('');
   const [message,setMessage]=useState('');
   const [tab,setTab]=useState<Tab>('Schedule');
@@ -68,7 +69,7 @@ export default function BasketballToolkitPage(){
   useEffect(()=>{
     if(!organizationId)return;
     const controller=new AbortController();
-    setLoaded(false);setError('');setMessage('');setData(blank);setRegistrations([]);setSlug(null);
+    setLoaded(false);setError('');setMessage('');setScheduleDirty(false);setData(blank);setRegistrations([]);setSlug(null);
     void fetch('/api/rch-sites/toolkit?organizationId='+encodeURIComponent(organizationId),
       {signal:controller.signal,cache:'no-store'}).then(async r=>{
       const body=await r.json() as Result;
@@ -96,6 +97,7 @@ export default function BasketballToolkitPage(){
       setData(current=>action==='publishSchedule'||action==='unpublishSchedule'
         ?{...current,schedule_public:action==='publishSchedule',revision:body.revision!}
         :{...current,[key]:value,schedule_public:action==='saveGames'?false:current.schedule_public,revision:body.revision!});
+      if(action==='saveGames')setScheduleDirty(false);
       setMessage('Saved successfully.');
     }catch(e){setError(e instanceof Error?e.message:'Unable to save.');}
     finally{setBusy(false);}
@@ -202,16 +204,16 @@ export default function BasketballToolkitPage(){
               className="grid items-center gap-2 rounded-xl border border-white/15 p-3 sm:grid-cols-[1fr_150px_115px]">
               <span className="text-sm font-semibold">{teamName(game.homeId)} vs {teamName(game.awayId)}</span>
               <input aria-label={'Date for '+game.id} type="date" className={input} value={game.date}
-                onChange={e=>setData(p=>({...p,games:p.games.map(g=>g.id===game.id?{...g,date:e.target.value}:g)}))}/>
+                onChange={e=>{setScheduleDirty(true);setData(p=>({...p,games:p.games.map(g=>g.id===game.id?{...g,date:e.target.value}:g)}));}}/>
               <input aria-label={'Time for '+game.id} type="time" className={input} value={game.time}
-                onChange={e=>setData(p=>({...p,games:p.games.map(g=>g.id===game.id?{...g,time:e.target.value}:g)}))}/>
+                onChange={e=>{setScheduleDirty(true);setData(p=>({...p,games:p.games.map(g=>g.id===game.id?{...g,time:e.target.value}:g)}));}}/>
             </div>)}</div>
             <button className={btn} disabled={busy} onClick={()=>{
               try{void save('saveGames',parseToolkitGames(data.games,data.teams));}
               catch(e){setError(e instanceof Error?e.message:'Schedule conflict');}
             }}>Save schedule changes</button>
-            {slug&&<button className="ml-3 min-h-11 text-sky-300" disabled={busy}
-              onClick={()=>void save(data.schedule_public?'unpublishSchedule':'publishSchedule',null)}>
+            {slug&&<button className="ml-3 min-h-11 text-sky-300" onClick={()=>void save(data.schedule_public?'unpublishSchedule':'publishSchedule',null)}
+              disabled={busy||scheduleDirty}>
               {data.schedule_public?'Unpublish schedule':'Publish schedule'}</button>}
             {slug&&data.schedule_public&&<a className="ml-3 inline-flex min-h-11 items-center text-sky-300"
               href={'/sites/'+slug+'/toolkit-schedule'} target="_blank" rel="noopener noreferrer">View public schedule</a>}
