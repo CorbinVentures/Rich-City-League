@@ -71,6 +71,7 @@ export default function RunRoomPage() {
   const [run, setRun] = useState<Run | null>(null);
   const [partner, setPartner] = useState<PartnerSession | null>(null);
   const [weekendDoubleRep, setWeekendDoubleRep] = useState(false);
+  const [suggestedCourt, setSuggestedCourt] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [registeredPlayerIds,setRegisteredPlayerIds]=useState<string[]>([]);
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
@@ -107,8 +108,9 @@ export default function RunRoomPage() {
     }
 
     setRun((runResult.data ?? null) as Run | null);
-    const {data:weekend}=await db.from('rch_weekend_circuit_events').select('run_id').eq('run_id',runId).eq('bonus_enabled',true).maybeSingle();
-    setWeekendDoubleRep(Boolean(weekend));
+    const {data:weekend}=await db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').eq('run_id',runId).maybeSingle();
+    setSuggestedCourt(Boolean(weekend));
+    setWeekendDoubleRep(Boolean(weekend?.bonus_enabled));
     const {data:linked}=await db.from('rch_runs_partner_sessions').select('partner_id,experience,price_cents').eq('run_id',runId).maybeSingle();
     if(linked){
       const {data:org}=await db.from('rch_runs_partners').select('slug,name,status').eq('id',linked.partner_id).eq('status','approved').maybeSingle();
@@ -186,11 +188,12 @@ export default function RunRoomPage() {
   const returnHref=returnCourt?'/runs/courts/'+encodeURIComponent(returnCourt)+(fromCity&&/^[a-z-]{2,40}$/.test(fromCity)?'?fromCity='+encodeURIComponent(fromCity):''):null;
   const registered = Boolean(user && registeredPlayerIds.includes(user.id));
   const spotsLeft=run?Math.max(0,run.max_players-registeredPlayerIds.length):0;
-  const canJoin=Boolean(run?.status==='open'&&spotsLeft>0);
   const startMs = run ? new Date(run.starts_at).getTime() : 0;
+  const isPastRun=startMs<=Date.now();
+  const canJoin=Boolean(run?.status==='open'&&spotsLeft>0&&!isPastRun);
   const now = Date.now();
-  const checkInOpen = Boolean(run && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000);
-  const highlightWindow = Boolean(run && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000);
+  const checkInOpen = Boolean(run && !suggestedCourt && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000);
+  const highlightWindow = Boolean(run && !suggestedCourt && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000);
 
   const toggleRegistration = async () => {
     if(!db||!run)return;
@@ -202,7 +205,7 @@ export default function RunRoomPage() {
       ?await db.from('run_players').delete().eq('run_id',run.id).eq('profile_id',user.id)
       :await db.from('run_players').insert({run_id:run.id,profile_id:user.id});
     if(result.error)setError(result.error.message);
-    else{setNotice(registered?'You left this Run.':'You joined this Run. Review the venue rules and arrive during the posted event window.');await load();}
+    else{setNotice(registered?(suggestedCourt?'You withdrew your interest.':'You left this Run.'):(suggestedCourt?'Interest registered. No game, organizer or court access is guaranteed. Coordinate with players before traveling.':'You joined this Run. Review venue rules and arrive during the posted event window.'));await load();}
     setBusy('');
   };
 
@@ -310,12 +313,13 @@ export default function RunRoomPage() {
 
   return (
     <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
+      {suggestedCourt&&<div className="mx-auto max-w-6xl px-4 pt-4"><div className="rounded-2xl border border-[#eabf70]/60 bg-[#2c250f] px-4 py-3 text-sm font-black text-[#ffe4b5]">SUGGESTED OPEN COURT · NOT A CONFIRMED GAME<p className="mt-1 text-xs font-normal leading-5 text-[#f7e8cf]">This is an unstaffed public-court meetup suggestion. There is no confirmed organizer, reserved court, guaranteed attendance or independently verified host. RSVP expresses interest only. Check venue availability and coordinate with other players before traveling.</p></div></div>}
       {weekendDoubleRep&&<div className="mx-auto max-w-6xl px-4 pt-4"><div className="rounded-2xl border border-[#d4a34d]/50 bg-[#30270e] px-4 py-3 text-sm font-bold text-[#ffe3a2]">2× Verified Runs REP · Weekend Circuit <span className="block pt-1 text-xs font-normal text-[#efe2c6]">Double rewards apply to independently confirmed ranked games and independently reviewed stats only. Check-ins and highlights stay at 1×. This is a community drop-in, not a reserved or staffed court.</span></div></div>}
       <ClientPageHero
         eyebrow="RCL Runs"
-        title={run.title}
-        accent={run.status === 'cancelled' ? 'Cancelled' : 'Run Room'}
-        description={run.description ?? 'Pickup basketball organized through RCL Runs.'}
+        title={suggestedCourt?'Weekend Court Suggestion · '+(run.court_name||run.location):run.title}
+        accent={run.status === 'cancelled' ? 'Cancelled' : isPastRun?'Past listing':suggestedCourt?'Court suggestion':'Run Room'}
+        description={suggestedCourt?'Public court discovery only—not an organized or confirmed basketball event.':run.description ?? 'Pickup basketball organized through RCL Runs.'}
         assetKey="runs.cover"
         actions={<div className="flex flex-wrap gap-2">{returnHref&&<Link href={returnHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#5592bb] bg-[#103b5c] px-4 text-xs font-black uppercase"><FaArrowLeft/> Back to Court Arena</Link>}{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#65b6ff]/40 bg-[#13456c] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
         meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 p-5"><p className="text-[10px] font-black uppercase tracking-wider text-rcl-blue"><FaLocationDot className="mr-1 inline" />{run.court_name || run.location}</p><p className="mt-2 text-sm font-black">{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p><p className="mt-2 text-xs text-white/35">{run.skill_level} · {run.game_format ?? 'Pickup'} · {profiles.length}/{run.max_players}</p></div>}
@@ -323,12 +327,12 @@ export default function RunRoomPage() {
 
       <Container maxWidth="xl" className="py-9">
         <section aria-label="Your game-day pathway" className="mb-7 overflow-hidden rounded-3xl border border-[#4f84ae] bg-[linear-gradient(135deg,#102f53,#071528)] p-5 shadow-[0_15px_45px_#0006] sm:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-black tracking-[.2em] text-[#9cd9ff]">RUNS WORLD / GAME LOBBY</p><h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">The real game starts here.</h2><p className="mt-2 max-w-xl text-xs leading-6 text-[#bdd7e9]">Meet the roster, register for an available place, then show up at the real court. Score review and rewards remain separate from checking in.</p></div><div className="rounded-xl border border-[#6499bf] bg-[#071b2f] px-4 py-3 text-right"><small className="block text-[10px] font-bold text-[#99c5e3]">REGISTERED PLAYERS</small><strong className="text-2xl font-black text-white">{registeredPlayerIds.length}<span className="text-[#7da4bb]"> / {run.max_players}</span></strong><small className="block text-[10px] text-[#b0dbf3]">{spotsLeft?spotsLeft+' open spots':run.status==='full'?'Full':'No open spots'}</small></div></div>
-          <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={()=>void toggleRegistration()} disabled={busy==='registration'||(user?.id===run.host_id&&!registered)||(!registered&&!canJoin)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-3 rounded-xl border border-[#8bd1ff] bg-[#196cef] px-6 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-55 sm:flex-none"><FaBasketball/>{busy==='registration'?'Updating registration…':registered?'Leave Run':joined?'Hosting this Run':canJoin?'JOIN THIS RUN':run.status==='cancelled'?'Run Cancelled':'Registration Closed'}<FaArrowRight/></button><button type="button" onClick={()=>void shareRun()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#4b789a] bg-[#0d304e] px-5 text-xs font-bold"><FaShareNodes/> Invite your crew</button><button type="button" onClick={()=>void load()} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#436e8d] bg-[#0b2841] px-4 text-xs font-bold text-[#c5e5f8]">Refresh slots</button></div>
+          <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-black tracking-[.2em] text-[#9cd9ff]">RUNS WORLD / GAME LOBBY</p><h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">{suggestedCourt?'Find players before you go.':'The real game starts here.'}</h2><p className="mt-2 max-w-xl text-xs leading-6 text-[#bdd7e9]">{suggestedCourt?'Express interest and coordinate with other players. A public court listing is not a confirmed game or a court reservation.':'Meet the roster, register for an available place, then show up at the real court. Score review and rewards remain separate from checking in.'}</p></div><div className="rounded-xl border border-[#6499bf] bg-[#071b2f] px-4 py-3 text-right"><small className="block text-[10px] font-bold text-[#99c5e3]">{suggestedCourt?'INTERESTED PLAYERS':'REGISTERED PLAYERS'}</small><strong className="text-2xl font-black text-white">{registeredPlayerIds.length}<span className="text-[#7da4bb]"> / {run.max_players}</span></strong><small className="block text-[10px] text-[#b0dbf3]">{spotsLeft?spotsLeft+' open spots':run.status==='full'?'Full':'No open spots'}</small></div></div>
+          <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={()=>void toggleRegistration()} disabled={busy==='registration'||(user?.id===run.host_id&&!registered)||(!registered&&!canJoin)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-3 rounded-xl border border-[#8bd1ff] bg-[#196cef] px-6 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-55 sm:flex-none"><FaBasketball/>{busy==='registration'?'Updating registration…':registered?(suggestedCourt?'Withdraw Interest':'Leave Run'):joined?'Hosting this Run':canJoin?(suggestedCourt?'REGISTER INTEREST':'JOIN THIS RUN'):run.status==='cancelled'?'Run Cancelled':isPastRun?'Listing Ended':'Registration Closed'}<FaArrowRight/></button><button type="button" onClick={()=>void shareRun()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#4b789a] bg-[#0d304e] px-5 text-xs font-bold"><FaShareNodes/> Invite your crew</button><button type="button" onClick={()=>void load()} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#436e8d] bg-[#0b2841] px-4 text-xs font-bold text-[#c5e5f8]">Refresh slots</button></div>
           <nav aria-label="Game-day sections" className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
            {([{id:'rch-run-lobby',title:'01 · Lobby'},{id:'rch-game-day',title:'02 · Check in'},{id:'rch-next-up',title:'03 · Next Up'},{id:'rch-result-review',title:'04 · Results'}] as const).map(step=><a key={step.id} href={'#'+step.id} className="flex min-h-11 items-center justify-center rounded-lg border border-[#375f85] bg-[#061e34] px-2 text-center text-[11px] font-bold text-[#d0e9fb] hover:border-[#91d7ff]">{step.title}</a>)}
           </nav>
-          {canJoin&&!registered&&<p className="mt-3 text-xs font-semibold text-[#d6e9f4]">Pull up solo — you don&apos;t need a crew to reserve an open roster spot. The host arranges the game.</p>}
+          {canJoin&&!registered&&<p className="mt-3 text-xs font-semibold text-[#d6e9f4]">{suggestedCourt?'Solo players welcome, but joining is not a promise of opponents, a host or open court time.':'Pull up solo — you don&apos;t need a crew to reserve an open roster spot. The host arranges the game.'}</p>}
           {!user&&<p className="mt-3 text-xs text-[#b9d6eb]">Sign in to register, check in and save your verified basketball progression.</p>}
           <p className="mt-3 text-[10px] leading-5 text-[#9cbdd5]"><FaCircleCheck className="mr-1 inline"/> Registrations and check-ins are not verified game outcomes. Ranked results require opponent confirmation; official title matches require independent certification.</p>
         </section>
