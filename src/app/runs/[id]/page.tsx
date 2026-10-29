@@ -270,8 +270,8 @@ export default function RunRoomPage() {
 
   const cancelRun=async()=>{
     if(!db||!run||!user||user.id!==run.host_id||!['open','full'].includes(run.status))return;
-    if(games.length>0||checkins.size>0){
-      setError('Recorded attendance or results exist. Ask RCH staff to review this Run before changing its status.');return;
+    if(games.length>0){
+      setError('Recorded game results exist. Stop play for safety and contact RCH staff to preserve scored-match history before changing the Run status.');return;
     }
     if(!window.confirm('Cancel this hosted Run? All RSVPs will stop accepting signups. You must also notify your players directly; this action does not send a message.'))return;
     setBusy('cancel');setError('');
@@ -368,7 +368,7 @@ export default function RunRoomPage() {
           {!user&&<p className="mt-3 text-xs text-[#b9d6eb]">Sign in to register, check in and save your verified basketball progression.</p>}
           <p className="mt-3 text-[10px] leading-5 text-[#9cbdd5]"><FaCircleCheck className="mr-1 inline"/> In-person code check-ins grant legacy XP only. Competitive REP, ratings and Court Master titles require independently confirmed game results and separate official certification.</p>
         </section>
-        {user?.id===run.host_id&&['open','full'].includes(run.status)&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div><p className="text-xs font-black text-[#d3e6f3]">Host event control</p><p className="mt-1 text-xs text-white/65">Bad weather or no usable court? Cancel before play, then contact your registered players directly.</p></div><button type="button" disabled={busy==='cancel'||games.length>0||checkins.size>0} onClick={()=>void cancelRun()} className="min-h-11 rounded-xl border border-red-300/40 bg-red-900/20 px-4 text-xs font-bold text-red-200 disabled:opacity-40">Cancel hosted Run</button></div>}
+        {user?.id===run.host_id&&['open','full'].includes(run.status)&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div><p className="text-xs font-black text-[#d3e6f3]">Host event control</p><p className="mt-1 text-xs text-white/65">Bad weather or no usable court? Cancel before play, then contact your registered players directly.</p></div><button type="button" disabled={busy==='cancel'||games.length>0} onClick={()=>void cancelRun()} className="min-h-11 rounded-xl border border-red-300/40 bg-red-900/20 px-4 text-xs font-bold text-red-200 disabled:opacity-40">Cancel hosted Run</button></div>}
         {partner&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4288b5] bg-[#0a3453] p-4"><div><p className="text-[11px] font-black uppercase tracking-wider text-[#92d2ff]">Official Runs Partner · {partner.experience==='rec'?'The REC':'The PARK'}</p><p className="mt-1 text-lg font-black text-white">Organized by {partner.name}</p><p className="mt-1 text-xs text-[#bdd7e9]">{partner.price_cents?'Advertised organizer fee $'+(partner.price_cents/100).toFixed(2)+' · Pay the organizer directly':'Free session · No advertised entry fee'} · RCH verifies competitive results separately</p></div><Link href={'/runs/partners/'+partner.slug} className="rounded-xl border border-[#73b6e3] px-4 py-2 text-xs font-bold text-[#cbeaff]">Partner HQ profile →</Link></div>}
         {notice && <p className="mb-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] p-4 text-sm text-emerald-100">{notice}</p>}
         {error && <p className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/[.06] p-4 text-sm text-red-100">{error}</p>}
