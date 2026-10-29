@@ -68,13 +68,18 @@ export function parseToolkitGames(value:unknown,teams:readonly ToolkitTeam[],
     return {id:g.id,homeId:g.homeId as string,awayId:g.awayId as string,
       date:g.date,time:g.time,court:cleanLabel(g.court,60)};
   });
-  const slots=new Set<string>(),pairings=new Set<string>();
+  const occupied=new Map<string,Array<{start:number;end:number}>>(),pairings=new Set<string>();
   for(const g of games){
-    const instant=g.date+'T'+g.time;
-    for(const slot of ['court:'+g.court.toLowerCase(),'team:'+g.homeId,'team:'+g.awayId]){
-      const key=instant+'|'+slot;
-      if(slots.has(key))throw Error('Two games overlap on one court or team');
-      slots.add(key);
+    // Free Schedule Studio has fixed 60-minute games. Compare full intervals,
+    // not just identical start times, when an organizer manually edits a game.
+    const start=Number(g.time.slice(0,2))*60+Number(g.time.slice(3));
+    const end=start+60;
+    if(end>1440)throw Error('Games cannot extend past midnight');
+    for(const resource of ['court:'+g.court.toLowerCase(),'team:'+g.homeId,'team:'+g.awayId]){
+      const key=g.date+'|'+resource,slots=occupied.get(key)??[];
+      if(slots.some(s=>start<s.end&&s.start<end))
+        throw Error('Two games overlap on one court or team');
+      slots.push({start,end});occupied.set(key,slots);
     }
     const pair=[g.homeId,g.awayId].sort().join('|');
     // Multiple round-robin seasons are separate schedules; Free permits one.
