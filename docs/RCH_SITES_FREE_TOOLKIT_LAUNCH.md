@@ -45,3 +45,36 @@
 ## Launch-readiness discovery (October 29, 2026)
 
 Production Vercel commit `91ced23d4e7a2951f7c2aad8485c5c0b30628053` is READY, but production Supabase did **not** yet contain `rch_site_toolkit` or `rch_site_toolkit_registrations` at the initial review; migration `20261029012000` was not recorded. Production Vercel had no toolkit rollout variables at that time. Do not turn on the features before migrating and testing the backend. The registration hardening migration depends on the original toolkit migration and pg_cron. These are release gates, not production features silently activated by code merge.
+
+## Production pilot release control (October 29, 2026)
+
+The global `RCH_SITES_TOOLKIT_ENABLED` switch **no longer grants access by itself**.
+Server routes additionally require the organization's UUID in the private
+`RCH_SITES_TOOLKIT_PILOT_ORG_IDS` comma-separated allowlist.
+`RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED=true` is an explicit, separate
+**future** broad-release override. Keep it unset or false during the pilot.
+Public schedule and registration endpoints enforce the same allowlist, and
+all private toolkit mutations separately verify the member is a claimed,
+verified organization's active owner or manager.
+
+For the pilot, keep `NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED` false to hide
+the general Organization HQ navigation link; communicate the direct
+`/network/dashboard/sites/toolkit?organizationId=<pilot-org-id>`
+link only to the approved owner. Pilot identifiers are not authentication
+tokens; verified ownership is still required.
+
+**Environment order:** apply all four verified production migrations,
+verify RLS and cron cleanup, configure `RCH_SITES_REGISTRATION_RATE_SECRET`
+(server-only, randomly generated), and select a **genuine claimed and verified**
+organization to allowlist. Do not create a fake verified customer organization or
+alter another organization's verification status to satisfy the pilot.
+Deploy with `RCH_SITES_TOOLKIT_ENABLED=true`, one allowlisted org,
+`RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED=false`, and navigation false.
+Validate unauthorized cross-tenant/public slugs, then have an authorized pilot
+owner exercise the live flows. Only enable general navigation and broad launch
+after a separate reviewed decision.
+
+**If no eligible pilot organization is available:** complete backend migrations
+and tests, leave `RCH_SITES_TOOLKIT_ENABLED=false`, and arrange legitimate
+organization claim and verification first. This is a release blocker, not
+a reason to bypass tenant checks.

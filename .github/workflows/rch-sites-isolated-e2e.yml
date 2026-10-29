@@ -61,6 +61,7 @@ jobs:
           echo "RCH_LOCAL_E2E_ORIGIN=http://localhost:3000" >> "$GITHUB_ENV"
           # Disposable localhost fixture only. These are not production feature flags.
           echo "RCH_SITES_TOOLKIT_ENABLED=true" >> "$GITHUB_ENV"
+          echo "RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED=true" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED=true" >> "$GITHUB_ENV"
           echo "RCH_SITES_REGISTRATION_RATE_SECRET=isolated-only-no-production-secret-0123456789abcdef" >> "$GITHUB_ENV"
       - name: Install Next.js app and pinned Chromium browser tooling
