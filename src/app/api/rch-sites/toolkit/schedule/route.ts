@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
+import {toolkitPilotOrganizationAllowed} from '@/lib/rch-sites-toolkit-rollout';
 import {isRchSiteSlug} from '@/lib/rch-site-builder';
 import {parseToolkitTeams,parseToolkitGames} from '@/lib/rch-sites-free-toolkit';
 export const runtime='nodejs';
@@ -14,7 +15,8 @@ export async function GET(request:Request){
   if(!admin)return reply({error:'Not available'},503);
   const {data:site,error}=await admin.from('rch_sites').select('organization_id')
     .eq('slug',slug).eq('status','published').maybeSingle();
-  if(error||!site)return reply({error:'Schedule not found'},404);
+  if(error||!site||!toolkitPilotOrganizationAllowed(site.organization_id))
+    return reply({error:'Schedule not found'},404);
   const [{data:org,error:orgError},{data:toolkit,error:toolError}]=await Promise.all([
     admin.from('network_organizations').select('name,status,is_claimed,is_verified,network_tier')
       .eq('id',site.organization_id).maybeSingle(),
