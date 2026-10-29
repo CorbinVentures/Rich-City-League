@@ -30,6 +30,8 @@ describe('RCH Sites Free Basketball Toolkit',()=>{
     expect(()=>generateRoundRobin({...settings(roster),startDate:'2026-02-30'})).toThrow();
     expect(()=>generateRoundRobin({...settings(roster),tipoff:'23:30'})).toThrow();
     expect(()=>parseToolkitGames([...games,{...games[0],id:'duplicate'}],roster)).toThrow();
+    const overlapping=games.map((g,i)=>i===1?{...g,date:games[0].date,time:'19:00'}:g);
+    expect(()=>parseToolkitGames(overlapping,roster)).toThrow('overlap');
     expect(()=>parseToolkitGames([{...games[0],awayId:games[0].homeId}],roster)).toThrow();
   });
   it('keeps Free rosters useful while enforcing one managed roster',()=>{
