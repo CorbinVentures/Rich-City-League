@@ -24,7 +24,15 @@ export function parsePreseasonDraftOrder(value: unknown, activeTeamIds: string[]
     ids.length < 2 || new Set(ids).size !== ids.length ||
     ids.length !== activeTeamIds.length ||
     !ids.every((id) => activeTeamIds.includes(id as string))) return null;
-  return input as PreseasonDraftOrder;
+  return {
+    season_label: input.season_label as string,
+    status: 'established',
+    format: 'snake',
+    rounds: input.rounds as number,
+    first_round_team_ids: ids as string[],
+    draw_seed: input.draw_seed as string,
+    generated_at: input.generated_at as string,
+  };
 }
 
 export function plannedDraftPicks(config: PreseasonDraftOrder) {
