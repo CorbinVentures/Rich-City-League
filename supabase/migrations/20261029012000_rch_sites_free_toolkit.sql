@@ -4,6 +4,7 @@ create table public.rch_site_toolkit (
   organization_id uuid primary key references public.network_organizations(id) on delete cascade,
   teams jsonb not null default '[]'::jsonb check (jsonb_typeof(teams)='array' and pg_column_size(teams)<40000),
   games jsonb not null default '[]'::jsonb check (jsonb_typeof(games)='array' and pg_column_size(games)<50000),
+  schedule_public boolean not null default false,
   form jsonb not null default '{"title":"Basketball Registration","open":false}'::jsonb
     check (jsonb_typeof(form)='object' and pg_column_size(form)<3000),
   budget jsonb not null default '{}'::jsonb check (jsonb_typeof(budget)='object' and pg_column_size(budget)<5000),
