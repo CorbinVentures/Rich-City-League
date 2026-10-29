@@ -12,6 +12,8 @@ select is(has_table_privilege('service_role','public.network_organizations','SEL
  'Server can verify organization identity on a fresh local database');
 select is(has_table_privilege('service_role','public.network_organization_members','SELECT'),true,
  'Server can read organization membership metadata on a fresh local database');
+select is(has_table_privilege('service_role','public.rch_sites','SELECT'),true,
+ 'Server can confirm site publication on a fresh local database');
 select has_table('public','rch_site_toolkit_registration_rate',
  'Private per-visitor attempt ledger exists');
 select is((select relrowsecurity from pg_class
