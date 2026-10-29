@@ -271,7 +271,7 @@ export default function DraftNightPage() {
                 <div className="rch-program-brand-copy">
               <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
               <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">Follow official Rich City League player selections, team rosters and the live draft board.</p>
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">The inaugural professional season is planned for November 2027. Explore the established franchise draft order now; official selections follow the 2027 tryouts.</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
