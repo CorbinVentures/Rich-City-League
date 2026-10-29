@@ -44,7 +44,8 @@ export async function POST(request:Request){
   if(body.isAdult!==true||body.privacyConsent!==true)
     return reply({error:'Adult confirmation and privacy agreement are required.'},400);
   const name=cleanLabel(body.name,90),email=typeof body.email==='string'?body.email.trim().toLowerCase():'';
-  if(name.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)
+  if(name.length<2||email.length<5||email.length>254||
+    !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)+$/.test(email))
     return reply({error:'Enter a valid name and email.'},400);
   const slug=typeof body.slug==='string'?body.slug:'';
   const target=await findRegistration(slug);
