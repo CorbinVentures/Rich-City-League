@@ -198,23 +198,22 @@ async function main(){
   const siteOrg=crypto.randomUUID();
   const outsiderOrg=crypto.randomUUID();
   const siteSlug='toolkit-test-'+crypto.randomBytes(5).toString('hex');
-  for(const [id,slugValue] of [[siteOrg,siteSlug],[outsiderOrg,siteSlug+'-other']]){
-    const {error:e}=await admin.from('network_organizations').insert({
-      id,slug:slugValue,name:'Toolkit E2E '+slugValue,organization_type:'training',
-      status:'active',is_claimed:true,is_verified:true,
-    });
-    if(e)throw Error('Local organization fixture failed: '+e.message);
-  }
-  const {error:memberError}=await admin.from('network_organization_members').insert({
-    organization_id:siteOrg,profile_id:userId,member_role:'owner',status:'active',
-  });
-  if(memberError)throw Error('Local organization owner fixture failed: '+memberError.message);
-  const {error:siteError}=await admin.from('rch_sites').insert({
-    organization_id:siteOrg,slug:siteSlug,
-    status:'published',config:{tagline:'Isolated basketball toolkit fixture'},
-  });
-  if(siteError)throw Error('Local published website fixture failed: '+siteError.message);
-  async function postToolkit(action,value,revision,extra={}){
+  // Organization verification tables are deliberately server-restricted.
+  // Seed ONLY into the disposable local database using its own postgres role.
+  const fixtureSql=[
+    "insert into public.network_organizations "+
+      "(id,slug,name,organization_type,is_claimed,is_verified,status) values "+
+      "('"+siteOrg+"','"+siteSlug+"','Toolkit E2E A','training',true,true,'active'),"+
+      "('"+outsiderOrg+"','"+siteSlug+"-other','Toolkit E2E B','training',true,true,'active');",
+    "insert into public.network_organization_members "+
+      "(organization_id,profile_id,member_role,status) values "+
+      "('"+siteOrg+"','"+userId+"','owner','active');",
+    "insert into public.rch_sites (organization_id,slug,config,status) values "+
+      "('"+siteOrg+"','"+siteSlug+"','{\"tagline\":\"Toolkit Test\"}'::jsonb,'published');",
+  ].join(' ');
+  execFileSync('docker',['exec',db,'psql','-X','-U','postgres','-d','postgres',
+    '-v','ON_ERROR_STOP=1','-c',fixtureSql],{encoding:'utf8'});
+    async function postToolkit(action,value,revision,extra={}){
     return page.evaluate(async ({organizationId,action,value,revision,extra})=>{
       const response=await fetch('/api/rch-sites/toolkit',{method:'POST',
         headers:{'Content-Type':'application/json'},
