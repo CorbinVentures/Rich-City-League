@@ -72,6 +72,7 @@ export default function RunRoomPage() {
   const [partner, setPartner] = useState<PartnerSession | null>(null);
   const [weekendDoubleRep, setWeekendDoubleRep] = useState(false);
   const [suggestedCourt, setSuggestedCourt] = useState(false);
+  const [listingStatusUnknown, setListingStatusUnknown] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [registeredPlayerIds,setRegisteredPlayerIds]=useState<string[]>([]);
   const [checkins, setCheckins] = useState<Set<string>>(new Set());
@@ -108,7 +109,8 @@ export default function RunRoomPage() {
     }
 
     setRun((runResult.data ?? null) as Run | null);
-    const {data:weekend}=await db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').eq('run_id',runId).maybeSingle();
+    const {data:weekend,error:circuitError}=await db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').eq('run_id',runId).maybeSingle();
+    setListingStatusUnknown(Boolean(circuitError));
     setSuggestedCourt(Boolean(weekend));
     setWeekendDoubleRep(Boolean(weekend?.bonus_enabled));
     const {data:linked}=await db.from('rch_runs_partner_sessions').select('partner_id,experience,price_cents').eq('run_id',runId).maybeSingle();
@@ -190,7 +192,7 @@ export default function RunRoomPage() {
   const spotsLeft=run?Math.max(0,run.max_players-registeredPlayerIds.length):0;
   const startMs = run ? new Date(run.starts_at).getTime() : 0;
   const isPastRun=startMs<=Date.now();
-  const canJoin=Boolean(run?.status==='open'&&spotsLeft>0&&!isPastRun);
+  const canJoin=Boolean(run?.status==='open'&&spotsLeft>0&&!isPastRun&&!listingStatusUnknown);
   const now = Date.now();
   const checkInOpen = Boolean(run && !suggestedCourt && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 6 * 60 * 60 * 1000);
   const highlightWindow = Boolean(run && !suggestedCourt && now >= startMs - 2 * 60 * 60 * 1000 && now <= startMs + 72 * 60 * 60 * 1000);
@@ -313,6 +315,7 @@ export default function RunRoomPage() {
 
   return (
     <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-28 text-white">
+      {listingStatusUnknown&&<div className="mx-auto max-w-6xl px-4 pt-4" role="alert"><div className="rounded-2xl border border-red-400/40 bg-[#351515] px-4 py-3 text-sm font-semibold text-red-100">Listing verification is temporarily unavailable. Registration is paused until this page can confirm whether an organizer is present. Refresh before making travel plans.</div></div>}
       {suggestedCourt&&<div className="mx-auto max-w-6xl px-4 pt-4"><div className="rounded-2xl border border-[#eabf70]/60 bg-[#2c250f] px-4 py-3 text-sm font-black text-[#ffe4b5]">SUGGESTED OPEN COURT · NOT A CONFIRMED GAME<p className="mt-1 text-xs font-normal leading-5 text-[#f7e8cf]">This is an unstaffed public-court meetup suggestion. There is no confirmed organizer, reserved court, guaranteed attendance or independently verified host. RSVP expresses interest only. Check venue availability and coordinate with other players before traveling.</p></div></div>}
       {weekendDoubleRep&&<div className="mx-auto max-w-6xl px-4 pt-4"><div className="rounded-2xl border border-[#d4a34d]/50 bg-[#30270e] px-4 py-3 text-sm font-bold text-[#ffe3a2]">2× Verified Runs REP · Weekend Circuit <span className="block pt-1 text-xs font-normal text-[#efe2c6]">Double rewards apply to independently confirmed ranked games and independently reviewed stats only. Check-ins and highlights stay at 1×. This is a community drop-in, not a reserved or staffed court.</span></div></div>}
       <ClientPageHero
