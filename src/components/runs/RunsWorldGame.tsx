@@ -118,22 +118,26 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       .in('status',['open','full']).gte('starts_at',new Date().toISOString())
       .order('starts_at',{ascending:true}).range(from,to),200,2000),
      db.from('rch_weekend_circuit_events')
-      .select('run_id').eq('city',city.name)
-      .eq('bonus_enabled',true).gte('starts_at',new Date().toISOString()).limit(150)
+      .select('run_id,bonus_enabled').eq('city',city.name)
+      .gte('starts_at',new Date().toISOString()).limit(150)
     ]);
     if(!alive)return;
     if(courtResult.error)throw courtResult.error;
     if(runResult.error)throw runResult.error;
+    // Never present unclassified circuit suggestions as hosted games.
+    if(featuredResult.error)throw featuredResult.error;
     const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(playableCourt);
     setCourts(nextCourts);
     const citySlugs=new Set(nextCourts.map(c=>c.slug));
     // Filter Runs by their canonical court relationship, not a fragile city
     // substring, which can include a neighboring county or exclude postal aliases.
-    const cityRuns=((runResult.data||[]) as WorldRun[]).filter(r=>matchesRunToCourts(r,citySlugs));
+    const circuitRows=(featuredResult.data||[]) as Array<{run_id:string;bonus_enabled:boolean}>;
+    const suggestedIds=new Set(circuitRows.map(item=>item.run_id));
+    const cityRuns=((runResult.data||[]) as WorldRun[]).filter(r=>matchesRunToCourts(r,citySlugs)&&!suggestedIds.has(r.id));
     setRuns(cityRuns);
     if(nextCourts.some(c=>c.latitude===null||c.longitude===null))
      setCoverageWarning('Official Parks & Recreation basketball facilities are listed, but some lack facility-verified coordinates. Their source records remain searchable; no guessed precision pins are shown.');
-    setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
+    setFeatured(circuitRows.filter(item=>item.bonus_enabled).map(item=>item.run_id));
     if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
     if((courtResult.data||[]).length===300||runResult.truncated)
       setWarning('Parks & Recreation display is capped at 300 sourced facilities and the Run lookup at 2,000 statewide. Additional results may exist.');
@@ -399,10 +403,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </section>
       <WorldPulse events={worldPulse} onCourt={slug=>chooseCourt(slug,true)}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
-       <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Scheduled Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
+       <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Player-hosted Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
        {areaRuns.length?areaRuns.slice(0,12).map(run=><Link href={'/runs/'+run.id} key={run.id} className="rwg-run-row">
          <span className="rwg-run-basket"><FaBasketball/></span><span><strong>{run.title}</strong><small>{shortWhen(run.starts_at)} · {run.game_format} · {run.status==='full'?'Full':'Scheduled'}</small></span>
-         {featuredSet.has(run.id)&&<b>2× VERIFIED REP</b>}<FaArrowRight/></Link>):<p className="rwg-empty">No upcoming games listed here. Create one or explore another city.</p>}
+         {featuredSet.has(run.id)&&<b>2× VERIFIED REP</b>}<FaArrowRight/></Link>):<p className="rwg-empty">No player-hosted games listed here yet. Create a Run or explore another city.</p>}
       </section>
      </>}
    </>}

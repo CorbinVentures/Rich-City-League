@@ -70,6 +70,7 @@ type Run = {
   independently_verified?:boolean;
   verified_host?:boolean;
   weekendMultiplier?: 1 | 2;
+  isSuggestedCourt?:boolean;
 };
 
 type Badge = {
@@ -213,9 +214,10 @@ export default function RunsPage() {
         runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents').in('run_id', runIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('rch_run_verifications').select('run_id').in('run_id',runIds).eq('verification_status','verified'):Promise.resolve({data:[]}),
         hostIds.length ? db.from('rch_verified_run_hosts').select('profile_id').in('profile_id',hostIds).eq('verification_status','approved').gt('expires_at',new Date().toISOString()):Promise.resolve({data:[]}),
-        runIds.length ? db.from('rch_weekend_circuit_events').select('run_id').in('run_id',runIds).eq('bonus_enabled',true) : Promise.resolve({data:[]}),
+        runIds.length ? db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').in('run_id',runIds) : Promise.resolve({data:[]}),
       ]);
 
+      if(weekendResult.error)throw weekendResult.error;
       const hostMap = new Map<string, Run['host']>((hostsResult.data ?? []).map((host: any) => [host.id, host]));
       const playerMap = new Map<string, string[]>();
       for (const player of (playersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
@@ -233,8 +235,10 @@ export default function RunsPage() {
       }));
       const certifiedRuns=new Set(((verificationResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
       const certifiedHosts=new Set(((hostVerificationResult.data??[]) as {profile_id:string}[]).map(x=>x.profile_id));
-      const weekendRunIds=new Set(((weekendResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
-      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id), weekendMultiplier:weekendRunIds.has(run.id)?2:1 })));
+      const weekendRows=(weekendResult.data??[]) as Array<{run_id:string;bonus_enabled:boolean}>;
+      const suggestedCourtIds=new Set(weekendRows.map(x=>x.run_id));
+      const weekendRunIds=new Set(weekendRows.filter(x=>x.bonus_enabled).map(x=>x.run_id));
+      setRuns(rows.map((run) => ({ ...run, host: hostMap.get(run.host_id), players: playerMap.get(run.id) ?? [],partner:runPartners.get(run.id), independently_verified:certifiedRuns.has(run.id), verified_host:certifiedHosts.has(run.host_id), weekendMultiplier:weekendRunIds.has(run.id)?2:1, isSuggestedCourt:suggestedCourtIds.has(run.id) })));
       const courtRows = (courtsResult.data ?? []) as Court[];
       if (courtParam && !courtRows.some(court => court.slug === courtParam)) {
         const { data: selectedCourtRow } = await db.from('rch_runs_outdoor_courts')
@@ -415,7 +419,7 @@ export default function RunsPage() {
     setBusy(null);
   };
 
-  const dailyCandidates = useMemo<DailyCircuitCandidate[]>(()=>runs.map(run=>({
+  const dailyCandidates = useMemo<DailyCircuitCandidate[]>(()=>runs.filter(run=>!run.isSuggestedCourt&&Date.parse(run.starts_at)>Date.now()).map(run=>({
     id:run.id,title:run.title,host_id:run.host_id,location:run.location,location_slug:run.location_slug,
     city:courts.find(c=>c.slug===run.location_slug)?.locality||cityForText(run.location)?.name||null,
     starts_at:run.starts_at,run_type:run.run_type,game_format:run.game_format,
@@ -426,6 +430,7 @@ export default function RunsPage() {
 
   const visibleRuns = useMemo(() => {
     const matching = runs.filter((run) => {
+      if(run.isSuggestedCourt||Date.parse(run.starts_at)<=Date.now())return false;
       const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
       const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
       const courtMatch = !courtParam || run.location_slug === courtParam;
@@ -501,7 +506,7 @@ export default function RunsPage() {
         {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
 
         {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
-          <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Upcoming Runs" description="Real courts, real people. See who's hosting and find a place on the floor." action={{href:'/runs/partners',label:'Explore organizers'}}/>
+          <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Player-hosted Runs" description="Actual member-hosted games and organizer events. Suggested public-court meetups appear separately below." action={{href:'/runs/partners',label:'Explore organizers'}}/>
           <div className="rch-run-discovery-controls">
             <button type="button" className="rch-run-solo-toggle" aria-pressed={soloOnly} onClick={()=>setSoloOnly(v=>!v)}><FaBasketball aria-hidden="true"/>{soloOnly?'Solo spots only ✓':'Find a solo spot'}</button>
             <a href="#rch-competition" className="rch-run-passport-link"><FaMedal aria-hidden="true"/> My Passport</a>
@@ -522,7 +527,7 @@ export default function RunsPage() {
           </div>
 
           {soloOnly&&!loading&&visibleRuns.length>0&&<p role="status" className="rch-run-solo-explainer">{visibleRuns.length} open {visibleRuns.length===1?'Run':'Runs'} taking individual RSVPs. No crew required to register.</p>}
-          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.length?'No games match those filters':'THE COURT IS WAITING'} description={runs.length?'Try another game format, style or city. All Virginia is available through location preferences.':'There are no upcoming Runs scheduled yet. Be the one to bring your city to life, or explore independent partner organizers.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.slice(0,visibleLimit).map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
+          {loading ? <LoadingCard label="Finding runs and meetups…" /> : visibleRuns.length === 0 ? <RCHEmptyState title={runs.some(run=>!run.isSuggestedCourt&&Date.parse(run.starts_at)>Date.now())?'No games match those filters':'THE COURT IS WAITING'} description={runs.some(run=>!run.isSuggestedCourt&&Date.parse(run.starts_at)>Date.now())?'Try another game format, style or city. All Virginia is available through location preferences.':'No upcoming player-hosted Runs are listed. Start one or invite local organizers to publish a confirmed game.'} actions={[{href:'/runs?create=1',label:'Host a Run',primary:true},{href:'/runs/partners',label:'Find organizers'}]}/> : <div className="rch-arena-run-slider">{visibleRuns.slice(0,visibleLimit).map((run) => <RunCard key={run.id} run={run} userId={user?.id} checkedIn={checkins.has(run.id)} highlightClaimed={highlightClaims.has(run.id)} busy={busy} onJoin={joinRun} onCheckIn={checkIn} onClaimHighlight={claimHighlight} />)}</div>}
           {view==='runs'&&visibleRuns.length>visibleLimit&&
             <div className="rch-run-load-more">
               <span>Showing {visibleLimit} of {visibleRuns.length} matching Runs</span>
@@ -534,12 +539,12 @@ export default function RunsPage() {
           <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
           {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
         </details>
-        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Weekend Double XP Circuit" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
+        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Suggested weekend open courts" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">DOUBLE RUNS REP EVERY WEEKEND</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">Saturday and Sunday rotate between two sets of local parks every week. Double rewards apply to independently verified games and reviewed stats; check-ins, highlights, and player-created Runs remain standard. Community drop-ins are not guaranteed staffed or reserved.</p></div>
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OPEN COURTS · 2× VERIFIED REP</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court meetup suggestions—not confirmed games, reserved courts, verified hosts, or promises that players will attend. The 2× REP benefit applies only to independently verified games and reviewed stats at eligible circuit sessions; check-ins and highlights remain 1×.</p></div>
             <span className="rounded-xl bg-[#ffd47a] px-3 py-2 text-sm font-black text-[#182137]">2× VERIFIED REP</span>
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.weekendMultiplier===2&&run.status!=='cancelled').slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}</span><FaArrowRight aria-hidden="true"/></Link>)}</div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.isSuggestedCourt&&run.weekendMultiplier===2&&run.status!=='cancelled'&&Date.parse(run.starts_at)>Date.now()).slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}<small className="block text-xs font-normal text-[#d3deef]">Open-court suggestion · no confirmed organizer</small></span><FaArrowRight aria-hidden="true"/></Link>)}</div>
         </section>}
 
         {view==='runs'&&<>
