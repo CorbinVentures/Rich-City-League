@@ -124,6 +124,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
     if(!alive)return;
     if(courtResult.error)throw courtResult.error;
     if(runResult.error)throw runResult.error;
+    // Never present unclassified circuit suggestions as hosted games.
+    if(featuredResult.error)throw featuredResult.error;
     const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(playableCourt);
     setCourts(nextCourts);
     const citySlugs=new Set(nextCourts.map(c=>c.slug));
