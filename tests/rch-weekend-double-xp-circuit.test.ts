@@ -42,7 +42,7 @@ describe('Weekend Double XP Circuit',()=>{
     expect(migration).toContain('rch_generate_weekend_circuit(8)');
     expect(arena).toContain("rch_weekend_circuit_events");
     expect(arena).toContain('SUGGESTED OPEN COURTS · 2× VERIFIED REP');
-    expect(arena).toContain('player-created Runs remain standard');
+    expect(arena).toContain('check-ins and highlights remain 1×');
     expect(room).toContain('Double rewards apply to independently confirmed ranked games');
   });
 });
