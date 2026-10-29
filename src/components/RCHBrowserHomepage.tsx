@@ -28,7 +28,7 @@ type Props = { news: News[]; events: Event[]; runs: Run[]; players: Player[] };
 
 const cards = [
   { title: 'Runs', label: 'Find your next game', detail: 'Find and organize runs near you.', href: '/runs', icon: FaBasketball, variant: 'runs' },
-  { title: 'Leagues', label: 'The next era of hoops', detail: 'Virginia competition, teams and standings.', href: '/league', icon: FaTrophy, variant: 'leagues' },
+  { title: 'Leagues', label: 'Pro season · Nov 2027', detail: 'Virginia franchises preparing for the November 2027 season.', href: '/league', icon: FaTrophy, variant: 'leagues' },
   { title: 'Discover', label: 'Your basketball world', detail: 'Training, tryouts and opportunities.', href: '/discover', icon: FaCompass, variant: 'discover' },
   { title: 'RCH TV', label: 'Every story matters', detail: 'Games, highlights and original content.', href: '/media', icon: FaVideo, variant: 'media' },
   { title: 'Social', label: 'Stay connected', detail: 'Players, coaches and basketball culture.', href: '/pulse', icon: FaUsers, variant: 'social' },
@@ -74,7 +74,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
         </div>
         <div className="rch-browser-hero-quick" aria-label="Popular places to start">
           <Link href="/runs"><FaLocationDot/><span><b>FIND RUNS</b><small>See where Virginia hoops</small></span><FaArrowRight/></Link>
-          <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Virginia&apos;s premier league vision</small></span><FaArrowRight/></Link>
+          <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Pro season planned · Nov 2027</small></span><FaArrowRight/></Link>
           <Link href="/players"><FaUsers/><span><b>FIND PLAYERS</b><small>Meet the basketball community</small></span><FaArrowRight/></Link>
           <Link href="/pulse"><FaUserGroup/><span><b>CONNECT</b><small>Culture, creators and fans</small></span><FaArrowRight/></Link>
         </div>
