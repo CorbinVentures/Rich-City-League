@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaCalendarDays,FaRankingStar} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
+import {RCL_PRO_SEASON} from '@/lib/rcl-pro-season';
 import type {Game,Standing,Team} from '@/types/database';
 
 type LeagueGame=Pick<Game,'id'|'home_team_id'|'away_team_id'|'scheduled_at'|'status'|'home_score'|'away_score'>;
@@ -25,7 +26,7 @@ export function LeaguePublicHub(){
     if(league.error)throw league.error;
     if(!league.data){if(active)setLoading(false);return;}
     const [seasons,teamResult]=await Promise.all([
-      db.from('seasons').select('id,name,status').eq('league_id',league.data.id).in('status',['active','registration','completed']).order('start_date',{ascending:false}).limit(5),
+      db.from('seasons').select('id,name,status,start_date').eq('league_id',league.data.id).gte('start_date',RCL_PRO_SEASON.startMonth+'-01').in('status',['active','registration','completed']).order('start_date',{ascending:false}).limit(5),
       db.from('teams').select('id,name,slug').eq('league_id',league.data.id).eq('is_active',true).order('name').limit(32),
     ]);
     if(seasons.error||teamResult.error)throw new Error('Unable to retrieve public league schedule');
@@ -61,7 +62,7 @@ export function LeaguePublicHub(){
        <strong>{name(featured.home_team_id)}</strong>
       </div><p>{new Date(featured.scheduled_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</p>
       <Link href={`/games/${featured.id}`}>Game center <FaArrowRight aria-hidden="true"/></Link></>:
-      <><h3>Season updates coming soon</h3><p>Official matchups will appear here once they are published.</p><Link href="/schedule">View schedule <FaArrowRight aria-hidden="true"/></Link></>}
+      <><h3>Season updates coming soon</h3><p>Professional season planned for {RCL_PRO_SEASON.startLabel}. Opening-night date and official matchups are not yet published.</p><Link href="/schedule">View schedule <FaArrowRight aria-hidden="true"/></Link></>}
     </article>
     <article className="rch-league-standings">
      <div className="rch-league-label"><FaRankingStar aria-hidden="true"/> STANDINGS</div>
@@ -69,7 +70,7 @@ export function LeaguePublicHub(){
       {state.standings.slice(0,5).map((entry,index)=><div key={entry.team_id}>
         <span>{entry.rank??index+1}</span><strong>{name(entry.team_id)}</strong><span>{entry.wins}–{entry.losses}</span>
       </div>)}
-     </div>:<p className="rch-league-feedback">Official standings will appear after league results are recorded.</p>}
+     </div>:<p className="rch-league-feedback">Professional-season standings will appear after official games begin in November 2027.</p>}
      <Link href="/standings">Full standings <FaArrowRight aria-hidden="true"/></Link>
     </article>
    </div>}
