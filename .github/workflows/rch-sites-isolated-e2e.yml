@@ -8,6 +8,11 @@ on:
       - "src/app/api/rch-sites/starter/**"
       - "src/components/sites/RchSiteStarterClient.tsx"
       - "src/app/network/dashboard/sites/overview/**"
+      - "src/app/network/dashboard/sites/toolkit/**"
+      - "src/app/api/rch-sites/toolkit/**"
+      - "src/app/sites/*/toolkit-*/**"
+      - "src/lib/rch-sites-free-toolkit.ts"
+      - "src/lib/rch-sites-registration-security.ts"
       - "src/lib/rch-sites-overview.ts"
       - "supabase/migrations/**"
   workflow_dispatch:
@@ -54,6 +59,10 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000" >> "$GITHUB_ENV"
           echo "RCH_LOCAL_E2E_ORIGIN=http://localhost:3000" >> "$GITHUB_ENV"
+          # Disposable localhost fixture only. These are not production feature flags.
+          echo "RCH_SITES_TOOLKIT_ENABLED=true" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED=true" >> "$GITHUB_ENV"
+          echo "RCH_SITES_REGISTRATION_RATE_SECRET=isolated-only-no-production-secret-0123456789abcdef" >> "$GITHUB_ENV"
       - name: Install Next.js app and pinned Chromium browser tooling
         run: |
           npm ci
