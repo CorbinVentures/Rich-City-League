@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { SeasonDraftScouting } from '@/components/draft/SeasonDraftScouting';
+import { parsePreseasonDraftOrder, plannedDraftPicks, type PreseasonDraftOrder } from '@/lib/draft/preseason';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
@@ -74,6 +75,8 @@ export default function DraftNightPage() {
   const { user, profile } = useAuth();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [preseasonOrder, setPreseasonOrder] = useState<PreseasonDraftOrder | null>(null);
+  const [previewRound, setPreviewRound] = useState(1);
   const [order, setOrder] = useState<DraftOrder[]>([]);
   const [picks, setPicks] = useState<DraftPick[]>([]);
   const [players, setPlayers] = useState<PublicPlayer[]>([]);
@@ -96,11 +99,26 @@ export default function DraftNightPage() {
 
   const load = useCallback(async () => {
     if (!supabase) return setLoading(false);
-    const draftResult = await supabase.from('drafts').select('*').in('status', ['SETUP', 'OPEN', 'PAUSED', 'COMPLETED']).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const [draftResult, preseasonResult, activeTeamResult] = await Promise.all([
+      supabase.from('drafts').select('*').in('status', ['SETUP', 'OPEN', 'PAUSED', 'COMPLETED']).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      supabase.from('site_settings').select('value').eq('key', 'rcl_2027_inaugural_draft_order').maybeSingle(),
+      supabase.from('teams').select('*').eq('is_active', true).order('name'),
+    ]);
     if (draftResult.error) { setMessage('The draft feed is temporarily unavailable.'); setLoading(false); return; }
+    const currentTeams = (activeTeamResult.data ?? []) as Team[];
+    setPreseasonOrder(preseasonResult.error || activeTeamResult.error
+      ? null : parsePreseasonDraftOrder(preseasonResult.data?.value, currentTeams.map(team => team.id)));
     const live = draftResult.data as Draft | null;
     setDraft(live);
-    if (!live) { setDraftEvaluations([]); setSeasonRoster([]); setLoading(false); return; }
+    if (!live) {
+      setTeams(currentTeams);
+      setOrder([]);
+      setPicks([]);
+      setDraftEvaluations([]);
+      setSeasonRoster([]);
+      setLoading(false);
+      return;
+    }
 
     const [teamsResult, orderResult, picksResult, poolResult, playersResult, iqResult] = await Promise.all([
       supabase.from('teams').select('*').eq('is_active', true).order('name'),
@@ -194,6 +212,8 @@ export default function DraftNightPage() {
     previousSecondsRef.current = seconds;
   }, [seconds, soundEnabled]);
 
+  const previewPicks = preseasonOrder ? plannedDraftPicks(preseasonOrder) : [];
+  const firstPreviewTeam = teams.find(team => team.id === previewPicks[0]?.teamId);
   const current = order.find((item) => item.pick_number === draft?.current_pick);
   const currentTeam = teams.find((team) => team.id === current?.team_id);
   const picked = new Set(picks.map((pick) => pick.player_id));
@@ -261,9 +281,9 @@ export default function DraftNightPage() {
               <button type="button" onClick={toggleSound} aria-pressed={soundEnabled} className="mt-4 min-h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-xs font-black uppercase tracking-wider text-white/75">{soundEnabled ? 'Mute draft sounds' : 'Enable draft sounds'}</button>
             </div>
             <div className="rcl-draft-live-card">
-              <span className="rcl-live">LIVE DRAFT BOARD</span>
-              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : draft?.status ?? 'SETUP'}</strong>
-              <small>{currentTeam?.name ?? 'Draft order pending'}</small>
+              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE DRAFT BOARD' : 'DRAFT NIGHT PREVIEW'}</span>
+              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : draft?.status ?? 'PRESEASON'}</strong>
+              <small>{currentTeam?.name ?? firstPreviewTeam?.name ?? 'Draft order pending'}</small>
               <div className="mt-4 flex items-end gap-3"><b>{clock(seconds)}</b><span>remaining</span></div>
             </div>
           </div>
@@ -274,11 +294,51 @@ export default function DraftNightPage() {
         <div className="rcl-draft-stat-strip">
           <div><span>NEXT PICK</span><strong>#{draft?.current_pick ?? '—'}</strong></div>
           <div><span>ROUND</span><strong>{current?.round_number ?? '—'}</strong></div>
-          <div><span>SEASON TEAMS</span><strong>{new Set(order.map(row=>row.team_id)).size || '—'}</strong></div>
+          <div><span>SEASON TEAMS</span><strong>{new Set(order.map(row=>row.team_id)).size || preseasonOrder?.first_round_team_ids.length || '—'}</strong></div>
           <div><span>SELECTED</span><strong>{picks.length}</strong></div>
         </div>
 
         {message && <div role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</div>}
+
+        {preseasonOrder && (!draft || draft.status === 'SETUP') && (
+          <section aria-labelledby="preseason-draft-title" className="mt-8 rounded-3xl border border-rcl-orange/25 bg-[#121821] p-5 text-white shadow-xl sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="rcl-kicker">ESTABLISHED PRESEASON ORDER · NOT LIVE</p>
+                <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">{preseasonOrder.season_label} Draft Order</h2>
+                <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                  {preseasonOrder.first_round_team_ids.length} franchises · {preseasonOrder.rounds} rounds · {previewPicks.length} selections.
+                  Snake format: every even-numbered round reverses the previous order.
+                </p>
+              </div>
+              <span className="rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-3 py-2 text-xs font-black tracking-wider text-rcl-orange">CLOCK NOT STARTED</span>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Preview draft round">
+              {Array.from({ length: preseasonOrder.rounds }, (_, index) => index + 1).map(round => (
+                <button key={round} type="button" onClick={() => setPreviewRound(round)}
+                  aria-pressed={previewRound === round}
+                  className={`min-h-11 rounded-xl border px-4 text-sm font-bold ${previewRound === round ? 'border-rcl-orange bg-rcl-orange text-black' : 'border-white/15 bg-white/5 text-slate-200'}`}>
+                  Round {round}
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 grid gap-2 md:grid-cols-2">
+              {previewPicks.filter(pick => pick.roundNumber === previewRound).map(pick => {
+                const team = teams.find(item => item.id === pick.teamId);
+                return <div key={pick.pickNumber} className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                  <span className="w-12 shrink-0 text-center text-xl font-black tabular-nums text-rcl-orange">#{pick.pickNumber}</span>
+                  <TeamMark team={team} />
+                  <span className="min-w-0 truncate text-sm font-semibold">{team?.name ?? 'Team unavailable'}</span>
+                </div>;
+              })}
+            </div>
+            <details className="mt-5 text-xs text-slate-400">
+              <summary className="cursor-pointer font-semibold text-slate-300">How the order was established</summary>
+              <p className="mt-2 max-w-3xl leading-5">The first round was assigned by a one-time random draw using a recorded seed. Team IDs were ranked by SHA-256 of seed + colon + team ID, lowest hash first. Even rounds reverse the team sequence. This is a published preseason allocation, not an open or finalized playable draft event.</p>
+              <p className="mt-2 break-all font-mono">Draw seed: {preseasonOrder.draw_seed}</p>
+            </details>
+          </section>
+        )}
 
         <section className="rcl-draft-workspace mt-8">
           <div className="rcl-draft-module rcl-draft-hub">
