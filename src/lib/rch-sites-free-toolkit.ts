@@ -93,7 +93,7 @@ export function generateRoundRobin(input:{teams:readonly ToolkitTeam[];startDate
   const {teams,startDate,weekdays,tipoff,gamesPerDay,slotMinutes}=input;
   if(teams.length<2||teams.length>8||!validDate(startDate)||!timePattern.test(tipoff)||
     !Number.isInteger(gamesPerDay)||gamesPerDay<1||gamesPerDay>4||
-    !Number.isInteger(slotMinutes)||slotMinutes<30||slotMinutes>180||
+    !Number.isInteger(slotMinutes)||slotMinutes<60||slotMinutes>180||
     weekdays.length===0||weekdays.some(d=>!Number.isInteger(d)||d<0||d>6)||
     !cleanLabel(input.court,60))throw Error('Check team names, dates, times and schedule settings');
   const working:(string|null)[]=teams.map(t=>t.id);
