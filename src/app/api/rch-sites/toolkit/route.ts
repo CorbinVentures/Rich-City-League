@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server';
 import {getRchSitesBillingPrincipal,verifiedRchSiteBillingOrg,
   isRchSiteUuid,rchSitesBillingOriginAllowed} from '@/lib/rch-sites-billing-auth';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
+import {toolkitPilotOrganizationAllowed} from '@/lib/rch-sites-toolkit-rollout';
 import {EMPTY_BUDGET,parseToolkitTeams,parseToolkitGames,parseToolkitBudget,
   parseToolkitForm} from '@/lib/rch-sites-free-toolkit';
 export const runtime='nodejs';
@@ -12,7 +13,7 @@ const enabled=()=>process.env.RCH_SITES_TOOLKIT_ENABLED==='true';
 const empty={teams:[],games:[],budget:EMPTY_BUDGET,
   form:{title:'Basketball Registration',open:false},schedule_public:false,revision:0};
 async function authorized(organizationId:unknown){
-  if(!isRchSiteUuid(organizationId))return null;
+  if(!isRchSiteUuid(organizationId)||!toolkitPilotOrganizationAllowed(organizationId))return null;
   const principal=await getRchSitesBillingPrincipal();
   if(!principal)return null;
   const org=await verifiedRchSiteBillingOrg(principal,organizationId);
