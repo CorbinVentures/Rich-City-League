@@ -217,6 +217,7 @@ export default function RunsPage() {
         runIds.length ? db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').in('run_id',runIds) : Promise.resolve({data:[]}),
       ]);
 
+      if(weekendResult.error)throw weekendResult.error;
       const hostMap = new Map<string, Run['host']>((hostsResult.data ?? []).map((host: any) => [host.id, host]));
       const playerMap = new Map<string, string[]>();
       for (const player of (playersResult.data ?? []) as Array<{ run_id: string; profile_id: string }>) {
