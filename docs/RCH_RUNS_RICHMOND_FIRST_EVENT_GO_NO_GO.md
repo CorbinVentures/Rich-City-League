@@ -8,6 +8,9 @@
 |---|---|---|---|
 | Outdoor court, hours, public accessibility and any organized-use permission confirmed | Venue lead | Official park source, call/email, exact physical court | YES |
 | Weather, heat, air quality and wet-court backup decision made | Venue lead | Rain date or cancellation announcement | YES |
+| Event liability, insurance needs, participant waiver and any park permit reviewed | Operations lead | Approval/coverage confirmation, waiver flow | YES |
+| For any under-18 participant: age policy, guardian consent and media safeguards reviewed | Operations lead | Approved youth participation policy; no unnecessary personal data | YES if minors |
+| First-aid supplies, emergency access and nearest AED/medical response plan | Safety lead | Staff briefing with address and emergency escalation | YES |
 | Named host and separate scorekeeper on-site | Operations lead | Assigned RCH accounts and contact plan | YES |
 | Independent match official (for Court Master / Takeover titles) | Operations lead | Role assignment, independence from either crew | YES for title games |
 | At least two real opposing checked-in players (1v1); six for a full 3v3 | Host | Actual RSVP roster, consent and attendance | YES |
@@ -22,7 +25,7 @@ If any YES gate is missing, **do not advertise a ranked or confirmed RCH event**
 
 ## 2. Host's event-day checklist
 
-**12 to 2 hours before:** Check official park hours and access; verify rain/wet court/lighting and availability; send location with entrance landmark, time, format, no-shows deadline and public court notice. Confirm two independently accessible participant accounts. Verify roles in Run Operations HQ and that each person knows their assigned job.
+**12 to 2 hours before:** Reconfirm waivers, any under-18 safeguarding and consent, venue permissions and emergency contacts. Check official park hours and access; verify rain/wet court/lighting and availability; send location with entrance landmark, time, format, no-shows deadline and public court notice. Confirm two independently accessible participant accounts. Verify roles in Run Operations HQ and that each person knows their assigned job.
 
 **2 hours before:** At the actual venue, the host opens the Run Room and generates the **12-character court check-in code**. Give it only to people present; never publish it in the event post or broadcast it online. The code is stored hashed, can be rotated, and expires six hours after the scheduled start. Each player must have joined the hosted Run and signed in on their own account. **A self-reported code alone is not GPS proof**; the host must physically check attendees.
 
