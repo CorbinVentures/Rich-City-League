@@ -1,6 +1,6 @@
 # RCH Sites Free Basketball Toolkit — implementation and release checklist
 
-**Status:** Feature branch only. Do not merge or deploy without CI, staging migration/RLS tests, security review and explicit release approval. The server-side environment flag `RCH_SITES_TOOLKIT_ENABLED` defaults OFF.
+**Status:** Free toolkit source was merged in PR #633; customer rollout is still OFF. The registration hardening PR must pass CI and isolated staging tests before enabling. A merged GitHub migration does NOT establish that the production Supabase migration was applied. The server-side environment flag `RCH_SITES_TOOLKIT_ENABLED` and client navigation flag `NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED` default OFF. An independent `RCH_SITES_REGISTRATION_RATE_SECRET` (random, at least 32 characters; never `NEXT_PUBLIC`) is mandatory before opening registration.
 
 ## Scope committed
 - `/network/dashboard/sites/toolkit`: authorized organization selector, working single round-robin Schedule Studio (explicit published public schedule page), team-name/Roster Builder, fixed adult-interest registration form and QR sharing, printable Game Day Pack, budget projections and CSV exports.
@@ -22,11 +22,11 @@
 3. Manual flow: claim/verify organization -> save two rosters -> generate 8-team schedule -> edit and save -> export CSV -> create adult form -> publish site -> scan QR -> submit -> review in owner dashboard -> create/print packet -> budget and CSV.
 4. Validate two distinct organization accounts and an anonymous visitor. Ensure public endpoints never expose internal rosters, emails, budget, or unpublished sites.
 5. Confirm schedules reject duplicate games, team/court overlaps, malformed dates, and obsolete edits. Confirm conflicting writes report revision 409.
-6. Test 100 monthly registrations followed by concurrent 101st and 102nd; verify one-email deduplication, bad-origin request denial, spam protection, and sensible rate limiting.
+6. Test the atomic 100/month contact limit, per-visitor 5/hour and 12/day attempt limits, and per-organization 60/hour limit; verify concurrent submissions, deduplication, invalid origin denial, missing secret failure, and malformed proxy-IP rejection. Confirm Postgres `cron.job` includes `rch-site-toolkit-privacy-cleanup` and expiry deletes 90-day contacts and 72-hour pseudonymous attempt counters.
 7. Exercise Free with no Stripe subscription, and ensure paid-tier entitlement state is not used to block Free.
 8. Confirm no regression in existing booking appointments, PayPal merchant links, official scoring, main PWA, website publication, and organization verification.
-9. Complete a legal/privacy and anti-bot review, especially retention, deletion and minor data boundaries; do not enable in production until mitigations pass.
-10. Only after approval set `RCH_SITES_TOOLKIT_ENABLED=true` in a controlled environment; validate actual migrated backend first. No automatic rollout from merging this branch.
+9. Verify adult-only consent and revised privacy terms, organization-manager deletion, 90-day automatic contact expiry, 72-hour fingerprint expiry, and explicit support/contact route for deletion; do not activate public intake without passing staging abuse/retention tests.
+10. Only after approval and **production migration verification**, configure the HMAC rate secret and set both `RCH_SITES_TOOLKIT_ENABLED=true` and `NEXT_PUBLIC_RCH_SITES_TOOLKIT_ENABLED=true` in the intended environment. Redeploy with the verified Vercel environment. First enable for a small pilot, then assess live logs before broader release. No automatic rollout from merging branches.
 
 ## Implementation follow-ups
 - Dedicated organization-controlled deletion/export request flow for adult registrations and privacy policy language.
@@ -41,3 +41,7 @@
 - Public registration form has fixed adult name/email fields; youth/guardian registrations require a separate reviewed system.
 - Organization manager changes use optimistic revision checks; the registration table has an atomic monthly quota trigger.
 - Unfinished features are withheld by the server release gate; a visible UI link is not proof of release.
+
+## Launch-readiness discovery (October 29, 2026)
+
+Production Vercel commit `91ced23d4e7a2951f7c2aad8485c5c0b30628053` is READY, but production Supabase did **not** yet contain `rch_site_toolkit` or `rch_site_toolkit_registrations` at the initial review; migration `20261029012000` was not recorded. Production Vercel had no toolkit rollout variables at that time. Do not turn on the features before migrating and testing the backend. The registration hardening migration depends on the original toolkit migration and pg_cron. These are release gates, not production features silently activated by code merge.

@@ -2,11 +2,14 @@ import {NextResponse} from 'next/server';
 import {getSupabaseAdminClient} from '@/lib/supabase-admin';
 import {isRchSiteSlug} from '@/lib/rch-site-builder';
 import {cleanLabel,parseToolkitForm} from '@/lib/rch-sites-free-toolkit';
+import {registrationVisitorFingerprint} from '@/lib/rch-sites-registration-security';
 import {rchSitesBillingOriginAllowed} from '@/lib/rch-sites-billing-auth';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 const reply=(data:Record<string,unknown>,status=200)=>NextResponse.json(data,
   {status,headers:{'Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
+const registrationReady=()=>Boolean(process.env.RCH_SITES_REGISTRATION_RATE_SECRET &&
+  process.env.RCH_SITES_REGISTRATION_RATE_SECRET.length>=32);
 async function findRegistration(slug:string){
   if(!isRchSiteSlug(slug))return null;
   const admin=getSupabaseAdminClient() as any;
@@ -28,6 +31,7 @@ async function findRegistration(slug:string){
 }
 export async function GET(request:Request){
   if(process.env.RCH_SITES_TOOLKIT_ENABLED!=='true')return reply({error:'Not available'},404);
+  if(!registrationReady())return reply({error:'Registration is not yet available.'},503);
   const slug=new URL(request.url).searchParams.get('slug')||'';
   const target=await findRegistration(slug);
   return target?reply({title:target.form.title,organizationName:target.name}):
@@ -35,6 +39,7 @@ export async function GET(request:Request){
 }
 export async function POST(request:Request){
   if(process.env.RCH_SITES_TOOLKIT_ENABLED!=='true')return reply({error:'Not available'},404);
+  if(!registrationReady())return reply({error:'Registration is not yet available.'},503);
   if(!rchSitesBillingOriginAllowed(request))return reply({error:'Invalid origin'},403);
   if(Number(request.headers.get('content-length')||0)>3000)return reply({error:'Request too large'},413);
   let body:Record<string,unknown>;
@@ -50,6 +55,17 @@ export async function POST(request:Request){
   const slug=typeof body.slug==='string'?body.slug:'';
   const target=await findRegistration(slug);
   if(!target)return reply({error:'Registration is not open.'},404);
+  const fingerprint=registrationVisitorFingerprint(request.headers,{
+    onVercel:process.env.VERCEL==='1',
+    secret:process.env.RCH_SITES_REGISTRATION_RATE_SECRET,
+  });
+  if(!fingerprint)return reply({error:'Registration protections are temporarily unavailable.'},503);
+  const {data:allowed,error:limitError}=await target.admin.rpc(
+    'rch_site_toolkit_claim_registration_attempt',
+    {p_organization_id:target.organizationId,p_fingerprint:fingerprint},
+  );
+  if(limitError)return reply({error:'Registration protection could not be verified.'},503);
+  if(allowed!==true)return reply({error:'Too many attempts. Try again later.'},429);
   const {error}=await target.admin.from('rch_site_toolkit_registrations').insert({
     organization_id:target.organizationId,name,email,
   });
