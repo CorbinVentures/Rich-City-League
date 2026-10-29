@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import crypto from 'node:crypto';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -142,26 +143,36 @@ function buildPulsePost(account: PulseAccount, clock: Clock) {
 async function buildRclPost(db: SupabaseClient, clock: Clock) {
   const now = new Date();
   const week = new Date(now.getTime() + 7 * 86_400_000).toISOString();
+  // Official pro league game totals must not include imported 2026 schedules.
+  const seasonResult = await db.from('seasons').select('id').gte('start_date', RCL_PRO_SEASON.startMonth + '-01');
+  const proSeasonIds = (seasonResult.data ?? []).map(row => row.id);
   const [members, games, runs] = await Promise.all([
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('is_system_account', false),
-    db.from('games').select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lt('scheduled_at', week),
+    proSeasonIds.length
+      ? db.from('games').select('id', { count: 'exact', head: true }).in('season_id', proSeasonIds).gte('scheduled_at', now.toISOString()).lt('scheduled_at', week)
+      : Promise.resolve({ count: 0 }),
     db.from('runs').select('id', { count: 'exact', head: true }).eq('status', 'open').gte('starts_at', now.toISOString()),
   ]);
-  return `🏀 TODAY ON RCH · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active members · ${games.count || 0} official RCL games in the next 7 days · ${runs.count || 0} open runs on the board.\n\nWhat are YOU doing in basketball today — playing, coaching, training, creating or looking for a run? Drop it on the feed.\n\n/social · /schedule · /runs\n\n#RichCityHoops #RCLNetwork`;
+  return `🏀 TODAY ON RCH · ${clock.dateLabel.toUpperCase()}\n\n${members.count || 0} active members · ${games.count || 0} official RCL pro games in the next 7 days · ${runs.count || 0} open runs on the board.
+
+Rich City League professional play is planned for ${RCL_PRO_SEASON.startLabel}. Summer 2027 tryouts and Draft Night lead up to the season. Runs are available independently.\n\nWhat are YOU doing in basketball today — playing, coaching, training, creating or looking for a run? Drop it on the feed.\n\n/social · /schedule · /runs\n\n#RichCityHoops #RCLNetwork`;
 }
 
 async function buildGameDayPost(db: SupabaseClient, clock: Clock) {
   const now = new Date();
   const next24 = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-  const gamesResult = await db.from('games')
+  const officialSeasons = await db.from('seasons').select('id').gte('start_date', RCL_PRO_SEASON.startMonth + '-01');
+  const proSeasonIds = (officialSeasons.data ?? []).map(row => row.id);
+  const gamesResult = proSeasonIds.length ? await db.from('games')
     .select('id,scheduled_at,home_team_id,away_team_id')
+    .in('season_id', proSeasonIds)
     .gte('scheduled_at', now.toISOString())
     .lt('scheduled_at', next24)
     .order('scheduled_at', { ascending: true })
-    .limit(3);
-  const games = (gamesResult.data || []) as GameRow[];
+    .limit(3) : null;
+  const games = (gamesResult?.data || []) as GameRow[];
   if (!games.length) {
-    return `🏀 RCL GAMEDAY · ${clock.dateLabel.toUpperCase()}\n\nNo official RCL games are scheduled in the next 24 hours — so open floor: what local matchup would you actually pay to watch right now? Teams, schools, players or a dream 1-on-1. 👀\n\n/games\n\n#RCLGameDay #RichmondBasketball`;
+    return `🏀 RCL GAMEDAY · ${clock.dateLabel.toUpperCase()}\n\nThe professional season is planned for ${RCL_PRO_SEASON.startLabel}, with official summer 2027 tryouts and Draft Night before opening night. No official pro games are scheduled in the next 24 hours. Which Virginia rivalry are you hoping to see? 👀\n\n/games\n\n#RCLGameDay #RichmondBasketball`;
   }
   const teamIds = [...new Set(games.flatMap(game => [game.home_team_id, game.away_team_id]).filter(Boolean))];
   const teamsResult = teamIds.length ? await db.from('teams').select('id,name').in('id', teamIds) : null;
