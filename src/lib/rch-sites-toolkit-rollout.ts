@@ -1,8 +1,7 @@
-/** Server-only rollout gates for the RCH Sites basketball toolkit.
+/** Only import this rollout helper from server routes. No client access. for the RCH Sites basketball toolkit.
  * Never allow the broad server switch to silently grant access to every organization.
  * A pilot org must independently pass authenticated owner/manager checks.
  */
-import 'server-only';
 const id=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function toolkitPilotOrganizationAllowed(orgId:unknown,env:NodeJS.ProcessEnv=process.env):boolean{
   if(env.RCH_SITES_TOOLKIT_ENABLED!=='true'||typeof orgId!=='string'||!id.test(orgId))
