@@ -227,7 +227,7 @@ export default function BasketballToolkitPage(){
             <div className="mt-4 inline-block rounded-xl bg-white p-3"><QRCode value={publicRegistration} size={140}/></div>
             <p className="mt-2 text-xs text-white/50">Scan or print this QR code. Registration opens only after you save an enabled form.</p>
           </div>}
-          {!slug&&<p className="text-sm text-amber-200">Publish your organization's website to enable the public registration URL.</p>}
+          {!slug&&<p className="text-sm text-amber-200">Publish your organization&apos;s website to enable the public registration URL.</p>}
           <div className="space-y-2"><h3 className="font-semibold">Recent registrations ({registrations.length} shown)</h3>
             {registrations.map(r=><div key={r.id} className="rounded-xl border border-white/15 p-3 text-sm">
               <span>{r.name}</span><span className="ml-3 text-white/50">{r.email}</span>
