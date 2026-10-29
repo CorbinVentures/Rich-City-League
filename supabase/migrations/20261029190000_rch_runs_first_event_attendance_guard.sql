@@ -5,6 +5,12 @@
 
 begin;
 
+-- Production retains legacy runs.capacity, and the Run creation client submits it.
+-- Add the same optional-legacy field on clean local/staging builds so first-event
+-- creation does not break with 'column capacity does not exist'. Preserve existing
+-- production values and mirror the canonical max_players for new client inserts.
+alter table public.runs add column if not exists capacity integer not null default 10;
+
 create table if not exists public.rch_run_checkin_codes (
  run_id uuid primary key references public.runs(id) on delete cascade,
  code_hash text not null,
