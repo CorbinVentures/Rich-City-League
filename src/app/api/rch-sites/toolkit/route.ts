@@ -89,6 +89,9 @@ export async function POST(request:Request){
       case 'saveForm':{
         const form=parseToolkitForm(input.value);
         if(form.open){
+          if(!process.env.RCH_SITES_REGISTRATION_RATE_SECRET||
+            process.env.RCH_SITES_REGISTRATION_RATE_SECRET.length<32)
+            return reply({error:'Public registration protections are not configured.'},503);
           const {data:site,error:siteError}=await admin.from('rch_sites')
             .select('status').eq('organization_id',organizationId).maybeSingle();
           if(siteError||site?.status!=='published')
