@@ -8,6 +8,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import type { DisciplineCase, Draft, DraftPool, LeagueRequest, Team, TryoutSession } from '@/types/database';
 import { generateSeasonDraftOrder } from '@/lib/draft/order';
 import { parsePreseasonDraftOrder, type PreseasonDraftOrder } from '@/lib/draft/preseason';
+import { isRclProSeasonWindow, RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 const categories = ['TRADE_REQUEST', 'ROSTER_CHANGE', 'PLAYER_RELEASE', 'PLAYER_ACTIVATION', 'DNP_INQUIRY', 'CONDUCT_CONCERN', 'GENERAL'];
 
@@ -78,6 +79,7 @@ export default function LeagueOperationsPage() {
   async function createTryout(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !sessionForm.season_id) return;
+    if (!isRclProSeasonWindow(seasons.find(item=>item.id===sessionForm.season_id)?.start_date)) { setMessage('Select the November 2027 or later professional season for tryouts. Imported 2026 seasons are historical.'); return; }
     const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('tryout_sessions').insert({ ...sessionForm, starts_at: new Date(sessionForm.starts_at).toISOString(), ends_at: new Date(sessionForm.ends_at).toISOString(), capacity: Number(sessionForm.capacity), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Tryout session created.');
@@ -87,6 +89,7 @@ export default function LeagueOperationsPage() {
   async function createDraft(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile || !draftForm.season_id) return;
+    if (!isRclProSeasonWindow(seasons.find(item=>item.id===draftForm.season_id)?.start_date)) { setMessage('Select a November 2027 or later professional season for the official draft.'); return; }
     const db = supabase as unknown as import('@supabase/supabase-js').SupabaseClient<import('@/types/database').Database>;
     const { error } = await db.from('drafts').insert({ ...draftForm, rounds: Number(draftForm.rounds), roster_limit: Number(draftForm.roster_limit), created_by: profile.id } as never);
     setMessage(error ? error.message : 'Draft created in setup mode.');
@@ -193,7 +196,7 @@ export default function LeagueOperationsPage() {
   const selectedDraft = drafts.find(item => item.id === orderDraftId);
   const selectedSeason = seasons.find(item => item.id === selectedDraft?.season_id);
   // Never apply the 2027 preseason allocation to the stale 2026 playable season.
-  const matchesInauguralSeason = Boolean(selectedSeason && selectedSeason.start_date >= '2027-11-01' && selectedSeason.start_date < '2028-01-01');
+  const matchesInauguralSeason = Boolean(selectedSeason && isRclProSeasonWindow(selectedSeason.start_date) && selectedSeason.start_date < '2028-01-01');
   const canApplyPreseasonOrder = Boolean(matchesInauguralSeason && preseasonOrder &&
     availableOrderTeams.length === preseasonOrder.first_round_team_ids.length &&
     preseasonOrder.first_round_team_ids.every(id => availableOrderTeams.some(team => team.id === id)));
@@ -201,7 +204,7 @@ export default function LeagueOperationsPage() {
   return <main className="min-h-screen pb-20"><Container maxWidth="xl" className="py-10">
     <Link href="/admin" className="text-sm text-rcl-gold">← Command center</Link>
     <p className="mt-8 text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">RCL league operations</p>
-    <h1 className="mt-2 font-display text-5xl font-bold">The league room</h1>
+    <h1 className="mt-2 font-display text-5xl font-bold">The league room</h1><p className="mt-3 rounded-xl border border-rcl-orange/25 bg-rcl-orange/[.035] p-4 text-sm text-white/75"><strong className="text-rcl-orange">PRO SEASON: {RCL_PRO_SEASON.startLabel.toUpperCase()}</strong> · Official tryouts planned for summer 2027; Draft Night follows. Imported 2026 season rows remain historical and must not be selected as the new professional season. Use League Setup once the exact opening date is confirmed.</p>
     <p className="mt-3 max-w-2xl text-gray-400">Run the player lifecycle from tryout registration through draft, roster status, requests, and discipline. Every change is protected by Supabase authorization and recorded in the audit log.</p>
     {message && <p className="mt-5 rounded-lg bg-rcl-gold/10 p-3 text-sm text-rcl-gold">{message}</p>}
     <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -215,14 +218,14 @@ export default function LeagueOperationsPage() {
     </div>
     <div className="mt-8 grid gap-8 lg:grid-cols-2">
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Preseason tryouts</h2><form onSubmit={createTryout} className="mt-5 grid gap-3 sm:grid-cols-2">
-        <select aria-label="Tryout season" required value={sessionForm.season_id} onChange={(e) => setSessionForm({ ...sessionForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white"><option value="">Season</option>{seasons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+        <select aria-label="Tryout season" required value={sessionForm.season_id} onChange={(e) => setSessionForm({ ...sessionForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white"><option value="">Season</option>{seasons.filter(s=>isRclProSeasonWindow(s.start_date)).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
         <input aria-label="Capacity" required type="number" min="1" value={sessionForm.capacity} onChange={(e) => setSessionForm({ ...sessionForm, capacity: Number(e.target.value) })} placeholder="Capacity" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <input aria-label="Tryout starts at" required type="datetime-local" value={sessionForm.starts_at} onChange={(e) => setSessionForm({ ...sessionForm, starts_at: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <input aria-label="Tryout ends at" required type="datetime-local" value={sessionForm.ends_at} onChange={(e) => setSessionForm({ ...sessionForm, ends_at: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <button className="rounded-lg bg-rcl-gold px-4 py-3 font-bold text-black sm:col-span-2">Create tryout session</button>
       </form><div className="mt-6 space-y-2">{sessions.map((s) => <div key={s.id} className="flex items-center justify-between rounded-lg border border-white/10 p-3 text-sm"><span>{new Date(s.starts_at).toLocaleString()} · cap {s.capacity}</span><select aria-label="Session status" value={s.status} onChange={(e) => void updateSession(s.id, e.target.value as TryoutSession['status'])} className="rounded border border-white/10 bg-black/30 p-2 text-white">{['DRAFT','OPEN','FULL','COMPLETED','CANCELLED'].map((v) => <option key={v}>{v}</option>)}</select></div>)}</div></section>
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"><h2 className="font-display text-2xl font-bold">Draft room</h2><form onSubmit={createDraft} className="mt-5 grid gap-3 sm:grid-cols-2">
-        <select aria-label="Draft season" required value={draftForm.season_id} onChange={(e) => setDraftForm({ ...draftForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white sm:col-span-2"><option value="">Season</option>{seasons.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+        <select aria-label="Draft season" required value={draftForm.season_id} onChange={(e) => setDraftForm({ ...draftForm, season_id: e.target.value })} className="rounded-lg border border-white/10 bg-black/30 p-3 text-white sm:col-span-2"><option value="">Season</option>{seasons.filter(s=>isRclProSeasonWindow(s.start_date)).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
         <input aria-label="Draft name" required value={draftForm.name} onChange={(e) => setDraftForm({ ...draftForm, name: e.target.value })} placeholder="Draft name" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white sm:col-span-2" />
         <input aria-label="Rounds" required type="number" min="1" value={draftForm.rounds} onChange={(e) => setDraftForm({ ...draftForm, rounds: Number(e.target.value) })} placeholder="Rounds" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />
         <input aria-label="Roster limit" required type="number" min="1" value={draftForm.roster_limit} onChange={(e) => setDraftForm({ ...draftForm, roster_limit: Number(e.target.value) })} placeholder="Roster limit" className="rounded-lg border border-white/10 bg-black/30 p-3 text-white" />

@@ -3,6 +3,7 @@ import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { RCHBrowserHomepage } from '@/components/RCHBrowserHomepage';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
+import { isRclProSeasonRecord, RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Virginia Basketball Runs & Leagues' }, description: 'Find pickup basketball runs, 1v1 games, courts and competition in Richmond and across Virginia. Join Rich City Hoops free to connect with players and crews.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Virginia Basketball Runs & Leagues',description:'Find local pickup basketball runs, 1v1 challenges, courts, crews and leagues in Virginia. Free to join.'} };
 
@@ -11,12 +12,14 @@ export const revalidate = 60;
 export default async function HomePage() {
   const { teams, games, standings, news, seasons, divisions } = await getLeagueSnapshot();
   const client = getPublicClient();
-  const season = seasons.find(item=>item.status === 'active') ?? seasons.find(item=>item.status === 'registration') ?? seasons[0];
+  const proSeasons = seasons.filter(isRclProSeasonRecord);
+  const season = proSeasons.find(item=>item.status === 'active') ?? proSeasons.find(item=>item.status === 'registration') ?? proSeasons[0];
   const seasonStandings = standings.filter(item=>item.season_id === season?.id);
   const divisionId = seasonStandings[0]?.division_id;
   const previewStandings = seasonStandings.filter(item=>item.division_id === divisionId);
-  const standingsLabel = [season?.name, divisions.find(item=>item.id === divisionId)?.name].filter(Boolean).join(' · ');
-  const completedGameIds = new Set(games.filter(game => game.status === 'completed' && (!season || game.season_id === season.id)).map(game => game.id));
+  const standingsLabel = [season?.name ?? `Pro season planned · ${RCL_PRO_SEASON.startLabel}`, divisions.find(item=>item.id === divisionId)?.name].filter(Boolean).join(' · ');
+  const proSeasonGames = season ? games.filter(game => game.season_id === season.id) : [];
+  const completedGameIds = new Set(proSeasonGames.filter(game => game.status === 'completed').map(game => game.id));
 
   // The landing page displays just six players and three posts. Never fetch an
   // unused player-IQ ranking or 1,000 unrelated game-stat rows for first paint.
@@ -52,7 +55,7 @@ export default async function HomePage() {
       <MemberHomeRedirect />
       <RCLHomeExperience
         teams={teams}
-        games={games}
+        games={proSeasonGames}
         standings={previewStandings}
         standingsLabel={standingsLabel}
         players={(playersRaw ?? []) as any}

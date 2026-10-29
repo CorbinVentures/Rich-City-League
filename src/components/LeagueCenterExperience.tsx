@@ -14,6 +14,7 @@ import {
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 type Role = 'player' | 'coach' | 'fan' | 'staff' | 'admin';
 type BadgeSnapshot = { name:string; icon:string|null; tier:string|null; earned_at:string };
@@ -79,7 +80,7 @@ export function LeagueCenterExperience(){
      <div className="rch-program-brand-copy">
       <p className="rch-league-kicker">VIRGINIA BASKETBALL · OFFICIAL LEAGUE</p>
       <h1>RICH CITY <span>LEAGUE</span></h1>
-      <p className="rch-league-tagline">Teams. Games. Rivalries. Championships.</p>
+      <p className="rch-league-tagline">Professional season planned for {RCL_PRO_SEASON.startLabel} · Official tryouts summer 2027 · Draft Night follows</p>
      </div>
     </div>
     <div className="rch-league-header-actions">
@@ -94,7 +95,7 @@ export function LeagueCenterExperience(){
     </div>}
    </Container>
   </header>
-  <Container maxWidth="xl" className="py-6 sm:py-8"><LeaguePublicHub/></Container>
+  <Container maxWidth="xl" className="py-6 sm:py-8"><p className="mb-5 rounded-xl border border-rcl-orange/25 bg-rcl-orange/[.045] px-4 py-3 text-sm text-white/75"><strong className="text-rcl-orange">NOVEMBER 2027 PRO SEASON</strong> · Preseason preparation is underway. Exact tipoff, tryout dates, and venues will be announced. Runs and the Commonwealth Cup are independent year-round competitions.</p><LeaguePublicHub/></Container>
   <Container maxWidth="xl" className="rch-league-member-content py-8 sm:py-10">{error&&<div className="mb-6 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">{error}</div>}
    {role==='player'&&<section><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">My season</p><h2 className="mt-2 font-display text-3xl font-semibold">Play. Track. Climb.</h2><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><StatusTile label="Games logged" value={loading?'—':String(state.stats?.games??0)} detail="Current-season completed games"/><StatusTile label="Scoring" value={loading?'—':`${state.stats?.ppg??0} PPG`} detail={`${state.stats?.rpg??0} RPG · ${state.stats?.apg??0} APG`} accent/><StatusTile label="Defense" value={loading?'—':`${state.stats?.spg??0} SPG`} detail={`${state.stats?.bpg??0} BPG`}/><StatusTile label="Badges" value={loading?'—':String(state.badges.length)} detail={state.badges[0]?.name?`Latest: ${state.badges[0].name}`:'Earned RCL achievements'}/></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><FeatureCard title="Schedule" copy="Know your next matchup and every game on the league calendar." href="/schedule" icon={FaCalendarDays}/><FeatureCard title="Leaderboards" copy="See where your production ranks against the rest of the league." href="/leaderboards" icon={FaListOl}/><FeatureCard title="Player Rankings" copy="Track RCL ranking movement and your competitive position." href="/rankings" icon={FaRankingStar}/><FeatureCard title="Stats + Badges" copy="Open your official numbers, badges and basketball identity." href={user?`/social/profile/${user.id}?tab=stats`:'/stats'} icon={FaTrophy}/></div></section>}
    {operator&&<section><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">Team operations</p><h2 className="mt-2 font-display text-3xl font-semibold">Run your team from RCL.</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-white/45">Official stats flow from the Scorebook into results, player profiles, leaderboards and Fantasy scoring. Coaches operate their team; admins control the league layer.</p>{state.teams.length>0&&<div className="mt-5 flex flex-wrap gap-2">{state.teams.slice(0,10).map(team=><Link key={team.id} href={`/teams/${team.slug}`} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-semibold"><FaShieldHalved className="text-rcl-blue"/>{team.name}</Link>)}</div>}<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><FeatureCard title="Scorebook" copy="Log the game live and push official team and player stats through the platform." href="https://rch-scorebook.vercel.app/" icon={FaChartSimple} eyebrow="Live game operations"/><FeatureCard title="Team Site" copy="Post announcements, game-day photos and team news from one publishing workspace." href="/portal/team" icon={FaImage} eyebrow="Team publishing"/><FeatureCard title="Draft Night" copy={role==='admin'?'Configure the draft, clock, order and rules while coaches make protected selections.':'Scout the board and make your official selection when your team is on the clock.'} href={role==='admin'?'/admin/operations':'/draft'} icon={FaCrown} eyebrow="Roster building"/><FeatureCard title="League Operations" copy="Schedules, rosters, standings and official competition controls for authorized staff." href={role==='admin'?'/admin/operations':'/league'} icon={FaShieldHalved} eyebrow="Organization control"/></div></section>}

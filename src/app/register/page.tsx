@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 const LEAGUE_REGISTRATION_URL = 'https://vba.leagueapps.com/leagues';
 
@@ -22,12 +23,11 @@ export default function RegisterPage() {
           <p className="text-xs font-black uppercase tracking-[.25em] text-orange-400">Rich City League · Richmond, Virginia</p>
           <h1 className="mt-5 font-display text-5xl font-black uppercase leading-tight sm:text-7xl">Your next chapter in Richmond basketball.</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/75">
-            Explore organized league competition through Rich City League. Official league availability,
-            registration requirements, dates and fees are shown in the existing registration portal.
+            Join the basketball community today. The next Rich City League professional season is planned for {RCL_PRO_SEASON.startLabel}, with official tryouts planned for summer 2027. Exact dates and professional registration availability have not been announced.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <a href={LEAGUE_REGISTRATION_URL} rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl bg-orange-500 px-6 text-sm font-black uppercase tracking-wide text-[#09101a] hover:bg-orange-400">
-              View league registration options ↗
+              View external league listings ↗
             </a>
             <Link href="/auth/sign-up" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-6 text-sm font-bold hover:border-white/60">
               Create a free RCH profile

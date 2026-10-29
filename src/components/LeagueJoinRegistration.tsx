@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import {RCL_PRO_SEASON} from '@/lib/rcl-pro-season';
 import {RegistrationForm} from '@/components/RegistrationForm';
 import type {Season,Division} from '@/types/database';
 
@@ -23,7 +24,7 @@ export function LeagueJoinRegistration(){
     const league=await db.from('leagues').select('id').eq('slug','rich-city-league').eq('is_active',true).maybeSingle();
     if(league.error)throw league.error;
     const result=league.data?.id
-      ? await db.from('seasons').select('*').eq('league_id',league.data.id).eq('registration_open',true).order('start_date',{ascending:true}).limit(10)
+      ? await db.from('seasons').select('*').eq('league_id',league.data.id).eq('registration_open',true).gte('start_date',RCL_PRO_SEASON.startMonth+'-01').order('start_date',{ascending:true}).limit(10)
       : {data:[] as Season[],error:null};
     if(result.error)throw result.error;
     const open=(result.data??[]) as Season[];
@@ -48,7 +49,7 @@ export function LeagueJoinRegistration(){
      :user?<RegistrationForm seasons={seasons} divisions={divisions}/>
      :<Link href="/auth/sign-in?redirect=%2Fleague%2Fjoin%23official-registration" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">Sign in to apply</Link>}
     </>
-   :<p className="mt-2 text-sm text-white/65">No in-app league season is currently listed as open for registration. You can still join Rich City Hoops, play Runs, and follow updates without waiting.</p>}
+   :<p className="mt-2 text-sm text-white/65">The professional season is planned for {RCL_PRO_SEASON.startLabel}. Official tryouts are planned for summer 2027; no pro-season registration window is currently open here. Join Rich City Hoops and play Runs in the meantime.</p>}
   <p className="mt-4 text-xs leading-5 text-white/55">League registration and official player tryouts may use different enrollment processes. Confirm eligibility, dates and fees in each official announcement.</p>
   <Link href="/register" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-rcl-orange">Other registration information →</Link>
  </section>;
