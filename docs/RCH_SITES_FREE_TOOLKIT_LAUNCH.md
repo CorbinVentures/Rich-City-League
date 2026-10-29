@@ -3,7 +3,7 @@
 **Status:** Feature branch only. Do not merge or deploy without CI, staging migration/RLS tests, security review and explicit release approval. The server-side environment flag `RCH_SITES_TOOLKIT_ENABLED` defaults OFF.
 
 ## Scope committed
-- `/network/dashboard/sites/toolkit`: authorized organization selector, working single round-robin Schedule Studio, team-name/Roster Builder, fixed adult-interest registration form and QR sharing, printable Game Day Pack, budget projections and CSV exports.
+- `/network/dashboard/sites/toolkit`: authorized organization selector, working single round-robin Schedule Studio (explicit published public schedule page), team-name/Roster Builder, fixed adult-interest registration form and QR sharing, printable Game Day Pack, budget projections and CSV exports.
 - `/sites/{slug}/toolkit-register`: public form for adult interest submissions on a verified, published organization's site when that organization explicitly opens the form.
 - `/api/rch-sites/toolkit`: verified owner/manager CRUD, server-side validated Free limits, optimistic revision matching and server-only storage.
 - `/api/rch-sites/toolkit/registration`: guarded public submission, single entry per email and a serialized per-organization monthly limit.
