@@ -47,7 +47,7 @@ create or replace function public.rch_label_weekend_circuit_suggestion()
 returns trigger language plpgsql security definer set search_path='' as $label$
 begin
  update public.runs r
- set title='Weekend Court Suggestion · '||coalesce(nullif(r.court_name,''),r.location),
+ set title='Weekend Court Suggestion · '||r.location,
      updated_at=now()
  where r.id=new.run_id
    and r.title like 'RCH Weekend Double XP %';
@@ -60,7 +60,7 @@ create trigger rch_weekend_circuit_truthful_label
  execute function public.rch_label_weekend_circuit_suggestion();
 
 update public.runs r
-set title='Weekend Court Suggestion · '||coalesce(nullif(r.court_name,''),r.location),
+set title='Weekend Court Suggestion · '||r.location,
     updated_at=now()
 from public.rch_weekend_circuit_events e
 where e.run_id=r.id and r.title like 'RCH Weekend Double XP %';
