@@ -386,37 +386,14 @@ export default function RunsPage() {
     void load();
   };
 
+  // A game-day attendance claim requires the host-issued court code in the Run Room.
+  // Do not invoke the legacy reward RPC directly from list cards.
   const checkIn = async (run: Run) => {
-    if (!db || !user) {
-      setError('Sign in to check in.');
-      return;
-    }
-    setBusy(`checkin-${run.id}`);
-    setError('');
-    const { data, error: rpcError } = await db.rpc('check_in_to_run', { p_run: run.id });
-    if (rpcError) setError(rpcError.message);
-    else {
-      setNotice(Number(data ?? 0) > 0 ? '+15 REP earned for your verified check-in.' : 'You are already checked in to this run.');
-      void load();
-    }
-    setBusy(null);
+    window.location.assign('/runs/'+encodeURIComponent(run.id)+'#rch-game-day');
   };
 
   const claimHighlight = async (run: Run) => {
-    if (!db || !user) {
-      setError('Sign in to claim highlight REP.');
-      return;
-    }
-    setBusy(`highlight-${run.id}`);
-    setError('');
-    const { data, error: rpcError } = await db.rpc('claim_latest_run_highlight', { p_run: run.id });
-    if (rpcError) setError(rpcError.message);
-    else {
-      const reward = Number(data?.[0]?.rep_awarded ?? 0);
-      setNotice(reward ? `+${reward} REP earned for your run highlight.` : 'This run highlight has already been rewarded.');
-      void load();
-    }
-    setBusy(null);
+    window.location.assign('/runs/'+encodeURIComponent(run.id)+'#rch-game-day');
   };
 
   const dailyCandidates = useMemo<DailyCircuitCandidate[]>(()=>runs.filter(run=>!run.isSuggestedCourt&&Date.parse(run.starts_at)>Date.now()).map(run=>({
@@ -663,8 +640,8 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
         <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
         <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
         <div className="flex flex-wrap gap-2">
-          {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Check in'}</button>}
-          {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim eligible highlight REP'}</button></>}
+          {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Court-code check-in'}</button>}
+          {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim highlight after check-in'}</button></>}
         </div>
       </details>
     </div>
