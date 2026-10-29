@@ -8,7 +8,11 @@ type ToolkitRolloutEnv={
   RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED?:string;
   RCH_SITES_TOOLKIT_PILOT_ORG_IDS?:string;
 };
-export function toolkitPilotOrganizationAllowed(orgId:unknown,env:ToolkitRolloutEnv=process.env):boolean{
+export function toolkitPilotOrganizationAllowed(orgId:unknown,env:ToolkitRolloutEnv={
+  RCH_SITES_TOOLKIT_ENABLED:process.env.RCH_SITES_TOOLKIT_ENABLED,
+  RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED:process.env.RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED,
+  RCH_SITES_TOOLKIT_PILOT_ORG_IDS:process.env.RCH_SITES_TOOLKIT_PILOT_ORG_IDS,
+}):boolean{
   if(env.RCH_SITES_TOOLKIT_ENABLED!=='true'||typeof orgId!=='string'||!id.test(orgId))
     return false;
   if(env.RCH_SITES_TOOLKIT_PUBLIC_LAUNCH_ENABLED==='true')return true;
