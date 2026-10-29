@@ -134,7 +134,7 @@ export default function BasketballToolkitPage(){
       {!authLoading&&!user?<Link className="mt-5 inline-block text-rose-300" href="/auth/sign-in">Sign in to continue</Link>:null}
       {orgs.length>0&&<label className="mt-5 block max-w-lg text-sm">Organization
         <select aria-label="Choose organization" className={input+' mt-2'} value={organizationId}
-          onChange={e=>setOrg(e.target.value)}>{orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select>
+          disabled={busy} onChange={e=>setOrg(e.target.value)}>{orgs.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select>
       </label>}
       {error&&<p role="alert" className="mt-4 rounded-xl border border-red-500/40 p-3 text-sm text-red-200">{error}</p>}
       {message&&<p role="status" className="mt-4 rounded-xl border border-emerald-500/40 p-3 text-sm text-emerald-200">{message}</p>}
