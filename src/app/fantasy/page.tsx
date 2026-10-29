@@ -319,7 +319,7 @@ export default function FantasyPage() {
         {!user && <Notice icon={<FaUsers />} tone="blue">Sign in as a fan to create and manage your fantasy team. The player pool, rules and official scoring remain public.</Notice>}
         {user && profile?.role !== 'fan' && <Notice icon={<FaBolt />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
         {message && <Notice icon={<FaBolt />} tone="orange">{message}</Notice>}
-        {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. This page is ready; once the league opens a fantasy season, the draft room will activate automatically.</Notice>}
+        {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. Rich City League professional play is planned for November 2027; Fantasy will activate when the official season and player pool are ready.</Notice>}
 
         <details className="rch-fantasy-help mb-5 rounded-xl border border-white/10 p-3"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">How Fantasy works</summary><section aria-label="How RCH Fantasy works" className="mt-3 grid gap-3 md:grid-cols-3">
           {[
