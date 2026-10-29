@@ -196,11 +196,11 @@ export default function RunHighlightPublisher() {
 
       let message = 'Run highlight posted to the Run Tape and RCL Social.';
       if (participant) {
-        const { data: rewardData, error: rewardError } = await db.rpc('claim_latest_run_highlight', { p_run: run.id });
+        const { data: rewardData, error: rewardError } = await db.rpc('rch_claim_checked_in_run_highlight', { p_run: run.id });
         if (!rewardError) {
           const reward = Number(rewardData?.[0]?.rep_awarded ?? 0);
           message = reward > 0
-            ? `Run highlight posted · +${reward} REP earned.`
+            ? `Run highlight posted · +${reward} XP earned after court check-in.`
             : 'Run highlight posted · this Run highlight reward was already claimed.';
         }
       }
@@ -233,7 +233,7 @@ export default function RunHighlightPublisher() {
         <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.12),transparent_36%),#07111b] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaBasketball className="mr-1 inline" />{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Show what happened.</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Joined players and the host can earn one verified +35 REP highlight reward during the Run highlight window.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Players who checked in with their host-issued court code can earn one +35 XP highlight reward after publishing eligible media. A joined roster spot alone does not award points.</p>
         </section>
 
         <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#07111b] p-2">
@@ -256,7 +256,7 @@ export default function RunHighlightPublisher() {
               {mode === 'moment' && files.length > 0 && files.length < SOCIAL_MAX_IMAGES && <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-black text-white/55">+ Add more photos</button>}
             </div>
 
-            {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Verified participant.</b> If this post falls inside the Run highlight window and you have not already claimed it, RCL will automatically award the +35 REP highlight bonus after publishing.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. The REP highlight reward is reserved for the Run host or joined players.</div>}
+            {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Rostered participant.</b> After a host-issued in-person check-in, an eligible published highlight may earn +35 XP. Media can still be shared without a reward.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. XP rewards require a verified court-code check-in.</div>}
 
             <label className="flex min-h-12 items-start gap-3 rounded-xl border border-white/15 bg-white/[.03] p-3 text-xs leading-5 text-white/75">
               <input type="checkbox" required checked={mediaPermission} onChange={e=>setMediaPermission(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#e65782]"/>
