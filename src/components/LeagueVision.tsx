@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 const pillars = [
   { number: '01', title: 'A team worth representing.', copy: 'The vision: teams rooted in communities across the Commonwealth, with distinctive identities, professional uniforms and dedicated team sites.' },
@@ -14,14 +15,14 @@ export function LeagueVision() {
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[.18em] text-blue-200">The next chapter · Our league vision</p>
           <h2 id="league-vision-title" className="mt-5 max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">One Commonwealth.<br/>Every city has a story.</h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200">We are building Rich City League to become Virginia’s premier professional basketball league. City pride, professional standards and unforgettable game nights—connected through Rich City Hoops.</p>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200">We are building Rich City League to become Virginia’s premier professional basketball league. City pride, professional standards and unforgettable game nights—connected through Rich City Hoops.</p><p className="mt-4 max-w-2xl rounded-xl border border-blue-200/30 bg-blue-950/40 px-4 py-3 text-sm font-semibold text-blue-100">Professional season planned for {RCL_PRO_SEASON.startLabel} · {RCL_PRO_SEASON.tryoutLabel} · Draft Night to follow. Exact dates will be announced.</p>
           <Link href="/teams" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-300/40 bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-300">Explore the league’s teams <span aria-hidden="true" className="ml-3">→</span></Link>
         </div>
         <aside className="min-w-0 rounded-2xl border border-white/15 bg-black/20 p-6">
           <p className="text-xs font-semibold uppercase tracking-[.14em] text-blue-200">The season is the story</p>
           <p className="mt-4 font-display text-2xl font-semibold leading-snug">The buildup. The battle.<br/>The aftermath.</p>
           <p className="mt-4 text-sm leading-6 text-slate-200">From practice to player introductions, from a rivalry’s first spark to the final buzzer. Give every matchup context and every fan a reason to come back.</p>
-          <p className="mt-4 text-xs leading-5 text-slate-300">Statewide expansion and professional operations are the direction we are building toward. Confirmed teams, venues and season details will be announced through official league updates.</p>
+          <p className="mt-4 text-xs leading-5 text-slate-300">Statewide expansion and professional operations are the direction we are building toward. The November 2027 launch month is the target; exact game dates, venue agreements and competition details will be confirmed through official league updates.</p>
         </aside>
       </div>
     </section>
