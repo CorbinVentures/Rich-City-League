@@ -1,0 +1,82 @@
+/* Phase 4: one competitive journey for official ranked data, recorded rivalries, weekly quests and Cup information. */
+.rcc-shell{max-width:1140px;margin:0 auto;padding:0 2px 30px;color:#f0f8ff;min-width:0}
+.rcc-hero{position:relative;overflow:hidden;border:1px solid #477eb5;border-radius:23px;background:radial-gradient(circle at 83% 12%,#21578a 0,#0e2a48 40%,#061524 80%);padding:24px;box-shadow:0 22px 50px #0007}
+.rcc-overline{display:flex;align-items:center;gap:7px;color:#9ad4ff;font-size:10px;font-weight:950;letter-spacing:.17em}
+.rcc-hero-content{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:15px}
+.rcc-hero-content>div:first-child{max-width:650px}
+.rcc-hero h2{font-size:clamp(30px,5vw,59px);line-height:.95;letter-spacing:-.05em;font-weight:1000}
+.rcc-hero h2 span{color:#7ac3fa}
+.rcc-hero-content p{max-width:570px;margin-top:12px;color:#c3dff0;font-size:13px;line-height:1.7}
+.rcc-season-emblem{display:flex;min-width:130px;flex-direction:column;align-items:center;gap:4px;border:1px solid #d3ac66;border-radius:17px;padding:14px;background:linear-gradient(145deg,#44371f,#0b2438);text-align:center;color:#ffdea5}
+.rcc-season-emblem>svg{font-size:33px}
+.rcc-season-emblem strong{font-size:21px;line-height:.95;letter-spacing:-.04em;font-weight:1000}
+.rcc-season-emblem small{font-size:8px;font-weight:900;letter-spacing:.07em}
+.rcc-season-disclosure{margin-top:16px;font-size:10px;line-height:1.6;color:#b4d1e6}
+.rcc-status-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:11px 0}
+.rcc-status-strip>div{min-width:0;padding:13px;border:1px solid #406c8c;border-radius:12px;background:#0c2d46}
+.rcc-status-strip small{display:block;color:#b1d1e5;font-size:9px;font-weight:850;letter-spacing:.03em}
+.rcc-status-strip strong{display:block;margin-top:6px;font-size:20px;font-weight:1000;overflow-wrap:anywhere}
+.rcc-account{padding:13px;margin-top:10px;border:1px solid #66819d;border-radius:11px;background:#0e2941;color:#d4e9f6;font-size:12px;line-height:1.6}
+.rcc-account a,.rcc-account button{color:#b9e2ff;text-decoration:underline;font-weight:900}
+.rcc-replay-preview{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid #5988ad;border-radius:13px;background:linear-gradient(100deg,#123f65,#092039);margin:9px 0 17px}
+.rcc-replay-preview div{min-width:0}
+.rcc-replay-preview small{display:block;font-size:9px;font-weight:900;color:#a2d9ff;letter-spacing:.07em}
+.rcc-replay-preview strong{display:block;font-size:15px;font-weight:1000;margin-top:3px}
+.rcc-replay-preview p{color:#bdd7ea;font-size:11px;line-height:1.6;margin-top:4px}
+.rcc-replay-preview>a{flex:none;display:flex;gap:7px;align-items:center;padding:9px;border:1px solid #96d2ff;border-radius:9px;background:#1d5e9f;color:white;text-decoration:none;font-size:10px;font-weight:950}
+.rcc-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:16px 0}
+.rcc-tabs button{display:flex;align-items:center;justify-content:center;gap:9px;min-height:53px;padding:8px;border:1px solid #436c8a;border-radius:12px;background:#0c2b44;color:#c4e0f2;cursor:pointer;font-size:12px;font-weight:1000}
+.rcc-tabs button[aria-pressed=true]{background:linear-gradient(120deg,#216ec8,#164879);border-color:#9bdcff;color:white;box-shadow:0 0 18px #4d9add4b}
+.rcc-tabs button:focus-visible,.rcc-shell a:focus-visible,.rcc-shell button:focus-visible{outline:3px solid #9bdcff;outline-offset:2px}
+.rcc-section{border:1px solid #365b79;border-radius:15px;background:#091d2e;padding:17px}
+.rcc-section-intro span{display:block;color:#96d4ff;font-size:10px;font-weight:950;letter-spacing:.14em}
+.rcc-section-intro h3{font-size:clamp(21px,4vw,31px);font-weight:1000;margin-top:6px}
+.rcc-section-intro p{max-width:730px;color:#bad5e8;font-size:12px;line-height:1.6;margin-top:7px}
+.rcc-records{margin-top:19px;padding:15px;border:1px solid #456d8b;border-radius:15px;background:#08192b}
+.rcc-records>header{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rcc-records>header span,.rcc-week-label{color:#9fd7ff;font-size:10px;font-weight:900;letter-spacing:.1em}
+.rcc-records h3{font-size:19px;font-weight:1000;margin-top:5px}
+.rcc-records>header button{display:flex;align-items:center;gap:6px;min-height:42px;border:1px solid #547e9e;border-radius:9px;padding:7px;color:#daefff;font-size:10px;font-weight:900}
+.rcc-formats{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0}
+.rcc-formats button{min-height:37px;padding:7px 10px;border:1px solid #4b7593;border-radius:9px;background:#102e47;color:#c5dfef;font-size:10px;font-weight:900}
+.rcc-formats button[aria-pressed=true]{background:#226cc1;border-color:#a4dcff;color:white}
+.rcc-receipts{list-style:none;display:grid;gap:7px;max-height:520px;overflow-y:auto;padding:0;margin:0}
+.rcc-receipts li{display:flex;gap:9px;align-items:center;border:1px solid #3c617c;border-radius:11px;background:#10283c;padding:10px}
+.rcc-result-mark{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid #657d95;border-radius:50%;background:#0d3554;color:#bfddf4}
+.rcc-result-mark.win{color:#ffe3a9;border-color:#cfaa69;background:#453c24}
+.rcc-receipts li>div{min-width:0;flex:1}
+.rcc-receipts strong{display:block;font-size:11px;font-weight:1000;overflow-wrap:anywhere}
+.rcc-receipts small{display:block;margin-top:5px;color:#b4d1e2;font-size:10px}
+.rcc-receipts li>a{display:flex;align-items:center;gap:6px;flex:none;font-size:10px;color:#b0e0ff;font-weight:900;text-decoration:none}
+.rcc-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:155px;border:1px dashed #5a7a96;border-radius:13px;padding:18px;margin-top:15px;text-align:center}
+.rcc-empty svg{font-size:25px}
+.rcc-empty strong{font-size:13px;font-weight:1000}
+.rcc-empty p{font-size:11px;color:#bad3e6;line-height:1.6}
+.rcc-empty a,.rcc-paths a{display:inline-flex;align-items:center;gap:7px;min-height:41px;border:1px solid #6693b9;border-radius:9px;background:#194f7d;padding:8px 12px;color:white;text-decoration:none;font-size:11px;font-weight:950}
+.rcc-truth{margin-top:12px;color:#b0cbdc;font-size:10px;line-height:1.6}
+.rcc-paths{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+.rcc-week-label{margin:13px 0}
+.rcc-quests{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.rcc-quests article{display:flex;gap:11px;align-items:center;padding:14px;border:1px solid #436c8b;border-radius:13px;background:#10293d}
+.rcc-quests article.done{border-color:#528d76;background:#0f3835}
+.rcc-quests article>span{font-size:27px;flex:none}
+.rcc-quests article>div{flex:1;min-width:0}
+.rcc-quests strong,.rcc-quests small,.rcc-quests article>div>span{display:block}
+.rcc-quests strong{font-size:13px;font-weight:950}
+.rcc-quests small{font-size:10px;color:#bcd7e9;margin-top:5px;line-height:1.5}
+.rcc-quests article>div>span{margin-top:7px;font-size:9px;font-weight:950;color:#9fd1fb}
+.rcc-quests article.done>div>span{color:#92f0bd}
+.rcc-quests article>a{flex:none;display:grid;place-items:center;min-width:40px;min-height:40px;border:1px solid #5a91b3;border-radius:9px;color:#d8efff}
+.rcc-cup-timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+.rcc-cup-timeline>div{display:flex;flex-direction:column;gap:9px;min-width:0;min-height:145px;padding:14px;border:1px solid #526c83;border-radius:13px;background:#102a40}
+.rcc-cup-timeline>div>span{color:#9ed5fc;font-size:10px;font-weight:900}
+.rcc-cup-timeline>div>svg{color:#ffe3a4;font-size:23px}
+.rcc-cup-timeline strong{font-size:11px;font-weight:1000}
+.rcc-cup-timeline p{color:#bcd6e8;font-size:10px;line-height:1.55}
+.rcc-cup-notice{display:flex;gap:11px;align-items:flex-start;border:1px solid #896f45;border-radius:11px;padding:13px;background:#392d19}
+.rcc-cup-notice>svg{flex:none;color:#ffdfa0}
+.rcc-cup-notice strong{font-size:12px;font-weight:1000}
+.rcc-cup-notice p{font-size:11px;color:#f0deb6;line-height:1.6;margin-top:5px}
+@media(max-width:700px){.rcc-hero{padding:17px;border-radius:17px}.rcc-hero-content{gap:10px}.rcc-season-emblem{min-width:95px;padding:9px}.rcc-season-emblem>svg{font-size:24px}.rcc-season-emblem strong{font-size:16px}.rcc-season-emblem small{font-size:7px}.rcc-hero-content p{font-size:11px}.rcc-status-strip strong{font-size:16px}.rcc-section{padding:12px}.rcc-tabs button{min-height:53px;flex-direction:column;gap:3px;font-size:10px}.rcc-quests{grid-template-columns:1fr}.rcc-cup-timeline{grid-template-columns:1fr}.rcc-cup-timeline>div{min-height:105px}.rcc-replay-preview{align-items:flex-start;flex-direction:column}}
+@media(max-width:390px){.rcc-hero-content{align-items:flex-start}.rcc-hero h2{font-size:29px}.rcc-status-strip>div{padding:7px}.rcc-status-strip strong{font-size:14px}.rcc-status-strip small{font-size:8px}.rcc-tabs button{font-size:9px}.rcc-receipts li{flex-wrap:wrap}.rcc-receipts li>a{margin-left:49px}}
+@media(prefers-reduced-motion:reduce){.rcc-shell *{animation:none!important;transition:none!important}}
