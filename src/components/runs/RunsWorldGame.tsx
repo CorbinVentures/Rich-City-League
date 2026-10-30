@@ -18,7 +18,6 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
-import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
 import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
@@ -328,9 +327,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       onBattle={()=>setScreen('battle')} onRules={onOpenRules}
       onReplay={()=>setIntroReplay(n=>n+1)}/>}
 
-   {screen==='world'&&<RunsGameLobby city={city?.name||null} journey={journey} signedIn={Boolean(user)} loading={journeyLoading}
-     onExplore={()=>{const arena=document.getElementById('rwg-world-map');arena?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});arena?.focus({preventScroll:true});}}
-     onMissions={()=>setScreen('missions')} onBattle={()=>setScreen('battle')}/>}
+   {screen==='world'&&<div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#385a72] bg-[#0c263b] px-4 py-3 text-sm">
+     <p className="text-[#cfe2ef]"><FaLocationDot className="mr-2 inline" aria-hidden="true"/>Select an outdoor court to explore its details. A map pin is not a scheduled game.</p>
+     <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 font-bold text-[#c8f06d]">Find hosted games <FaArrowRight aria-hidden="true"/></Link>
+   </div>}
 
    <nav className="rwg-nav" aria-label="Runs World gameplay modes">
     {nav.map(item=><button type="button" key={item.id} aria-pressed={screen===item.id} onClick={()=>setScreen(item.id)} className={screen===item.id?'active':''}>
