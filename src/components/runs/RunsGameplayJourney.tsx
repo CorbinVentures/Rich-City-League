@@ -55,6 +55,19 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
    .subscribe();
   return()=>{void db.removeChannel(channel);};
  },[db,runId,userId,suggested]);
+ const [shareStatus,setShareStatus]=useState('');
+ const sharePostgame=async()=>{
+  if(!verified)return;
+  const text='RCH Runs · '+(verified.won?'Verified Victory':'Verified Game')+
+   ' · '+format+' · +'+verified.xp+' World XP · +'+verified.rep+' Match REP. #RCHRuns';
+  const url=window.location.origin+'/runs/'+encodeURIComponent(runId);
+  try{
+   if(navigator.share)await navigator.share({title:'My verified RCH Runs result',text,url});
+   else{await navigator.clipboard.writeText(text+' '+url);setShareStatus('Verified result recap copied.');}
+  }catch(error){
+   if(!(error instanceof Error&&error.name==='AbortError'))setShareStatus('Sharing unavailable on this device.');
+  }
+ };
  const roster=lobbySnapshot({format,registered:registeredIds.length,capacity,status,suggested,past});
  const slots=playerTarget(format);
  const actualSlots=slots===null?Math.min(10,Math.max(1,registeredIds.length)):slots;
@@ -101,6 +114,7 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
   {userId&&!suggested&&<button type="button" onClick={()=>setRefreshTick(v=>v+1)} className="rch-game-sync" aria-label="Refresh verified game rewards">Refresh verified game status</button>}
   {verifiedError&&<p className="rch-game-journey-caution">Verified career receipts cannot sync right now; no game result is being assumed.</p>}
   <Link href={safeAction.href} className="rch-game-next"><div><small>YOUR NEXT MOVE</small><strong>{safeAction.title}</strong><span>{safeAction.desc}</span></div><FaArrowRight aria-hidden="true"/></Link>
-  {verified&&<Link className="rch-game-replay" href="/runs?view=world&mode=player">VIEW VERIFIED CAREER RECAP <FaArrowRight aria-hidden="true"/></Link>}
+  {verified&&<div className="rch-game-postgame-actions"><button type="button" onClick={()=>void sharePostgame()}>SHARE VERIFIED RESULT <FaArrowRight aria-hidden="true"/></button><Link className="rch-game-replay" href="/runs?view=world&mode=player">VIEW MYPLAYER CAREER <FaArrowRight aria-hidden="true"/></Link></div>}
+  {shareStatus&&<p className="rch-game-journey-caution" role="status">{shareStatus}</p>}
  </section>;
 }
