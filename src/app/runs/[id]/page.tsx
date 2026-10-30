@@ -364,7 +364,7 @@ export default function RunRoomPage() {
         <RunsGameplayJourney runId={run.id} format={run.game_format||'unknown'} status={run.status} capacity={run.max_players}
           suggested={suggestedCourt} listingUnknown={listingStatusUnknown} past={isPastRun}
           registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)} profiles={profiles}
-          userId={user?.id||null} scorecardCount={games.length}/>
+          userId={user?.id||null} scorecardCount={games.length} host={Boolean(user?.id===run.host_id)}/>
         <RunTeamMatchupBoard format={run.game_format||'unknown'} teams={teams} members={members}
           profiles={profiles} registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)}
           canManage={canManage} suggested={suggestedCourt||listingStatusUnknown||isPastRun} status={run.status}/>
