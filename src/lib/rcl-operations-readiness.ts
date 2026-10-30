@@ -32,7 +32,7 @@ export function inspectRclPilotReadiness(snapshot: RclOperationsSnapshot): {
   requiredManualApprovals: string[];
   duplicatePlayerIds: string[];
 } {
-  const seasonIsOfficialWindow = Boolean(snapshot.season && isRclProSeasonRecord(snapshot.season));
+  const seasonIsOfficialWindow = Boolean(snapshot.season && isRclProSeasonRecord(snapshot.season) && snapshot.season.start_date.startsWith('2027-11-'));
   const eligibleClubs = snapshot.assignedClubs.filter(item => item.active);
   const teamSeasonIds = new Set(eligibleClubs.map(item => item.team_season_id));
   const teamIds = new Set(eligibleClubs.map(item => item.team_id));
