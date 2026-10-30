@@ -154,6 +154,7 @@ export default function RchTvAdminPage() {
     const fileError = rchTvFileError(file);
     if (fileError) return setError(fileError);
     if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
+    if (publishNow && !window.confirm('Publish publicly now? Confirm that documented footage, audio, participant and event distribution permissions have been reviewed.')) return;
     const selected = file;
     const isVideo = rchTvIsVideo(selected);
     if (isVideo && !posterBlob) return setError('Choose a thumbnail or wait for automatic preview generation.');
@@ -222,6 +223,7 @@ export default function RchTvAdminPage() {
   }
   async function changeMediaStatus(id: string, status: 'published'|'draft'|'archived') {
     if (!db) return;
+    if (status === 'published' && !window.confirm('Confirm written distribution permissions, footage ownership, music rights and required participant or venue clearances before publishing this title. Proceed?')) return;
     setBusy(id);setError('');setNotice('');
     const r = await db.from('media').update({status}).eq('id',id);
     if (r.error) setError(r.error.message);
@@ -264,7 +266,7 @@ export default function RchTvAdminPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="text-xs font-bold uppercase tracking-[.2em] text-rcl-blue">Media operations</p>
           <h1 className="mt-2 text-3xl font-bold sm:text-4xl">RCH TV Studio</h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/60">Organize Live Games, The Pulse, Movies and Original Content; prepare licensed media and review founding creators.</p>
+          <p className="mt-2 max-w-2xl text-sm text-white/60">Operate free Live Games, publish rights-cleared archives, review creators and direct media production or sponsor proposals to the existing acquisition CRM.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={()=>void load()} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-bold"><FaRotate/>Refresh</button>
@@ -285,6 +287,16 @@ export default function RchTvAdminPage() {
         <Link href="/admin/rch-tv/studio" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-black text-black">Open Broadcast Studio <FaArrowRight aria-hidden="true" /></Link>
       </section>
 
+      <section className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/[.025] p-5">
+        <div><p className="text-xs font-black uppercase tracking-wider text-rcl-orange">RCH Media commercial pipeline</p>
+          <h2 className="mt-2 text-lg font-bold">Production & sponsor inquiries</h2>
+          <p className="mt-2 text-sm text-white/55">Incoming RCH Studios proposals are saved in the existing Network acquisition pipeline; search for “RCH MEDIA / STUDIOS COMMERCIAL INQUIRY”. Proposals are not confirmed bookings or collected revenue.</p></div>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/network/acquisition" className="inline-flex min-h-11 items-center rounded-lg border border-white/20 px-4 text-sm font-bold">Open acquisition CRM</Link>
+          <Link href="/media/studios" className="inline-flex min-h-11 items-center rounded-lg border border-white/20 px-4 text-sm font-bold">View Studio offers</Link>
+        </div>
+      </section>
+
       <div className="mt-8 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
         <section className="rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
           <h2 className="text-xl font-bold">Upload RCH TV media</h2>
@@ -303,7 +315,7 @@ export default function RchTvAdminPage() {
             </div>}
             {busy==='upload'&&<div role="status" aria-label="Upload progress" className="rounded-xl border border-white/10 p-3"><p className="mb-2 text-xs text-white/70">{uploadPercent}% uploaded</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-blue" style={{width:uploadPercent+'%'}} /></div></div>}
             <label className="block text-xs font-bold text-white/70">RCH TV section<select value={category} onChange={e=>setCategory(e.target.value as (typeof TV_CATEGORIES)[number]['value'])} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white">{TV_CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-            <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I own this production or have permission to distribute it on RCH TV, including its audio and footage.</span></label>
+            <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I confirm that RCH has the necessary permissions for public distribution of the footage, audio/music, event or venue, and identifiable participants, including required guardian releases.</span></label>
             <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)}/>Publish immediately instead of saving as draft</label>
             <button disabled={busy==='upload' || Boolean(file && rchTvIsVideo(file) && !posterBlob)} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
             {busy==='upload'&&<button type="button" onClick={()=>uploadAbortRef.current?.abort()} className="w-full rounded-lg border border-white/20 px-4 py-3 text-xs text-white/70">Pause upload</button>}
