@@ -448,7 +448,7 @@ export default function RunsPage() {
           </div>
         </section>}
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
-          <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
+          <Link href="/runs?view=world&mode=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
           <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How It Works</button>
         </nav>
@@ -513,7 +513,7 @@ export default function RunsPage() {
         </details>
         {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Suggested weekend open courts" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OUTDOOR COURTS</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court ideas, not scheduled games, reserved space or a promise of players. Visiting a suggested court alone earns no bonus; eligible 2× verified-game REP requires an independently confirmed game. Check-ins and highlights remain 1×.</p></div>
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OUTDOOR COURTS</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court ideas, not scheduled games, reserved space or a promise of players. Visiting a suggested court alone earns no bonus; eligible 2× verified-game REP requires an independently confirmed game; check-ins and highlights remain 1×.</p></div>
             <span className="rounded-xl border border-[#ffd47a]/50 px-3 py-2 text-xs font-black text-[#ffdb94]">COURT IDEAS · NOT EVENTS</span>
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.isSuggestedCourt&&run.weekendMultiplier===2&&run.status!=='cancelled'&&Date.parse(run.starts_at)>Date.now()).slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}<small className="block text-xs font-normal text-[#d3deef]">Open-court suggestion · no confirmed organizer</small></span><FaArrowRight aria-hidden="true"/></Link>)}</div>
