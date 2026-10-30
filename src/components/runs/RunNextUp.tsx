@@ -93,11 +93,12 @@ export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:s
   {error&&<p role="alert" className="mt-4 rounded-lg border border-rose-500/40 p-3 text-sm text-[#ffc2c2]">{error}</p>}
   {notice&&<p role="status" className="mt-4 rounded-lg border border-[#447a96] p-3 text-sm text-[#c7f4ff]">{notice}</p>}
   {user?<div className="mt-4 flex flex-wrap gap-2">
-   {!active&&canJoinQueue?<button disabled={busy} onClick={()=>void act('rch_join_run_queue',{p_run:runId},'You are now in the Next Up line.')} className="min-h-11 rounded-xl bg-[#318cf2] px-5 text-sm font-black disabled:opacity-50">Join Next Up</button>:
-   <div className="flex items-center gap-3"><span className="text-xs font-bold text-[#afdcf8]">Your status: {active.status.toUpperCase()}</span>
-    {active.status!=='playing'&&<button disabled={busy} onClick={()=>void act('rch_leave_run_queue',{p_entry:active.id},'You have left the queue.')} className="min-h-10 rounded-xl border border-[#7792a5] px-3 text-xs font-bold disabled:opacity-50">Leave queue</button>}</div>}
-    {!active&&!canJoinQueue&&<p className="rounded-lg border border-[#52778f] bg-[#102d45] px-3 py-3 text-xs leading-5 text-[#c7e4f6]" role="status">{!hosted?'Next Up is only available at an active hosted game.':!checkedIn?'Your RSVP does not place you in the on-court queue. Check in at the venue using the host code first.':'Sign in before joining Next Up.'} <a href="#rch-game-day" className="font-black underline">Game-day check-in</a></p>}
+   {active?<div className="flex items-center gap-3"><span className="text-xs font-bold text-[#afdcf8]">Your status: {active.status.toUpperCase()}</span>
+    {active.status!=='playing'&&<button disabled={busy} onClick={()=>void act('rch_leave_run_queue',{p_entry:active.id},'You have left the queue.')} className="min-h-10 rounded-xl border border-[#7792a5] px-3 text-xs font-bold disabled:opacity-50">Leave queue</button>}</div>:
+    canJoinQueue?<button disabled={busy} onClick={()=>void act('rch_join_run_queue',{p_run:runId},'You are now in the Next Up line.')} className="min-h-11 rounded-xl bg-[#318cf2] px-5 text-sm font-black disabled:opacity-50">Join Next Up</button>:
+    <p className="rounded-lg border border-[#52778f] bg-[#102d45] px-3 py-3 text-xs leading-5 text-[#c7e4f6]" role="status">{!hosted?'Next Up is only available at an active hosted game.':'Your RSVP does not place you in the on-court queue. Check in at the venue using the host code first.'} <a href="#rch-game-day" className="font-black underline">Game-day check-in</a></p>}
   </div>:<p className="mt-3 text-xs text-[#acd0eb]">Sign in, register and check in at the real court to enter Next Up.</p>}
+
   <div className="mt-5 space-y-2">
    {items.map((item)=>{
     const action=nextAction[item.status];
