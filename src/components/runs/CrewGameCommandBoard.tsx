@@ -36,7 +36,7 @@ export function CrewGameCommandBoard({crewName,city,logo,homeCourt,members,peopl
     <><h3>THE COURT IS WAITING</h3><p>No upcoming competitive Runs are listed. Organize a real game with your squad.</p><Link href="/runs?create=1">HOST A RUN <FaArrowRight aria-hidden="true"/></Link></>}
    </div>
   </div>
-  <div className="rch-crew-game-paths"><Link href={homeCourt?'/runs/courts/'+encodeURIComponent(homeCourt):'/runs/world'}><FaBasketball aria-hidden="true"/>{homeCourt?'OUR COURT ARENA':'CHOOSE A COURT'}</Link><Link href="/runs?view=list&competition=courts#rch-competition"><FaBolt aria-hidden="true"/> COURT BATTLES</Link><Link href="/commonwealth"><FaTrophy aria-hidden="true"/> COMMONWEALTH CUP</Link></div>
+  <div className="rch-crew-game-paths"><Link href={homeCourt?'/runs/courts/'+encodeURIComponent(homeCourt):'/runs/world'}><FaBasketball aria-hidden="true"/>{homeCourt?'OUR COURT ARENA':'CHOOSE A COURT'}</Link><Link href="/runs?view=world&mode=season"><FaBolt aria-hidden="true"/> RANKED & RIVALS</Link><Link href="/commonwealth"><FaTrophy aria-hidden="true"/> COMMONWEALTH CUP</Link></div>
   <p className="rch-crew-game-disclosure"><FaShieldHalved aria-hidden="true"/> This HQ displays recorded crew membership and published competition entries. A crew registration is not an individual RSVP, a verified match, or territorial control.</p>
  </section>;
 }
