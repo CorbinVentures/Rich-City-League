@@ -20,6 +20,7 @@ import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,ty
 import './runs-world.css';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
+import {RunsMyCareerStage} from '@/components/runs/RunsMyCareerStage';
 import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
 import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCourtPreview';
 
@@ -461,27 +462,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       <span className="rwg-kicker">YOUR BASKETBALL CAREER</span><h2>My Player.</h2>
       {!user?<div className="rwg-empty"><p>Create a free RCH account to build a real basketball legacy.</p>
        <Link className="rwg-primary" href="/auth/sign-up">Create my player <FaArrowRight/></Link></div>:<>
-       <div className="rwg-player-stats">
-        <div><small>HOOPER LEVEL</small><strong>{journey?.signed_in?journey.world_level:'—'}</strong><span>Earn World XP from verified games</span></div>
-        <div><small>SPENDABLE REP</small><strong>{player.repBalance??'—'}</strong><span>Earned through eligible activities</span></div>
-        <div><small>VERIFIED GAMES</small><strong>{player.passport?.verified_games??'—'}</strong><span>Competitive history</span></div>
-        <div><small>RUN BADGES</small><strong>{player.passport?.badges?.length??'—'}</strong><span>Confirmed achievements</span></div>
-       </div>
-
-       {player.passport?.last_results?.length?(()=>{
-        const result=player.passport!.last_results[0];
-        const ratingChanged=typeof result.rating_after==='number'&&typeof result.rating_before==='number';
-        return <section className="rwg-match-reveal" aria-label="Your most recent verified match">
-         <span className="rwg-kicker"><FaTrophy/> VERIFIED MATCH RECEIPT</span>
-         <h3>{result.court_name||'Competitive match'}</h3>
-         <p>{result.game_format||'Basketball'} · {shortWhen(result.verified_at)}{typeof result.won==='boolean'?(result.won?' · Verified win':' · Verified loss'):''}</p>
-         {ratingChanged&&<div className="rwg-rating-shift"><span>BEFORE <strong>{result.rating_before}</strong></span>
-           <FaArrowRight/><span>AFTER <strong>{result.rating_after}</strong></span>
-           <b>{(result.rating_after!-result.rating_before!)>=0?'+':''}{result.rating_after!-result.rating_before!} rating</b>
-         </div>}
-         <small>This comes from your confirmed match history, not a simulated game.</small>
-        </section>;
-       })():null}
+       <RunsMyCareerStage name={identity?.display_name||identity?.username||'RCH Hooper'}
+         avatar={identity?.avatar_url||null} journey={journey} rep={player.repBalance} passport={player.passport}/>
        <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="player"/>
        <p className="rwg-disclosure">Hooper Level tracks verified basketball progress. REP is spendable, competitive Rank comes from independently confirmed matches, and badges must be earned. Social XP ({player.socialXp??'—'}) belongs to the wider RCH community, not your basketball rank.</p>
        <div className="rwg-mode-links"><Link className="rwg-primary" href="/profile">View Profile <FaArrowRight/></Link><Link className="rwg-secondary" href="/crews?intent=mine">My Crew</Link><Link className="rwg-secondary" href="/rep">REP Exchange</Link></div>
