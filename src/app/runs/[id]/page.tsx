@@ -29,6 +29,7 @@ import { RunMasterOfficialControl } from '@/components/runs/RunMasterOfficialCon
 import { RunNextUp } from '@/components/runs/RunNextUp';
 import {RunLobbyReadiness} from '@/components/runs/RunLobbyReadiness';
 import {RunsGameplayJourney} from '@/components/runs/RunsGameplayJourney';
+import {RunTeamMatchupBoard} from '@/components/runs/RunTeamMatchupBoard';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
 import './run-room-game.css';
 
@@ -263,7 +264,7 @@ export default function RunRoomPage() {
     });
     if (insertError) setError(insertError.message);
     else {
-      setNotice('Run result recorded.');
+      setNotice('Pickup scorecard saved. Rankings, World XP and REP remain pending until independent match confirmation.');
       setGameDraft({ home: '', away: '', homeScore: '', awayScore: '' });
       await load();
     }
@@ -363,7 +364,10 @@ export default function RunRoomPage() {
         <RunsGameplayJourney runId={run.id} format={run.game_format||'unknown'} status={run.status} capacity={run.max_players}
           suggested={suggestedCourt} listingUnknown={listingStatusUnknown} past={isPastRun}
           registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)} profiles={profiles}
-          userId={user?.id||null} scorecardCount={games.length}/>
+          userId={user?.id||null} scorecardCount={games.length} host={Boolean(user?.id===run.host_id)}/>
+        <RunTeamMatchupBoard format={run.game_format||'unknown'} teams={teams} members={members}
+          profiles={profiles} registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)}
+          canManage={canManage} suggested={suggestedCourt||listingStatusUnknown||isPastRun} status={run.status}/>
         <section aria-label="Your game-day pathway" className="mb-7 overflow-hidden rounded-3xl border border-[#4f84ae] bg-[linear-gradient(135deg,#102f53,#071528)] p-5 shadow-[0_15px_45px_#0006] sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-black tracking-[.2em] text-[#9cd9ff]">RUNS WORLD / GAME LOBBY</p><h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">{suggestedCourt?'Find players before you go.':'The real game starts here.'}</h2><p className="mt-2 max-w-xl text-xs leading-6 text-[#bdd7e9]">{suggestedCourt?'Express interest and coordinate with other players. A public court listing is not a confirmed game or a court reservation.':'Meet the roster, register for an available place, then show up at the real court. Score review and rewards remain separate from checking in.'}</p></div><div className="rounded-xl border border-[#6499bf] bg-[#071b2f] px-4 py-3 text-right"><small className="block text-[10px] font-bold text-[#99c5e3]">{suggestedCourt?'INTERESTED PLAYERS':'REGISTERED PLAYERS'}</small><strong className="text-2xl font-black text-white">{registeredPlayerIds.length}<span className="text-[#7da4bb]"> / {run.max_players}</span></strong><small className="block text-[10px] text-[#b0dbf3]">{spotsLeft?spotsLeft+' open spots':run.status==='full'?'Full':'No open spots'}</small></div></div>
           <div className="mt-5 flex flex-wrap gap-3"><button id="rch-join-action" type="button" onClick={()=>void toggleRegistration()} disabled={busy==='registration'||(user?.id===run.host_id&&!registered)||(!registered&&!canJoin)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-3 rounded-xl border border-[#8bd1ff] bg-[#196cef] px-6 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-55 sm:flex-none"><FaBasketball/>{busy==='registration'?'Updating registration…':registered?(suggestedCourt?'Withdraw Interest':'Leave Run'):joined?'Hosting this Run':canJoin?(suggestedCourt?'REGISTER INTEREST':'JOIN THIS RUN'):run.status==='cancelled'?'Run Cancelled':isPastRun?'Listing Ended':'Registration Closed'}<FaArrowRight/></button><button type="button" onClick={()=>void shareRun()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#4b789a] bg-[#0d304e] px-5 text-xs font-bold"><FaShareNodes/> Invite your crew</button><button type="button" onClick={()=>void load()} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#436e8d] bg-[#0b2841] px-4 text-xs font-bold text-[#c5e5f8]">Refresh slots</button></div>
@@ -391,7 +395,7 @@ export default function RunRoomPage() {
         <section id="rch-run-lobby" className="grid scroll-mt-36 gap-6 lg:grid-cols-[.75fr_1.25fr]" aria-label="Run roster and floor">
           <article className="rounded-3xl border border-white/10 bg-white/[.02] p-6">
             <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaPeopleGroup className="mr-1 inline" />Run roster</p>
-            <h2 className="mt-1 font-display text-2xl font-black uppercase">Who showed up</h2>
+            <h2 className="mt-1 font-display text-2xl font-black uppercase">Registered players</h2>
             <div className="mt-5 space-y-2">
               {profiles.map((profile) => {
                 const rel = reliability.find((item) => item.profile_id === profile.id);
@@ -411,7 +415,7 @@ export default function RunRoomPage() {
             <article className="rounded-3xl border border-rcl-orange/15 bg-rcl-orange/[.025] p-6">
               <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange"><FaTrophy className="mr-1 inline" />Run results</p>
               <h2 className="mt-1 font-display text-2xl font-black uppercase">Record an unverified score</h2><p className="mt-1 text-xs text-white/60">Scorecards are not ranked results. Opposing checked-in players must separately confirm a game before ratings or awards change.</p>
-              {canManage && teams.length >= 2 && !suggestedCourt && !listingStatusUnknown ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><select value={gameDraft.away} onChange={(event) => setGameDraft((current) => ({ ...current, away: event.target.value }))} className="field"><option value="">Away team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input inputMode="numeric" value={gameDraft.awayScore} onChange={(event) => setGameDraft((current) => ({ ...current, awayScore: event.target.value }))} className="field" placeholder="Score" /><select value={gameDraft.home} onChange={(event) => setGameDraft((current) => ({ ...current, home: event.target.value }))} className="field"><option value="">Home team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input inputMode="numeric" value={gameDraft.homeScore} onChange={(event) => setGameDraft((current) => ({ ...current, homeScore: event.target.value }))} className="field" placeholder="Score" /><button onClick={() => void record()} disabled={busy === 'game'} className="h-11 rounded-xl bg-rcl-orange px-4 text-[10px] font-black uppercase text-black disabled:opacity-40">Record</button></div> : null}
+              {canManage && teams.length >= 2 && !suggestedCourt && !listingStatusUnknown ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><select aria-label="Away team" value={gameDraft.away} onChange={(event) => setGameDraft((current) => ({ ...current, away: event.target.value }))} className="field"><option value="">Away team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Away team final score" inputMode="numeric" value={gameDraft.awayScore} onChange={(event) => setGameDraft((current) => ({ ...current, awayScore: event.target.value }))} className="field" placeholder="Score" /><select aria-label="Home team" value={gameDraft.home} onChange={(event) => setGameDraft((current) => ({ ...current, home: event.target.value }))} className="field"><option value="">Home team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Home team final score" inputMode="numeric" value={gameDraft.homeScore} onChange={(event) => setGameDraft((current) => ({ ...current, homeScore: event.target.value }))} className="field" placeholder="Score" /><button onClick={() => void record()} disabled={busy === 'game'} className="h-11 rounded-xl bg-rcl-orange px-4 text-[10px] font-black uppercase text-black disabled:opacity-40">Record</button></div> : null}
               <div className="mt-5 space-y-2">{games.length ? games.map((game) => <div key={game.id} className="grid grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-white/10 bg-black/20 p-4"><div><p className="text-[9px] uppercase text-white/30">Away</p><p className="font-black">{team(game.away_run_team_id)}</p></div><p className="font-display text-3xl font-black">{game.away_score}<span className="mx-2 text-white/20">–</span>{game.home_score}</p><div className="text-right"><p className="text-[9px] uppercase text-white/30">Home</p><p className="font-black">{team(game.home_run_team_id)}</p></div></div>) : <p className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/35">No pickup results recorded yet.</p>}</div>
             </article>
           </div>

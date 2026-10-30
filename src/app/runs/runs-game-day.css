@@ -1,0 +1,51 @@
+/* Runs Game Day — consistent team board, Next Up and ranked-score review surfaces. */
+.rch-matchup-board{margin:0 0 24px;padding:19px;border:1px solid #456d90;border-radius:20px;background:radial-gradient(ellipse at 88% 0%,#173c62,#071a2a 64%);color:#f2f9ff;box-shadow:0 16px 40px #0005}
+.rch-matchup-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rch-matchup-title small{display:block;color:#9fd2fb;font-size:10px;font-weight:950;letter-spacing:.13em}
+.rch-matchup-title h2{font-size:clamp(22px,5vw,33px);font-weight:1000;letter-spacing:-.04em;line-height:1.1;margin-top:4px}
+.rch-matchup-title>span{display:flex;align-items:center;gap:7px;color:#ffdc9c;font-size:14px;font-weight:950}
+.rch-matchup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.rch-matchup-team{overflow:hidden;border:1px solid #406989;border-radius:15px;background:#0b263e}
+.rch-matchup-team header{display:flex;align-items:center;gap:8px;min-width:0;padding:12px;background:#17446b;border-bottom:1px solid #456f90}
+.rch-matchup-team header svg{flex:none;color:#c6e8ff}
+.rch-matchup-team header h3{flex:1;min-width:0;font-size:15px;font-weight:950;overflow-wrap:anywhere}
+.rch-matchup-team header span{flex:none;font-size:11px;color:#d2eafa;font-weight:850}
+.rch-matchup-players{display:grid;gap:7px;padding:9px}
+.rch-matchup-player{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;min-height:40px;padding:8px;border:1px solid #375d7b;border-radius:9px;background:#081a2b}
+.rch-matchup-player>span{font-size:11px;font-weight:900;overflow-wrap:anywhere}
+.rch-matchup-player small{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:800;color:#c7daec}
+.rch-matchup-player small svg{color:#81e8b5}
+.rch-matchup-player.empty{border-style:dashed;background:#071725;color:#86a8c3}
+.rch-matchup-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-top:14px;min-height:130px;border:1px dashed #527494;border-radius:12px;padding:14px;text-align:center;color:#bedbf2}
+.rch-matchup-empty>svg{font-size:29px}
+.rch-matchup-empty strong{color:#e9f7ff;font-size:14px;font-weight:950}
+.rch-matchup-empty p{max-width:440px;color:#b0cbe2;font-size:11px;line-height:1.5}
+.rch-matchup-empty a{font-size:11px;color:#9bd6ff;font-weight:900}
+.rch-matchup-info{display:flex;gap:6px;align-items:flex-start;margin-top:12px;color:#b1cfe5;font-size:10px;line-height:1.6}
+.rch-matchup-info svg{flex:none;margin-top:2px}
+.rch-matchup-bench{margin-top:14px;border:1px solid #375a7a;border-radius:11px;padding:12px}
+.rch-matchup-bench>strong{display:block;margin-bottom:9px;color:#ffdc9c;font-size:10px;letter-spacing:.08em}
+.rch-matchup-bench>div{display:flex;flex-wrap:wrap;gap:6px}
+.rch-matchup-bench>div span{border:1px solid #436780;border-radius:9px;background:#0e334d;padding:6px 9px;font-size:10px}
+.rch-matchup-bench>small{display:block;margin-top:6px;color:#b1cfe5}
+.rch-nextup-you{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin-top:15px;padding:14px;border:1px solid #6ca4cc;border-radius:13px;background:linear-gradient(120deg,#12446e,#0b2d4b);color:white}
+.rch-nextup-you>svg{font-size:25px;color:#c2e8ff}
+.rch-nextup-you div{flex:1;min-width:0}
+.rch-nextup-you small{display:block;font-size:10px;color:#b7daf4;font-weight:900;letter-spacing:.11em}
+.rch-nextup-you strong{display:block;margin-top:3px;font-size:22px;font-weight:1000}
+.rch-nextup-you span{font-size:11px;color:#bfe1f5}
+.rch-ranked-confirmation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.rch-ranked-confirmation>div{padding:11px;border:1px solid #466a8b;border-radius:11px;background:#0b2944}
+.rch-ranked-confirmation strong{display:block;font-size:11px;font-weight:950}
+.rch-ranked-confirmation small{display:block;margin-top:4px;color:#b0cce4;font-size:10px}
+.rch-ranked-review-state{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:11px;line-height:1.55;color:#d2e9fa}
+.rch-ranked-review-state>svg{flex:none}
+@media(max-width:650px){.rch-matchup-board{padding:13px;margin-bottom:18px;border-radius:15px}.rch-matchup-grid{grid-template-columns:1fr}.rch-matchup-title h2{font-size:25px}.rch-matchup-player{min-height:42px}.rch-matchup-empty{min-height:112px}.rch-nextup-you strong{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.rch-matchup-board *,.rch-nextup-you *,.rch-ranked-confirmation *{animation:none!important;transition:none!important}}
+
+.rch-game-sync{display:inline-flex;align-items:center;min-height:40px;margin-top:12px;padding:7px 12px;border:1px solid #557d9a;border-radius:9px;background:#10334e;color:#c5e7ff;font-size:10px;font-weight:900;cursor:pointer}
+.rch-game-sync:hover{border-color:#9bd5ff}
+.rch-game-sync:focus-visible,.rch-game-postgame-actions button:focus-visible{outline:3px solid #a0dcff;outline-offset:2px}
+.rch-game-postgame-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+.rch-game-postgame-actions button{display:inline-flex;gap:7px;align-items:center;min-height:42px;padding:9px 12px;border:1px solid #a8d8a4;border-radius:10px;background:#134c3d;color:#d3ffe8;font-size:11px;font-weight:900;cursor:pointer}
+.rch-game-postgame-actions .rch-game-replay{display:inline-flex;align-items:center;gap:6px;margin:0;color:#b4dcff;font-size:11px;font-weight:900}

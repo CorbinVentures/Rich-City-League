@@ -25,6 +25,7 @@ export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:
   const [busy,setBusy]=useState('');
   const [notice,setNotice]=useState('');
   const [revision,setRevision]=useState(0);
+  const [confirmTarget,setConfirmTarget]=useState<string|null>(null);
   const eligible=runType==='competitive' && formats.includes(format??'');
 
   useEffect(()=>{
@@ -43,9 +44,18 @@ export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:
     return ()=>{cancelled=true;};
   },[db,eligible,runId,revision]);
 
+  useEffect(()=>{
+    if(!db||!eligible)return;
+    const channel=db.channel('rch-ranked-review-'+runId)
+      .on('postgres_changes',{event:'*',schema:'public',table:'run_ranked_matches',filter:'run_id=eq.'+runId},()=>setRevision(v=>v+1))
+      .subscribe();
+    return()=>{void db.removeChannel(channel);};
+  },[db,eligible,runId]);
+
   async function action(name:'submit_ranked_run_result'|'review_ranked_run_result',args:Record<string,unknown>){
     if(!db||!user)return;
     setBusy(String(args.p_game||args.p_match));
+    setConfirmTarget(null);
     setNotice('');
     const {data,error}=await db.rpc(name,args);
     setBusy('');
@@ -63,13 +73,14 @@ export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
         <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.2em] text-[#85beff]"><FaShieldHalved/> RCH Ranked · {format}</p>
-        <h2 id="rch-run-ranked-title" className="mt-2 text-2xl font-black uppercase sm:text-3xl">Make the score count.</h2>
+        <h2 id="rch-run-ranked-title" className="mt-2 text-2xl font-black uppercase sm:text-3xl">OFFICIAL SCORE REVIEW</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#bad3ec]">The host records a completed game. A checked-in player from each team independently confirms the result before ratings move. No verified match can be quietly edited.</p>
       </div>
       <Link href="/commonwealth" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#4c86bb] px-4 text-xs font-black text-white"><FaTrophy/> Road to the Cup</Link>
     </div>
     {unavailable&&<p className="mt-4 rounded-xl border border-[#ba9959]/35 bg-[#6e4919]/30 p-3 text-xs text-[#fbe7ba]">Ranked verification is not yet available on this deployment. Pickup results remain separate from official ratings.</p>}
     {notice&&<p className="mt-4 rounded-xl border border-[#568dbd] bg-[#1c4667] p-3 text-sm" role="status">{notice}</p>}
+    <div className="rch-ranked-review-state"><FaShieldHalved aria-hidden="true"/> An entered score is a pickup record only. Until opposing checked-in sides confirm the official review, no rank or verified match reward is granted.</div>
     {!loading&&!unavailable&&<div className="mt-5 space-y-3">
       {games.filter(g=>g.status==='completed').map(game=>{
         const review=reviews.find(r=>r.game_id===game.id);
@@ -80,15 +91,16 @@ export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:
         return <article key={game.id} className="rounded-2xl border border-[#365b7d] bg-[#07182a]/85 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0"><p className="text-xs font-bold text-[#a8c7e7]">{label(game.home_run_team_id)} vs {label(game.away_run_team_id)}</p>
-              <p className="mt-1 font-display text-2xl font-black text-white">{game.home_score} – {game.away_score}</p></div>
+              <p className="mt-1 font-display text-2xl font-black text-white">{review?review.home_score:game.home_score} – {review?review.away_score:game.away_score}</p></div>
             <span className={'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider '+(review?.status==='verified'?'bg-emerald-400/15 text-emerald-200':'bg-[#2b5c88] text-[#d7eaff]')}>
-              {review?.status==='verified'?'Verified / Rated':review?.status==='rejected'?'Disputed':review?'Awaiting both teams':'Unranked'}
+              {review?.status==='verified'?'Verified / Rated':review?.status==='rejected'?'Disputed':review?'Awaiting both sides':'Not submitted'}
             </span>
           </div>
-          {review?.status==='pending'&&<div className="mt-3 flex flex-wrap gap-3 text-xs font-bold text-[#c8dcf4]"><span>{review.home_confirmed_by?'✓':'○'} Home confirmed</span><span>{review.away_confirmed_by?'✓':'○'} Away confirmed</span></div>}
+          {review?.status==='pending'&&<div className="rch-ranked-confirmation" aria-label="Independent team confirmation status"><div><strong>{review.home_confirmed_by?'✓ HOME CONFIRMED':'○ HOME PENDING'}</strong><small>One eligible checked-in home player</small></div><div><strong>{review.away_confirmed_by?'✓ AWAY CONFIRMED':'○ AWAY PENDING'}</strong><small>One eligible checked-in away player</small></div></div>}
+          {confirmTarget===review?.id&&canConfirm&&<p className="rch-ranked-review-state" role="status">Check the displayed score. A second tap verifies it as your independent team confirmation. Use Dispute if incorrect.</p>}
           <div className="mt-3 flex flex-wrap gap-2">
             {canSubmit&&<button disabled={!!busy} onClick={()=>void action('submit_ranked_run_result',{p_game:game.id})} className="min-h-10 rounded-xl bg-[#2b92ff] px-4 text-xs font-bold text-white disabled:opacity-50">{busy===game.id?'Saving…':review?'Resubmit corrected result':'Submit for ranking'}</button>}
-            {canConfirm&&<><button disabled={!!busy} onClick={()=>void action('review_ranked_run_result',{p_match:review.id,p_approve:true})} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white disabled:opacity-50"><FaCircleCheck/> Confirm score</button>
+            {canConfirm&&<><button disabled={!!busy} onClick={()=>{if(confirmTarget===review.id)void action('review_ranked_run_result',{p_match:review.id,p_approve:true});else setConfirmTarget(review.id);}} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white disabled:opacity-50"><FaCircleCheck/> {confirmTarget===review.id?'YES — VERIFY THIS SCORE':'Review and confirm'}</button>
               <button disabled={!!busy} onClick={()=>void action('review_ranked_run_result',{p_match:review.id,p_approve:false})} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#68839c] px-4 text-xs font-bold disabled:opacity-50"><FaFlag/> Dispute</button></>}
           </div>
         </article>;

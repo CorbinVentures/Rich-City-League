@@ -5,6 +5,7 @@ import { RunsGlobalNav } from '@/components/runs/RunsGlobalNav';
 import { RunsGameChrome } from '@/components/runs/RunsGameChrome';
 import './runs-global-nav.css';
 import './runs-game-system.css';
+import './runs-game-day.css';
 
 export const metadata: Metadata = {
   title: { absolute: 'Pickup Basketball Runs in Virginia | Rich City Hoops' },
