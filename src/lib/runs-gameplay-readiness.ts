@@ -16,7 +16,7 @@ export function playerTarget(format:string):number|null{
   return match?2*Number(match[1]):null;
 }
 export function isRookieFriendly(run:Pick<GameplayRun,'skill_level'|'run_type'>):boolean{
-  return run.run_type==='social'||['all','beginner','intermediate'].includes(run.skill_level);
+  return ['all','beginner','intermediate'].includes(run.skill_level) && run.skill_level!=='elite';
 }
 export function lobbySnapshot(input:{
   format:string;registered:number;capacity:number;status:string;
