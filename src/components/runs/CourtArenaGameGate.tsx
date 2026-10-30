@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {FaArrowRight,FaBasketball,FaCalendarDays,FaCrown,FaLocationDot,FaShieldHalved,FaSwords} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaCalendarDays,FaCrown,FaLocationDot,FaShieldHalved,FaBolt} from 'react-icons/fa6';
 
 type Run={id:string;title:string;starts_at:string;game_format:string;status:string};
 export function CourtArenaGameGate({slug,name,locality,controller,registeredCrews,runs,watching,historyRecorded,historyLoading}:{
@@ -22,7 +22,7 @@ export function CourtArenaGameGate({slug,name,locality,controller,registeredCrew
   </Link>:<div className="rch-court-game-empty"><FaCalendarDays aria-hidden="true"/><span><strong>NO UPCOMING HOSTED GAME</strong><small>This verified park is not a reservation or proof that players will be there. Start a real Run with a confirmed organizer.</small></span></div>}
   <nav className="rch-court-game-actions" aria-label="Court Arena next moves">
    <Link href={'/runs?create=1&court='+encodeURIComponent(slug)}><FaBasketball aria-hidden="true"/> HOST A GAME</Link>
-   <Link href={'/runs?view=list&competition=courts&court='+encodeURIComponent(slug)+'#rch-competition'}><FaSwords aria-hidden="true"/> COMPETE</Link>
+   <Link href={'/runs?view=list&competition=courts&court='+encodeURIComponent(slug)+'#rch-competition'}><FaBolt aria-hidden="true"/> COMPETE</Link>
    <a href="#rch-court-masters"><FaCrown aria-hidden="true"/> VIEW MASTERS</a>
   </nav>
   <p className="rch-court-game-caution"><FaShieldHalved aria-hidden="true"/> {watching?'Watching this court saves a discovery preference—not a booking or a verified visit.':'Park hours, court access, actual players and event permissions require independent confirmation before traveling.'}</p>
