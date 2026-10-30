@@ -206,6 +206,7 @@ export default function LeagueOperationsPage() {
     <p className="mt-8 text-xs font-bold uppercase tracking-[0.25em] text-rcl-gold">RCL league operations</p>
     <h1 className="mt-2 font-display text-5xl font-bold">The league room</h1><p className="mt-3 rounded-xl border border-rcl-orange/25 bg-rcl-orange/[.035] p-4 text-sm text-white/75"><strong className="text-rcl-orange">PRO SEASON: {RCL_PRO_SEASON.startLabel.toUpperCase()}</strong> · Official tryouts planned for summer 2027; Draft Night follows. Imported 2026 season rows remain historical and must not be selected as the new professional season. Use League Setup once the exact opening date is confirmed.</p>
     <p className="mt-3 max-w-2xl text-gray-400">Run the player lifecycle from tryout registration through draft, roster status, requests, and discipline. Every change is protected by Supabase authorization and recorded in the audit log.</p>
+    <Link href="/admin/league-readiness" className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-rcl-orange/45 bg-rcl-orange/10 px-4 text-sm font-semibold text-rcl-orange">Review 2027–28 season readiness →</Link>
     {message && <p className="mt-5 rounded-lg bg-rcl-gold/10 p-3 text-sm text-rcl-gold">{message}</p>}
     <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {[

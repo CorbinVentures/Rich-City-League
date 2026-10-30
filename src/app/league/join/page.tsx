@@ -36,6 +36,7 @@ export default function JoinRichCityLeaguePage(){
    <div className="mt-5 flex flex-wrap gap-3">
     <Link href="/auth/sign-up?next=%2Fsocial" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-sm font-bold text-black">Join RCH free <FaArrowRight aria-hidden="true"/></Link>
     <Link href="/register" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Check league registration</Link>
+    <Link href="/league/rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Proposed league rules</Link>
    </div>
    <section aria-label="Four basketball destinations" className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
     {worlds.map(({title,subtitle,href,program})=><Link href={href} key={href} className="flex min-h-28 flex-col gap-2 rounded-xl border border-white/15 bg-white/[.035] p-3 transition hover:border-rcl-orange/50 focus-visible:outline focus-visible:outline-2">
