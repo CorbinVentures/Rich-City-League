@@ -35,7 +35,7 @@ export function RunsMyCareerStage({name,avatar,journey,rep,passport}:{
    </div>
    <div className="rch-career-panel"><div className="rch-career-panel-head"><FaShieldHalved aria-hidden="true"/><strong>NEXT CHAPTER</strong></div>
     {nextQuest?<><h3>{nextQuest.title}</h3><p>{nextQuest.detail}</p><Link href={nextQuest.href}>START OBJECTIVE <FaArrowRight aria-hidden="true"/></Link></>:
-     journey?<><h3>THIS WEEK'S QUESTS COMPLETE</h3><p>Find another hosted Run or revisit your verified career history.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></Link></>:
+     journey?<><h3>THIS WEEK&apos;S QUESTS COMPLETE</h3><p>Find another hosted Run or revisit your verified career history.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></Link></>:
      <><h3>BUILD YOUR LEGACY</h3><p>Find real games and start building your verified basketball résumé.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></Link></>}
    </div>
   </div>
