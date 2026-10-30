@@ -46,6 +46,9 @@ describe('Runs Full-Game Phase 3: connected MyPLAYER, Crew HQ and Court Arenas',
   expect(page).toContain('<CourtArenaGameGate');
   expect(page).toContain('controller={owner?.crew_name||null}');
   expect(page).toContain('runs={runs}');
+  expect(page).toContain("db.from('rch_weekend_circuit_events')");
+  expect(page).toContain('setRuns(hosted)');
+  expect(page).toContain('hostedStatusUnknown=true');
   expect(page).toContain('historyRecorded={history.length}');
   expect(gate).toContain('No upcoming hosted game'.toUpperCase());
   expect(gate).toContain('Only verified competition can award court control');
