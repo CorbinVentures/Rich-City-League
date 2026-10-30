@@ -13,7 +13,6 @@ import type {WorldRun} from '@/lib/runs-world-game';
 import './runs-cinematic-home.css';
 
 const INTRO_KEY='rch-runs-cinematic-intro-session-v1';
-const RULES_KEY='rch-runs-rules-intro-session-v1';
 
 function formatWhen(value:string){
  const date=new Date(value);
@@ -21,7 +20,7 @@ function formatWhen(value:string){
  return date.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET';
 }
 
-/** A skippable, once-per-session visual entrance. It does not alter any game data. */
+/** An optional replay-only cinematic: real game discovery is never delayed. */
 export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replayToken:number}){
  const [step,setStep]=useState<'done'|'logo'|'world'>('done');
  const skipRef=useRef<HTMLButtonElement>(null);
@@ -30,14 +29,8 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
   try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional session storage. */}
  },[]);
  useEffect(()=>{
-  if(!enabled)return;
-  let rulesSeen=true,alreadySeen=false;
-  try{
-   rulesSeen=window.sessionStorage.getItem(RULES_KEY)==='seen';
-   alreadySeen=window.sessionStorage.getItem(INTRO_KEY)==='seen';
-  }catch{/* Storage may be unavailable. */}
-  if(!rulesSeen)return;
-  if(replayToken===0&&alreadySeen)return;
+  // Never autoplay a modal before a player can find or host a game.
+  if(!enabled||replayToken===0)return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
    setStep('done');
    try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional. */}
@@ -192,21 +185,21 @@ export function RunsCinematicHome({
   <Link href={nextHref} className="rch-gh-play"><FaBasketball/><span>{nextRun?'VIEW RUN DETAILS':'FIND A RUN'}<small>{nextRun?'See date, location and registration':'Browse upcoming basketball games'}</small></span><FaArrowRight/></Link>
 
   <section className="rch-gh-section" aria-labelledby="rch-next-run">
-   <div className="rch-gh-section-title"><h2 id="rch-next-run">NEXT REAL RUN</h2><Link href="/runs?view=list#rch-upcoming-runs">VIEW ALL <FaArrowRight/></Link></div>
+   <div className="rch-gh-section-title"><h2 id="rch-next-run">NEXT HOSTED RUN</h2><Link href="/runs?view=list#rch-upcoming-runs">VIEW ALL <FaArrowRight/></Link></div>
    {nextRun?<Link className="rch-gh-next-card" href={nextHref}>
     <span className="rch-gh-run-photo" aria-hidden="true"><FaBasketball/></span>
     <span className="rch-gh-run-body"><strong>{nextRun.title}</strong><small><FaLocationDot/> {nextRun.location||'Court details in event'}</small><small><FaCalendarDays/> {formatWhen(nextRun.starts_at)} · {nextRun.game_format}</small></span>
     {doubleRep&&<span className="rch-gh-double">2× VERIFIED REP</span>}
     <FaArrowRight className="rch-gh-run-arrow"/>
-   </Link>:<div className="rch-gh-next-empty">{finding?'Finding available Runs…':city?'No upcoming player-hosted game is listed here. Organize a Run or browse other courts.':'No upcoming player-hosted games found. Organize one or explore public courts.'}</div>}
+   </Link>:<div className="rch-gh-next-empty">{finding?'Checking real hosted games…':city?'No hosted Runs are scheduled here. Host one or explore public outdoor courts.':'No hosted Runs are scheduled yet. Explore outdoor courts or host the first game.'}</div>}
   </section>
 
   <section className="rch-gh-section" aria-labelledby="rch-quick-actions">
    <div className="rch-gh-section-title"><h2 id="rch-quick-actions">QUICK ACTIONS</h2></div>
    <div className="rch-gh-actions">
-    <button type="button" onClick={onWorld}><FaCompass/><span>WORLD</span></button>
-    <button type="button" onClick={onBattle}><FaBasketball/><span>BATTLES</span></button>
-    <button type="button" onClick={onVault}><FaTrophy/><span>VAULT</span></button>
+    <button type="button" onClick={onWorld}><FaCompass/><span>COURTS</span></button>
+    <button type="button" onClick={onBattle}><FaBasketball/><span>COMPETE</span></button>
+    <button type="button" onClick={onVault}><FaTrophy/><span>PROGRESS</span></button>
     <Link href="/crews?intent=mine"><FaPeopleGroup/><span>CREW</span></Link>
    </div>
   </section>
