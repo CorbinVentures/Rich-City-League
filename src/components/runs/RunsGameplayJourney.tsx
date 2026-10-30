@@ -11,15 +11,17 @@ type VerifiedReceipt={run_id:string;won:boolean;xp:number;rep:number;verified_at
 type Props={
  runId:string;format:string;status:string;capacity:number;past:boolean;suggested:boolean;listingUnknown:boolean;
  registeredIds:readonly string[];checkedInIds:readonly string[];profiles:readonly Person[];
- userId:string|null;scorecardCount:number;
+ userId:string|null;scorecardCount:number;host:boolean;
 };
 
 /** The game lobby only visualizes server records. RSVP != physical attendance.
  * Recorded pickup score != independently confirmed competitive result. */
-export function RunsGameplayJourney({runId,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount}:Props){
+export function RunsGameplayJourney({runId,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount,host}:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [verified,setVerified]=useState<VerifiedReceipt|null>(null);
  const [verifiedError,setVerifiedError]=useState(false);
+ const [refreshTick,setRefreshTick]=useState(0);
+ const [queueStatus,setQueueStatus]=useState<'waiting'|'called'|'playing'|null>(null);
  useEffect(()=>{
   if(!userId||!db){setVerified(null);return;}
   let alive=true;setVerified(null);setVerifiedError(false);
@@ -29,19 +31,43 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
    setVerified((data?.receipts||[]).find(receipt=>receipt.run_id===runId)||null);
   }).catch(()=>{if(alive)setVerifiedError(true);});
   return()=>{alive=false;};
- },[db,runId,userId,scorecardCount]);
+ },[db,runId,userId,scorecardCount,refreshTick]);
+ useEffect(()=>{
+  if(!db||!userId||suggested||listingUnknown){setQueueStatus(null);return;}
+  let active=true;
+  const load=()=>db.from('rch_run_queue').select('status')
+   .eq('run_id',runId).eq('profile_id',userId).in('status',['waiting','called','playing'])
+   .order('joined_at',{ascending:false}).limit(1).maybeSingle()
+   .then(({data,error}:{data:{status:string}|null;error:unknown})=>{
+    if(!active)return;
+    setQueueStatus(!error&&['waiting','called','playing'].includes(data?.status||'')?data!.status as 'waiting'|'called'|'playing':null);
+   }).catch(()=>{if(active)setQueueStatus(null);});
+  void load();
+  const channel=db.channel('rch-game-day-personal-queue-'+runId+'-'+userId)
+   .on('postgres_changes',{event:'*',schema:'public',table:'rch_run_queue',filter:'run_id=eq.'+runId},()=>{void load();})
+   .subscribe();
+  return()=>{active=false;void db.removeChannel(channel);};
+ },[db,runId,userId,suggested,listingUnknown]);
+ useEffect(()=>{
+  if(!db||!userId||suggested)return;
+  const channel=db.channel('rch-game-day-verified-'+runId)
+   .on('postgres_changes',{event:'*',schema:'public',table:'run_ranked_matches',filter:'run_id=eq.'+runId},()=>setRefreshTick(v=>v+1))
+   .subscribe();
+  return()=>{void db.removeChannel(channel);};
+ },[db,runId,userId,suggested]);
  const roster=lobbySnapshot({format,registered:registeredIds.length,capacity,status,suggested,past});
  const slots=playerTarget(format);
  const actualSlots=slots===null?Math.min(10,Math.max(1,registeredIds.length)):slots;
  const checkedIn=Boolean(userId&&checkedInIds.includes(userId));
  const signedUp=Boolean(userId&&registeredIds.includes(userId));
  const unavailable=suggested||listingUnknown||past||!['open','full'].includes(status);
- const stage=verified?4:checkedIn?2:signedUp?1:0;
+ const stage=verified?4:scorecardCount>0?3:checkedIn?2:signedUp?1:0;
  const nextAction=verified?{href:'/runs?view=list#rch-upcoming-runs',title:'FIND YOUR NEXT GAME',desc:'Keep building your verified basketball story'}:
  !userId?{href:'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId),title:'SIGN IN TO PLAY',desc:'Create your player and register for a real Run'}:
- !signedUp?{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
+ !signedUp?host?{href:'#rch-run-lobby',title:'MANAGE YOUR GAME',desc:'Host the event and set up teams; hosting is not player check-in'}:{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
  !checkedIn?{href:past?'/runs?view=list#rch-upcoming-runs':'#rch-game-day',title:past?'FIND YOUR NEXT GAME':'GET GAME-DAY READY',desc:past?'This event has ended; do not attempt a late check-in':'Check in at the court using the host’s in-person code'}:
- !verified?{href:scorecardCount>0?'#rch-result-review':'#rch-next-up',title:scorecardCount>0?'REVIEW THE RESULT':'GET ON DECK',desc:'Only independent confirmation can award ranked results'}:
+ !verified?scorecardCount>0?{href:'#rch-result-review',title:'REVIEW RECORDED SCORE',desc:'Both teams must independently confirm before rewards'}:
+ {href:'#rch-next-up',title:queueStatus==='called'?'YOU ARE ON DECK':queueStatus==='playing'?'RECORDED ON COURT':queueStatus==='waiting'?'YOUR NEXT UP QUEUE':'JOIN NEXT UP',desc:queueStatus==='called'?'The host marked you called; report to the court':queueStatus==='playing'?'The host recorded you as playing; no result is verified yet':queueStatus==='waiting'?'Your queue position is available in Next Up':'Get in the real court queue for this Run'}:
  {href:'/runs?view=list#rch-upcoming-runs',title:'PLAY AGAIN',desc:'Find a real hosted game'};
  const safeAction=unavailable&&!verified&&nextAction.href==='#rch-join-action'?{...nextAction,href:'/runs?view=list#rch-upcoming-runs'}:nextAction;
  return <section className="rch-game-journey" aria-label="Live Runs game journey" data-rch-game-lifecycle="true">
@@ -67,10 +93,12 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
      </div>;
     })}
    </div>}
+  {queueStatus&&<p className="rch-game-journey-caution" role="status" aria-live="polite"><FaBasketball aria-hidden="true"/> Your recorded Next Up status: <strong>{queueStatus.toUpperCase()}</strong>. Actual court play and result verification remain separate.</p>}
   {slots===null&&<p className="rch-game-journey-caution">Game format needs host confirmation; roster minimum cannot be determined.</p>}
   {!suggested&&slots!==null&&<p className="rch-game-journey-caution">{roster.guidance}</p>}
   {verified?<div className="rch-game-verified" role="status"><FaTrophy aria-hidden="true"/><div><strong>{verified.won?'VICTORY VERIFIED':'GAME VERIFIED'}</strong><span>+{verified.xp} World XP · +{verified.rep} credited match REP · independently confirmed for your player</span></div></div>:
    scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. This does not prove a verified ranked result or issue rewards.</p>:null}
+  {userId&&!suggested&&<button type="button" onClick={()=>setRefreshTick(v=>v+1)} className="rch-game-sync" aria-label="Refresh verified game rewards">Refresh verified game status</button>}
   {verifiedError&&<p className="rch-game-journey-caution">Verified career receipts cannot sync right now; no game result is being assumed.</p>}
   <Link href={safeAction.href} className="rch-game-next"><div><small>YOUR NEXT MOVE</small><strong>{safeAction.title}</strong><span>{safeAction.desc}</span></div><FaArrowRight aria-hidden="true"/></Link>
   {verified&&<Link className="rch-game-replay" href="/runs?view=world&mode=player">VIEW VERIFIED CAREER RECAP <FaArrowRight aria-hidden="true"/></Link>}
