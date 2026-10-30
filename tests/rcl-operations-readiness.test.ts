@@ -18,6 +18,7 @@ const ready: RclOperationsSnapshot = {
   scheduledGames:fixtures,
   eligibleDraftProspects:24,
   draft:{status:'SETUP',rounds:4,roster_limit:12},
+  draftPreflightBlockers:[],
 };
 
 describe('2027–28 professional league operational preflight',()=>{
@@ -31,7 +32,7 @@ describe('2027–28 professional league operational preflight',()=>{
     expect(result.requiredManualApprovals).toHaveLength(6);
   });
   it('never treats missing official season data as an approved competition',()=>{
-    const result=inspectRclPilotReadiness({season:null,assignedClubs:[],activeRosters:[],scheduledGames:[],eligibleDraftProspects:0,draft:null});
+    const result=inspectRclPilotReadiness({season:null,assignedClubs:[],activeRosters:[],scheduledGames:[],eligibleDraftProspects:0,draft:null,draftPreflightBlockers:null});
     expect(result.clearTechnicalPreflight).toBe(false);
     expect(result.checks.find(check=>check.id==='roster-integrity')?.passed).toBe(false);
     expect(result.checks.find(check=>check.id==='season')?.passed).toBe(false);
@@ -52,6 +53,8 @@ describe('2027–28 professional league operational preflight',()=>{
   });
   it('keeps official games and draft activation contingent on actual season records',()=>{
     const result=inspectRclPilotReadiness({...ready,eligibleDraftProspects:23});
+    expect(inspectRclPilotReadiness({...ready,draftPreflightBlockers:['Draft order not complete']}).clearTechnicalPreflight).toBe(false);
+    expect(inspectRclPilotReadiness({...ready,draftPreflightBlockers:null}).checks.find(check=>check.id==='draft')?.passed).toBe(false);
     expect(result.checks.find(check=>check.id==='draft')?.passed).toBe(false);
     const page=readFileSync(join(process.cwd(),'src/app/admin/league-readiness/page.tsx'),'utf8');
     expect(page).toContain('NOT APPROVED FOR OPENING NIGHT');
