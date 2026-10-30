@@ -23,7 +23,7 @@ export function CourtArenaGameGate({slug,name,locality,controller,registeredCrew
   <nav className="rch-court-game-actions" aria-label="Court Arena next moves">
    <Link href={'/runs?create=1&court='+encodeURIComponent(slug)}><FaBasketball aria-hidden="true"/> HOST A GAME</Link>
    <Link href={'/runs?view=list&competition=courts&court='+encodeURIComponent(slug)+'#rch-competition'}><FaBolt aria-hidden="true"/> COMPETE</Link>
-   <a href="#rch-court-masters"><FaCrown aria-hidden="true"/> VIEW MASTERS</a>
+   <Link href="/runs?view=world&mode=season"><FaCrown aria-hidden="true"/> COMPETITIVE CIRCUIT</Link>
   </nav>
   <p className="rch-court-game-caution"><FaShieldHalved aria-hidden="true"/> {watching?'Watching this court saves a discovery preference—not a booking or a verified visit.':'Park hours, court access, actual players and event permissions require independent confirmation before traveling.'}</p>
  </section>;
