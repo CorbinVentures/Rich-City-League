@@ -84,7 +84,7 @@ export default function FantasyPage() {
     let activeSeason: FantasySeason | null = null;
     if (candidateSeason) {
       const linked = await supabase.from('seasons')
-        .select('start_date,status').eq('id', candidateSeason.season_id).maybeSingle();
+        .select('start_date,status,leagues!inner(slug,is_active)').eq('id', candidateSeason.season_id).maybeSingle();
       if (!linked.error && canActivateRclFantasySeason(linked.data)) activeSeason = candidateSeason;
     }
     const playerPool = (playersResult.data ?? []) as PublicPlayer[];
