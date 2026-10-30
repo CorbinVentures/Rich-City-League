@@ -80,3 +80,13 @@
 @media(max-width:700px){.rcc-hero{padding:17px;border-radius:17px}.rcc-hero-content{gap:10px}.rcc-season-emblem{min-width:95px;padding:9px}.rcc-season-emblem>svg{font-size:24px}.rcc-season-emblem strong{font-size:16px}.rcc-season-emblem small{font-size:7px}.rcc-hero-content p{font-size:11px}.rcc-status-strip strong{font-size:16px}.rcc-section{padding:12px}.rcc-tabs button{min-height:53px;flex-direction:column;gap:3px;font-size:10px}.rcc-quests{grid-template-columns:1fr}.rcc-cup-timeline{grid-template-columns:1fr}.rcc-cup-timeline>div{min-height:105px}.rcc-replay-preview{align-items:flex-start;flex-direction:column}}
 @media(max-width:390px){.rcc-hero-content{align-items:flex-start}.rcc-hero h2{font-size:29px}.rcc-status-strip>div{padding:7px}.rcc-status-strip strong{font-size:14px}.rcc-status-strip small{font-size:8px}.rcc-tabs button{font-size:9px}.rcc-receipts li{flex-wrap:wrap}.rcc-receipts li>a{margin-left:49px}}
 @media(prefers-reduced-motion:reduce){.rcc-shell *{animation:none!important;transition:none!important}}
+
+.rcc-home-door{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:18px auto;padding:17px;max-width:1140px;border:1px solid #729bba;border-radius:16px;background:linear-gradient(105deg,#174575,#0c233b);color:#f3fbff}
+.rcc-home-door>div{min-width:0}
+.rcc-home-door span,.rcc-home-door strong,.rcc-home-door small{display:block}
+.rcc-home-door span{font-size:9px;font-weight:950;letter-spacing:.12em;color:#a4d9fc}
+.rcc-home-door strong{font-size:16px;font-weight:1000;margin-top:3px}
+.rcc-home-door small{font-size:10px;color:#c0d8ea;margin-top:3px}
+.rcc-home-door>a{flex:none;display:flex;align-items:center;gap:7px;min-height:42px;border:1px solid #a5d8ff;border-radius:10px;padding:9px 12px;background:#286fb0;font-size:10px;font-weight:950;color:white;text-decoration:none}
+.rcc-home-door>a:focus-visible{outline:3px solid #c0e5ff;outline-offset:2px}
+@media(max-width:500px){.rcc-home-door{margin:13px 4px;flex-direction:column;align-items:stretch;padding:12px}.rcc-home-door>a{justify-content:center}}
