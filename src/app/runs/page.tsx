@@ -131,17 +131,7 @@ export default function RunsPage() {
   const [highlightClaims, setHighlightClaims] = useState<Set<string>>(new Set());
   const [view, setView] = useState<ViewMode>('runs');
   const [rulesOpen, setRulesOpen] = useState(false);
-  const closeRules = useCallback(() => {
-    setRulesOpen(false);
-    try { window.sessionStorage.setItem('rch-runs-rules-intro-session-v1', 'seen'); } catch { /* Storage must never block basketball. */ }
-  }, []);
-  useEffect(() => {
-    // Auto-show on entry to the game world once per browser session; let
-    // explicit RSVP, Run creation and court deep links proceed uninterrupted.
-    if (showLegacyList) return;
-    try { if (window.sessionStorage.getItem('rch-runs-rules-intro-session-v1') === 'seen') return; } catch { /* Show the rules if storage is unavailable. */ }
-    setRulesOpen(true);
-  }, [showLegacyList]);
+  const closeRules = useCallback(() => setRulesOpen(false), []);
   const competitionParam=searchParams.get('competition');
   const [competitionView, setCompetitionView] = useState<'passport'|'courts'|'rankings'>(competitionParam==='rankings'?'rankings':competitionParam==='courts'?'courts':'passport');
   const [showCreate, setShowCreate] = useState(false);
@@ -445,17 +435,22 @@ export default function RunsPage() {
           <div className="rch-program-brand-lockup">
             <ProgramEmblem program="runs" className="rch-program-emblem-runs" priority/>
             <div><h1 className="text-3xl font-black">Runs</h1><p className="mt-1 text-sm text-[#d3deef]">Find your next game.</p></div></div>
-          <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">
-            <FaPlus aria-hidden="true"/> Host a run
-          </button>
         </header>
       </Container>
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
+        {view==='runs'&&<section aria-labelledby="rch-runs-start" className="mb-4 rounded-2xl border border-[#3e7295] bg-[linear-gradient(110deg,#123b59,#071a2c_76%)] px-4 py-5 sm:px-6 sm:py-6">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#a9d5ed]">Real courts · Real people</p>
+          <h2 id="rch-runs-start" className="mt-2 text-2xl font-black uppercase tracking-tight text-white sm:text-3xl">Find a game. Build your legacy.</h2>
+          <p className="mt-2 max-w-2xl text-sm text-[#d3e5f2]">Join an actual hosted Run, organize one yourself, or discover outdoor courts. Park suggestions are not confirmed games.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#c8f06d] px-4 py-3 text-sm font-black text-[#102014]"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
+            <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
+          </div>
+        </section>}
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
-          <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Court Map</Link>
+          <Link href="/runs?view=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
-          <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How to Play</button>
+          <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How It Works</button>
         </nav>
         <details className="rch-run-extras">
           <summary>More run tools</summary>
@@ -518,8 +513,8 @@ export default function RunsPage() {
         </details>
         {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Suggested weekend open courts" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OPEN COURTS · 2× VERIFIED REP</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court meetup suggestions—not confirmed games, reserved courts, verified hosts, or promises that players will attend. The 2× REP benefit applies only to independently verified games and reviewed stats at eligible circuit sessions; check-ins and highlights remain 1×.</p></div>
-            <span className="rounded-xl bg-[#ffd47a] px-3 py-2 text-sm font-black text-[#182137]">2× VERIFIED REP</span>
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OUTDOOR COURTS</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court ideas, not scheduled games, reserved space or a promise of players. Visiting a suggested court alone earns no bonus; eligible 2× verified-game REP requires an independently confirmed game. Check-ins and highlights remain 1×.</p></div>
+            <span className="rounded-xl border border-[#ffd47a]/50 px-3 py-2 text-xs font-black text-[#ffdb94]">COURT IDEAS · NOT EVENTS</span>
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.isSuggestedCourt&&run.weekendMultiplier===2&&run.status!=='cancelled'&&Date.parse(run.starts_at)>Date.now()).slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}<small className="block text-xs font-normal text-[#d3deef]">Open-court suggestion · no confirmed organizer</small></span><FaArrowRight aria-hidden="true"/></Link>)}</div>
         </section>}
