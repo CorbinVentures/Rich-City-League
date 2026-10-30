@@ -29,7 +29,7 @@ describe('RCH program emblems',()=>{
   const draft=text('src/app/draft/page.tsx');
   const fantasy=text('src/app/fantasy/page.tsx');
   const league=text('src/components/LeagueCenterExperience.tsx');
-  expect(runs).toContain('Host a run');
+  expect(runs).toContain('Host a Game');
   expect(draft).toContain('LIVE DRAFT BOARD');
   expect(fantasy).toContain('My team');
   expect(league).toContain('Join the league');
