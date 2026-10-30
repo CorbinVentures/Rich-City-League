@@ -4,6 +4,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaBasketball,FaClock,FaRotate} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
+import {nextUpEligibility} from '@/lib/runs-next-up-eligibility';
 
 type QueueEntry={
  id:string;profile_id:string;status:'waiting'|'called'|'playing'|'completed'|'left'|'no_show';
@@ -72,7 +73,8 @@ export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:s
  const current=items.filter(i=>i.status==='playing');
  const called=items.filter(i=>i.status==='called');
  const waitingPosition=active?.status==='waiting'?waiting.findIndex(i=>i.id===active.id)+1:0;
- const canJoinQueue=Boolean(user?.id&&checkedIn&&hosted);
+ const gate=nextUpEligibility({signedIn:Boolean(user?.id),hostedGameDay:hosted,checkedIn});
+ const canJoinQueue=gate==='eligible';
  const personalLabel=active?.status==='playing'?'ON COURT':active?.status==='called'?'YOU ARE ON DECK':active?.status==='waiting'?'WAITING POSITION #'+waitingPosition:'NOT IN QUEUE';
  if(!enabled)return <section aria-label="Next Up basketball queue" role="alert" className="mt-6 rounded-xl border border-amber-300/40 bg-[#252116] p-4 text-sm text-amber-100">Next Up is unavailable. The host can retry when connectivity returns. No queue position has been confirmed.</section>;
  return <section aria-label="Next Up basketball queue" className="mt-6 rounded-3xl border border-[#38678b] bg-[#081e32] p-5 text-white sm:p-7">
@@ -96,7 +98,7 @@ export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:s
    {active?<div className="flex items-center gap-3"><span className="text-xs font-bold text-[#afdcf8]">Your status: {active.status.toUpperCase()}</span>
     {active.status!=='playing'&&<button disabled={busy} onClick={()=>void act('rch_leave_run_queue',{p_entry:active.id},'You have left the queue.')} className="min-h-10 rounded-xl border border-[#7792a5] px-3 text-xs font-bold disabled:opacity-50">Leave queue</button>}</div>:
     canJoinQueue?<button disabled={busy} onClick={()=>void act('rch_join_run_queue',{p_run:runId},'You are now in the Next Up line.')} className="min-h-11 rounded-xl bg-[#318cf2] px-5 text-sm font-black disabled:opacity-50">Join Next Up</button>:
-    <p className="rounded-lg border border-[#52778f] bg-[#102d45] px-3 py-3 text-xs leading-5 text-[#c7e4f6]" role="status">{!hosted?'Next Up is only available at an active hosted game.':'Your RSVP does not place you in the on-court queue. Check in at the venue using the host code first.'} <a href="#rch-game-day" className="font-black underline">Game-day check-in</a></p>}
+    <p className="rounded-lg border border-[#52778f] bg-[#102d45] px-3 py-3 text-xs leading-5 text-[#c7e4f6]" role="status">{gate==='not_hosted'?'Next Up is only available during the actual game-day window of a hosted Run.':'Your RSVP does not place you in the on-court queue. Check in at the venue using the host code first.'} <a href="#rch-game-day" className="font-black underline">Game-day check-in</a></p>}
   </div>:<p className="mt-3 text-xs text-[#acd0eb]">Sign in, register and check in at the real court to enter Next Up.</p>}
 
   <div className="mt-5 space-y-2">
