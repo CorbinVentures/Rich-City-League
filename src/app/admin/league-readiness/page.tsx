@@ -87,7 +87,7 @@ export default function RclLeagueReadinessPage() {
     <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">Planning baseline: {RCL_PILOT_OPERATIONS.clubs} clubs, {RCL_PILOT_OPERATIONS.regularSeasonGamesPerClub} games per club, {RCL_PILOT_OPERATIONS.regularSeasonGamesTotal} total regular-season games, {RCL_PILOT_OPERATIONS.playoffClubs} playoff clubs. These are recommendations, not signed league policy.</p>
     <div role="status" className="mt-5 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-5">
       <b className="text-amber-100">NOT APPROVED FOR OPENING NIGHT</b>
-      <p className="mt-2 text-sm leading-6 text-white/65">Technical preflight: {passed}/{readiness.checks.length} checks. {seasonName? `Season reviewed: ${seasonName}.`:'No qualifying November 2027 professional-season record exists.'} Even six green checks do not replace executed contracts, financial verification, insurance, commissioner approval or a published rulebook.</p>
+      <p className="mt-2 text-sm leading-6 text-white/65">Technical preflight: {passed}/{readiness.checks.length} checks. {readiness.clearTechnicalPreflight ? 'Automated checks satisfied; manual approvals remain outstanding.' : 'There are unresolved technical blockers.'} {seasonName? `Season reviewed: ${seasonName}.`:'No qualifying November 2027 professional-season record exists.'} Even six green checks do not replace executed contracts, financial verification, insurance, commissioner approval or a published rulebook.</p>
     </div>
     {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/25 p-4 text-sm text-red-200">{error}</p>}
     <section className="mt-8 space-y-3" aria-label="Operational technical preflight">
