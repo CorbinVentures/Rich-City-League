@@ -19,7 +19,7 @@ describe('RCH screenshot-driven core product fit',()=>{
    expect(runs).toContain('aria-label="Runs quick actions" className="rch-run-primary-actions"');
    expect(runs).toContain('<summary>More run tools</summary>');
    expect(runs).toContain('My Crew');
-   expect(runs).toContain('Court Map');
+   expect(runs).toContain('Explore Courts');
    expect(runs).toContain('id="rch-upcoming-runs"');
    expect(runs.indexOf('rch-run-primary-actions')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
  });

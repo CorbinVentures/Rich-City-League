@@ -12,10 +12,10 @@ const components=read('src/components/runs/arena-ui.tsx');
 
 describe('RCH Visual Experience v1 product contract',()=>{
  it('opens Runs with a genuine host action and real games before optional extras',()=>{
-  expect(page).toContain('Host a run');
+  expect(page).toContain('Host a Game');
   expect(page).toContain('onClick={() => openCreateForCourt');
   expect(page).toContain('id="rch-upcoming-runs"');
-  expect(page).toContain('href="/runs?view=world"');
+  expect(page).toContain('href="/runs?view=world&mode=world"');
   expect(page).toContain('My run recommendations');
   expect(page).not.toContain('<RunArenaHero');
   expect(page.indexOf('Host a run')).toBeLessThan(page.indexOf('My run recommendations'));

@@ -41,7 +41,7 @@ describe('RCH PWA clarity and progressive disclosure',()=>{
   it('opens Runs to real games, with optional immersive court world',()=>{
     const runs=read('src/app/runs/page.tsx');
     expect(runs).toContain("searchParams.get('view')!=='world'");
-    expect(runs).toContain('href="/runs?view=world"');
+    expect(runs).toContain('href="/runs?view=world&mode=world"');
     expect(runs).toContain('My run recommendations');
     expect(runs).not.toContain('<RunArenaHero');
     expect(runs).toContain('<RunsWorldGame');
