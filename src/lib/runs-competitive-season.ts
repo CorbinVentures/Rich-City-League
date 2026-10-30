@@ -14,7 +14,7 @@ export function verifiedCompetitionHistory(input:readonly CompetitiveReceipt[]|n
    ||typeof r.won!=='boolean'||!Number.isFinite(Date.parse(r.verified_at)))return false;
   seen.add(r.id);return true;
  }).sort((a,b)=>Date.parse(b.verified_at)-Date.parse(a.verified_at));
- const formats=competitiveFormats.map(format=>{
+ const formats:FormatSummary[]=competitiveFormats.map(format=>{
   const matches=verified.filter(r=>r.game_format===format);
   return {format,games:matches.length,wins:matches.filter(r=>r.won).length,losses:matches.filter(r=>!r.won).length};
  });
