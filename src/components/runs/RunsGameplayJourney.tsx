@@ -111,7 +111,7 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
   {slots===null&&<p className="rch-game-journey-caution">Game format needs host confirmation; roster minimum cannot be determined.</p>}
   {!suggested&&slots!==null&&<p className="rch-game-journey-caution">{roster.guidance}</p>}
   {verified?<div className="rch-game-verified" role="status"><FaTrophy aria-hidden="true"/><div><strong>{verified.won?'VICTORY VERIFIED':'GAME VERIFIED'}</strong><span>+{verified.xp} World XP · +{verified.rep} credited match REP · independently confirmed for your player</span></div></div>:
-   scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} event scorecard{scorecardCount===1?'':'s'} recorded. This does not prove that you played or that a ranked result was verified. No personal reward is assumed.</p>:null}
+   scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. This does not prove that you played or that a ranked result was verified. No personal reward is assumed.</p>:null}
   {userId&&!suggested&&<button type="button" onClick={()=>setRefreshTick(v=>v+1)} className="rch-game-sync" aria-label="Refresh verified game rewards">Refresh verified game status</button>}
   {verifiedError&&<p className="rch-game-journey-caution">Verified career receipts cannot sync right now; no game result is being assumed.</p>}
   <Link href={safeAction.href} className="rch-game-next"><div><small>YOUR NEXT MOVE</small><strong>{safeAction.title}</strong><span>{safeAction.desc}</span></div><FaArrowRight aria-hidden="true"/></Link>
