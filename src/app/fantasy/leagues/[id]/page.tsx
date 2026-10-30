@@ -43,7 +43,7 @@ export default function PrivateFantasyLeaguePage({ params }:{ params:Promise<{id
     const fantasySeason = await supabase.from('fantasy_seasons')
       .select('season_id,status').eq('id',currentLeague.fantasy_season_id).maybeSingle();
     const linkedPro = fantasySeason.data?.season_id
-      ? await supabase.from('seasons').select('start_date,status').eq('id',fantasySeason.data.season_id).maybeSingle()
+      ? await supabase.from('seasons').select('start_date,status,leagues!inner(slug,is_active)').eq('id',fantasySeason.data.season_id).maybeSingle()
       : null;
     if (fantasySeason.error || fantasySeason.data?.status !== 'active' || !linkedPro || linkedPro.error || !canActivateRclFantasySeason(linkedPro.data)) {
       setLeague(null);
