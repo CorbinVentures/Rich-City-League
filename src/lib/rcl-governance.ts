@@ -13,11 +13,16 @@ export const RCL_RULEBOOK_DRAFT = {
 type OfficialSeason = {
   start_date: string;
   status: string;
+  leagues?: { slug: string; is_active: boolean } | null;
 };
 
-/** A fantasy league must NEVER treat active historical seasons as the new professional campaign. */
+/** A fantasy league must never treat historical or OTHER programs as the new professional competition. */
 export function canActivateRclFantasySeason(season: OfficialSeason | null | undefined): boolean {
-  return Boolean(season && isRclProSeasonRecord(season) && season.status === 'active');
+  return Boolean(season &&
+    isRclProSeasonRecord(season) &&
+    season.status === 'active' &&
+    season.leagues?.slug === 'rich-city-league' &&
+    season.leagues.is_active === true);
 }
 
 /** Draft selections need not equal the maximum permitted season roster: expose the gap. */
