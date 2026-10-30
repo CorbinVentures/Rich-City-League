@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaBasketball,FaClock,FaRotate} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
@@ -39,7 +40,7 @@ export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:s
   ]);
   if(queue.error){setEnabled(false);setError('The live queue could not be read. No attendance or position is being assumed.');return;}
   const entries=(queue.data??[]) as QueueEntry[];
-  setItems(entries);setEnabled(true);
+  setItems(entries);setEnabled(true);setError('');
   setRole(operator.data?.role??'');
   setManager(Boolean(host.data)||user.id===hostId||['cohost','scorekeeper'].includes(operator.data?.role??''));
   if(entries.length) {
@@ -76,7 +77,8 @@ export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:s
  const gate=nextUpEligibility({signedIn:Boolean(user?.id),hostedGameDay:hosted,checkedIn});
  const canJoinQueue=gate==='eligible';
  const personalLabel=active?.status==='playing'?'ON COURT':active?.status==='called'?'YOU ARE ON DECK':active?.status==='waiting'?'WAITING POSITION #'+waitingPosition:'NOT IN QUEUE';
- if(!enabled)return <section aria-label="Next Up basketball queue" role="alert" className="mt-6 rounded-xl border border-amber-300/40 bg-[#252116] p-4 text-sm text-amber-100">Next Up is unavailable. The host can retry when connectivity returns. No queue position has been confirmed.</section>;
+ if(!user)return <section aria-label="Next Up basketball queue" className="mt-6 rounded-xl border border-[#4b7192] bg-[#0b2941] p-4 text-sm text-[#d4eafa]">Next Up shows only real checked-in attendees. <Link href={'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId+'#rch-next-up')} className="font-black underline">Sign in</Link> to view the live court queue.</section>;
+ if(!enabled)return <section aria-label="Next Up basketball queue" role="alert" className="mt-6 rounded-xl border border-amber-300/40 bg-[#252116] p-4 text-sm text-amber-100">Next Up is temporarily unavailable. No queue position has been confirmed. <button type="button" onClick={()=>void load()} className="ml-2 min-h-10 rounded-lg border border-amber-300/50 px-3 font-bold">Retry live queue</button></section>;
  return <section aria-label="Next Up basketball queue" className="mt-6 rounded-3xl border border-[#38678b] bg-[#081e32] p-5 text-white sm:p-7">
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div>
