@@ -475,7 +475,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </>}
       <GravityLocationPicker compact/>
     </section>}
-   {screen==='home'&&<RunsJourneyHub runId={areaRuns.find(r=>r.status==='open')?.id||null} courtSlug={selectedSlug}/>}
+   {screen==='home'&&<><div className="rcc-home-door"><div><span>THE COMPETITIVE CIRCUIT</span><strong>Ranked · Rivals · Weekly · Cup</strong><small>Your next chapter uses real verified results.</small></div><Link href="/runs?view=world&mode=season">ENTER CIRCUIT <FaArrowRight aria-hidden="true"/></Link></div><RunsJourneyHub runId={areaRuns.find(r=>r.status==='open')?.id||null} courtSlug={selectedSlug}/></>}
   </div>
  </main>;
 }
