@@ -5,14 +5,16 @@ import {playerTarget} from '@/lib/runs-gameplay-readiness';
 type Team={id:string;name:string;sort_order:number};
 type Member={run_team_id:string;profile_id:string};
 type Person={id:string;display_name:string|null;username:string|null};
-type Props={format:string;teams:readonly Team[];members:readonly Member[];profiles:readonly Person[];registeredIds:readonly string[];checkedInIds:readonly string[];canManage:boolean;suggested:boolean;status:string};
+type Props={format:string;teams:readonly Team[];members:readonly Member[];profiles:readonly Person[];registeredIds:readonly string[];checkedInIds:readonly string[];viewerId:string|null;canManage:boolean;suggested:boolean;status:string};
 
-export function RunTeamMatchupBoard({format,teams,members,profiles,registeredIds,checkedInIds,canManage,suggested,status}:Props){
+export function RunTeamMatchupBoard({format,teams,members,profiles,registeredIds,checkedInIds,viewerId,canManage,suggested,status}:Props){
  const roster=new Set(registeredIds),checked=new Set(checkedInIds);
  const target=playerTarget(format),perSide=target===null?null:target/2;
  const assigned=new Set(members.filter(m=>roster.has(m.profile_id)).map(m=>m.profile_id));
  const unassigned=registeredIds.filter(id=>!assigned.has(id));
  const sorted=[...teams].sort((a,b)=>a.sort_order-b.sort_order);
+ // RLS permits the player and host to see their check-ins, but other attendees may be hidden.
+ const checkedLabel=(id:string)=>checked.has(id)?'CHECKED IN':canManage||id===viewerId?'RSVP ONLY':'CHECK-IN NOT VISIBLE';
  const name=(id:string)=>{const p=profiles.find(p=>p.id===id);return p?.display_name||p?.username||'Registered player';};
  const group=(team:Team)=>{
   const players=members.filter(m=>m.run_team_id===team.id&&roster.has(m.profile_id));
@@ -21,7 +23,7 @@ export function RunTeamMatchupBoard({format,teams,members,profiles,registeredIds
    <header><FaPeopleGroup aria-hidden="true"/><h3>{team.name}</h3><span>{players.length}{perSide!==null?' / '+perSide:''}</span></header>
    <div className="rch-matchup-players">{Array.from({length:Math.max(1,Math.min(count,12))},(_,i)=>{
     const id=players[i]?.profile_id;
-    return <div className={'rch-matchup-player'+(id?'':' empty')} key={id||'slot-'+i}><span>{id?name(id):'Open position'}</span><small>{id?(checked.has(id)?<><FaCircleCheck aria-hidden="true"/> CHECKED IN</>:'RSVP ONLY'):'UNASSIGNED'}</small></div>;
+    return <div className={'rch-matchup-player'+(id?'':' empty')} key={id||'slot-'+i}><span>{id?name(id):'Open position'}</span><small>{id?(checked.has(id)?<><FaCircleCheck aria-hidden="true"/> CHECKED IN</>:checkedLabel(id)):'UNASSIGNED'}</small></div>;
    })}</div>
   </article>;
  };

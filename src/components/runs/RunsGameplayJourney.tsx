@@ -74,7 +74,8 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
  const checkedIn=Boolean(userId&&checkedInIds.includes(userId));
  const signedUp=Boolean(userId&&registeredIds.includes(userId));
  const unavailable=suggested||listingUnknown||past||!['open','full'].includes(status);
- const stage=verified?4:scorecardCount>0?3:checkedIn?2:signedUp?1:0;
+ // Never mark a player's PLAY / CONFIRM stages complete because another team recorded a scorecard.
+ const stage=verified?4:checkedIn?2:signedUp?1:0;
  const nextAction=verified?{href:'/runs?view=list#rch-upcoming-runs',title:'FIND YOUR NEXT GAME',desc:'Keep building your verified basketball story'}:
  !userId?{href:'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId),title:'SIGN IN TO PLAY',desc:'Create your player and register for a real Run'}:
  !signedUp?host?{href:'#rch-run-lobby',title:'MANAGE YOUR GAME',desc:'Host the event and set up teams; hosting is not player check-in'}:{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
@@ -102,7 +103,7 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
      return <div key={playerId||'empty-'+index} className={'rch-game-slot '+(playerId?'occupied':'empty')+(playerId===userId?' own':'')}>
       <span className="rch-game-slot-avatar">{person?.avatar_url?<img src={person.avatar_url} alt="" loading="lazy"/>:<FaUser aria-hidden="true"/>}</span>
       <strong>{playerId?(person?.display_name||person?.username||'Registered player'):'OPEN SLOT'}</strong>
-      <small>{playerId?(checkedInIds.includes(playerId)?'CHECKED IN':'RSVP · NOT CHECKED IN'):'WAITING FOR A PLAYER'}</small>
+      <small>{playerId?(checkedInIds.includes(playerId)?'CHECKED IN':playerId===userId?'RSVP · NOT CHECKED IN':'RSVP · CHECK-IN NOT VISIBLE'):'WAITING FOR A PLAYER'}</small>
      </div>;
     })}
    </div>}
@@ -110,7 +111,7 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
   {slots===null&&<p className="rch-game-journey-caution">Game format needs host confirmation; roster minimum cannot be determined.</p>}
   {!suggested&&slots!==null&&<p className="rch-game-journey-caution">{roster.guidance}</p>}
   {verified?<div className="rch-game-verified" role="status"><FaTrophy aria-hidden="true"/><div><strong>{verified.won?'VICTORY VERIFIED':'GAME VERIFIED'}</strong><span>+{verified.xp} World XP · +{verified.rep} credited match REP · independently confirmed for your player</span></div></div>:
-   scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. This does not prove a verified ranked result or issue rewards.</p>:null}
+   scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. This does not prove that you played or that a ranked result was verified. No personal reward is assumed.</p>:null}
   {userId&&!suggested&&<button type="button" onClick={()=>setRefreshTick(v=>v+1)} className="rch-game-sync" aria-label="Refresh verified game rewards">Refresh verified game status</button>}
   {verifiedError&&<p className="rch-game-journey-caution">Verified career receipts cannot sync right now; no game result is being assumed.</p>}
   <Link href={safeAction.href} className="rch-game-next"><div><small>YOUR NEXT MOVE</small><strong>{safeAction.title}</strong><span>{safeAction.desc}</span></div><FaArrowRight aria-hidden="true"/></Link>
