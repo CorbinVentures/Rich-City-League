@@ -42,3 +42,10 @@
 .rch-ranked-review-state>svg{flex:none}
 @media(max-width:650px){.rch-matchup-board{padding:13px;margin-bottom:18px;border-radius:15px}.rch-matchup-grid{grid-template-columns:1fr}.rch-matchup-title h2{font-size:25px}.rch-matchup-player{min-height:42px}.rch-matchup-empty{min-height:112px}.rch-nextup-you strong{font-size:19px}}
 @media(prefers-reduced-motion:reduce){.rch-matchup-board *,.rch-nextup-you *,.rch-ranked-confirmation *{animation:none!important;transition:none!important}}
+
+.rch-game-sync{display:inline-flex;align-items:center;min-height:40px;margin-top:12px;padding:7px 12px;border:1px solid #557d9a;border-radius:9px;background:#10334e;color:#c5e7ff;font-size:10px;font-weight:900;cursor:pointer}
+.rch-game-sync:hover{border-color:#9bd5ff}
+.rch-game-sync:focus-visible,.rch-game-postgame-actions button:focus-visible{outline:3px solid #a0dcff;outline-offset:2px}
+.rch-game-postgame-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+.rch-game-postgame-actions button{display:inline-flex;gap:7px;align-items:center;min-height:42px;padding:9px 12px;border:1px solid #a8d8a4;border-radius:10px;background:#134c3d;color:#d3ffe8;font-size:11px;font-weight:900;cursor:pointer}
+.rch-game-postgame-actions .rch-game-replay{display:inline-flex;align-items:center;gap:6px;margin:0;color:#b4dcff;font-size:11px;font-weight:900}
