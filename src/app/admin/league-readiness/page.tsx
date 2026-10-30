@@ -34,7 +34,7 @@ export default function RclLeagueReadinessPage() {
         if(league.error) throw league.error;
         if(!league.data) throw new Error('The official Rich City League record is unavailable.');
         const season=await db!.from('seasons').select('id,name,start_date,status')
-          .eq('league_id',league.data.id).gte('start_date','2027-11-01')
+          .eq('league_id',league.data.id).gte('start_date','2027-11-01').lte('start_date','2027-11-30')
           .order('start_date',{ascending:true}).limit(1).maybeSingle();
         if(season.error)throw season.error;
         if(!season.data){ if(!cancelled) {setSnapshot(emptySnapshot);setSeasonName('');}return; }
