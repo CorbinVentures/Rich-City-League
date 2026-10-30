@@ -37,6 +37,8 @@ Minimum club evidence:
 
 Failure to meet requirements leads to pending, suspended or denied status; a commissioner must publish objective reasons and an appeal path.
 
+**On-court operations draft:** See `docs/RCL_2027_28_GAME_RULES_APPENDIX_DRAFT.md` for a proposed FIBA 2026 v1.1 rules authority, equipment/officials requirements, and explicit approval checklist.
+
 ## 4. Competition calendar and format
 **Proposed pilot for approval:** six teams, double round robin (ten regular-season games per team, thirty league-wide), top four playoff with seeded semifinals and championship. No published date or venue is authorized by this suggestion. A future eight- or twelve-club schedule requires a distinct voted format and financial model.
 
