@@ -42,7 +42,8 @@ function stages(runId:string|null,courtSlug:string|null):Stage[]{
   {id:'17',label:'Court Masters',description:'1v1, 2v2 and 3v3 verified crowns',href:courtSlug?court+'#rch-court-masters':court,status:'core'},
   {id:'18',label:'Leaderboards',description:'Independent records, format and court standings',href:root+'?view=list&competition=rankings#rch-competition',status:'core'},
   {id:'19',label:'Commonwealth Cup',description:'Distinct statewide qualification and event competition',href:'/commonwealth',status:'linked'},
-  {id:'20',label:'Host Operations',description:'Venue readiness, roster, staff and score tools',href:eventTarget('rch-host-operations'),status:'core'}]},
+  {id:'20',label:'Host Operations',description:'Venue readiness, roster, staff and score tools',href:eventTarget('rch-host-operations'),status:'core'},
+  {id:'25',label:'Competitive Circuit',description:'Verified ranked ladder, rivalries and weekly objectives',href:root+'?view=world&mode=season',status:'core'}]},
  {id:'community',eyebrow:'06 / THE LIVING COMMUNITY',title:'Keep basketball connected',summary:'Partners, media, invitations and fair-play controls.',icon:FaPeopleGroup,destinations:[
   {id:'21',label:'Partner Runs',description:'Approved organizations and their actual events',href:root+'/partners',status:'core'},
   {id:'22',label:'Game Social',description:'Run Tape, clips and moments',href:eventTarget('rch-run-tape'),status:'core'},
