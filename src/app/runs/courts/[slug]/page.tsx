@@ -8,6 +8,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {CourtMasterTitles} from '@/components/runs/CourtMasterTitles';
 import {CourtPulseFeed} from '@/components/runs/CourtPulseFeed';
+import {CourtArenaGameGate} from '@/components/runs/CourtArenaGameGate';
 import {RCHEmptyState,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
 import '../../visual-experience.css';
 import './court-game-arena.css';
@@ -114,6 +115,9 @@ export default function RunCourtProfile(){
     <div><small>CREWS ON LADDER</small><strong>{crews.length}</strong></div>
     <div><small>UPCOMING RUNS</small><strong>{runs.length}</strong></div>
    </div>
+   <CourtArenaGameGate slug={court.slug} name={court.name} locality={court.locality}
+     controller={owner?.crew_name||null} registeredCrews={crews.length}
+     runs={runs} watching={watched} historyRecorded={history.length} historyLoading={historyLoading}/>
    {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/40 p-4 text-sm text-red-200">{error}</p>}
    {notice&&<p role="status" className="mt-4 rounded-xl border border-emerald-400/40 p-4 text-sm text-emerald-200">{notice}</p>}
    <CourtPulseFeed courtSlug={court.slug}/>
