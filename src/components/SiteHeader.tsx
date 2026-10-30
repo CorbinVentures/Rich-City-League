@@ -82,7 +82,9 @@ export function SiteHeader(){
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
   const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_GUEST_MOBILE_NAV;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
-  const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
+  // SiteHeader belongs to the installed PWA. Open its Runs tab in the game
+  // experience, while normal browser /runs remains the direct real-game list.
+  const resolveMemberHref=(href:string)=>href==='/runs'?'/runs?view=world&mode=home':href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
   const sectionLabel=pathname.startsWith('/social/profile')?'Profile'
