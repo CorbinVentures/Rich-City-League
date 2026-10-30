@@ -8,7 +8,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { RCL_PILOT_OPERATIONS, inspectRclPilotReadiness, type RclOperationsSnapshot } from '@/lib/rcl-operations-readiness';
 
 const emptySnapshot: RclOperationsSnapshot = {
-  season:null,assignedClubs:[],activeRosters:[],scheduledGames:[],eligibleDraftProspects:0,draft:null,
+  season:null,assignedClubs:[],activeRosters:[],scheduledGames:[],eligibleDraftProspects:0,draft:null,draftPreflightBlockers:null,
 };
 
 type SeasonRecord = {id:string;name:string;start_date:string;status:string};
@@ -42,7 +42,7 @@ export default function RclLeagueReadinessPage() {
         const [assignments,games,draft,pool]=await Promise.all([
           db!.from('team_seasons').select('id,team_id,season_id').eq('season_id',official.id),
           db!.from('games').select('home_team_id,away_team_id').eq('season_id',official.id),
-          db!.from('drafts').select('status,rounds,roster_limit').eq('season_id',official.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
+          db!.from('drafts').select('id,status,rounds,roster_limit').eq('season_id',official.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
           db!.from('draft_pools').select('player_id').eq('season_id',official.id).eq('eligible',true),
         ]);
         const problem=[assignments.error,games.error,draft.error,pool.error].find(Boolean);
@@ -55,6 +55,9 @@ export default function RclLeagueReadinessPage() {
           seasonIds.length ? db!.from('rosters').select('player_id,team_season_id,left_at').in('team_season_id',seasonIds).is('left_at',null) : Promise.resolve({data:[],error:null}),
         ]);
         if(teams.error||rosters.error)throw teams.error??rosters.error;
+        const rpc=draft.data ? await db!.rpc('season_draft_readiness',{target_draft:draft.data.id}) : null;
+        if(rpc?.error)throw rpc.error;
+        const draftPreflightBlockers=rpc && Array.isArray(rpc.data) ? rpc.data.map(String) : null;
         const active=new Map((teams.data??[]).map(t=>[t.id,t.is_active]));
         if(cancelled)return;
         setSeasonName(official.name);
@@ -65,6 +68,7 @@ export default function RclLeagueReadinessPage() {
           scheduledGames:(games.data??[]).map(g=>({home_team_id:g.home_team_id,away_team_id:g.away_team_id})),
           eligibleDraftProspects:(pool.data??[]).length,
           draft:draft.data ? {status:draft.data.status,rounds:draft.data.rounds,roster_limit:draft.data.roster_limit}:null,
+          draftPreflightBlockers,
         });
       } catch(e) {
         if(!cancelled)setError(e instanceof Error?e.message:'Unable to inspect official league records.');
