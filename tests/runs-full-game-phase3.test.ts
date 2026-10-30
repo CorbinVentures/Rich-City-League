@@ -16,7 +16,7 @@ describe('Runs Full-Game Phase 3: connected MyPLAYER, Crew HQ and Court Arenas',
   expect(career).toContain('worldMilestoneCatalog');
   expect(career).toContain('worldQuestProgress(journey,q.key)');
   expect(career).toContain('SPENDABLE REP');
-  expect(career).toContain('SKILL RATING');
+  expect(career).toContain('Skill rating');
   expect(career).toContain('VERIFIED GAMES');
   expect(career).toContain('social XP is separate');
  });
