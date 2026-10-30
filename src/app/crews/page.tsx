@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import {RunsGameChrome} from '@/components/runs/RunsGameChrome';
+import {CrewGameCommandBoard} from '@/components/runs/CrewGameCommandBoard';
 import '../runs/runs-game-system.css';
+import '../runs/runs-game-world-scenes.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
@@ -159,6 +161,12 @@ function CrewsView(){
         <h2 className="text-xl font-black">Crew invites <span className="text-[#ff768c]">({invites.length})</span></h2>
         <div className="mt-4 space-y-3">{invites.map(invite=><div key={invite.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#071627] p-4"><span className="text-sm font-bold">{crews.find(c=>c.id===invite.crew_id)?.name||'RCH Crew'} invited you to join</span><div className="flex gap-2"><button disabled={!!busy} className="rounded-lg bg-[#68baff] px-4 py-2 text-xs font-black text-[#051321]" onClick={()=>void execute('commonwealth_respond_invitation',{p_invitation:invite.id,p_accept:true},'Invitation accepted. Captain invitations join immediately; teammate invitations go to the captain for approval.')}>Accept</button><button disabled={!!busy} className="rounded-lg border border-white/20 px-4 py-2 text-xs font-bold" onClick={()=>void execute('commonwealth_respond_invitation',{p_invitation:invite.id,p_accept:false},'Invitation declined.')}>Decline</button></div></div>)}</div>
       </section>}
+
+      {selected&&<CrewGameCommandBoard crewName={selected.name} city={selected.city}
+        logo={logo(selected)} homeCourt={selected.home_court_slug||null}
+        members={selectedMembers} people={people}
+        runs={runs.filter(run=>entries.some(e=>e.crew_id===selected.id&&e.run_id===run.id))}
+        entries={entries.filter(e=>e.crew_id===selected.id)} mine={mine}/>}
 
       {selected&&<section id="rch-crew-hq" className="rch-identity-crew-stage mt-7 scroll-mt-24" aria-label="Crew headquarters">
         <div className="flex flex-wrap items-center gap-5">
