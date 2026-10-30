@@ -40,7 +40,7 @@ export function RunsMyCareerStage({name,avatar,journey,rep,passport}:{
    </div>
   </div>
   {latest&&<div className="rch-career-record"><FaTrophy aria-hidden="true"/><div><small>MOST RECENT VERIFIED PERFORMANCE</small><strong>{latest.won?'VERIFIED VICTORY':'VERIFIED GAME'} · {latest.court_name||'Virginia court'}</strong><span>{latest.game_format||'Basketball'} · {new Date(latest.verified_at).toLocaleDateString('en-US',{timeZone:'America/New_York'})}{typeof latest.rating_before==='number'&&typeof latest.rating_after==='number'?' · RATING '+latest.rating_before+' → '+latest.rating_after:''}</span></div></div>}
-  <div className="rch-career-paths"><Link href="/runs?view=list#rch-competition">VIEW FORMAT RANKINGS <FaArrowRight aria-hidden="true"/></Link><Link href="/crews?intent=mine"><FaPeopleGroup aria-hidden="true"/> CREW HQ</Link><Link href="/runs/world">EXPLORE COURTS <FaArrowRight aria-hidden="true"/></Link></div>
+  <div className="rch-career-paths"><Link href="/runs?view=world&mode=season">COMPETITIVE CIRCUIT <FaArrowRight aria-hidden="true"/></Link><Link href="/crews?intent=mine"><FaPeopleGroup aria-hidden="true"/> CREW HQ</Link><Link href="/runs/world">EXPLORE COURTS <FaArrowRight aria-hidden="true"/></Link></div>
   <p className="rch-career-integrity"><FaShieldHalved aria-hidden="true"/> Hooper Level and World XP track verified basketball activity. Skill rating is per format, REP is spendable, and community social XP is separate. These are never interchangeable.</p>
  </section>;
 }
