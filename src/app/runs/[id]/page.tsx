@@ -29,6 +29,7 @@ import { RunMasterOfficialControl } from '@/components/runs/RunMasterOfficialCon
 import { RunNextUp } from '@/components/runs/RunNextUp';
 import {RunLobbyReadiness} from '@/components/runs/RunLobbyReadiness';
 import {RunsGameplayJourney} from '@/components/runs/RunsGameplayJourney';
+import {RunTeamMatchupBoard} from '@/components/runs/RunTeamMatchupBoard';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
 import './run-room-game.css';
 
