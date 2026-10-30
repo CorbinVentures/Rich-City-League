@@ -21,7 +21,7 @@ describe('Runs Full-Game Phase 2: real game-day',()=>{
   const room=source('src/app/runs/[id]/page.tsx');
   const ranked=source('src/components/runs/RunRankedMatchControl.tsx');
   expect(room).toContain('Pickup scorecard saved.');
-  expect(room).toContain('rankings');
+  expect(room).toContain('Rankings');
   expect(ranked).toContain("db.from('run_ranked_matches')");
   expect(ranked).toContain('run_ranked_matches');
   expect(ranked).toContain('HOME PENDING');
