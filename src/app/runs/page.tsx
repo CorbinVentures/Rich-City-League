@@ -141,7 +141,7 @@ export default function RunsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
   const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
-  const [rookieOnly,setRookieOnly]=useState(false);
+  const [rookieOnly,setRookieOnly]=useState(searchParams.get('rookie')==='1');
   const [visibleLimit,setVisibleLimit]=useState(8);
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);

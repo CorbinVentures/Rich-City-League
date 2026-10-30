@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rcl-static-v12';
-const SW_VERSION = 'v12';
+const CACHE_NAME = 'rcl-static-v13';
+const SW_VERSION = 'v13';
 const STATIC_ASSETS = [
   '/favicon.svg?v=black-r-1',
   '/icon?v=black-r-1',
@@ -17,7 +17,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+    await Promise.all(keys.filter((key) => key.startsWith('rcl-static-') && key !== CACHE_NAME).map((key) => caches.delete(key)));
     await self.clients.claim();
 
     // iOS installed PWAs can keep the previous document alive after a worker update.
