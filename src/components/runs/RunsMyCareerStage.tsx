@@ -36,7 +36,7 @@ export function RunsMyCareerStage({name,avatar,journey,rep,passport}:{
    <div className="rch-career-panel"><div className="rch-career-panel-head"><FaShieldHalved aria-hidden="true"/><strong>NEXT CHAPTER</strong></div>
     {nextQuest?<><h3>{nextQuest.title}</h3><p>{nextQuest.detail}</p><Link href={nextQuest.href}>START OBJECTIVE <FaArrowRight aria-hidden="true"/></Link></>:
      journey?<><h3>THIS WEEK'S QUESTS COMPLETE</h3><p>Find another hosted Run or revisit your verified career history.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></Link></>:
-     <><h3>BUILD YOUR LEGACY</h3><p>Find real games and start building your verified basketball résumé.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></>}
+     <><h3>BUILD YOUR LEGACY</h3><p>Find real games and start building your verified basketball résumé.</p><Link href="/runs?view=list#rch-upcoming-runs">FIND A RUN <FaArrowRight aria-hidden="true"/></Link></>}
    </div>
   </div>
   {latest&&<div className="rch-career-record"><FaTrophy aria-hidden="true"/><div><small>MOST RECENT VERIFIED PERFORMANCE</small><strong>{latest.won?'VERIFIED VICTORY':'VERIFIED GAME'} · {latest.court_name||'Virginia court'}</strong><span>{latest.game_format||'Basketball'} · {new Date(latest.verified_at).toLocaleDateString('en-US',{timeZone:'America/New_York'})}{typeof latest.rating_before==='number'&&typeof latest.rating_after==='number'?' · RATING '+latest.rating_before+' → '+latest.rating_after:''}</span></div></div>}
