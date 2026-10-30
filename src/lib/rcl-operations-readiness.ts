@@ -19,6 +19,8 @@ export type RclOperationsSnapshot = {
   scheduledGames: Array<{ home_team_id: string; away_team_id: string }>;
   eligibleDraftProspects: number;
   draft: { status: string; rounds: number; roster_limit: number } | null;
+  /** Authoritative existing DB draft order/eligibility preflight result. Null = not verified. */
+  draftPreflightBlockers: string[] | null;
 };
 
 export type OperationsCheck = { id: string; label: string; passed: boolean; detail: string };
@@ -70,7 +72,8 @@ export function inspectRclPilotReadiness(snapshot: RclOperationsSnapshot): {
   const plannedSelections = eligibleClubs.length * (snapshot.draft?.rounds ?? RCL_PILOT_OPERATIONS.draftRounds);
   const draftReady = Boolean(snapshot.draft && snapshot.draft.status === 'SETUP' &&
     snapshot.draft.rounds <= snapshot.draft.roster_limit &&
-    snapshot.eligibleDraftProspects >= plannedSelections);
+    snapshot.eligibleDraftProspects >= plannedSelections &&
+    Array.isArray(snapshot.draftPreflightBlockers) && snapshot.draftPreflightBlockers.length === 0);
 
   const checks: OperationsCheck[] = [
     {id:'season',label:'2027–28 official season record',passed:seasonIsOfficialWindow,
@@ -85,7 +88,7 @@ export function inspectRclPilotReadiness(snapshot: RclOperationsSnapshot): {
     {id:'schedule',label:'Double round-robin schedule',passed:scheduleFitsFormat,
       detail:`${validGames.length}/${RCL_PILOT_OPERATIONS.regularSeasonGamesTotal} valid regular-season games across assigned clubs`},
     {id:'draft',label:'Draft pool and roster coverage',passed:draftReady,
-      detail:snapshot.draft ? `${snapshot.eligibleDraftProspects} eligible prospects for ${plannedSelections} proposed selections` : 'No official SETUP draft for this season'},
+      detail:snapshot.draft ? `${snapshot.eligibleDraftProspects} nominally eligible prospects for ${plannedSelections} proposed selections; ${snapshot.draftPreflightBlockers === null ? 'official preflight not verified' : `${snapshot.draftPreflightBlockers.length} authoritative draft preflight blockers`}` : 'No official SETUP draft for this season'},
   ];
 
   return {
