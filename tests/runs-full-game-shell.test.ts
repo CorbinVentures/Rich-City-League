@@ -20,7 +20,7 @@ describe('RCH Runs connected full-game shell v1',()=>{
   expect(chrome).toContain('worldXpProgress(journey.data.world_xp)');
   expect(chrome).toContain("setUnavailable(true)");
   expect(chrome).toContain('VERIFIED GAMES');
-  expect(chrome).toContain("pathname==='/runs/world'");
+  expect(chrome).toContain("pathname!=='/runs/world'");
  });
  it('gives deep pages the same four game modes as the cinematic home',()=>{
   const nav=read('src/components/runs/RunsGlobalNav.tsx');
