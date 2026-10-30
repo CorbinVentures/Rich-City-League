@@ -329,7 +329,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
 
    {screen==='world'&&<div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#385a72] bg-[#0c263b] px-4 py-3 text-sm">
      <p className="text-[#cfe2ef]"><FaLocationDot className="mr-2 inline" aria-hidden="true"/>Select an outdoor court to explore its details. A map pin is not a scheduled game.</p>
-     <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 font-bold text-[#c8f06d]">Find hosted games <FaArrowRight aria-hidden="true"/></Link>
+     <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 font-bold text-[var(--rch-brand-accent-text)]">Find hosted games <FaArrowRight aria-hidden="true"/></Link>
    </div>}
 
    <nav className="rwg-nav" aria-label="Runs World gameplay modes">
