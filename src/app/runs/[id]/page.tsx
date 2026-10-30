@@ -264,7 +264,7 @@ export default function RunRoomPage() {
     });
     if (insertError) setError(insertError.message);
     else {
-      setNotice('Run result recorded.');
+      setNotice('Pickup scorecard saved. Rankings, World XP and REP remain pending until independent match confirmation.');
       setGameDraft({ home: '', away: '', homeScore: '', awayScore: '' });
       await load();
     }
@@ -395,7 +395,7 @@ export default function RunRoomPage() {
         <section id="rch-run-lobby" className="grid scroll-mt-36 gap-6 lg:grid-cols-[.75fr_1.25fr]" aria-label="Run roster and floor">
           <article className="rounded-3xl border border-white/10 bg-white/[.02] p-6">
             <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaPeopleGroup className="mr-1 inline" />Run roster</p>
-            <h2 className="mt-1 font-display text-2xl font-black uppercase">Who showed up</h2>
+            <h2 className="mt-1 font-display text-2xl font-black uppercase">Registered players</h2>
             <div className="mt-5 space-y-2">
               {profiles.map((profile) => {
                 const rel = reliability.find((item) => item.profile_id === profile.id);
@@ -415,7 +415,7 @@ export default function RunRoomPage() {
             <article className="rounded-3xl border border-rcl-orange/15 bg-rcl-orange/[.025] p-6">
               <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange"><FaTrophy className="mr-1 inline" />Run results</p>
               <h2 className="mt-1 font-display text-2xl font-black uppercase">Record an unverified score</h2><p className="mt-1 text-xs text-white/60">Scorecards are not ranked results. Opposing checked-in players must separately confirm a game before ratings or awards change.</p>
-              {canManage && teams.length >= 2 && !suggestedCourt && !listingStatusUnknown ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><select value={gameDraft.away} onChange={(event) => setGameDraft((current) => ({ ...current, away: event.target.value }))} className="field"><option value="">Away team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input inputMode="numeric" value={gameDraft.awayScore} onChange={(event) => setGameDraft((current) => ({ ...current, awayScore: event.target.value }))} className="field" placeholder="Score" /><select value={gameDraft.home} onChange={(event) => setGameDraft((current) => ({ ...current, home: event.target.value }))} className="field"><option value="">Home team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input inputMode="numeric" value={gameDraft.homeScore} onChange={(event) => setGameDraft((current) => ({ ...current, homeScore: event.target.value }))} className="field" placeholder="Score" /><button onClick={() => void record()} disabled={busy === 'game'} className="h-11 rounded-xl bg-rcl-orange px-4 text-[10px] font-black uppercase text-black disabled:opacity-40">Record</button></div> : null}
+              {canManage && teams.length >= 2 && !suggestedCourt && !listingStatusUnknown ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><select aria-label="Away team" value={gameDraft.away} onChange={(event) => setGameDraft((current) => ({ ...current, away: event.target.value }))} className="field"><option value="">Away team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Away team final score" inputMode="numeric" value={gameDraft.awayScore} onChange={(event) => setGameDraft((current) => ({ ...current, awayScore: event.target.value }))} className="field" placeholder="Score" /><select aria-label="Home team" value={gameDraft.home} onChange={(event) => setGameDraft((current) => ({ ...current, home: event.target.value }))} className="field"><option value="">Home team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Home team final score" inputMode="numeric" value={gameDraft.homeScore} onChange={(event) => setGameDraft((current) => ({ ...current, homeScore: event.target.value }))} className="field" placeholder="Score" /><button onClick={() => void record()} disabled={busy === 'game'} className="h-11 rounded-xl bg-rcl-orange px-4 text-[10px] font-black uppercase text-black disabled:opacity-40">Record</button></div> : null}
               <div className="mt-5 space-y-2">{games.length ? games.map((game) => <div key={game.id} className="grid grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-white/10 bg-black/20 p-4"><div><p className="text-[9px] uppercase text-white/30">Away</p><p className="font-black">{team(game.away_run_team_id)}</p></div><p className="font-display text-3xl font-black">{game.away_score}<span className="mx-2 text-white/20">–</span>{game.home_score}</p><div className="text-right"><p className="text-[9px] uppercase text-white/30">Home</p><p className="font-black">{team(game.home_run_team_id)}</p></div></div>) : <p className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/35">No pickup results recorded yet.</p>}</div>
             </article>
           </div>
