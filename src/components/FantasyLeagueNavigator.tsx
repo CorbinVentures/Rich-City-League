@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaCrown, FaKey, FaLock, FaPlus, FaTrophy, FaUsers } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { canActivateRclFantasySeason } from '@/lib/rcl-governance';
 
 type PrivateLeague = {
   id:string;
@@ -37,8 +38,13 @@ export function FantasyLeagueNavigator() {
 
   async function load() {
     if (!supabase || !user) return;
-    const seasonResult = await supabase.from('fantasy_seasons').select('id').eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle();
-    const activeSeasonId = seasonResult.data?.id ?? '';
+    const seasonResult = await supabase.from('fantasy_seasons').select('id,season_id').eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle();
+    let activeSeasonId = '';
+    if (!seasonResult.error && seasonResult.data) {
+      const linked = await supabase.from('seasons').select('start_date,status')
+        .eq('id',seasonResult.data.season_id).maybeSingle();
+      if (!linked.error && canActivateRclFantasySeason(linked.data)) activeSeasonId = seasonResult.data.id;
+    }
     setSeasonId(activeSeasonId);
     if (!activeSeasonId) { setLeagues([]); setMemberships([]); setFranchise(null); return; }
 
@@ -62,7 +68,7 @@ export function FantasyLeagueNavigator() {
 
   async function createPrivate(event:React.FormEvent) {
     event.preventDefault();
-    if (!fan || createName.trim().length < 2 || busy) return;
+    if (!fan || !seasonId || createName.trim().length < 2 || busy) return;
     setBusy(true); setMessage('');
     const result = await db.rpc('create_private_fantasy_league', { target_name:createName.trim(), target_max_teams:maxTeams });
     if (result.error) setMessage(result.error.message ?? 'Unable to create private league.');
@@ -78,7 +84,7 @@ export function FantasyLeagueNavigator() {
 
   async function joinPrivate(event:React.FormEvent) {
     event.preventDefault();
-    if (!fan || joinCode.trim().length < 6 || busy) return;
+    if (!fan || !seasonId || joinCode.trim().length < 6 || busy) return;
     setBusy(true); setMessage('');
     const result = await db.rpc('join_private_fantasy_league', { target_join_code:joinCode.trim() });
     if (result.error) setMessage(result.error.message ?? 'Unable to join private league.');
