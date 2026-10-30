@@ -20,6 +20,7 @@ import {
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { canActivateRclFantasySeason } from '@/lib/rcl-governance';
 import type { FantasyRoster, FantasySeason, FantasyTeam, PublicPlayer } from '@/types/database';
 import { calculateFantasyPoints } from '@/lib/rcl-algorithms';
 import { FantasyIntelligencePanel, type FantasyGameStat } from '@/components/fantasy/FantasyIntelligencePanel';
@@ -78,14 +79,25 @@ export default function FantasyPage() {
       return;
     }
 
-    const activeSeason = seasonResult.data as FantasySeason | null;
+    // An old/imported active fantasy season cannot be mistaken for the new pro competition.
+    const candidateSeason = seasonResult.data as FantasySeason | null;
+    let activeSeason: FantasySeason | null = null;
+    if (candidateSeason) {
+      const linked = await supabase.from('seasons')
+        .select('start_date,status').eq('id', candidateSeason.season_id).maybeSingle();
+      if (!linked.error && canActivateRclFantasySeason(linked.data)) activeSeason = candidateSeason;
+    }
     const playerPool = (playersResult.data ?? []) as PublicPlayer[];
     setSeason(activeSeason);
     setPlayers(playerPool);
 
     if (!activeSeason) {
+      setTeam(null);
+      setRoster([]);
       setFantasyTeams([]);
       setMatchups([]);
+      setPlayerStats([]);
+      setTeamActivity([]);
       setLoading(false);
       return;
     }
@@ -319,7 +331,8 @@ export default function FantasyPage() {
         {!user && <Notice icon={<FaUsers />} tone="blue">Sign in as a fan to create and manage your fantasy team. The player pool, rules and official scoring remain public.</Notice>}
         {user && profile?.role !== 'fan' && <Notice icon={<FaBolt />} tone="orange">RCL Fantasy is fan-first. Official and player accounts can view the player pool and league results, but fantasy team management is reserved for fan accounts.</Notice>}
         {message && <Notice icon={<FaBolt />} tone="orange">{message}</Notice>}
-        {!season && <Notice icon={<FaClock />} tone="blue">No active fantasy season is published yet. Rich City League professional play is planned for November 2027; Fantasy will activate when the official season and player pool are ready.</Notice>}
+        {!season && <Notice icon={<FaClock />} tone="blue">No eligible official 2027–28 fantasy season is active yet. Rich City League professional play is planned for November 2027; Fantasy will activate after the official season and competition rules are approved.</Notice>}
+        <p className="mb-5 text-xs leading-5 text-white/45">RCL Fantasy is free to enter. Paid-entry competitions are not authorized. <Link className="font-bold text-rcl-orange underline-offset-2 hover:underline" href="/league/rules">Read the proposed rules</Link>.</p>
 
         <details className="rch-fantasy-help mb-5 rounded-xl border border-white/10 p-3"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">How Fantasy works</summary><section aria-label="How RCH Fantasy works" className="mt-3 grid gap-3 md:grid-cols-3">
           {[
