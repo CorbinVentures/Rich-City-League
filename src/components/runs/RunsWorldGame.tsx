@@ -462,7 +462,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       {!user?<div className="rwg-empty"><p>Create a free RCH account to build a real basketball legacy.</p>
        <Link className="rwg-primary" href="/auth/sign-up">Create my player <FaArrowRight/></Link></div>:<>
        <div className="rwg-player-stats">
-        <div><small>SOCIAL LEVEL</small><strong>{player.socialLevel??'—'}</strong><span>{player.socialXp===null?'Unavailable':player.socialXp+' social XP'}</span></div>
+        <div><small>HOOPER LEVEL</small><strong>{journey?.signed_in?journey.world_level:'—'}</strong><span>Earn World XP from verified games</span></div>
         <div><small>SPENDABLE REP</small><strong>{player.repBalance??'—'}</strong><span>Earned through eligible activities</span></div>
         <div><small>VERIFIED GAMES</small><strong>{player.passport?.verified_games??'—'}</strong><span>Competitive history</span></div>
         <div><small>RUN BADGES</small><strong>{player.passport?.badges?.length??'—'}</strong><span>Confirmed achievements</span></div>
@@ -483,7 +483,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
         </section>;
        })():null}
        <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="player"/>
-       <p className="rwg-disclosure">Social XP, spendable REP, competitive skill rating and awards are distinct. No invented gameplay levels or pay-to-win advantages.</p>
+       <p className="rwg-disclosure">Hooper Level tracks verified basketball progress. REP is spendable, competitive Rank comes from independently confirmed matches, and badges must be earned. Social XP ({player.socialXp??'—'}) belongs to the wider RCH community, not your basketball rank.</p>
        <div className="rwg-mode-links"><Link className="rwg-primary" href="/profile">View Profile <FaArrowRight/></Link><Link className="rwg-secondary" href="/crews?intent=mine">My Crew</Link><Link className="rwg-secondary" href="/rep">REP Exchange</Link></div>
       </>}
       <GravityLocationPicker compact/>

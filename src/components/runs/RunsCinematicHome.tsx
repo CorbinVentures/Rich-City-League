@@ -168,7 +168,7 @@ export function RunsCinematicHome({
     <span className="rch-gh-kicker">{signedIn?'MY PLAYER · VERIFIED PROGRESSION':'YOUR BASKETBALL JOURNEY'}</span>
     <strong>{signedIn?name:'CREATE YOUR PLAYER'}</strong>
     <div className="rch-gh-level">
-     <span>{displayLevel!==null?'WORLD LVL '+displayLevel:journeyLoading?'SYNCING WORLD XP':'WORLD LEVEL —'}</span>
+     <span>{displayLevel!==null?'HOOPER LVL '+displayLevel:journeyLoading?'SYNCING WORLD XP':'HOOPER LEVEL —'}</span>
      <small>{progress?progress.within.toLocaleString()+' / '+progress.toNext.toLocaleString()+' XP':'Earn XP from verified games'}</small>
     </div>
     <progress max={progress?.toNext||1} value={progress?.within||0} aria-label="World XP toward next level"/>

@@ -26,6 +26,8 @@ import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsored
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { GravityLocationPicker } from '@/components/GravityLocationPicker';
+import {RunQuickPlay} from '@/components/runs/RunQuickPlay';
+import {isRookieFriendly} from '@/lib/runs-gameplay-readiness';
 import { useGravityLocation } from '@/hooks/useGravityLocation';
 import { cityForText } from '@/lib/virginia-world';
 import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
@@ -139,6 +141,7 @@ export default function RunsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
   const [runSearch, setRunSearch] = useState('');
   const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
+  const [rookieOnly,setRookieOnly]=useState(false);
   const [visibleLimit,setVisibleLimit]=useState(8);
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [loading, setLoading] = useState(true);
@@ -403,7 +406,7 @@ export default function RunsPage() {
       const courtMatch = !courtParam || run.location_slug === courtParam;
       const words = runSearch.trim().toLowerCase();
       const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
-      return skillMatch && typeMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run));
+      return skillMatch && typeMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run)) && (!rookieOnly || isRookieFriendly(run));
     });
     // Registered availability always comes before filled/cancelled events;
     // a player-selected city/format makes this feed relevant without hiding other Virginia courts.
@@ -420,9 +423,9 @@ export default function RunsPage() {
       const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
-  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,rookieOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
-  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,runSearch,courtParam,soloOnly]);
+  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,runSearch,courtParam,soloOnly,rookieOnly]);
 
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
@@ -470,6 +473,7 @@ export default function RunsPage() {
         </details>
         {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
+        {view === 'runs' && <RunQuickPlay runs={visibleRuns} loading={loading} rookieOnly={rookieOnly} onRookieChange={setRookieOnly} soloOnly={soloOnly} onSoloChange={setSoloOnly}/>}
         {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
           <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your schedule is live</p><p className="mt-1 text-sm text-white/60">Every date has its own RSVP and invitation.</p></div><button type="button" onClick={() => setCreatedRuns([])} aria-label="Dismiss new runs" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
@@ -482,7 +486,7 @@ export default function RunsPage() {
           <div className="rch-run-discovery-controls">
             <button type="button" className="rch-run-solo-toggle" aria-pressed={soloOnly} onClick={()=>setSoloOnly(v=>!v)}><FaBasketball aria-hidden="true"/>{soloOnly?'Solo spots only ✓':'Find a solo spot'}</button>
             <a href="#rch-competition" className="rch-run-passport-link"><FaMedal aria-hidden="true"/> My Passport</a>
-            <button type="button" className="rch-run-clear" onClick={()=>{setTypeFilter('all');setSkillFilter('all');setRunSearch('');setSoloOnly(false);}}>Clear filters</button>
+            <button type="button" className="rch-run-clear" onClick={()=>{setTypeFilter('all');setSkillFilter('all');setRunSearch('');setSoloOnly(false);setRookieOnly(false);}}>Clear filters</button>
           </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setTypeFilter('all')} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'}>All Runs</button>

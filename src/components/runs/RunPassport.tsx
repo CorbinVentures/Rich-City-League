@@ -45,7 +45,7 @@ export function RunPassport(){
   <div className="flex flex-wrap items-center justify-between gap-3">
    <div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-[#93d4ff]"><FaMedal/> Personal Basketball Identity</p>
     <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Your Run Passport</h2>
-    <p className="mt-2 text-sm text-[#a7c4df]">Every verified game builds your basketball history, skill rating and badges — separate from your social reputation.</p></div>
+    <p className="mt-2 text-sm text-[#a7c4df]">Your basketball identity: verified games, competitive Rank, earned badges and spendable REP. Social XP is separate.</p></div>
    <div className="rch-run-passport-actions">
     <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black">{expanded?'Hide Passport':'View Passport'}</button>
     <button type="button" disabled={loading||Boolean(error)} onClick={()=>void shareMyPassport()} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black disabled:opacity-50"><FaShareNodes className="mr-1 inline" aria-hidden="true"/> Share my stats</button>
@@ -81,6 +81,7 @@ export function RunPassport(){
     {data.open_appeals>0&&<p className="mt-4 text-xs font-bold text-[#f2d1a6]">{data.open_appeals} integrity review(s) in progress</p>}
     <p className="mt-4 text-[11px] leading-5 text-[#99bbd7]">Only you can view this detailed Passport. Public Run rankings continue to respect your profile privacy settings.</p>
     <SkillMasteryCollection />
+    <p className="mt-4 text-xs text-[#a7c1d9]">Skill ratings change only after independent opponent verification, not RSVPs or highlights. Start with a real hosted game.</p>
    </div>}
  </section>;
 }
