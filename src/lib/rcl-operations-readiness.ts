@@ -51,16 +51,20 @@ export function inspectRclPilotReadiness(snapshot: RclOperationsSnapshot): {
     teamIds.has(game.home_team_id) && teamIds.has(game.away_team_id));
   const opponents = new Map<string, number>();
   const pairCount = new Map<string, number>();
+  const directedCount = new Map<string, number>();
   for (const game of validGames) {
     opponents.set(game.home_team_id,(opponents.get(game.home_team_id) ?? 0) + 1);
     opponents.set(game.away_team_id,(opponents.get(game.away_team_id) ?? 0) + 1);
     const pair = [game.home_team_id, game.away_team_id].sort().join(':');
     pairCount.set(pair,(pairCount.get(pair) ?? 0) + 1);
+    const direction = [game.home_team_id,game.away_team_id].join(':');
+    directedCount.set(direction,(directedCount.get(direction) ?? 0) + 1);
   }
   const scheduleFitsFormat = eligibleClubs.length === RCL_PILOT_OPERATIONS.clubs &&
     validGames.length === RCL_PILOT_OPERATIONS.regularSeasonGamesTotal &&
     eligibleClubs.every(club => opponents.get(club.team_id) === RCL_PILOT_OPERATIONS.regularSeasonGamesPerClub) &&
     pairCount.size === 15 && [...pairCount.values()].every(count => count === 2) &&
+    directedCount.size === 30 && [...directedCount.values()].every(count => count === 1) &&
     snapshot.scheduledGames.length === validGames.length;
 
   const plannedSelections = eligibleClubs.length * (snapshot.draft?.rounds ?? RCL_PILOT_OPERATIONS.draftRounds);
@@ -75,7 +79,7 @@ export function inspectRclPilotReadiness(snapshot: RclOperationsSnapshot): {
       detail:'Keep the season in draft until commissioner approvals and a confirmed schedule'},
     {id:'clubs',label:'Six-team pilot allocation',passed:eligibleClubs.length === RCL_PILOT_OPERATIONS.clubs && teamIds.size === eligibleClubs.length,
       detail:`${eligibleClubs.length} active team-season assignments; these are NOT signed franchise approvals`},
-    {id:'roster-integrity',label:'Single-team active rosters',passed:duplicatePlayerIds.length === 0 && !overCapacity,
+    {id:'roster-integrity',label:'Single-team active rosters',passed:seasonIsOfficialWindow && eligibleClubs.length > 0 && duplicatePlayerIds.length === 0 && !overCapacity,
       detail:duplicatePlayerIds.length ? `${duplicatePlayerIds.length} players assigned to multiple clubs` :
         overCapacity ? 'At least one club exceeds the proposed 12-player cap' : 'No observed multi-club conflicts or cap violations'},
     {id:'schedule',label:'Double round-robin schedule',passed:scheduleFitsFormat,
