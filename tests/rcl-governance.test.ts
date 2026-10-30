@@ -21,7 +21,10 @@ describe('RCL 2027–28 governance guards', () => {
     expect(canActivateRclFantasySeason({ start_date: '2026-12-01', status: 'active' })).toBe(false);
     expect(canActivateRclFantasySeason({ start_date: '2027-10-31', status: 'active' })).toBe(false);
     expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'draft' })).toBe(false);
-    expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'active' })).toBe(true);
+    expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'active' })).toBe(false);
+    expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'active', leagues: { slug: 'other-league', is_active: true } })).toBe(false);
+    expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'active', leagues: { slug: 'rich-city-league', is_active: false } })).toBe(false);
+    expect(canActivateRclFantasySeason({ start_date: '2027-11-15', status: 'active', leagues: { slug: 'rich-city-league', is_active: true } })).toBe(true);
     expect(source('src/app/fantasy/page.tsx')).toContain('canActivateRclFantasySeason');
     expect(source('src/components/FantasyLeagueNavigator.tsx')).toContain('canActivateRclFantasySeason');
     expect(source('src/app/fantasy/leagues/[id]/page.tsx')).toContain('canActivateRclFantasySeason');
