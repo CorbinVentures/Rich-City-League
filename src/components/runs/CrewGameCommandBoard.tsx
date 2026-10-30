@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {FaArrowRight,FaBasketball,FaCrown,FaPeopleGroup,FaShieldHalved,FaSwords,FaTrophy} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaCrown,FaPeopleGroup,FaShieldHalved,FaBolt,FaTrophy} from 'react-icons/fa6';
 
 type Member={profile_id:string;role:string};
 type Person={id:string;display_name:string|null;username:string|null;avatar_url:string|null};
@@ -31,12 +31,12 @@ export function CrewGameCommandBoard({crewName,city,logo,homeCourt,members,peopl
     })}{!members.length&&<p>No players have joined this roster yet.</p>}</div>
     <a href="#rch-crew-hq">VIEW FULL ROSTER <FaArrowRight aria-hidden="true"/></a>
    </div>
-   <div className="rch-crew-game-panel"><div className="rch-crew-game-panel-title"><FaSwords aria-hidden="true"/> NEXT COMPETITIVE MOVE</div>
+   <div className="rch-crew-game-panel"><div className="rch-crew-game-panel-title"><FaBolt aria-hidden="true"/> NEXT COMPETITIVE MOVE</div>
     {nextRun?<><h3>{nextRun.title}</h3><p>{new Date(nextRun.starts_at).toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} · {nextRun.game_format} · {nextRun.location}</p><Link href={'/runs/'+encodeURIComponent(nextRun.id)}>VIEW REAL GAME <FaArrowRight aria-hidden="true"/></Link></>:
     <><h3>THE COURT IS WAITING</h3><p>No upcoming competitive Runs are listed. Organize a real game with your squad.</p><Link href="/runs?create=1">HOST A RUN <FaArrowRight aria-hidden="true"/></Link></>}
    </div>
   </div>
-  <div className="rch-crew-game-paths"><Link href={homeCourt?'/runs/courts/'+encodeURIComponent(homeCourt):'/runs/world'}><FaBasketball aria-hidden="true"/>{homeCourt?'OUR COURT ARENA':'CHOOSE A COURT'}</Link><Link href="/runs?view=list&competition=courts#rch-competition"><FaSwords aria-hidden="true"/> COURT BATTLES</Link><Link href="/commonwealth"><FaTrophy aria-hidden="true"/> COMMONWEALTH CUP</Link></div>
+  <div className="rch-crew-game-paths"><Link href={homeCourt?'/runs/courts/'+encodeURIComponent(homeCourt):'/runs/world'}><FaBasketball aria-hidden="true"/>{homeCourt?'OUR COURT ARENA':'CHOOSE A COURT'}</Link><Link href="/runs?view=list&competition=courts#rch-competition"><FaBolt aria-hidden="true"/> COURT BATTLES</Link><Link href="/commonwealth"><FaTrophy aria-hidden="true"/> COMMONWEALTH CUP</Link></div>
   <p className="rch-crew-game-disclosure"><FaShieldHalved aria-hidden="true"/> This HQ displays recorded crew membership and published competition entries. A crew registration is not an individual RSVP, a verified match, or territorial control.</p>
  </section>;
 }
