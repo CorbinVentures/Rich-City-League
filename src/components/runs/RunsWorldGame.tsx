@@ -142,10 +142,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
     if(nextCourts.some(c=>c.latitude===null||c.longitude===null))
      setCoverageWarning('Official Parks & Recreation basketball facilities are listed, but some lack facility-verified coordinates. Their source records remain searchable; no guessed precision pins are shown.');
     setFeatured(circuitRows.filter(item=>item.bonus_enabled).map(item=>item.run_id));
-    if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
     if((courtResult.data||[]).length===300||runResult.truncated)
       setWarning('Parks & Recreation display is capped at 300 sourced facilities and the local Run lookup at 1,000. Additional results may exist.');
-    const slugs=nextCourts.map(c=>c.slug);
     // Only actual confirmed title history and genuine requested/accepted
     // crew challenges contribute to the cinematic local world pulse.
     if(slugs.length){
