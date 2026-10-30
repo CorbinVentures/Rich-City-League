@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container } from '@/components/Container';
 import { SeasonDraftScouting } from '@/components/draft/SeasonDraftScouting';
 import { parsePreseasonDraftOrder, plannedDraftPicks, type PreseasonDraftOrder } from '@/lib/draft/preseason';
+import { draftRosterCoverage } from '@/lib/rcl-governance';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
@@ -277,6 +278,7 @@ export default function DraftNightPage() {
               <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
                 <Link href="/league/join" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-black">Join Rich City League <FaArrowRight/></Link>
                 <Link href="/fantasy" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Fan Fantasy <FaArrowRight/></Link>
+                <Link href="/league/rules" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Proposed League Rules</Link>
               </div>
               <button type="button" onClick={toggleSound} aria-pressed={soundEnabled} className="mt-4 min-h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-xs font-black uppercase tracking-wider text-white/75">{soundEnabled ? 'Mute draft sounds' : 'Enable draft sounds'}</button>
             </div>
@@ -307,9 +309,18 @@ export default function DraftNightPage() {
                 <p className="rcl-kicker">ESTABLISHED PRESEASON ORDER · NOT LIVE</p>
                 <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">{preseasonOrder.season_label} Draft Order</h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                  {preseasonOrder.first_round_team_ids.length} franchises · {preseasonOrder.rounds} rounds · {previewPicks.length} selections.
-                  Snake format: every even-numbered round reverses the previous order.
+                  {preseasonOrder.first_round_team_ids.length} listed team identities · {preseasonOrder.rounds} rounds · {previewPicks.length} preview selections.
+                  Snake format: every even-numbered round reverses the previous order. Club admission and official eligibility remain subject to approval.
                 </p>
+                {(() => {
+                  const coverage = draftRosterCoverage(preseasonOrder.first_round_team_ids.length, preseasonOrder.rounds, 12);
+                  return coverage && coverage.remainingPlaces > 0 ? (
+                    <p className="mt-3 max-w-2xl rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">
+                      Roster planning illustration: with a proposed 12-player limit per team, {coverage.draftPicks} selections would leave {coverage.remainingPlaces} roster places to fill across listed clubs. Retained-player and free-agent policies are not yet approved.
+                      {' '}<Link href="/league/rules" className="font-bold text-rcl-orange underline">Proposed rules</Link>
+                    </p>
+                  ) : null;
+                })()}
               </div>
               <span className="rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-3 py-2 text-xs font-black tracking-wider text-rcl-orange">CLOCK NOT STARTED</span>
             </div>
