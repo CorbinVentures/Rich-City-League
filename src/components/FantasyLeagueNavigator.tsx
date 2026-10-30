@@ -41,7 +41,7 @@ export function FantasyLeagueNavigator() {
     const seasonResult = await supabase.from('fantasy_seasons').select('id,season_id').eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle();
     let activeSeasonId = '';
     if (!seasonResult.error && seasonResult.data) {
-      const linked = await supabase.from('seasons').select('start_date,status')
+      const linked = await supabase.from('seasons').select('start_date,status,leagues!inner(slug,is_active)')
         .eq('id',seasonResult.data.season_id).maybeSingle();
       if (!linked.error && canActivateRclFantasySeason(linked.data)) activeSeasonId = seasonResult.data.id;
     }
