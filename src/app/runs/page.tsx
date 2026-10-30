@@ -443,7 +443,7 @@ export default function RunsPage() {
           <h2 id="rch-runs-start" className="mt-2 text-2xl font-black uppercase tracking-tight text-white sm:text-3xl">Find a game. Build your legacy.</h2>
           <p className="mt-2 max-w-2xl text-sm text-[#d3e5f2]">Join an actual hosted Run, organize one yourself, or discover outdoor courts. Park suggestions are not confirmed games.</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#c8f06d] px-4 py-3 text-sm font-black text-[#102014]"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
+            <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--rch-brand-accent)] px-4 py-3 text-sm font-black text-white"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
             <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
           </div>
         </section>}
