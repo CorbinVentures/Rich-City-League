@@ -149,7 +149,7 @@ export function RunsCinematicHome({
   <div className="rch-gh-cinema">
    <span className="rch-gh-live"><span aria-hidden="true"/> {city?city.toUpperCase()+' COURTS':'VIRGINIA BASKETBALL'}</span>
    <div className="rch-gh-cinema-copy">
-    <span className="rch-gh-eyebrow">THE REAL-WORLD BASKETBALL GAME</span>
+    <span className="rch-gh-eyebrow">RUNS 2.0 · THE REAL-WORLD BASKETBALL GAME</span>
     <h1>YOUR CITY.<br/><span>YOUR RUNS.</span></h1>
     <p>Find real courts. Meet real hoopers. Build a legacy you can prove.</p>
     <div className="rch-gh-entrance-actions">
@@ -181,6 +181,16 @@ export function RunsCinematicHome({
    <div><FaCrown/><strong>{player.repBalance===null?'—':player.repBalance.toLocaleString()}</strong><span>REP WALLET</span></div>
    <div><FaMedal/><strong>{player.badges===null?'—':player.badges}</strong><span>RUN BADGES</span></div>
   </div>
+
+  <section className="rch-gh-section" aria-labelledby="rch-game-start" data-rch-runs-pwa-quick-play="true">
+   <div className="rch-gh-section-title"><h2 id="rch-game-start">QUICK PLAY</h2><Link href="/runs?view=list#rch-upcoming-runs">ALL GAMES <FaArrowRight/></Link></div>
+   <p className="rch-gh-game-start-copy">Find a hosted game, bring your crew, or start one yourself. No simulated matchmaking.</p>
+   <div className="rch-gh-game-start-grid">
+    <Link href="/runs?view=list#rch-upcoming-runs" className="rch-gh-game-start-action"><FaBasketball aria-hidden="true"/><strong>FIND A GAME</strong><small>Real hosted Runs only</small></Link>
+    <Link href="/runs?view=list&rookie=1#rch-upcoming-runs" className="rch-gh-game-start-action"><FaShieldHalved aria-hidden="true"/><strong>ROOKIE FRIENDLY</strong><small>Start at your level</small></Link>
+    <Link href="/runs?create=1" className="rch-gh-game-start-action"><FaPeopleGroup aria-hidden="true"/><strong>HOST A GAME</strong><small>Build the first roster</small></Link>
+   </div>
+  </section>
 
   <Link href={nextHref} className="rch-gh-play"><FaBasketball/><span>{nextRun?'VIEW RUN DETAILS':'FIND A RUN'}<small>{nextRun?'See date, location and registration':'Browse upcoming basketball games'}</small></span><FaArrowRight/></Link>
 
