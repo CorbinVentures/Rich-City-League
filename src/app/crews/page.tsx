@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import {RunsGameChrome} from '@/components/runs/RunsGameChrome';
+import '../runs/runs-game-system.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaBasketball, FaCheck, FaCrown, FaImage, FaPeopleGroup, FaShareNodes, FaTrophy, FaUserPlus } from 'react-icons/fa6';
@@ -134,6 +136,7 @@ function CrewsView(){
   };
   const toggleFavorite=(id:string)=>setFavorites(current=>current.includes(id)?current.filter(value=>value!==id):current.length<5?[...current,id]:current);
   return <main className="rcl-social-secondary rch-identity-surface min-h-screen bg-[#050d19] pb-28 text-white">
+    <RunsGameChrome crew/>
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-7">
       <nav className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-wider text-[#a9cef6]"><Link href="/runs">← Runs</Link><Link href="/commonwealth">Commonwealth Cup →</Link></nav>
       <header className="mt-6 overflow-hidden rounded-xl border border-[#44484e] bg-[radial-gradient(ellipse_at_90%_5%,#54202a,#141618_58%)] p-5 sm:p-8">
