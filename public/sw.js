@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rcl-static-v12';
-const SW_VERSION = 'v12';
+const CACHE_NAME = 'rcl-static-v13';
+const SW_VERSION = 'v13';
 const STATIC_ASSETS = [
   '/favicon.svg?v=black-r-1',
   '/icon?v=black-r-1',
