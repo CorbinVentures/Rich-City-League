@@ -366,7 +366,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        loggedIn={Boolean(user)} scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))} onScout={()=>setScoutVersion(n=>n+1)}
        onClose={closeCourtPreview}/>}
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> This map shows sourced public outdoor Parks & Recreation basketball courts. A court pin is not a hosted game, reserved space, or proof anyone is playing. Confirm park hours and accessibility before traveling. GPS is optional.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> This map shows sourced public outdoor Parks & Recreation basketball courts. A court pin is not a hosted game, reserved space, or proof anyone is playing. Confirm park hours before traveling. Unverified community tips are not approved courts. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
