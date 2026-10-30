@@ -55,7 +55,7 @@ export default function RclLeagueReadinessPage() {
           seasonIds.length ? db!.from('rosters').select('player_id,team_season_id,left_at').in('team_season_id',seasonIds).is('left_at',null) : Promise.resolve({data:[],error:null}),
         ]);
         if(teams.error||rosters.error)throw teams.error??rosters.error;
-        const rpc=draft.data ? await db!.rpc('season_draft_readiness',{target_draft:draft.data.id}) : null;
+        const rpc=draft.data ? await db!.rpc('season_draft_readiness' as never,{target_draft:draft.data.id} as never) : null;
         if(rpc?.error)throw rpc.error;
         const draftPreflightBlockers=rpc && Array.isArray(rpc.data) ? rpc.data.map(String) : null;
         const active=new Map((teams.data??[]).map(t=>[t.id,t.is_active]));
