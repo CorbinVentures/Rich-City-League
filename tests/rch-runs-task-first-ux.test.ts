@@ -15,6 +15,7 @@ describe('Runs 2.0 task-first and verified activity UX',()=>{
    expect(runs).toContain('Find a Game');
    expect(runs).toContain('Host a Game');
    expect(runs).toContain('Park suggestions are not confirmed games');
+   expect(runs).toContain('href="/runs?view=world&mode=world"');
    expect(runs.indexOf('Find a Game')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
  });
  it('never gates player discovery on forced instructions or auto-playing cinematics',()=>{
@@ -40,6 +41,7 @@ describe('Runs 2.0 task-first and verified activity UX',()=>{
    expect(world).toContain("select('run_id,bonus_enabled').in('run_id',runIds)");
    expect(world.match(/const slugs=nextCourts.map/g)).toHaveLength(1);
    expect(world).toContain('A court pin is not a hosted game');
+   expect(world).not.toContain('<RunsGameLobby');
    expect(world).not.toContain('Indoor gym hours and permitted basketball use');
  });
 });
