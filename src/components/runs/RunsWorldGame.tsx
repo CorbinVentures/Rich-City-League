@@ -21,10 +21,11 @@ import './runs-world.css';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
 import {RunsMyCareerStage} from '@/components/runs/RunsMyCareerStage';
+import {RunsCompetitiveCircuit} from '@/components/runs/RunsCompetitiveCircuit';
 import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
 import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCourtPreview';
 
-type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
+type Screen='home'|'world'|'battle'|'season'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
 type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;crewLogoPath:string|null;defenses:number;loading:boolean};
@@ -58,7 +59,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const requestedMode=searchParams.get('mode');
  const requestedCity=searchParams.get('city');
  const requestedCourt=searchParams.get('court');
- const allowedModes:readonly Screen[]=['home','world','battle','missions','vault','player','crew'];
+ const allowedModes:readonly Screen[]=['home','world','battle','season','missions','vault','player','crew'];
  const selectedMode=requestedMode&&allowedModes.includes(requestedMode as Screen)?requestedMode as Screen:initialScreen;
  const [screen,setScreen]=useState<Screen>(selectedMode);
  useEffect(()=>{setScreen(selectedMode);},[selectedMode]);
@@ -434,6 +435,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
     </section>}
+
+   {screen==='season'&&<RunsCompetitiveCircuit journey={journey} journeyLoading={journeyLoading}
+     cityName={city?.name||null} courtSlugs={battleCourtSlugs}
+     onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>}
 
    {screen==='crew'&&<section className="rwg-mode" aria-label="Your basketball crew">
       <span className="rwg-kicker"><FaPeopleGroup/> REPRESENT YOUR CITY</span><h2>Make your crew a name worth defending.</h2>
