@@ -17,7 +17,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+    await Promise.all(keys.filter((key) => key.startsWith('rcl-static-') && key !== CACHE_NAME).map((key) => caches.delete(key)));
     await self.clients.claim();
 
     // iOS installed PWAs can keep the previous document alive after a worker update.
