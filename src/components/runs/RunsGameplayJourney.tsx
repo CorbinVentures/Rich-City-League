@@ -9,14 +9,14 @@ import {playerTarget,lobbySnapshot} from '@/lib/runs-gameplay-readiness';
 type Person={id:string;display_name:string|null;username:string|null;avatar_url?:string|null};
 type VerifiedReceipt={run_id:string;won:boolean;xp:number;rep:number;verified_at:string};
 type Props={
- runId:string;format:string;status:string;past:boolean;suggested:boolean;listingUnknown:boolean;
+ runId:string;format:string;status:string;capacity:number;past:boolean;suggested:boolean;listingUnknown:boolean;
  registeredIds:readonly string[];checkedInIds:readonly string[];profiles:readonly Person[];
  userId:string|null;scorecardCount:number;
 };
 
 /** The game lobby only visualizes server records. RSVP != physical attendance.
  * Recorded pickup score != independently confirmed competitive result. */
-export function RunsGameplayJourney({runId,format,status,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount}:Props){
+export function RunsGameplayJourney({runId,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount}:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [verified,setVerified]=useState<VerifiedReceipt|null>(null);
  const [verifiedError,setVerifiedError]=useState(false);
@@ -30,7 +30,7 @@ export function RunsGameplayJourney({runId,format,status,past,suggested,listingU
   }).catch(()=>{if(alive)setVerifiedError(true);});
   return()=>{alive=false;};
  },[db,runId,userId,scorecardCount]);
- const roster=lobbySnapshot({format,registered:registeredIds.length,capacity:Math.max(registeredIds.length,playerTarget(format)||0),status,suggested,past});
+ const roster=lobbySnapshot({format,registered:registeredIds.length,capacity,status,suggested,past});
  const slots=playerTarget(format);
  const actualSlots=slots===null?Math.min(10,Math.max(1,registeredIds.length)):slots;
  const checkedIn=Boolean(userId&&checkedInIds.includes(userId));
@@ -40,7 +40,7 @@ export function RunsGameplayJourney({runId,format,status,past,suggested,listingU
  const nextAction=verified?{href:'/runs?view=list#rch-upcoming-runs',title:'FIND YOUR NEXT GAME',desc:'Keep building your verified basketball story'}:
  !userId?{href:'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId),title:'SIGN IN TO PLAY',desc:'Create your player and register for a real Run'}:
  !signedUp?{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
- !checkedIn?{href:'#rch-game-day',title:'GET GAME-DAY READY',desc:'Check in at the court using the host’s in-person code'}:
+ !checkedIn?{href:past?'/runs?view=list#rch-upcoming-runs':'#rch-game-day',title:past?'FIND YOUR NEXT GAME':'GET GAME-DAY READY',desc:past?'This event has ended; do not attempt a late check-in':'Check in at the court using the host’s in-person code'}:
  !verified?{href:scorecardCount>0?'#rch-result-review':'#rch-next-up',title:scorecardCount>0?'REVIEW THE RESULT':'GET ON DECK',desc:'Only independent confirmation can award ranked results'}:
  {href:'/runs?view=list#rch-upcoming-runs',title:'PLAY AGAIN',desc:'Find a real hosted game'};
  const safeAction=unavailable&&!verified&&nextAction.href==='#rch-join-action'?{...nextAction,href:'/runs?view=list#rch-upcoming-runs'}:nextAction;
