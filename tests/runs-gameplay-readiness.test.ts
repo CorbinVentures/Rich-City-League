@@ -36,11 +36,12 @@ describe('RCH Runs game activation contracts',()=>{
  it('offers opt-in rookie games and a truthful live roster in the existing Run Room',()=>{
   expect(isRookieFriendly(sample())).toBe(true);
   expect(isRookieFriendly(sample({run_type:'competitive',skill_level:'elite'}))).toBe(false);
+  expect(isRookieFriendly(sample({run_type:'social',skill_level:'advanced'}))).toBe(false);
   const runs=source('src/app/runs/page.tsx');
   const room=source('src/app/runs/[id]/page.tsx');
   expect(runs).toContain('<RunQuickPlay runs={visibleRuns}');
   expect(runs).toContain('isRookieFriendly(run)');
-  expect(room).toContain('<RunLobbyReadiness format={run.game_format}');
+  expect(room).toContain("<RunLobbyReadiness format={run.game_format||'unknown'}");
   expect(room).toContain('registered={registeredPlayerIds.length}');
   expect(room).toContain('suggested={suggestedCourt}');
   expect(room).toContain("db.rpc('rch_check_in_with_code'");
