@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 describe('RCH public signup integrity', () => {
-  const migration = readFileSync('supabase/migrations/20261031210000_rch_signup_integrity_restore.sql', 'utf8');
+  const migration = readFileSync('supabase/migrations/20261031205536_rch_signup_integrity_restore.sql', 'utf8');
   const form = readFileSync('src/components/AuthForm.tsx', 'utf8');
 
   it('keeps social provider accounts incomplete until age/legal checks pass', () => {
