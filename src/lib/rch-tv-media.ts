@@ -1,3 +1,4 @@
+import { resolveRchAdaptiveEmbed, RCH_TV_ADAPTIVE_PREFIX } from './rch-tv-adaptive';
 /**
  * RCH TV stores uploads as relative paths in the public "media" bucket.
  * Never send a raw bucket path to a browser image/video element.
@@ -9,9 +10,13 @@ export function resolveRchMediaUrl(
   path: string | null | undefined,
   getPublicUrl: (path: string) => string,
   getRchTvPublicUrl?: (path: string) => string,
+  cloudflareCustomerCode?: string,
 ): string | null {
   const value = path?.trim();
   if (!value) return null;
+  if (value.startsWith(RCH_TV_ADAPTIVE_PREFIX)) {
+    return resolveRchAdaptiveEmbed(value, cloudflareCustomerCode);
+  }
 
   if (value.startsWith(RCH_TV_VIDEO_STORAGE_PREFIX)) {
     const objectPath = value.slice(RCH_TV_VIDEO_STORAGE_PREFIX.length);
