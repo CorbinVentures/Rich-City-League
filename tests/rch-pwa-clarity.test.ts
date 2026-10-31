@@ -52,7 +52,8 @@ describe('RCH PWA clarity and progressive disclosure',()=>{
     expect(profile.indexOf('>Public information</h2>')).toBeLessThan(profile.indexOf('>Photos and cover</summary>'));
     expect(profile).toContain('>Profile music</summary>');
     const notifications=read('src/app/notifications/page.tsx');
-    expect(notifications).toContain('>Notification settings</summary>');
+    expect(notifications).toContain('href="/settings/notifications"');
+    expect(notifications).toContain('Mobile push alerts</summary>');
     expect(notifications).not.toContain('<ClientPageHero');
   });
   it('keeps viewing categories and privacy/security destinations reachable',()=>{

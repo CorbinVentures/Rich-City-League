@@ -32,6 +32,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   const [message, setMessage] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [weeklyDigestOptIn, setWeeklyDigestOptIn] = useState(false);
   const [signupHasSession, setSignupHasSession] = useState(false);
   const [mobileApp, setMobileApp] = useState(false);
   const [referralCode, setReferralCode] = useState('');
@@ -133,6 +134,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           date_of_birth: dateOfBirth,
           legal_terms_accepted_at: new Date().toISOString(),
           privacy_policy_acknowledged_at: new Date().toISOString(),
+          weekly_digest_opt_in: weeklyDigestOptIn ? 'true' : 'false',
         });
         setSignupHasSession(Boolean(session));
         trackRchConversion('signup_created', 'email');
@@ -212,6 +214,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
           </div>
         </details>
+        <label className="flex items-start gap-3 rounded-xl border border-rcl-orange/20 bg-rcl-orange/[.04] p-4 text-xs text-white/80"><input type="checkbox" checked={weeklyDigestOptIn} onChange={e=>setWeeklyDigestOptIn(e.target.checked)} className="mt-1 accent-orange-500"/><span><strong className="block text-sm text-white">Send me the Weekly Hoops Brief</strong>One weekly email with runs, upcoming events, news, my REP and badges, plus clearly marked sponsor features. Optional. I can unsubscribe anytime.</span></label>
         <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/80"><input required type="checkbox" checked={acceptedLegal} onChange={e=>setAcceptedLegal(e.target.checked)} className="mt-1"/><span>I agree to the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/terms">Terms of Service</Link> and acknowledge the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/privacy">Privacy Policy</Link> and <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/community-guidelines">Community Guidelines</Link>.</span></label>
       </div>}
 
