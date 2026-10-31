@@ -249,11 +249,11 @@ with allowed as (
  and exists(select 1 from public.run_checkins c where c.run_id=m.run_id and c.profile_id=s.profile_id)
 ), scored as (
  select e.*,
- (e.points>=case e.game_format when '1v1' then 7 when '2v2' then 7 when '3v3' then 7 when '4v4' then 9 else 10 end
+ (e.points>=case e.game_format when '1v1' then 7 when '2v2' then 7 when '3v3' then 7 when '4v4' then 9 when '5v5' then 10 else 251 end
  and (e.game_format='1v1' or e.points*100>=e.team_score*30)) as good_scoring,
- (e.rebounds is not null and e.rebounds>=case e.game_format when '1v1' then 5 when '2v2' then 5 when '3v3' then 6 when '4v4' then 7 else 8 end) as good_glass,
+ (e.rebounds is not null and e.rebounds>=case e.game_format when '1v1' then 5 when '2v2' then 5 when '3v3' then 6 when '4v4' then 7 when '5v5' then 8 else 51 end) as good_glass,
  (e.game_format<>'1v1' and e.assists is not null
- and e.assists>=case e.game_format when '2v2' then 3 when '3v3' then 4 when '4v4' then 5 else 6 end) as good_creation
+ and e.assists>=case e.game_format when '2v2' then 3 when '3v3' then 4 when '4v4' then 5 when '5v5' then 6 else 51 end) as good_creation
  from evidence e
 ), qualifications as (
  select x.run_id,x.match_id,b.code,
