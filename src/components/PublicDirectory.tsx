@@ -52,6 +52,9 @@ export function NewsDirectory({ items }: { items: NewsItem[] }) {
 function MediaVideo({ item }: { item: MediaItem }) {
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [buffering, setBuffering] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const retryPlayback = () => {setFailed(false);setBuffering(false);setAttempt(value=>value+1);setPlaying(true);};
   const isMov = /\.mov(?:\?|$)/i.test(item.url);
   if (!playing) return <button type="button" onClick={() => setPlaying(true)}
     aria-label={`Play ${item.title}`} className="group relative h-full w-full overflow-hidden bg-[#020408] text-white">
@@ -61,11 +64,19 @@ function MediaVideo({ item }: { item: MediaItem }) {
   </button>;
   if (failed) return <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center">
     <p className="text-sm text-white/75">{isMov ? 'Your browser cannot play this MOV recording.' : 'This video could not be played in your browser.'}</p>
+    <button type="button" onClick={retryPlayback} className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-white">Retry video</button>
     <a href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-rcl-blue">Open original video file</a>
     {isMov&&<p className="text-xs text-white/40">For broad compatibility, an MP4 (H.264/AAC) version is recommended.</p>}
   </div>;
-  return <video src={item.url} controls autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline onError={() => setFailed(true)}
-    className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>;
+  return <div className="relative h-full w-full">
+    <video key={attempt} src={item.url} controls autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline
+      onError={() => {setFailed(true);setBuffering(false);}}
+      onWaiting={() => setBuffering(true)} onStalled={() => setBuffering(true)} onPlaying={() => setBuffering(false)}
+      onCanPlay={() => setBuffering(false)}
+      className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>
+    {buffering && <div role="status" className="pointer-events-none absolute left-2 top-2 rounded-lg bg-black/80 px-3 py-2 text-xs font-semibold text-white">Loading video…</div>}
+    {buffering && <button type="button" onClick={retryPlayback} className="absolute bottom-14 right-3 rounded-lg border border-white/30 bg-black/85 px-3 py-2 text-xs font-bold text-white">Retry playback</button>}
+  </div>;
 }
 
 export function MediaDirectory({ items }: { items: MediaItem[] }) {

@@ -10,6 +10,7 @@ import { getSupabaseConfig } from '@/lib/supabase-config';
 import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
 import { uploadRchTvVideo, clearRchTvCheckpoint, rchTvFileError, rchTvIsVideo } from '@/lib/rch-tv-upload';
 import { captureRchTvPoster, validateRchTvPosterImage } from '@/lib/rch-tv-thumbnail';
+import { inspectRchTvVideo, formatRchTvDuration, type RchTvVideoPreflight } from '@/lib/rch-tv-preflight';
 
 type MediaRecord = {
   id: string; title: string; media_type: string; status: string; rch_tv_category: string;
@@ -55,6 +56,7 @@ export default function RchTvAdminPage() {
   const [publishNow, setPublishNow] = useState(false);
   const [category, setCategory] = useState<(typeof TV_CATEGORIES)[number]['value']>('original_content');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [videoInspection, setVideoInspection] = useState<{status:'idle'|'checking'|'ready'|'blocked'; result?:RchTvVideoPreflight; detail?:string}>({status:'idle'});
 
   const load = useCallback(async () => {
     if (!authorized || !db) return;
@@ -94,6 +96,30 @@ export default function RchTvAdminPage() {
       }).finally(() => { if (active) setPosterLoading(false); });
     }
     return () => { active = false; };
+  }, [file]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const replay = params.get('replay');
+    if (replay === 'live_games' || replay === 'the_pulse') setCategory(replay);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setVideoInspection({status:'idle'});
+    if (!file) return () => {active=false;};
+    const invalid = rchTvFileError(file);
+    if (invalid) {
+      setVideoInspection({status:'blocked',detail:invalid});
+    } else if (rchTvIsVideo(file)) {
+      setVideoInspection({status:'checking'});
+      void inspectRchTvVideo(file).then(result => {
+        if (active) setVideoInspection({status:'ready',result});
+      }).catch(cause => {
+        if (active) setVideoInspection({status:'blocked',detail:cause instanceof Error?cause.message:'Video inspection failed.'});
+      });
+    }
+    return () => {active=false;};
   }, [file]);
 
   useEffect(() => {
@@ -154,6 +180,8 @@ export default function RchTvAdminPage() {
     const fileError = rchTvFileError(file);
     if (fileError) return setError(fileError);
     if (!rightsConfirmed) return setError('Confirm that you have permission to distribute this content before publishing or uploading.');
+    if (publishNow && rchTvIsVideo(file) && videoInspection.status !== 'ready')
+      return setError('Video preflight must pass before publishing. You can upload a playable MP4 or WebM as a draft for review.');
     if (publishNow && !window.confirm('Publish publicly now? Confirm that documented footage, audio, participant and event distribution permissions have been reviewed.')) return;
     const selected = file;
     const isVideo = rchTvIsVideo(selected);
@@ -208,7 +236,7 @@ export default function RchTvAdminPage() {
       if (isVideo) clearRchTvCheckpoint(user.id,selected);
       setNotice(publishNow ? 'Media published to RCH TV. The public archive can take up to 60 seconds to refresh.' : 'Media uploaded as a draft.');
       setFile(null); setPosterBlob(null); setTitle(''); setDescription(''); setPublishNow(false);
-      setRightsConfirmed(false); setCategory('original_content');
+      setRightsConfirmed(false); setCategory('original_content'); setVideoInspection({status:'idle'});
       await load();
     } catch (cause) {
       if (controller.signal.aborted) {
@@ -298,15 +326,23 @@ export default function RchTvAdminPage() {
       </section>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
-        <section className="rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
+        <section id="upload-replay" className="scroll-mt-24 rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
           <h2 className="text-xl font-bold">Upload RCH TV media</h2>
-          <p className="mt-2 text-xs text-white/55">Upload full games and videos up to 5 GB, directly to Supabase with resumable transfers. Images and audio remain limited to 50 MB.</p>
+          <p className="mt-2 text-xs text-white/55">Upload MP4 or WebM recordings up to 5 GB with resumable transfers. iPhone MOV files must first be exported as MP4 (H.264/AAC). Images and audio remain limited to 50 MB. This is file delivery, not automatic video transcoding.</p>
           <form onSubmit={upload} className="mt-5 space-y-4">
             <label className="block text-xs font-bold text-white/70">Title<input required value={title} maxLength={180} onChange={e=>setTitle(e.target.value)} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Show, interview or highlight title"/></label>
             <label className="block text-xs font-bold text-white/70">Description<textarea value={description} maxLength={2000} onChange={e=>setDescription(e.target.value)} rows={3} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white" placeholder="Tell viewers what this piece is about."/></label>
             <label className="block text-xs font-bold text-white/70">Media file<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-quicktime,.mov,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/wav" onChange={e=>{setPosterBlob(null);setPosterError('');setPosterPreview('');setFile(e.target.files?.[0]||null);setUploadPercent(0);}} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] p-3 text-sm text-white"/></label>
             {file&&<p className="text-xs text-white/55">{(file.size/1024/1024).toFixed(1)} MB · {rchTvIsVideo(file)?'Resumable full-length video':'Image / audio upload'}</p>}
-            {file&&/\.mov$/i.test(file.name)&&<p className="text-xs text-amber-200/80">MOV files upload without conversion. Some browsers cannot play them; MP4 is recommended for the widest playback support.</p>}
+            {file && rchTvFileError(file) && <p role="alert" className="rounded-lg border border-amber-300/25 bg-amber-300/10 p-3 text-xs text-amber-200">{rchTvFileError(file)}</p>}
+            {file && rchTvIsVideo(file) && <div role="status" className="rounded-lg border border-white/15 bg-black/20 p-3 text-xs leading-5 text-white/70">
+              <strong className="block text-white">Video compatibility preflight</strong>
+              {videoInspection.status === 'checking' && 'Inspecting recording duration and dimensions on this device…'}
+              {videoInspection.status === 'ready' && videoInspection.result && (
+                <span>Local metadata verified: {formatRchTvDuration(videoInspection.result.durationSeconds)} · {videoInspection.result.width}×{videoInspection.result.height}. This does not guarantee streaming compatibility on every device.</span>
+              )}
+              {videoInspection.status === 'blocked' && <span className="text-amber-200">{videoInspection.detail} Do not publish until the file is re-exported or reviewed.</span>}
+            </div>}
             {file&&rchTvIsVideo(file)&&<div className="rounded-xl border border-white/15 bg-black/25 p-3">
               <p className="mb-2 text-xs font-bold text-white/75">Video thumbnail · 16:9</p>
               {posterPreview?<img src={posterPreview} alt="Selected video thumbnail" className="aspect-video w-full max-w-sm rounded-lg object-cover"/>:<div className="grid aspect-video w-full max-w-sm place-items-center rounded-lg bg-white/5 text-xs text-white/55">{posterLoading?'Generating thumbnail…':'No preview yet'}</div>}
@@ -316,8 +352,8 @@ export default function RchTvAdminPage() {
             {busy==='upload'&&<div role="status" aria-label="Upload progress" className="rounded-xl border border-white/10 p-3"><p className="mb-2 text-xs text-white/70">{uploadPercent}% uploaded</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-rcl-blue" style={{width:uploadPercent+'%'}} /></div></div>}
             <label className="block text-xs font-bold text-white/70">RCH TV section<select value={category} onChange={e=>setCategory(e.target.value as (typeof TV_CATEGORIES)[number]['value'])} className="mt-2 block w-full rounded-lg border border-white/25 bg-[#0b1724] px-4 py-3 text-sm text-white">{TV_CATEGORIES.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
             <label className="flex items-start gap-3 text-sm text-white/75"><input type="checkbox" required checked={rightsConfirmed} onChange={e=>setRightsConfirmed(e.target.checked)}/><span>I confirm that RCH has the necessary permissions for public distribution of the footage, audio/music, event or venue, and identifiable participants, including required guardian releases.</span></label>
-            <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)}/>Publish immediately instead of saving as draft</label>
-            <button disabled={busy==='upload' || Boolean(file && rchTvIsVideo(file) && !posterBlob)} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
+            <label className="flex items-center gap-3 text-sm text-white/75"><input type="checkbox" checked={publishNow} onChange={e=>setPublishNow(e.target.checked)} disabled={Boolean(file&&rchTvIsVideo(file)&&videoInspection.status!=='ready')}/>Publish immediately instead of saving as draft (only after quality and rights review)</label>
+            <button disabled={busy==='upload' || Boolean(file && (rchTvFileError(file) || (rchTvIsVideo(file) && (!posterBlob || videoInspection.status==='checking' || (publishNow && videoInspection.status!=='ready'))))} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
             {busy==='upload'&&<button type="button" onClick={()=>uploadAbortRef.current?.abort()} className="w-full rounded-lg border border-white/20 px-4 py-3 text-xs text-white/70">Pause upload</button>}
           </form>
         </section>

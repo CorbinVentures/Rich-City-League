@@ -23,6 +23,8 @@ describe('RCH TV full-game upload compatibility', () => {
   });
   it('permits 108.6 MB and 5 GB videos without relaxing image/audio limits', () => {
     expect(rchTvIsVideo({type:'video/mp4'})).toBe(true);
+    expect(rchTvVideoMimeType({name:'game.mp4',type:''})).toBe('video/mp4');
+    expect(rchTvVideoMimeType({name:'game.webm',type:'application/octet-stream'})).toBe('video/webm');
     expect(rchTvFileError({type:'video/mp4',size:Math.ceil(108.6*1024*1024)})).toBeNull();
     expect(rchTvFileError({type:'video/mp4',size:RCH_TV_VIDEO_MAX_BYTES})).toBeNull();
     expect(rchTvFileError({type:'video/mp4',size:RCH_TV_VIDEO_MAX_BYTES+1})).toMatch(/5 GB/);
@@ -33,9 +35,9 @@ describe('RCH TV full-game upload compatibility', () => {
     expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:''})).toBe('video/quicktime');
     expect(rchTvVideoMimeType({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/mp4'})).toBe('video/quicktime');
     expect(rchTvIsVideo({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime'})).toBe(true);
-    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime',size:Math.ceil(72.6*1024*1024)})).toBeNull();
-    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.MOV',type:'',size:Math.ceil(72.6*1024*1024)})).toBeNull();
-    expect(rchTvFileError({name:'clip.mov',type:'video/quicktime',size:RCH_TV_VIDEO_MAX_BYTES+1})).toMatch(/5 GB/);
+    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.mov',type:'video/quicktime',size:Math.ceil(72.6*1024*1024)})).toMatch(/Export as MP4/);
+    expect(rchTvFileError({name:'RVA-vs-DC-SnapYT.App.MOV',type:'',size:Math.ceil(72.6*1024*1024)})).toMatch(/Export as MP4/);
+    expect(rchTvFileError({name:'clip.mov',type:'video/quicktime',size:RCH_TV_VIDEO_MAX_BYTES+1})).toMatch(/Export as MP4/);
     expect(rchTvFileError({name:'not-really-a-video.mov',type:'image/jpeg',size:1000})).toMatch(/unexpected format/);
     expect(rchTvFileError({name:'photo.jpg',type:'video/quicktime',size:1000})).not.toBeNull();
   });
