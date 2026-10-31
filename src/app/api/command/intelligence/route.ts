@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     const memberIds = new Set(members.map(p=>p.id));
     const currentVisits = siteVisits.filter(r => when(r,'first_seen_at',since));
     const currentMemberVisits = currentVisits.filter(r=>r.member_id && memberIds.has(r.member_id));
-    const humanPosts = posts.filter(p=>p.is_automated !== true && memberIds.has(p.author_id));
+    const humanPosts = posts.filter(p=>p.status === 'published' && p.is_automated !== true && memberIds.has(p.author_id));
     const activePwa = pwa.filter(r=>when(r,'last_seen_at',since)&&memberIds.has(r.profile_id));
     const dailyProfiles = totalsByDay(members.filter(p=>when(p,'created_at',since)),'created_at');
     const dailyCheckins = totalsByDay(checkins,'checked_in_at');
