@@ -1,7 +1,7 @@
 // Task-first routing for the authenticated RCL Command Center.
 // Every shortcut maps to an existing module or to its validated record form.
 export type CommandArea =
- 'overview'|'analytics'|'revenue'|'finance'|'venues'|'concessions'|'trades'|
+ 'overview'|'analytics'|'intelligence'|'revenue'|'finance'|'venues'|'concessions'|'trades'|
  'stories'|'entertainment'|'operations'|'franchises'|'audit';
 export type CommandCaptureKind =
  'budgets'|'ledger'|'venues'|'bookings'|'inventory'|'concession_sales'|'trades'|'tasks';
@@ -15,6 +15,7 @@ export type CommandAction = {
  defaults?:Record<string,string>;
 };
 export const commandActions:CommandAction[]=[
+ {id:'intelligence',title:'Open Executive Intelligence Center',description:'Analyze growth cohorts, Virginia market coverage, PWA adoption and sponsorship intelligence',area:'intelligence',keywords:'intelligence location city retention cohorts heatmaps posthog clarity data acquisition pwa analytics funnel'},
  {id:'site-analytics',title:'Analyze the RCH platform',description:'Explore executive sitewide audience, social, basketball and revenue intelligence',area:'analytics',keywords:'metrics data audience visitors analytics engagement conversions growth runs users traffic chart sitewide'},
  {id:'game-plan',title:'Prepare game day',description:'Open the automatic game readiness desk',area:'operations',keywords:'game schedule checklist readiness scorebook referee staff production run of show'},
  {id:'storyboard',title:'Make a trailer or player feature',description:'Go to Storyline Studio and its visual storyboard',area:'stories',keywords:'storyline story board camera video clip promo rivalry player feature film make trailer creative'},
@@ -36,7 +37,8 @@ export const commandActions:CommandAction[]=[
 ];
 export const areaSuggestions:Record<CommandArea,string[]>={
  overview:['site-analytics','game-plan','expense','storyboard','sale'],
- analytics:['site-analytics','game-plan'],
+ analytics:['site-analytics','intelligence','game-plan'],
+ intelligence:['intelligence','site-analytics'],
  finance:['expense','income','budget'],
  revenue:['game-revenue','income'],
  venues:['gym-search','book-gym','new-gym'],
