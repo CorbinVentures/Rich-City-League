@@ -13,6 +13,7 @@ import { captureRchTvPoster, validateRchTvPosterImage } from '@/lib/rch-tv-thumb
 import { inspectRchTvVideo, formatRchTvDuration, type RchTvVideoPreflight } from '@/lib/rch-tv-preflight';
 import { RCH_TV_ADAPTIVE_PREFIX } from '@/lib/rch-tv-adaptive';
 import { RchTvAdaptiveDraftForm } from '@/components/media/RchTvAdaptiveDraftForm';
+import { rchTvPublicationBlockers } from '@/lib/rch-tv-publication';
 
 type MediaRecord = {
   id: string; title: string; media_type: string; status: string; rch_tv_category: string;
@@ -255,7 +256,12 @@ export default function RchTvAdminPage() {
   }
   async function changeMediaStatus(id: string, status: 'published'|'draft'|'archived') {
     if (!db) return;
-    if (status === 'published' && !window.confirm('Confirm written distribution permissions, footage ownership, music rights and required participant or venue clearances before publishing this title. Proceed?')) return;
+    if (status === 'published') {
+      const item=media.find(record=>record.id===id);
+      const blockers=item?rchTvPublicationBlockers(item):['This title was not found in the latest media records.'];
+      if(blockers.length){setError('Cannot publish: '+blockers.join(' '));return;}
+      if(!window.confirm('Confirm written distribution permissions, footage ownership, music rights and required participant or venue clearances before publishing this title. Proceed?'))return;
+    }
     setBusy(id);setError('');setNotice('');
     const r = await db.from('media').update({status}).eq('id',id);
     if (r.error) setError(r.error.message);
@@ -282,10 +288,12 @@ export default function RchTvAdminPage() {
   }
 
   const published = media.filter(item => item.status==='published').length;
+  const missingReadyMetadata=media.filter(item=>item.media_type==='video' && rchTvPublicationBlockers(item).length>0).length;
   const pendingCreators = applications.filter(item => item.status==='new'||item.status==='in_review').length;
   const licensed = acquisitions.filter(item => item.status==='licensed'||item.status==='published').length;
   const stats: Array<{label:string;value:number;Icon:IconType}> = [
     {label:'Published media',value:published,Icon:FaVideo},
+    {label:'Videos requiring publication QA',value:missingReadyMetadata,Icon:FaFilm},
     {label:'Creator applications',value:applications.length,Icon:FaUsers},
     {label:'Pending creator reviews',value:pendingCreators,Icon:FaUsers},
     {label:'Licensed titles',value:licensed,Icon:FaFilm},
@@ -373,7 +381,7 @@ export default function RchTvAdminPage() {
             {!media.length&&<p className="rounded-xl border border-dashed border-white/20 p-5 text-sm text-white/60">No RCH TV media records yet. Upload your first licensed clip above.</p>}
             {media.map(item=><article key={item.id} className="rounded-xl border border-white/15 bg-black/15 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
+                <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p>{rchTvPublicationBlockers(item).length>0&&<p role="status" className="mt-2 text-xs text-amber-200">Publication QA: {rchTvPublicationBlockers(item).join(' ')}</p>}</div>
                 <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={resolveRchMediaUrl(item.storage_path, p=>supabase!.storage.from('media').getPublicUrl(p).data.publicUrl, p=>supabase!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl, process.env.NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE) || '#'}>Open file ↗</a>
               </div>
               {item.media_type==='video'&&<div className="mt-3 flex flex-wrap items-center gap-3">
