@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=read('supabase/migrations/20261031123000_rch_skill_engine_v2.sql');
+const migration=read('supabase/migrations/20261031123417_rch_skill_engine_v2.sql');
 const ui=read('src/components/rep/SkillMasteryCollection.tsx');
 const desk=read('src/components/runs/RunSkillEvidenceDesk.tsx');
 const room=read('src/app/runs/[id]/page.tsx');
