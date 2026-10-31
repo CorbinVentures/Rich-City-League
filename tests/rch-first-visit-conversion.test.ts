@@ -14,10 +14,10 @@ describe('RCH first-visit basketball conversion', () => {
     expect(getSafePostAuthPath('/auth/sign-in', '/runs')).toBe('/runs');
   });
 
-  it('connects both Join Free calls to real runs after registration', () => {
+  it('connects the hero, benefits and footer Join Free calls to real runs after registration', () => {
     const homepage = read('src/components/RCHBrowserHomepage.tsx');
     const ctas = homepage.match(/guestHref="\/auth\/sign-up\?next=%2Fruns"/g) ?? [];
-    expect(ctas).toHaveLength(2);
+    expect(ctas).toHaveLength(3);
     expect(homepage).toContain('guestLabel="Join Free"');
     expect(homepage).toContain('href="/runs"');
   });
