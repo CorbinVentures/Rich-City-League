@@ -6,11 +6,11 @@ This code deploys a **disabled-by-default integration**. It does **not** activat
 
 ## 1. Server-side cloud recording
 
-The existing RCH LiveKit producer authenticates as an RCH administrator. The server-only route \`/api/rch-tv/recording\` authorizes each request with Supabase \`auth.getUser()\` and \`is_admin()\`. It supports:
+The existing RCH LiveKit producer authenticates as an RCH administrator. The server-only route `/api/rch-tv/recording` authorizes each request with Supabase `auth.getUser()` and `is_admin()`. It supports:
 
-- \`GET ?mode=live_games|the_pulse\`: configured/active status for that fixed channel
-- \`POST {mode,action:"start"}\`: verify there are no active Egresses in the room, start RoomComposite Egress to **private S3-compatible storage**
-- \`POST {mode,action:"stop"}\`: stop an active Egress on that same named channel before ending the broadcast
+- `GET ?mode=live_games|the_pulse`: configured/active status for that fixed channel
+- `POST {mode,action:"start"}`: verify there are no active Egresses in the room, start RoomComposite Egress to **private S3-compatible storage**
+- `POST {mode,action:"stop"}`: stop an active Egress on that same named channel before ending the broadcast
 
 **Output is never given to the browser**, and the server never returns S3 credentials. Recording files remain outside the public RCH TV library. Studio status indicates starting/finalizing, not completion or guaranteed file integrity.
 
@@ -18,13 +18,13 @@ The existing RCH LiveKit producer authenticates as an RCH administrator. The ser
 
 ### Required server-only environment settings (all must be present to enable)
 
-- \`RCH_TV_RECORDING_ENABLED=true\` — **leave unset** until budget, credentials and field tests approved
-- \`LIVEKIT_URL\` (existing \`wss://\` URL), \`LIVEKIT_API_KEY\`, \`LIVEKIT_API_SECRET\`
-- \`RCH_TV_RECORDING_S3_ENDPOINT\` (full HTTPS custom endpoint)
-- \`RCH_TV_RECORDING_S3_REGION\`, \`RCH_TV_RECORDING_S3_BUCKET\`
-- \`RCH_TV_RECORDING_S3_ACCESS_KEY\`, \`RCH_TV_RECORDING_S3_SECRET_KEY\`
+- `RCH_TV_RECORDING_ENABLED=true` — **leave unset** until budget, credentials and field tests approved
+- `LIVEKIT_URL` (existing `wss://` URL), `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`
+- `RCH_TV_RECORDING_S3_ENDPOINT` (full HTTPS custom endpoint)
+- `RCH_TV_RECORDING_S3_REGION`, `RCH_TV_RECORDING_S3_BUCKET`
+- `RCH_TV_RECORDING_S3_ACCESS_KEY`, `RCH_TV_RECORDING_S3_SECRET_KEY`
 
-Use a **separate private recording bucket and least-privilege upload credentials** with hard account/provider spending limits, automatic file retention, and auditable access. Do **not** casually use Supabase Storage S3 access keys: the standard long-lived server S3 keys can access every bucket and bypass RLS. Prefer a dedicated scoped S3-compatible bucket such as R2 or a dedicated narrowly scoped S3 IAM identity. Do not put these secrets into \`NEXT_PUBLIC_\`, GitHub files, chat, or public headers.
+Use a **separate private recording bucket and least-privilege upload credentials** with hard account/provider spending limits, automatic file retention, and auditable access. Do **not** casually use Supabase Storage S3 access keys: the standard long-lived server S3 keys can access every bucket and bypass RLS. Prefer a dedicated scoped S3-compatible bucket such as R2 or a dedicated narrowly scoped S3 IAM identity. Do not put these secrets into `NEXT_PUBLIC_`, GitHub files, chat, or public headers.
 
 ### Before enabling
 
@@ -42,11 +42,11 @@ There is no session-cost hard stop implemented in this code or server reconcilia
 
 ## 2. Adaptive video option
 
-The existing public \`/media\` continues showing the same videos at no additional charge from this deployment. An additional optional identifier format is supported in the existing \`media.storage_path\` field:
+The existing public `/media` continues showing the same videos at no additional charge from this deployment. An additional optional identifier format is supported in the existing `media.storage_path` field:
 
-\`cloudflare-stream:<32-character hexadecimal video UID>\`
+`cloudflare-stream:<32-character hexadecimal video UID>`
 
-The server constructs a tightly validated embed from \`NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE\`; the public app shows Cloudflare's own embedded adaptive player only for an approved customer subdomain. It never accepts arbitrary frame URLs. The admin can import a reviewed, Cloudflare-account-hosted UID **as a draft only**. Streaming must be purchased, uploaded/encoded, previewed and licensed separately. No video is uploaded by the draft form. Cloudflare auto-encoding is not part of RCH's existing Supabase TUS upload path. Manually attach a poster image; remote Stream iframes cannot be locally canvased for a thumbnail.
+The server constructs a tightly validated embed from `NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE`; the public app shows Cloudflare's own embedded adaptive player only for an approved customer subdomain. It never accepts arbitrary frame URLs. The admin can import a reviewed, Cloudflare-account-hosted UID **as a draft only**. Streaming must be purchased, uploaded/encoded, previewed and licensed separately. No video is uploaded by the draft form. Cloudflare auto-encoding is not part of RCH's existing Supabase TUS upload path. Manually attach a poster image; remote Stream iframes cannot be locally canvased for a thumbnail.
 
 The public customer code is an identifier, not an API token. Keep all actual billing/API keys private. Hosted videos are not shown on RCH TV until an admin explicitly publishes the record after verifying rights, preview and supported devices. The public player is still free to view; adding adaptive delivery does not add membership checks or create premium entitlements.
 
