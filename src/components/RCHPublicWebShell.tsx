@@ -16,12 +16,14 @@ import {
 const nav = [
   { name: 'Home', href: '/' },
   { name: 'Discover', href: '/discover' },
-  { name: 'Living World', href: '/world' },
   { name: 'Runs', href: '/runs' },
-  { name: 'Leagues', href: '/league' },
-  { name: 'Social', href: '/pulse' },
-  { name: 'News', href: '/news' },
+  { name: 'Community', href: '/community' },
+  { name: 'Rich City League', href: '/league' },
   { name: 'RCH TV', href: '/media' },
+];
+const secondaryNav = [
+  { name: 'News', href: '/news' },
+  { name: 'Living World', href: '/world' },
   { name: 'Build a Site', href: '/website-creator' },
 ];
 
@@ -157,6 +159,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           {nav.map(item => <Link key={item.href} href={browserNavHref(item.href, Boolean(user))} aria-current={pathname===browserNavHref(item.href, Boolean(user))?'page':undefined} onClick={closeMenu}>
             <span>{item.name}</span><FaArrowRight aria-hidden="true"/>
           </Link>)}
+          {secondaryNav.map(item => <Link key={item.href} href={item.href} onClick={closeMenu}><span>{item.name}</span><FaArrowRight aria-hidden="true"/></Link>)}
           <Link href="/search" onClick={closeMenu}><span><FaMagnifyingGlass aria-hidden="true"/> Search basketball</span><FaArrowRight aria-hidden="true"/></Link>
           {user && <>
             <Link href="/my-hoops" onClick={closeMenu}><span>My Hoops</span><FaArrowRight aria-hidden="true"/></Link>
