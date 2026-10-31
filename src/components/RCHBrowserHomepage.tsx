@@ -20,6 +20,7 @@ type Run = { id:string; title:string; starts_at:string; location:string; court_n
 type Member = {id:string; display_name:string|null; first_name:string|null; last_name:string|null; avatar_url:string|null; role:string|null};
 type Activity = {id:string;body:string;author_name:string};
 type Props = {news:News[];events:Event[];runs:Run[];members:Member[];activity:Activity[]};
+type Opportunity = {id:string;href:string;title:string;starts_at:string;location:string;type:string;art:string;host_name?:string|null;rsvp_count?:number|null;max_players?:number|null;game_format?:string|null};
 
 const cards = [
   { title: 'Runs', label: 'Find your next game', detail: 'Find and organize runs near you.', href: '/runs', icon: FaBasketball, variant: 'runs' },
@@ -47,7 +48,7 @@ function SectionTitle({ label, title, href, action }: {label: string; title: str
 }
 
 export function RCHBrowserHomepage({ news, events, runs, members, activity }: Props) {
-  const opportunities = [
+  const opportunities: Opportunity[] = [
     ...runs.map(item => ({ id: 'run-' + item.id, href: '/runs/' + item.id, title: item.title, starts_at: item.starts_at, location: item.court_name || item.location, type: 'Run', art: 'run', host_name: item.host_name, rsvp_count: item.rsvp_count, max_players: item.max_players, game_format: item.game_format })),
     ...events.map(item => ({ id: 'event-' + item.id, href: `/network/events/${item.slug}`, title: item.title, starts_at: item.starts_at, location: [item.city, item.state].filter(Boolean).join(', ') || 'Virginia', type: item.event_type?.replace(/_/g, ' ') || 'Event', art: 'event' })),
   ].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()).slice(0, 4);
@@ -84,7 +85,7 @@ export function RCHBrowserHomepage({ news, events, runs, members, activity }: Pr
           const date = dateParts(item.starts_at);
           return <Link key={item.id} href={item.href} className={'rch-browser-event rch-browser-event-' + (index % 4 + 1)}>
             <div className="rch-browser-event-art"><div className="rch-browser-event-date"><b>{date.month}</b><strong>{date.day}</strong></div></div>
-            <div className="rch-browser-event-details"><small>{item.type}{'game_format' in item && item.game_format ? ' · ' + item.game_format : ''}</small><h3>{item.title}</h3><p><FaLocationDot/> {item.location}</p>{'host_name' in item && item.host_name && <p>Host: {item.host_name}</p>}{'rsvp_count' in item && item.rsvp_count != null && <p>{item.rsvp_count} registered{'max_players' in item && item.max_players ? ' / ' + item.max_players + ' spots' : ''} · RSVP is not check-in</p>}<span>{date.label} · View details <FaArrowRight/></span></div>
+            <div className="rch-browser-event-details"><small>{item.type}{item.game_format ? ' · ' + item.game_format : ''}</small><h3>{item.title}</h3><p><FaLocationDot/> {item.location}</p>{item.host_name && <p>Host: {item.host_name}</p>}{item.rsvp_count != null && <p>{item.rsvp_count} registered{item.max_players ? ' / ' + item.max_players + ' spots' : ''} · RSVP is not check-in</p>}<span>{date.label} · View details <FaArrowRight/></span></div>
           </Link>;
         })}
       </div> : <div className="rch-browser-empty"><FaCalendarDays/><p>New Runs and basketball events will appear as hosts publish them.</p><Link href="/discover">Explore what&apos;s available <FaArrowRight/></Link></div>}
