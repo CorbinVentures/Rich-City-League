@@ -40,7 +40,7 @@ export function AnalyticsPrivacyChoices() {
       <button type="button" disabled={!ready} aria-pressed={!allowed||blocked} onClick={()=>update(false)}
         className={`min-h-11 rounded-xl px-4 text-sm font-bold disabled:opacity-45 ${!allowed||blocked?'bg-[#8ccfff] text-[#091b2b]':'border border-[#5983a0] text-white'}`}>Decline / withdraw</button>
     </div>
-    {blocked&&<p role="status" className="mt-3 text-xs font-semibold text-[#c9e5fb]">Your browser's Do Not Track or Global Privacy Control signal takes priority. External analytics remain disabled.</p>}
+    {blocked&&<p role="status" className="mt-3 text-xs font-semibold text-[#c9e5fb]">Your browser&apos;s Do Not Track or Global Privacy Control signal takes priority. External analytics remain disabled.</p>}
     {notice&&<p role="status" className="mt-3 text-xs text-[#c9e5fb]">{notice}</p>}
   </section>;
 }
