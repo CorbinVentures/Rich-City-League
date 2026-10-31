@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
+import { getPublicClient } from '@/lib/public-data';
 
 export const metadata: Metadata = {
   title: { absolute: 'Pickup Basketball Runs Richmond VA | Rich City Hoops' },
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
   openGraph: { images: [{ url: 'https://www.richcityhoops.com/opengraph-image?v=20261014', width: 1200, height: 630, alt: 'Rich City Hoops — Richmond pickup basketball' }], url: '/richmond-basketball-runs', title: 'Pickup Basketball Runs Richmond VA | Rich City Hoops', description: 'Find Richmond pickup basketball runs, challenge other players and discover local courts with Rich City Hoops.' },
 };
 
-export default function RichmondBasketballRunsPage() {
+export const revalidate=60;
+export default async function RichmondBasketballRunsPage() {
+  const db=getPublicClient();
+  const {data:openRuns}=db ? await db.from('runs').select('id,title,court_name,location,starts_at,game_format').eq('status','open').gte('starts_at',new Date().toISOString()).ilike('location','%Richmond%').order('starts_at',{ascending:true}).limit(12) : {data:[]};
+  const upcoming=openRuns ?? [];
+
   const breadcrumb = {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[
     {'@type':'ListItem',position:1,name:'Rich City Hoops',item:'https://www.richcityhoops.com/'},
     {'@type':'ListItem',position:2,name:'Richmond Basketball Runs',item:'https://www.richcityhoops.com/richmond-basketball-runs'}
@@ -25,6 +31,13 @@ export default function RichmondBasketballRunsPage() {
       </Container>
     </section>
     <Container maxWidth="xl" className="py-16">
+      <section className="mb-14" aria-label="Upcoming Richmond pickup basketball">
+        <h2 className="font-display text-4xl font-black uppercase">Upcoming Richmond Runs</h2>
+        <p className="mt-3 text-sm text-white/65">Live open listings from RCH Runs. A listing is not a court reservation or a guarantee of opponents; coordinate with your host.</p>
+        {upcoming.length ? <div className="mt-6 grid gap-3 md:grid-cols-2">{upcoming.map(run => <Link key={run.id} href={'/runs/'+run.id} className="rounded-xl border border-white/15 bg-white/[.04] p-5 hover:border-rose-400">
+          <p className="text-xs font-bold uppercase text-rose-300">{new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(run.starts_at))}</p><h3 className="mt-2 text-xl font-black">{run.title}</h3><p className="mt-2 text-sm text-white/70">{run.court_name || run.location}{run.game_format ? ' · '+run.game_format : ''}</p><span className="mt-3 inline-block text-sm font-bold">View Run →</span>
+        </Link>)}</div> : <p className="mt-5 rounded-xl border border-white/15 p-6 text-white/70">There are no upcoming Richmond listings right now. Browse statewide Runs or check back for a new session.</p>}
+      </section>
       <section className="grid gap-4 md:grid-cols-3">
         {[['FIND RUNS','See upcoming basketball activity created by the RCL community.'],['JOIN THE COMMUNITY','Build your RCH profile, connect with Richmond players and join the basketball community.'],['HOST A RUN','Signed-in members can create runs with a court, date, time, format, skill level and player limit.']].map(([t,d])=><article key={t} className="border border-white/10 bg-white/[.025] p-6"><h2 className="font-display text-2xl font-black uppercase">{t}</h2><p className="mt-3 text-sm leading-7 text-white/55">{d}</p></article>)}
       </section>

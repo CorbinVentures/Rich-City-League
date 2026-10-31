@@ -23,17 +23,39 @@ export default async function HomePage() {
 
   // The landing page displays just six players and three posts. Never fetch an
   // unused player-IQ ranking or 1,000 unrelated game-stat rows for first paint.
-  const [{ data: playersRaw }, { data: postsRaw }, { data: eventsRaw }, { data: runsRaw }] = client
+  const [{ data: playersRaw }, { data: postsRaw }, { data: eventsRaw }, { data: runsRaw }, { data: membersRaw }] = client
     ? await Promise.all([
         client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
-        client.from('posts').select('id,body,created_at,author:profiles!posts_author_id_fkey!inner(display_name,first_name,last_name)')
+        (client as any).from('posts').select('id,body,created_at,author:profiles!posts_author_id_fkey!inner(display_name,first_name,last_name)')
           .eq('author.profile_visibility', 'public').eq('author.is_active', true)
-          .eq('status', 'published').is('target_profile_id', null)
+          .eq('status', 'published').eq('is_automated', false).is('target_profile_id', null)
           .order('created_at', { ascending: false }).limit(3),
         (client as any).from('network_events').select('id,slug,title,starts_at,city,state,event_type').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
-        (client as any).from('runs').select('id,title,starts_at,location,game_format').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
+        (client as any).from('runs').select('id,title,starts_at,location,court_name,game_format,host_id,max_players').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
+        (client as any).from('profiles').select('id,display_name,first_name,last_name,avatar_url,role').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).not('avatar_url','is',null).order('updated_at',{ascending:false}).limit(12),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+
+  type RunRow = {id:string;host_id:string;title:string;starts_at:string;location:string;court_name:string|null;game_format:string|null;max_players:number|null};
+  type MemberRow = {id:string;display_name:string|null;first_name:string|null;last_name:string|null;avatar_url:string|null;role:string|null};
+  type PostRow = {id:string;body:string;author:{display_name:string|null;first_name:string|null;last_name:string|null}|null};
+  const runRows=(runsRaw ?? []) as RunRow[];
+  const memberRows=(membersRaw ?? []) as MemberRow[];
+  const postRows=(postsRaw ?? []) as PostRow[];
+  const runIds = runRows.map(run=>run.id);
+  const hostIds = [...new Set(runRows.map(run=>run.host_id).filter((id):id is string=>Boolean(id)))];
+  const [{data:registrations,error:rsvpError},{data:hosts}] = client ? await Promise.all([
+    runIds.length ? (client as any).from('run_players').select('run_id').in('run_id',runIds).limit(1000) : Promise.resolve({data:[],error:null}),
+    hostIds.length ? client.from('profiles').select('id,display_name,first_name,last_name').in('id',hostIds).eq('profile_visibility','public').eq('is_active',true) : Promise.resolve({data:[]}),
+  ]) : [{data:[],error:null},{data:[]}];
+  const rsvpCounts=new Map<string,number>();
+  for(const row of registrations ?? []) rsvpCounts.set(row.run_id,(rsvpCounts.get(row.run_id) || 0)+1);
+  const hostNames=new Map((hosts ?? []).map(row=>[row.id,row.display_name || [row.first_name,row.last_name].filter(Boolean).join(' ')]));
+  const enrichedRuns=runRows.map(row=>({...row,host_name:hostNames.get(row.host_id)||null,rsvp_count:rsvpError ? null : rsvpCounts.get(row.id)||0}));
+  const publicMembers=memberRows.filter(row=>Boolean(row.avatar_url?.trim())).slice(0,6);
+  const publicActivity=postRows.filter(row=>typeof row.body==='string' && row.body.trim()).map(row=>({
+    id:row.id,body:row.body.slice(0,220),author_name:row.author?.display_name || [row.author?.first_name,row.author?.last_name].filter(Boolean).join(' ') || 'RCH Member',
+  }));
 
   const playerIds = (playersRaw ?? []).map(player => player.id).filter((id): id is string => Boolean(id));
   const { data: statsRaw } = client && playerIds.length && completedGameIds.size
@@ -48,8 +70,9 @@ export default async function HomePage() {
         <RCHBrowserHomepage
           news={news as any}
           events={(eventsRaw ?? []) as any}
-          runs={(runsRaw ?? []) as any}
-          players={(playersRaw ?? []) as any}
+          runs={enrichedRuns as any}
+          members={publicMembers as any}
+          activity={publicActivity}
         />
       </div>
       <MemberHomeRedirect />

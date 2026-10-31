@@ -45,6 +45,9 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeMenu = () => setOpenOnPath(null);
+  useEffect(() => {
+    if (pathname === '/') trackRchConversion('home_view', 'home_hero');
+  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
