@@ -316,7 +316,10 @@ export default function RchTvAdminPage() {
           <h2 className="mt-2 text-xl font-bold">Broadcast Live Games & The Pulse</h2>
           <p className="mt-2 max-w-xl text-sm text-white/55">Choose an iPad or Canon capture input, preview your shot, design scoreboards and podcast overlays, and control the live player.</p>
         </div>
-        <Link href="/admin/rch-tv/studio" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-black text-black">Open Broadcast Studio <FaArrowRight aria-hidden="true" /></Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/rch-tv/game-day" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-black text-black">Open Game Day Center <FaArrowRight aria-hidden="true" /></Link>
+          <Link href="/admin/rch-tv/studio" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-5 text-sm font-black text-white">Broadcast Studio</Link>
+        </div>
       </section>
 
       <section className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/[.025] p-5">
