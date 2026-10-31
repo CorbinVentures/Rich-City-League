@@ -3,7 +3,7 @@ import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { gravityCityFromId } from '@/lib/rch-gravity-location';
 import { cityForText } from '@/lib/virginia-world';
-import { VIRGINIA_CITIES } from '@/lib/virginia-world';
+import { groupSharedCities } from '@/lib/command/intelligence-market';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -128,14 +128,7 @@ export async function GET(request: NextRequest) {
         sessions:unique(currentVisits.filter(v=>v.section===section),'session_id')}))
       .sort((a,b)=>b.entries-a.entries).slice(0,16);
 
-    const cities = new Map<string,number>();
-    for(const item of cityConsents) {
-      if(!memberIds.has(item.profile_id)||!VIRGINIA_CITIES.some(c=>c.id===item.city_id))continue;
-      cities.set(item.city_id,(cities.get(item.city_id)??0)+1);
-    }
-    const cityGroups = [...cities.entries()].filter(([,count])=>count>=3)
-      .map(([cityId,count])=>({cityId,city:gravityCityFromId(cityId)?.name??cityId,members:count}))
-      .sort((a,b)=>b.members-a.members);
+    const {visible:cityGroups,hiddenGroupCount} = groupSharedCities(cityConsents as {profile_id:string;city_id:string}[],memberIds);
     const courtsBySlug = new Map(courts.filter(c=>c.is_active!==false && c.verification_status==='official').map(c=>[c.slug,c]));
     const runCities = new Map<string,{scheduledRuns:number;locations:Set<string>}>();
     for(const run of runs) {
@@ -189,7 +182,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       generatedAt:new Date(now).toISOString(),days,observations,daily,sections,funnel,sources,cohorts,
       geography:{consentedTotal:observations.optInCityMembers,reportedCities:cityGroups,
-        hiddenCities:[...cities.values()].filter(n=>n<3).length,courtActivity,
+        hiddenCities:hiddenGroupCount,courtActivity,
         basis:'Member cities are explicit opt-ins; only groups of at least three are shown. Court activity is event scheduling at verified listed courts, not member proximity.'},
       integrations,insights,
       measurement:{privacy:'No exact location or member identities returned. Do Not Track and browser session restrictions apply to site observation.',
