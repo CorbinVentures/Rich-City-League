@@ -95,7 +95,7 @@ export function RchPwaAdoptionDashboard({ members, generatedAt }: {
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead className="border-b border-white/20 text-xs uppercase tracking-wider text-white/60">
-            <tr><th scope="col" className="py-3 pr-3">Member</th><th scope="col" className="py-3 pr-3">Observed on</th><th scope="col" className="py-3 pr-3">First seen</th><th scope="col" className="py-3 pr-3">Last seen</th><th scope="col" className="py-3 text-right">Returns*</th></tr>
+            <tr><th scope="col" className="py-3 pr-3">Member</th><th scope="col" className="py-3 pr-3">Observed on</th><th scope="col" className="py-3 pr-3">First seen</th><th scope="col" className="py-3 pr-3">Last seen</th><th scope="col" className="py-3 text-right">Launch windows*</th></tr>
           </thead>
           <tbody className="divide-y divide-white/10">
             {visible.map(m => <tr key={m.profileId}>
