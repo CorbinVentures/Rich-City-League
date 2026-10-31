@@ -31,7 +31,13 @@ alter table public.rch_match_skill_box_scores enable row level security;
 revoke all on public.rch_match_skill_box_scores from public,anon,authenticated;
 grant select on public.rch_match_skill_box_scores to authenticated;
 create policy rch_skill_stats_owner_read on public.rch_match_skill_box_scores for select to authenticated
- using(profile_id=(select auth.uid()) or coalesce(public.is_staff_or_admin(),false));
+ using(profile_id=(select auth.uid()) or coalesce(public.is_staff_or_admin(),false)
+ or exists(
+  select 1 from public.run_ranked_matches m join public.runs r on r.id=m.run_id
+  where m.id=rch_match_skill_box_scores.match_id and
+  (r.host_id=(select auth.uid()) or exists(select 1 from public.rch_run_operators o
+   where o.run_id=r.id and o.profile_id=(select auth.uid()) and o.role in ('cohost','scorekeeper')))
+ ));
  
 -- Immutable human-readable correction ledger; clients cannot forge evidence.
 create table public.rch_skill_evidence_corrections (
