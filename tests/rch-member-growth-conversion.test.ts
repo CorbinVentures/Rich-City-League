@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { isBrowserPublicRoute } from '../src/lib/rch-mobile-experience';
 
 const read = (path: string) => readFileSync(path, 'utf8');
 
@@ -29,7 +30,9 @@ describe('RCH free membership growth safeguards', () => {
     const form = read('src/components/AuthForm.tsx');
     for (const audience of ['players', 'fans', 'coaches', 'creators', 'organizations']) {
       expect(route).toContain(audience + ': {');
+      expect(isBrowserPublicRoute('/join/' + audience)).toBe(true);
     }
+    expect(isBrowserPublicRoute('/join/unknown')).toBe(false);
     expect(route).toContain("encodeURIComponent(entry.destination)");
     expect(form).toContain("requestedRole === 'player'");
     expect(form).toContain('if (Number.isNaN(birth.getTime()) || age < 16)');
