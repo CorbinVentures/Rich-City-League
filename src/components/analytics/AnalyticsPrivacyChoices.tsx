@@ -31,9 +31,9 @@ export function AnalyticsPrivacyChoices() {
   return <section className="not-prose rounded-2xl border border-white/20 bg-[#0b253b] p-5 text-white" aria-labelledby="external-analytics-title">
     <h2 id="external-analytics-title" className="text-lg font-black">Optional product analytics</h2>
     <p className="mt-2 text-sm leading-6 text-white/75">
-      By default, no external product analytics are sent. You can choose to share anonymous, broad-section activity on designated public landing pages with an analytics provider once RCH has connected one. Private messages, profiles, account pages, form fields, and precise location are excluded. You can withdraw this choice at any time.
+      By default, no external product analytics are sent. You can choose to share anonymous, broad-section activity on designated public landing pages with connected analytics services such as PostHog or Vercel Web Analytics, if activated by RCH. Private messages, profiles, account pages, form fields, and precise location are excluded. You can withdraw this choice at any time.
     </p>
-    <p className="mt-2 text-xs leading-5 text-white/60">Session recordings and heatmaps remain disabled. This choice does not enable advertising personalization or identify you as a member. Essential service and existing first-party operational telemetry have separate rules.</p>
+    <p className="mt-2 text-xs leading-5 text-white/60">Vercel may produce aggregated approximate city/region information from the connection when enabled; we never ask for device GPS for this. Session recordings and heatmaps remain disabled. This choice does not enable advertising personalization or identify you as a member. Essential service and existing first-party operational telemetry have separate rules.</p>
     <div className="mt-4 flex flex-wrap gap-2">
       <button type="button" disabled={!ready||blocked} aria-pressed={allowed&&!blocked} onClick={()=>update(true)}
         className={`min-h-11 rounded-xl px-4 text-sm font-bold disabled:opacity-45 ${allowed&&!blocked?'bg-[#8ccfff] text-[#091b2b]':'border border-[#5983a0] text-white'}`}>Allow optional analytics</button>

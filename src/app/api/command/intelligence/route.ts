@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
       vendor('PostHog',Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY),'Opt-in anonymous public-section events; no SDK replay or private interaction capture','https://posthog.com/docs'),
       vendor('Microsoft Clarity',false,'Session replay OFF pending explicit recording-consent and project masking verification','https://clarity.microsoft.com/'),
       vendor('Google Search Console',Boolean(process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL),'Search reach, impressions and indexing','https://search.google.com/search-console'),
-      vendor('Vercel Analytics',false,'Project dashboard activation and official Next.js SDK still required','https://vercel.com/docs/analytics'),
+      vendor('Vercel Analytics',false,'Opt-in public-page tracking prepared; Vercel dashboard enablement and live verification still required','https://vercel.com/docs/analytics'),
       vendor('Sentry',false,'Error monitoring SDK and verified DSN still required','https://sentry.io/'),
     ];
     const insights: string[] = [];
