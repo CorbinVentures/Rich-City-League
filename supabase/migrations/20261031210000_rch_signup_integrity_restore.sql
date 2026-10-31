@@ -126,3 +126,4 @@ revoke all on function public.rch_username_available(text) from public, anon, au
 grant execute on function public.rch_username_available(text) to anon, authenticated;
 -- Trigger-only: preserve least privilege for the auth profile creator.
 revoke all on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to supabase_auth_admin;
