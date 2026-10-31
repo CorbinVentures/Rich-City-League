@@ -143,10 +143,13 @@ declare actor uuid:=auth.uid();s public.rch_match_skill_box_scores%rowtype;
  v_side text;v_team_score integer;v_approved_points integer;
 begin
  if actor is null then raise exception 'Sign in to review evidence';end if;
+ -- Serialize all teammate approvals on the canonical match row so two reviewers
+ -- cannot independently approve point totals that together exceed team score.
+ select * into m from public.run_ranked_matches where id=p_match for update;
+ if not found then raise exception 'Official match not found';end if;
  select * into s from public.rch_match_skill_box_scores
   where match_id=p_match and profile_id=p_player for update;
  if not found or s.review_status<>'pending' then raise exception 'No pending score to review';end if;
- select * into m from public.run_ranked_matches where id=p_match;
  select * into r from public.runs where id=m.run_id;
  if actor=s.recorded_by or actor=s.profile_id then
    raise exception 'Evidence requires a different independent reviewer';end if;
