@@ -1,6 +1,4 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { RCHAudienceJoinCTA } from '@/components/RCHAudienceJoinCTA';
 
 type Audience = 'players' | 'fans' | 'coaches' | 'creators' | 'organizations';
@@ -47,18 +45,8 @@ const entries: Record<Audience, Entry> = {
   },
 };
 
-export function generateStaticParams() {
-  return (Object.keys(entries) as Audience[]).map(audience => ({ audience }));
-}
-export async function generateMetadata({ params }: { params: Promise<{audience: string}> }): Promise<Metadata> {
-  const { audience } = await params;
-  const entry = entries[audience as Audience];
-  return { title: entry ? entry.headline + ' | Join Rich City Hoops' : 'Join Rich City Hoops', robots: { index: Boolean(entry), follow: true } };
-}
-export default async function AudienceJoinPage({ params }: { params: Promise<{audience: string}> }) {
-  const { audience } = await params;
-  const entry = entries[audience as Audience];
-  if (!entry) notFound();
+export function RCHAudienceJoinPage({ audience }: { audience: Audience }) {
+  const entry = entries[audience];
   const href = '/auth/sign-up?next=' + encodeURIComponent(entry.destination) + '&role=' + entry.role;
   return <main className="min-h-svh bg-[#080e16] text-white">
     <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
