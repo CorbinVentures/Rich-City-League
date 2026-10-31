@@ -29,7 +29,7 @@ export function setExternalAnalyticsChoice(allowed: boolean) {
 export const SAFE_ANALYTICS_PAGES = new Set([
   '/', '/about', '/news', '/runs', '/league', '/media', '/website-creator',
   '/discover', '/players', '/teams', '/schedule', '/commonwealth',
-  '/crews', '/fantasy', '/sponsors', '/app', '/membership', '/faq',
+  '/crews', '/sponsors', '/app', '/membership', '/faq',
   '/richmond-basketball-runs', '/richmond-basketball-league',
 ]);
 
