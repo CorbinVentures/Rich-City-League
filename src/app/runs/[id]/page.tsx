@@ -426,7 +426,7 @@ export default function RunRoomPage() {
         <RunCrewEntries runId={run.id} />
         <RunCrewTeamLinker runId={run.id} />
         <div id="rch-result-review" className="scroll-mt-36"><RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} /></div>
-        {canManage && <RunSkillEvidenceDesk runId={run.id} />}
+        <RunSkillEvidenceDesk runId={run.id} />
         <div id="rch-host-operations" className="scroll-mt-36"><RunOperationsHQ runId={run.id} hostId={run.host_id} /></div>
         <RunVerifiedSignal runId={run.id} />
         <RunMasterOfficialControl runId={run.id} />
