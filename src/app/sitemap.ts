@@ -5,6 +5,11 @@ const SITE = 'https://www.richcityhoops.com';
 const core = [
   ['',1,'daily'],
   ['/about',.9,'monthly'],
+  ['/join/players',.85,'weekly'],
+  ['/join/fans',.8,'weekly'],
+  ['/join/coaches',.8,'weekly'],
+  ['/join/creators',.8,'weekly'],
+  ['/join/organizations',.85,'weekly'],
   ['/league',1,'weekly'],
   ['/richmond-basketball-league',1,'weekly'],
   ['/richmond-basketball-runs',1,'daily'],

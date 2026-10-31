@@ -42,7 +42,7 @@
   background-image:
     linear-gradient(90deg,var(--rch-brand-canvas) 0%,rgb(var(--rch-brand-canvas-rgb) / .98) 13%,rgb(var(--rch-brand-canvas-rgb) / .72) 36%,rgb(var(--rch-brand-canvas-rgb) / .06) 77%,rgb(var(--rch-brand-canvas-rgb) / .5) 100%),
     linear-gradient(0deg,var(--rch-brand-canvas) 0%,rgb(var(--rch-brand-canvas-rgb) / .05) 48%,rgb(var(--rch-brand-canvas-rgb) / .48) 100%),
-    url("https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=1800&q=85");
+    linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
   background-size:cover;
   background-position:center,center,center 47%;
   filter:saturate(.78) contrast(1.16);
@@ -175,24 +175,24 @@
 .rch-public-web .rch-browser-feature-runs .rch-browser-feature-art,
 .rch-public-web .rch-browser-event-1 .rch-browser-event-art,
 .rch-public-web .rch-browser-community-tile-courts {
-  background-image:url("https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=650&q=80");
+  background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
 }
 .rch-public-web .rch-browser-feature-leagues .rch-browser-feature-art,
 .rch-public-web .rch-browser-event-2 .rch-browser-event-art {
-  background-image:url("https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=650&q=80");
+  background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
 }
 .rch-public-web .rch-browser-feature-discover .rch-browser-feature-art,
 .rch-public-web .rch-browser-event-3 .rch-browser-event-art,
 .rch-public-web .rch-browser-community-tile-culture {
-  background-image:url("https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=650&q=80");
+  background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
 }
 .rch-public-web .rch-browser-feature-media .rch-browser-feature-art,
 .rch-public-web .rch-browser-event-4 .rch-browser-event-art {
-  background-image:url("https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=650&q=80");
+  background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
 }
 .rch-public-web .rch-browser-feature-social .rch-browser-feature-art,
 .rch-public-web .rch-browser-community-tile-players {
-  background-image:url("https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?auto=format&fit=crop&w=650&q=80");
+  background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
 }
 .rch-public-web .rch-browser-feature-content {width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:end;padding:15px}
 .rch-public-web .rch-browser-feature-icon {color:var(--rch-brand-accent-text);font-size:18px;width:100%}
@@ -253,7 +253,7 @@
 .rch-public-web .rch-browser-community-tile {min-width:0;height:170px;position:relative;overflow:hidden;display:flex;align-items:end;border:1px solid var(--rch-brand-border);border-radius:10px;padding:12px;background-color:var(--rch-brand-raised);background-size:cover;background-position:center;color:#fff!important;isolation:isolate}
 .rch-public-web .rch-browser-community-tile::before {content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(0deg,rgb(var(--rch-brand-canvas-rgb) / .89),transparent 72%)}
 .rch-public-web .rch-browser-community-tile>span:last-child {position:relative;z-index:1;font-weight:950;font-size:11px;text-transform:uppercase;letter-spacing:.07em;text-shadow:0 3px 10px #000}
-.rch-public-web .rch-browser-community-tile-coaches {background-image:url("https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&w=500&q=80")}
+.rch-public-web .rch-browser-community-tile-coaches {background-image:linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%)}
 .rch-public-web .rch-browser-community-person {background:linear-gradient(135deg,var(--rch-brand-border),var(--rch-brand-surface))}
 .rch-public-web .rch-browser-community-person img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .rch-public-web .rch-browser-community-initial {align-self:center;margin:auto;font-size:44px!important;color:var(--rch-brand-accent-text)!important}
@@ -286,7 +286,7 @@
   .rch-public-web .rch-browser-hero {min-height:650px;align-items:start}
   .rch-public-web .rch-browser-hero-container {display:flex;flex-direction:column;gap:26px;align-items:stretch;padding:49px 20px 37px}
   .rch-public-web .rch-browser-hero-art {
-    background-image:linear-gradient(90deg,rgb(var(--rch-brand-canvas-rgb) / .87),rgb(var(--rch-brand-canvas-rgb) / .34) 75%),linear-gradient(0deg,var(--rch-brand-canvas) 0%,rgb(var(--rch-brand-canvas-rgb) / .32) 48%,rgb(var(--rch-brand-canvas-rgb) / .52) 100%),url("https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=950&q=85");
+    background-image:linear-gradient(90deg,rgb(var(--rch-brand-canvas-rgb) / .87),rgb(var(--rch-brand-canvas-rgb) / .34) 75%),linear-gradient(0deg,var(--rch-brand-canvas) 0%,rgb(var(--rch-brand-canvas-rgb) / .32) 48%,rgb(var(--rch-brand-canvas-rgb) / .52) 100%),linear-gradient(135deg,#173047 0%,#0c151f 55%,#251923 100%);
     background-position:center,center,center;
   }
   .rch-public-web .rch-browser-hero-copy {width:100%}
@@ -476,3 +476,26 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rc
 .rch-public-web .rch-browser-pulse-empty p{font-size:13px!important;color:var(--rch-brand-copy)!important}
 @media(max-width:850px){.rch-public-web .rch-browser-pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.rch-public-web .rch-browser-pulse-grid{grid-template-columns:1fr}.rch-public-web .rch-browser-pulse-heading{align-items:flex-start;flex-direction:column}.rch-public-web .rch-browser-pulse-hero{padding:55px 0 60px}}
+
+/* Member-growth pass: branded gradients replace unrelated stock imagery. Real
+   basketball photography is presented through actual public player/content data. */
+.rch-public-web .rch-browser-hero h1,
+.rch-public-web #rch-public-content .rch-browser-hero h1 {
+  font-size:clamp(43px,5.1vw,81px)!important;
+  line-height:.96!important;
+}
+.rch-public-web .rch-browser-app-promo {
+  display:flex;
+  justify-content:center;
+  min-height:200px;
+  padding:32px max(20px,calc((100% - 1200px)/2));
+}
+.rch-public-web .rch-browser-app-copy {max-width:770px}
+@media(max-width:640px){
+  .rch-public-web .rch-browser-hero h1,
+  .rch-public-web #rch-public-content .rch-browser-hero h1 {
+    font-size:clamp(39px,10.2vw,61px)!important;
+    letter-spacing:-.06em!important;
+  }
+  .rch-public-web .rch-browser-app-promo {display:flex;justify-content:flex-start;padding:28px 20px}
+}

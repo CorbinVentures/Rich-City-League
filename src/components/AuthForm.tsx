@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getBrowserPostAuthPath, getSafePostAuthPath } from '@/lib/auth-redirect';
+import { trackRchConversion } from '@/lib/analytics/conversion';
 
 type ProfileType = 'player' | 'coach' | 'fan';
 
@@ -46,6 +47,8 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   useEffect(() => {
     if (mode !== 'sign-up') return;
     const signupParams = new URLSearchParams(window.location.search);
+    const requestedRole = signupParams.get('role');
+    if (requestedRole === 'player' || requestedRole === 'coach' || requestedRole === 'fan') setProfileType(requestedRole);
     setSignupDestination(getSafePostAuthPath(signupParams.get('next') ?? signupParams.get('redirect'), '/runs'));
     const invite = signupParams.get('invite');
     if (invite) {
@@ -56,6 +59,10 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       const pending = window.localStorage.getItem('rcl_pending_referral');
       if (pending) setReferralCode(pending);
     }
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode === 'sign-up') trackRchConversion('signup_view', 'email');
   }, [mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -97,12 +104,17 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         }
         window.location.assign(destination);
       } else if (mode === 'sign-up') {
-        if (step < 3) { setStep((current) => current + 1); return; }
+        if (step < 3) {
+          trackRchConversion(step === 1 ? 'signup_account_continue' : 'signup_role_continue', 'email');
+          setStep((current) => current + 1);
+          return;
+        }
         if (password !== confirmation) { setStep(1); setMessage('Passwords do not match.'); return; }
         if (!firstName.trim() || !lastName.trim() || !username.trim() || !dateOfBirth) { setMessage('Complete the required profile fields and age screen.'); return; }
         const birth = new Date(dateOfBirth + 'T00:00:00'); const now = new Date(); let age = now.getFullYear()-birth.getFullYear(); const md=now.getMonth()-birth.getMonth(); if(md<0||(md===0&&now.getDate()<birth.getDate())) age--;
         if (Number.isNaN(birth.getTime()) || age < 16) { setMessage('RCL Social accounts are currently available only to users age 16 or older.'); return; }
         if (!acceptedLegal) { setMessage('Review and accept the Terms and Privacy Policy to create an account.'); return; }
+        trackRchConversion('signup_submitted', 'email');
         const { session } = await signUp(email, password, {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -123,6 +135,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           privacy_policy_acknowledged_at: new Date().toISOString(),
         });
         setSignupHasSession(Boolean(session));
+        trackRchConversion('signup_created', 'email');
         if (session && referralCode) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           if (client) {
@@ -132,13 +145,13 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         }
         setStep(4);
         setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. You can still explore public runs and stories.');
-        // The shared install prompt opens as soon as registration succeeds.
-        window.dispatchEvent(new Event('rch:registration-complete'));
+        // Delay any install invitation until after the member has received practical value.
       } else {
         await resetPassword(email);
         setMessage('Password recovery instructions have been sent if this email exists.');
       }
     } catch {
+      if (mode === 'sign-up') trackRchConversion('signup_failed', 'email');
       setMessage('Unable to complete this request. Please check the details above and try again.');
     }
   }

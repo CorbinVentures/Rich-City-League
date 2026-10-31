@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
 import { useAuth } from '@/hooks/useAuth';
+import { trackRchConversion } from '@/lib/analytics/conversion';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { ReactNode } from 'react';
 import {
@@ -16,12 +17,14 @@ import {
 const nav = [
   { name: 'Home', href: '/' },
   { name: 'Discover', href: '/discover' },
-  { name: 'Living World', href: '/world' },
   { name: 'Runs', href: '/runs' },
-  { name: 'Leagues', href: '/league' },
-  { name: 'Social', href: '/pulse' },
-  { name: 'News', href: '/news' },
+  { name: 'Community', href: '/community' },
+  { name: 'Rich City League', href: '/league' },
   { name: 'RCH TV', href: '/media' },
+];
+const secondaryNav = [
+  { name: 'News', href: '/news' },
+  { name: 'Living World', href: '/world' },
   { name: 'Build a Site', href: '/website-creator' },
 ];
 
@@ -117,7 +120,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
             <button type="button" className="rch-public-signin" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
             <Link href="/auth/sign-in" className="rch-public-signin">Sign in</Link>
-            <Link href="/auth/sign-up" className="rch-public-join">Join Free <FaArrowRight/></Link>
+            <Link href="/auth/sign-up" onClick={() => trackRchConversion("join_click", "header")} className="rch-public-join">Join Free <FaArrowRight/></Link>
           </>}
         </div>
         <button
@@ -157,6 +160,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
           {nav.map(item => <Link key={item.href} href={browserNavHref(item.href, Boolean(user))} aria-current={pathname===browserNavHref(item.href, Boolean(user))?'page':undefined} onClick={closeMenu}>
             <span>{item.name}</span><FaArrowRight aria-hidden="true"/>
           </Link>)}
+          {secondaryNav.map(item => <Link key={item.href} href={item.href} onClick={closeMenu}><span>{item.name}</span><FaArrowRight aria-hidden="true"/></Link>)}
           <Link href="/search" onClick={closeMenu}><span><FaMagnifyingGlass aria-hidden="true"/> Search basketball</span><FaArrowRight aria-hidden="true"/></Link>
           {user && <>
             <Link href="/my-hoops" onClick={closeMenu}><span>My Hoops</span><FaArrowRight aria-hidden="true"/></Link>
@@ -175,7 +179,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
             <Link href="/profile" onClick={closeMenu}>My Profile <FaArrowRight aria-hidden="true"/></Link>
             <button type="button" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
-            <Link href="/auth/sign-up" onClick={closeMenu}>Join Free <FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/auth/sign-up" onClick={() => { trackRchConversion("join_click", "header"); closeMenu(); }}>Join Free <FaArrowRight aria-hidden="true"/></Link>
             <Link href="/auth/sign-in" onClick={closeMenu}>Sign in</Link>
           </>}
         </div>
