@@ -32,6 +32,9 @@ export default function RchBroadcastStudio() {
   const [message, setMessage] = useState('');
   const [activePanel, setActivePanel] = useState<'camera' | 'score' | 'graphics' | 'show'>('camera');
   const [facing, setFacing] = useState<'environment' | 'user'>('environment');
+  const [rightsCleared, setRightsCleared] = useState(false);
+  const [backupReady, setBackupReady] = useState(false);
+  const [completedBroadcast, setCompletedBroadcast] = useState(false);
   const preview = useRef<HTMLVideoElement | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const room = useRef<Room | null>(null);
@@ -151,6 +154,11 @@ export default function RchBroadcastStudio() {
 
   async function goLive() {
     if (!client || !authorized || !ready || !stream.current || onAir || config.active) return;
+    if (!rightsCleared || !backupReady) {
+      setError('Confirm rights and the independent recording plan before going live.');
+      return;
+    }
+    setCompletedBroadcast(false);
     setBusy(true);setError('');setMessage('');
     const next = new Room({ adaptiveStream:true, dynacast:true });
     try {
@@ -175,6 +183,7 @@ export default function RchBroadcastStudio() {
         streaming.current=false;
         setOnAir(false);
         setError('Broadcast connection lost. Confirm the stream is offline before restarting.');
+        setCompletedBroadcast(true);
         void saveConfig(currentConfig.current,false,currentMode.current).catch(()=>undefined);
       });
       const saved=await saveConfig(config,true,mode);
@@ -199,7 +208,8 @@ export default function RchBroadcastStudio() {
       await room.current?.disconnect();
       room.current=null;
       setOnAir(false);
-      setMessage('Off air. This session is finished.');
+      setCompletedBroadcast(true);
+      setMessage('Off air. This session has ended. If a separate recording was made, upload it as a draft for the replay review. Live video is not automatically archived.');
     } catch(e){setError(e instanceof Error?e.message:'Unable to take broadcast offline.');}
     finally{setBusy(false);}
   }
@@ -228,7 +238,7 @@ export default function RchBroadcastStudio() {
         <div className="rch-studio-mode-switch flex items-center gap-2" role="group" aria-label="Production format">
           {(['live_games', 'the_pulse'] as const).map(item => (
             <button type="button" disabled={onAir || busy} key={item}
-              onClick={() => { stopPreview(); setMode(item); setActivePanel('camera'); setMessage(''); }}
+              onClick={() => { stopPreview(); setMode(item); setActivePanel('camera'); setMessage(''); setRightsCleared(false); setBackupReady(false); setCompletedBroadcast(false); }}
               aria-pressed={mode === item}
               className={`rch-studio-button min-h-10 flex-1 rounded-lg border px-4 py-2.5 text-xs font-extrabold sm:flex-none sm:text-sm ${mode === item ? 'rch-studio-button-selected' : ''}`}>
               {RCH_TV_MODES[item].label}
@@ -260,13 +270,24 @@ export default function RchBroadcastStudio() {
               className="rch-studio-button rch-studio-stop min-h-11 rounded-lg px-3 text-xs font-bold disabled:opacity-40">Stop preview</button>
             {onAir
               ? <button type="button" onClick={() => void endBroadcast()} disabled={busy} className="rch-studio-button rch-studio-live min-h-11 rounded-lg px-5 text-xs font-black disabled:opacity-40">End Live</button>
-              : <button type="button" onClick={() => void goLive()} disabled={!ready || config.active || busy}
+              : <button type="button" onClick={() => void goLive()} disabled={!ready || !rightsCleared || !backupReady || config.active || busy}
                   className="rch-studio-button rch-studio-primary min-h-11 rounded-lg px-5 text-xs font-black disabled:opacity-40">● Go Live</button>}
             <button type="button" onClick={() => void updateGraphics()} disabled={busy}
               className="rch-studio-button rch-studio-publish min-h-11 rounded-lg px-3 text-xs font-bold disabled:opacity-40">Publish graphics</button>
           </div>
         </section>
 
+        <section className="mt-3 rounded-xl border border-white/15 bg-white/[.035] p-3 text-xs leading-5 text-white/75" aria-label="Broadcast readiness checklist">
+          <p className="font-black uppercase tracking-wide text-sky-200">Before going live</p>
+          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={rightsCleared} disabled={onAir} onChange={e=>setRightsCleared(e.target.checked)} className="mt-1"/><span>Event, venue, participants and any on-air sponsor/music usage are cleared for live distribution.</span></label>
+          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={backupReady} disabled={onAir} onChange={e=>setBackupReady(e.target.checked)} className="mt-1"/><span>Independent local recording or an approved replay plan is ready. RCH&apos;s browser stream does not automatically create a replay.</span></label>
+          <p className="mt-2 text-white/45">After Go Live, verify video and sound on a separate viewer device. If the connection drops, use Mark Channel Offline and verify before restarting.</p>
+        </section>
+        {completedBroadcast && !onAir && <section role="status" className="mt-3 rounded-xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm text-white/75">
+          <strong className="block text-white">Broadcast ended · Replay handoff</strong>
+          <p className="mt-2">Save the independent recording, export to MP4 or WebM, then upload as a draft for rights and playback review. A browser broadcast alone does not create a saved video.</p>
+          <Link href={'/admin/rch-tv?replay=' + mode + '#upload-replay'} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-sky-300 px-4 text-xs font-black text-black">Upload replay to RCH TV</Link>
+        </section>}
         {error && <p role="alert" className="rch-studio-alert mt-3 rounded-lg p-3 text-xs leading-5">{error}</p>}
         {message && <p role="status" className="rch-studio-message mt-3 rounded-lg p-3 text-xs leading-5">{message}</p>}
 

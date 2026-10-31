@@ -19,6 +19,8 @@ export function rchTvVideoMimeType(file: FileIdentity): VideoMimeType | null {
     return ['', 'application/octet-stream', 'video/quicktime', 'video/x-quicktime', 'video/mov', 'video/mp4'].includes(mime)
       ? 'video/quicktime' : null;
   }
+  if ((mime === '' || mime === 'application/octet-stream') && /\.mp4$/i.test(name)) return 'video/mp4';
+  if ((mime === '' || mime === 'application/octet-stream') && /\.webm$/i.test(name)) return 'video/webm';
   if (mime === 'video/mp4' || mime === 'video/webm') return mime;
   return null;
 }
@@ -26,6 +28,10 @@ export function rchTvVideoMimeType(file: FileIdentity): VideoMimeType | null {
 export function rchTvFileError(file: Pick<File, 'type'|'size'> & { name?: string }): string | null {
   const isVideo = Boolean(rchTvVideoMimeType(file));
   if (file.name && /\.mov$/i.test(file.name) && !isVideo) return 'This MOV file has an unexpected format. Export it as a video and try again.';
+  // The production video bucket permits only video/mp4 and video/webm.
+  // Reject MOV BEFORE starting a multi-GB upload; it would fail at storage.
+  if (isVideo && rchTvVideoMimeType(file) === 'video/quicktime')
+    return 'iPhone MOV cannot be uploaded to this video bucket. Export as MP4 (H.264 video / AAC audio) on your device, then select the MP4. The original remains unchanged.';
   if (!isVideo && !OTHERS.has(file.type)) return 'Choose MP4, MOV, WebM, JPEG, PNG, WebP, MP3, M4A or WAV.';
   if (file.size < 1) return 'Choose a nonempty file.';
   if (isVideo && file.size > RCH_TV_VIDEO_MAX_BYTES) return 'Videos must be 5 GB or smaller.';
