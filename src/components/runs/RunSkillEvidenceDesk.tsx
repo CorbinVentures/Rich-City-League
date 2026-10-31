@@ -31,6 +31,7 @@ const optionalNumber=(s:string)=>s.trim()===''?null:Number(s);
 
 export function RunSkillEvidenceDesk({runId}:{runId:string}){
  const {user}=useAuth();
+ const uid=user?.id;
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [matches,setMatches]=useState<Match[]>([]);
  const [receipts,setReceipts]=useState<Receipt[]>([]);
@@ -47,13 +48,13 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
  const [revision,setRevision]=useState(0);
  const reload=useCallback(()=>setRevision(v=>v+1),[]);
  useEffect(()=>{
-  if(!db||!user){setLoading(false);return;}
+  if(!db||!uid){setLoading(false);return;}
   let alive=true;
   void (async()=>{
    setLoading(true);setError('');
    const [manager,operator]=await Promise.all([
     db.rpc('can_manage_run',{target_run:runId}),
-    db.from('rch_run_operators').select('role').eq('run_id',runId).eq('profile_id',user.id).maybeSingle(),
+    db.from('rch_run_operators').select('role').eq('run_id',runId).eq('profile_id',uid).maybeSingle(),
    ]);
    const allowed=Boolean(!manager.error&&manager.data)||
     Boolean(!operator.error&&['cohost','scorekeeper'].includes(operator.data?.role||''));
@@ -84,7 +85,7 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
    setLoading(false);
   })();
   return()=>{alive=false;};
- },[db,runId,user?.id,revision]);
+ },[db,runId,uid,revision]);
  const match=matches.find(m=>m.id===selectedMatch);
  const players=match?[...match.home_roster,...match.away_roster]:[];
  const activeReceipt=receipts.find(r=>r.match_id===selectedMatch&&r.profile_id===selectedPlayer);
@@ -122,13 +123,13 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
   else{setNotice(approve?'Stats independently certified. Skill progress is now eligible.':'Submission rejected for correction.');reload();}
   setBusy(false);
  }
- if(!user||!authorized)return null;
+ if(!uid||!authorized)return null;
  return <section aria-label="Skill Engine official game scorekeeping" className="my-6 rounded-3xl border border-[#537693] bg-[#091f35] p-5 text-white sm:p-6">
   <div className="flex items-start gap-3">
    <FaClipboardCheck className="mt-1 shrink-0 text-2xl text-[#f2ce83]"/>
    <div><p className="text-[10px] font-black uppercase tracking-widest text-[#9acaf0]">Official scorekeeper · Skill Engine V2</p>
     <h2 className="mt-2 font-display text-2xl font-black">Match-Level Skill Evidence</h2>
-    <p className="mt-2 text-sm leading-6 text-[#b2cee1]">Record each player's actual stats from a verified game. A different authorized official must approve the evidence. A Run RSVP, personal claim or generic event box score cannot earn a competitive badge.</p>
+    <p className="mt-2 text-sm leading-6 text-[#b2cee1]">Record each player&apos;s actual stats from a verified game. A different authorized official must approve the evidence. A Run RSVP, personal claim or generic event box score cannot earn a competitive badge.</p>
    </div>
   </div>
   {loading&&<p className="mt-4 text-sm text-[#c4daed]" role="status">Loading official matches…</p>}
