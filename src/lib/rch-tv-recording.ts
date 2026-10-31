@@ -36,7 +36,7 @@ export function recordingConfig(env: Record<string, string | undefined>): Record
   }
 }
 
-function client(config: RecordingConfig): EgressClient {
+export function client(config: RecordingConfig): EgressClient {
   if (!config.apiUrl || !config.apiKey || !config.apiSecret) throw new Error('LiveKit recording service not configured.');
   return new EgressClient(config.apiUrl, config.apiKey, config.apiSecret);
 }
@@ -67,7 +67,7 @@ export async function startRchRecording(mode: RchTvMode, config = recordingConfi
     }) },
   });
   const started = await service.startRoomCompositeEgress(roomName, output, { layout: 'speaker' });
-  return { egressId: started.egressId, state: 'starting',
+  return { egressId: started.egressId, outputPath: path, state: 'starting',
     note: 'Recording is initializing. Confirm Egress state in LiveKit before relying on the file.' };
 }
 
@@ -79,4 +79,10 @@ export async function stopRchRecording(mode: RchTvMode, config = recordingConfig
   const recording = active[0];
   await service.stopEgress(recording.egressId);
   return { state: 'finalizing', egressId: recording.egressId };
+}
+
+/** Provider status and final-output metadata are not proof of actual S3 storage until HEAD succeeds. */
+export async function listRchEgress(mode: RchTvMode, config = recordingConfig(process.env)) {
+  if (config.state !== 'available') return [];
+  return client(config).listEgress({ roomName: RCH_TV_MODES[mode].room, active: false });
 }

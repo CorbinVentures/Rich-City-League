@@ -28,6 +28,10 @@
     {
       "path": "/api/cron/command-prices",
       "schedule": "15 10 * * *"
+    },
+    {
+      "path": "/api/cron/rch-tv-recording-safety",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

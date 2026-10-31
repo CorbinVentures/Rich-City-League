@@ -52,7 +52,8 @@ describe('RCH TV live production studio',()=>{
     expect(studio).toContain('Increase');
     expect(studio).toContain('The Pulse · Episode');
     expect(studio).toContain('Publish Graphics');
-    expect(studio).toContain('Overlays are displayed over the RCH TV website feed');
+    expect(studio).toContain('Overlays appear on the RCH TV website feed');
+    expect(studio).toContain('not embedded into saved Egress files');
   });
 
   it('connects both viewer channels to LiveKit with an offline fallback',()=>{

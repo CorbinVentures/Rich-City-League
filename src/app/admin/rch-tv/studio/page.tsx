@@ -58,6 +58,11 @@ export default function RchBroadcastStudio() {
   }, [authorized, db]);
 
   useEffect(() => {
+    const incoming = new URLSearchParams(window.location.search).get('mode');
+    if (incoming === 'live_games' || incoming === 'the_pulse') setMode(incoming);
+  }, []);
+
+  useEffect(() => {
     if (authLoading) return;
     if (!authorized || !db) { setLoading(false); return; }
     let alive = true;
@@ -294,7 +299,10 @@ export default function RchBroadcastStudio() {
             <p className="text-[10px] font-black uppercase tracking-[.18em] text-sky-300">RCH TV · Production</p>
             <h1 className="mt-1 truncate text-xl font-black tracking-tight text-white sm:text-3xl">Broadcast Studio</h1>
           </div>
-          <Link href="/admin/rch-tv" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-white/20 px-4 py-2 text-xs font-bold text-white" aria-label="Leave Broadcast Studio and return to RCH TV administration">Exit Studio ↗</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/rch-tv/game-day" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-sky-300/40 px-4 py-2 text-xs font-bold text-sky-200">Game Day Center</Link>
+            <Link href="/admin/rch-tv" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-white/20 px-4 py-2 text-xs font-bold text-white" aria-label="Leave Broadcast Studio and return to RCH TV administration">Exit Studio ↗</Link>
+          </div>
         </header>
 
         <div className="rch-studio-mode-switch flex items-center gap-2" role="group" aria-label="Production format">
@@ -490,7 +498,7 @@ export default function RchBroadcastStudio() {
                 <button type="button" disabled={busy} onClick={() => void endBroadcast()} className="rch-studio-button mt-3 block min-h-11 rounded-lg border border-red-400/40 px-4 font-bold">Mark channel offline</button>
               </div>
             )}
-            <p className="mt-5 border-t border-white/15 pt-4 text-xs leading-5 text-slate-400">Overlays are displayed over the RCH TV website feed. Automatic recording and multi-camera switching are not yet enabled.</p>
+            <p className="mt-5 border-t border-white/15 pt-4 text-xs leading-5 text-slate-400">Overlays appear on the RCH TV website feed and are not embedded into saved Egress files. Optional private cloud recording requires explicit configuration and costs; multi-camera switching is not available.</p>
           </section>
         </div>
       </div>
