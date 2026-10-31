@@ -7,8 +7,8 @@ import { getPublicClient } from '@/lib/public-data';
 import { FaArrowRight, FaBasketball, FaBolt, FaFire, FaLocationDot, FaMagnifyingGlass, FaPeopleGroup } from 'react-icons/fa6';
 
 export const metadata = {
-  title: 'RCH Community Discovery',
-  description: 'Discover people, communities, runs, trends and basketball activity across RCL.',
+  title: 'Virginia Basketball Community Discovery',
+  description: 'Discover Virginia basketball people, communities, hosted Runs and real member activity on Rich City Hoops.',
   alternates: { canonical: '/discover/community' },
 };
 
@@ -51,7 +51,15 @@ export default async function DiscoverRCLPage(){
   const topRep = [...people].sort((a,b)=>(b.rep??0)-(a.rep??0) || b.activity-a.activity).slice(0,6);
   const newcomers = [...people].sort((a,b)=>new Date(b.created_at??0).getTime()-new Date(a.created_at??0).getTime()).slice(0,5);
   const communities = (communitiesRaw ?? []) as Community[];
-  const runs = (runsRaw ?? []) as Run[];
+  const upcomingRuns=(runsRaw??[]) as Run[];
+  const upcomingIds=upcomingRuns.map(run=>run.id);
+  // A weekend circuit entry is an automated suggestion, not a hosted event.
+  // Fail closed on ledger errors rather than claim an unclassified Run is hosted.
+  const {data:suggested,error:suggestionError}=publicDb && upcomingIds.length
+    ? await publicDb.from('rch_weekend_circuit_events').select('run_id').in('run_id',upcomingIds)
+    : {data:[],error:null};
+  const suggestedIds=new Set<string>((suggested??[]).map((row:{run_id:string})=>row.run_id));
+  const runs:Run[]=suggestionError?[]:upcomingRuns.filter(run=>!suggestedIds.has(run.id));
   const official = (officialRaw ?? []) as ActivityPost[];
   const pagePriority = ['nba-news','nfl-betting-stats','rva-hoops','rcl-runs','rcl-gameday','rcl-community','rcl-history','rcl-business','rcl-rep','rcl-fantasy','rcl'];
   const pages = ((pagesRaw ?? []) as RchPage[]).sort((a,b)=>{
@@ -59,15 +67,15 @@ export default async function DiscoverRCLPage(){
     const bi=pagePriority.indexOf(b.system_account_key ?? '');
     return (ai<0?999:ai)-(bi<0?999:bi);
   });
-  const trends = getTrends(recentPosts.map(post=>post.body));
+  const trends = getTrends(recentPosts.filter(post=>!post.is_automated).map(post=>post.body));
 
   return <main className="rcl-social-secondary min-h-screen bg-[#03070d] pb-24 text-white">
     <header className="border-b border-rcl-blue/12 bg-[#071018]/88">
       <Container maxWidth="xl" className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-rcl-blue/65">Discover</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Discover RCL</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">People, runs, communities, league activity and reputation across Richmond basketball.</p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] sm:text-4xl">Discover RCH</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">People, real hosted Runs, community conversations and basketball identity across Virginia.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/search" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-semibold text-[#071018]"><FaMagnifyingGlass/> Search</Link>
@@ -80,7 +88,7 @@ export default async function DiscoverRCLPage(){
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,.55fr)]">
         <div className="space-y-8">
           <section>
-            <SectionHeading eyebrow="7-day activity" title="Rising in RCL" detail="Members creating momentum across RCL." />
+            <SectionHeading eyebrow="7-day activity" title="Rising in RCH" detail="Member activity across Virginia, excluding automated posts." />
             {rising.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rising.map((person,index)=><PersonCard key={person.id} person={person} index={index} />)}</div> : <EmptyState copy="Rising members will appear as RCL gets active." />}
           </section>
 
@@ -97,7 +105,7 @@ export default async function DiscoverRCLPage(){
           />
 
           <section>
-            <SectionHeading eyebrow="Reputation" title="Top REP in the city" detail="Recognition built through activity, contribution and RCL participation." actionHref="/leaderboards" actionLabel="Leaderboards" />
+            <SectionHeading eyebrow="Reputation" title="Top REP across RCH" detail="Network REP is not an official competitive rating." actionHref="/leaderboards" actionLabel="Leaderboards" />
             {topRep.length ? <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/65">{topRep.map((person,index)=><Link key={person.id} href={`/social/profile/${person.id}`} className="flex items-center gap-3 p-4 transition hover:bg-white/[.03]"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-rcl-blue/25 text-xs font-semibold text-rcl-blue">#{index+1}</span><SocialIdentity author={person} link={false}/><span className="ml-auto hidden text-xs font-semibold uppercase tracking-wider text-white/25 sm:block">{formatRep(person.rep??0)} REP</span></Link>)}</div> : <EmptyState copy="REP leaders will appear as members build activity." />}
           </section>
 
@@ -107,8 +115,8 @@ export default async function DiscoverRCLPage(){
           </section>
 
           <section>
-            <SectionHeading eyebrow="Get on court" title="Upcoming runs" detail="Turn online connections into real basketball." actionHref="/runs" actionLabel="All runs" />
-            {runs.length ? <div className="grid gap-3 md:grid-cols-2">{runs.map(run=><Link href="/runs" key={run.id} className="rounded-2xl border border-rcl-blue/15 bg-rcl-blue/[.025] p-5 transition hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-4"><div><small className="text-xs font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{run.game_format || 'RCL Run'} · {run.skill_level || 'Open'}</small><h3 className="mt-2 font-display text-2xl font-semibold">{run.title}</h3></div><FaBasketball className="text-2xl text-rcl-blue/60"/></div><div className="mt-4 flex flex-wrap gap-3 text-xs font-bold text-white/40"><span>{formatDate(run.starts_at)}</span>{(run.court_name||run.location)&&<span className="inline-flex items-center gap-1"><FaLocationDot/>{run.court_name||run.location}</span>}<span>{run.capacity ?? 0}/{run.max_players ?? '—'} joined</span></div></Link>)}</div> : <EmptyState copy="Open pickup runs will appear here when they are scheduled." />}
+            <SectionHeading eyebrow="Get on court" title="Host-posted Runs" detail="Unhosted court suggestions are excluded from this list." actionHref="/runs" actionLabel="All runs" />
+            {runs.length ? <div className="grid gap-3 md:grid-cols-2">{runs.map(run=><Link href="/runs" key={run.id} className="rounded-2xl border border-rcl-blue/15 bg-rcl-blue/[.025] p-5 transition hover:border-rcl-blue/40"><div className="flex items-start justify-between gap-4"><div><small className="text-xs font-semibold uppercase tracking-[.12em] text-rcl-blue/65">{run.game_format || 'RCL Run'} · {run.skill_level || 'Open'}</small><h3 className="mt-2 font-display text-2xl font-semibold">{run.title}</h3></div><FaBasketball className="text-2xl text-rcl-blue/60"/></div><div className="mt-4 flex flex-wrap gap-3 text-xs font-bold text-white/40"><span>{formatDate(run.starts_at)}</span>{(run.court_name||run.location)&&<span className="inline-flex items-center gap-1"><FaLocationDot/>{run.court_name||run.location}</span>}<span>RSVP is not confirmed attendance</span></div></Link>)}</div> : <EmptyState copy="No host-posted upcoming Runs in this preview. Explore court suggestions separately in Runs." />}
           </section>
         </div>
 
