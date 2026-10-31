@@ -58,7 +58,7 @@ export async function recordingDashboard(mode: RchTvMode) {
   const provider = await getRchRecordingStatus(mode, config);
   const activeSession = (data || []).find((row:any)=>OPEN.includes(row.state)) ?? null;
   // If a provider recording exists without a matching ledger row, fail closed.
-  return { ...provider, safetyReady: config.state === 'disabled' || settings.ready,
+  return { ...provider, state: config.state === 'available' && !settings.ready ? 'misconfigured' : provider.state, safetyReady: config.state === 'disabled' || settings.ready,
     maxMinutes: settings.maxMinutes, dailyMinutes: settings.dailyMinutes,
     active: provider.active || !!activeSession,
     egressId: provider.egressId ?? activeSession?.egress_id ?? null,
