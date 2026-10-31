@@ -69,7 +69,7 @@ function MediaVideo({ item }: { item: MediaItem }) {
     {isMov&&<p className="text-xs text-white/40">For broad compatibility, an MP4 (H.264/AAC) version is recommended.</p>}
   </div>;
   return <div className="relative h-full w-full">
-    <video key={attempt} src={item.url} controls autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline
+    <video src={item.url} controls key={attempt} autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline
       onError={() => {setFailed(true);setBuffering(false);}}
       onWaiting={() => setBuffering(true)} onStalled={() => setBuffering(true)} onPlaying={() => setBuffering(false)}
       onCanPlay={() => setBuffering(false)}
