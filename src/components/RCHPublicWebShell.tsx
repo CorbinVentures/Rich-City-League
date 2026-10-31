@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
 import { useAuth } from '@/hooks/useAuth';
+import { trackRchConversion } from '@/lib/analytics/conversion';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { ReactNode } from 'react';
 import {
@@ -119,7 +120,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
             <button type="button" className="rch-public-signin" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
             <Link href="/auth/sign-in" className="rch-public-signin">Sign in</Link>
-            <Link href="/auth/sign-up" className="rch-public-join">Join Free <FaArrowRight/></Link>
+            <Link href="/auth/sign-up" onClick={() => trackRchConversion("join_click", "header")} className="rch-public-join">Join Free <FaArrowRight/></Link>
           </>}
         </div>
         <button
@@ -178,7 +179,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
             <Link href="/profile" onClick={closeMenu}>My Profile <FaArrowRight aria-hidden="true"/></Link>
             <button type="button" disabled={signingOut} onClick={() => void handleBrowserSignOut()}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </> : <>
-            <Link href="/auth/sign-up" onClick={closeMenu}>Join Free <FaArrowRight aria-hidden="true"/></Link>
+            <Link href="/auth/sign-up" onClick={() => { trackRchConversion("join_click", "header"); closeMenu(); }}>Join Free <FaArrowRight aria-hidden="true"/></Link>
             <Link href="/auth/sign-in" onClick={closeMenu}>Sign in</Link>
           </>}
         </div>
