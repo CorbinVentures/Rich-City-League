@@ -30,7 +30,7 @@ export default async function MediaPage() {
     title: item.title,
     description: item.description,
     type: item.media_type,
-    url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl, (path) => client!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(path).data.publicUrl),
+    url: resolveRchMediaUrl(item.storage_path, (path) => client!.storage.from('media').getPublicUrl(path).data.publicUrl, (path) => client!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(path).data.publicUrl, process.env.NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE),
     createdAt: item.created_at,
     posterUrl: item.thumbnail_path ? resolveRchMediaUrl(item.thumbnail_path,
       path => client!.storage.from('media').getPublicUrl(path).data.publicUrl) : null,

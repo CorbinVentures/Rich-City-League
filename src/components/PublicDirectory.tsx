@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { FaArrowRight, FaMagnifyingGlass, FaPlay } from 'react-icons/fa6';
 import { rchMediaKind } from '@/lib/rch-tv-media';
+import { isRchAdaptiveEmbedUrl } from '@/lib/rch-tv-adaptive';
 
 type TeamItem = { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; division: string | null; season: string | null; wins: number | null; losses: number | null };
 type CoachItem = { id: string; profileId: string; name: string; title: string; team: string | null; teamSlug: string | null; wins: number | null; losses: number | null };
@@ -50,12 +51,18 @@ export function NewsDirectory({ items }: { items: NewsItem[] }) {
 }
 
 function MediaVideo({ item }: { item: MediaItem }) {
+  const adaptive = isRchAdaptiveEmbedUrl(item.url);
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const retryPlayback = () => {setFailed(false);setBuffering(false);setAttempt(value=>value+1);setPlaying(true);};
   const isMov = /\.mov(?:\?|$)/i.test(item.url);
+  if (adaptive) return <div className="h-full w-full bg-black">
+    <iframe src={item.url} title={`Watch ${item.title} on RCH TV`} loading="lazy"
+      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full border-0"/>
+  </div>;
   if (!playing) return <button type="button" onClick={() => setPlaying(true)}
     aria-label={`Play ${item.title}`} className="group relative h-full w-full overflow-hidden bg-[#020408] text-white">
     {item.posterUrl?<img src={item.posterUrl} loading="lazy" alt="" className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.025]"/>:

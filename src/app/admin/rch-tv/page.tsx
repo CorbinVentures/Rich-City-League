@@ -11,6 +11,8 @@ import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
 import { uploadRchTvVideo, clearRchTvCheckpoint, rchTvFileError, rchTvIsVideo } from '@/lib/rch-tv-upload';
 import { captureRchTvPoster, validateRchTvPosterImage } from '@/lib/rch-tv-thumbnail';
 import { inspectRchTvVideo, formatRchTvDuration, type RchTvVideoPreflight } from '@/lib/rch-tv-preflight';
+import { RCH_TV_ADAPTIVE_PREFIX } from '@/lib/rch-tv-adaptive';
+import { RchTvAdaptiveDraftForm } from '@/components/media/RchTvAdaptiveDraftForm';
 
 type MediaRecord = {
   id: string; title: string; media_type: string; status: string; rch_tv_category: string;
@@ -160,7 +162,9 @@ export default function RchTvAdminPage() {
       }
       const url = resolveRchMediaUrl(item.storage_path,
         p => supabase.storage.from('media').getPublicUrl(p).data.publicUrl,
-        p => supabase.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl);
+        p => supabase.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl, process.env.NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE);
+      if (!image && item.storage_path.startsWith(RCH_TV_ADAPTIVE_PREFIX))
+        throw new Error('Hosted videos need a manually selected thumbnail image.');
       if (!image && !url) throw new Error('Could not locate the existing video.');
       path = await storePoster(image || await captureRchTvPoster(url!), user.id);
       const updated = await db.from('media').update({ thumbnail_path: path }).eq('id', item.id).eq('media_type', 'video');
@@ -356,6 +360,7 @@ export default function RchTvAdminPage() {
             <button disabled={busy==='upload' || Boolean(file && (rchTvFileError(file) || (rchTvIsVideo(file) && (!posterBlob || videoInspection.status==='checking' || (publishNow && videoInspection.status!=='ready')))))} type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-rcl-blue px-5 text-sm font-bold text-black disabled:opacity-50"><FaUpload/>{busy==='upload'?'Uploading '+uploadPercent+'%…':publishNow?'Upload & publish':'Upload as draft'}</button>
             {busy==='upload'&&<button type="button" onClick={()=>uploadAbortRef.current?.abort()} className="w-full rounded-lg border border-white/20 px-4 py-3 text-xs text-white/70">Pause upload</button>}
           </form>
+          <RchTvAdaptiveDraftForm onAdded={load}/>
         </section>
 
         <section className="rounded-2xl border border-white/15 bg-white/[.025] p-5 sm:p-6">
@@ -366,11 +371,11 @@ export default function RchTvAdminPage() {
             {media.map(item=><article key={item.id} className="rounded-xl border border-white/15 bg-black/15 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0"><p className="font-semibold">{item.title}</p><p className="mt-1 text-xs text-white/50">{item.media_type} · {item.status} · {TV_CATEGORY_OPTIONS.find(option=>option.value===item.rch_tv_category)?.label||'Uncategorized'} · {new Date(item.created_at).toLocaleDateString('en-US')}</p></div>
-                <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={resolveRchMediaUrl(item.storage_path, p=>supabase!.storage.from('media').getPublicUrl(p).data.publicUrl, p=>supabase!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl) || '#'}>Open file ↗</a>
+                <a target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-rcl-blue" href={resolveRchMediaUrl(item.storage_path, p=>supabase!.storage.from('media').getPublicUrl(p).data.publicUrl, p=>supabase!.storage.from(RCH_TV_VIDEO_BUCKET).getPublicUrl(p).data.publicUrl, process.env.NEXT_PUBLIC_RCH_TV_CF_CUSTOMER_CODE) || '#'}>Open file ↗</a>
               </div>
               {item.media_type==='video'&&<div className="mt-3 flex flex-wrap items-center gap-3">
                 {item.thumbnail_path?<img className="aspect-video w-28 rounded-md object-cover" alt={`Preview for ${item.title}`} src={supabase!.storage.from('media').getPublicUrl(item.thumbnail_path).data.publicUrl}/>:<div className="grid aspect-video w-28 place-items-center rounded-md bg-white/5 text-xs text-white/40">No thumbnail</div>}
-                <button type="button" disabled={Boolean(busy)} onClick={()=>void saveExistingPoster(item)} className="min-h-9 rounded-lg border border-rcl-blue/40 px-3 text-xs font-bold text-rcl-blue disabled:opacity-50">{busy===item.id?'Generating…':item.thumbnail_path?'Regenerate':'Generate preview'}</button>
+                <button type="button" disabled={Boolean(busy) || item.storage_path.startsWith(RCH_TV_ADAPTIVE_PREFIX)} onClick={()=>void saveExistingPoster(item)} className="min-h-9 rounded-lg border border-rcl-blue/40 px-3 text-xs font-bold text-rcl-blue disabled:opacity-50">{busy===item.id?'Generating…':item.thumbnail_path?'Regenerate':'Generate preview'}</button>
                 <label className="text-xs font-semibold text-white/70">Upload image<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(busy)} onChange={e=>{const image=e.target.files?.[0];if(image)void saveExistingPoster(item,image);e.target.value='';}} className="mt-1 block w-40 text-xs"/></label>
               </div>}
               <div className="mt-3 flex flex-wrap items-center gap-2"><label htmlFor={`rch-tv-category-${item.id}`} className="text-xs text-white/60">Section</label><select id={`rch-tv-category-${item.id}`} disabled={busy===item.id} value={TV_CATEGORY_OPTIONS.some(option=>option.value===item.rch_tv_category)?item.rch_tv_category:'general'} onChange={e=>void changeCategory(item.id,e.target.value)} className="min-h-9 max-w-full rounded-lg border border-white/20 bg-[#0b1724] px-2 text-xs text-white">{TV_CATEGORY_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>
