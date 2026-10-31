@@ -67,7 +67,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
           <p className="rch-browser-hero-mantra">FIND A RUN <i>•</i> BUILD YOUR NAME <i>•</i> STAY CONNECTED</p>
           <p className="rch-browser-hero-description">Find real basketball runs, connect with Virginia players and build your basketball identity—all in one community.</p>
           <div className="rch-browser-hero-actions">
-            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" memberLabel="My Basketball" memberHref="/my-hoops" />
+            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_hero" memberLabel="My Basketball" memberHref="/my-hoops" />
             <Link className="rch-browser-button rch-browser-button-outline" href="/runs">Explore Runs <FaCompass aria-hidden="true" /></Link>
           </div>
           <p className="rch-browser-hero-footnote">Community membership is free. Explore before signing up.</p>
@@ -105,7 +105,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
         <article className="rounded-2xl border border-white/15 bg-white/[.035] p-5 text-white"><FaUsers aria-hidden="true" className="text-2xl text-rose-400"/><h3 className="mt-3 text-lg font-black">Meet your basketball people</h3><p className="mt-2 text-sm leading-6 text-white/70">Follow players, connect with your crew and see what your community shares.</p></article>
         <article className="rounded-2xl border border-white/15 bg-white/[.035] p-5 text-white"><FaTrophy aria-hidden="true" className="text-2xl text-rose-400"/><h3 className="mt-3 text-lg font-black">Build your basketball identity</h3><p className="mt-2 text-sm leading-6 text-white/70">Create a shareable profile and earn recognition through verified basketball activity.</p></article>
       </div>
-      <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary mt-5 inline-flex" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Create Free Profile" memberLabel="Open My Basketball" memberHref="/my-hoops" />
+      <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary mt-5 inline-flex" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Create Free Profile" trackingContext="home_benefits" memberLabel="Open My Basketball" memberHref="/my-hoops" />
     </section>
 
 
@@ -175,7 +175,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
     <section className="rch-browser-last-call">
       <div className="rch-browser-last-call-mantra">PLAY<br/><em>CONNECT</em><br/>COMPETE<br/><em>CREATE</em></div>
       <div><span>RICH CITY HOOPS</span><h2>YOUR BASKETBALL WORLD STARTS HERE.</h2></div>
-      <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" memberLabel="Go to My Hoops" memberHref="/my-hoops" />
+      <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_footer" memberLabel="Go to My Hoops" memberHref="/my-hoops" />
     </section>
   </main>;
 }
