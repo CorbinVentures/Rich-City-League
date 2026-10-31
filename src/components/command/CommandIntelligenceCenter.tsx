@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import {
   FaArrowUpRightFromSquare, FaChartLine, FaLocationDot, FaRotate, FaShieldHalved,
-  FaBasketball, FaUsers, FaChartColumn, FaMobileScreen, FaCircleExclamation,
+  FaCircleExclamation,
 } from 'react-icons/fa6';
 type WindowDays = 7 | 30 | 90;
 type Metric = Record<string, number>;
-type Day = {date:string;members:number;verifiedCheckins:number;organicPosts:number;observedEntries:number};
+type Day = {date:string;members:number;recordedCheckins:number;organicPosts:number;observedEntries:number};
 type Report = {
   generatedAt:string;days:WindowDays; observations:Metric; daily:Day[];
   sections:{section:string;entries:number;sessions:number}[];
@@ -51,19 +51,19 @@ function Bars({rows,labelKey,valueKey,empty='No qualifying records yet.'}:{
   })}</div>;
 }
 function Trend({daily}:{daily:Day[]}) {
-  const peak=Math.max(1,...daily.map(d=>d.members+d.verifiedCheckins+d.organicPosts));
+  const peak=Math.max(1,...daily.map(d=>d.members+d.recordedCheckins+d.organicPosts));
   return <div>
-    <div className="flex h-40 items-end gap-1 border-b border-[#426785] pb-1" aria-label="Daily new memberships, verified check-ins and organic posts">
-      {daily.map(d=><div key={d.date} className="group relative flex h-full min-w-0 flex-1 items-end gap-px" title={`${d.date}: ${d.members} new members, ${d.verifiedCheckins} verified check-ins, ${d.organicPosts} organic posts`}>
+    <div className="flex h-40 items-end gap-1 border-b border-[#426785] pb-1" aria-label="Daily new memberships, recorded check-ins and organic posts">
+      {daily.map(d=><div key={d.date} className="group relative flex h-full min-w-0 flex-1 items-end gap-px" title={`${d.date}: ${d.members} new members, ${d.recordedCheckins} recorded check-ins, ${d.organicPosts} organic posts`}>
         <span className="w-1/3 rounded-t-sm bg-[#83cfff]" style={{height:`${Math.max(1,d.members/peak*100)}%`}}/>
-        <span className="w-1/3 rounded-t-sm bg-[#91e4b4]" style={{height:`${Math.max(1,d.verifiedCheckins/peak*100)}%`}}/>
+        <span className="w-1/3 rounded-t-sm bg-[#91e4b4]" style={{height:`${Math.max(1,d.recordedCheckins/peak*100)}%`}}/>
         <span className="w-1/3 rounded-t-sm bg-[#e5b5ff]" style={{height:`${Math.max(1,d.organicPosts/peak*100)}%`}}/>
       </div>)}
     </div>
     <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-[#bfd7eb]"><span>{daily[0]?.date}</span><span>{daily[daily.length-1]?.date}</span></div>
     <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[#d4e8f7]">
       <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#83cfff]"/>New members</span>
-      <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#91e4b4]"/>Verified check-ins</span>
+      <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#91e4b4]"/>Recorded check-ins</span>
       <span><i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#e5b5ff]"/>Organic posts</span>
     </div>
   </div>;
@@ -126,13 +126,13 @@ export function CommandIntelligenceCenter() {
           <KPI label="Members" value={n('membersTotal')} detail="Non-system accounts, all-time"/>
           <KPI label="New memberships" value={n('newMembers')} detail={`Created over ${days} days`}/>
           <KPI label="Observed active members" value={n('activeObservedMembers')} detail="Signed-in section visits, not all active users"/>
-          <KPI label="Verified check-ins" value={n('verifiedCheckins')} detail="Recorded on-site basketball check-ins"/>
+          <KPI label="Recorded check-ins" value={n('recordedCheckins')} detail="Recorded on-site basketball check-ins"/>
           <KPI label="PWA members" value={n('pwaMembers')} detail="Observed standalone launches; not installed-device census"/>
           <KPI label="Run participants" value={n('runPlayers')} detail="Distinct members joining Runs"/>
           <KPI label="Human creators" value={n('creators')} detail="Distinct non-automated post authors"/>
           <KPI label="Opted-in VA city members" value={n('optInCityMembers')} detail="Voluntary city signals only"/>
         </div>
-        <Surface title="Platform growth velocity" subtitle="Measured daily registrations, verified attendance and original social publishing. Each bar reports actual database records.">
+        <Surface title="Platform growth velocity" subtitle="Measured daily registrations, recorded check-ins and original social publishing. Each bar reports actual database records.">
           <Trend daily={report.daily}/>
         </Surface>
         <div className="grid gap-4 lg:grid-cols-2">
@@ -148,7 +148,7 @@ export function CommandIntelligenceCenter() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <KPI label="Observed tab sessions" value={n('observedTabSessions')} detail="Browser-tab IDs; not unique visitors"/>
           <KPI label="Run signups" value={n('runJoins')} detail="Run roster joins"/>
-          <KPI label="Recorded attendees" value={n('verifiedAttendees')} detail="Distinct checked-in player accounts"/>
+          <KPI label="Recorded attendees" value={n('recordedAttendees')} detail="Distinct profiles with check-in records"/>
           <KPI label="Push subscribers" value={n('pushMembers')} detail="Distinct member profiles with saved subscriptions, all time"/>
           <KPI label="iPhone/iPad PWA" value={n('pwaIos')} detail="Observed standalone app users"/>
           <KPI label="Android PWA" value={n('pwaAndroid')} detail="Observed standalone app users"/>
@@ -176,11 +176,11 @@ export function CommandIntelligenceCenter() {
         </div>
       </>}
       {view==='geography'&&<>
-        <Surface title="Virginia market intelligence" subtitle="Planning signals from voluntary city preferences and basketball activity at verified courts. No GPS traces, visitor IP geography or individual whereabouts.">
+        <Surface title="Virginia market intelligence" subtitle="Planning signals from voluntary city preferences and basketball activity at officially sourced courts. No GPS traces, visitor IP geography or individual whereabouts.">
           <div className="grid gap-3 sm:grid-cols-3">
             <KPI label="Opted-in city members" value={n('optInCityMembers')} detail="All-time current opt-ins"/>
             <KPI label="Reportable markets" value={fmt.format(report.geography.reportedCities.length)} detail="At least 3 consenting members per city"/>
-            <KPI label="Court-active cities" value={fmt.format(report.geography.courtActivity.length)} detail={`Verified-court scheduled Runs in ${days} days`}/>
+            <KPI label="Court-active cities" value={fmt.format(report.geography.courtActivity.length)} detail={`Official-court scheduled Runs in ${days} days`}/>
           </div>
           <p className="mt-4 text-xs leading-6 text-[#b9d5e9]">{report.geography.basis} {report.geography.hiddenCities>0?`${report.geography.hiddenCities} small market groups are suppressed.`:''}</p>
         </Surface>
@@ -188,8 +188,8 @@ export function CommandIntelligenceCenter() {
           <Surface title="Member-supported cities" subtitle="Only members who intentionally opted into reporting. Groups with fewer than three are hidden.">
             <Bars rows={report.geography.reportedCities} labelKey="city" valueKey="members" empty="No consenting Virginia city has yet reached the three-member publication threshold."/>
           </Surface>
-          <Surface title="Verified-court activity by city" subtitle="Scheduled run records linked to verified park basketball courts; not proof the event occurred.">
-            <Bars rows={report.geography.courtActivity} labelKey="city" valueKey="scheduledRuns" empty="No Runs are linked to a verified court within this reporting window."/>
+          <Surface title="Verified-court activity by city" subtitle="Scheduled run records linked to official park basketball courts; not proof the event occurred.">
+            <Bars rows={report.geography.courtActivity} labelKey="city" valueKey="scheduledRuns" empty="No Runs are linked to an official court within this reporting window."/>
           </Surface>
         </div>
         <p className="text-xs leading-6 text-[#c4daeb]">Members can voluntarily share or remove their city under <a href="/settings/discovery" className="font-bold text-[#93d3ff] underline">Location & Discovery</a>. Exact device coordinates are never collected by this report.</p>

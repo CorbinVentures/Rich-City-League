@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
-import { cityForText, gravityCityFromId } from '@/lib/rch-gravity-location';
+import { gravityCityFromId } from '@/lib/rch-gravity-location';
+import { cityForText } from '@/lib/virginia-world';
 import { VIRGINIA_CITIES } from '@/lib/virginia-world';
 
 export const dynamic = 'force-dynamic';
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
     const dailyVisits = totalsByDay(currentVisits,'first_seen_at');
     const daily = Array.from({length:days},(_,i)=>{
       const date = new Date(now - (days - 1 - i) * DAY_MS).toISOString().slice(0,10);
-      return {date,members:dailyProfiles.get(date)??0,verifiedCheckins:dailyCheckins.get(date)??0,
+      return {date,members:dailyProfiles.get(date)??0,recordedCheckins:dailyCheckins.get(date)??0,
         organicPosts:dailyPosts.get(date)??0,observedEntries:dailyVisits.get(date)??0};
     });
 
@@ -135,7 +136,7 @@ export async function GET(request: NextRequest) {
     const cityGroups = [...cities.entries()].filter(([,count])=>count>=3)
       .map(([cityId,count])=>({cityId,city:gravityCityFromId(cityId)?.name??cityId,members:count}))
       .sort((a,b)=>b.members-a.members);
-    const courtsBySlug = new Map(courts.filter(c=>c.is_active!==false && c.verification_status==='verified').map(c=>[c.slug,c]));
+    const courtsBySlug = new Map(courts.filter(c=>c.is_active!==false && c.verification_status==='official').map(c=>[c.slug,c]));
     const runCities = new Map<string,{scheduledRuns:number;locations:Set<string>}>();
     for(const run of runs) {
       const court = courtsBySlug.get(run.location_slug);
@@ -158,7 +159,7 @@ export async function GET(request: NextRequest) {
       activeObservedMembers:unique(currentMemberVisits,'member_id'),
       observedTabSessions:unique(currentVisits,'session_id'),
       runJoins:runPlayers.length, runPlayers:unique(runPlayers,'profile_id'),
-      verifiedCheckins:checkins.length,verifiedAttendees:unique(checkins,'profile_id'),
+      recordedCheckins:checkins.length,recordedAttendees:unique(checkins,'profile_id'),
       organicPosts:humanPosts.length,creators:unique(humanPosts,'author_id'),
       pwaMembers:unique(activePwa,'profile_id'),
       pwaIos:unique(activePwa.filter(p=>p.platform==='ios'),'profile_id'),
@@ -183,7 +184,7 @@ export async function GET(request: NextRequest) {
     if(observations.newMembers>0 && observations.runPlayers===0)insights.push('New memberships are being recorded, but no distinct Run players joined in this window. Review the onboarding path to Runs.');
     if(observations.observedTabSessions>0 && observations.pwaMembers===0)insights.push('Web activity is observed, but no signed-in standalone iOS/Android PWA launches are observed for this window. Review the install invitation.');
     if(cohorts.d7.eligible>=10 && cohorts.d7.percentage!==null && cohorts.d7.percentage<20)insights.push('The measured day-7-to-13 return window is below 20%. Review first-week engagement before drawing a causal conclusion.');
-    if(observations.verifiedCheckins===0 && observations.runJoins>0)insights.push('Run signups exist without recorded check-ins in this window. Confirm whether events have occurred and check-in workflow usage.');
+    if(observations.recordedCheckins===0 && observations.runJoins>0)insights.push('Run signups exist without recorded check-ins in this window. Confirm whether events have occurred and check-in workflow usage.');
     if(insights.length===0)insights.push('No rule-based exception triggered. Continue measuring verified member activity, cohorts, and sponsorship outcomes.');
     return NextResponse.json({
       generatedAt:new Date(now).toISOString(),days,observations,daily,sections,funnel,sources,cohorts,
