@@ -12,7 +12,7 @@ type RecordingConfig = {
 };
 
 /** Fail closed: no paid Egress call unless the flag and all required values are set. */
-export function recordingConfig(env: NodeJS.ProcessEnv): RecordingConfig {
+export function recordingConfig(env: Record<string, string | undefined>): RecordingConfig {
   if (env.RCH_TV_RECORDING_ENABLED !== 'true') return { state: 'disabled' };
   try {
     const url = new URL(env.LIVEKIT_URL || '');
