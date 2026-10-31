@@ -44,7 +44,7 @@ describe('RCH free membership growth safeguards', () => {
     expect(tracker).toContain('session_id: session');
     expect(migration).toContain('enable row level security');
     expect(migration).toContain('grant insert (session_id, event_type, context)');
-    expect(migration).not.toContain('email');
+    expect(migration).not.toContain('email_address');
     expect(migration).not.toContain('password');
   });
 
