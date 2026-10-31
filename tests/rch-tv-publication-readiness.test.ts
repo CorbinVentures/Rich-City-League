@@ -21,5 +21,8 @@ describe('RCH TV editorial publish readiness',()=>{
   expect(source).toContain("rchTvPublicationBlockers(item)");
   expect(source).toContain("Cannot publish:");
   expect(source).toContain("Videos requiring publication QA");
+  const migration=readFileSync('supabase/migrations/20261031123000_rch_tv_published_video_preview_guard.sql','utf8');
+  expect(migration).toContain('not valid');
+  expect(migration).toContain('rch_tv_published_video_preview_required');
  });
 });
