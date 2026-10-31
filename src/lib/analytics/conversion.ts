@@ -3,6 +3,8 @@
 import { getSupabaseClient } from '@/lib/supabase';
 
 export type ConversionEvent =
+  | 'home_view'
+  | 'first_action_click'
   | 'join_click'
   | 'signup_view'
   | 'signup_account_continue'
@@ -13,7 +15,7 @@ export type ConversionEvent =
 
 const SESSION_KEY = 'rch:site-analytics-tab-session';
 const CONTEXTS = new Set([
-  'home_hero', 'home_benefits', 'home_footer', 'header',
+  'home_hero', 'home_benefits', 'home_footer', 'header', 'welcome',
   'audience_player', 'audience_fan', 'audience_coach',
   'audience_creator', 'audience_organizer', 'email', 'oauth',
   'unknown',

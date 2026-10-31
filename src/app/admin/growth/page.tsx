@@ -12,12 +12,14 @@ type EventRow = {
 };
 
 const ORDER = [
+  ['home_view', 'Homepage viewed (anonymous tab sessions)'],
   ['join_click', 'Join Free clicked'],
   ['signup_view', 'Registration viewed'],
   ['signup_account_continue', 'Account details continued'],
   ['signup_role_continue', 'Role selected'],
   ['signup_submitted', 'Registration submitted'],
   ['signup_created', 'Email account created'],
+  ['first_action_click', 'Welcome action clicked'],
   ['signup_failed', 'Registration failure'],
 ] as const;
 
@@ -53,7 +55,7 @@ export default async function GrowthCenter() {
       <Link href="/admin" className="text-sm text-sky-300">← Admin</Link>
       <p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-rose-400">Rich City Hoops · Acquisition</p>
       <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">Member Growth Center</h1>
-      <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">Last seven days. Each count is deduplicated by anonymous browser-tab session, not by real people. Consent and privacy opt-outs are respected. OAuth completions and verified account activations require separate measurement.</p>
+      <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">Last seven days. Each count is deduplicated by anonymous browser-tab session, not by real people. Consent and privacy opt-outs are respected. Homepage views and clicks are anonymous tab-session measures, not visitor identities. Welcome clicks are not proof of Run attendance or day-seven retention. OAuth completions and verified account activations require separate measurement.</p>
       {error && <div role="status" className="mt-6 rounded-xl border border-amber-300/30 p-4 text-sm text-amber-100">Conversion telemetry is currently unavailable. The database connection or event permissions need review.</div>}
       <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {ORDER.slice(0,4).map(([key, label]) => <div key={key} className="rounded-2xl border border-white/15 bg-white/[.04] p-5">

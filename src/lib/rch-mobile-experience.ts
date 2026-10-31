@@ -7,6 +7,7 @@ export function isBrowserAccountRoute(pathname: string): boolean {
     || pathname === '/member-access'
     || pathname === '/app'
     || pathname === '/profile'
+    || pathname === '/welcome'
     || pathname.startsWith('/auth/')
     || pathname === '/auth'
     || pathname.startsWith('/legal/')
