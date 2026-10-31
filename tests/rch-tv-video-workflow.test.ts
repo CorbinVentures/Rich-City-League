@@ -10,7 +10,7 @@ describe('RCH TV live-to-replay integrity', () => {
     expect(studio).toContain('!rightsCleared || !backupReady');
     expect(studio).toContain('Replay handoff');
     expect(studio).toContain('/admin/rch-tv?replay=');
-    expect(studio).toContain('Live video is not automatically archived');
+    expect(studio).toContain('cloud recording files are not automatically published');
   });
   it('checks local video before publishing and keeps the archive public', () => {
     const upload=read('src/app/admin/rch-tv/page.tsx');
