@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { summarizeSponsorDelivery } from '@/lib/rch-sponsor-delivery';
 import {
   FaArrowRight, FaBullhorn, FaChartLine, FaCircleCheck, FaClock,
   FaGlobe, FaRectangleAd,
@@ -55,14 +56,11 @@ export default function SponsorDashboardPage(){
   const org=memberships.find(item=>item.organization_id===selected)?.organization??memberships[0].organization;
   const orgCampaigns=campaigns.filter(item=>item.organization_id===org.id);
   const orgReach=reach.filter(item=>item.organization_id===org.id);
-  const metrics=orgReach.reduce((sum,row)=>({
-    reach:sum.reach+(row.impressions||0)+(row.organization_views||0)+(row.event_views||0)+(row.media_views||0),
-    clicks:sum.clicks+(row.outbound_clicks||0),
-    engagements:sum.engagements+(row.outbound_clicks||0)+(row.shares||0)+(row.saves||0),
-  }),{reach:0,clicks:0,engagements:0});
+  const metrics=summarizeSponsorDelivery(orgReach);
   const live=orgCampaigns.filter(item=>item.status==='active').length;
   const awaiting=orgCampaigns.filter(item=>['pending','approved'].includes(item.status)).length;
-  const ctr=metrics.reach?metrics.clicks/metrics.reach*100:0;
+  // CTR is intentionally null without actual measured ad impressions.
+  // Organization/media/event page views are NOT ad impressions or unique reach.
 
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_10%,rgba(21,159,255,.13),transparent_28%),linear-gradient(145deg,#071522,#03070d)]">
@@ -76,13 +74,14 @@ export default function SponsorDashboardPage(){
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-white/30">Sponsor organization</p><b className="mt-1 block font-display text-2xl font-black uppercase">{org.name}</b></div>{memberships.length>1&&<select value={org.id} onChange={e=>setSelected(e.target.value)} className="min-h-11 rounded-xl border border-white/10 bg-[#071522] px-4 text-sm text-white">{memberships.map(item=><option key={item.organization_id} value={item.organization_id}>{item.organization.name}</option>)}</select>}</div>
 
       <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Metric icon={<FaGlobe/>} label="Delivered reach" value={metrics.reach} detail="RCH campaign delivery"/>
+        <Metric icon={<FaGlobe/>} label="Recorded ad impressions" value={metrics.adImpressions} detail="Not unique people; page views tracked separately"/>
         <Metric icon={<FaArrowRight/>} label="Outbound clicks" value={metrics.clicks} detail="Tracked destination clicks"/>
-        <Metric icon={<FaChartLine/>} label="CTR" value={ctr.toFixed(1)+'%'} detail="Clicks ÷ delivered reach"/>
+        <Metric icon={<FaChartLine/>} label="Impression CTR" value={metrics.ctrPercent===null?'N/A':metrics.ctrPercent.toFixed(2)+'%'} detail="Tracked outbound clicks ÷ recorded ad impressions; N/A without impressions"/>
         <Metric icon={<FaCircleCheck/>} label="Live campaigns" value={live} detail="Currently delivering"/>
         <Metric icon={<FaClock/>} label="In review / ready" value={awaiting} detail="Pending or approved"/>
       </section>
 
+      <p className="mt-4 text-xs leading-5 text-white/55">Additional organization, event and media page views: {metrics.destinationViews.toLocaleString()}. These visits are not added to ad impressions or used to claim unique audience reach, sales, or verified conversions. Campaign reporting covers recorded eligible activity only.</p>
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
         <div className="rounded-3xl border border-white/10 bg-white/[.025] p-6"><div className="flex items-center gap-3"><FaRectangleAd className="text-rcl-blue"/><div><p className="text-[10px] font-black uppercase tracking-[.15em] text-white/35">Campaign pipeline</p><h2 className="font-display text-3xl font-black uppercase">Your sponsorship activity</h2></div></div><div className="mt-5 space-y-3">{orgCampaigns.length?orgCampaigns.slice(0,12).map(item=><CampaignCard key={item.id} campaign={item}/>):<Empty text="No sponsorship campaigns yet. Start with one clear objective and one placement."/>}</div></div>
         <div className="space-y-5">
