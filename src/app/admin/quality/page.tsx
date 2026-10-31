@@ -22,7 +22,7 @@ export default async function QualityGatePage(){
     ['Non-system member profiles','Real account records, not verified active users'],
     ['Human-authored posts · 7 days','Non-automated posts, not distinct contributors'],
     ['Automated posts · 7 days','Never count as human engagement'],
-    ['Completed Run game records','Database records, not independently field-audited'],
+    ['Run game records','Database records, not independently field-audited or necessarily completed'],
     ['Ranked match records','Requires separate integrity and verification review'],
     ['Published organization sites','Publication alone does not prove organizer success'],
   ].map(([label,detail],i)=>({
