@@ -41,6 +41,7 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
  const [sourceNote,setSourceNote]=useState('');
  const [busy,setBusy]=useState(false);
  const [loading,setLoading]=useState(true);
+ const [authorized,setAuthorized]=useState(false);
  const [error,setError]=useState('');
  const [notice,setNotice]=useState('');
  const [revision,setRevision]=useState(0);
@@ -50,6 +51,15 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
   let alive=true;
   void (async()=>{
    setLoading(true);setError('');
+   const [manager,operator]=await Promise.all([
+    db.rpc('can_manage_run',{target_run:runId}),
+    db.from('rch_run_operators').select('role').eq('run_id',runId).eq('profile_id',user.id).maybeSingle(),
+   ]);
+   const allowed=Boolean(!manager.error&&manager.data)||
+    Boolean(!operator.error&&['cohost','scorekeeper'].includes(operator.data?.role||''));
+   if(!alive)return;
+   setAuthorized(allowed);
+   if(!allowed){setMatches([]);setLoading(false);return;}
    const m=await db.from('run_ranked_matches')
     .select('id,game_id,game_format,home_score,away_score,home_roster,away_roster,verified_at')
     .eq('run_id',runId).eq('status','verified').order('verified_at',{ascending:false}).limit(60);
@@ -112,7 +122,7 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
   else{setNotice(approve?'Stats independently certified. Skill progress is now eligible.':'Submission rejected for correction.');reload();}
   setBusy(false);
  }
- if(!user)return null;
+ if(!user||!authorized)return null;
  return <section aria-label="Skill Engine official game scorekeeping" className="my-6 rounded-3xl border border-[#537693] bg-[#091f35] p-5 text-white sm:p-6">
   <div className="flex items-start gap-3">
    <FaClipboardCheck className="mt-1 shrink-0 text-2xl text-[#f2ce83]"/>
