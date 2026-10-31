@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { isBrowserPublicRoute } from '../src/lib/rch-mobile-experience';
 
@@ -26,13 +26,16 @@ describe('RCH free membership growth safeguards', () => {
   });
 
   it('provides purposeful, free and role-specific joining with safe destinations', () => {
-    const route = read('src/app/join/[audience]/page.tsx');
+    const route = read('src/components/RCHAudienceJoinPage.tsx');
     const form = read('src/components/AuthForm.tsx');
     for (const audience of ['players', 'fans', 'coaches', 'creators', 'organizations']) {
       expect(route).toContain(audience + ': {');
+      expect(existsSync('src/app/join/' + audience + '/page.tsx')).toBe(true);
       expect(isBrowserPublicRoute('/join/' + audience)).toBe(true);
     }
     expect(isBrowserPublicRoute('/join/unknown')).toBe(false);
+    expect(existsSync('src/app/join/[audience]/page.tsx')).toBe(false);
+    expect(existsSync('src/app/join/[code]/page.tsx')).toBe(true);
     expect(route).toContain("encodeURIComponent(entry.destination)");
     expect(form).toContain("requestedRole === 'player'");
     expect(form).toContain('if (Number.isNaN(birth.getTime()) || age < 16)');
