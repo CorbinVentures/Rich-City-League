@@ -117,7 +117,7 @@ export default function NotificationsPage() {
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4"><p className="text-[11px] uppercase tracking-wider text-white/45">Needs your attention</p><p className="mt-1 text-3xl font-black text-rcl-orange">{unread}</p><p className="text-xs text-white/40">Unread updates</p></div>
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4"><p className="text-[11px] uppercase tracking-wider text-white/45">Your latest activity</p><p className="mt-1 text-3xl font-black">{items.length}</p><p className="text-xs text-white/40">Recent alerts</p></div>
-          <Link href="/settings/notifications" className="col-span-2 flex items-center justify-between gap-3 rounded-2xl border border-rcl-orange/25 bg-rcl-orange/10 p-4 transition hover:bg-rcl-orange/15 sm:col-span-1">
+          <Link href="/notifications/weekly" className="col-span-2 flex items-center justify-between gap-3 rounded-2xl border border-rcl-orange/25 bg-rcl-orange/10 p-4 transition hover:bg-rcl-orange/15 sm:col-span-1">
             <span><span className="block text-xs font-black uppercase tracking-wider text-rcl-orange">The Weekly Hoops Brief</span><span className="mt-1 block text-xs leading-5 text-white/70">Runs, news, badges, events & partners in your inbox.</span></span><FaEnvelope className="shrink-0 text-xl text-rcl-orange"/>
           </Link>
         </div>
