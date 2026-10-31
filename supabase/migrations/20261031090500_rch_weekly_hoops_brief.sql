@@ -62,7 +62,7 @@ FOR EACH ROW EXECUTE FUNCTION public.rch_signup_weekly_digest_preference();
 CREATE OR REPLACE FUNCTION public.rch_unsubscribe_weekly_digest(p_token text)
 RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $function$
-DECLARE did_change boolean;
+DECLARE changed_rows integer;
 BEGIN
   IF p_token IS NULL OR p_token !~ '^[0-9a-f]{48}$' THEN RETURN false; END IF;
   UPDATE public.notification_preferences p
@@ -70,8 +70,8 @@ BEGIN
     FROM public.rch_weekly_digest_deliveries d
    WHERE d.recipient_id=p.profile_id
      AND d.token_hash=encode(sha256(convert_to(p_token,'UTF8')),'hex');
-  GET DIAGNOSTICS did_change = ROW_COUNT;
-  RETURN did_change;
+  GET DIAGNOSTICS changed_rows = ROW_COUNT;
+  RETURN changed_rows>0;
 END;
 $function$;
 REVOKE ALL ON FUNCTION public.rch_unsubscribe_weekly_digest(text) FROM PUBLIC;
@@ -177,7 +177,7 @@ BEGIN
     LIMIT p_limit
   LOOP
     delivery_id:=NULL;
-    token:=encode(gen_random_bytes(24),'hex');
+    token:=encode(extensions.gen_random_bytes(24),'hex');
     INSERT INTO public.rch_weekly_digest_deliveries(recipient_id,week_start,recipient_email,token_hash,status,detail)
     VALUES(member.id,week_monday,member.email,encode(sha256(convert_to(token,'UTF8')),'hex'),'queued','Preparing Weekly Hoops Brief')
     ON CONFLICT (recipient_id,week_start) DO NOTHING
