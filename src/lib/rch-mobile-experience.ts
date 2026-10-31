@@ -19,6 +19,7 @@ export function isBrowserAccountRoute(pathname: string): boolean {
  */
 const PUBLIC_BROWSER_PAGES = new Set([
   '/', '/about', '/app', '/legal', '/legal/privacy', '/legal/terms',
+  '/join/players', '/join/fans', '/join/coaches', '/join/creators', '/join/organizations',
   '/legal/cookies', '/legal/safety', '/legal/community-guidelines',
   '/legal/dmca', '/legal/take-it-down',
   '/league', '/richmond-basketball-league',
