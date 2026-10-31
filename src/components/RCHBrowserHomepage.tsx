@@ -166,7 +166,7 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       <div className="rch-browser-app-copy">
         <span className="rch-browser-eyebrow">THE FULL EXPERIENCE</span>
         <h2 id="rch-browser-app-title">TAKE <em>RCH</em> ANYWHERE.</h2>
-        <p>Keep your basketball community close. Browse and join directly on the web, then add the RCH app to your home screen when you're ready.</p>
+        <p>Keep your basketball community close. Browse and join directly on the web, then add the RCH app to your home screen when you&apos;re ready.</p>
         <Link href="/app" className="rch-browser-button rch-browser-button-primary">Explore the RCH App <FaArrowRight aria-hidden="true"/></Link>
         <small>No app installation required to create an account or explore basketball.</small>
       </div>
