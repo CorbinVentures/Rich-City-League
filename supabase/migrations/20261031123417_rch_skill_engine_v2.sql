@@ -140,6 +140,7 @@ create function public.rch_review_match_skill_stats(p_match uuid,p_player uuid,p
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid();s public.rch_match_skill_box_scores%rowtype;
  m public.run_ranked_matches%rowtype;r public.runs%rowtype;
+ v_side text;v_team_score integer;v_approved_points integer;
 begin
  if actor is null then raise exception 'Sign in to review evidence';end if;
  select * into s from public.rch_match_skill_box_scores
@@ -155,6 +156,22 @@ begin
  then raise exception 'Unauthorized match reviewer';end if;
  if m.status<>'verified' or m.verified_at is null or r.status<>'completed'
  then raise exception 'Only final verified competitive games qualify';end if;
+ if p_approve then
+  select mp.side into v_side from public.run_ranked_match_players mp
+   where mp.match_id=p_match and mp.profile_id=p_player;
+  if v_side is null then raise exception 'Player is not on the official verified roster';end if;
+  v_team_score:=case when v_side='home' then m.home_score else m.away_score end;
+  select coalesce(sum(other.points),0)::integer into v_approved_points
+  from public.rch_match_skill_box_scores other
+  join public.run_ranked_match_players teammate
+   on teammate.match_id=other.match_id and teammate.profile_id=other.profile_id
+  where other.match_id=p_match and other.profile_id<>p_player
+    and other.review_status='verified' and teammate.side=v_side;
+  if v_approved_points+s.points>v_team_score then
+   raise exception 'Approved teammate points exceed the final official score';end if;
+  if m.game_format='1v1' and s.points<>v_team_score then
+   raise exception '1v1 points must equal the independently verified game score';end if;
+ end if;
  update public.rch_match_skill_box_scores set
  review_status=case when p_approve then 'verified' else 'rejected' end,
  reviewed_by=actor,reviewed_at=now(),updated_at=now()
