@@ -23,6 +23,14 @@ describe('guest onboarding / authentication regression', () => {
     expect(hook).toContain('await applySession(sessionError ? null : data.user)');
     expect(hook).toContain('status >= 500');
     expect(hook).toContain('account service is temporarily unavailable');
+    // Signup 500s can come from GoTrue's database or email path. Preserve the
+    // distinction while never surfacing raw SQL/SMTP exception details.
+    expect(hook).toContain("message.includes('database error')");
+    expect(hook).toContain('RCH-AUTH-DB-500');
+    expect(hook).toContain("message.includes('confirmation email')");
+    expect(hook).toContain('RCH-AUTH-MAIL-500');
+    expect(hook).toContain('RCH-AUTH-HOOK-500');
+    expect(hook).toContain('RCH-AUTH-500');
     expect(form).toContain("setMessage(mode === 'sign-up' ? ''");
   });
 });
