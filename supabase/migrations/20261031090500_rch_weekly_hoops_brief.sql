@@ -302,7 +302,7 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION public.rch_send_weekly_digest_batch(integer) FROM PUBLIC, anon, authenticated;
 
-SELECT cron.schedule('rch-weekly-hoops-brief','* * * * *',
+SELECT cron.schedule('rch-weekly-hoops-brief','* 13,14 * * 1',
   'select public.rch_send_weekly_digest_batch(25) where extract(isodow from timezone(''America/New_York'',now()))=1 and extract(hour from timezone(''America/New_York'',now()))=9');
 SELECT cron.schedule('rch-reconcile-weekly-digest','*/2 * * * *',
   'select public.rch_reconcile_weekly_digest_deliveries()');
