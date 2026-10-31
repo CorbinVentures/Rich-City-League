@@ -28,7 +28,11 @@ export function RCHBrowserAccountLink({
   trackingContext?: string;
 }) {
   const { user, loading } = useAuth();
-  if (loading) return <span className={className} role="status" aria-live="polite">Checking account…</span>;
+  // Render a genuine guest link before hydration, including with JavaScript disabled.
+  // Once auth resolves, members receive their own destination instead.
+  if (loading) return <Link href={guestHref} className={className} onClick={() => trackRchConversion('join_click', trackingContext)}>
+    {icon}{guestLabel}<FaArrowRight aria-hidden="true"/>
+  </Link>;
   const href = user ? memberHref : guestHref;
   return <Link href={href} className={className} onClick={() => { if (!user) trackRchConversion('join_click', trackingContext); }}>
     {icon}{user ? memberLabel : guestLabel}<FaArrowRight aria-hidden="true"/>

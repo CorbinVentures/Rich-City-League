@@ -43,7 +43,7 @@ describe('RCH truthful public discovery contract',()=>{
     expect(home).toContain("from('rch_weekend_circuit_events')");
     expect(home).toContain('confirmedRuns=suggestionsKnown?enrichedRuns.filter');
     expect(home).toContain('suggestedRuns=suggestionsKnown?enrichedRuns.filter');
-    expect(home).toContain('runs={confirmedRuns as any}');
+    expect(home).toMatch(/runs=\{(?:confirmedRuns|data\.confirmedRuns) as any\}/);
     expect(browser).toContain('SUGGESTED COURTS');
     expect(browser).toContain('not confirmed hosted games');
   });

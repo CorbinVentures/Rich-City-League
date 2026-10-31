@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
+import { connection } from 'next/server';
 import { RCLHomeExperience } from '@/components/RCLHomeExperience';
 import { RCHBrowserHomepage } from '@/components/RCHBrowserHomepage';
 import { MemberHomeRedirect } from '@/components/MemberHomeRedirect';
@@ -7,9 +9,9 @@ import { isRclProSeasonRecord, RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 export const metadata: Metadata = { title: { absolute: 'Rich City Hoops | Virginia Basketball Runs & Leagues' }, description: 'Find pickup basketball runs, 1v1 games, courts and competition in Richmond and across Virginia. Join Rich City Hoops free to connect with players and crews.', alternates:{canonical:'/'}, openGraph:{images:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'Rich City Hoops basketball community'}],url:'/',title:'Rich City Hoops | Virginia Basketball Runs & Leagues',description:'Find local pickup basketball runs, 1v1 challenges, courts, crews and leagues in Virginia. Free to join.'} };
 
-export const revalidate = 60;
+// Request-rendered HTML; share only the anonymous public dataset for 60 seconds.
 
-export default async function HomePage() {
+async function loadPublicHomepageData() {
   const { teams, games, standings, news, seasons, divisions } = await getLeagueSnapshot();
   const client = getPublicClient();
   const proSeasons = seasons.filter(isRclProSeasonRecord);
@@ -75,29 +77,81 @@ export default async function HomePage() {
     : { data: [] };
   const currentStats = statsRaw ?? [];
 
+  // Cache contains only published/anonymous data from the public Supabase client.
+  // Do not reference cookies, headers, privileged clients or member sessions here.
+  return {
+    teams,
+    games: proSeasonGames,
+    standings: previewStandings,
+    standingsLabel,
+    news,
+    players: playersRaw ?? [],
+    posts: postsRaw ?? [],
+    events: eventsRaw ?? [],
+    confirmedRuns,
+    suggestedRuns,
+    listingsVerified: suggestionsKnown,
+    members: publicMembers,
+    activity: publicActivity,
+    stats: currentStats,
+  };
+}
+
+const getCachedPublicHomepageData = unstable_cache(
+  loadPublicHomepageData,
+  ['rch-public-home-data-v2'],
+  { revalidate: 60, tags: ['rch-public-home'] },
+);
+
+export default async function HomePage() {
+  // Resolve each HTTP document per request; never cache a browser-mode loader.
+  await connection();
+
+  let data: Awaited<ReturnType<typeof loadPublicHomepageData>>;
+  try {
+    data = await getCachedPublicHomepageData();
+  } catch (error) {
+    console.error('Public homepage data failed; showing safe branded fallback', error);
+    data = {
+      teams: [],
+      games: [],
+      standings: [],
+      standingsLabel: `Pro season planned · ${RCL_PRO_SEASON.startLabel}`,
+      news: [],
+      players: [],
+      posts: [],
+      events: [],
+      confirmedRuns: [],
+      suggestedRuns: [],
+      listingsVerified: false,
+      members: [],
+      activity: [],
+      stats: [],
+    };
+  }
   return (
     <>
       <div className="rch-browser-home-target">
         <RCHBrowserHomepage
-          news={news as any}
-          events={(eventsRaw ?? []) as any}
-          runs={confirmedRuns as any}
-          suggestedRuns={suggestedRuns as any}
-          listingsVerified={suggestionsKnown}
-          members={publicMembers as any}
-          activity={publicActivity}
+          news={data.news as any}
+          events={data.events as any}
+          runs={data.confirmedRuns as any}
+          suggestedRuns={data.suggestedRuns as any}
+          listingsVerified={data.listingsVerified}
+          members={data.members as any}
+          activity={data.activity}
         />
       </div>
       <MemberHomeRedirect />
       <RCLHomeExperience
-        teams={teams}
-        games={proSeasonGames}
-        standings={previewStandings}
-        standingsLabel={standingsLabel}
-        players={(playersRaw ?? []) as any}
-        stats={currentStats as any}
-        news={news}
-        posts={(postsRaw ?? []) as any}
+        teams={data.teams}
+        games={data.games}
+        standings={data.standings}
+        standingsLabel={data.standingsLabel}
+        players={data.players as any}
+        stats={data.stats as any}
+        news={data.news}
+        posts={data.posts as any}
       />
     </>
   );

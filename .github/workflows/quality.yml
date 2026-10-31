@@ -23,4 +23,23 @@ jobs:
       - run: npm run type-check
       - run: npm run lint
       - run: npm run build
+      - name: Verify the server-rendered public homepage without hydration
+        run: |
+          set -euo pipefail
+          PORT=3105 npm run start -- -p 3105 > /tmp/rch-home-smoke.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail -o /dev/null http://127.0.0.1:3105/; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != 1 ]; then
+            cat /tmp/rch-home-smoke.log
+            exit 1
+          fi
+          PUBLIC_HOME_URL=http://127.0.0.1:3105/ PUBLIC_HOME_REQUESTS=5 node scripts/check-public-home-first-response.mjs
       - run: npm test
