@@ -91,14 +91,14 @@ export function RchMediaInterestForm() {
   if (sent) {
     return <section role="status" className="rounded-3xl border border-rcl-blue/30 bg-[#071522] p-7">
       <h3 className="font-display text-2xl font-black uppercase">Request received</h3>
-      <p className="mt-3 text-sm leading-6 text-white/70">Your proposal is in the RCH review pipeline. This is not a booking, production commitment or sponsorship confirmation. We'll review the scope before discussing terms.</p>
+      <p className="mt-3 text-sm leading-6 text-white/70">Your proposal is in the RCH review pipeline. This is not a booking, production commitment or sponsorship confirmation. We&apos;ll review the scope before discussing terms.</p>
       <button type="button" className="mt-5 min-h-11 rounded-xl border border-white/20 px-4 text-sm font-bold" onClick={() => setSent(false)}>Start another request</button>
     </section>;
   }
 
   return <form onSubmit={submit} className="rounded-3xl border border-white/15 bg-[#071522] p-5 sm:p-8">
-    <h3 className="font-display text-2xl font-black uppercase">Tell us what you're building</h3>
-    <p className="mt-2 text-sm text-white/60">No account or upfront payment required. We'll discuss availability, deliverables, rights, and a written quote.</p>
+    <h3 className="font-display text-2xl font-black uppercase">Tell us what you&apos;re building</h3>
+    <p className="mt-2 text-sm text-white/60">No account or upfront payment required. We&apos;ll discuss availability, deliverables, rights, and a written quote.</p>
     <div className="mt-6 grid gap-4 sm:grid-cols-2">
       <label className="text-xs font-bold text-white/75">Organization / business
         <input className={field + ' mt-2'} maxLength={160} required value={form.organization} onChange={e => update('organization', e.target.value)} />
