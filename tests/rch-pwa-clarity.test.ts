@@ -57,7 +57,7 @@ describe('RCH PWA clarity and progressive disclosure',()=>{
   });
   it('keeps viewing categories and privacy/security destinations reachable',()=>{
     const tv=read('src/app/media/page.tsx');
-    for(const heading of ['Live games','The Pulse','Movies','Originals'])expect(tv).toContain(heading);
+    for(const heading of ['Live games','The Pulse','Films & Documentaries','Originals'])expect(tv).toContain(heading);
     const settings=read('src/app/settings/page.tsx');
     for(const href of ['/account/security','/settings/privacy','/settings/discovery','/legal'])expect(settings).toContain(href);
   });
