@@ -51,7 +51,19 @@ function getAuthErrorMessage(error: unknown, fallback: string) {
   if (code === 'email_not_confirmed' || message.includes('email not confirmed')) return 'Please confirm your email before signing in.';
   if (code === 'user_banned') return 'This account is unavailable. Contact the league administrator.';
   if (status >= 500 || code === 'unexpected_failure' || message.includes('timeout') || message.includes('context canceled') || message.includes('connection')) {
-    return 'The account service is temporarily unavailable. Please try again shortly. If it continues, contact the league.';
+    // GoTrue returns the same HTTP 500 / unexpected_failure code for both database
+    // and confirmation-mail failures. Do not discard its safe, high-level
+    // error message: the distinction is essential for incident recovery.
+    if (message.includes('database error') || message.includes('saving new user') || message.includes('creating new user')) {
+      return 'Account creation could not be saved to the database. Please contact the league with error RCH-AUTH-DB-500.';
+    }
+    if (message.includes('confirmation email') || message.includes('sending email') || message.includes('smtp') || message.includes('gomail')) {
+      return 'Account creation could not finish because the verification-email service failed. Please contact the league with error RCH-AUTH-MAIL-500.';
+    }
+    if (message.includes('hook')) {
+      return 'Account creation was blocked by an authentication service hook. Please contact the league with error RCH-AUTH-HOOK-500.';
+    }
+    return 'The account service is temporarily unavailable. Please try again shortly. If it continues, contact the league with error RCH-AUTH-500.';
   }
   if (message.includes('password')) return 'Use a password with at least 8 characters.';
   return fallback;
