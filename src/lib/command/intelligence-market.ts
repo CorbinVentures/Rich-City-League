@@ -1,4 +1,4 @@
-import { VIRGINIA_CITIES } from '@/lib/virginia-world';
+import { VIRGINIA_CITIES } from '../virginia-world';
 
 type Consent = { profile_id: string; city_id: string };
 export type VisibleMarket = { cityId: string; city: string; members: number };
