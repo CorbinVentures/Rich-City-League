@@ -48,7 +48,7 @@ export default function RchStudiosPage() {
         </article>
       </section>
       <section id="request" className="mt-14 scroll-mt-24 grid gap-6 lg:grid-cols-[.75fr_1.25fr]">
-        <div><p className="text-xs font-black uppercase tracking-[.24em] text-rcl-orange">Let's work</p><h2 className="mt-3 font-display text-3xl font-black uppercase">Build your project with RCH</h2><p className="mt-4 text-sm leading-7 text-white/60">Submit your inquiry to our existing partnerships review pipeline. RCH will confirm availability, scope, production costs, rights and commercial terms before accepting any assignment.</p>
+        <div><p className="text-xs font-black uppercase tracking-[.24em] text-rcl-orange">Let&apos;s work</p><h2 className="mt-3 font-display text-3xl font-black uppercase">Build your project with RCH</h2><p className="mt-4 text-sm leading-7 text-white/60">Submit your inquiry to our existing partnerships review pipeline. RCH will confirm availability, scope, production costs, rights and commercial terms before accepting any assignment.</p>
           <p className="mt-4 text-sm text-white/55">Prefer email? <a href="mailto:info@richcityhoops.com?subject=RCH%20Studios%20inquiry" className="underline text-rcl-blue">info@richcityhoops.com</a></p>
           <p className="mt-4 text-sm text-white/55">Are you a filmmaker instead? <Link href="/media/creators" className="underline text-rcl-blue">Explore the Creator Network</Link>.</p></div>
         <RchMediaInterestForm/>
