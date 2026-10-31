@@ -19,7 +19,7 @@ type Event = {
 type Run = { id:string; title:string; starts_at:string; location:string; court_name?:string|null; game_format?:string|null; host_name?:string|null; rsvp_count?:number|null; max_players?:number|null };
 type Member = {id:string; display_name:string|null; first_name:string|null; last_name:string|null; avatar_url:string|null; role:string|null};
 type Activity = {id:string;body:string;author_name:string};
-type Props = {news:News[];events:Event[];runs:Run[];members:Member[];activity:Activity[]};
+type Props = {news:News[];events:Event[];runs:Run[];suggestedRuns?:Run[];listingsVerified?:boolean;members:Member[];activity:Activity[]};
 type Opportunity = {id:string;href:string;title:string;starts_at:string;location:string;type:string;art:string;host_name?:string|null;rsvp_count?:number|null;max_players?:number|null;game_format?:string|null};
 
 const cards = [
@@ -47,7 +47,7 @@ function SectionTitle({ label, title, href, action }: {label: string; title: str
   </div>;
 }
 
-export function RCHBrowserHomepage({ news, events, runs, members, activity }: Props) {
+export function RCHBrowserHomepage({ news, events, runs, suggestedRuns = [], listingsVerified = true, members, activity }: Props) {
   const opportunities: Opportunity[] = [
     ...runs.map(item => ({ id: 'run-' + item.id, href: '/runs/' + item.id, title: item.title, starts_at: item.starts_at, location: item.court_name || item.location, type: 'Run', art: 'run', host_name: item.host_name, rsvp_count: item.rsvp_count, max_players: item.max_players, game_format: item.game_format })),
     ...events.map(item => ({ id: 'event-' + item.id, href: `/network/events/${item.slug}`, title: item.title, starts_at: item.starts_at, location: [item.city, item.state].filter(Boolean).join(', ') || 'Virginia', type: item.event_type?.replace(/_/g, ' ') || 'Event', art: 'event' })),
@@ -79,7 +79,7 @@ export function RCHBrowserHomepage({ news, events, runs, members, activity }: Pr
     </section>
 
     <section className="rch-browser-section" id="whats-happening">
-      <SectionTitle label="GET IN THE GAME" title="UPCOMING RUNS & EVENTS" href="/runs" action="View all Runs" />
+      <SectionTitle label="GET IN THE GAME" title="HOSTED RUNS & EVENTS" href="/runs" action="Explore Runs" />
       {opportunities.length ? <div className="rch-browser-event-grid">
         {opportunities.map((item, index) => {
           const date = dateParts(item.starts_at);
@@ -88,8 +88,21 @@ export function RCHBrowserHomepage({ news, events, runs, members, activity }: Pr
             <div className="rch-browser-event-details"><small>{item.type}{item.game_format ? ' · ' + item.game_format : ''}</small><h3>{item.title}</h3><p><FaLocationDot/> {item.location}</p>{item.host_name && <p>Host: {item.host_name}</p>}{item.rsvp_count != null && <p>{item.rsvp_count} registered{item.max_players ? ' / ' + item.max_players + ' spots' : ''} · RSVP is not check-in</p>}<span>{date.label} · View details <FaArrowRight/></span></div>
           </Link>;
         })}
-      </div> : <div className="rch-browser-empty"><FaCalendarDays/><p>New Runs and basketball events will appear as hosts publish them.</p><Link href="/discover">Explore what&apos;s available <FaArrowRight/></Link></div>}
+      </div> : <div className="rch-browser-empty"><FaCalendarDays/><p>{listingsVerified ? 'No upcoming host-posted Runs or published events in this preview. Explore courts or organize a game.' : 'Run listing classification is temporarily unavailable. We will not display unverified listings as hosted games.'}</p><Link href="/runs">Explore courts and Runs <FaArrowRight/></Link></div>}
     </section>
+
+    {suggestedRuns.length > 0 && <section className="rch-browser-section" aria-labelledby="rch-unhosted-courts-title">
+      <div className="rch-browser-section-head"><div><span>IDEAS FOR PICKUP</span><h2 id="rch-unhosted-courts-title">SUGGESTED COURTS</h2></div><Link href="/runs">Explore Runs <FaArrowRight aria-hidden="true"/></Link></div>
+      <p className="mb-5 max-w-3xl text-sm leading-6 text-white/75">These are automated court suggestions, not confirmed hosted games. No organizer, attendance or available spot is guaranteed. Check park access and arrange your group before heading out.</p>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {suggestedRuns.slice(0,4).map(run=><Link href={'/runs/'+run.id} key={run.id} className="rounded-xl border border-white/20 bg-white/[.035] p-4 text-white hover:border-rose-400">
+          <span className="text-xs font-black uppercase text-amber-200">Unhosted court suggestion</span>
+          <h3 className="mt-2 font-semibold">{run.court_name || run.location}</h3>
+          <p className="mt-2 text-xs text-white/70">Suggested time: {dateParts(run.starts_at).label}</p>
+          <span className="mt-3 inline-flex items-center gap-2 text-sm font-semibold">View suggestion <FaArrowRight aria-hidden="true"/></span>
+        </Link>)}
+      </div>
+    </section>}
 
     <div className="mx-auto max-w-[1450px] px-4 pt-4"><Link href="/richmond-basketball-runs" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-white/80 underline underline-offset-4">Pickup basketball in Richmond <FaArrowRight aria-hidden="true"/></Link></div>
 

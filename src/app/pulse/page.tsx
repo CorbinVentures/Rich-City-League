@@ -40,7 +40,9 @@ export default async function PulsePublicPage() {
         .select('id,body,created_at,author:profiles!posts_author_id_fkey!inner(display_name,username,first_name,last_name)')
         .eq('author.profile_visibility', 'public')
         .eq('author.is_active', true)
+        .eq('author.is_system_account', false)
         .eq('status', 'published')
+        .eq('is_automated', false)
         .is('target_profile_id', null)
         .order('created_at', { ascending: false })
         .limit(24)
@@ -63,9 +65,10 @@ export default async function PulsePublicPage() {
     </section>
     <div className="rch-browser-pulse-inner rch-browser-pulse-body">
       <div className="rch-browser-pulse-heading">
-        <div><span>PUBLIC COMMUNITY FEED</span><h2>WHAT HOOPERS ARE SAYING</h2></div>
+        <div><span>PUBLIC MEMBER POSTS · NO AUTOMATED CONTENT</span><h2>WHAT HOOPERS ARE SAYING</h2></div>
         <RCHBrowserAccountLink guestHref="/auth/sign-in?next=%2Fsocial%3Fcompose%3D1" guestLabel="Sign in to post" memberLabel="Create a post" memberHref="/social?compose=1" />
       </div>
+      <p className="mb-6 text-sm text-white/70">This preview shows actual member posts. For RCH announcements and automated editorial updates, visit <Link href="/news" className="underline underline-offset-4">Virginia basketball news</Link>.</p>
       {posts.length ? <div className="rch-browser-pulse-grid">
         {posts.map(post => {
           const author = Array.isArray(post.author) ? post.author[0] : post.author;

@@ -55,6 +55,7 @@ export default async function GrowthCenter() {
       <Link href="/admin" className="text-sm text-sky-300">← Admin</Link>
       <p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-rose-400">Rich City Hoops · Acquisition</p>
       <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-6xl">Member Growth Center</h1>
+      <Link href="/admin/quality" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-rose-300 underline underline-offset-4">Open the 16-category business psychology quality gate</Link>
       <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">Last seven days. Each count is deduplicated by anonymous browser-tab session, not by real people. Consent and privacy opt-outs are respected. Homepage views and clicks are anonymous tab-session measures, not visitor identities. Welcome clicks are not proof of Run attendance or day-seven retention. OAuth completions and verified account activations require separate measurement.</p>
       {error && <div role="status" className="mt-6 rounded-xl border border-amber-300/30 p-4 text-sm text-amber-100">Conversion telemetry is currently unavailable. The database connection or event permissions need review.</div>}
       <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
