@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const file=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=file('supabase/migrations/20261031090500_rch_weekly_hoops_brief.sql');
+const migration=file('supabase/migrations/20261031052324_rch_weekly_hoops_brief.sql');
 
 describe('Weekly Hoops Brief safety and member experience',()=>{
   it('only enrolls members who affirmatively opted in',()=>{
