@@ -280,7 +280,7 @@ export default function RchBroadcastStudio() {
         <section className="mt-3 rounded-xl border border-white/15 bg-white/[.035] p-3 text-xs leading-5 text-white/75" aria-label="Broadcast readiness checklist">
           <p className="font-black uppercase tracking-wide text-sky-200">Before going live</p>
           <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={rightsCleared} disabled={onAir} onChange={e=>setRightsCleared(e.target.checked)} className="mt-1"/><span>Event, venue, participants and any on-air sponsor/music usage are cleared for live distribution.</span></label>
-          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={backupReady} disabled={onAir} onChange={e=>setBackupReady(e.target.checked)} className="mt-1"/><span>Independent local recording or an approved replay plan is ready. RCH's browser stream does not automatically create a replay.</span></label>
+          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={backupReady} disabled={onAir} onChange={e=>setBackupReady(e.target.checked)} className="mt-1"/><span>Independent local recording or an approved replay plan is ready. RCH&apos;s browser stream does not automatically create a replay.</span></label>
           <p className="mt-2 text-white/45">After Go Live, verify video and sound on a separate viewer device. If the connection drops, use Mark Channel Offline and verify before restarting.</p>
         </section>
         {completedBroadcast && !onAir && <section role="status" className="mt-3 rounded-xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm text-white/75">
