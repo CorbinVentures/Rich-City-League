@@ -6,6 +6,7 @@ import { FaApple, FaGoogle } from 'react-icons/fa6';
 import { getSafeNextPath } from '@/lib/auth-redirect';
 import { getSupabaseClient } from '@/lib/supabase';
 import { getSupabaseConfig } from '@/lib/supabase-config';
+import { trackRchConversion } from '@/lib/analytics/conversion';
 
 type SocialProvider = 'apple' | 'google';
 type ProviderAvailability = Record<SocialProvider, boolean>;
@@ -100,6 +101,7 @@ export function SocialAuthOptions({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     try {
       const callback = new URL('/auth/callback', window.location.origin);
       if (next) callback.searchParams.set('next', next);
+      if (mode === 'sign-up') trackRchConversion('signup_submitted', 'oauth');
       const { error: oauthError } = await client.auth.signInWithOAuth({
         provider,
         options: {
