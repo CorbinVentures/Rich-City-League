@@ -10,7 +10,7 @@ describe('RCH free membership growth safeguards', () => {
     expect(page).toContain('YOUR COURT.');
     expect(page).toContain('YOUR LEGACY.');
     expect(page.indexOf('id="whats-happening"')).toBeLessThan(page.indexOf('rch-browser-feature-grid'));
-    expect(page).toContain('players.slice(0, 6)');
+    expect(page).toContain('members.slice(0,6)');
     expect(page).toContain('More than another feed.');
     expect(page).toContain('trackingContext="home_hero"');
     expect(page).not.toContain('rch-browser-phone-screen');

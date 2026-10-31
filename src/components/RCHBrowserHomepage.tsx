@@ -16,15 +16,10 @@ type Event = {
   id: string; slug: string; title: string; starts_at: string;
   city?: string | null; state?: string | null; event_type?: string | null;
 };
-type Run = {
-  id: string; title: string; starts_at: string;
-  location: string; game_format?: string | null;
-};
-type Player = {
-  id: string; first_name: string; last_name: string; photo_url?: string | null;
-};
-
-type Props = { news: News[]; events: Event[]; runs: Run[]; players: Player[] };
+type Run = { id:string; title:string; starts_at:string; location:string; court_name?:string|null; game_format?:string|null; host_name?:string|null; rsvp_count?:number|null; max_players?:number|null };
+type Member = {id:string; display_name:string|null; first_name:string|null; last_name:string|null; avatar_url:string|null; role:string|null};
+type Activity = {id:string;body:string;author_name:string};
+type Props = {news:News[];events:Event[];runs:Run[];members:Member[];activity:Activity[]};
 
 const cards = [
   { title: 'Runs', label: 'Find your next game', detail: 'Find and organize runs near you.', href: '/runs', icon: FaBasketball, variant: 'runs' },
@@ -51,9 +46,9 @@ function SectionTitle({ label, title, href, action }: {label: string; title: str
   </div>;
 }
 
-export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
+export function RCHBrowserHomepage({ news, events, runs, members, activity }: Props) {
   const opportunities = [
-    ...runs.map(item => ({ id: 'run-' + item.id, href: '/runs/' + item.id, title: item.title, starts_at: item.starts_at, location: item.location, type: 'Run', art: 'run' })),
+    ...runs.map(item => ({ id: 'run-' + item.id, href: '/runs/' + item.id, title: item.title, starts_at: item.starts_at, location: item.court_name || item.location, type: 'Run', art: 'run', host_name: item.host_name, rsvp_count: item.rsvp_count, max_players: item.max_players, game_format: item.game_format })),
     ...events.map(item => ({ id: 'event-' + item.id, href: `/network/events/${item.slug}`, title: item.title, starts_at: item.starts_at, location: [item.city, item.state].filter(Boolean).join(', ') || 'Virginia', type: item.event_type?.replace(/_/g, ' ') || 'Event', art: 'event' })),
   ].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()).slice(0, 4);
 
@@ -67,8 +62,8 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
           <p className="rch-browser-hero-mantra">FIND A RUN <i>•</i> BUILD YOUR NAME <i>•</i> STAY CONNECTED</p>
           <p className="rch-browser-hero-description">Find real basketball runs, connect with Virginia players and build your basketball identity—all in one community.</p>
           <div className="rch-browser-hero-actions">
-            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-primary" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_hero" memberLabel="My Basketball" memberHref="/my-hoops" />
-            <Link className="rch-browser-button rch-browser-button-outline" href="/runs">Explore Runs <FaCompass aria-hidden="true" /></Link>
+            <Link className="rch-browser-button rch-browser-button-primary" href="/runs">Find a Run <FaCompass aria-hidden="true" /></Link>
+            <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-outline" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_hero" memberLabel="My Basketball" memberHref="/my-hoops" />
           </div>
           <p className="rch-browser-hero-footnote">Community membership is free. Explore before signing up.</p>
         </div>
@@ -82,19 +77,39 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       <div className="rch-browser-hero-corner" aria-hidden="true">MORE THAN<br/>A GAME</div>
     </section>
 
-    <RCHDiscoveryStarter mode="web" opportunities={opportunities} />
-
     <section className="rch-browser-section" id="whats-happening">
-      <SectionTitle label="GET IN THE GAME" title="UPCOMING RUNS & EVENTS" href="/discover" action="Discover all" />
+      <SectionTitle label="GET IN THE GAME" title="UPCOMING RUNS & EVENTS" href="/runs" action="View all Runs" />
       {opportunities.length ? <div className="rch-browser-event-grid">
         {opportunities.map((item, index) => {
           const date = dateParts(item.starts_at);
           return <Link key={item.id} href={item.href} className={'rch-browser-event rch-browser-event-' + (index % 4 + 1)}>
             <div className="rch-browser-event-art"><div className="rch-browser-event-date"><b>{date.month}</b><strong>{date.day}</strong></div></div>
-            <div className="rch-browser-event-details"><small>{item.type}</small><h3>{item.title}</h3><p><FaLocationDot/> {item.location}</p><span>{date.label} <FaArrowRight/></span></div>
+            <div className="rch-browser-event-details"><small>{item.type}{'game_format' in item && item.game_format ? ' · ' + item.game_format : ''}</small><h3>{item.title}</h3><p><FaLocationDot/> {item.location}</p>{'host_name' in item && item.host_name && <p>Host: {item.host_name}</p>}{'rsvp_count' in item && item.rsvp_count != null && <p>{item.rsvp_count} registered{'max_players' in item && item.max_players ? ' / ' + item.max_players + ' spots' : ''} · RSVP is not check-in</p>}<span>{date.label} · View details <FaArrowRight/></span></div>
           </Link>;
         })}
       </div> : <div className="rch-browser-empty"><FaCalendarDays/><p>New Runs and basketball events will appear as hosts publish them.</p><Link href="/discover">Explore what&apos;s available <FaArrowRight/></Link></div>}
+    </section>
+
+    <div className="mx-auto max-w-[1450px] px-4 pt-4"><Link href="/richmond-basketball-runs" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-white/80 underline underline-offset-4">Pickup basketball in Richmond <FaArrowRight aria-hidden="true"/></Link></div>
+
+    <RCHDiscoveryStarter mode="web" opportunities={opportunities} />
+
+    <section className="rch-browser-section" aria-label="Real active Rich City Hoops members">
+      <SectionTitle label="THE PEOPLE" title="MEET THE RCH COMMUNITY" href="/pulse" action="See community activity" />
+      {members.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {members.slice(0,6).map(person => <Link key={person.id} href={'/social/profile/'+person.id} className="overflow-hidden rounded-xl border border-white/15 bg-white/[.04] text-white hover:border-rose-400">
+          <div className="flex aspect-square items-center justify-center bg-[#172331]">{person.avatar_url ? <img src={person.avatar_url} loading="lazy" alt="" className="h-full w-full object-cover" /> : <FaUsers className="text-3xl" />}</div>
+          <p className="px-3 pt-3 text-sm font-black">{person.display_name || [person.first_name,person.last_name].filter(Boolean).join(' ') || 'RCH Member'}</p>
+          <p className="px-3 pb-3 text-xs text-white/60">{person.role || 'Member'}</p>
+        </Link>)}
+      </div> : <p className="mt-4 text-white/70">Member profiles with public photos will appear here as the community grows.</p>}
+      {activity.length>0 && <div className="mt-5 grid gap-3 md:grid-cols-3">
+        {activity.slice(0,3).map(post => <Link key={post.id} href="/pulse" className="rounded-xl border border-white/15 bg-white/[.04] p-5 text-white hover:border-rose-400">
+          <p className="text-xs font-black uppercase text-rose-300">{post.author_name} · Public post</p>
+          <p className="mt-2 line-clamp-4 text-sm leading-6 text-white/80">{post.body}</p>
+        </Link>)}
+      </div>}
+      <p className="mt-4 text-xs text-white/55">Only publicly visible member profiles and published member posts appear here. Historical league rosters are a separate resource.</p>
     </section>
 
     <section className="mx-auto w-[calc(100%-28px)] max-w-[1450px] py-8" aria-labelledby="rch-benefits-title">
@@ -133,25 +148,6 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
       </div>
     </section>
 
-    <section className="mx-auto mt-7 flex w-[calc(100%-28px)] max-w-[1450px] flex-col items-start justify-between gap-5 rounded-3xl border border-sky-400/30 bg-[linear-gradient(120deg,#102b40,#081322)] p-6 text-white sm:flex-row sm:items-center sm:p-9" aria-labelledby="rch-sites-title">
-      <div className="min-w-0">
-        <p className="text-xs font-black uppercase tracking-[.19em] text-sky-300">RCH Sites · Website Creator</p>
-        <h2 id="rch-sites-title" className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Your basketball business. Your website.</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">For coaches, trainers, teams and organizers. Start with a free site draft. Amateur and Professional options are separate website subscriptions.</p>
-      </div>
-      <Link href="/website-creator" className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-black text-[#071522] hover:bg-sky-300">Build a website <FaArrowRight aria-hidden="true"/></Link>
-    </section>
-
-    {players.length > 0 && <section className="rch-browser-section" aria-label="Real Rich City Hoops player profiles">
-      <SectionTitle label="REAL BASKETBALL PEOPLE" title="MEET THE COMMUNITY" href="/players" action="Explore player profiles" />
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {players.slice(0, 6).map(player => <Link href={'/players/' + player.id} key={player.id} className="overflow-hidden rounded-xl border border-white/15 bg-white/[.04] text-white hover:border-rose-400/70">
-          <div className="flex aspect-square items-center justify-center bg-[#1a2533] text-3xl font-black">{player.photo_url ? <img src={player.photo_url} alt={player.first_name + ' ' + player.last_name} className="h-full w-full object-cover" loading="lazy"/> : player.first_name.slice(0, 1) + player.last_name.slice(0, 1)}</div>
-          <p className="px-3 py-3 text-sm font-bold">{player.first_name} {player.last_name}</p>
-        </Link>)}
-      </div>
-    </section>}
-
     <section className="rch-browser-section">
       <SectionTitle label="THE STORIES WE LIVE" title="LATEST FROM RCH" href="/news" action="All news" />
       {news.length ? <div className="rch-browser-news-grid">
@@ -160,6 +156,15 @@ export function RCHBrowserHomepage({ news, events, runs, players }: Props) {
           <div><small>{item.category?.replace(/-/g,' ') || 'RCH NEWS'}</small><h3>{item.title}</h3><p>{item.published_at ? new Intl.DateTimeFormat('en-US', {dateStyle: 'medium'}).format(new Date(item.published_at)) : 'Rich City Hoops'}</p></div>
         </Link>)}
       </div> : <div className="rch-browser-empty"><FaCamera/><p>Stories from Virginia basketball will be featured here as they are published.</p><Link href="/news">Visit the newsroom <FaArrowRight/></Link></div>}
+    </section>
+
+    <section className="mx-auto mt-7 flex w-[calc(100%-28px)] max-w-[1450px] flex-col items-start justify-between gap-5 rounded-3xl border border-sky-400/30 bg-[linear-gradient(120deg,#102b40,#081322)] p-6 text-white sm:flex-row sm:items-center sm:p-9" aria-labelledby="rch-sites-title">
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase tracking-[.19em] text-sky-300">RCH Sites · Website Creator</p>
+        <h2 id="rch-sites-title" className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Your basketball business. Your website.</h2>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">For coaches, trainers, teams and organizers. Start with a free site draft. Amateur and Professional options are separate website subscriptions.</p>
+      </div>
+      <Link href="/website-creator" className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-black text-[#071522] hover:bg-sky-300">Build a website <FaArrowRight aria-hidden="true"/></Link>
     </section>
 
     <section className="rch-browser-app-promo" aria-labelledby="rch-browser-app-title">
