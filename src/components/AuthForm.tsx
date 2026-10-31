@@ -154,7 +154,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       }
     } catch {
       if (mode === 'sign-up') trackRchConversion('signup_failed', 'email');
-      setMessage('Unable to complete this request. Please check the details above and try again.');
+      // useAuth already exposes an actionable, safe auth error. Do not bury it
+      // behind a second generic signup message when the server rejects signup.
+      setMessage(mode === 'sign-up' ? '' : 'Unable to complete this request. Please check the details above and try again.');
     }
   }
 
