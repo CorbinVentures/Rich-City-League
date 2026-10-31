@@ -167,11 +167,11 @@ export async function GET(request: NextRequest) {
     };
     const cohorts = {d7:retention(members,siteVisits,7,14,now),d30:retention(members,siteVisits,30,37,now)};
     const integrations = [
-      vendor('PostHog',Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY),'Funnels, experiments, product behavior','https://posthog.com/docs'),
-      vendor('Microsoft Clarity',Boolean(process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID),'Opt-in public-page heatmaps / replay','https://clarity.microsoft.com/'),
+      vendor('PostHog',Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY),'Opt-in anonymous public-section events; no SDK replay or private interaction capture','https://posthog.com/docs'),
+      vendor('Microsoft Clarity',false,'Session replay OFF pending explicit recording-consent and project masking verification','https://clarity.microsoft.com/'),
       vendor('Google Search Console',Boolean(process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL),'Search reach, impressions and indexing','https://search.google.com/search-console'),
-      vendor('Vercel Analytics',Boolean(process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ID),'Independent traffic and web vitals','https://vercel.com/docs/analytics'),
-      vendor('Sentry',Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),'Crashes, exceptions and technical alerts','https://sentry.io/'),
+      vendor('Vercel Analytics',false,'Project dashboard activation and official Next.js SDK still required','https://vercel.com/docs/analytics'),
+      vendor('Sentry',false,'Error monitoring SDK and verified DSN still required','https://sentry.io/'),
     ];
     const insights: string[] = [];
     if(observations.newMembers>0 && observations.runPlayers===0)insights.push('New memberships are being recorded, but no distinct Run players joined in this window. Review the onboarding path to Runs.');
