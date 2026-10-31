@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
+import { RchActivationCohorts } from '@/components/admin/RchActivationCohorts';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,7 @@ export default async function GrowthCenter() {
           : <p className="mt-5 text-sm text-white/60">No measured join clicks in this period.</p>}
         </article>
       </section>
+      <RchActivationCohorts />
       <p className="mt-6 max-w-3xl text-xs leading-6 text-white/50">These measures show registration flow friction, not signup conversion percentages, unique visitors, active users, or verified Run attendance. Compare them with actual profile creation and activity metrics before taking budget decisions.</p>
     </Container>
   </main>;
