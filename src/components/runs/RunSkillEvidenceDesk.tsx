@@ -157,9 +157,9 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
     <p className="font-bold uppercase tracking-wider text-[#e5c17e]">Existing evidence: {activeReceipt.review_status}</p>
     <p className="mt-1 text-[#bed2e2]">{activeReceipt.points} PTS · {activeReceipt.rebounds??'—'} REB · {activeReceipt.assists??'—'} AST</p>
     {activeReceipt.review_status==='pending'&&<div className="mt-3 flex flex-wrap gap-2">
-     <button disabled={busy||activeReceipt.recorded_by===user.id} type="button" onClick={()=>void review(true)} className="min-h-11 rounded-lg bg-[#91dbbf] px-4 text-xs font-black text-[#092d2b] disabled:opacity-40"><FaCheck className="mr-1 inline"/> Certify independently</button>
-     <button disabled={busy||activeReceipt.recorded_by===user.id} type="button" onClick={()=>void review(false)} className="min-h-11 rounded-lg border border-[#ac8080] px-4 text-xs font-bold disabled:opacity-40">Reject</button>
-     {activeReceipt.recorded_by===user.id&&<span className="self-center text-[#c3d4e1]">A different authorized reviewer must approve your entry.</span>}
+     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(true)} className="min-h-11 rounded-lg bg-[#91dbbf] px-4 text-xs font-black text-[#092d2b] disabled:opacity-40"><FaCheck className="mr-1 inline"/> Certify independently</button>
+     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(false)} className="min-h-11 rounded-lg border border-[#ac8080] px-4 text-xs font-bold disabled:opacity-40">Reject</button>
+     {activeReceipt.recorded_by===uid&&<span className="self-center text-[#c3d4e1]">A different authorized reviewer must approve your entry.</span>}
     </div>}
     {activeReceipt.review_status==='verified'&&<p className="mt-2 text-emerald-200">Locked verified receipt. Corrections require audited staff revocation.</p>}
    </div>}
