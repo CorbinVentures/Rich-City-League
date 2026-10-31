@@ -38,7 +38,7 @@ describe('RCH free membership growth safeguards', () => {
 
   it('records minimal opt-out-aware conversion events without personal data', () => {
     const tracker = read('src/lib/analytics/conversion.ts');
-    const migration = read('supabase/migrations/20261031025000_rch_member_conversion_events.sql');
+    const migration = read('supabase/migrations/20261031030208_rch_member_conversion_events.sql');
     expect(tracker).toContain("globalPrivacyControl === true");
     expect(tracker).toContain("privacy.doNotTrack === '1'");
     expect(tracker).toContain('session_id: session');
