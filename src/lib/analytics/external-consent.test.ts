@@ -16,7 +16,7 @@ describe('third-party analytics consent and route guard', () => {
   it('refuses sensitive routes, detail pages and query-bearing strings', () => {
     for (const path of ['/messages','/messages/123','/admin','/command','/settings/privacy',
       '/auth/sign-in','/profile','/players/example','/organizations/1',
-      '/rch-sites/organization','/runs/new','/runs?id=1','/shop/checkout']) {
+      '/rch-sites/organization','/runs/new','/fantasy','/runs?id=1','/shop/checkout']) {
       expect(canSendExternalAnalytics(path, true, false)).toBe(false);
     }
   });

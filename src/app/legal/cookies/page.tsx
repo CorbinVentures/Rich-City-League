@@ -13,7 +13,7 @@ export default function CookiesPolicy() {
   return <main className="min-h-screen bg-rcl-black text-white">
     <Container maxWidth="lg" className="py-14 prose prose-invert">
       <h1>Rich City Hoops Cookie &amp; Storage Policy</h1>
-      <p><b>Effective: October 5, 2026</b></p>
+      <p><b>Effective: October 31, 2026</b></p>
       <p>This policy explains how Rich City Hoops (“RCH”) uses cookies, local storage, service-worker caches and similar browser technologies across the website and installable app.</p>
 
       <h2>Necessary account and security storage</h2>
