@@ -21,6 +21,7 @@ import {
   FaTrophy,
   FaFilm,
   FaUsers,
+  FaMobileScreenButton,
 } from 'react-icons/fa6';
 
 type AdminNavGroup = {
@@ -54,6 +55,7 @@ const groups: AdminNavGroup[] = [
     items: [
       { label: 'Network', href: '/admin/network', icon: FaNetworkWired, description: 'Organizations, events and promotion approvals' },
       { label: 'RCH TV', href: '/admin/rch-tv', icon: FaFilm, description: 'Video library, publishing, acquisitions and founding creators' },
+      { label: 'PWA adoption', href: '/admin/pwa-installs', icon: FaMobileScreenButton, description: 'Verified launches by signed-in iPhone and Android members' },
       { label: 'LeagueApps', href: '/admin/leagueapps', icon: FaPlug, description: 'Integration status and data sync' },
       { label: 'Shop', href: '/admin/shop', icon: FaShirt, description: 'Products, inventory and orders' },
       { label: 'Seasonal Themes', href: '/admin/seasonal-themes', icon: FaCalendarDays, description: 'Holiday themes and visual effects' },
