@@ -214,11 +214,11 @@ export function CommandIntelligenceCenter() {
         </Surface>
       </>}
       {view==='systems'&&<>
-        <Surface title="Analytics integrations" subtitle="Connection status reports presence of configuration only. It does not imply consent, successful data ingestion, session replay, or an operational external dashboard.">
+        <Surface title="Analytics integrations" subtitle="Connection status reports verified prerequisites only. It does not imply consent, successful data ingestion, replay, or a functioning external dashboard.">
           <div className="grid gap-3 lg:grid-cols-2">{report.integrations.map(item=><article key={item.name} className="rounded-xl border border-[#365878] bg-[#102b45] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <strong>{item.name}</strong>
-              <span className={`text-xs font-bold ${item.configured?'text-[#9ae5c0]':'text-[#f8c993]'}`}>{item.configured?'Credentials detected · verify service':'Not configured'}</span>
+              <span className={`text-xs font-bold ${item.configured?'text-[#9ae5c0]':'text-[#f8c993]'}`}>{item.configured?'Configuration detected · validate delivery':'Setup needed'}</span>
             </div>
             <p className="mt-2 text-xs leading-5 text-[#bdd5e7]">{item.purpose}</p>
             <a href={item.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-bold text-[#90d0ff]">Provider setup <FaArrowUpRightFromSquare/></a>
@@ -229,7 +229,7 @@ export function CommandIntelligenceCenter() {
             <div className="flex items-start gap-3 text-sm leading-6 text-[#d3e4f2]"><FaShieldHalved className="mt-1 shrink-0 text-[#a1d5fc]"/>Vercel runtime diagnostics and Sentry reporting require their own verified connected datasets. Until configured and validated, this module reports connection readiness only.</div>
           </Surface>
           <Surface title="Heatmaps, replay & A/B experiments" subtitle="Privacy and measurement prerequisites before activating.">
-            <div className="text-sm leading-6 text-[#d3e4f2]">Replay is disabled until a provider is configured and explicit user consent with sensitive-field masking is implemented and verified. Experiment win rates are not shown without randomized assignments, exposure logs and observed outcomes.</div>
+            <div className="text-sm leading-6 text-[#d3e4f2]">Session replay remains disabled. Optional anonymous public-section product analytics require a separate opt-in at /legal/cookies and a PostHog project token. Experiment win rates are not shown without randomized assignments, exposure logs and observed outcomes.</div>
           </Surface>
         </div>
       </>}

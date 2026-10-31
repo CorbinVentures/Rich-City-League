@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { FaArrowLeft, FaArrowRight, FaBan, FaComments, FaFileShield, FaLock, FaPen, FaTrash, FaUserGroup, FaUserShield } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import { AnalyticsPrivacyChoices } from '@/components/analytics/AnalyticsPrivacyChoices';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -114,6 +115,7 @@ export default function PrivacyCenter() {
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
     <ClientPageHero eyebrow="Account Control" title="Privacy Center" accent="Your data, your rights" description="Review RCL privacy information and submit authenticated access, correction, deletion, or appeal requests from one place." meta={<span className="grid h-14 w-14 place-items-center rounded-2xl border border-rcl-blue/20 bg-rcl-blue/10 text-2xl text-rcl-blue"><FaLock/></span>} />
     <Container maxWidth="xl" className="py-8 sm:py-12">
+      <div className="mb-6"><AnalyticsPrivacyChoices /></div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><Link href="/settings" className="inline-flex min-h-11 items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-white/35 transition hover:text-white"><FaArrowLeft/> Settings</Link><Link href="/legal/privacy" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/5 px-4 text-xs font-black uppercase tracking-wider text-rcl-blue transition hover:border-rcl-blue/50">Read Privacy Policy <FaArrowRight/></Link></div>
 
       {authLoading ? <div className="h-48 animate-pulse rounded-2xl border border-rcl-blue/10 bg-white/[.025]"/> : user ? <section>
