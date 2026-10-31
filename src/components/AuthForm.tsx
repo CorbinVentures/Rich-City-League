@@ -115,12 +115,33 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         const birth = new Date(dateOfBirth + 'T00:00:00'); const now = new Date(); let age = now.getFullYear()-birth.getFullYear(); const md=now.getMonth()-birth.getMonth(); if(md<0||(md===0&&now.getDate()<birth.getDate())) age--;
         if (Number.isNaN(birth.getTime()) || age < 16) { setMessage('RCL Social accounts are currently available only to users age 16 or older.'); return; }
         if (!acceptedLegal) { setMessage('Review and accept the Terms and Privacy Policy to create an account.'); return; }
+        const normalizedUsername = username.trim().replace(/^@/, '');
+        if (!/^[A-Za-z0-9_]{3,30}$/.test(normalizedUsername)) {
+          setMessage('Choose a username of 3–30 letters, numbers, or underscores.');
+          return;
+        }
+        const client = (await import('@/lib/supabase')).getSupabaseClient();
+        if (!client) {
+          setMessage('Account registration is temporarily unavailable. Please retry.');
+          return;
+        }
+        const { data: available, error: availabilityError } = await (client.rpc as any)(
+          'rch_username_available', { p_username: normalizedUsername },
+        );
+        if (availabilityError) {
+          setMessage('Unable to check your username right now. Please retry.');
+          return;
+        }
+        if (available !== true) {
+          setMessage('That username is already taken. Choose another to continue.');
+          return;
+        }
         trackRchConversion('signup_submitted', 'email');
         const { session } = await signUp(email, password, {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           display_name: displayName.trim() || `${firstName.trim()} ${lastName.trim()}`,
-          username: username.trim().replace(/^@/, ''),
+          username: normalizedUsername,
           requested_profile_type: profileType,
           location: location.trim(),
           bio: bio.trim(),
@@ -146,7 +167,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           }
         }
         setStep(3);
-        setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. You can still explore public runs and stories.');
+        setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. If your username changed during signup, you can update it from your profile.');
         // Delay any install invitation until after the member has received practical value.
       } else {
         await resetPassword(email);
@@ -154,7 +175,9 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       }
     } catch {
       if (mode === 'sign-up') trackRchConversion('signup_failed', 'email');
-      setMessage('Unable to complete this request. Please check the details above and try again.');
+      // useAuth already exposes an actionable, safe auth error. Do not bury it
+      // behind a second generic signup message when the server rejects signup.
+      setMessage(mode === 'sign-up' ? '' : 'Unable to complete this request. Please check the details above and try again.');
     }
   }
 
