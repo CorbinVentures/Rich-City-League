@@ -27,7 +27,7 @@ describe('RCH Skill Engine V2: earned mastery, not participation',()=>{
   expect(migration).toContain('public.is_staff_or_admin()');
   expect(migration).toContain("'scorekeeper','cohost'");
   expect(migration).toContain('Only an authorized event scorekeeper');
-  expect(migration).toContain('A different independent reviewer');
+  expect(migration).toContain('different independent reviewer');
   expect(migration).toContain('revoke all on public.rch_match_skill_box_scores');
   expect(migration).toContain('enable row level security');
   expect(migration).toContain('rch_skill_stats_owner_read');
