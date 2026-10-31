@@ -23,7 +23,21 @@ describe('public homepage SSR and anonymous-cache contract', () => {
     expect(home).toContain(".eq('author.is_active', true)");
     expect(home).toContain(".is('target_profile_id', null)");
     expect(home).toContain("client.from('public_players')");
+    expect(home).toContain(".eq('is_automated', false)");
+    expect(home).toContain("seasons.filter(isRclProSeasonRecord)");
+    expect(home).toContain("const confirmedRuns=suggestionsKnown?");
+    expect(home).toContain("const publicMembers=memberRows");
+    expect(home).toContain("const publicActivity=postRows");
+    expect(home).toContain("listingsVerified={data.listingsVerified}");
+    expect(home).toContain("members={data.members as any}");
+    expect(home).toContain("activity={data.activity}");
     expect(home).toContain(".eq('status', 'published')");
+  });
+
+  it('renders a real Join Free anchor before hydration or without JavaScript', () => {
+    const account = read('src/components/RCHBrowserAccountLink.tsx');
+    expect(account).toContain('if (loading) return <Link href={guestHref}');
+    expect(account).not.toContain('if (loading) return <span');
   });
 
   it('retains the browser shell for first render and mobile-only installed PWA gating', () => {

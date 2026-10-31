@@ -19,7 +19,7 @@ describe('RCH earned skill mastery & collectible showcase',()=>{
   for(const skill of ['certified_bucket','winning_scorer','glass_cleaner','floor_general','double_double'])expect(sql).toContain(skill);
   for(const threshold of ['s.q>=30','s.q>=16','s.q>=8','s.q>=3','s.q>=1'])expect(sql).toContain(threshold);
   expect(ui).toContain("get_rch_skill_mastery");
-  expect(ui).toContain('verified competitive Runs');
+  expect(ui).toContain('match-specific box scores');
  });
  it('respects private profile visibility and keeps the read API tightly scoped',()=>{
   expect(sql).toContain("p.id=(select auth.uid())");

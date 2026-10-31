@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = await getNewsBySlug(slug);
   if (!item) return { title: 'RCL News', robots: { index: false, follow: false } };
 
-  const description = item.seo_description || item.excerpt || `${item.title} — reporting from the RCL Newsroom.`;
-  const title = item.seo_title || `${item.title} | RCL News`;
+  const description = item.seo_description || item.excerpt || `${item.title} — reporting from Rich City Hoops.`;
+  const title = item.seo_title || `${item.title} | RCH News`;
   const keywords = item.seo_keywords?.length ? item.seo_keywords : undefined;
   const cover = item.cover_image_url || `/api/news-cover/${encodeURIComponent(item.slug)}`;
   const socialCover = new URL(cover, 'https://www.richcityhoops.com').toString();
@@ -64,10 +64,14 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   const sourceUrls = stringArray(item.source_urls);
   const sourceNames = stringArray(item.source_names);
-  const sources = sourceUrls.map((url, index) => ({
-    url,
-    name: sourceNames[index] || (() => { try { return new URL(url).hostname.replace(/^www\./,''); } catch { return 'Source'; } })(),
-  }));
+  // Only genuine HTTP(S) references can be published as clickable sources.
+  const sources = sourceUrls.flatMap((url, index) => {
+    try {
+      const parsed=new URL(url);
+      if(!['http:','https:'].includes(parsed.protocol))return [];
+      return [{url:parsed.toString(),name:sourceNames[index] || parsed.hostname.replace(/^www\./,'')}];
+    } catch {return [];}
+  });
   const section = categoryLabel(item.category);
   const coverImageUrl = item.cover_image_url || `/api/news-cover/${encodeURIComponent(item.slug)}`;
   const paragraphs = item.body.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
@@ -79,8 +83,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     '@context':'https://schema.org',
     '@type':'BreadcrumbList',
     itemListElement:[
-      {'@type':'ListItem',position:1,name:'Rich City League',item:'https://www.richcityhoops.com/'},
-      {'@type':'ListItem',position:2,name:'RCL Newsroom',item:'https://www.richcityhoops.com/news'},
+      {'@type':'ListItem',position:1,name:'Rich City Hoops',item:'https://www.richcityhoops.com/'},
+      {'@type':'ListItem',position:2,name:'RCH Newsroom',item:'https://www.richcityhoops.com/news'},
       {'@type':'ListItem',position:3,name:item.title,item:`https://www.richcityhoops.com/news/${item.slug}`},
     ],
   };
@@ -95,8 +99,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     articleSection:section,
     keywords:item.seo_keywords?.length ? item.seo_keywords.join(', ') : undefined,
     mainEntityOfPage:`https://www.richcityhoops.com/news/${item.slug}`,
-    author:{'@type':'Organization',name:'RCL Newsroom',url:'https://www.richcityhoops.com/news'},
-    publisher:{'@type':'Organization',name:'Rich City League',url:'https://www.richcityhoops.com'},
+    author:{'@type':'Organization',name:'RCH Newsroom',url:'https://www.richcityhoops.com/news'},
+    publisher:{'@type':'Organization',name:'Rich City Hoops',url:'https://www.richcityhoops.com'},
     isAccessibleForFree:true,
   };
 
@@ -115,14 +119,14 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         <div className="flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-[.16em]">
           <span className="text-rcl-orange">{section}</span>
           <span className="text-white/20">•</span>
-          <span className="text-white/35">{item.published_at ? formatDate(item.published_at) : 'RCL Newsroom'}</span>
+          <span className="text-white/35">{item.published_at ? formatDate(item.published_at) : 'RCH Newsroom'}</span>
         </div>
 
         <h1 className="mt-4 font-display text-4xl font-black leading-[.98] sm:text-6xl">{item.title}</h1>
         {item.excerpt && <p className="mt-6 text-lg leading-8 text-white/55 sm:text-xl">{item.excerpt}</p>}
 
         {item.is_automated && <div className="mt-7 rounded-2xl border border-rcl-blue/18 bg-rcl-blue/[.05] p-4 text-xs leading-5 text-white/45">
-          <div className="flex items-start gap-3"><FaCircleCheck className="mt-0.5 shrink-0 text-rcl-blue"/><p><b className="text-white/75">RCL Newsroom disclosure:</b> This story was AI-assisted and generated through RCL&apos;s source-grounded newsroom system. League reporting is based on official RCL data; external reporting links to the public sources used. The system is instructed not to invent quotes or unsupported facts.</p></div>
+          <div className="flex items-start gap-3"><FaCircleCheck className="mt-0.5 shrink-0 text-rcl-blue"/><p><b className="text-white/75">RCH Newsroom disclosure:</b> This article was AI-assisted. Linked references, where available, are shown below; the presence of automation is not proof that every claim was independently verified. Corrections and source reviews may be requested through the newsroom.</p></div>
           {confidence !== null && <p className="mt-2 pl-6 text-[10px] uppercase tracking-wider text-white/25">Automated editorial confidence · {Math.round(confidence * 100)}%</p>}
         </div>}
       </div>
@@ -145,6 +149,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         className="mt-10 max-w-3xl"
       />
 
+      {sources.length===0 && <p className="mt-10 max-w-3xl rounded-xl border border-amber-300/25 bg-amber-300/[.04] p-4 text-xs leading-5 text-amber-100">No external reporting sources are linked for this article. Treat independent claims as uncorroborated until sources are provided; official Rich City League announcements should be confirmed against league records.</p>}
       {sources.length > 0 && <section className="mt-12 max-w-3xl rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
         <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Reporting sources</p>
         <p className="mt-2 text-xs leading-5 text-white/35">RCL links to the reporting or official information used to ground this article. Source links open on the original publisher&apos;s site.</p>

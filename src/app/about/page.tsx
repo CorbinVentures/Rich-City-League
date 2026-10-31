@@ -10,6 +10,8 @@ const timeline = [
   ['EXPANSION', 'BEYOND RICHMOND', 'RCL history records collaborations with the Goodman League and Entertainers Basketball Classic, along with recognition from SLAM Magazine and local media.'],
   ['2023', 'END OF A CHAPTER', 'The last full season of the earlier RCL era closes, creating room to rethink what an independent Richmond basketball organization could become.'],
   ['2026', 'THE REBUILD', 'RCL returns with a larger vision: basketball, technology, media, analytics, fantasy competition, social community, and league operations in one ecosystem.'],
+  ['SUMMER 2027', 'THE OFFICIAL TRYOUTS', 'The professional league plans its official summer tryouts; specific dates and venues are to be announced.'],
+  ['NOVEMBER 2027', 'THE PRO SEASON', 'Rich City League plans to begin its first new professional season in November 2027. The exact opening-night date is still to be announced.'],
 ];
 
 const ecosystem = [

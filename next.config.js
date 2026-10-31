@@ -8,8 +8,16 @@ const liveKitConnectSource = (() => {
   }
 })();
 
+const optionalPosthogConnect = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim() ? ' https://us.i.posthog.com https://eu.i.posthog.com' : '';
+
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      // Route /join directly to signup rather than returning a streamed HTTP 200.
+      { source: '/join', destination: '/auth/sign-up', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
@@ -34,7 +42,7 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'Content-Security-Policy', value: `default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tiles.openfreemap.org https://*.openfreemap.org https://services.arcgis.com https://services.dwr.virginia.gov wss://*.livekit.cloud https://*.livekit.cloud${liveKitConnectSource}; img-src 'self' data: blob: https:; media-src 'self' https: blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; font-src 'self' data:; frame-src 'self' https://www.google.com/maps https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },
+          { key: 'Content-Security-Policy', value: `default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co${optionalPosthogConnect} https://tiles.openfreemap.org https://*.openfreemap.org https://services.arcgis.com https://services.dwr.virginia.gov wss://*.livekit.cloud https://*.livekit.cloud${liveKitConnectSource}; img-src 'self' data: blob: https:; media-src 'self' https: blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; font-src 'self' data:; frame-src 'self' https://www.google.com/maps https://www.youtube.com https://www.youtube-nocookie.com https://*.cloudflarestream.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self)' },

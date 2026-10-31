@@ -134,3 +134,19 @@
  .rch-next-journey-links{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
  .rch-next-journey-links a{min-width:0;padding:9px 10px;font-size:11px!important;line-height:1.35}
 }
+
+/* Visual shortcuts complement the persistent program tabs. */
+.rcl-navigation-panel .rch-menu-destinations {
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px;
+}
+.rcl-navigation-panel .rch-menu-destination {
+ display:flex;align-items:center;gap:12px;min-width:0;min-height:64px;padding:12px;
+ border:1px solid var(--rch-brand-border);border-radius:14px;
+ background:var(--rch-brand-raised);color:var(--rch-brand-ink);text-decoration:none;
+}
+.rcl-navigation-panel .rch-menu-destination svg {
+ flex:none;width:22px;height:22px;color:var(--rch-brand-accent-text);
+}
+.rcl-navigation-panel .rch-menu-destination span {font-size:14px;font-weight:700;overflow-wrap:anywhere;}
+.rcl-navigation-panel .rch-menu-destination:is(:hover,[aria-current="page"]) {border-color:var(--rch-brand-accent-text);}
+.rcl-navigation-panel .rch-menu-destination:focus-visible {outline:2px solid var(--rch-brand-accent-text);outline-offset:3px;}

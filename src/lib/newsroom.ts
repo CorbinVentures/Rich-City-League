@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type NewsBeat = 'rich-city-league' | 'richmond-basketball' | 'richmond-culture' | 'rcl-insider';
@@ -328,6 +329,7 @@ function editorialInstructions(beat: NewsBeat) {
     return [
       ...shared,
       'BEAT: Rich City League.',
+      `Official professional-season context: first new pro season planned for ${RCL_PRO_SEASON.startLabel}, official tryouts planned for summer 2027, Draft Night after tryouts, then Fantasy during official play. Exact dates are unannounced; do not imply the pro league is already underway. Prior 2011–2023 history and imported 2026 season rows are not the November 2027 pro season. RCH Runs and the Commonwealth Cup have independent schedules.`, 
       'Use ONLY the official structured RCL data included in the prompt. Do not browse or add outside facts.',
       'Choose the strongest timely RCL angle: completed games, upcoming games, standings movement, registration status, open runs, or a useful league explainer supported by the supplied data.',
       'If there is no dramatic news, write a useful verified preview or state-of-the-league piece rather than manufacturing a development.',
@@ -339,6 +341,7 @@ function editorialInstructions(beat: NewsBeat) {
     return [
       ...shared,
       'BEAT: RCL Insider — product, business and platform growth.',
+      `Rich City League professional season is planned to begin ${RCL_PRO_SEASON.startLabel}. Do not describe preseason development or independent Runs as current official pro league games. Exact tipoff date unannounced.`, 
       'Use ONLY the approved official RCL business context included in the prompt. Do not browse or add outside business claims.',
       'The selected product topic is the primary angle. Explain what it does, who it helps, why it matters to Richmond/Virginia basketball, and how it connects to the broader RCL business.',
       'If topic.status is live, describe it as available now. If status is preview, describe it as being introduced or expanded, not as universally available. If status is roadmap, use careful language such as planned, on the roadmap, or being developed. Never announce a launch date, price, partnership, sponsor, revenue figure or guarantee unless the supplied context explicitly contains it.',

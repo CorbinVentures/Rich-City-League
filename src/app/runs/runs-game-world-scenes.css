@@ -1,0 +1,73 @@
+/* Phase 3 — shared MyPLAYER, Crew HQ, Court Arena game scenes. Source-backed stats only. */
+.rch-career-stage,.rch-crew-game,.rch-court-game-gate{color:#f4faff;border:1px solid #36668d;border-radius:21px;padding:20px;background:radial-gradient(ellipse at 85% 0%,#16446e 0%,#0b2138 46%,#05121f 100%);box-shadow:0 18px 45px #0006;min-width:0}
+.rch-career-kicker,.rch-crew-game-header small,.rch-court-game-title>span{display:flex;align-items:center;gap:7px;color:#a4d7ff;font-size:10px;font-weight:950;letter-spacing:.16em}
+.rch-career-profile{display:flex;align-items:center;gap:17px;margin:16px 0;padding:16px;border:1px solid #3c739a;border-radius:17px;background:linear-gradient(110deg,#174b75,#081c31)}
+.rch-career-portrait{display:grid;place-items:center;flex:none;width:92px;height:108px;border:1px solid #98cdf2;border-radius:13px;background:linear-gradient(130deg,#316fa1,#0b2744);overflow:hidden;font-size:38px}
+.rch-career-portrait img,.rch-crew-game-crest img,.rch-crew-game-avatars img{width:100%;height:100%;object-fit:cover}
+.rch-career-persona{flex:1;min-width:0}
+.rch-career-persona small{display:block;color:#b1d1eb;font-size:10px;font-weight:900;letter-spacing:.08em}
+.rch-career-persona h2{font-size:clamp(25px,5vw,40px);font-weight:1000;line-height:1;overflow-wrap:anywhere;margin:7px 0}
+.rch-career-persona strong{display:block;color:#ffdc93;font-size:13px;font-weight:950}
+.rch-career-persona p{color:#bdd9ec;font-size:11px}
+.rch-career-progress{margin-top:13px;max-width:520px}
+.rch-career-progress progress{display:block;width:100%;height:9px;accent-color:#7cc6ff}
+.rch-career-progress span{display:block;font-size:10px;color:#b9d7ee;font-weight:850;margin-top:6px}
+.rch-career-metrics,.rch-crew-game-metrics,.rch-court-game-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:15px 0}
+.rch-career-metrics>div,.rch-crew-game-metrics>div,.rch-court-game-grid>div{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:94px;gap:5px;padding:10px;border:1px solid #416a8b;border-radius:12px;background:#09263c;text-align:center}
+.rch-career-metrics>div svg{color:#8bcbff;font-size:18px}
+.rch-career-metrics strong,.rch-crew-game-metrics strong,.rch-court-game-grid strong{font-size:clamp(19px,3vw,27px);font-weight:1000;overflow-wrap:anywhere;line-height:1.1}
+.rch-career-metrics span,.rch-crew-game-metrics small,.rch-court-game-grid small{color:#bed6e7;font-size:9px;font-weight:900;letter-spacing:.04em}
+.rch-career-panels,.rch-crew-game-lineup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rch-career-panel,.rch-crew-game-panel{min-width:0;border:1px solid #3e678a;border-radius:14px;background:#082237;padding:15px}
+.rch-career-panel-head,.rch-crew-game-panel-title{display:flex;align-items:center;gap:7px;color:#aedbff;font-size:11px;font-weight:950;letter-spacing:.05em}
+.rch-career-panel h3,.rch-crew-game-panel h3{font-size:17px;font-weight:1000;margin:12px 0 7px}
+.rch-career-panel p,.rch-crew-game-panel p{color:#c2d9e9;font-size:11px;line-height:1.6;margin-top:9px}
+.rch-career-panel>a,.rch-crew-game-panel>a{display:inline-flex;align-items:center;gap:6px;margin-top:13px;color:#9edaff;font-weight:950;font-size:11px;text-decoration:none}
+.rch-career-medals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:12px}
+.rch-career-medal{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:88px;padding:8px 4px;border:1px solid #526b7d;border-radius:10px;background:#102c43;text-align:center}
+.rch-career-medal span{font-size:24px}
+.rch-career-medal small{color:#d7eaf6;font-size:9px;font-weight:850;line-height:1.4}
+.rch-career-medal.unlocked{border-color:#e2bc72;background:linear-gradient(145deg,#483f2a,#102f41)}
+.rch-career-medal.locked{opacity:.65}
+.rch-career-record,.rch-court-next-run{display:flex;align-items:center;gap:13px;margin-top:14px;padding:13px;border:1px solid #5594b8;border-radius:13px;background:#123c60;color:#f0faff}
+.rch-career-record>svg,.rch-court-next-run>svg:first-child{flex:none;font-size:26px;color:#ffdf92}
+.rch-career-record>div,.rch-court-next-run>span{flex:1;min-width:0}
+.rch-career-record small,.rch-court-next-run small{display:block;color:#afd8f4;font-size:9px;font-weight:950;letter-spacing:.08em}
+.rch-career-record strong,.rch-court-next-run strong{display:block;margin:5px 0;font-size:13px;font-weight:1000;overflow-wrap:anywhere}
+.rch-career-record span,.rch-court-next-run span span{display:block;color:#c2dcef;font-size:10px;line-height:1.5}
+.rch-career-paths,.rch-crew-game-paths,.rch-court-game-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:15px}
+.rch-career-paths a,.rch-crew-game-paths a,.rch-court-game-actions a{display:flex;align-items:center;justify-content:center;min-height:48px;gap:6px;border:1px solid #5282a5;border-radius:10px;background:#103856;color:#eef8ff;text-align:center;font-size:10px;font-weight:950;text-decoration:none;padding:8px}
+.rch-career-paths a:first-child,.rch-court-game-actions a:first-child{background:linear-gradient(100deg,#216ac5,#17568f);border-color:#87cfff}
+.rch-career-integrity,.rch-crew-game-disclosure,.rch-court-game-caution{display:flex;align-items:flex-start;gap:7px;margin-top:13px;color:#b8d2e4;font-size:10px;line-height:1.65}
+.rch-career-integrity svg,.rch-crew-game-disclosure svg,.rch-court-game-caution svg{flex:none;margin-top:2px}
+.rch-crew-game{margin:22px 0 0}
+.rch-crew-game-header{display:flex;align-items:center;gap:14px;min-width:0}
+.rch-crew-game-header>div:last-child{min-width:0;flex:1}
+.rch-crew-game-crest{display:grid;place-items:center;width:84px;height:84px;flex:none;border:1px solid #aed7ff;border-radius:17px;overflow:hidden;background:#113d61;font-size:36px}
+.rch-crew-game-crest img{object-fit:contain}
+.rch-crew-game-header h2{font-size:clamp(23px,5vw,39px);font-weight:1000;line-height:1.1;margin:5px 0;overflow-wrap:anywhere}
+.rch-crew-game-header span{display:flex;align-items:center;gap:6px;color:#bedbec;font-size:10px;font-weight:900}
+.rch-crew-game-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rch-crew-game-panel-title{color:#ffe3a5}
+.rch-crew-game-captain{color:#ffda93!important;font-weight:900}
+.rch-crew-game-avatars{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:14px 0}
+.rch-crew-game-avatars a{display:grid;place-items:center;width:49px;height:49px;border:1px solid #77a6c5;border-radius:50%;overflow:hidden;background:#153957;color:#c7eaff}
+.rch-crew-game-avatars a:hover{border-color:#fce1ad}
+.rch-crew-game-quiet{color:#b8d5ea}
+.rch-court-game-gate{margin:19px 0}
+.rch-court-game-title h2{font-size:clamp(27px,6vw,39px);font-weight:1000;margin:6px 0 2px;line-height:1}
+.rch-court-game-title p{font-size:13px;color:#b8d9ee;font-weight:850}
+.rch-court-game-grid>div{align-items:flex-start;min-height:114px;text-align:left}
+.rch-court-game-grid strong{font-size:clamp(14px,2vw,20px)}
+.rch-court-game-grid>div span{color:#a7c7dc;font-size:9px;line-height:1.4}
+.rch-court-next-run{text-decoration:none;min-height:78px}
+.rch-court-next-run>svg:last-child{flex:none}
+.rch-court-game-empty{display:flex;gap:12px;align-items:center;min-height:78px;border:1px dashed #587e99;border-radius:13px;padding:13px;background:#0b2a42}
+.rch-court-game-empty>svg{font-size:26px;flex:none;color:#e1c78e}
+.rch-court-game-empty strong,.rch-court-game-empty small{display:block}
+.rch-court-game-empty strong{font-size:12px;font-weight:1000}
+.rch-court-game-empty small{margin-top:5px;font-size:10px;color:#c3d8e8;line-height:1.5}
+.rch-career-paths a:focus-visible,.rch-crew-game a:focus-visible,.rch-court-game-gate a:focus-visible{outline:3px solid #abdcff;outline-offset:3px}
+@media(max-width:750px){.rch-career-stage,.rch-crew-game,.rch-court-game-gate{padding:13px;border-radius:16px}.rch-career-panels,.rch-crew-game-lineup{grid-template-columns:1fr}.rch-career-metrics,.rch-court-game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rch-career-portrait{width:76px;height:91px}.rch-career-profile{gap:11px;padding:10px}.rch-crew-game-crest{width:67px;height:67px}.rch-career-paths a,.rch-crew-game-paths a,.rch-court-game-actions a{font-size:9px}.rch-career-metrics strong{font-size:22px}}
+@media(max-width:390px){.rch-career-paths,.rch-crew-game-paths,.rch-court-game-actions{grid-template-columns:1fr}.rch-crew-game-header{align-items:flex-start}.rch-crew-game-metrics>div{padding:7px}.rch-crew-game-metrics strong{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.rch-career-stage *,.rch-crew-game *,.rch-court-game-gate *{animation:none!important;transition:none!important}}

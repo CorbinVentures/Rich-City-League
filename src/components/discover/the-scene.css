@@ -153,3 +153,9 @@
   .rch-scene-rail { gap:12px; }
 }
 @media(prefers-reduced-motion:reduce) { .rch-scene-page * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+
+/* Content-first PWA Discover: no empty right rail when extras are collapsed. */
+.rch-scene-content.rch-scene-content-simple {display:block;max-width:900px;margin-inline:auto;}
+.rch-scene-content-simple>.rch-scene-main-column {min-width:0;width:100%;}
+.rch-scene-content-simple>.rch-scene-main-column+.rch-scene-rail {margin-top:20px;}
+.rch-scene-content-simple>details>summary:focus-visible {outline:2px solid var(--rch-brand-accent-text);outline-offset:3px;}

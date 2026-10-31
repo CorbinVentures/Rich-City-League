@@ -4,6 +4,7 @@ import { Container } from '@/components/Container';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { GravityLocationPicker } from '@/components/GravityLocationPicker';
 import { GravityAccountSyncPanel } from '@/components/GravityAccountSyncPanel';
+import { AnalyticsCitySharing } from '@/components/analytics/AnalyticsCitySharing';
 import { FaArrowLeft, FaCompass, FaLocationDot, FaShieldHalved } from 'react-icons/fa6';
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function DiscoveryLocationSettingsPage() {
     <Container maxWidth="lg" className="space-y-5 py-7 sm:py-10">
       <GravityLocationPicker />
       <GravityAccountSyncPanel />
+      <AnalyticsCitySharing />
       <section className="rounded-2xl border border-[#315878] bg-[#0b253b] p-6">
         <h2 className="flex items-center gap-2 text-lg font-bold"><FaCompass className="text-[#91cfff]"/> How Gravity uses your area</h2>
         <p className="mt-3 text-sm leading-7 text-[#d2e1ed]">Nearby city matches receive priority for runs, tournaments, training, and other basketball opportunities. Your selected radius is a preference—not a hard exclusion: major events elsewhere in Virginia remain discoverable. Distances are approximated between city centers, not calculated from your address.</p>

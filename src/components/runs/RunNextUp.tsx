@@ -1,9 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaArrowRight,FaBasketball,FaClock,FaRotate} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
+import {nextUpEligibility} from '@/lib/runs-next-up-eligibility';
 
 type QueueEntry={
  id:string;profile_id:string;status:'waiting'|'called'|'playing'|'completed'|'left'|'no_show';
@@ -14,7 +16,7 @@ const nextAction:Record<string,{label:string,action:string}|undefined>={
  called:{label:'Start game',action:'playing'},
  playing:{label:'Finish game',action:'completed'},
 };
-export function RunNextUp({runId,hostId}:{runId:string;hostId:string}) {
+export function RunNextUp({runId,hostId,checkedIn,hosted}:{runId:string;hostId:string;checkedIn:boolean;hosted:boolean}) {
  const {user}=useAuth();
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [items,setItems]=useState<QueueEntry[]>([]);
@@ -36,9 +38,9 @@ export function RunNextUp({runId,hostId}:{runId:string;hostId:string}) {
    db.from('rch_run_operators').select('role').eq('run_id',runId).eq('profile_id',user.id).maybeSingle(),
    db.rpc('can_manage_run',{target_run:runId}),
   ]);
-  if(queue.error){setEnabled(false);return;}
+  if(queue.error){setEnabled(false);setError('The live queue could not be read. No attendance or position is being assumed.');return;}
   const entries=(queue.data??[]) as QueueEntry[];
-  setItems(entries);setEnabled(true);
+  setItems(entries);setEnabled(true);setError('');
   setRole(operator.data?.role??'');
   setManager(Boolean(host.data)||user.id===hostId||['cohost','scorekeeper'].includes(operator.data?.role??''));
   if(entries.length) {
@@ -71,12 +73,17 @@ export function RunNextUp({runId,hostId}:{runId:string;hostId:string}) {
  const waiting=items.filter(i=>i.status==='waiting');
  const current=items.filter(i=>i.status==='playing');
  const called=items.filter(i=>i.status==='called');
- if(!enabled)return null;
+ const waitingPosition=active?.status==='waiting'?waiting.findIndex(i=>i.id===active.id)+1:0;
+ const gate=nextUpEligibility({signedIn:Boolean(user?.id),hostedGameDay:hosted,checkedIn});
+ const canJoinQueue=gate==='eligible';
+ const personalLabel=active?.status==='playing'?'ON COURT':active?.status==='called'?'YOU ARE ON DECK':active?.status==='waiting'?'WAITING POSITION #'+waitingPosition:'NOT IN QUEUE';
+ if(!user)return <section aria-label="Next Up basketball queue" className="mt-6 rounded-xl border border-[#4b7192] bg-[#0b2941] p-4 text-sm text-[#d4eafa]">Next Up shows only real checked-in attendees. <Link href={'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId+'#rch-next-up')} className="font-black underline">Sign in</Link> to view the live court queue.</section>;
+ if(!enabled)return <section aria-label="Next Up basketball queue" role="alert" className="mt-6 rounded-xl border border-amber-300/40 bg-[#252116] p-4 text-sm text-amber-100">Next Up is temporarily unavailable. No queue position has been confirmed. <button type="button" onClick={()=>void load()} className="ml-2 min-h-10 rounded-lg border border-amber-300/50 px-3 font-bold">Retry live queue</button></section>;
  return <section aria-label="Next Up basketball queue" className="mt-6 rounded-3xl border border-[#38678b] bg-[#081e32] p-5 text-white sm:p-7">
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div>
     <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#8fceff]"><FaClock/> RCH Runs · Live Operations</p>
-    <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Next Up</h2>
+    <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">ON DECK · NEXT UP</h2>
     <p className="mt-2 max-w-xl text-sm text-[#aac6db]">Your place in line. No confusion over who has next. Hosts move players from waiting to called, then playing and finished.</p>
    </div>
    <button type="button" onClick={()=>void load()} className="flex min-h-10 items-center gap-2 rounded-xl border border-[#477695] px-3 text-xs font-bold"><FaRotate/> Refresh</button>
@@ -86,27 +93,30 @@ export function RunNextUp({runId,hostId}:{runId:string;hostId:string}) {
     <div key={label} className="rounded-xl bg-[#102e48] px-3 py-3"><span className="block text-xl font-black">{value}</span><span className="text-[11px] text-[#9fc4dd]">{label}</span></div>
    )}
   </div>
+  {active&&<div className="rch-nextup-you" role="status" aria-live="polite"><FaBasketball aria-hidden="true"/><div><small>YOUR LIVE COURT QUEUE STATUS</small><strong>{personalLabel}</strong><span>{active.status==='waiting'?'Your exact waiting position among queued players.':'The host determines real on-court play; this is the recorded queue status.'}</span></div></div>}
   {error&&<p role="alert" className="mt-4 rounded-lg border border-rose-500/40 p-3 text-sm text-[#ffc2c2]">{error}</p>}
   {notice&&<p role="status" className="mt-4 rounded-lg border border-[#447a96] p-3 text-sm text-[#c7f4ff]">{notice}</p>}
   {user?<div className="mt-4 flex flex-wrap gap-2">
-   {!active?<button disabled={busy} onClick={()=>void act('rch_join_run_queue',{p_run:runId},'You are now in the Next Up line.')} className="min-h-11 rounded-xl bg-[#318cf2] px-5 text-sm font-black disabled:opacity-50">Join Next Up</button>:
-   <div className="flex items-center gap-3"><span className="text-xs font-bold text-[#afdcf8]">Your status: {active.status.toUpperCase()}</span>
-    {active.status!=='playing'&&<button disabled={busy} onClick={()=>void act('rch_leave_run_queue',{p_entry:active.id},'You have left the queue.')} className="min-h-10 rounded-xl border border-[#7792a5] px-3 text-xs font-bold disabled:opacity-50">Leave queue</button>}</div>}
-  </div>:<p className="mt-3 text-xs text-[#acd0eb]">Sign in and join this Run to enter Next Up.</p>}
+   {active?<div className="flex items-center gap-3"><span className="text-xs font-bold text-[#afdcf8]">Your status: {active.status.toUpperCase()}</span>
+    {active.status!=='playing'&&<button disabled={busy} onClick={()=>void act('rch_leave_run_queue',{p_entry:active.id},'You have left the queue.')} className="min-h-10 rounded-xl border border-[#7792a5] px-3 text-xs font-bold disabled:opacity-50">Leave queue</button>}</div>:
+    canJoinQueue?<button disabled={busy} onClick={()=>void act('rch_join_run_queue',{p_run:runId},'You are now in the Next Up line.')} className="min-h-11 rounded-xl bg-[#318cf2] px-5 text-sm font-black disabled:opacity-50">Join Next Up</button>:
+    <p className="rounded-lg border border-[#52778f] bg-[#102d45] px-3 py-3 text-xs leading-5 text-[#c7e4f6]" role="status">{gate==='not_hosted'?'Next Up is only available during the actual game-day window of a hosted Run.':'Your RSVP does not place you in the on-court queue. Check in at the venue using the host code first.'} <a href="#rch-game-day" className="font-black underline">Game-day check-in</a></p>}
+  </div>:<p className="mt-3 text-xs text-[#acd0eb]">Sign in, register and check in at the real court to enter Next Up.</p>}
+
   <div className="mt-5 space-y-2">
-   {items.map((item,index)=>{
+   {items.map((item)=>{
     const action=nextAction[item.status];
     return <div key={item.id} className="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-xl border border-[#365775] bg-[#0b2842] px-4 py-3">
       <div className="flex min-w-0 items-center gap-3">
-       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#183d5e] text-sm font-black">{index+1}</span>
+       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#183d5e] text-sm font-black">{item.status==='waiting'?waiting.findIndex(w=>w.id===item.id)+1:item.status==='called'?'→':'●'}</span>
        <div><p className="truncate text-sm font-bold">{names[item.profile_id]||'RCH Player'}{item.profile_id===user?.id?' · You':''}</p>
-        <p className="mt-1 flex items-center gap-1 text-[11px] text-[#9bc8e5]"><FaBasketball/> {item.status==='playing'?'On court':item.status==='called'?'On deck':'Waiting for next game'}</p></div>
+        <p className="mt-1 flex items-center gap-1 text-[11px] text-[#9bc8e5]"><FaBasketball/> {item.status==='playing'?'On court':item.status==='called'?'Called to play':'Waiting for next game'}</p></div>
       </div>
       {manager&&action&&<button disabled={busy} onClick={()=>void act('rch_manage_run_queue',{p_entry:item.id,p_action:action.action},action.label+' recorded.')} className="flex min-h-10 items-center gap-1 rounded-lg bg-[#255f93] px-3 text-xs font-bold disabled:opacity-50">{action.label}<FaArrowRight/></button>}
     </div>;
    })}
-   {!items.length&&<p className="rounded-xl border border-dashed border-[#4c7492] px-4 py-6 text-center text-sm text-[#b7d3e8]">Nobody is in the queue yet. Claim the first spot.</p>}
+   {!items.length&&<p className="rounded-xl border border-dashed border-[#4c7492] px-4 py-6 text-center text-sm text-[#b7d3e8]">No checked-in players are in Next Up yet. Join after your in-person code check-in.</p>}
   </div>
-  <p className="mt-4 text-[11px] text-[#91b6d1]">Queue position reflects entry order, not basketball rating. The host is responsible for fair game rotation and local court rules.</p>
+  <p className="mt-4 text-[11px] text-[#91b6d1]">Only recorded in-person check-ins can enter Next Up; RSVP is not attendance. Queue position reflects entry order, not basketball rating. The host is responsible for fair game rotation and local court rules.</p>
  </section>;
 }

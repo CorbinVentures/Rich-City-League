@@ -3,8 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
-import { LegalFooter } from '@/components/LegalFooter';
-import { RCHContinueJourney } from '@/components/RCHContinueJourney';
 import { RCHDiscoveryStarter } from '@/components/RCHDiscoveryStarter';
 
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
@@ -42,10 +40,9 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
       <SiteHeader />
       <AdminControlShortcut />
       <div id="rcl-content" tabIndex={-1} className="rcl-platform-root">
-        {(pathname === '/social' || pathname === '/today') && <RCHDiscoveryStarter mode="pwa" />}
-        {children}<RCHContinueJourney pathname={pathname}/>
+        {pathname === '/today' && <RCHDiscoveryStarter mode="pwa" />}
+        {children}
       </div>
-      <LegalFooter />
     </>
   );
 }

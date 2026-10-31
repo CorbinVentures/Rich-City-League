@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
 import { CorporatePageHero } from '@/components/CorporatePageHero';
 import { getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { FaChartLine, FaCrown, FaRankingStar, FaStar } from 'react-icons/fa6';
+
+export const metadata: Metadata = {
+  title: { absolute: 'Rich City League Player & Team Rankings | Virginia' },
+  description: 'See Rich City League basketball rankings based on finalized games, including player leaders, team records and coaching results.',
+  alternates: { canonical: '/rankings' },
+};
 
 export const revalidate = 60;
 

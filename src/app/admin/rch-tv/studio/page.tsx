@@ -32,6 +32,12 @@ export default function RchBroadcastStudio() {
   const [message, setMessage] = useState('');
   const [activePanel, setActivePanel] = useState<'camera' | 'score' | 'graphics' | 'show'>('camera');
   const [facing, setFacing] = useState<'environment' | 'user'>('environment');
+  const [rightsCleared, setRightsCleared] = useState(false);
+  const [backupReady, setBackupReady] = useState(false);
+  const [completedBroadcast, setCompletedBroadcast] = useState(false);
+  const [recordingState, setRecordingState] = useState<'checking'|'disabled'|'misconfigured'|'available'|'error'>('checking');
+  const [recordingActive, setRecordingActive] = useState(false);
+  const [recordingId, setRecordingId] = useState<string | null>(null);
   const preview = useRef<HTMLVideoElement | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const room = useRef<Room | null>(null);
@@ -52,6 +58,11 @@ export default function RchBroadcastStudio() {
   }, [authorized, db]);
 
   useEffect(() => {
+    const incoming = new URLSearchParams(window.location.search).get('mode');
+    if (incoming === 'live_games' || incoming === 'the_pulse') setMode(incoming);
+  }, []);
+
+  useEffect(() => {
     if (authLoading) return;
     if (!authorized || !db) { setLoading(false); return; }
     let alive = true;
@@ -66,6 +77,34 @@ export default function RchBroadcastStudio() {
       });
     return () => { alive = false; };
   }, [mode, authLoading, authorized, db]);
+
+  const recordingRequest = useCallback(async (channel: RchTvMode, action?: 'start' | 'stop') => {
+    if (!client) throw new Error('Authentication unavailable.');
+    const {data: session} = await client.auth.getSession();
+    if (!session.session?.access_token) throw new Error('Sign in again before starting the recording workflow.');
+    const response = await fetch(action ? '/api/rch-tv/recording' : '/api/rch-tv/recording?mode=' + channel, {
+      method: action ? 'POST' : 'GET',
+      headers: {'Authorization': 'Bearer ' + session.session.access_token, ...(action ? {'Content-Type':'application/json'} : {})},
+      ...(action ? {body:JSON.stringify({mode:channel,action})} : {}),
+      cache:'no-store',
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Cloud recording service unavailable.');
+    return result as {state:string;active?:boolean;egressId?:string|null;note?:string};
+  }, [client]);
+
+  useEffect(() => {
+    if (!authorized || authLoading) return;
+    let mounted = true;
+    setRecordingState('checking');
+    void recordingRequest(mode).then(data => {
+      if (!mounted) return;
+      setRecordingState(data.state === 'available' || data.state === 'disabled' || data.state === 'misconfigured' ? data.state : 'error');
+      setRecordingActive(data.active === true);
+      setRecordingId(data.egressId || null);
+    }).catch(() => {if (mounted) setRecordingState('error');});
+    return () => {mounted = false;};
+  }, [mode, authorized, authLoading, recordingRequest]);
 
   useEffect(() => {
     return () => {
@@ -151,8 +190,18 @@ export default function RchBroadcastStudio() {
 
   async function goLive() {
     if (!client || !authorized || !ready || !stream.current || onAir || config.active) return;
+    if (recordingState === 'checking' || recordingState === 'error' || recordingState === 'misconfigured' || recordingActive) {
+      setError('Cloud recording status is not safe to start. Refresh the studio and resolve the recording status.');
+      return;
+    }
+    if (!rightsCleared || !backupReady) {
+      setError('Confirm rights and the independent recording plan before going live.');
+      return;
+    }
+    setCompletedBroadcast(false);
     setBusy(true);setError('');setMessage('');
     const next = new Room({ adaptiveStream:true, dynacast:true });
+    let startedRecording = false;
     try {
       const session = await client.auth.getSession();
       if (!session.data.session?.access_token) throw new Error('Sign in again to start broadcasting.');
@@ -168,6 +217,12 @@ export default function RchBroadcastStudio() {
           source:track.kind==='video'?Track.Source.Camera:Track.Source.Microphone,
         });
       }
+      if (recordingState === 'available') {
+        const started = await recordingRequest(mode, 'start');
+        startedRecording = true;
+        setRecordingId(started.egressId || null);
+        setRecordingActive(true);
+      }
       room.current=next;
       streaming.current=true;
       next.on(RoomEvent.Disconnected, () => {
@@ -175,14 +230,25 @@ export default function RchBroadcastStudio() {
         streaming.current=false;
         setOnAir(false);
         setError('Broadcast connection lost. Confirm the stream is offline before restarting.');
+        setCompletedBroadcast(true);
+        if (recordingState === 'available') {
+          void recordingRequest(currentMode.current, 'stop').catch(() => undefined);
+          setRecordingActive(false);
+        }
         void saveConfig(currentConfig.current,false,currentMode.current).catch(()=>undefined);
       });
       const saved=await saveConfig(config,true,mode);
       setConfig(saved);
       setOnAir(true);
-      setMessage('On air. Open RCH TV on another device to test the picture and audio.');
+      setMessage(recordingState === 'available'
+        ? 'On air. Recording is initializing in LiveKit. Confirm provider status and check video/audio on a second device.'
+        : 'On air using your independent recording plan. Check video and audio on a second device.');
     } catch(e) {
       streaming.current=false;
+      if (startedRecording) {
+        await recordingRequest(mode, 'stop').catch(() => undefined);
+        setRecordingActive(false);
+      }
       await next.disconnect();
       room.current=null;
       setError(e instanceof Error?e.message:'Could not start live broadcasting.');
@@ -196,10 +262,21 @@ export default function RchBroadcastStudio() {
       const saved=await saveConfig(config,false,mode);
       setConfig(saved);
       streaming.current=false;
+      let recordingNotice = '';
+      if (recordingState === 'available') {
+        try {
+          const result = await recordingRequest(mode, 'stop');
+          recordingNotice = result.state === 'finalizing' ? ' Cloud recording is finalizing in the private archive. Verify the file before importing a replay.' : ' No active cloud recorder was found. Verify the backup.';
+          setRecordingActive(false);
+        } catch {
+          recordingNotice = ' Cloud recording could not be stopped or verified. Check LiveKit immediately.';
+        }
+      }
       await room.current?.disconnect();
       room.current=null;
       setOnAir(false);
-      setMessage('Off air. This session is finished.');
+      setCompletedBroadcast(true);
+      setMessage('Off air. Broadcast ended.' + recordingNotice + ' Only upload a reviewed and rights-cleared file as a draft; cloud recording files are not automatically published.');
     } catch(e){setError(e instanceof Error?e.message:'Unable to take broadcast offline.');}
     finally{setBusy(false);}
   }
@@ -222,13 +299,16 @@ export default function RchBroadcastStudio() {
             <p className="text-[10px] font-black uppercase tracking-[.18em] text-sky-300">RCH TV · Production</p>
             <h1 className="mt-1 truncate text-xl font-black tracking-tight text-white sm:text-3xl">Broadcast Studio</h1>
           </div>
-          <Link href="/admin/rch-tv" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-white/20 px-4 py-2 text-xs font-bold text-white" aria-label="Leave Broadcast Studio and return to RCH TV administration">Exit Studio ↗</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/rch-tv/game-day" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-sky-300/40 px-4 py-2 text-xs font-bold text-sky-200">Game Day Center</Link>
+            <Link href="/admin/rch-tv" className="rch-studio-button min-h-10 shrink-0 rounded-lg border border-white/20 px-4 py-2 text-xs font-bold text-white" aria-label="Leave Broadcast Studio and return to RCH TV administration">Exit Studio ↗</Link>
+          </div>
         </header>
 
         <div className="rch-studio-mode-switch flex items-center gap-2" role="group" aria-label="Production format">
           {(['live_games', 'the_pulse'] as const).map(item => (
             <button type="button" disabled={onAir || busy} key={item}
-              onClick={() => { stopPreview(); setMode(item); setActivePanel('camera'); setMessage(''); }}
+              onClick={() => { stopPreview(); setMode(item); setActivePanel('camera'); setMessage(''); setRightsCleared(false); setBackupReady(false); setCompletedBroadcast(false); }}
               aria-pressed={mode === item}
               className={`rch-studio-button min-h-10 flex-1 rounded-lg border px-4 py-2.5 text-xs font-extrabold sm:flex-none sm:text-sm ${mode === item ? 'rch-studio-button-selected' : ''}`}>
               {RCH_TV_MODES[item].label}
@@ -260,13 +340,29 @@ export default function RchBroadcastStudio() {
               className="rch-studio-button rch-studio-stop min-h-11 rounded-lg px-3 text-xs font-bold disabled:opacity-40">Stop preview</button>
             {onAir
               ? <button type="button" onClick={() => void endBroadcast()} disabled={busy} className="rch-studio-button rch-studio-live min-h-11 rounded-lg px-5 text-xs font-black disabled:opacity-40">End Live</button>
-              : <button type="button" onClick={() => void goLive()} disabled={!ready || config.active || busy}
+              : <button type="button" onClick={() => void goLive()} disabled={!ready || !rightsCleared || !backupReady || config.active || busy || recordingState === 'checking' || recordingState === 'error' || recordingState === 'misconfigured' || recordingActive}
                   className="rch-studio-button rch-studio-primary min-h-11 rounded-lg px-5 text-xs font-black disabled:opacity-40">● Go Live</button>}
             <button type="button" onClick={() => void updateGraphics()} disabled={busy}
               className="rch-studio-button rch-studio-publish min-h-11 rounded-lg px-3 text-xs font-bold disabled:opacity-40">Publish graphics</button>
           </div>
         </section>
 
+        <section className="mt-3 rounded-xl border border-white/15 bg-white/[.035] p-3 text-xs leading-5 text-white/75" aria-label="Broadcast readiness checklist">
+          <div role="status" className="mb-3 rounded-lg border border-sky-400/20 bg-sky-500/5 p-3">
+            <p className="font-bold text-sky-200">Cloud recording: {recordingState === 'available' ? (recordingActive ? 'Active — verify output' : 'Configured, not yet recording') : recordingState === 'disabled' ? 'Not enabled — independent recording required' : recordingState === 'checking' ? 'Checking…' : 'Unavailable — broadcast blocked'}</p>
+            {recordingId && <p className="mt-1 break-all text-white/50">LiveKit recording ID: {recordingId}</p>}
+            <p className="mt-1 text-white/55">Cloud recording uses a private archive, not automatic RCH TV publishing. A separate backup is still required.</p>
+          </div>
+          <p className="font-black uppercase tracking-wide text-sky-200">Before going live</p>
+          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={rightsCleared} disabled={onAir} onChange={e=>setRightsCleared(e.target.checked)} className="mt-1"/><span>Event, venue, participants and any on-air sponsor/music usage are cleared for live distribution.</span></label>
+          <label className="mt-2 flex items-start gap-2"><input type="checkbox" checked={backupReady} disabled={onAir} onChange={e=>setBackupReady(e.target.checked)} className="mt-1"/><span>Independent local recording or verified backup is ready. Cloud recording is optional and requires a separate enabled service.</span></label>
+          <p className="mt-2 text-white/45">After Go Live, verify video and sound on a separate viewer device. If the connection drops, use Mark Channel Offline and verify before restarting.</p>
+        </section>
+        {completedBroadcast && !onAir && <section role="status" className="mt-3 rounded-xl border border-sky-400/20 bg-sky-500/5 p-4 text-sm text-white/75">
+          <strong className="block text-white">Broadcast ended · Replay handoff</strong>
+          <p className="mt-2">Save the independent recording and verify any private LiveKit export. After rights and playback review, upload a compatible MP4/WebM as a draft. A live broadcast does not automatically publish a replay.</p>
+          <Link href={'/admin/rch-tv?replay=' + mode + '#upload-replay'} className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-sky-300 px-4 text-xs font-black text-black">Upload replay to RCH TV</Link>
+        </section>}
         {error && <p role="alert" className="rch-studio-alert mt-3 rounded-lg p-3 text-xs leading-5">{error}</p>}
         {message && <p role="status" className="rch-studio-message mt-3 rounded-lg p-3 text-xs leading-5">{message}</p>}
 
@@ -402,7 +498,7 @@ export default function RchBroadcastStudio() {
                 <button type="button" disabled={busy} onClick={() => void endBroadcast()} className="rch-studio-button mt-3 block min-h-11 rounded-lg border border-red-400/40 px-4 font-bold">Mark channel offline</button>
               </div>
             )}
-            <p className="mt-5 border-t border-white/15 pt-4 text-xs leading-5 text-slate-400">Overlays are displayed over the RCH TV website feed. Automatic recording and multi-camera switching are not yet enabled.</p>
+            <p className="mt-5 border-t border-white/15 pt-4 text-xs leading-5 text-slate-400">Overlays appear on the RCH TV website feed and are not embedded into saved Egress files. Optional private cloud recording requires explicit configuration and costs; multi-camera switching is not available.</p>
           </section>
         </div>
       </div>

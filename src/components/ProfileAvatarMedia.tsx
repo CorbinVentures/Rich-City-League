@@ -10,11 +10,13 @@ export function ProfileAvatarMedia({
   alt = '',
   className = '',
   priority = false,
+  sizes = '96px',
 }: {
   src?: string | null;
   alt?: string;
   className?: string;
   priority?: boolean;
+  sizes?: string;
 }) {
   const normalizedSrc = useMemo(() => src?.trim() ?? '', [src]);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function ProfileAvatarMedia({
       alt={alt}
       width={96}
       height={96}
-      sizes="96px"
+      sizes={sizes}
       quality={72}
       className={className}
       loading={priority ? 'eager' : 'lazy'}

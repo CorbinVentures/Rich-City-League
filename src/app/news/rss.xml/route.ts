@@ -16,7 +16,7 @@ export async function GET() {
 <channel>
 <title>Rich City Hoops Newsroom</title>
 <link>${SITE}/news</link>
-<description>Rich City League, Richmond basketball and Richmond culture news from the RCL Newsroom.</description>
+<description>Virginia basketball reporting, verified community stories and Rich City League updates from the RCH Newsroom.</description>
 <language>en-us</language>
 <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items.map(item => `<item>

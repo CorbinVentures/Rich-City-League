@@ -15,10 +15,10 @@ const chapters=[
  {
   number:'01',short:'Explore',eyebrow:'SCOUT THE WORLD',title:'EVERY COURT IS AN ARENA.',
   icon:FaLocationDot,
-  description:'Explore Virginia, find a real court or gym, and discover upcoming Runs in your area.',
+  description:'Explore Virginia, find a sourced public outdoor basketball court, and discover upcoming Runs in your area.',
   rules:[
    'Choose a city and open a court to see its schedule, local contenders and territory.',
-   'Officially sourced courts are real locations—not promises of open gym time, a hosted game or guaranteed access.'
+   'A sourced park court is a real location—not a reserved space, confirmed hosted game, or guarantee of access.'
   ],
   punchline:'FIND THE COURT. FIND YOUR PEOPLE.'
  },

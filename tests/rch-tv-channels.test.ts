@@ -18,6 +18,13 @@ describe('RCH TV — four editorial destinations', () => {
     expect(hub).toContain('RCH TV weekly show + podcast');
   });
 
+  it('makes published game replays directly discoverable', () => {
+    expect(hub).toContain('href="#game-replays"');
+    expect(hub).toContain('id="game-replays"');
+    expect(hub).toContain('Watch now ({gameReplays.length})');
+    expect(hub).toContain("gameReplays.length>0");
+  });
+
   it('separates curated titles without silently including general uploads', () => {
     expect(hub).toContain("item.category==='live_games'");
     expect(hub).toContain("item.category==='the_pulse'");
@@ -29,10 +36,10 @@ describe('RCH TV — four editorial destinations', () => {
   });
 
   it('keeps the archive free of fictitious movies or fabricated premiere dates', () => {
-    expect(hub).toContain('No films are available yet.');
+    expect(hub).toContain('No films are currently published.');
     expect(hub).toContain('Premiere to be announced');
     expect(hub).toContain('Episodes will appear here when published.');
-    expect(hub).toContain('Every movie needs distribution rights cleared');
+    expect(hub).toContain('each title is licensed individually');
   });
 
   it('publishes selected admin media to the matching channel', () => {

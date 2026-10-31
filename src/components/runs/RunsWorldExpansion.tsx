@@ -3,7 +3,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {getSupabaseClient} from '@/lib/supabase';
-import {worldMilestoneCatalog,type WorldJourney} from '@/lib/runs-world-progression';
+import {worldMilestoneCatalog,worldXpProgress,type WorldJourney} from '@/lib/runs-world-progression';
 import './runs-world-expansion.css';
 
 type Receipt={id:string;run_id:string;court_slug:string|null;court_name:string|null;verified_at:string;game_format:string;won:boolean;xp:number;first_court:boolean;rep:number;badges:string[];territory:string|null;crown:string|null};
@@ -44,6 +44,15 @@ export function RunsWorldExpansion({mode,journey,revision}:{mode:'world'|'battle
  if(!data)return <p className="rwx-loading" role="status">Loading your game rewards…</p>;
  const banner=worldMilestoneCatalog.find(m=>m.key===data.loadout.banner&&journey?.milestones[m.key]);
  const goal=data.rewards.find(r=>r.code===data.loadout.reward_goal);
+ const playerProgress=journey?.signed_in?worldXpProgress(journey.world_xp):null;
+ const shareVerifiedRecap=async(receipt:Receipt)=>{
+  const shareText=`RCH Runs | ${receipt.won?'Verified victory':'Verified game'} | ${receipt.game_format} at ${receipt.court_name||'a Virginia court'} | +${receipt.xp} World XP. Only real, independently verified results count. #RCHRuns`;
+  const shareUrl=window.location.origin+'/runs/'+encodeURIComponent(receipt.run_id);
+  try{
+   if(navigator.share)await navigator.share({title:'My verified RCH Runs game',text:shareText,url:shareUrl});
+   else {await navigator.clipboard.writeText(shareText+' '+shareUrl);setNotice('Verified game recap copied.');}
+  }catch(error){if(!(error instanceof Error&&error.name==='AbortError'))setNotice('Sharing unavailable. Try again.');}
+ };
  const latest=data.receipts.find(r=>r.id===selected)||data.receipts[0];
  const goalCard=<div className="rwx-goal">
   <span className="rwg-kicker">YOUR NEXT UNLOCK</span>
@@ -57,14 +66,16 @@ export function RunsWorldExpansion({mode,journey,revision}:{mode:'world'|'battle
    {banner&&<div className={'rwx-banner banner-'+banner.key}><span aria-hidden="true">{banner.icon}</span><div><small>EQUIPPED WORLD BANNER</small><h3>{banner.name}</h3><p>{banner.description}</p></div></div>}
    {latest?<article className="rwx-recap" key={latest.id}>
     <div className="rwx-head"><span className="rwg-kicker">VERIFIED GAME RECAP</span><button onClick={()=>setRefresh(n=>n+1)}>Refresh results</button></div>
-    <h2>{latest.won?'Victory recorded.':'Another game. More progress.'}</h2>
+    <h2 className={latest.won?'rwx-victory':''}>{latest.won?'VICTORY VERIFIED':'GAME VERIFIED'}</h2>
+    <p className="rwx-reveal-note">{latest.won?'This win is recorded in your real competitive history.':'Your effort counts. The next game builds your basketball career.'}</p>
     <p>{latest.court_name||'Court'} · {latest.game_format} · {new Date(latest.verified_at).toLocaleDateString('en-US',{timeZone:'America/New_York'})}</p>
     <div className="rwx-stats"><div><strong>+{latest.xp}</strong><span>World XP</span></div><div><strong>+{latest.rep}</strong><span>Match REP credited</span></div><div><strong>{latest.first_court?'NEW':'✓'}</strong><span>{latest.first_court?'Verified court unlocked':'Verified game'}</span></div></div>
     {latest.badges.length>0&&<p className="rwx-earned">Badges earned: {latest.badges.map(title).join(' · ')}</p>}
     {latest.crown&&<p className="rwx-earned">Crown achievement: {title(latest.crown)}</p>}
     {latest.territory&&<p className="rwx-earned">Territory result: {latest.territory} won the court battle.</p>}
     <p>Weekly progress: {journey?.weekly_verified_games??'—'} verified games · {data.weekly_courts} courts · {data.weekly_teammates} different teammates.</p>
-    <Link className="rwg-primary" href={'/runs/'+encodeURIComponent(latest.run_id)}>Open game room →</Link>
+    {playerProgress&&<div className="rwx-goal" aria-label="Hooper level progression"><strong>Hooper Level {playerProgress.level}</strong><progress max={playerProgress.toNext} value={playerProgress.within} aria-label="World XP toward next Hooper Level"/><small>{playerProgress.toNext-playerProgress.within} World XP to Level {playerProgress.level+1}</small></div>}
+    <div className="flex flex-wrap gap-3"><button type="button" onClick={()=>void shareVerifiedRecap(latest)} className="rwg-secondary">Share verified recap</button><Link className="rwg-primary" href={'/runs/'+encodeURIComponent(latest.run_id)}>Open game room →</Link></div>
     {data.receipts.length>1&&<label className="rwx-history">Replay a verified game<select value={latest.id} onChange={e=>setSelected(e.target.value)}>{data.receipts.map(r=><option key={r.id} value={r.id}>{r.court_name||'Court'} · {new Date(r.verified_at).toLocaleDateString('en-US',{timeZone:'America/New_York'})} · {r.won?'Win':'Played'}</option>)}</select></label>}
     <small>Match REP comes from your wallet receipts, including any credited event bonus. Separately reviewed stat rewards appear in the Exchange ledger.</small>
    </article>:<div className="rwx-goal"><h3>Your first game starts the story.</h3><p>After a verified game, your XP, match REP, badges and court result appear here together.</p><Link href="/runs?view=list#rch-upcoming-runs">Find your next Run →</Link></div>}

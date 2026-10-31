@@ -60,11 +60,10 @@ describe('RCH main-site iPad orientation and responsive layout', () => {
     const css = source('src/app/rch-ipad-responsive.css');
 
     expect(feed).toContain('rcl-network-feed-grid');
-    expect(feed).toContain('2xl:grid-cols-[170px_minmax(0,1fr)_270px]');
-    expect(feed).not.toContain('lg:grid-cols-[190px_minmax(0,680px)_minmax(250px,1fr)]');
-    expect(feed).toContain('hidden 2xl:block');
-    expect(feed).toContain('rcl-network-left-rail');
-    expect(feed).toContain('rcl-network-right-rail');
+    expect(feed).toContain('grid-cols-1');
+    expect(feed).not.toContain('rcl-network-left-rail');
+    expect(feed).not.toContain('rcl-network-right-rail');
+    expect(source('src/app/rch-pulse.css')).toContain('grid-template-columns:minmax(0,1fr)!important');
     expect(css).toContain('(min-width: 1250px) and (max-width: 1399px) and (orientation: landscape)');
     expect(css).toContain('grid-template-columns: minmax(0, 1fr) minmax(260px, 290px) !important');
     expect(css).toContain('> .rcl-network-left-rail');

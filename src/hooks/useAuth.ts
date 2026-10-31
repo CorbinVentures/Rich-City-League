@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { getSupabaseClient, getSupabaseRecoveryClient } from '@/lib/supabase';
 import { getSupabaseConfig, getSupabaseConfigMessage } from '@/lib/supabase-config';
+import { isExpectedMissingSession } from '@/lib/auth-session';
 import { Profile } from '@/types';
 
 const PRODUCTION_SITE_URL = 'https://richcityhoops.com';
@@ -10,8 +11,14 @@ const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 function getAuthSiteUrl() {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, '');
   if (configuredSiteUrl === PRODUCTION_SITE_URL) return configuredSiteUrl;
-  if (typeof window !== 'undefined' && LOCAL_HOSTNAMES.has(window.location.hostname)) {
-    return window.location.origin.replace(/\/$/, '');
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin.replace(/\/$/, '');
+    if (LOCAL_HOSTNAMES.has(window.location.hostname)) return origin;
+    // Only use the current protected Preview origin when it is *exactly*
+    // the environment's configured site URL. Never trust a supplied redirect.
+    if (window.location.hostname.endsWith('.vercel.app') && configuredSiteUrl === origin) {
+      return origin;
+    }
   }
   return PRODUCTION_SITE_URL;
 }
@@ -26,11 +33,25 @@ function getSupabaseUnavailableMessage() {
 function getAuthErrorMessage(error: unknown, fallback: string) {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
   const message = error instanceof Error ? error.message.toLowerCase() : '';
-  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) return 'Invalid email or password.';
+  const status = typeof error === 'object' && error !== null && 'status' in error
+    ? Number(error.status) : 0;
+  if (code === 'user_already_exists' || message.includes('already registered')) {
+    return 'This email already has an account. Try signing in or resetting your password.';
+  }
+  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') {
+    return 'Too many attempts. Please wait a few minutes before trying again.';
+  }
+  if (code === 'signup_disabled') return 'New account registration is temporarily paused. Please contact the league.';
+  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
+    if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
+      return 'This test site has separate accounts from live Rich City Hoops. Use your staging credentials or create a test account below.';
+    }
+    return 'Invalid email or password.';
+  }
   if (code === 'email_not_confirmed' || message.includes('email not confirmed')) return 'Please confirm your email before signing in.';
   if (code === 'user_banned') return 'This account is unavailable. Contact the league administrator.';
-  if (code === 'unexpected_failure' || message.includes('timeout') || message.includes('context canceled') || message.includes('connection')) {
-    return 'The sign-in service is temporarily unavailable. Please try again shortly.';
+  if (status >= 500 || code === 'unexpected_failure' || message.includes('timeout') || message.includes('context canceled') || message.includes('connection')) {
+    return 'The account service is temporarily unavailable. Please try again shortly. If it continues, contact the league.';
   }
   if (message.includes('password')) return 'Use a password with at least 8 characters.';
   return fallback;
@@ -153,11 +174,12 @@ export function useAuth() {
       try {
         if (!recoveryFlow) {
           const { data, error: sessionError } = await supabase.auth.getUser();
-          // A transient refresh-token/GoTrue outage is not proof of sign-out.
-          // Do not silently apply a null user when the network call failed.
-          if (sessionError) throw sessionError;
+          // Visitors without a session should see a working signup/sign-in form.
+          // A refresh-token or network outage is different and must surface.
+          if (sessionError && !isExpectedMissingSession(sessionError)) throw sessionError;
           if (!mounted) return;
-          await applySession(data.user);
+          if (sessionError) setError(null);
+          await applySession(sessionError ? null : data.user);
         } else {
           setRecoverySession(true);
           setUser(null);

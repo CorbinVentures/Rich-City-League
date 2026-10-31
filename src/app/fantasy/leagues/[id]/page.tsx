@@ -6,6 +6,7 @@ import { FaArrowRight, FaBasketball, FaCrown, FaKey, FaLock, FaTrophy, FaUsers }
 import { Container } from '@/components/Container';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { canActivateRclFantasySeason } from '@/lib/rcl-governance';
 
 type League = { id:string; fantasy_season_id:string; owner_id:string; name:string; join_code:string; max_teams:number; status:string; created_at:string };
 type Membership = { fantasy_league_id:string; profile_id:string; role:string; joined_at:string };
@@ -39,6 +40,21 @@ export default function PrivateFantasyLeaguePage({ params }:{ params:Promise<{id
       setLeague(null); setError('This private Fantasy league is unavailable or you are not a member.'); setLoading(false); return;
     }
     const currentLeague = leagueResult.data as League;
+    const fantasySeason = await supabase.from('fantasy_seasons')
+      .select('season_id,status').eq('id',currentLeague.fantasy_season_id).maybeSingle();
+    const linkedPro = fantasySeason.data?.season_id
+      ? await supabase.from('seasons').select('start_date,status,leagues!inner(slug,is_active)').eq('id',fantasySeason.data.season_id).maybeSingle()
+      : null;
+    if (fantasySeason.error || fantasySeason.data?.status !== 'active' || !linkedPro || linkedPro.error || !canActivateRclFantasySeason(linkedPro.data)) {
+      setLeague(null);
+      setMembers([]);
+      setTeams([]);
+      setMatchups([]);
+      setMyTeam(null);
+      setError('This Fantasy room is not associated with an active official 2027–28 professional season.');
+      setLoading(false);
+      return;
+    }
     setLeague(currentLeague);
     const [memberResult,matchupResult,myTeamResult] = await Promise.all([
       db.from('fantasy_league_members').select('fantasy_league_id,profile_id,role,joined_at').eq('fantasy_league_id',id).order('joined_at'),

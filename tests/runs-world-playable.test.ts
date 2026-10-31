@@ -46,9 +46,8 @@ describe('Runs World playable geography and game progression',()=>{
   expect(verifiedParksRecFacility(court({source_url:null}))).toBe(false);
   expect(verifiedParksRecFacility(court({verification_status:'community'}))).toBe(false);
   const pins=buildCourtMapPins([beulah,deepRun,cityGym],[]);
-  expect(pins).toHaveLength(3);
-  expect(pins.find(p=>p.id==='court:beulah-rec')?.indoor).toBe(true);
-  expect(pins.find(p=>p.id==='court:deep-run-rec')?.indoor).toBeUndefined();
+  expect(pins).toHaveLength(0); // All indoor/mixed venues are excluded from Runs World.
+  expect(buildCourtMapPins([court({slug:'rockwood-park',name:'Rockwood Park'})],[])).toHaveLength(1);
  });
  it('does not fabricate competitive results or award extra REP for tasks',()=>{
   const missions=getWorldMissions({city:'Richmond',scouted:true,upcomingJoined:1,recentVerified:0});

@@ -1,0 +1,80 @@
+begin;
+select no_plan();
+set role postgres;
+
+insert into auth.users(id,aud,role,email) values
+('a6190000-0000-4000-8000-000000000001','authenticated','authenticated','starter-owner@example.test'),
+('a6190000-0000-4000-8000-000000000002','authenticated','authenticated','starter-stranger@example.test');
+delete from public.profiles where id in
+ ('a6190000-0000-4000-8000-000000000001','a6190000-0000-4000-8000-000000000002');
+insert into public.profiles(id,role,is_active,onboarding_complete)
+values
+('a6190000-0000-4000-8000-000000000001','player',true,true),
+('a6190000-0000-4000-8000-000000000002','player',true,true);
+
+insert into public.rch_site_starter_drafts
+ (profile_id,organization_name,desired_slug,preferred_tier,config)
+values
+('a6190000-0000-4000-8000-000000000001',
+ 'Future Richmond Trainer','future-richmond-trainer','free',
+ '{"siteType":"trainer","theme":"courtside","tagline":"Grow your game","about":"Adult training"}');
+
+select is((select preferred_billing_interval from public.rch_site_starter_drafts
+  where profile_id='a6190000-0000-4000-8000-000000000001'),'monthly',
+  'Existing website starter records default to monthly preference');
+update public.rch_site_starter_drafts set preferred_billing_interval='annual'
+  where profile_id='a6190000-0000-4000-8000-000000000001';
+select is((select preferred_billing_interval from public.rch_site_starter_drafts
+  where profile_id='a6190000-0000-4000-8000-000000000001'),'annual',
+  'Annual billing preference can be saved without paid enrollment');
+select throws_ok($$
+ update public.rch_site_starter_drafts set preferred_billing_interval='weekly'
+ where profile_id='a6190000-0000-4000-8000-000000000001'
+$$,'23514',null,'Unsupported billing frequencies are rejected');
+
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','SELECT'),
+'Server role can read private starter drafts in clean installs');
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','INSERT'),
+'Server role can save private starter drafts in clean installs');
+select ok(has_table_privilege('service_role','public.rch_site_starter_drafts','UPDATE'),
+'Server role can update account-owned website drafts');
+select ok(has_table_privilege('service_role','public.rch_site_subscriptions','SELECT'),
+'Server role can inspect website entitlements');
+select ok(has_table_privilege('service_role','public.rch_site_plan_limits','SELECT'),
+'Server role can inspect internal plan capacity');
+select ok(has_table_privilege('service_role','public.rch_site_booking_quota_rollout','SELECT'),
+'Server role can read phased quota rollout status');
+select ok(has_table_privilege('authenticated','public.rch_site_starter_drafts','SELECT'),
+'Authenticated owner has RLS-protected read permission');
+select ok(not has_table_privilege('authenticated','public.rch_site_starter_drafts','INSERT'),
+'No browser user can create draft with another profile ID');
+select ok(not has_table_privilege('authenticated','public.rch_site_starter_drafts','UPDATE'),
+'No browser user can overwrite another site design');
+select ok(not has_table_privilege('anon','public.rch_site_starter_drafts','SELECT'),
+'Anonymous users cannot read starter records');
+select throws_ok($$
+ insert into public.rch_site_starter_drafts(profile_id,organization_name,desired_slug,preferred_tier,config)
+ values('a6190000-0000-4000-8000-000000000002','Bad slug','../bad','free','{}')
+$$,'23514',null,'Database rejects invalid starter slugs');
+select throws_ok($$
+ insert into public.rch_site_starter_drafts(profile_id,organization_name,desired_slug,preferred_tier,config)
+ values('a6190000-0000-4000-8000-000000000002','Bad tier','valid-slug','flagship','{}')
+$$,'23514',null,'Network advertising/flagship tiers cannot create site entitlements');
+
+set role anon;
+select throws_ok($$select * from public.rch_site_starter_drafts$$,
+'42501',null,'Anonymous site visitors cannot read private drafts');
+
+set role authenticated;
+select set_config('request.jwt.claim.sub','a6190000-0000-4000-8000-000000000002',true);
+select is((select count(*) from public.rch_site_starter_drafts),0::bigint,
+'Another signed-in profile cannot see the private website');
+select throws_ok($$update public.rch_site_starter_drafts
+  set organization_name='Impersonated'$$,
+'42501',null,'Other users cannot change a private starter');
+select set_config('request.jwt.claim.sub','a6190000-0000-4000-8000-000000000001',true);
+select is((select count(*) from public.rch_site_starter_drafts),1::bigint,
+'The draft owner can resume the private website');
+
+select * from finish();
+rollback;

@@ -213,7 +213,7 @@ export function NetworkPostCard({
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <Link href={profileHref} aria-label={`Open ${post.author?.display_name ?? 'RCL member'} profile`}>
-            <SocialIdentity author={post.author} compact />
+            <SocialIdentity author={post.author} compact link={false} />
           </Link>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">

@@ -120,7 +120,7 @@ html.rch-premium-root[data-season-theme] {
     scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;
   }
 }
-html.rch-premium-root body.rch-premium-app .rcl-universal-bottom { grid-template-columns:repeat(4,minmax(0,1fr))!important; }
+html.rch-premium-root body.rch-premium-app .rcl-universal-bottom { grid-template-columns:repeat(5,minmax(0,1fr))!important; }
 /* Legacy inline Tailwind action colors also get a readable label. */
 html.rch-premium-root body.rch-premium-app :is(a,button)[class~="bg-rcl-blue"] {
   background:var(--rch-brand-accent)!important;color:#fff!important;

@@ -82,7 +82,9 @@ export function SiteHeader(){
   const primaryItems=memberMode?RCL_MEMBER_DESKTOP_NAV:RCL_PRIMARY_NAV_ITEMS;
   const bottomItems=memberMode?RCL_MEMBER_PRIMARY_NAV:RCL_GUEST_MOBILE_NAV;
   const active=(href:string)=>memberMode?isMemberNavigationActive(pathname,href):isPrimaryNavigationActive(pathname,href);
-  const resolveMemberHref=(href:string)=>href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
+  // SiteHeader belongs to the installed PWA. Open its Runs tab in the game
+  // experience, while normal browser /runs remains the direct real-game list.
+  const resolveMemberHref=(href:string)=>href==='/runs'?'/runs?view=world&mode=home':href==='/social/profile/me'&&user?`/social/profile/${user.id}`:href;
   const profileHref=user?`/social/profile/${user.id}`:'/auth/sign-up';
   const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCH Member';
   const sectionLabel=pathname.startsWith('/social/profile')?'Profile'
@@ -90,6 +92,8 @@ export function SiteHeader(){
     :pathname.startsWith('/world')?'Living World'
     :pathname.startsWith('/discover')?'Discover'
     :pathname.startsWith('/runs')?'Runs'
+    :pathname.startsWith('/draft')?'Draft'
+    :pathname.startsWith('/fantasy')?'Fantasy'
     :pathname.startsWith('/media')?'RCH TV'
     :pathname.startsWith('/league')||pathname.startsWith('/games')?'League'
     :pathname.startsWith('/communities')?'Communities'
@@ -119,7 +123,7 @@ export function SiteHeader(){
       </nav>
 
       <button type="button" className="rcl-universal-more" onClick={()=>setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen}>
-        <FaBars/><span>Quick start</span>
+        <FaBars/><span>Menu</span>
       </button>
 
       <div className="rcl-universal-account">
@@ -142,7 +146,7 @@ export function SiteHeader(){
       </div>
     </aside>
 
-    <header className="rcl-universal-topbar rcl-social-world-topbar">
+    <header className="rcl-universal-topbar rcl-social-world-topbar rch-court-topbar">
       <Link href="/social" className="rcl-universal-wordmark" aria-label="Open RCH social home">
         <span>RCH</span><b>RCH <i>{sectionLabel}</i></b>
       </Link>
@@ -155,13 +159,14 @@ export function SiteHeader(){
 
       <div className="rcl-universal-tools">
         {user&&<MessageQuickMenu userId={user.id} unreadCount={messageUnread}/>} 
+        {user&&<Link href={profileHref} aria-label="My profile" className="rcl-notification-button"><FaUser/></Link>}
         {user&&<Link href="/notifications" aria-label="Notifications" className="rcl-notification-button"><FaBell/>{unreadCount>0&&<em>{unreadCount>9?'9+':unreadCount}</em>}</Link>}
         {!user&&<Link href="/auth/sign-in?redirect=/social" className="rcl-topbar-signin">Sign in</Link>}
-        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Find an action or browse RCH navigation" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
+        <button type="button" onClick={()=>setMenuOpen(true)} aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen}><FaBars/></button>
       </div>
     </header>
 
-    <nav className="rcl-universal-bottom rcl-social-world-bottom" aria-label="RCL mobile navigation">
+    <nav className="rcl-universal-bottom rcl-social-world-bottom rch-court-bottom" aria-label="RCH mobile navigation">
       {bottomItems.map(item=>{
         const Icon=item.icon;
         const selected=active(item.href);

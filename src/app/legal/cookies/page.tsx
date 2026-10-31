@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/Container';
+import { AnalyticsPrivacyChoices } from '@/components/analytics/AnalyticsPrivacyChoices';
 
 export const metadata: Metadata = {
   title: 'Cookie & Storage Policy',
@@ -12,7 +13,7 @@ export default function CookiesPolicy() {
   return <main className="min-h-screen bg-rcl-black text-white">
     <Container maxWidth="lg" className="py-14 prose prose-invert">
       <h1>Rich City Hoops Cookie &amp; Storage Policy</h1>
-      <p><b>Effective: October 5, 2026</b></p>
+      <p><b>Effective: October 31, 2026</b></p>
       <p>This policy explains how Rich City Hoops (“RCH”) uses cookies, local storage, service-worker caches and similar browser technologies across the website and installable app.</p>
 
       <h2>Necessary account and security storage</h2>
@@ -25,9 +26,10 @@ export default function CookiesPolicy() {
       <p>If paid features are enabled and you choose to use them, payment checkout may be provided on a payment processor&apos;s hosted pages. That provider may use its own necessary security and payment technologies under its own privacy and cookie policies.</p>
 
       <h2>Analytics and advertising</h2>
-      <p>RCH uses first-party, section-level measurements to understand which areas of the service are useful. We may store a randomly generated per-tab session identifier in browser session storage and record broad categories (for example, Runs or News) in ten-minute intervals. Where a member is signed in, the measurement can be associated with the account for aggregate reporting. We do not include precise location, raw visited URLs, search terms or IP addresses in this analytics feature, and we honor supported browser Do Not Track and Global Privacy Control signals.</p><p>Analytics reports are limited to verified administrators and show aggregate counts, not individual browsing histories. If optional advertising or analytics technologies that require additional consent are introduced, RCH will provide the controls and disclosures required for that use.</p>
+      <p>RCH uses first-party, section-level measurements to understand which areas of the service are useful. We may store a randomly generated per-tab session identifier in browser session storage and record broad categories (for example, Runs or News) in ten-minute intervals. Where a member is signed in, the measurement can be associated with the account for aggregate reporting. We do not include precise location, raw visited URLs, search terms or IP addresses in this analytics feature, and we honor supported browser Do Not Track and Global Privacy Control signals.</p><p>Analytics reports are limited to verified administrators and show aggregate counts, not individual browsing histories. Optional outside-the-platform product analytics are off by default and require your separate permission. When enabled by RCH and approved by you, PostHog receives only a random tab identifier and coarse public section name, without a name, member ID, raw URL, coordinates, input values or query strings. PostHog is prevented from enriching events with IP-derived location. Session replay and heatmaps are not enabled by this control.</p>
 
       <h2>Your choices</h2>
+      <AnalyticsPrivacyChoices />
       <p>You can control browser cookies and site storage through your browser or device settings. Clearing storage may sign you out, reset preferences, remove cached app files or require RCH to rebuild local app data.</p>
 
       <h2>Changes</h2>

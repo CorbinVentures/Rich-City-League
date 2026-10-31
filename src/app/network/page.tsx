@@ -57,6 +57,7 @@ export default async function NetworkPage() {
             <Link href="/community" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-blue/25 px-5 text-xs font-black uppercase tracking-wide text-rcl-blue">RCH Community <FaPeopleGroup/></Link>
             <Link href="/network/partners" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-orange/35 bg-rcl-orange/[.06] px-5 text-xs font-black uppercase tracking-wide text-rcl-orange">Grow your exposure <FaBullhorn/></Link>
             <Link href="/network/dashboard" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/10 px-5 text-xs font-black uppercase tracking-wide text-white/55">Partner dashboard <FaChartLine/></Link>
+            <Link href="/website-creator" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sky-400/35 bg-sky-400/10 px-5 text-xs font-black uppercase tracking-wide text-sky-200">Website Creator <FaArrowRight/></Link>
           </div>
         </div>
         <div className="mt-12 grid gap-3 sm:grid-cols-3">

@@ -24,7 +24,7 @@ Cards use 10px corners, thin visible borders, and restrained shadows. Primary bu
 
 ## Navigation
 
-Mobile browser and installed-app navigation share Home, Runs, Community and Profile. Public Home opens `/`; signed-in app Home opens `/social`. Profile opens the real account/profile route or sign-up for guests. Discover, Create, League, media, messages and staff tools remain available through existing menus. Preserve account-aware links and route protections. Navigation active states must not mark Home selected while viewing a profile.
+Signed-in mobile navigation uses Home, Runs, League, Draft and Profile. Fantasy remains a quick menu destination; guests retain Home, Runs, League, Draft and Fantasy. Public Home opens `/`; signed-in app Home opens `/social`. Profile opens the real account/profile route or sign-up for guests. Discover, Create, Fantasy, media, messages and staff tools remain available through existing menus. Preserve account-aware links and route protections. Navigation active states must not mark Home selected while viewing a profile.
 
 Browser chrome includes the same persistent four-item mobile bar, safe-area padding and enough page clearance. Desktop retains its broader navigation. Preserve dedicated scorebook and production-studio controls.
 
@@ -45,3 +45,7 @@ Browser chrome includes the same persistent four-item mobile bar, safe-area padd
 Normal text token pairs must meet 4.5:1 contrast. Primary labels are white on crimson. Accent text uses the lighter token, never the button-fill token on dark surfaces. Focus rings stay visible, touch targets remain comfortable, reduced-motion preferences are respected, and photographs are not tinted globally.
 
 Validate TypeScript, production build, existing behavioral tests, CSS parse/token references and actual palette contrast. Inspect mobile and desktop renderings when preview infrastructure is available. Root inheritance is coverage, not evidence of a manual review of each page. Record verification limitations in the PR and route coverage document.
+
+## October 26 approved PWA Home visual flare
+
+`rch-court-flare.css` is the final scoped app-chrome/Home art-direction layer: metallic RCH lettering, a self-hosted decorative court texture, crimson story rings, underline feed tabs, restrained press feedback, and edge-to-edge member media on phones. Keep real feed imagery unaltered and preserve its aspect ratio. The approved generated mockup is a visual reference only; its people, captions, engagement and imagery are not production content. Maintain Home/Runs/League/Draft/Profile navigation, all five post actions, keyboard focus, forced-color branding and reduced-motion behavior. Other page bodies retain their existing layouts.

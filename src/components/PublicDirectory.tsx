@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { FaArrowRight, FaMagnifyingGlass } from 'react-icons/fa6';
+import { FaArrowRight, FaMagnifyingGlass, FaPlay } from 'react-icons/fa6';
 import { rchMediaKind } from '@/lib/rch-tv-media';
+import { isRchAdaptiveEmbedUrl } from '@/lib/rch-tv-adaptive';
 
 type TeamItem = { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; division: string | null; season: string | null; wins: number | null; losses: number | null };
 type CoachItem = { id: string; profileId: string; name: string; title: string; team: string | null; teamSlug: string | null; wins: number | null; losses: number | null };
 type NewsItem = { id: string; slug: string; title: string; excerpt: string | null; category: string; publishedAt: string | null; coverImageUrl: string | null };
-type MediaItem = { id: string; title: string; description: string | null; type: string; url: string; createdAt: string };
+type MediaItem = { id: string; title: string; description: string | null; type: string; url: string; createdAt: string; posterUrl?: string | null };
 
 const inputClass = 'h-12 w-full rounded-xl border border-rcl-blue/15 bg-[#071522]/70 px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-rcl-blue/60 focus:ring-2 focus:ring-rcl-blue/10';
 const selectClass = 'h-12 rounded-xl border border-rcl-blue/15 bg-[#071522] px-4 text-sm font-bold text-white outline-none transition focus:border-rcl-blue/60 focus:ring-2 focus:ring-rcl-blue/10';
@@ -49,6 +50,42 @@ export function NewsDirectory({ items }: { items: NewsItem[] }) {
   return <div><div className="mb-5 flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row"><SearchField value={query} onChange={setQuery} placeholder="Search RCL News..." label="Search RCL News"/><select aria-label="Category filter" value={category} onChange={(event) => setCategory(event.target.value)} className={selectClass}><option value="ALL">All categories</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>{!items.length ? <EmptyState title="No stories yet." body="Official RCL news will appear here once the league begins publishing." /> : !filtered.length ? <EmptyState title="No stories found." body="Try another search or category." /> : <div className="grid gap-5 md:grid-cols-2">{filtered.map((item) => <Link key={item.id} href={`/news/${item.slug}`} className="group overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 transition hover:-translate-y-1 hover:border-rcl-blue/45">{item.coverImageUrl && <div className="relative h-48 w-full overflow-hidden"><Image src={item.coverImageUrl} alt={item.title} fill sizes="(max-width: 768px) 100vw, 50vw" unoptimized={item.coverImageUrl.startsWith('/api/news-cover/')} className="object-cover transition duration-300 group-hover:scale-[1.03]" /></div>}<div className="p-6"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">{item.category}</p><div className="mt-3 flex items-start justify-between gap-4"><h2 className="font-display text-2xl font-black uppercase leading-tight group-hover:text-rcl-blue">{item.title}</h2><FaArrowRight className="mt-1 shrink-0 text-xs text-white/20 group-hover:text-rcl-orange"/></div>{item.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/45">{item.excerpt}</p>}<p className="mt-5 border-t border-white/10 pt-4 text-xs uppercase tracking-wider text-white/30">{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : 'RCL News'}</p></div></Link>)}</div>}</div>;
 }
 
+function MediaVideo({ item }: { item: MediaItem }) {
+  const adaptive = isRchAdaptiveEmbedUrl(item.url);
+  const [failed, setFailed] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [buffering, setBuffering] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const retryPlayback = () => {setFailed(false);setBuffering(false);setAttempt(value=>value+1);setPlaying(true);};
+  const isMov = /\.mov(?:\?|$)/i.test(item.url);
+  if (adaptive) return <div className="h-full w-full bg-black">
+    <iframe src={item.url} title={`Watch ${item.title} on RCH TV`} loading="lazy"
+      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full border-0"/>
+  </div>;
+  if (!playing) return <button type="button" onClick={() => setPlaying(true)}
+    aria-label={`Play ${item.title}`} className="group relative h-full w-full overflow-hidden bg-[#020408] text-white">
+    {item.posterUrl?<img src={item.posterUrl} loading="lazy" alt="" className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.025]"/>:
+      <div className="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_center,rgba(26,155,220,.13),#020408_68%)]"><span className="text-xs font-bold uppercase tracking-wide text-white/45">RCH TV</span></div>}
+    <span className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid h-14 w-14 place-items-center rounded-full border border-white/40 bg-black/65 text-white shadow-xl"><FaPlay aria-hidden="true"/></span></span>
+  </button>;
+  if (failed) return <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center">
+    <p className="text-sm text-white/75">{isMov ? 'Your browser cannot play this MOV recording.' : 'This video could not be played in your browser.'}</p>
+    <button type="button" onClick={retryPlayback} className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-white">Retry video</button>
+    <a href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-rcl-blue/40 px-4 py-2 text-xs font-bold text-rcl-blue">Open original video file</a>
+    {isMov&&<p className="text-xs text-white/40">For broad compatibility, an MP4 (H.264/AAC) version is recommended.</p>}
+  </div>;
+  return <div className="relative h-full w-full">
+    <video src={item.url} controls key={attempt} autoPlay preload="metadata" poster={item.posterUrl||undefined} playsInline
+      onError={() => {setFailed(true);setBuffering(false);}}
+      onWaiting={() => setBuffering(true)} onStalled={() => setBuffering(true)} onPlaying={() => setBuffering(false)}
+      onCanPlay={() => setBuffering(false)}
+      className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>
+    {buffering && <div role="status" className="pointer-events-none absolute left-2 top-2 rounded-lg bg-black/80 px-3 py-2 text-xs font-semibold text-white">Loading video…</div>}
+    {buffering && <button type="button" onClick={retryPlayback} className="absolute bottom-14 right-3 rounded-lg border border-white/30 bg-black/85 px-3 py-2 text-xs font-bold text-white">Retry playback</button>}
+  </div>;
+}
+
 export function MediaDirectory({ items }: { items: MediaItem[] }) {
   const [category, setCategory] = useState('ALL');
   const categories = [...new Set(items.map((item) => item.type))];
@@ -67,7 +104,7 @@ export function MediaDirectory({ items }: { items: MediaItem[] }) {
             return <article key={item.id} className="overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/55">
               <div className="flex aspect-video items-center justify-center overflow-hidden bg-black">
                 {kind === 'video' ? (
-                  <video src={item.url} controls preload="metadata" playsInline className="h-full w-full object-contain" aria-label={`Play ${item.title}`}>Your browser cannot play this video. <a href={item.url}>Open video</a></video>
+                  <MediaVideo item={item} />
                 ) : kind === 'image' ? (
                   <img src={item.url} alt={item.title} loading="lazy" className="h-full w-full object-contain" />
                 ) : kind === 'audio' ? (

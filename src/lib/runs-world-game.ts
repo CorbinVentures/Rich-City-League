@@ -44,7 +44,7 @@ export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly Wor
  const owned=new Set(state.ownedCourts||[]);
  const challenged=new Set(state.challengedCourts||[]);
  const bonus=new Set(activeRuns.filter(run=>(state.doubleRepRuns||[]).includes(run.id)).map(run=>run.location_slug));
- return courts.filter(court=>verifiedParksRecFacility(court)&&virginiaCoordinates(court.latitude,court.longitude))
+ return courts.filter(court=>playableCourt(court)&&virginiaCoordinates(court.latitude,court.longitude))
    .map(court=>{
     const gameState=challenged.has(court.slug)?'battle' as const:owned.has(court.slug)?'crown' as const:bonus.has(court.slug)?'double-rep' as const:null;
     return {
@@ -53,7 +53,6 @@ export function buildCourtMapPins(courts:readonly WorldCourt[],runs:readonly Wor
      lat:court.latitude as number,lon:court.longitude as number,
      href:'/runs/courts/'+encodeURIComponent(court.slug),
      precision:'venue' as const,
-     ...(court.venue_type==='indoor'?{indoor:true}:{}),
      ...(gameState?{gameState}:{})
     };
    });

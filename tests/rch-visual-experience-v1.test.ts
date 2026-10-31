@@ -11,15 +11,18 @@ const nav=read('src/lib/member-navigation.ts');
 const components=read('src/components/runs/arena-ui.tsx');
 
 describe('RCH Visual Experience v1 product contract',()=>{
- it('has a compact find-first Runs lobby with a genuine host action',()=>{
+ it('opens Runs with a genuine host action and real games before optional extras',()=>{
+  expect(page).toContain('Host a Game');
+  expect(page).toContain('onClick={() => openCreateForCourt');
+  expect(page).toContain('id="rch-upcoming-runs"');
+  expect(page).toContain('href="/runs?view=world&mode=world"');
+  expect(page).toContain('My run recommendations');
+  expect(page).not.toContain('<RunArenaHero');
+  expect(page.indexOf('Host a run')).toBeLessThan(page.indexOf('My run recommendations'));
+  // The immersive world is still a supported, accessible alternative experience.
   expect(hero).toContain('YOUR COURT.');
   expect(hero).toContain('Find a Run');
   expect(hero).toContain('Host a Run');
-  expect(hero).toContain("activeMode==='all'");
-  expect(hero).toContain('aria-pressed');
-  expect(page).toContain('onFind={() =>');
-  expect(page).toContain("document.getElementById('rch-upcoming-runs')");
-  expect(page.indexOf('<RunArenaHero')).toBeLessThan(page.indexOf('<RunDailyCircuit'));
  });
  it('places real availability above optional deep competition with one primary card CTA',()=>{
   expect(page.indexOf('id="rch-upcoming-runs"')).toBeLessThan(page.indexOf('id="rch-competition"'));
@@ -35,8 +38,8 @@ describe('RCH Visual Experience v1 product contract',()=>{
   expect(page).toContain('showTakeovers');
   expect(page).toContain('<RunRankedLadder/>');
  });
- it('keeps the approved four destinations and scopes the Runs geometry',()=>{
-  for(const route of ['/social','/runs','/community','/social/profile/me'])expect(nav).toContain("href:'"+route+"'");
+ it('keeps the social and competition destinations and scopes the Runs geometry',()=>{
+  for(const route of ['/social','/runs','/league','/draft','/fantasy'])expect(nav).toContain("href:'"+route+"'");
   expect(page).toContain("import './visual-experience.css'");
   expect(styles).toContain('.rch-arena-shell');
   expect(styles).not.toMatch(/(^|\n)(body|html|:root|main|button)\s*\{/m);
@@ -56,11 +59,12 @@ describe('RCH Visual Experience v1 product contract',()=>{
   expect(components).toContain("status==='verified'");
   expect(components).toContain('Registration open');
  });
- it('brings real Today context above stories while preserving the timeline and composer',()=>{
-  expect(social).toContain('Your next move starts here.');
-  expect(social.indexOf('<TodayPanel')).toBeLessThan(social.indexOf('<StoryRail'));
+ it('keeps Home focused on posts, stories and the composer',()=>{
+  expect(social).not.toContain('<TodayPanel');
+  expect(social).not.toContain('RCHPulseMoment');
+  expect(social).not.toContain('RCHFirstSessionDiscovery');
+  expect(social).toContain('<StoryRail');
   expect(social).toContain('<NetworkPostCard');
   expect(social).toContain('rch-pulse-compose-strip');
-  expect(social).toContain('RCHPulseMoment');
  });
 });

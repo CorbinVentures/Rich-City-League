@@ -77,9 +77,12 @@ async function syncPWADeployment(registration: ServiceWorkerRegistration) {
     return;
   }
 
+  // Existing installed PWAs may have been created before this version key
+  // existed. Merely saving the current version leaves their old document open.
+  // Bootstrap standalone installs with one guarded fresh navigation.
   if (!knownVersion) {
     window.localStorage.setItem(VERSION_KEY, version);
-    return;
+    if (!isStandaloneMode()) return;
   }
 
   if (knownVersion === version) {

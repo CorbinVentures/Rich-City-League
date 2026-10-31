@@ -7,6 +7,7 @@ export function isBrowserAccountRoute(pathname: string): boolean {
     || pathname === '/member-access'
     || pathname === '/app'
     || pathname === '/profile'
+    || pathname === '/welcome'
     || pathname.startsWith('/auth/')
     || pathname === '/auth'
     || pathname.startsWith('/legal/')
@@ -19,12 +20,13 @@ export function isBrowserAccountRoute(pathname: string): boolean {
  */
 const PUBLIC_BROWSER_PAGES = new Set([
   '/', '/about', '/app', '/legal', '/legal/privacy', '/legal/terms',
+  '/join/players', '/join/fans', '/join/coaches', '/join/creators', '/join/organizations',
   '/legal/cookies', '/legal/safety', '/legal/community-guidelines',
   '/legal/dmca', '/legal/take-it-down',
   '/league', '/richmond-basketball-league',
   '/richmond-basketball-runs', '/network', '/community', '/sponsors',
   '/sponsors/start', '/organizations', '/network/partners',
-  '/network/partners/apply', '/membership', '/news', '/players',
+  '/network/partners/apply', '/website-creator', '/website-creator/start', '/membership', '/news', '/players',
   '/teams', '/games', '/standings', '/leaderboards', '/schedule',
   '/stats', '/rankings', '/coaches', '/runs', '/draft', '/media',
   '/shop', '/faq', '/register', '/coaches', '/discover', '/search', '/pulse', '/world',

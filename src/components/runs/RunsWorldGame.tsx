@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {FaArrowRight,FaArrowRotateRight,FaBasketball,FaBookOpen,FaBolt,FaCompass,FaCrown,FaGift,FaLocationDot,FaMedal,FaPeopleGroup,FaShieldHalved,FaTrophy} from 'react-icons/fa6';
-import {AccurateVirginiaMap,type CommunityCourtLead} from '@/components/runs/AccurateVirginiaMap';
+import {AccurateVirginiaMap} from '@/components/runs/AccurateVirginiaMap';
 import {courtCoverage,localityNames,matchesRunToCourts} from '@/lib/runs-geography';
 import {GravityLocationPicker} from '@/components/GravityLocationPicker';
 import {CourtDominion} from '@/components/runs/CourtDominion';
@@ -16,15 +16,16 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,readPagedUpcomingRuns,verifiedParksRecFacility,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
-import {RunsGameLobby} from '@/components/runs/RunsGameLobby';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
+import {RunsMyCareerStage} from '@/components/runs/RunsMyCareerStage';
+import {RunsCompetitiveCircuit} from '@/components/runs/RunsCompetitiveCircuit';
 import {RunsJourneyHub} from '@/components/runs/RunsJourneyHub';
 import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCourtPreview';
 
-type Screen='home'|'world'|'battle'|'missions'|'vault'|'player'|'crew';
+type Screen='home'|'world'|'battle'|'season'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
 type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;crewLogoPath:string|null;defenses:number;loading:boolean};
@@ -41,11 +42,10 @@ const parksRecAreas:VirginiaCity[]=[
 const runsAreaOptions=[...VIRGINIA_CITIES,...parksRecAreas];
 const cityTabs=[...VIRGINIA_CITIES.filter(city=>city.major),...parksRecAreas];
 const nav:{id:Screen;title:string;icon:typeof FaCompass}[]=[
- {id:'home',title:'Home',icon:FaBasketball},
- {id:'world',title:'Map',icon:FaCompass},
- {id:'battle',title:'Runs',icon:FaBolt},
- {id:'vault',title:'Vault',icon:FaMedal},
- {id:'crew',title:'Crew',icon:FaPeopleGroup},
+ {id:'home',title:'Play',icon:FaBasketball},
+ {id:'world',title:'Courts',icon:FaCompass},
+ {id:'crew',title:'Crews',icon:FaPeopleGroup},
+ {id:'player',title:'My Player',icon:FaCrown},
 ];
 function shortWhen(value:string){
  const d=new Date(value);
@@ -59,14 +59,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const requestedMode=searchParams.get('mode');
  const requestedCity=searchParams.get('city');
  const requestedCourt=searchParams.get('court');
- const allowedModes:readonly Screen[]=['home','world','battle','missions','vault','player','crew'];
+ const allowedModes:readonly Screen[]=['home','world','battle','season','missions','vault','player','crew'];
  const selectedMode=requestedMode&&allowedModes.includes(requestedMode as Screen)?requestedMode as Screen:initialScreen;
  const [screen,setScreen]=useState<Screen>(selectedMode);
  useEffect(()=>{setScreen(selectedMode);},[selectedMode]);
  const [introReplay,setIntroReplay]=useState(0);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
- const [communityLeads,setCommunityLeads]=useState<CommunityCourtLead[]>([]);
  const [runs,setRuns]=useState<WorldRun[]>([]);
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
@@ -85,25 +84,6 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [query,setQuery]=useState('');
  const [coverageWarning,setCoverageWarning]=useState('');
  const restoredCourt=useRef<string|null>(null);
- useEffect(()=>{
-  if(!db)return;
-  let active=true;
-  void (async()=>{
-   const collected:CommunityCourtLead[]=[];
-   for(let from=0;from<5500;from+=500){
-    const {data,error}=await db.from('basketball_locations')
-      .select('slug,name,locality,latitude,longitude')
-      .eq('is_active',true).eq('verification_status','community')
-      .not('latitude','is',null).not('longitude','is',null)
-      .order('slug').range(from,from+499);
-    if(error||!active)return;
-    collected.push(...((data||[]) as CommunityCourtLead[]));
-    if((data||[]).length<500)break;
-   }
-   if(active)setCommunityLeads(collected);
-  })();
-  return()=>{active=false;};
- },[db]);
  const city=runsAreaOptions.find(c=>c.id===cityId)||null;
  const refresh=()=>setPulse(n=>n+1);
 
@@ -127,38 +107,44 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    setCourts([]);setRuns([]);setFeatured([]);setTerritories([]);setWorldPulse([]);setSelectedSlug(null);
    if(!city){setLoading(false);return;}
    try{
-    const [courtResult,runResult,featuredResult]=await Promise.all([
-     db.from('basketball_locations')
+    const courtResult=await db.from('rch_runs_outdoor_courts')
       .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text,notes')
       .eq('is_active',true).in('locality',localityNames(city))
       .in('verification_status',['official','provider'])
-      .in('venue_type',['outdoor','indoor','mixed'])
-      .order('name').range(0,299),
-     readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
-      .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
-      .in('status',['open','full']).gte('starts_at',new Date().toISOString())
-      .order('starts_at',{ascending:true}).range(from,to),200,2000),
-     db.from('rch_weekend_circuit_events')
-      .select('run_id').eq('city',city.name)
-      .eq('bonus_enabled',true).gte('starts_at',new Date().toISOString()).limit(150)
-    ]);
+      .order('name').range(0,299);
     if(!alive)return;
     if(courtResult.error)throw courtResult.error;
-    if(runResult.error)throw runResult.error;
-    const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(verifiedParksRecFacility);
+    const nextCourts=((courtResult.data||[]) as WorldCourt[]).filter(playableCourt);
     setCourts(nextCourts);
-    const citySlugs=new Set(nextCourts.map(c=>c.slug));
-    // Filter Runs by their canonical court relationship, not a fragile city
-    // substring, which can include a neighboring county or exclude postal aliases.
-    const cityRuns=((runResult.data||[]) as WorldRun[]).filter(r=>matchesRunToCourts(r,citySlugs));
+    const slugs=nextCourts.map(c=>c.slug);
+    // Fetch only Runs at approved courts in this area. Never load the entire
+    // statewide Run history just to discover games for one city.
+    const runResult=slugs.length?await readPagedUpcomingRuns<WorldRun>((from,to)=>db.from('runs')
+      .select('id,title,location,location_slug,starts_at,status,game_format,run_type')
+      .in('status',['open','full']).in('location_slug',slugs)
+      .gte('starts_at',new Date().toISOString())
+      .order('starts_at',{ascending:true}).range(from,to),100,1000):
+      {data:[] as WorldRun[],error:null,truncated:false};
+    if(!alive)return;
+    if(runResult.error)throw runResult.error;
+    const runIds=runResult.data.map(run=>run.id);
+    // Classify every returned run by its actual circuit relationship, not
+    // only a string-matched city value; suggestions must never appear hosted.
+    const featuredResult=runIds.length?await db.from('rch_weekend_circuit_events')
+      .select('run_id,bonus_enabled').in('run_id',runIds).limit(1000):
+      {data:[],error:null};
+    if(!alive)return;
+    if(featuredResult.error)throw featuredResult.error;
+    const circuitRows=(featuredResult.data||[]) as Array<{run_id:string;bonus_enabled:boolean}>;
+    const suggestedIds=new Set(circuitRows.map(item=>item.run_id));
+    const citySlugs=new Set(slugs);
+    const cityRuns=runResult.data.filter(r=>matchesRunToCourts(r,citySlugs)&&!suggestedIds.has(r.id));
     setRuns(cityRuns);
     if(nextCourts.some(c=>c.latitude===null||c.longitude===null))
      setCoverageWarning('Official Parks & Recreation basketball facilities are listed, but some lack facility-verified coordinates. Their source records remain searchable; no guessed precision pins are shown.');
-    setFeatured(((featuredResult.data||[]) as {run_id:string}[]).map(r=>r.run_id));
-    if(runResult.error||featuredResult.error)setWarning('Some scheduled games could not be loaded. Browse the Runs list to see more.');
+    setFeatured(circuitRows.filter(item=>item.bonus_enabled).map(item=>item.run_id));
     if((courtResult.data||[]).length===300||runResult.truncated)
-      setWarning('Parks & Recreation display is capped at 300 sourced facilities and the Run lookup at 2,000 statewide. Additional results may exist.');
-    const slugs=nextCourts.map(c=>c.slug);
+      setWarning('Parks & Recreation display is capped at 300 sourced facilities and the local Run lookup at 1,000. Additional results may exist.');
     // Only actual confirmed title history and genuine requested/accepted
     // crew challenges contribute to the cinematic local world pulse.
     if(slugs.length){
@@ -343,9 +329,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       onBattle={()=>setScreen('battle')} onRules={onOpenRules}
       onReplay={()=>setIntroReplay(n=>n+1)}/>}
 
-   {screen==='world'&&<RunsGameLobby city={city?.name||null} journey={journey} signedIn={Boolean(user)} loading={journeyLoading}
-     onExplore={()=>{const arena=document.getElementById('rwg-world-map');arena?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});arena?.focus({preventScroll:true});}}
-     onMissions={()=>setScreen('missions')} onBattle={()=>setScreen('battle')}/>}
+   {screen==='world'&&<div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#385a72] bg-[#0c263b] px-4 py-3 text-sm">
+     <p className="text-[#cfe2ef]"><FaLocationDot className="mr-2 inline" aria-hidden="true"/>Select an outdoor court to explore its details. A map pin is not a scheduled game.</p>
+     <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 font-bold text-[var(--rch-brand-accent-text)]">Find hosted games <FaArrowRight aria-hidden="true"/></Link>
+   </div>}
 
    <nav className="rwg-nav" aria-label="Runs World gameplay modes">
     {nav.map(item=><button type="button" key={item.id} aria-pressed={screen===item.id} onClick={()=>setScreen(item.id)} className={screen===item.id?'active':''}>
@@ -358,7 +345,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
      <div><small>PARKS & REC COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
      <div><small>PRECISE PINS</small><strong>{loading?'…':coverage.mapped}</strong></div>
-     <div><small>{city?'UPCOMING RUNS':'COMMUNITY LEADS'}</small><strong>{city?(loading?'…':coverage.scheduled):communityLeads.length.toLocaleString()}</strong></div>
+     <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
     <div className="rwg-world-game-legend" aria-label="Runs World map marker guide"><span><FaLocationDot/> Sourced Court</span><span><FaCrown/> Crew Territory</span><span><FaBolt/> Active Challenge</span><span><FaGift/> 2× Verified REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
@@ -373,7 +360,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} leads={communityLeads} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
@@ -381,7 +368,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        loggedIn={Boolean(user)} scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))} onScout={()=>setScoutVersion(n=>n+1)}
        onClose={closeCourtPreview}/>}
      </div>
-     <p className="rwg-disclosure"><FaShieldHalved/> Real roads and waterways use OpenStreetMap vector data and official 2026 Census boundaries. Bright arena pins represent officially sourced Parks & Recreation basketball courts and gyms with coordinates on file. Indoor gym hours and permitted basketball use must be checked. Gray dots are unverified community tips, not approved courts. No location permission required. GPS is optional.</p>
+     <p className="rwg-disclosure"><FaShieldHalved/> This map shows sourced public outdoor Parks & Recreation basketball courts. A court pin is not a hosted game, reserved space, or proof anyone is playing. Confirm park hours before traveling. Unverified community tips are not approved courts. No location permission required. GPS is optional.</p>
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">
@@ -411,7 +398,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
          const mapped=pins.some(p=>p.id==='court:'+c.slug);
          return <button key={c.slug} type="button" onClick={()=>chooseCourt(c.slug,true)} aria-pressed={selectedSlug===c.slug} className={'rwg-court '+(selectedSlug===c.slug?'selected':'')}>
           <span className="rwg-court-icon">{ownership?<FaCrown/>:count?<FaBolt/>:<FaBasketball/>}</span>
-          <span className="rwg-court-copy"><strong>{c.name}</strong><small>{c.venue_type==='indoor'?'Indoor gym':c.venue_type==='mixed'?'Recreation center':'Outdoor court'} · {count?count+' scheduled Run'+(count===1?'':'s'):c.access_type==='public'&&c.venue_type==='outdoor'?'Check park hours':'Check gym access / schedule'} · {mapped?'Coordinates on file':'Pin needs review'}</small></span>
+          <span className="rwg-court-copy"><strong>{c.name}</strong><small>Outdoor park court · {count?count+' scheduled Run'+(count===1?'':'s'):c.access_type==='public'&&c.venue_type==='outdoor'?'Check park hours':'Check gym access / schedule'} · {mapped?'Coordinates on file':'Pin needs review'}</small></span>
           <FaArrowRight className="rwg-court-arrow"/>
          </button>;
         })}
@@ -420,10 +407,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </section>
       <WorldPulse events={worldPulse} onCourt={slug=>chooseCourt(slug,true)}/>
       <section className="rwg-activity" aria-label="Upcoming games in the selected city">
-       <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Scheduled Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
+       <div className="rwg-section-head"><div><span className="rwg-kicker">THE NEXT CHALLENGE</span><h2>Player-hosted Runs</h2></div><Link href="/runs?view=list#rch-upcoming-runs">All Runs <FaArrowRight/></Link></div>
        {areaRuns.length?areaRuns.slice(0,12).map(run=><Link href={'/runs/'+run.id} key={run.id} className="rwg-run-row">
          <span className="rwg-run-basket"><FaBasketball/></span><span><strong>{run.title}</strong><small>{shortWhen(run.starts_at)} · {run.game_format} · {run.status==='full'?'Full':'Scheduled'}</small></span>
-         {featuredSet.has(run.id)&&<b>2× VERIFIED REP</b>}<FaArrowRight/></Link>):<p className="rwg-empty">No upcoming games listed here. Create one or explore another city.</p>}
+         {featuredSet.has(run.id)&&<b>2× VERIFIED REP</b>}<FaArrowRight/></Link>):<p className="rwg-empty">No player-hosted games listed here yet. Create a Run or explore another city.</p>}
       </section>
      </>}
    </>}
@@ -448,6 +435,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
      <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
     </section>}
+
+   {screen==='season'&&<RunsCompetitiveCircuit journey={journey} journeyLoading={journeyLoading}
+     cityName={city?.name||null} courtSlugs={battleCourtSlugs}
+     onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>}
 
    {screen==='crew'&&<section className="rwg-mode" aria-label="Your basketball crew">
       <span className="rwg-kicker"><FaPeopleGroup/> REPRESENT YOUR CITY</span><h2>Make your crew a name worth defending.</h2>
@@ -476,34 +467,15 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       <span className="rwg-kicker">YOUR BASKETBALL CAREER</span><h2>My Player.</h2>
       {!user?<div className="rwg-empty"><p>Create a free RCH account to build a real basketball legacy.</p>
        <Link className="rwg-primary" href="/auth/sign-up">Create my player <FaArrowRight/></Link></div>:<>
-       <div className="rwg-player-stats">
-        <div><small>SOCIAL LEVEL</small><strong>{player.socialLevel??'—'}</strong><span>{player.socialXp===null?'Unavailable':player.socialXp+' social XP'}</span></div>
-        <div><small>SPENDABLE REP</small><strong>{player.repBalance??'—'}</strong><span>Earned through eligible activities</span></div>
-        <div><small>VERIFIED GAMES</small><strong>{player.passport?.verified_games??'—'}</strong><span>Competitive history</span></div>
-        <div><small>RUN BADGES</small><strong>{player.passport?.badges?.length??'—'}</strong><span>Confirmed achievements</span></div>
-       </div>
-
-       {player.passport?.last_results?.length?(()=>{
-        const result=player.passport!.last_results[0];
-        const ratingChanged=typeof result.rating_after==='number'&&typeof result.rating_before==='number';
-        return <section className="rwg-match-reveal" aria-label="Your most recent verified match">
-         <span className="rwg-kicker"><FaTrophy/> VERIFIED MATCH RECEIPT</span>
-         <h3>{result.court_name||'Competitive match'}</h3>
-         <p>{result.game_format||'Basketball'} · {shortWhen(result.verified_at)}{typeof result.won==='boolean'?(result.won?' · Verified win':' · Verified loss'):''}</p>
-         {ratingChanged&&<div className="rwg-rating-shift"><span>BEFORE <strong>{result.rating_before}</strong></span>
-           <FaArrowRight/><span>AFTER <strong>{result.rating_after}</strong></span>
-           <b>{(result.rating_after!-result.rating_before!)>=0?'+':''}{result.rating_after!-result.rating_before!} rating</b>
-         </div>}
-         <small>This comes from your confirmed match history, not a simulated game.</small>
-        </section>;
-       })():null}
+       <RunsMyCareerStage name={identity?.display_name||identity?.username||'RCH Hooper'}
+         avatar={identity?.avatar_url||null} journey={journey} rep={player.repBalance} passport={player.passport}/>
        <WorldJourneyPanel journey={journey} loading={journeyLoading} mode="player"/>
-       <p className="rwg-disclosure">Social XP, spendable REP, competitive skill rating and awards are distinct. No invented gameplay levels or pay-to-win advantages.</p>
+       <p className="rwg-disclosure">Hooper Level tracks verified basketball progress. REP is spendable, competitive Rank comes from independently confirmed matches, and badges must be earned. Social XP ({player.socialXp??'—'}) belongs to the wider RCH community, not your basketball rank.</p>
        <div className="rwg-mode-links"><Link className="rwg-primary" href="/profile">View Profile <FaArrowRight/></Link><Link className="rwg-secondary" href="/crews?intent=mine">My Crew</Link><Link className="rwg-secondary" href="/rep">REP Exchange</Link></div>
       </>}
       <GravityLocationPicker compact/>
     </section>}
-   {screen==='home'&&<RunsJourneyHub runId={areaRuns.find(r=>r.status==='open')?.id||null} courtSlug={selectedSlug}/>}
+   {screen==='home'&&<><div className="rcc-home-door"><div><span>THE COMPETITIVE CIRCUIT</span><strong>Ranked · Rivals · Weekly · Cup</strong><small>Your next chapter uses real verified results.</small></div><Link href="/runs?view=world&mode=season">ENTER CIRCUIT <FaArrowRight aria-hidden="true"/></Link></div><RunsJourneyHub runId={areaRuns.find(r=>r.status==='open')?.id||null} courtSlug={selectedSlug}/></>}
   </div>
  </main>;
 }

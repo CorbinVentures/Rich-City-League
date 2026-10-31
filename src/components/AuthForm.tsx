@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getBrowserPostAuthPath, getSafePostAuthPath } from '@/lib/auth-redirect';
+import { trackRchConversion } from '@/lib/analytics/conversion';
 
 type ProfileType = 'player' | 'coach' | 'fan';
 
@@ -31,6 +32,7 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   const [message, setMessage] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [weeklyDigestOptIn, setWeeklyDigestOptIn] = useState(false);
   const [signupHasSession, setSignupHasSession] = useState(false);
   const [mobileApp, setMobileApp] = useState(false);
   const [referralCode, setReferralCode] = useState('');
@@ -46,6 +48,8 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
   useEffect(() => {
     if (mode !== 'sign-up') return;
     const signupParams = new URLSearchParams(window.location.search);
+    const requestedRole = signupParams.get('role');
+    if (requestedRole === 'player' || requestedRole === 'coach' || requestedRole === 'fan') setProfileType(requestedRole);
     setSignupDestination(getSafePostAuthPath(signupParams.get('next') ?? signupParams.get('redirect'), '/runs'));
     const invite = signupParams.get('invite');
     if (invite) {
@@ -56,6 +60,10 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       const pending = window.localStorage.getItem('rcl_pending_referral');
       if (pending) setReferralCode(pending);
     }
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode === 'sign-up') trackRchConversion('signup_view', 'email');
   }, [mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -97,17 +105,43 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
         }
         window.location.assign(destination);
       } else if (mode === 'sign-up') {
-        if (step < 3) { setStep((current) => current + 1); return; }
+        if (step < 2) {
+          trackRchConversion('signup_account_continue', 'email');
+          setStep((current) => current + 1);
+          return;
+        }
         if (password !== confirmation) { setStep(1); setMessage('Passwords do not match.'); return; }
         if (!firstName.trim() || !lastName.trim() || !username.trim() || !dateOfBirth) { setMessage('Complete the required profile fields and age screen.'); return; }
         const birth = new Date(dateOfBirth + 'T00:00:00'); const now = new Date(); let age = now.getFullYear()-birth.getFullYear(); const md=now.getMonth()-birth.getMonth(); if(md<0||(md===0&&now.getDate()<birth.getDate())) age--;
         if (Number.isNaN(birth.getTime()) || age < 16) { setMessage('RCL Social accounts are currently available only to users age 16 or older.'); return; }
         if (!acceptedLegal) { setMessage('Review and accept the Terms and Privacy Policy to create an account.'); return; }
+        const normalizedUsername = username.trim().replace(/^@/, '');
+        if (!/^[A-Za-z0-9_]{3,30}$/.test(normalizedUsername)) {
+          setMessage('Choose a username of 3–30 letters, numbers, or underscores.');
+          return;
+        }
+        const client = (await import('@/lib/supabase')).getSupabaseClient();
+        if (!client) {
+          setMessage('Account registration is temporarily unavailable. Please retry.');
+          return;
+        }
+        const { data: available, error: availabilityError } = await (client.rpc as any)(
+          'rch_username_available', { p_username: normalizedUsername },
+        );
+        if (availabilityError) {
+          setMessage('Unable to check your username right now. Please retry.');
+          return;
+        }
+        if (available !== true) {
+          setMessage('That username is already taken. Choose another to continue.');
+          return;
+        }
+        trackRchConversion('signup_submitted', 'email');
         const { session } = await signUp(email, password, {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           display_name: displayName.trim() || `${firstName.trim()} ${lastName.trim()}`,
-          username: username.trim().replace(/^@/, ''),
+          username: normalizedUsername,
           requested_profile_type: profileType,
           location: location.trim(),
           bio: bio.trim(),
@@ -121,8 +155,10 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
           date_of_birth: dateOfBirth,
           legal_terms_accepted_at: new Date().toISOString(),
           privacy_policy_acknowledged_at: new Date().toISOString(),
+          weekly_digest_opt_in: weeklyDigestOptIn ? 'true' : 'false',
         });
         setSignupHasSession(Boolean(session));
+        trackRchConversion('signup_created', 'email');
         if (session && referralCode) {
           const client = (await import('@/lib/supabase')).getSupabaseClient();
           if (client) {
@@ -130,35 +166,46 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             if (claimed) window.localStorage.removeItem('rcl_pending_referral');
           }
         }
-        setStep(4);
-        setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. You can still explore public runs and stories.');
-        // The shared install prompt opens as soon as registration succeeds.
-        window.dispatchEvent(new Event('rch:registration-complete'));
+        setStep(3);
+        setMessage(session ? 'Your Rich City Hoops account is ready. Continue to basketball near you.' : 'Account created. Check your email and verify your address before signing in. If your username changed during signup, you can update it from your profile.');
+        // Delay any install invitation until after the member has received practical value.
       } else {
         await resetPassword(email);
         setMessage('Password recovery instructions have been sent if this email exists.');
       }
     } catch {
-      setMessage('Unable to complete this request. Please check the details above and try again.');
+      if (mode === 'sign-up') trackRchConversion('signup_failed', 'email');
+      // useAuth already exposes an actionable, safe auth error. Do not bury it
+      // behind a second generic signup message when the server rejects signup.
+      setMessage(mode === 'sign-up' ? '' : 'Unable to complete this request. Please check the details above and try again.');
     }
   }
 
   const inputClass = "mt-2 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 font-normal outline-none transition focus:border-[var(--rch-brand-accent-text)]";
   const title = mode === 'sign-in' ? 'Welcome back' : mode === 'sign-up' ? 'Join Rich City Hoops' : 'Reset your password';
 
+  const isolatedPreview = /^https:\/\/[^/]+\.vercel\.app\/?$/.test(process.env.NEXT_PUBLIC_SITE_URL ?? '');
+
   return (
     <form onSubmit={submit} className="space-y-5 rounded-2xl border border-[var(--rch-brand-border)] bg-white/[0.04] p-6">
+      {isolatedPreview && mode === 'sign-in' && (
+        <div role="note" className="rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 py-3 text-sm leading-6 text-sky-100">
+          <strong className="block">Website Creator testing site</strong>
+          This Preview has separate login accounts. Your regular Rich City Hoops password does not sign you in here.
+          Use an existing staging login or choose Create account below.
+        </div>
+      )}
       <div>
         <h1 className="font-display text-3xl font-bold uppercase">{title}</h1>
         <p className="mt-2 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-up' ? 'Create a free profile. Find runs, connect with players and stay in the game.' : mode === 'reset' ? 'Enter your email and we’ll send you a password recovery link.' : 'Use your Rich City Hoops account to pick up where you left off.'}</p>
       </div>
 
-      {mode === 'sign-up' && referralCode && step < 4 && <div className="rounded-xl border border-[var(--rch-brand-accent-text)]/25 bg-[var(--rch-brand-raised)] px-4 py-3 text-xs font-bold text-[var(--rch-brand-accent-text)]">You were invited by an RCH member. Finish signup to connect the referral.</div>}
+      {mode === 'sign-up' && referralCode && step < 3 && <div className="rounded-xl border border-[var(--rch-brand-accent-text)]/25 bg-[var(--rch-brand-raised)] px-4 py-3 text-xs font-bold text-[var(--rch-brand-accent-text)]">You were invited by an RCH member. Finish signup to connect the referral.</div>}
 
-      {mode === 'sign-up' && step < 4 && (
+      {mode === 'sign-up' && step < 3 && (
         <div>
-          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-[var(--rch-brand-muted)]"><span className={step >= 1 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Account</span><span className={step >= 2 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Identity</span><span className={step >= 3 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Profile</span><span>Welcome</span></div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-[var(--rch-brand-accent)] transition-all" style={{ width: `${step * 25}%` }} /></div>
+          <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-[var(--rch-brand-muted)]"><span className={step >= 1 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Account</span><span className={step >= 2 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Identity</span><span className={step >= 3 ? 'text-[var(--rch-brand-accent-text)]' : ''}>Welcome</span></div>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-[var(--rch-brand-accent)] transition-all" style={{ width: `${step * (100 / 3)}%` }} /></div>
         </div>
       )}
 
@@ -169,15 +216,13 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
       </>}
 
       {mode === 'sign-up' && step === 2 && <div className="space-y-3">
-        <h2 className="text-lg font-bold">How do you hoop?</h2>
+        <h2 className="text-lg font-bold">How do you hoop?</h2><p className="text-xs text-[var(--rch-brand-copy)]">Choose your role. You can finish the detailed basketball profile later.</p>
         {([
           ['player','PLAYER','Build your basketball identity.'],
           ['coach','COACH','Lead, manage, scout and develop.'],
           ['fan','FAN','Follow the league, join the community and play fantasy.'],
-        ] as const).map(([value,label,copy]) => <button key={value} type="button" aria-pressed={profileType === value} onClick={() => setProfileType(value)} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-[var(--rch-brand-accent-text)] bg-[var(--rch-brand-raised)]' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-[var(--rch-brand-copy)]">{copy}</span>{value === 'coach' && <span className="mt-1 block text-xs uppercase text-[var(--rch-brand-accent-text)]">Coach access requires league approval</span>}</button>)}
-      </div>}
-
-      {mode === 'sign-up' && step === 3 && <div className="space-y-4">
+        ] as const).map(([value,label,copy]) => <button key={value} type="button" aria-pressed={profileType === value} onClick={() => { setProfileType(value); trackRchConversion('signup_role_continue','email'); }} className={`w-full rounded-xl border p-4 text-left transition ${profileType === value ? 'border-[var(--rch-brand-accent-text)] bg-[var(--rch-brand-raised)]' : 'border-white/10 bg-black/30'}`}><span className="block font-display text-xl font-bold">{label}</span><span className="text-xs text-[var(--rch-brand-copy)]">{copy}</span>{value === 'coach' && <span className="mt-1 block text-xs uppercase text-[var(--rch-brand-accent-text)]">Coach access requires league approval</span>}</button>)}
+        <h2 className="pt-3 text-lg font-bold">Your account essentials</h2>
         <div className="grid grid-cols-2 gap-3"><label className="text-sm font-semibold">First name<input required value={firstName} onChange={e=>setFirstName(e.target.value)} className={inputClass}/></label><label className="text-sm font-semibold">Last name<input required value={lastName} onChange={e=>setLastName(e.target.value)} className={inputClass}/></label></div>
         <label className="block text-sm font-semibold">Date of birth <span className="font-normal text-[var(--rch-brand-muted)]">(used for age-appropriate access)</span><input required type="date" value={dateOfBirth} onChange={e=>setDateOfBirth(e.target.value)} className={inputClass}/></label>
         <label className="block text-sm font-semibold">Username<input required placeholder="@yourname" value={username} onChange={e=>setUsername(e.target.value)} className={inputClass}/></label>
@@ -192,14 +237,15 @@ export function AuthForm({ mode, allowSignUp = true }: { mode: 'sign-in' | 'sign
             {profileType === 'fan' && <label className="block text-sm font-semibold">Basketball interests<input placeholder="Fantasy, highlights, teams..." value={fanInterests} onChange={e=>setFanInterests(e.target.value)} className={inputClass}/></label>}
           </div>
         </details>
+        <label className="flex items-start gap-3 rounded-xl border border-rcl-orange/20 bg-rcl-orange/[.04] p-4 text-xs text-white/80"><input type="checkbox" checked={weeklyDigestOptIn} onChange={e=>setWeeklyDigestOptIn(e.target.checked)} className="mt-1 accent-orange-500"/><span><strong className="block text-sm text-white">Send me the Weekly Hoops Brief</strong>One weekly email with runs, upcoming events, news, my REP and badges, plus clearly marked sponsor features. Optional. I can unsubscribe anytime.</span></label>
         <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/80"><input required type="checkbox" checked={acceptedLegal} onChange={e=>setAcceptedLegal(e.target.checked)} className="mt-1"/><span>I agree to the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/terms">Terms of Service</Link> and acknowledge the <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/privacy">Privacy Policy</Link> and <Link className="text-[var(--rch-brand-accent-text)]" href="/legal/community-guidelines">Community Guidelines</Link>.</span></label>
       </div>}
 
-      {mode === 'sign-up' && step === 4 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.18em] text-[var(--rch-brand-accent-text)]">Welcome to Rich City Hoops</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-[var(--rch-brand-copy)]">{profileType} • {location || 'RCH Community'}</p><p className="mt-5 text-sm text-[var(--rch-brand-copy)]" role="status">{message}</p><Link href={signupHasSession ? getBrowserPostAuthPath(signupDestination, '/runs') : '/runs'} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--rch-brand-accent)] px-6 py-3 font-bold text-white">{signupHasSession ? 'Explore basketball' : 'Browse public runs'}</Link>{!signupHasSession && <p className="mt-4 text-sm text-[var(--rch-brand-copy)]">Verified your email? <Link className="font-semibold text-[var(--rch-brand-accent-text)] underline" href={`/auth/sign-in?next=${encodeURIComponent(signupDestination)}`}>Sign in and continue</Link></p>}</div>}
+      {mode === 'sign-up' && step === 3 && <div className="py-6 text-center"><div className="text-xs font-bold uppercase tracking-[.18em] text-[var(--rch-brand-accent-text)]">Welcome to Rich City Hoops</div><h2 className="mt-3 font-display text-3xl font-bold">{displayName || `${firstName} ${lastName}`}</h2><p className="mt-2 uppercase text-[var(--rch-brand-copy)]">{profileType} • {location || 'RCH Community'}</p><p className="mt-5 text-sm text-[var(--rch-brand-copy)]" role="status">{message}</p><Link href={signupHasSession ? '/welcome?role=' + profileType + '&next=' + encodeURIComponent(getBrowserPostAuthPath(signupDestination, '/runs')) : '/runs'} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--rch-brand-accent)] px-6 py-3 font-bold text-white">{signupHasSession ? 'Explore basketball' : 'Browse public runs'}</Link>{!signupHasSession && <p className="mt-4 text-sm text-[var(--rch-brand-copy)]">Verified your email? <Link className="font-semibold text-[var(--rch-brand-accent-text)] underline" href={`/auth/sign-in?next=${encodeURIComponent('/welcome?role=' + profileType + '&next=' + encodeURIComponent(signupDestination))}`}>Sign in and continue</Link></p>}</div>}
 
-      {(error || (message && step !== 4)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-[var(--rch-brand-accent-text)]'}`}>{error ?? message}</p>}
-      {step !== 4 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-[var(--rch-brand-accent)] px-4 py-3 font-bold text-white disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 3 ? 'Continue' : 'Create account'}</button></div>}
-      {step !== 4 && <div className="flex flex-wrap justify-between gap-3 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-[var(--rch-brand-accent-text)]">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-[var(--rch-brand-accent-text)]">Forgot password?</Link></> : <Link href={mode === 'sign-up' ? `/auth/sign-in?next=${encodeURIComponent(signupDestination)}` : '/auth/sign-in'} className="hover:text-[var(--rch-brand-accent-text)]">Back to sign in</Link>}</div>}
+      {(error || (message && step !== 3)) && <p role={error ? 'alert' : 'status'} className={`text-sm ${error ? 'text-rcl-red' : 'text-[var(--rch-brand-accent-text)]'}`}>{error ?? message}</p>}
+      {step !== 3 && <div className="flex gap-3">{mode === 'sign-up' && step > 1 && <button type="button" onClick={()=>setStep(s=>s-1)} className="rounded-lg border border-white/15 px-4 py-3 font-bold">Back</button>}<button type="submit" disabled={loading} className="flex-1 rounded-lg bg-[var(--rch-brand-accent)] px-4 py-3 font-bold text-white disabled:opacity-60">{loading ? 'Please wait…' : mode === 'reset' ? 'Send recovery email' : mode === 'sign-in' ? 'Sign in' : step < 2 ? 'Continue' : 'Create account'}</button></div>}
+      {step !== 3 && <div className="flex flex-wrap justify-between gap-3 text-sm text-[var(--rch-brand-copy)]">{mode === 'sign-in' ? <>{allowSignUp && <Link href="/auth/sign-up" className="hover:text-[var(--rch-brand-accent-text)]">Create account</Link>}<Link href="/auth/forgot-password" className="hover:text-[var(--rch-brand-accent-text)]">Forgot password?</Link></> : <Link href={mode === 'sign-up' ? `/auth/sign-in?next=${encodeURIComponent(signupDestination)}` : '/auth/sign-in'} className="hover:text-[var(--rch-brand-accent-text)]">Back to sign in</Link>}</div>}
     </form>
   );
 }

@@ -68,7 +68,7 @@ describe('RCH premium sitewide design contract',()=>{
     expect(atlas).toContain("const GATEWAYS=['bristol','roanoke','richmond','winchester','norfolk']");
     expect(atlas).toContain('onClick={()=>selectCity(item)}');
     expect(atlas).toContain('clusterAtlasPoints(relevant,camera.zoom,selectedId)');
-    expect(world).toContain('search_basketball_locations');
+    expect(world).toContain('search_rch_outdoor_park_courts');
   });
   it('preserves production-only tools and geographic interaction',()=>{
     expect(file('src/components/PlatformChrome.tsx')).toContain('rcl-scorebook-immersive');

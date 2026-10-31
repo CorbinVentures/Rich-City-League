@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaArrowRight, FaCrown, FaKey, FaLock, FaPlus, FaTrophy, FaUsers } from 'react-icons/fa6';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { canActivateRclFantasySeason } from '@/lib/rcl-governance';
 
 type PrivateLeague = {
   id:string;
@@ -37,8 +38,13 @@ export function FantasyLeagueNavigator() {
 
   async function load() {
     if (!supabase || !user) return;
-    const seasonResult = await supabase.from('fantasy_seasons').select('id').eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle();
-    const activeSeasonId = seasonResult.data?.id ?? '';
+    const seasonResult = await supabase.from('fantasy_seasons').select('id,season_id').eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle();
+    let activeSeasonId = '';
+    if (!seasonResult.error && seasonResult.data) {
+      const linked = await supabase.from('seasons').select('start_date,status,leagues!inner(slug,is_active)')
+        .eq('id',seasonResult.data.season_id).maybeSingle();
+      if (!linked.error && canActivateRclFantasySeason(linked.data)) activeSeasonId = seasonResult.data.id;
+    }
     setSeasonId(activeSeasonId);
     if (!activeSeasonId) { setLeagues([]); setMemberships([]); setFranchise(null); return; }
 
@@ -62,7 +68,7 @@ export function FantasyLeagueNavigator() {
 
   async function createPrivate(event:React.FormEvent) {
     event.preventDefault();
-    if (!fan || createName.trim().length < 2 || busy) return;
+    if (!fan || !seasonId || createName.trim().length < 2 || busy) return;
     setBusy(true); setMessage('');
     const result = await db.rpc('create_private_fantasy_league', { target_name:createName.trim(), target_max_teams:maxTeams });
     if (result.error) setMessage(result.error.message ?? 'Unable to create private league.');
@@ -78,7 +84,7 @@ export function FantasyLeagueNavigator() {
 
   async function joinPrivate(event:React.FormEvent) {
     event.preventDefault();
-    if (!fan || joinCode.trim().length < 6 || busy) return;
+    if (!fan || !seasonId || joinCode.trim().length < 6 || busy) return;
     setBusy(true); setMessage('');
     const result = await db.rpc('join_private_fantasy_league', { target_join_code:joinCode.trim() });
     if (result.error) setMessage(result.error.message ?? 'Unable to join private league.');
@@ -94,12 +100,12 @@ export function FantasyLeagueNavigator() {
 
   if (authLoading || !user) return null;
 
-  return <section className="border-b border-white/10 bg-[#03070d] text-white">
+  return <section id="fantasy-leagues" className="rch-fantasy-leagues border-t border-white/10 bg-[#03070d] text-white">
     <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 sm:py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">Fantasy</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold">Leagues</h2>
+          <h2 className="mt-1 font-display text-2xl font-semibold">My Fantasy Leagues</h2>
         </div>
         <Link href="/league" className="text-xs font-semibold text-white/40 hover:text-rcl-blue">League Center →</Link>
       </div>

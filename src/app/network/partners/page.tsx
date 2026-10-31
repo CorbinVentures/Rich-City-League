@@ -92,6 +92,7 @@ export default function NetworkPartnersPage(){
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/network/partners/apply?plan=community" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-blue px-5 text-xs font-black uppercase tracking-wide text-[#03101a]">Join free <FaPeopleGroup/></Link>
           <Link href="#advertising" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rcl-orange/35 bg-rcl-orange/[.06] px-5 text-xs font-black uppercase tracking-wide text-rcl-orange">Advertise with RCH <FaRectangleAd/></Link>
+          <Link href="/network/dashboard/sites" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-rose-400/35 bg-rose-500/[.08] px-5 text-xs font-black uppercase tracking-wide text-rose-200">Build your RCH Site <FaGlobe/></Link>
           <Link href="/community" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/10 px-5 text-xs font-black uppercase tracking-wide text-white/55">Explore community <FaArrowRight/></Link>
         </div>
       </Container>

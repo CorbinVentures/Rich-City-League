@@ -10,7 +10,6 @@ import { ProfileAvatarMedia } from '@/components/ProfileAvatarMedia';
 import { ProfileMusicPicker } from '@/components/ProfileMusicPicker';
 import { RCHCoachFields } from '@/components/RCHCoachFields';
 import { emptyCoachIdentity,type CoachIdentityForm } from '@/lib/rch-coach-identity';
-import { ClientPageHero } from '@/components/ClientPageHero';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -127,14 +126,9 @@ export default function ProfilePage() {
   const statusMessage = error || (saved ? isPrivileged ? 'Profile saved. Your league authorization is unchanged.' : role === 'fan' ? 'Profile saved. Your fan identity is active.' : role === 'coach' ? 'RCH coach details saved to your regular member profile. League staff access is separate.' : 'Profile saved. Your basketball identity is updated.' : '');
 
   return <main className="rcl-social-secondary min-h-screen bg-rcl-black pb-24 text-white">
-    <ClientPageHero
-      eyebrow="RCL Identity"
-      title="Your profile"
-      accent="How you show up"
-      description="Control your public identity, images, role request, location, bio, and visibility without changing your official league history."
-      assetKey="social.cover"
-      meta={profile ? <div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Member identity</p><p className="mt-1 font-display text-xl font-black uppercase">{isPrivileged ? profile.role : role}</p><p className="mt-2 text-xs text-rcl-blue">{visibility} profile</p></div> : null}
-    />
+    <Container maxWidth="lg" className="pt-6 sm:pt-9">
+      <h1 className="text-2xl font-black">Edit profile</h1>
+    </Container>
 
     <Container maxWidth="lg" className="py-8 sm:py-12">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -143,7 +137,17 @@ export default function ProfilePage() {
       </div>
 
       {authLoading ? <div className="h-96 animate-pulse rounded-2xl border border-rcl-blue/10 bg-white/[.025]"/> : user ? <form onSubmit={save} className="grid gap-6">
-        <section className="overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/55 shadow-[0_20px_60px_rgba(0,0,0,.18)]">
+        <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Profile details</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Public information</h2>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"/></label><div><p className="text-xs font-black uppercase tracking-wider text-white/40">Account role</p><p className="mt-2 flex h-12 items-center rounded-xl border border-white/10 bg-black/20 px-4 text-sm font-black uppercase text-white/55">{isPrivileged ? profile?.role?.toUpperCase() : role.toUpperCase()}</p></div></div>
+          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">Bio<textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={500} placeholder="Tell the RCL community who you are…" className="mt-2 h-32 w-full resize-none rounded-xl border border-rcl-blue/15 bg-black/25 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/><span className="mt-1 block text-right text-xs text-white/25">{bio.length}/500</span></label>
+          <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Location<input value={location} onChange={e => setLocation(e.target.value)} maxLength={100} placeholder="Richmond, VA" className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label><label className="block text-xs font-black uppercase tracking-wider text-white/40">Profile visibility<select value={visibility} onChange={e => setVisibility(e.target.value as 'public'|'friends'|'private')} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></label></div>
+        </section>
+
+        {role==='coach'&&<RCHCoachFields value={coachIdentity} onChange={setCoachIdentity} profileVisibility={visibility}/>}
+        <details className="rounded-xl border border-white/15 p-3">
+          <summary className="min-h-11 cursor-pointer px-2 py-3 text-sm font-semibold">Photos and cover</summary>
+          <div className="pt-3">        <section className="overflow-hidden rounded-2xl border border-rcl-blue/20 bg-[#071522]/55 shadow-[0_20px_60px_rgba(0,0,0,.18)]">
           <div className="relative h-48 bg-gradient-to-br from-rcl-navy to-black sm:h-56">
             {coverUrl && <img src={coverUrl} alt="Cover preview" className="h-full w-full object-cover"/>}
             <div className="absolute inset-0 bg-gradient-to-t from-[#071522] via-transparent to-black/20"/>
@@ -154,21 +158,21 @@ export default function ProfilePage() {
           <div className="px-5 pb-6 pt-16 sm:px-7"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile media</p><p className="mt-2 text-sm text-white/40">Use clear, recognizable images. Uploads must be images 5 MB or smaller.</p></div>
         </section>
 
-        <section className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-5 sm:p-7">
+          </div>
+        </details>
+        <details className="rounded-xl border border-white/15 p-3">
+          <summary className="min-h-11 cursor-pointer px-2 py-3 text-sm font-semibold">Account type</summary>
+          <div className="pt-3">        <section className="rounded-2xl border border-rcl-blue/15 bg-[linear-gradient(145deg,#0a1b2a,#050b12)] p-5 sm:p-7">
           <div><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Identity type</p><h2 className="mt-1 font-display text-2xl font-black uppercase">How do you participate?</h2><p className="mt-2 text-sm leading-6 text-white/40">Coach identity is free, and does not grant official RCL coaching or staff access. Admin/staff authorization cannot be changed here.</p><Link href="/league/royaltee/join" className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-[#e78a4d] bg-[#fd8732]/10 px-4 text-xs font-black uppercase tracking-wide text-[#ffc39a]">Royaltee adult cheer + step (18+) — add affiliation →</Link></div>
           <div className={`mt-5 grid gap-3 md:grid-cols-3 ${isPrivileged ? 'pointer-events-none opacity-45' : ''}`}>{roleCards.map(({id,icon:Icon,title,subtitle,detail,accent}) => <button type="button" key={id} onClick={() => setRole(id)} className={`rounded-2xl border p-4 text-left transition ${role === id ? accent : 'border-white/10 bg-black/20 hover:border-rcl-blue/25'}`}><div className="flex items-center justify-between"><Icon className={role === id ? 'text-rcl-orange' : 'text-white/35'}/><span className={`h-2.5 w-2.5 rounded-full ${role === id ? 'bg-rcl-orange' : 'bg-white/10'}`}/></div><p className="mt-5 font-display text-lg font-black">{title}</p><p className="mt-1 text-xs font-semibold text-white/70">{subtitle}</p><p className="mt-3 text-xs leading-5 text-white/40">{detail}</p></button>)}</div>
           {isAdmin && <div className="mt-4 flex gap-3 rounded-2xl border border-rcl-blue/20 bg-rcl-blue/5 p-4 text-sm"><FaShieldHalved className="mt-1 shrink-0 text-rcl-blue"/><p><strong className="text-rcl-blue">ADMIN ACCESS</strong><br/><span className="text-white/50">Administrator permissions are controlled by league authorization and cannot be granted from this form.</span></p></div>}
         </section>
 
-        <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
-          <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Profile details</p><h2 className="mt-1 font-display text-2xl font-black uppercase">Public information</h2>
-          <div className="mt-6 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Display name<input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"/></label><div><p className="text-xs font-black uppercase tracking-wider text-white/40">Account role</p><p className="mt-2 flex h-12 items-center rounded-xl border border-white/10 bg-black/20 px-4 text-sm font-black uppercase text-white/55">{isPrivileged ? profile?.role?.toUpperCase() : role.toUpperCase()}</p></div></div>
-          <label className="mt-5 block text-xs font-black uppercase tracking-wider text-white/40">Bio<textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={500} placeholder="Tell the RCL community who you are…" className="mt-2 h-32 w-full resize-none rounded-xl border border-rcl-blue/15 bg-black/25 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/><span className="mt-1 block text-right text-xs text-white/25">{bio.length}/500</span></label>
-          <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="block text-xs font-black uppercase tracking-wider text-white/40">Location<input value={location} onChange={e => setLocation(e.target.value)} maxLength={100} placeholder="Richmond, VA" className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-rcl-blue/60"/></label><label className="block text-xs font-black uppercase tracking-wider text-white/40">Profile visibility<select value={visibility} onChange={e => setVisibility(e.target.value as 'public'|'friends'|'private')} className="mt-2 h-12 w-full rounded-xl border border-rcl-blue/15 bg-black/25 px-4 text-sm text-white outline-none focus:border-rcl-blue/60"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></label></div>
-        </section>
-
-        {role==='coach'&&<RCHCoachFields value={coachIdentity} onChange={setCoachIdentity} profileVisibility={visibility}/>}
-        <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
+          </div>
+        </details>
+        <details className="rounded-xl border border-white/15 p-3">
+          <summary className="min-h-11 cursor-pointer px-2 py-3 text-sm font-semibold">Profile music</summary>
+          <div className="pt-3">        <section className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5 sm:p-7">
           <p className="text-xs font-black uppercase tracking-[.18em] text-rcl-orange">Profile music</p>
           <h2 className="mt-1 font-display text-2xl font-black uppercase">Choose your profile song</h2>
           <p className="mt-2 text-sm leading-6 text-white/70">Search the Audius catalog, listen and select a song for your profile. No YouTube link needed.</p>
@@ -176,6 +180,8 @@ export default function ProfilePage() {
           <p className="mt-4 text-xs leading-5 text-white/65">After choosing, tap Save RCL profile below. Playback is free; Safari may require visitors to tap Play.</p>
         </section>
 
+          </div>
+        </details>
         <div className="flex flex-col gap-3 rounded-2xl border border-rcl-blue/15 bg-[#071522]/45 p-4 sm:flex-row sm:items-center sm:justify-between">
           <span role="status" className={`text-sm ${error ? 'text-red-300' : saved ? 'text-emerald-300' : 'text-white/35'}`}>{statusMessage || 'Changes are not saved until you submit this form.'}</span>
           <button disabled={saving || uploading !== null} className="min-h-12 shrink-0 rounded-xl bg-rcl-orange px-7 text-xs font-black uppercase tracking-wider text-black transition hover:brightness-110 disabled:opacity-50">{saving ? 'Saving…' : 'Save RCL profile'}</button>

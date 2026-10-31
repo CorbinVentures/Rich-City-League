@@ -58,7 +58,8 @@ describe('RCH Living World', () => {
     expect(memberNav).toContain("href:'/world'");
     expect(read('src/lib/rch-mobile-experience.ts')).toContain("'/world'");
     expect(read('src/components/RCHPublicWebShell.tsx')).toContain("href: '/world'");
-    expect(social).toContain('href="/world"');
+    expect(social).not.toContain('rch-pulse-world-link');
+    expect(read('src/lib/rcl-navigation.ts')).toContain("href:'/world'");
     expect(read('src/components/rep/RepExchangeClient.tsx')).toContain("rch_buy_rep_reward");
     expect(read('src/app/runs/page.tsx')).toContain("<CourtDominion initialCourt=");
   });

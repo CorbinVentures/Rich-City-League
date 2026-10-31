@@ -301,3 +301,28 @@ main.rch-pulse-page .rch-pulse-world-link>span:last-child {display:flex;align-it
 main.rch-pulse-page .rch-pulse-world-link:hover {border-color:var(--rch-brand-ink)}
 main.rch-pulse-page .rch-pulse-world-link:focus-visible {outline:3px solid var(--rch-brand-ink);outline-offset:4px}
 @media(max-width:430px){main.rch-pulse-page .rch-pulse-world-link {padding:13px}main.rch-pulse-page .rch-pulse-world-link small {font-size:11px}}
+
+/* Home is a timeline at phone, tablet and desktop widths. */
+.rcl-platform-root main.rch-timeline-home .rch-timeline-container {
+  max-width:760px!important;
+}
+.rcl-platform-root main.rch-timeline-home .rcl-network-feed-grid {
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.rcl-platform-root main.rch-timeline-home .rch-pulse-masthead {
+  padding:0 0 8px;border:0;background:transparent;box-shadow:none;
+}
+.rcl-platform-root main.rch-timeline-home .rch-pulse-masthead-brand h1 {
+  font-size:24px!important;letter-spacing:-.025em;
+}
+.rch-timeline-filters {display:flex;align-items:center;gap:8px;min-width:0;}
+.rch-timeline-filters .rcl-feed-mode-tabs {flex:1;min-width:0;}
+.rch-timeline-more {
+  max-width:110px;min-height:44px;padding:8px;border-radius:10px;
+  border:1px solid var(--rch-brand-border);background:var(--rch-brand-surface);
+  color:var(--rch-brand-ink);font-size:13px;
+}
+.rch-timeline-more:focus-visible {outline:2px solid var(--rch-brand-copy);outline-offset:3px;}
+.rcl-platform-root main.rch-timeline-home .rch-pulse-masthead-actions :is(a,button) {
+  min-width:44px;min-height:44px;
+}

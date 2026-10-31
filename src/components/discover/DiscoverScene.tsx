@@ -230,24 +230,12 @@ export default function DiscoverScene() {
 
   return <main className="rch-scene-page">
     <div className="rch-scene-container">
-      <section className="rch-scene-hero" aria-labelledby="scene-title">
-        <div className="rch-scene-hero-copy">
-          <p className="rch-scene-eyebrow"><span className="rch-scene-orbit" aria-hidden="true"/> RICH CITY HOOPS / THE SCENE</p>
-          <h1 id="scene-title">Find your <em>next play.</em></h1>
-          <p>Runs, tournaments, training, leagues and tryouts — your basketball world across Virginia, all in one place.</p>
-          <div className="rch-scene-hero-links">
-            <a href="#scene-categories" className="rch-scene-hero-action">Explore opportunities <FaArrowRight aria-hidden="true"/></a>
-            <Link href="/discover/radar" className="rch-scene-hero-radar"><FaCompass aria-hidden="true"/> Open Court Radar</Link>
-          </div>
-        </div>
-        <div className="rch-scene-hero-visual" aria-hidden="true">
-          <span className="rch-scene-visual-circle rch-scene-circle-one"/>
-          <span className="rch-scene-visual-circle rch-scene-circle-two"/>
-          <span className="rch-scene-visual-circle rch-scene-circle-three"/>
-          <FaBasketball className="rch-scene-visual-ball"/>
-          <span className="rch-scene-visual-label">VIRGINIA / YOUR COURT IS CALLING</span>
-        </div>
-      </section>
+      <header className="flex flex-wrap items-center justify-between gap-3 py-4">
+        <h1 id="scene-title" className="text-3xl font-black">Discover</h1>
+        <Link href="/discover/radar" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-3 text-sm font-semibold">
+          <FaCompass aria-hidden="true"/> Court Map
+        </Link>
+      </header>
 
       <section className="rch-scene-searchbar" aria-label="Search basketball opportunities">
         <label className="rch-scene-search-input"><FaMagnifyingGlass aria-hidden="true"/>
@@ -265,11 +253,13 @@ export default function DiscoverScene() {
         </label>
       </section>
 
-      <GravityLocationPicker className="mb-5" />
+      <details className="mb-4 rounded-xl border border-white/10 p-3">
+        <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My area</summary>
+        <GravityLocationPicker className="mt-2" />
+      </details>
       <section id="scene-categories" className="rch-scene-section">
         <div className="rch-scene-section-title">
-          <div><span className="rch-scene-kicker">YOUR NEXT MOVE</span><h2>What brings you to the court?</h2></div>
-          <p>Jump straight into what matters to you.</p>
+          <div><h2>Find basketball</h2></div>
         </div>
         <div className="rch-scene-categories">
           {CATEGORIES.map(item => {
@@ -277,26 +267,27 @@ export default function DiscoverScene() {
             return <button key={item.id} type="button" className={'rch-scene-category'+(category === item.id?' is-active':'')}
               onClick={() => selectCategory(category === item.id ? 'all' : item.id)} aria-pressed={category === item.id}>
               <span className="rch-scene-category-icon"><Icon aria-hidden="true"/></span>
-              <strong>{item.title}</strong><small>{item.caption}</small>
+              <strong>{item.title}</strong>
               <FaArrowRight className="rch-scene-category-arrow" aria-hidden="true"/>
             </button>;
           })}
         </div>
       </section>
 
-      <section className="rch-scene-path" aria-label="Personalize your discovery">
+      <details className="rch-scene-path" aria-label="Personalize your discovery">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold">Personalize results</summary>
         <div className="rch-scene-path-head"><span className="rch-scene-kicker">MY PATH</span><strong>Your game. Your goals.</strong><p>Choose what you want next. We’ll prioritize related opportunities on this device.</p></div>
         <div className="rch-scene-goals" role="group" aria-label="Your basketball goal">
           {GOALS.map(item => <button type="button" aria-pressed={goal === item.id} key={item.id}
             className={goal === item.id ? 'is-active' : ''} onClick={() => chooseGoal(item.id)}
             title={item.detail}>{item.label}</button>)}
         </div>
-      </section>
+      </details>
 
-      <section className="rch-scene-content" id="scene-feed">
+      <section className="rch-scene-content rch-scene-content-simple" id="scene-feed">
         <div className="rch-scene-main-column">
           <div className="rch-scene-section-title rch-scene-feed-title">
-            <div><span className="rch-scene-kicker">OPPORTUNITY FEED</span><h2>The latest in your scene.</h2></div>
+            <div><h2>Upcoming</h2></div>
             {!loading&&<p aria-live="polite">{visible.length} {visible.length===1?'opportunity':'opportunities'}</p>}
           </div>
           <div className="rch-scene-toolbar">
@@ -327,7 +318,7 @@ export default function DiscoverScene() {
                 </div>
                 <h3><Link href={item.href}>{item.title}</Link></h3>
                 {item.organizer&&<p className="rch-scene-organizer">{item.organizer}{item.verified&&<span className="rch-scene-verified"> · Verified organization</span>}</p>}
-                {item.description&&<p className="rch-scene-description">{item.description}</p>}
+                
                 <div className="rch-scene-meta">
                   <span><FaCalendarDays aria-hidden="true"/>{readableDate(item.startsAt)}</span>
                   <span><FaLocationDot aria-hidden="true"/>{item.venue}{item.city&&item.city!=='Virginia'?' · '+item.city:''}</span>
@@ -353,7 +344,9 @@ export default function DiscoverScene() {
             </div>}
           <p className="rch-scene-footnote">Listings come from published RCH Network events and upcoming RCH runs. Verify fees, age eligibility and registration details with the organizer before attending. Saved items stay on this device; saving does not register you or send alerts.</p>
         </div>
-        <aside className="rch-scene-rail" aria-label="Explore more Virginia basketball">
+        <details className="mt-6 rounded-xl border border-white/10 p-3">
+          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">More ways to explore</summary>
+          <aside className="rch-scene-rail" aria-label="Explore more Virginia basketball">
           <div className="rch-scene-rail-card rch-scene-pulse">
             <p className="rch-scene-kicker">VA PULSE</p>
             <h2>Coming up across Virginia</h2>
@@ -387,7 +380,8 @@ export default function DiscoverScene() {
             <FaArrowRight aria-hidden="true"/>
           </Link>
           <Link href="/runs?create=1" className="rch-scene-create">Have a run to share? <strong>Host a run <FaArrowRight aria-hidden="true"/></strong></Link>
-        </aside>
+          </aside>
+        </details>
       </section>
     </div>
   </main>;
