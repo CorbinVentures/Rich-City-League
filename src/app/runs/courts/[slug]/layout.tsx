@@ -18,7 +18,8 @@ type CourtLookup =
 // The public court page uses this same verified outdoor-court view. A missing
 // record is a real 404, not an indexable client-side "court not available" page.
 const getCourt = cache(async (slug: string): Promise<CourtLookup> => {
-  const db = getPublicClient();
+  // The verified court view is newer than the generated Supabase Database types.
+  const db = getPublicClient() as any;
   if (!db) return { status: 'unavailable' };
   const { data, error } = await db.from('rch_runs_outdoor_courts')
     .select('slug,name,locality,address')
