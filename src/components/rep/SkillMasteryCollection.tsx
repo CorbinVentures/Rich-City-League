@@ -60,7 +60,7 @@ export default function SkillMasteryCollection({profileId}:{profileId?:string}){
  const disciplines=['All',...new Set(badges.map(b=>b.discipline))];
  const visible=selected==='All'?badges:badges.filter(b=>b.discipline===selected);
  const achieved=badges.filter(b=>b.tier_index>0).length;
- return <section aria-label="RCH MyPLAYER verified basketball skill mastery" className="mt-7 overflow-hidden rounded-3xl border border-[#456d95] bg-[radial-gradient(circle_at_top_right,#173a59,#071726_70%)] p-4 text-white sm:p-6">
+ return <section id="rch-skill-mastery" aria-label="RCH MyPLAYER verified basketball skill mastery" className="mt-7 overflow-hidden rounded-3xl border border-[#456d95] bg-[radial-gradient(circle_at_top_right,#173a59,#071726_70%)] p-4 text-white sm:p-6">
   <div className="flex flex-wrap items-start justify-between gap-4">
    <div>
     <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.18em] text-[#9bd4fc]"><FaMedal/> MyPLAYER · Skill Engine V2</p>
