@@ -1,0 +1,121 @@
+/* RCH blue-metal finish. The palette comes from rch-brand-tokens.css; this
+   layer adds controlled glass depth to shared app chrome and common controls. */
+html.rch-premium-root body.rch-premium-app {
+  background:
+    radial-gradient(ellipse at 50% -18%, rgb(var(--rch-brand-accent-text-rgb) / .12), transparent 38rem),
+    linear-gradient(155deg, #0d2135 0%, var(--rch-brand-canvas) 56%, #050d18 100%) !important;
+  background-attachment: fixed !important;
+}
+
+html.rch-premium-root body.rch-premium-app
+  :is(.rcl-universal-topbar, .rcl-universal-sidebar, .rcl-universal-bottom, .rch-public-header, .rch-public-mobile-drawer) {
+  background: linear-gradient(145deg, rgb(20 43 65 / .9), rgb(7 17 31 / .96)) !important;
+  border-color: var(--rch-glass-edge) !important;
+  box-shadow: 0 12px 34px rgb(0 0 0 / .24), inset 0 1px rgb(230 243 255 / .07) !important;
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+html.rch-premium-root body.rch-premium-app
+  :is(.rcl-universal-mark, .rch-public-logo > span, .rch-public-footer-brand) {
+  color: var(--rch-brand-accent-text) !important;
+  text-shadow: 0 0 18px rgb(var(--rch-brand-accent-rgb) / .24);
+}
+
+html.rch-premium-root body.rch-premium-app
+  :is(.rcl-panel, .rcl-game-card, .rcl-news-card, .rcl-editorial, .rch-browser-event, .rch-browser-news, .rch-browser-feature, .rch-pulse-post, .rcl-story-rail) {
+  border-color: var(--rch-glass-edge) !important;
+  background: linear-gradient(145deg, rgb(20 43 65 / .86), rgb(9 24 40 / .94)) !important;
+  box-shadow: 0 14px 36px rgb(0 0 0 / .2), inset 0 1px rgb(229 243 255 / .06) !important;
+}
+
+html.rch-premium-root body.rch-premium-app
+  :is(.rch-button-primary, .rch-browser-button-primary, .rch-identity-primary, .rcl-pwa-primary) {
+  border: 1px solid rgb(190 224 250 / .38) !important;
+  background: linear-gradient(180deg, #58aaff 0%, #287fe0 50%, #1767bd 100%) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .32), 0 8px 22px rgb(18 92 166 / .25) !important;
+}
+
+html.rch-premium-root body.rch-premium-app
+  :is(.rch-button-secondary, .rch-browser-button-outline, .rch-button-outline, .rcl-pwa-secondary) {
+  border-color: var(--rch-glass-edge) !important;
+  background: linear-gradient(150deg, rgb(35 62 87 / .62), rgb(13 31 50 / .76)) !important;
+  color: var(--rch-brand-copy) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .07) !important;
+}
+
+html.rch-premium-root body.rch-premium-app :is(input, select, textarea) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .24) !important;
+  background-color: rgb(5 16 29 / .72) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .04);
+}
+
+html.rch-premium-root body.rch-premium-app :is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline-color: var(--rch-brand-accent-text) !important;
+}
+
+/* Replace the previous hard-coded crimson Home accents while leaving real
+   partner, team, badge-tier and semantic status colors untouched. */
+html.rch-premium-root body.rch-premium-app .rch-court-topbar {
+  background-color: var(--rch-brand-canvas) !important;
+  border-bottom-color: var(--rch-glass-edge) !important;
+}
+html.rch-premium-root body.rch-premium-app .rch-court-bottom {
+  background: linear-gradient(180deg, rgb(19 42 64 / .96), rgb(7 17 31 / .98)) !important;
+  border-top-color: var(--rch-glass-edge) !important;
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+html.rch-premium-root body.rch-premium-app .rch-court-bottom > a.active {
+  color: var(--rch-brand-accent-text) !important;
+  background: radial-gradient(ellipse at bottom, rgb(var(--rch-brand-accent-rgb) / .22), transparent 76%) !important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed {
+  background:
+    radial-gradient(ellipse 600px 280px at 50% 0, rgb(var(--rch-brand-accent-rgb) / .1), transparent),
+    var(--rch-brand-canvas) !important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-feed-mode-tabs button[aria-pressed="true"]::after {
+  background: linear-gradient(90deg, #7fc5ff, #287fe0) !important;
+  box-shadow: 0 1px 10px rgb(var(--rch-brand-accent-rgb) / .46) !important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rcl-story-media {
+  border-color: var(--rch-brand-accent-text) !important;
+  box-shadow: 0 0 0 3px var(--rch-brand-canvas), 0 0 0 4px rgb(var(--rch-brand-accent-rgb) / .62) !important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed .rch-pulse-compose-prompt {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .25) !important;
+  background: linear-gradient(120deg, var(--rch-brand-raised), var(--rch-brand-surface)) !important;
+}
+html.rch-premium-root body.rch-premium-app main.rch-court-feed :is(button, a, input, select):focus-visible {
+  outline-color: var(--rch-brand-accent-text) !important;
+}
+
+/* Replace legacy crimson/pink brand lettering throughout the member product.
+   Error, warning, medal, team and partner colors keep their semantic meaning. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is([class*="text-[#ff768c]"], [class*="text-[#ff98aa]"], [class*="text-[#ff6674]"], [class*="text-[#ff9db8]"], [class*="text-[#ff8dab]"], [class*="text-[#f6819e]"], [class*="text-[#f681a0]"]):not([role="alert"]) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-browser-hero h1 em {
+  color: var(--rch-brand-accent-text) !important;
+  text-shadow: 0 0 24px rgb(var(--rch-brand-accent-rgb) / .25);
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-league-kicker, .rch-league-header h1 span, .rch-league-section-heading p, .rch-league-label, .rch-league-versus span, .rch-league-feature-game a, .rch-league-standings > a, .rch-league-table span, .rch-fantasy-kicker, .rch-run-badge-heading p, .rch-run-culture-head p, .rch-run-badge-heading a, .rch-run-culture-head a, .rch-run-badge span, .rch-run-culture-card > span, .rch-run-culture-card small, .rch-run-culture-empty a, .rch-run-guest-note a, .rch-run-load-more button, .rcl-draft-hero .rcl-display span, .rcl-draft-live-card .rcl-live, .rcl-module-heading small, .rcl-draft-readable .rcl-kicker) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-run-solo-explainer, .rch-run-share-button) {
+  color: var(--rch-brand-copy) !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.rch-premium-root body.rch-premium-app
+    :is(.rcl-universal-topbar, .rcl-universal-sidebar, .rcl-universal-bottom, .rch-public-header, .rch-public-mobile-drawer) {
+    background: var(--rch-brand-canvas) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
