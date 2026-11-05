@@ -138,7 +138,7 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
       return <article key={option.kind+':'+option.key} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 p-3">
        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#806a46] text-[#f2d39a]"><Icon aria-hidden="true"/></div>
        <div className="min-w-0 flex-1"><p className="text-[9px] font-black uppercase tracking-wide text-[#b6c6d5]">{option.category}{option.tier?' · '+option.tier:''}</p><strong className="block truncate text-xs">{option.name}</strong><small className="block truncate text-[10px] text-[#aab7c4]">{option.detail}</small></div>
-       <button type="button" disabled={busy!==null||pinned||pins.length>=5} onClick={()=>void changePin(option,false)} aria-label={'Feature '+option.name} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#a27d3a] text-[#f2d39a] disabled:cursor-not-allowed disabled:opacity-40">{pinned?<FaCheck/>:<FaPlus/>}</button>
+       <button type="button" disabled={busy!==null||pinned||pins.length>=5} onClick={()=>void changePin(option,false)} aria-label={'Pin to Top Five: '+option.name} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#a27d3a] text-[#f2d39a] disabled:cursor-not-allowed disabled:opacity-40">{pinned?<FaCheck/>:<FaPlus/>}</button>
       </article>;
      })}
     </div>}
