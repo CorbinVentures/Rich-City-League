@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
+import {RunsPlayerSpotlight} from '@/components/runs/RunsPlayerSpotlight';
 import { RunsRulesIntro } from '@/components/runs/RunsRulesIntro';
 import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
 import {RCHEmptyState,RCHRunDetails,RCHSectionHeader,RCHStatusChip} from '@/components/runs/arena-ui';
@@ -450,6 +451,7 @@ export default function RunsPage() {
             <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
           </div>
         </section>}
+        {view==='runs'&&<div className="mb-5"><RunsPlayerSpotlight /></div>}
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
           <Link href="/runs?view=world&mode=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
