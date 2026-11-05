@@ -11,6 +11,7 @@ const core = [
   ['/join/creators',.8,'weekly'],
   ['/join/organizations',.85,'weekly'],
   ['/league',1,'weekly'],
+  ['/awards',.85,'weekly'],
   ['/richmond-basketball-league',1,'weekly'],
   ['/richmond-basketball-runs',1,'daily'],
   ['/network',.95,'daily'],

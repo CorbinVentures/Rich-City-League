@@ -70,6 +70,7 @@ export const RCL_MEMBER_NAV_GROUPS:RCLNavGroup[]=[
     description:'The premier league and flagship competition property on RCL',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Championship Awards',href:'/awards',icon:FaTrophy},
       {label:'Join / Tryouts',href:'/league/join',icon:FaUserPlus},
       {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},

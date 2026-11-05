@@ -72,6 +72,7 @@ export const RCL_NAV_GROUPS:RCLNavGroup[]=[
     description:'The flagship competition property inside the RCL basketball world',
     items:[
       {label:'League Center',href:'/league',icon:FaBasketball},
+      {label:'Championship Awards',href:'/awards',icon:FaTrophy},
       {label:'Join / Tryouts',href:'/league/join',icon:FaUser},
       {label:'Royaltee Cheer + Step',href:'/league/royaltee',icon:FaStar},
       {label:'RCL Staff HQ',href:'/staff',icon:FaPeopleGroup},
