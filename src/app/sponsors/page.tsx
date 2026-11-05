@@ -14,7 +14,8 @@ export const metadata: Metadata={
 };
 
 export default function SponsorsPage(){
-  const featured=SPONSOR_INVENTORY.filter(item=>item.featured);
+  const featured=SPONSOR_INVENTORY.filter(item=>item.featured&&!item.code.startsWith('bmf-'));
+  const bmfPackages=SPONSOR_INVENTORY.filter(item=>item.code.startsWith('bmf-'));
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="overflow-hidden border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_12%,rgba(21,159,255,.16),transparent_30%),radial-gradient(circle_at_12%_88%,rgba(249,115,22,.10),transparent_27%),linear-gradient(145deg,#071522,#03070d_72%)]">
       <Container maxWidth="xl" className="py-14 sm:py-20 lg:py-24">
@@ -50,7 +51,13 @@ export default function SponsorsPage(){
 
       <section className="mt-16">
         <div className="mx-auto max-w-3xl text-center"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Available opportunities</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Choose the outcome first.</h2><p className="mt-3 text-sm leading-6 text-white/45">Every placement remains subject to fit, availability and RCH approval. “From” pricing is a starting point, not a guaranteed media buy.</p></div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{SPONSOR_INVENTORY.map(item=><InventoryCard key={item.code} item={item}/>)}</div>
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{SPONSOR_INVENTORY.filter(item=>!item.code.startsWith('bmf-')).map(item=><InventoryCard key={item.code} item={item}/>)}</div>
+      </section>
+
+      <section className="mt-16 overflow-hidden rounded-3xl border border-rcl-orange/25 bg-[radial-gradient(circle_at_80%_0%,rgba(249,115,22,.12),transparent_32%),linear-gradient(135deg,#101821,#071522_62%,#03070d)] p-6 sm:p-9" aria-labelledby="bmf-sponsor-heading">
+        <div className="max-w-3xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Founding event inventory · 1v1</p><h2 id="bmf-sponsor-heading" className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">BMF Championship partners.</h2><p className="mt-3 text-sm leading-6 text-white/60">Saturday, January 2, 2027 · Richmond, Virginia · venue pending. These are proposed founding packages and slot counts. RCH confirms current availability, final benefits and terms before any agreement.</p></div>
+        <div className="mt-6 grid gap-3 md:grid-cols-3">{bmfPackages.map(item=><InventoryCard key={item.code} item={item}/>)}</div>
+        <p className="mt-5 text-xs leading-5 text-white/50">Submitting a sponsorship brief does not reserve inventory or create a payment obligation. The BMF championship name remains subject to trademark clearance.</p>
       </section>
 
       <section className="mt-16 rounded-3xl border border-rcl-blue/20 bg-[linear-gradient(120deg,rgba(21,159,255,.07),#071522_42%,rgba(249,115,22,.05))] p-7 sm:p-10">
@@ -88,6 +95,7 @@ function InventoryCard({item}:{item:(typeof SPONSOR_INVENTORY)[number]}){
     <p className={'text-[9px] font-black uppercase tracking-[.16em] '+(item.featured?'text-rcl-orange':'text-rcl-blue')}>{item.eyebrow}</p>
     <h3 className="mt-2 font-display text-2xl font-black uppercase">{item.name}</h3>
     <strong className="mt-3 block text-sm text-white/75">{item.priceLabel}</strong>
+    {item.availabilityLabel&&<span className="mt-2 inline-flex rounded-full border border-rcl-orange/30 bg-rcl-orange/[.07] px-3 py-1 text-[10px] font-bold text-rcl-orange">{item.availabilityLabel}</span>}
     <p className="mt-3 min-h-[60px] text-xs leading-5 text-white/40">{item.description}</p>
     <div className="mt-4 space-y-2 border-t border-white/10 pt-4">{item.deliverables.slice(0,4).map(deliverable=><p key={deliverable} className="flex gap-2 text-[11px] leading-5 text-white/50"><FaCircleCheck className="mt-1 shrink-0 text-rcl-blue"/><span>{deliverable}</span></p>)}</div>
     <p className="mt-4 text-[10px] leading-5 text-white/30"><b className="text-white/50">Good for:</b> {item.idealFor}</p>

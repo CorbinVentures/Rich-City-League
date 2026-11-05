@@ -8,13 +8,16 @@ export type SponsorInventoryCode =
   | 'weekend-guide'
   | 'runs-presenting'
   | 'rch-tv-presenting'
-  | 'category-exclusive';
+  | 'category-exclusive'
+  | 'bmf-presenting'
+  | 'bmf-championship-partner'
+  | 'bmf-community-partner';
 
 export type SponsorInventoryItem = {
   code:SponsorInventoryCode;
   name:string;
   eyebrow:string;
-  kind:'campaign'|'featured-partner'|'presenting'|'exclusive';
+  kind:'campaign'|'featured-partner'|'presenting'|'exclusive'|'event-partner';
   placement:'social-feed'|'event-spotlight'|'community-feature'|'media-feature'|'digest'|'regional-feature'|'network-home'|'search-feature'|'news-feature';
   package:'boost'|'amplify'|'premier'|'custom';
   objective:'awareness'|'event-traffic'|'website-traffic'|'media-views'|'audience-growth';
@@ -25,6 +28,7 @@ export type SponsorInventoryItem = {
   deliverables:string[];
   idealFor:string;
   featured?:boolean;
+  availabilityLabel?:string;
 };
 
 export const SPONSOR_INVENTORY:SponsorInventoryItem[]=[
@@ -181,6 +185,30 @@ export const SPONSOR_INVENTORY:SponsorInventoryItem[]=[
     deliverables:['Category exclusivity where available','Custom inventory mix','Named RCH association','Executive reporting'],
     idealFor:'Dealerships, banks, telecom, insurance, healthcare and enterprise local brands',
     featured:true,
+  },
+  {
+    code:'bmf-presenting', name:'BMF Presenting Partner', eyebrow:'Exclusive event lead',
+    kind:'event-partner', placement:'event-spotlight', package:'custom', objective:'event-traffic',
+    durationDays:null, startingPriceCents:250000, priceLabel:'Proposed $2,500',
+    description:'Top billing and event association for the RCH BMF 1v1 Championship.',
+    deliverables:['One presenting partner slot','Presented-by event branding','On-site and digital recognition','Post-event recap placement'],
+    idealFor:'A brand seeking lead association with the championship', featured:true, availabilityLabel:'1 proposed slot',
+  },
+  {
+    code:'bmf-championship-partner', name:'BMF Championship Partner', eyebrow:'Event partner',
+    kind:'event-partner', placement:'event-spotlight', package:'custom', objective:'event-traffic',
+    durationDays:null, startingPriceCents:100000, priceLabel:'Proposed $1,000',
+    description:'A featured partner position across the championship event and RCH promotion.',
+    deliverables:['Event partner recognition','Digital event promotion','On-site brand placement','Post-event recap placement'],
+    idealFor:'Local and regional brands aligned with basketball', featured:true, availabilityLabel:'2 proposed slots',
+  },
+  {
+    code:'bmf-community-partner', name:'BMF Community Partner', eyebrow:'Community support',
+    kind:'event-partner', placement:'event-spotlight', package:'custom', objective:'event-traffic',
+    durationDays:null, startingPriceCents:50000, priceLabel:'Proposed $500',
+    description:'Support the championship and receive a clear, defined event partner presence.',
+    deliverables:['Community partner recognition','Digital event promotion','Post-event recap placement'],
+    idealFor:'Richmond area businesses and community organizations', featured:false, availabilityLabel:'4 proposed slots',
   },
 ];
 

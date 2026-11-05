@@ -47,6 +47,7 @@ const groups: AdminNavGroup[] = [
       { label: 'League Setup', href: '/admin/league-setup', icon: FaLayerGroup, description: 'Seasons, teams, scheduling and scorebook setup' },
       { label: 'Draft Night', href: '/admin/draft', icon: FaListOl, description: 'Draft rules, pick clock and live room' },
       { label: 'Operations', href: '/admin/operations', icon: FaScrewdriverWrench, description: 'Tryouts, eligibility, requests and disputes' },
+      { label: 'BMF Interest Desk', href: '/admin/runs/bmf', icon: FaBasketball, description: 'Manage BMF Championship interest registrations' },
       { label: 'Recognition', href: '/admin/recognition', icon: FaTrophy, description: 'Awards, badges and recognition programs' },
     ],
   },

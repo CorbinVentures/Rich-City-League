@@ -55,7 +55,7 @@ export default function SponsorCampaignBuilderPage(){
   async function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();setError('');
     if(!user||!db||!organization)return setError('Choose a verified organization.');
-    if(product.kind==='presenting'||product.kind==='exclusive')return setError('Presenting and exclusive sponsorships require a custom sponsorship brief instead of self-service campaign submission.');
+    if(product.kind==='presenting'||product.kind==='exclusive'||product.kind==='event-partner')return setError('Presenting, event and exclusive sponsorships require a custom sponsorship brief instead of self-service campaign submission.');
     if(!form.headline.trim()||!form.destinationUrl.trim())return setError('Headline and destination URL are required.');
     const start=new Date(form.startsAt+'T12:00:00');const finish=new Date(form.endsAt+'T12:00:00');
     if(!Number.isFinite(start.getTime())||!Number.isFinite(finish.getTime())||finish<=start)return setError('Choose a valid campaign window.');
@@ -106,9 +106,9 @@ export default function SponsorCampaignBuilderPage(){
             <div className="sm:col-span-2"><Field label="Destination URL"><input type="url" value={form.destinationUrl} onChange={e=>setForm({...form,destinationUrl:e.target.value})} placeholder="https://" className="sponsor-campaign-input"/></Field></div>
             <Field label="Working budget"><input type="number" min="0" step="1" value={form.budget?String(Math.round(Number(form.budget)/100)):''} onChange={e=>setForm({...form,budget:e.target.value?String(Number(e.target.value)*100):''})} placeholder="USD" className="sponsor-campaign-input"/></Field>
           </div>
-          {(product.kind==='presenting'||product.kind==='exclusive')&&<div className="mt-5 rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-4"><p className="text-xs font-black uppercase text-rcl-orange">Custom sponsorship required</p><p className="mt-2 text-xs leading-5 text-white/45">{product.name} includes association or exclusivity rights and cannot be activated as a self-service campaign.</p><Link href={'/sponsors/start?product='+product.code} className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">Open sponsorship brief <FaArrowRight/></Link></div>}
+          {(product.kind==='presenting'||product.kind==='exclusive'||product.kind==='event-partner')&&<div className="mt-5 rounded-2xl border border-rcl-orange/25 bg-rcl-orange/[.055] p-4"><p className="text-xs font-black uppercase text-rcl-orange">Custom sponsorship required</p><p className="mt-2 text-xs leading-5 text-white/45">{product.name} includes event association or exclusivity rights and needs a reviewed sponsorship agreement.</p><Link href={'/sponsors/start?product='+product.code} className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase text-rcl-orange">Open sponsorship brief <FaArrowRight/></Link></div>}
           {error&&<p className="mt-5 rounded-xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
-          <button disabled={busy||product.kind==='presenting'||product.kind==='exclusive'} className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-6 text-xs font-black uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-40">{busy?'Submitting…':'Submit for RCH review'} <FaArrowRight/></button>
+          <button disabled={busy||product.kind==='presenting'||product.kind==='exclusive'||product.kind==='event-partner'} className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-6 text-xs font-black uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-40">{busy?'Submitting…':'Submit for RCH review'} <FaArrowRight/></button>
           <style jsx>{':global(.sponsor-campaign-input){width:100%;min-height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:#050b12;padding:11px 13px;color:#f6f8fb;outline:none}:global(.sponsor-campaign-input:focus){border-color:rgba(21,159,255,.6);box-shadow:0 0 0 3px rgba(21,159,255,.08)}'}</style>
         </form>
 
