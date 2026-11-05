@@ -68,7 +68,7 @@ type Run = {
   allow_fan_checkin: boolean;
   host?: { display_name: string | null; username: string | null; avatar_url?: string | null };
   players?: string[];
-  partner?: {slug:string;name:string;experience:'park'|'rec';price_cents:number};
+  partner?: {slug:string;name:string;experience:'park'|'rec';price_cents:number;reward_multiplier:number};
   independently_verified?:boolean;
   verified_host?:boolean;
   weekendMultiplier?: 1 | 2;
@@ -204,7 +204,7 @@ export default function RunsPage() {
       const [hostsResult, playersResult, partnerLinksResult, verificationResult, hostVerificationResult, weekendResult] = await Promise.all([
         hostIds.length ? db.from('profiles').select('id,display_name,username,avatar_url').in('id', hostIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('run_players').select('run_id,profile_id').in('run_id', runIds) : Promise.resolve({ data: [] }),
-        runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents').in('run_id', runIds) : Promise.resolve({ data: [] }),
+        runIds.length ? db.from('rch_runs_partner_sessions').select('run_id,partner_id,experience,price_cents,reward_multiplier').in('run_id', runIds) : Promise.resolve({ data: [] }),
         runIds.length ? db.from('rch_run_verifications').select('run_id').in('run_id',runIds).eq('verification_status','verified'):Promise.resolve({data:[]}),
         hostIds.length ? db.from('rch_verified_run_hosts').select('profile_id').in('profile_id',hostIds).eq('verification_status','approved').gt('expires_at',new Date().toISOString()):Promise.resolve({data:[]}),
         runIds.length ? db.from('rch_weekend_circuit_events').select('run_id,bonus_enabled').in('run_id',runIds) : Promise.resolve({data:[]}),
@@ -217,14 +217,14 @@ export default function RunsPage() {
         playerMap.set(player.run_id, [...(playerMap.get(player.run_id) ?? []), player.profile_id]);
       }
 
-      const partnerLinks=(partnerLinksResult.data??[]) as Array<{run_id:string;partner_id:string;experience:'park'|'rec';price_cents:number}>;
+      const partnerLinks=(partnerLinksResult.data??[]) as Array<{run_id:string;partner_id:string;experience:'park'|'rec';price_cents:number;reward_multiplier:number}>;
       const partnerIds=[...new Set(partnerLinks.map(link=>link.partner_id))];
       const {data:partnerRows}=partnerIds.length?await db.from('rch_runs_partners')
         .select('id,slug,name').in('id',partnerIds).eq('status','approved'): {data:[]};
       const partnerById=new Map(((partnerRows??[]) as Array<{id:string;slug:string;name:string}>).map(p=>[p.id,p]));
       const runPartners=new Map(partnerLinks.flatMap(link=>{
         const org=partnerById.get(link.partner_id);
-        return org?[[link.run_id,{slug:org.slug,name:org.name,experience:link.experience,price_cents:link.price_cents}] as const]:[];
+        return org?[[link.run_id,{slug:org.slug,name:org.name,experience:link.experience,price_cents:link.price_cents,reward_multiplier:link.reward_multiplier}] as const]:[];
       }));
       const certifiedRuns=new Set(((verificationResult.data??[]) as {run_id:string}[]).map(x=>x.run_id));
       const certifiedHosts=new Set(((hostVerificationResult.data??[]) as {profile_id:string}[]).map(x=>x.profile_id));
@@ -619,6 +619,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
     <div className="rch-ux-game-body">
       {run.weekendMultiplier===2&&<p className="text-xs leading-5 text-[#ffe3a2]">Featured weekend community drop-in · Court access and staffing are not guaranteed.</p>}
       {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#3d8c88] bg-[#123e45] px-3 py-2 text-xs font-bold text-[#bbf3e4]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
+      {run.partner?.reward_multiplier===2&&<span className="inline-flex self-start rounded-lg border border-[#b8903c]/60 bg-[#392d13] px-3 py-2 text-xs font-black text-[#ffe5a2]">2× eligible verified game rewards</span>}
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
