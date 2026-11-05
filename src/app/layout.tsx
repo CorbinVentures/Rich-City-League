@@ -55,7 +55,7 @@ import './rch-scene-visual-authority.css';
 // Isolated browser marketing surface; never applies to installed PWA routes.
 import './rch-browser-home.css';
 import './rch-discovery-starter.css';
-// Browser-specific geometry; both shells consume the shared charcoal/crimson palette.
+// Browser-specific geometry; both shells consume the shared blue-metal palette.
 import './rch-browser-sitewide.css';
 import './rch-unified-mockup.css';
 // Screenshot-verified last override: five tabs and dark high-contrast basketball product surfaces.
@@ -65,6 +65,7 @@ import './rch-runs-social-culture.css';
 // Official 3D identity for the four live basketball program pages.
 import './rch-program-emblems.css';
 import './rch-court-flare.css';
+import './rch-blue-metal.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
@@ -102,10 +103,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/favicon.svg?v=black-r-1', type: 'image/svg+xml' },
-      { url: '/icon?v=black-r-1', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.svg?v=blue-metal-1', type: 'image/svg+xml' },
+      { url: '/icon?v=blue-metal-1', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [{ url: '/apple-icon?v=black-r-1', sizes: '180x180', type: 'image/png' }],
+    apple: [{ url: '/apple-icon?v=blue-metal-1', sizes: '180x180', type: 'image/png' }],
   },
   appleWebApp: {
     capable: true,
@@ -122,7 +123,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#0b0c0e',
+  themeColor: '#07111f',
   colorScheme: 'dark',
 };
 
