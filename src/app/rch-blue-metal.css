@@ -98,6 +98,16 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root
   :is([class*="text-[#ff768c]"], [class*="text-[#ff98aa]"], [class*="text-[#ff6674]"], [class*="text-[#ff9db8]"], [class*="text-[#ff8dab]"], [class*="text-[#f6819e]"], [class*="text-[#f681a0]"]):not([role="alert"]) {
   color: var(--rch-brand-accent-text) !important;
 }
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is([class*="text-[#ff768c]"], [class*="text-[#f07696]"], [class*="text-[#f16b90]"],
+      [class*="text-[#f18fa8]"], [class*="text-[#ff6a7b]"], [class*="text-[#ed2340]"]):not([role="alert"]) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app
+  :is(.rcl-universal-mark, .rcl-universal-wordmark > span, .rch-public-logo > span, .rch-public-footer-brand) {
+  color: var(--rch-brand-accent-text) !important;
+  text-shadow: 0 0 18px rgb(var(--rch-brand-accent-rgb) / .24) !important;
+}
 html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-browser-hero h1 em {
   color: var(--rch-brand-accent-text) !important;
   text-shadow: 0 0 24px rgb(var(--rch-brand-accent-rgb) / .25);
@@ -109,6 +119,153 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root
 html.rch-premium-root body.rch-premium-app .rcl-platform-root
   :is(.rch-run-solo-explainer, .rch-run-share-button) {
   color: var(--rch-brand-copy) !important;
+}
+
+/* Finish the blue-metal pass on product areas that still carried their old
+   crimson/pink campaign palette. These are RCH-owned interface accents. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-browser-hero h1 em, .rch-starter-kicker, .rch-starter-result > div > span,
+      .rch-starter-preview > span, .rch-starter-preview p a, .rch-run-extras > summary::after,
+      .rch-run-culture-head p, .rch-run-culture-head a, .rch-run-badge-heading p,
+      .rch-run-badge-heading a, .rch-run-share-button, .rch-league-kicker,
+      .rch-league-header h1 span, .rch-league-section-heading p, .rch-league-label,
+      .rch-league-versus span, .rch-league-feature-game a, .rch-league-standings > a,
+      .rch-league-table span, .rch-fantasy-kicker, .rcl-draft-readable .rcl-draft-hero .rcl-display span,
+      .rcl-draft-readable .rcl-kicker, .rcl-home-game-grid small) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-starter-options button.selected, .rch-starter-primary, .rch-league-header-actions a.rch-league-join,
+      .rch-fantasy-main-action, .rcl-draft-readable .rcl-draft-primary,
+      .rcl-draft-readable .rcl-filter-row button.active) {
+  color: #fff !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .55) !important;
+  background: linear-gradient(180deg, #58aaff 0%, #287fe0 52%, #1767bd 100%) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .24), 0 7px 19px rgb(18 92 166 / .2) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-run-solo-toggle[aria-pressed="true"], .rch-run-solo-toggle.active) {
+  color: #fff !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .55) !important;
+  background: linear-gradient(180deg, #58aaff, #1767bd) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-browser-hero, .rch-league-site, .rch-fantasy-workspace, .rch-draft-readable, .rch-run-culture-card) {
+  --rch-brand-accent: #287fe0;
+  --rch-brand-accent-text: #8fcaff;
+}
+
+/* Command Center was the largest remaining block of first-party red. Its
+   warning, error, over-budget, negative-value, and urgent states stay semantic. */
+html.rch-premium-root body.rch-premium-app .command-app,
+html.rch-premium-root body.rch-premium-app .cmd-entry {
+  --cmd-red: #287fe0;
+  --red: #287fe0;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-brand-r, .cmd-add, .cmd-button, .cmd-loading-r, .cmd-entry-mark, .cmd-entry-submit) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .55) !important;
+  background: linear-gradient(180deg, #58aaff 0%, #287fe0 52%, #1767bd 100%) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .24), 0 8px 22px rgb(18 92 166 / .24) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-nav-item.active, .cmd-fast-all, .cmd-directory-noresults button) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .42) !important;
+  background: linear-gradient(145deg, rgb(40 127 224 / .3), rgb(12 35 58 / .92)) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-nav-item.active svg, .cmd-eyebrow, .cmd-hero h2 em, .cmd-hero-mark,
+      .cmd-franchise-icon, .cmd-secondary-link, .cmd-directory-intro-title > svg,
+      .cmd-directory-note svg, .cmd-directory-subheader button, .cmd-directory-noresults > svg,
+      .cmd-gym-type svg, .cmd-gym-location svg, .cmd-gym-availability svg,
+      .cmd-fast-action svg, .cmd-fast-search-row, .cmd-fast-result-right,
+      .cmd-empty-glyph, .cmd-wholesale-tag, .cmd-wholesale-supplier,
+      .cmd-ops-game > svg,
+      .studio-hero h2 em, .studio-hero-badge span, .studio-pill, .storyboard-caption span,
+      .storyboard-empty span) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-active-line, .cmd-metric::before, .cmd-ops-progress, .cmd-budget-auto-preview) {
+  background-color: var(--rch-brand-accent) !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .42) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-hero, .cmd-entry-noise, .cmd-entry-presentation, .cmd-directory-intro,
+      .cmd-franchise-icon, .cmd-info, .cmd-fast-top-trigger, .cmd-fastlane) {
+  background-image: linear-gradient(145deg, rgb(24 56 87 / .84), rgb(8 24 41 / .96)) !important;
+  border-color: var(--rch-glass-edge) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-add:hover, .cmd-button:hover, .cmd-entry-submit:hover) {
+  background: linear-gradient(180deg, #78bdff, #287fe0 55%, #145da9) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-directory-search:focus-within, .cmd-directory-select:focus-within,
+      .cmd-entry-form input:focus-visible, .cmd-field input:focus, .cmd-field select:focus,
+      .cmd-field textarea:focus, .studio button.storyboard-tile.is-selected) {
+  border-color: var(--rch-brand-accent-text) !important;
+  box-shadow: 0 0 0 2px rgb(var(--rch-brand-accent-rgb) / .24) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-refresh:hover, .cmd-menu-toggle:hover, .cmd-dir-refresh:hover,
+      .cmd-gym-card:hover, .cmd-fast-top-trigger:hover, .cmd-fast-top-trigger:focus-visible,
+      .cmd-fast-action:hover, .cmd-fast-action:focus-visible, .cmd-fast-signal:hover,
+      .cmd-fast-signal:focus-visible, .cmd-fast-result.chosen, .cmd-fast-result:hover,
+      .cmd-fast-result:focus-visible) {
+  border-color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app .studio
+  :is(button.studio-primary, .studio-primary, input[type="checkbox"]) {
+  accent-color: var(--rch-brand-accent) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app .studio-tabs button[aria-current] {
+  color: var(--rch-brand-accent-text) !important;
+  border-color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-install, .cmd-entry-switch) {
+  color: var(--rch-brand-accent-text) !important;
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .4) !important;
+  background: linear-gradient(145deg, rgb(24 56 87 / .84), rgb(8 24 41 / .96)) !important;
+}
+html.rch-premium-root body.rch-premium-app .command-app
+  :is(.cmd-ops-game.selected, .cmd-budget-auto-preview, .cmd-wholesale-tag.need) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .48) !important;
+  background: rgb(var(--rch-brand-accent-rgb) / .18) !important;
+}
+html.rch-premium-root body.rch-premium-app .cmd-entry
+  :is(.cmd-entry-mark, .cmd-entry-submit) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .55) !important;
+  background: linear-gradient(180deg, #58aaff 0%, #287fe0 52%, #1767bd 100%) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / .24), 0 8px 22px rgb(18 92 166 / .24) !important;
+}
+html.rch-premium-root body.rch-premium-app .cmd-entry
+  :is(.cmd-entry-eyebrow, .cmd-entry-hero h1 em, .cmd-entry-detail b, .cmd-entry-install-icon) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .cmd-entry
+  :is(.cmd-entry-noise, .cmd-entry-presentation) {
+  background-image: linear-gradient(145deg, rgb(24 56 87 / .65), rgb(8 24 41 / .94)) !important;
+  border-color: var(--rch-glass-edge) !important;
+}
+html.rch-premium-root body.rch-premium-app .cmd-entry .cmd-entry-submit:hover {
+  background: linear-gradient(180deg, #78bdff, #287fe0 55%, #145da9) !important;
+}
+
+/* Retire legacy orange from shared first-party controls and keyboard focus. */
+html.rch-premium-root body.rch-premium-app
+  :is(.rcl-button:hover, .rcl-splash-enter:hover, .rcl-state-primary,
+      .rcl-navigation-panel nav a[aria-current="page"]) {
+  border-color: rgb(var(--rch-brand-accent-text-rgb) / .5) !important;
+  background: linear-gradient(180deg, #58aaff, #287fe0 55%, #1767bd) !important;
+  color: #fff !important;
+}
+html.rch-premium-root body.rch-premium-app :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--rch-brand-accent) !important;
+}
+html.rch-premium-root body.rch-premium-app :is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline-color: var(--rch-brand-accent-text) !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
