@@ -34,10 +34,11 @@ export function SponsorInterestForm({initialProduct=''}:{initialProduct?:string}
     if(!db)return setError('Sponsorship requests are temporarily unavailable.');
     if(!form.businessName.trim()||!form.contactName.trim()||!form.contactEmail.trim())return setError('Business name, contact name, and email are required.');
     setBusy(true);
-    const major=selected?.kind==='presenting'||selected?.kind==='exclusive';
+    const major=selected?.kind==='presenting'||selected?.kind==='exclusive'||selected?.kind==='event-partner';
     const budgetLabel=SPONSOR_BUDGET_OPTIONS.find(([value])=>value===form.budget)?.[1]??form.budget;
     const detail=[
       'Requested opportunity: '+(selected?selected.name+' ('+selected.code+')':'Not sure yet'),
+      selected?.availabilityLabel?'Availability shown: '+selected.availabilityLabel:'',
       'Business category: '+form.category,
       'Budget: '+budgetLabel,
       form.phone.trim()?'Phone: '+form.phone.trim():'',
@@ -86,7 +87,7 @@ export function SponsorInterestForm({initialProduct=''}:{initialProduct?:string}
       <div className="md:col-span-2"><Field label="Opportunity"><select value={form.inventoryCode} onChange={e=>update('inventoryCode',e.target.value)} className="sponsor-input"><option value="">Help me choose</option>{SPONSOR_INVENTORY.map(item=><option key={item.code} value={item.code}>{item.name} — {item.priceLabel}</option>)}</select></Field></div>
       <div className="md:col-span-2"><Field label="What do you want this sponsorship to do?"><textarea value={form.goals} onChange={e=>update('goals',e.target.value)} rows={5} maxLength={2200} placeholder="Examples: drive traffic to our dealership, fill an event, promote an offer, own a recurring RCH category, reach Richmond basketball fans…" className="sponsor-input resize-y"/></Field></div>
     </div>
-    {selected&&<div className="mt-5 rounded-2xl border border-rcl-blue/15 bg-black/15 p-4"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-blue">Selected opportunity</p><div className="mt-2 flex flex-wrap items-end justify-between gap-3"><div><b className="font-display text-2xl font-black uppercase">{selected.name}</b><p className="mt-1 max-w-2xl text-xs leading-5 text-white/40">{selected.description}</p></div><span className="text-sm font-black text-rcl-orange">{selected.priceLabel}</span></div></div>}
+    {selected&&<div className="mt-5 rounded-2xl border border-rcl-blue/15 bg-black/15 p-4"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-blue">Selected opportunity</p><div className="mt-2 flex flex-wrap items-end justify-between gap-3"><div><b className="font-display text-2xl font-black uppercase">{selected.name}</b><p className="mt-1 max-w-2xl text-xs leading-5 text-white/40">{selected.description}</p>{selected.availabilityLabel&&<p className="mt-2 text-xs font-bold text-rcl-orange">{selected.availabilityLabel} · confirm before agreement</p>}</div><span className="text-sm font-black text-rcl-orange">{selected.priceLabel}</span></div></div>}
     {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
     <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between"><p className="max-w-xl text-[11px] leading-5 text-white/30">Submitting a request does not reserve inventory or create a payment obligation. RCH confirms availability and terms first.</p><button disabled={busy} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-rcl-orange px-6 text-xs font-black uppercase tracking-wide text-black disabled:opacity-50">{busy?'Sending…':'Request sponsorship'} <FaArrowRight/></button></div>
     <style jsx>{':global(.sponsor-input){width:100%;min-height:48px;border-radius:12px;border:1px solid rgba(21,159,255,.18);background:#050b12;padding:12px 14px;color:#f6f8fb;outline:none}:global(.sponsor-input:focus){border-color:rgba(21,159,255,.68);box-shadow:0 0 0 3px rgba(21,159,255,.08)}:global(textarea.sponsor-input){min-height:132px}'}</style>

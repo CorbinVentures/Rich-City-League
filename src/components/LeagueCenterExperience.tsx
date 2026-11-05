@@ -84,7 +84,7 @@ export function LeagueCenterExperience(){
      </div>
     </div>
     <div className="rch-league-header-actions">
-     <Link href="/league/join" aria-label="Join Rich City League" className="rch-league-join">Join the league <FaArrowRight aria-hidden="true"/></Link>
+     <div className="flex flex-wrap items-center gap-3"><Link href="/commissioners/natwan-young" className="inline-flex min-h-11 items-center rounded-xl border border-[#c9a64b]/40 bg-[#c9a64b]/10 px-4 text-xs font-black uppercase tracking-wide text-[#e8ca76]">Commissioner · Natwan Young</Link><Link href="/league/join" aria-label="Join Rich City League" className="rch-league-join">Join the league <FaArrowRight aria-hidden="true"/></Link></div>
      <Link href="/schedule">Schedule</Link>
      <Link href="/teams">Teams</Link>
      <Link href="/draft">Draft Night</Link>

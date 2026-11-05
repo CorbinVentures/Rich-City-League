@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {weeklyQuestCatalog,worldQuestProgress,worldXpProgress,type WorldJourney} from '@/lib/runs-world-progression';
+import { RunsChampionshipShowcase } from '@/components/runs/RunsChampionshipShowcase';
 import type {WorldRun} from '@/lib/runs-world-game';
 import './runs-cinematic-home.css';
 
@@ -159,6 +160,8 @@ export function RunsCinematicHome({
    </div>
    <div className="rch-gh-cinema-foot"><FaLocationDot/> REAL COURTS · REAL PEOPLE · REAL RUNS</div>
   </div>
+
+  <RunsChampionshipShowcase/>
 
   <div className="rch-gh-player-card">
    <button type="button" className="rch-gh-portrait" onClick={onPlayer} aria-label="Open My Player">

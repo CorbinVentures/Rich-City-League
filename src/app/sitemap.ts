@@ -40,6 +40,8 @@ const core = [
   ['/rankings',.8,'daily'],
   ['/coaches',.75,'weekly'],
   ['/runs',1,'daily'],
+  ['/runs/bmf-championship',.9,'weekly'],
+  ['/commissioners/natwan-young',.7,'monthly'],
   ['/draft',.7,'weekly'],
   ['/media',.7,'weekly'],
   ['/shop',.7,'weekly'],

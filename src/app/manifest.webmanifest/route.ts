@@ -19,6 +19,7 @@ export function GET() {
       { name:'Discover Basketball', short_name:'Discover', description:'Find players, teams and basketball around you.', url:'/discover?source=pwa-shortcut', icons:[{src:'/icon?v=black-r-1',sizes:'512x512',type:'image/png'}] },
       { name:'Open Runs', short_name:'Runs', description:'Find basketball runs across Virginia.', url:'/runs?source=pwa-shortcut', icons:[{src:'/icon?v=black-r-1',sizes:'512x512',type:'image/png'}] },
       { name:'Rich City League', short_name:'League', description:'Open the flagship Rich City League experience.', url:'/league?source=pwa-shortcut', icons:[{src:'/icon?v=black-r-1',sizes:'512x512',type:'image/png'}] },
+      { name:'BMF Championship', short_name:'BMF', description:'View championship details and register your interest.', url:'/runs/bmf-championship?source=pwa-shortcut', icons:[{src:'/icon?v=black-r-1',sizes:'512x512',type:'image/png'}] },
     ],
     icons: [
       { src:'/favicon.svg?v=black-r-1', sizes:'any', type:'image/svg+xml', purpose:'any' },
