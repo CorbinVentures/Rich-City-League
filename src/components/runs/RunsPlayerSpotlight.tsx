@@ -30,7 +30,7 @@ export function RunsPlayerSpotlight(){
     </div>
     <div className="mt-6 flex flex-wrap gap-3">
      <Link href={JOEL_PROFILE} className="inline-flex items-center gap-2 rounded-full bg-rcl-orange px-5 py-3 text-xs font-black uppercase tracking-wide text-black transition hover:brightness-110">View Joel’s RCH profile <FaArrowRight/></Link>
-     <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-white/10"><FaBasketball/> Find the SYB event</Link>
+     <Link href="/runs/partners/syb-hoop-richmond" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-white/10"><FaBasketball/> Visit SYB on RCH</Link>
     </div>
    </div>
   </div>
