@@ -8,9 +8,9 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 import {RunVenuePicker,runVenueLocation,type RunVenue} from '@/components/runs/RunVenuePicker';
 
-type Partner={id:string;slug:string;owner_id:string;name:string;city:string;description:string;instagram_url:string|null;logo_url:string|null;brand_color:string;status:string};
+type Partner={id:string;slug:string;owner_id:string;name:string;city:string;description:string;instagram_url:string|null;logo_url:string|null;brand_color:string;status:string;reward_multiplier:number};
 type Member={profile_id:string;role:'manager'|'scorekeeper'};
-type Session={run_id:string;experience:'park'|'rec';price_cents:number;run?:{id:string;title:string;starts_at:string;location:string;status:string;game_format:string}};
+type Session={run_id:string;experience:'park'|'rec';price_cents:number;reward_multiplier:number;run?:{id:string;title:string;starts_at:string;location:string;status:string;game_format:string}};
 type Metrics={total_sessions:number;upcoming_sessions:number;total_checkins:number;unique_attendees:number;repeat_attendees:number;verified_matches:number;waiting_players:number};
 type SessionForm={title:string;starts:string;location:string;court_slug:string;format:string;experience:'park'|'rec';capacity:number;price:string;description:string};
 const empty:SessionForm={title:'',starts:'',location:'',court_slug:'',format:'5v5',experience:'rec',capacity:20,price:'0',description:''};
@@ -43,7 +43,7 @@ export default function RunsPartnerHeadquarters(){
   if(!db||!slug||!user?.id){setLoading(false);return;}
   setLoading(true);
   const {data:row,error:failure}=await db.from('rch_runs_partners')
-   .select('id,slug,owner_id,name,city,description,instagram_url,logo_url,brand_color,status')
+   .select('id,slug,owner_id,name,city,description,instagram_url,logo_url,brand_color,status,reward_multiplier')
    .eq('slug',slug).maybeSingle();
   if(failure||!row){setError('Partner HQ not found or not accessible.');setLoading(false);return;}
   const p=row as Partner;
@@ -55,7 +55,7 @@ export default function RunsPartnerHeadquarters(){
   const [metricResult,staffResult,linksResult]=await Promise.all([
    db.rpc('rch_partner_hq_metrics',{p_partner:p.id}),
    own?db.from('rch_runs_partner_members').select('profile_id,role').eq('partner_id',p.id):Promise.resolve({data:[]}),
-   db.from('rch_runs_partner_sessions').select('run_id,experience,price_cents').eq('partner_id',p.id).limit(200)
+   db.from('rch_runs_partner_sessions').select('run_id,experience,price_cents,reward_multiplier').eq('partner_id',p.id).limit(200)
   ]);
   if(metricResult.data)setMetrics(metricResult.data as Metrics);
   if(metricResult.error)setError(metricResult.error.message);
@@ -107,8 +107,8 @@ export default function RunsPartnerHeadquarters(){
    <header className="mt-5 rounded-3xl border border-[#355f7e] bg-[radial-gradient(circle_at_top_right,#164267,#0a243c_70%)] p-6 sm:p-9">
     <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8acdfb]"><FaBuildingIcon/> Official Runs Partner HQ</p>
     <h1 className="mt-3 text-3xl font-black uppercase leading-tight sm:text-5xl">{partner.name}</h1>
-    <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full border border-[#3d8b9b] px-3 py-1 text-xs font-bold text-[#a7edc9]">{partner.status==='approved'?'Approved network organization':partner.status}</span><span className="rounded-full border border-[#527f9f] px-3 py-1 text-xs font-bold">{role.toUpperCase()} ACCESS</span><span className="rounded-full border border-[#527f9f] px-3 py-1 text-xs font-bold">{partner.city}, VA</span></div>
-    <p className="mt-4 max-w-2xl text-sm leading-6 text-[#bad0df]">Your operation, your event schedule and your brand. RCH connects your players to statewide Run Passport, Next Up, verified competition, REP and badges.</p>
+    <div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full border border-[#3d8b9b] px-3 py-1 text-xs font-bold text-[#a7edc9]">{partner.status==='approved'?'Verified organization':partner.status}</span><span className="rounded-full border border-[#527f9f] px-3 py-1 text-xs font-bold">{role.toUpperCase()} ACCESS</span><span className="rounded-full border border-[#527f9f] px-3 py-1 text-xs font-bold">{partner.city}, VA</span>{partner.reward_multiplier===2&&<span className="rounded-full border border-[#b3944d] bg-[#392d13] px-3 py-1 text-xs font-black text-[#ffe5a2]">2× event XP / REP</span>}</div>
+    <p className="mt-4 max-w-2xl text-sm leading-6 text-[#bad0df]">Publish event listings and schedules here. Players use a free RCH profile to check in, join games and share Run Tape highlights. RCH verification of an organization does not certify an individual event or score.</p>
    </header>
    {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/50 bg-red-900/20 p-4 text-sm text-red-100">{error}</p>}
    {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-500/40 bg-emerald-900/20 p-4 text-sm text-emerald-100">{notice}</p>}
@@ -120,24 +120,24 @@ export default function RunsPartnerHeadquarters(){
     <p className="mt-3 text-xs leading-5 text-[#91afc6]">Aggregated from actual RCH session, check-in, queue and verified-match records. A scheduled run is not proof of attendance, and advertised fees are not revenue.</p>
    </section>
    <section className="mt-9 rounded-2xl border border-[#356182] bg-[#0b253d] p-5 sm:p-7">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-[#8ec9f6]"><FaCalendarDays/> THE PARK / THE REC</p><h2 className="mt-2 text-2xl font-black uppercase">Session control room</h2></div>{canManage&&<button onClick={()=>setShowForm(v=>!v)} className="min-h-11 rounded-xl bg-[#348ff5] px-4 text-sm font-black">{showForm?'Close editor':'+ Publish a Run'}</button>}</div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-[#8ec9f6]"><FaCalendarDays/> THE PARK / THE REC</p><h2 className="mt-2 text-2xl font-black uppercase">Event schedule</h2></div>{canManage&&<button onClick={()=>setShowForm(v=>!v)} className="min-h-11 rounded-xl bg-[#348ff5] px-4 text-sm font-black">{showForm?'Close editor':'+ Publish an event'}</button>}</div>
     {showForm&&canManage&&<form onSubmit={e=>void publish(e)} className="mt-5 grid gap-4 rounded-xl border border-[#4c7698] bg-[#091e33] p-5 sm:grid-cols-2">
      <div className="sm:col-span-2 grid grid-cols-2 gap-2">
       {(['park','rec'] as const).map(mode=><button type="button" key={mode} aria-pressed={form.experience===mode} onClick={()=>setForm({...form,experience:mode})} className={'min-h-12 rounded-xl border px-4 text-sm font-black '+(form.experience===mode?'border-[#58b4fc] bg-[#2067a3]':'border-[#456d8b]')}>{mode==='park'?'THE PARK · Pickup':'THE REC · Organized'}</button>)}
      </div>
-     <label className="text-xs font-black sm:col-span-2">Session title<input required minLength={5} maxLength={120} className={fieldClass} value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Friday night 5V5 — The REC"/></label>
+     <label className="text-xs font-black sm:col-span-2">Event title<input required minLength={5} maxLength={120} className={fieldClass} value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="SYB Comp Week — Lucks Field"/></label>
      <RunVenuePicker selected={selectedVenue} onSelect={venue=>{setSelectedVenue(venue);setForm(f=>({...f,location:runVenueLocation(venue),court_slug:venue.slug}));}} onClear={()=>{setSelectedVenue(null);setForm(f=>({...f,court_slug:'',location:''}));}}/>
      <label className="text-xs font-black sm:col-span-2">Venue / address<input required minLength={5} maxLength={300} className={fieldClass} value={form.location} onChange={e=>setForm({...form,location:e.target.value})} placeholder="Gym or park name, street address, Virginia city"/></label>
      <label className="text-xs font-black">Start (Virginia local time)<input required type="datetime-local" className={fieldClass} value={form.starts} onChange={e=>setForm({...form,starts:e.target.value})}/></label>
      <label className="text-xs font-black">Game format<select value={form.format} onChange={e=>setForm({...form,format:e.target.value})} className={fieldClass}>{['1v1','2v2','3v3','4v4','5v5'].map(x=><option key={x} value={x}>{x}</option>)}</select></label>
      <label className="text-xs font-black">Player capacity<input required type="number" min={2} max={50} className={fieldClass} value={form.capacity} onChange={e=>setForm({...form,capacity:Number(e.target.value)})}/></label>
      <label className="text-xs font-black">Organizer fee (USD)<input required type="number" min={0} max={500} step=".01" className={fieldClass} value={form.price} onChange={e=>setForm({...form,price:e.target.value})}/></label>
-     <label className="text-xs font-black sm:col-span-2">Run rules / check-in instructions<textarea maxLength={1600} rows={3} className={fieldClass} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Team rotation, arrival, parking, skill requirements, bring a light/dark jersey…"/></label>
-     <p className="text-xs leading-5 text-[#a9c8dd] sm:col-span-2">Event fees are listed for transparency. RCH does not collect payments on the organizer&apos;s behalf. Results are verified separately after play.</p>
-     <button disabled={busy} type="submit" className="min-h-12 rounded-xl bg-[#3b95f5] px-5 font-black disabled:opacity-50">{busy?'Publishing…':'Publish under this Partner HQ'}</button>
+     <label className="text-xs font-black sm:col-span-2">Schedule, rules and check-in instructions<textarea maxLength={1600} rows={5} className={fieldClass} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Arrival time, first game, matchup schedule, parking, rules and player check-in details…"/></label>
+     <p className="text-xs leading-5 text-[#a9c8dd] sm:col-span-2">Add the event schedule and logistics above. Each Run Room carries its recorded results and Run Tape highlights. RCH does not collect event fees. For 2× partners, code-verified attendance and eligible verified game/stat rewards are doubled; highlights stay standard rate.</p>
+     <button disabled={busy} type="submit" className="min-h-12 rounded-xl bg-[#3b95f5] px-5 font-black disabled:opacity-50">{busy?'Publishing…':'Publish event to Runs'}</button>
     </form>}
     <div className="mt-5 space-y-3">{sessions.map(s=><div key={s.run_id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#3c607e] bg-[#092037] p-4">
-     <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-bold uppercase text-[#91d0fd]">{s.experience==='rec'?'THE REC':'THE PARK'} · {s.run?.game_format} · {s.run?.status}</p><h3 className="mt-1 font-black">{s.run?.title}</h3><p className="mt-1 text-xs text-[#b1cee2]">{s.run?.starts_at?new Date(s.run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''} · {s.run?.location}</p></div>
+     <div className="min-w-0"><p className="flex items-center gap-2 text-xs font-bold uppercase text-[#91d0fd]">{s.experience==='rec'?'THE REC':'THE PARK'} · {s.run?.game_format} · {s.run?.status}</p><h3 className="mt-1 font-black">{s.run?.title}</h3><p className="mt-1 text-xs text-[#b1cee2]">{s.run?.starts_at?new Date(s.run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''} · {s.run?.location}</p>{s.reward_multiplier===2&&<p className="mt-2 text-[10px] font-black uppercase text-[#ffe5a2]">2× event XP / REP</p>}</div>
      <div className="flex items-center gap-3"><span className="text-xs font-black">{s.price_cents?'$'+(s.price_cents/100).toFixed(2):'FREE'}</span><Link href={'/runs/'+s.run_id} className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-[#5f8eb3] px-3 text-xs font-black">Run Room <FaArrowRight/></Link></div>
     </div>)}{!sessions.length&&<p className="rounded-xl border border-dashed border-[#3d6280] p-6 text-sm text-[#b4d0e2]">No sessions published yet. Start with your next scheduled run.</p>}</div>
    </section>

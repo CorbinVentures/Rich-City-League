@@ -6,7 +6,7 @@ import {FaArrowRight,FaBasketball,FaBuilding,FaCircleCheck,FaLocationDot,FaShiel
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 
-type Partner={id:string;slug:string;name:string;city:string;description:string;instagram_url:string|null;logo_url:string|null;brand_color:string;owner_id:string;status:string};
+type Partner={id:string;slug:string;name:string;city:string;description:string;instagram_url:string|null;logo_url:string|null;brand_color:string;owner_id:string;status:string;reward_multiplier:number};
 const empty={name:'',city:'',description:'',instagram:'',logo:''};
 
 export default function RunsPartnersPage(){
@@ -28,8 +28,8 @@ export default function RunsPartnersPage(){
   if(user?.id){const {data:admin}=await db.rpc('is_staff_or_admin');setReviewAccess(Boolean(admin));}
   else setReviewAccess(false);
   const [directory,own,staff]=await Promise.all([
-   db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status').eq('status','approved').order('city').order('name').limit(150),
-   user?.id?db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status').eq('owner_id',user.id).order('created_at',{ascending:false}):Promise.resolve({data:[]}),
+   db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status,reward_multiplier').eq('status','approved').order('city').order('name').limit(150),
+   user?.id?db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status,reward_multiplier').eq('owner_id',user.id).order('created_at',{ascending:false}):Promise.resolve({data:[]}),
    user?.id?db.from('rch_runs_partner_members').select('partner_id').eq('profile_id',user.id):Promise.resolve({data:[]})
   ]);
   if(directory.error&&directory.error.code!=='42P01')setError(directory.error.message);
@@ -37,7 +37,7 @@ export default function RunsPartnersPage(){
   setMine((own.data??[]) as Partner[]);
   const ids=(staff.data??[]).map((x:{partner_id:string})=>x.partner_id);
   if(ids.length){
-   const {data}=await db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status').in('id',ids);
+   const {data}=await db.from('rch_runs_partners').select('id,slug,name,city,description,instagram_url,logo_url,brand_color,owner_id,status,reward_multiplier').in('id',ids);
    setManaged((data??[]) as Partner[]);
   }else setManaged([]);
   setLoading(false);
@@ -77,7 +77,7 @@ export default function RunsPartnersPage(){
     <label className="text-xs font-bold sm:col-span-2">What does your organization host?<textarea maxLength={1200} rows={3} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="mt-2 w-full rounded-lg border border-[#497596] bg-[#071a2c] p-3 text-sm" placeholder="Indoor REC games, outdoor runs, leagues, training..."/></label>
     <label className="text-xs font-bold">Instagram profile URL<input type="url" value={form.instagram} onChange={e=>setForm({...form,instagram:e.target.value})} className="mt-2 w-full rounded-lg border border-[#497596] bg-[#071a2c] p-3 text-sm" placeholder="https://www.instagram.com/yourpage"/></label>
     <label className="text-xs font-bold">Logo image URL (optional)<input type="url" value={form.logo} onChange={e=>setForm({...form,logo:e.target.value})} className="mt-2 w-full rounded-lg border border-[#497596] bg-[#071a2c] p-3 text-sm" placeholder="https://..."/></label>
-    <p className="text-xs leading-5 text-[#a7c9e4] sm:col-span-2">RCH reviews each partner and requires a current verified Runs host credential. Applying does not announce or guarantee a partnership. Organizations remain responsible for their own venues, prices, payments and operations.</p>
+    <p className="text-xs leading-5 text-[#a7c9e4] sm:col-span-2">RCH reviews each organization before it appears publicly. Organization approval does not certify individual Runs, scores or venues. Partners remain responsible for their own facilities, prices, payments and event operations.</p>
     <button disabled={busy||!user} className="min-h-12 rounded-xl bg-[#348ff5] px-6 text-sm font-black disabled:opacity-60">{user?busy?'Submitting…':'Submit for review':'Sign in before applying'}</button>
     {!user&&<Link href="/auth/sign-in?next=%2Fruns%2Fpartners" className="self-center text-xs text-[#9dd5ff]">Sign in →</Link>}
    </form>}
@@ -93,7 +93,7 @@ export default function RunsPartnersPage(){
     {loading?<p className="mt-6 text-sm text-[#b8d1e7]">Loading partner network…</p>:!partners.length?<div className="mt-5 rounded-2xl border border-dashed border-[#3a6081] bg-[#0b2236] p-8 text-center"><FaUsers className="mx-auto text-3xl text-[#69b9f5]"/><h3 className="mt-3 text-xl font-black">The partner network is opening</h3><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#aac6dc]">Verified community organizers will appear here after RCH approves their partnership. No organizations are being represented as confirmed partners before that review.</p></div>:
      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{partners.map(p=><Link href={'/runs/partners/'+p.slug} key={p.id} className="group overflow-hidden rounded-2xl border border-[#2e5776] bg-[#0c263f] hover:border-[#6eb7e9]">
       <div style={{background:'linear-gradient(130deg,'+p.brand_color+'35,#081e32)'}} className="flex h-28 items-center justify-center border-b border-[#2e5776]">{p.logo_url?<img src={p.logo_url} alt={p.name+' logo'} loading="lazy" referrerPolicy="no-referrer" className="h-20 w-20 rounded-xl object-contain"/>:<FaBasketball className="text-5xl text-white/70"/>}</div>
-      <div className="p-5"><p className="flex items-center gap-1 text-[11px] font-black uppercase text-[#7ce7c1]"><FaShieldHalved/> RCH approved organizer</p><h3 className="mt-2 text-xl font-black">{p.name}</h3><p className="mt-2 flex items-center gap-1 text-xs text-[#abd2e9]"><FaLocationDot/>{p.city}, Virginia</p><p className="mt-3 line-clamp-2 text-sm leading-6 text-[#b4cada]">{p.description||'Basketball runs and organized competitive sessions.'}</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-black text-[#8fcfff]">Explore Runs <FaArrowRight/></span></div>
+      <div className="p-5"><p className="flex items-center gap-1 text-[11px] font-black uppercase text-[#7ce7c1]"><FaShieldHalved/> RCH verified organization</p><h3 className="mt-2 text-xl font-black">{p.name}</h3><p className="mt-2 flex items-center gap-1 text-xs text-[#abd2e9]"><FaLocationDot/>{p.city}, Virginia</p>{p.reward_multiplier===2&&<span className="mt-3 inline-flex rounded-full border border-[#edca71]/50 bg-[#392d13] px-3 py-1 text-[10px] font-black uppercase text-[#ffe5a2]">2× event XP / REP</span>}<p className="mt-3 line-clamp-2 text-sm leading-6 text-[#b4cada]">{p.description||'Basketball runs and organized competitive sessions.'}</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-black text-[#8fcfff]">Explore events <FaArrowRight/></span></div>
      </Link>)}</div>}
    </section>
    <div className="mt-9 rounded-2xl border border-[#345c7c] bg-[#092039] p-5 text-xs leading-6 text-[#b9cfe1]"><FaCircleCheck className="mr-2 inline text-[#68d6a7]"/>One player account connects to RCH verified match history, courts, crew standings, REP and mastery badges. Partner-session fees are organizer-set and paid outside RCH; no payments are processed through this dashboard.</div>
