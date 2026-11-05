@@ -95,7 +95,7 @@ html.rch-premium-root body.rch-premium-app main.rch-court-feed :is(button, a, in
 /* Replace legacy crimson/pink brand lettering throughout the member product.
    Error, warning, medal, team and partner colors keep their semantic meaning. */
 html.rch-premium-root body.rch-premium-app .rcl-platform-root
-  :is([class*="text-[#ff768c]"], [class*="text-[#ff98aa]"], [class*="text-[#ff6674]"], [class*="text-[#ff9db8]"], [class*="text-[#ff8dab]"], [class*="text-[#f6819e]"], [class*="text-[#f681a0]"]) {
+  :is([class*="text-[#ff768c]"], [class*="text-[#ff98aa]"], [class*="text-[#ff6674]"], [class*="text-[#ff9db8]"], [class*="text-[#ff8dab]"], [class*="text-[#f6819e]"], [class*="text-[#f681a0]"]):not([role="alert"]) {
   color: var(--rch-brand-accent-text) !important;
 }
 html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-browser-hero h1 em {
