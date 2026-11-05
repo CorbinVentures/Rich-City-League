@@ -92,6 +92,25 @@ html.rch-premium-root body.rch-premium-app main.rch-court-feed :is(button, a, in
   outline-color: var(--rch-brand-accent-text) !important;
 }
 
+/* Replace legacy crimson/pink brand lettering throughout the member product.
+   Error, warning, medal, team and partner colors keep their semantic meaning. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is([class*="text-[#ff768c]"], [class*="text-[#ff98aa]"], [class*="text-[#ff6674]"], [class*="text-[#ff9db8]"], [class*="text-[#ff8dab]"], [class*="text-[#f6819e]"], [class*="text-[#f681a0]"]) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root.rch-public-web .rch-browser-hero h1 em {
+  color: var(--rch-brand-accent-text) !important;
+  text-shadow: 0 0 24px rgb(var(--rch-brand-accent-rgb) / .25);
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-league-kicker, .rch-league-header h1 span, .rch-league-section-heading p, .rch-league-label, .rch-league-versus span, .rch-league-feature-game a, .rch-league-standings > a, .rch-league-table span, .rch-fantasy-kicker, .rch-run-badge-heading p, .rch-run-culture-head p, .rch-run-badge-heading a, .rch-run-culture-head a, .rch-run-badge span, .rch-run-culture-card > span, .rch-run-culture-card small, .rch-run-culture-empty a, .rch-run-guest-note a, .rch-run-load-more button, .rcl-draft-hero .rcl-display span, .rcl-draft-live-card .rcl-live, .rcl-module-heading small, .rcl-draft-readable .rcl-kicker) {
+  color: var(--rch-brand-accent-text) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root
+  :is(.rch-run-solo-explainer, .rch-run-share-button) {
+  color: var(--rch-brand-copy) !important;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   html.rch-premium-root body.rch-premium-app
     :is(.rcl-universal-topbar, .rcl-universal-sidebar, .rcl-universal-bottom, .rch-public-header, .rch-public-mobile-drawer) {
