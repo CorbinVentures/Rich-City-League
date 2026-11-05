@@ -65,6 +65,7 @@ export default async function BadgesPage() {
         <Link href="#rch-skill-mastery" className="rounded-full border border-rcl-blue/30 bg-rcl-blue/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-[#b8dfff]">Skill Mastery</Link>
         <Link href="/runs?view=world&mode=vault" className="rounded-full border border-[#a98ce8]/30 bg-[#a98ce8]/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-[#dfd1ff]">World Milestones</Link>
         <Link href="#rch-court-badges" className="rounded-full border border-[#e2ac45]/30 bg-[#e2ac45]/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-[#ffe1a5]">Court Medals</Link>
+        <Link href="#rch-badge-category-community-runs" className="rounded-full border border-[#4b9580]/30 bg-[#4b9580]/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-[#b3f0dd]">Community & Events</Link>
       </nav>
       <div id="rch-place-collectibles" className="scroll-mt-24"><PlaceBadgeVault /></div>
       <div className="space-y-11">{[...groups.entries()].map(([category, items]) => <section key={category} id={"rch-badge-category-"+category.toLowerCase().replace(/[^a-z0-9]+/g,"-")} aria-label={category}>
