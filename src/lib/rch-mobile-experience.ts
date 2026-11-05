@@ -45,6 +45,10 @@ export function isBrowserPublicRoute(pathname: string): boolean {
   if (parts.length === 2 && PUBLIC_DETAIL_SECTIONS.has(parts[0])) {
     return !PRIVATE_DETAIL_SLUGS.has(parts[1].toLowerCase());
   }
+  // Partner public pages are readable without sign-in; review and HQ management remain private.
+  if (parts.length === 3 && parts[0] === 'runs' && parts[1] === 'partners') {
+    return !PRIVATE_DETAIL_SLUGS.has(parts[2].toLowerCase()) && parts[2].toLowerCase() !== 'review';
+  }
   if (parts.length === 3 && parts[0] === 'organizations' && parts[1] === 'region') return true;
   if (parts.length === 3 && parts[0] === 'network' && parts[1] === 'events') return true;
   // Published player basketball passports are public data; management is not.
