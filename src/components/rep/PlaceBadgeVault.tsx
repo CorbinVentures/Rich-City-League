@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import SkillMasteryCollection from './SkillMasteryCollection';
+import {WorldBadgeMilestones} from './WorldBadgeMilestones';
 import '../../app/rch-identity.css';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaBasketball,FaBolt,FaCrown,FaGem,FaLocationDot,FaRoute,FaShieldHalved,FaTicket,FaTrophy,FaUsers,FaVideo} from 'react-icons/fa6';
@@ -110,11 +111,11 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
   else await load();
   setPinBusy(null);
  };
- return <section aria-label="RCH geographic achievements" className="mt-9">
+ return <section id="rch-court-badges" aria-label="RCH Badge Cabinet: verified skills, World milestones and court medals" className="mt-9">
   <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/15 pb-4">
-   <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#a1d7ff]">Location authenticated • Original collectible artwork</p>
-    <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">The Trophy Case</h2>
-    <p className="mt-2 max-w-2xl text-sm text-[#9fc0d9]">Each medal remembers where you earned it, from Rockwood Park to the entire Commonwealth. Individual honors cannot be purchased with REP.</p>
+   <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-[#a1d7ff]">RCH BADGE CABINET • VERIFIED LEGACY</p>
+    <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">The Badge Cabinet</h2>
+    <p className="mt-2 max-w-2xl text-sm text-[#9fc0d9]">Your verified skill progress, permanent Runs World milestones and court medals live together here. Every competitive achievement is earned through real, reviewed basketball.</p>
    </div>
    <Link href="/rep" className="flex min-h-11 items-center gap-2 rounded-xl border border-[#6a91b4] px-4 text-xs font-black text-[#b8dfff]"><FaBolt/> Open REP Exchange</Link>
   </div>
@@ -124,6 +125,7 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">{pins.map(p=>{const a=awards.find(a=>a.id===p.award_id);const b=a?byCode.get(a.badge_code):null;return a&&b?<div key={p.award_id} className="rounded-xl border border-[#826e4a] bg-[#0d2135] p-2 text-center"><PlaceBadgeMedal badge={b} place={a.place_label} earned compact/><p className="mt-2 text-xs font-black text-[#f5dfb0]">{b.display_name}</p><p className="mt-1 text-[10px] text-[#9ebbd1]">{a.place_label}</p></div>:null;})}</div>
   </div>}
   {owner&&<p className="mt-3 text-[11px] text-[#a5c3db]">Pin up to five verified location medals to your public profile ({pins.length}/5).</p>}
+  <WorldBadgeMilestones profileId={target}/>
   <div className="mt-4 flex flex-wrap items-center gap-2">
    <button aria-pressed={view==='earned'} onClick={()=>setView('earned')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='earned'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Earned medals ({awards.length})</button>
    <button aria-pressed={view==='catalog'} onClick={()=>setView('catalog')} className={'min-h-10 rounded-xl px-4 text-sm font-bold '+(view==='catalog'?'bg-[#256b9c] text-white':'border border-[#3e637e] text-[#a9cce4]')}>Unlock Collection ({blueprints.length})</button>
