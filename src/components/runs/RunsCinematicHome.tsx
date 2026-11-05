@@ -7,6 +7,7 @@ import {
  FaCompass,FaCrown,FaLocationDot,FaMedal,FaPeopleGroup,
  FaPlay,FaShieldHalved,FaTrophy,FaXmark
 } from 'react-icons/fa6';
+import {RunsPlayerSpotlight} from '@/components/runs/RunsPlayerSpotlight';
 import {getSupabaseClient} from '@/lib/supabase';
 import {weeklyQuestCatalog,worldQuestProgress,worldXpProgress,type WorldJourney} from '@/lib/runs-world-progression';
 import type {WorldRun} from '@/lib/runs-world-game';
@@ -159,6 +160,8 @@ export function RunsCinematicHome({
    </div>
    <div className="rch-gh-cinema-foot"><FaLocationDot/> REAL COURTS · REAL PEOPLE · REAL RUNS</div>
   </div>
+
+  <RunsPlayerSpotlight />
 
   <div className="rch-gh-player-card">
    <button type="button" className="rch-gh-portrait" onClick={onPlayer} aria-label="Open My Player">
