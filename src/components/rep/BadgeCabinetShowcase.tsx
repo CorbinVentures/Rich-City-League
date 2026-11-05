@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaAward,FaBasketball,FaCheck,FaCrown,FaLocationDot,FaMedal,FaPlus,FaShieldHalved,FaTrash,FaTrophy} from 'react-icons/fa6';
+import {FaAward,FaBasketball,FaCheck,FaCrown,FaLocationDot,FaPlus,FaShieldHalved,FaTrash,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
 
@@ -92,7 +92,15 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
   else await load();
   setBusy(null);
  };
- const optionFor=(pin:Pin)=>options.find(item=>item.kind===pin.badge_kind&&item.key===pin.badge_key);
+ const optionFor=(pin:Pin):Option|undefined=>{
+  const existing=options.find(item=>item.kind===pin.badge_kind&&item.key===pin.badge_key);
+  if(existing)return existing;
+  if(pin.badge_kind==='world'){
+   const milestone=worldCatalog.find(item=>item.key===pin.badge_key);
+   if(milestone)return {kind:'world',key:milestone.key,name:milestone.name,detail:milestone.detail,tier:'Verified',category:'World'};
+  }
+  return undefined;
+ };
  const badgeIcon=(kind:Pin['badge_kind'])=>kind==='skill'?FaBasketball:kind==='world'?FaCrown:kind==='location'?FaLocationDot:FaAward;
 
  return <section aria-label="Featured mixed-type badge showcase" className="mt-7 rounded-3xl border border-[#9a7b49] bg-[radial-gradient(circle_at_top_right,#342c20,#0b1826_65%)] p-4 text-white sm:p-6">
