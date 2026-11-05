@@ -91,7 +91,6 @@ export default function PlaceBadgeVault({profileId}:{profileId?:string}){
  },[db,target]);
  useEffect(()=>{void load();},[load]);
  const byCode=new Map(blueprints.map(b=>[b.code,b]));
- const owner=Boolean(user?.id&&target===user.id);
  const visibleAwards=awards.filter(a=>tierFilter==='all'||byCode.get(a.badge_code)?.tier===tierFilter);
  const visibleBlueprints=blueprints.filter(b=>tierFilter==='all'||b.tier===tierFilter);
  return <section id="rch-court-badges" aria-label="RCH Badge Cabinet: verified skills, World milestones and court medals" className="mt-9">
