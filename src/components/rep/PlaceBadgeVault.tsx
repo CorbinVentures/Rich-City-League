@@ -4,6 +4,7 @@ import Link from 'next/link';
 import SkillMasteryCollection from './SkillMasteryCollection';
 import {WorldBadgeMilestones} from './WorldBadgeMilestones';
 import {BadgeCabinetShowcase} from './BadgeCabinetShowcase';
+// Legacy rch_badge_showcase_pins are backfilled by the cabinet migration so old location selections remain featured.
 import '../../app/rch-identity.css';
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaBasketball,FaBolt,FaCrown,FaGem,FaLocationDot,FaRoute,FaShieldHalved,FaTicket,FaTrophy,FaUsers,FaVideo} from 'react-icons/fa6';
