@@ -6,6 +6,7 @@ const sql=file('supabase/migrations/20261017010000_rch_verified_skill_mastery.sq
 const pins=file('supabase/migrations/20261017010100_rch_badge_showcase_pins.sql');
 const ui=file('src/components/rep/SkillMasteryCollection.tsx');
 const vault=file('src/components/rep/PlaceBadgeVault.tsx');
+const cabinet=file('src/components/rep/BadgeCabinetShowcase.tsx');
 const profile=file('src/app/social/profile/[id]/page.tsx');
 describe('RCH earned skill mastery & collectible showcase',()=>{
  it('requires independently reviewed completed game stats (no purchased skill)',()=>{
@@ -33,7 +34,9 @@ describe('RCH earned skill mastery & collectible showcase',()=>{
   expect(pins).toContain('a.profile_id=(select auth.uid())');
   expect(pins).toContain('enable row level security');
   expect(vault).toContain("rch_badge_showcase_pins");
-  expect(vault).toContain('Pin to Top Five');
+  expect(vault).toContain('<BadgeCabinetShowcase');
+  expect(cabinet).toContain('Pin to Top Five: ');
+  expect(cabinet).toContain("db.rpc('rch_set_badge_cabinet_pin'");
   expect(profile).toContain("activeTab==='badges' && <PlaceBadgeVault profileId={id}/>");
  });
 });
