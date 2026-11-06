@@ -90,6 +90,16 @@
 .rwg-mode h2{margin-top:10px}
 .rwg-mode>p{margin-top:12px;font-size:13px;line-height:1.6;color:var(--rch-brand-copy);max-width:75ch}
 .rwg-mode .rwg-empty{margin-top:17px}
+.rwg-takeover-selected-court{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin:18px 0 4px;padding:14px;border:1px solid #9c7942;border-radius:15px;background:radial-gradient(ellipse at 100% 0%,rgb(214 170 95 / .18),transparent 62%),linear-gradient(130deg,#1b2630,#0a1a29);box-shadow:inset 0 1px rgb(255 255 255 / .08),0 8px 25px #0005}
+.rwg-takeover-selected-court>div{display:grid;gap:4px}
+.rwg-takeover-selected-court>div small{color:#f2ca7a;font-size:9px;font-weight:1000;letter-spacing:.14em}
+.rwg-takeover-selected-court>div strong{color:#fff;font-size:clamp(17px,3vw,24px);font-weight:1000;line-height:1.15}
+.rwg-takeover-selected-court>div span{color:#c5d6e3;font-size:10px;line-height:1.5}
+.rwg-takeover-selected-court>p{grid-column:1/-1;margin:0;color:#f1d9a8;font-size:10px;line-height:1.5}
+.rwg-takeover-selected-court>button{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:center;gap:7px;min-height:43px;padding:9px 11px;border:1px solid #d4ae67;border-radius:9px;background:rgb(78 57 27 / .72);color:#f9dda2;font-size:9px;font-weight:950;cursor:pointer}
+.rwg-takeover-signin{grid-column:1/-1;display:flex;align-items:center;gap:7px;color:#a8dafa;font-size:10px;font-weight:850;line-height:1.5;text-decoration:underline;text-underline-offset:3px}
+.rwg-takeover-control{scroll-margin-top:90px}
+.rwg-takeover-control .rch-game-journey{scroll-margin-top:90px}
 .rwg-mission-meter{margin:21px 0;padding:20px;border:1px solid var(--rch-brand-muted);border-radius:15px;background:var(--rch-brand-raised)}
 .rwg-mission-meter strong{font-size:28px;font-weight:1000}
 .rwg-mission-meter span{margin-left:12px;font-size:10px;font-weight:900;color:var(--rch-brand-copy)}
