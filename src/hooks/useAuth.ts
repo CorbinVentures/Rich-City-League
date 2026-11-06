@@ -297,14 +297,24 @@ export function useAuth() {
   };
 
   const updatePassword = async (password: string) => {
-    if (!supabase) throw new Error(getSupabaseUnavailableMessage());
+    const recoveryClient = getSupabaseRecoveryClient();
+    if (!recoveryClient) throw new Error(getSupabaseUnavailableMessage());
     setError(null);
-    const { error } = await supabase.auth.updateUser({ password });
+
+    const { data: sessionData, error: sessionError } = await recoveryClient.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      const recoveryError = sessionError ?? new Error('Your password reset link is invalid or expired.');
+      setError('Your password reset link is invalid or expired. Request a new reset email.');
+      throw recoveryError;
+    }
+
+    const { error } = await recoveryClient.auth.updateUser({ password });
     if (error) {
-      setError('Unable to update your password.');
+      setError('Unable to update your password. Request a new reset email and try again.');
       throw error;
     }
-    await supabase.auth.signOut();
+
+    await recoveryClient.auth.signOut({ scope: 'local' });
     setUser(null);
     setProfile(null);
     setRecoverySession(false);
