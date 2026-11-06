@@ -160,6 +160,9 @@ html body .rwg-shell .rch-gh-section-title h2{color:white!important;font-size:18
 @media(max-width:410px){.rwg-shell .rch-gh-game-start-grid{gap:6px}.rwg-shell .rch-gh-game-start-action{padding:10px 8px}.rwg-shell .rch-gh-game-start-action strong{font-size:10px}.rwg-shell .rch-gh-game-start-action small{font-size:9px}}
 
 /* A playable-feeling mode console: selection stays in Runs until the player enters. */
+.rwg-shell .rch-gh-arena-console{position:relative;margin:14px 0 20px;padding:clamp(14px,2.8vw,22px);overflow:hidden;border:1px solid var(--rch-brand-border);border-radius:22px;background:linear-gradient(112deg,rgb(var(--rch-brand-canvas-rgb) / .94),rgb(var(--rch-brand-surface-rgb) / .88)),url('/rch-runs-night-court.svg') center/cover no-repeat;box-shadow:0 18px 46px #0008,inset 0 1px rgb(var(--rch-brand-ink-rgb) / .12)}
+.rch-gh-arena-console:before{content:'';pointer-events:none;position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--rch-brand-accent-text),#f2c877,transparent);opacity:.9}
+.rch-gh-arena-console>.rch-gh-section-title,.rch-gh-arena-console>.rch-gh-game-start-copy,.rch-gh-arena-console>.rch-gh-mode-console-grid{position:relative;z-index:1}
 .rwg-shell .rch-gh-mode-console-grid{display:grid;grid-template-columns:minmax(220px,.82fr) minmax(0,1.5fr);gap:11px}
 .rwg-shell .rch-gh-mode-select{display:flex;flex-direction:column;gap:7px;padding:10px;border:1px solid var(--rch-brand-border);border-radius:16px;background:linear-gradient(160deg,var(--rch-brand-raised),var(--rch-brand-surface));box-shadow:inset 0 1px rgb(var(--rch-brand-ink-rgb) / .08)}
 .rwg-shell .rch-gh-mode-option{position:relative;display:grid;grid-template-columns:28px 28px minmax(0,1fr) 15px;align-items:center;gap:9px;min-height:65px;padding:9px 10px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--rch-brand-copy);text-align:left;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
@@ -193,6 +196,11 @@ html body .rwg-shell .rch-gh-briefing-heading h3{margin:3px 0 0;color:#fff;font-
 .rch-gh-briefing-objective span{flex:none;color:var(--rch-brand-accent-text);font-size:8px;font-weight:950;letter-spacing:.12em}
 .rch-gh-briefing-objective strong{color:#fff;font-size:11px;line-height:1.4}
 .rch-gh-briefing-description{max-width:68ch;margin:9px 0;color:var(--rch-brand-copy);font-size:10px;line-height:1.55}
+.rch-gh-mode-run-target{display:grid;gap:5px;margin:2px 0 10px;padding:10px 11px;border:1px solid var(--rch-brand-border);border-left:3px solid var(--rch-brand-accent-text);border-radius:10px;background:linear-gradient(105deg,rgb(var(--rch-brand-canvas-rgb) / .84),rgb(var(--rch-brand-surface-rgb) / .74));box-shadow:inset 0 1px rgb(var(--rch-brand-ink-rgb) / .08)}
+.rch-gh-mode-run-target>span{display:flex;align-items:center;gap:6px;color:var(--rch-brand-accent-text);font-size:8px;font-weight:1000;letter-spacing:.12em}
+.rch-gh-mode-run-target>strong{color:#fff;font-size:12px;line-height:1.35}
+.rch-gh-mode-run-target>small{display:flex;align-items:center;gap:6px;color:var(--rch-brand-copy);font-size:9px;line-height:1.4}
+.rch-gh-mode-run-target>small svg{flex:none;color:var(--rch-brand-accent-text)}
 .rch-gh-briefing-steps{display:flex;flex-wrap:wrap;gap:5px;margin:3px 0 13px}
 .rch-gh-briefing-step{position:relative;display:flex;align-items:center;gap:5px;min-height:25px;padding:4px 7px;border:1px solid var(--rch-brand-border);border-radius:7px;background:rgb(var(--rch-brand-canvas-rgb) / .32);color:var(--rch-brand-ink);font-size:8px;font-weight:850}
 .rch-gh-briefing-step>span{color:var(--rch-brand-accent-text);font-size:7px;font-weight:1000}
