@@ -44,6 +44,7 @@ import {
   FaMedal,
   FaPeopleGroup,
   FaPlus,
+  FaShieldHalved,
   FaTrophy,
   FaVideo,
   FaXmark,
@@ -122,6 +123,7 @@ export default function RunsPage() {
   const searchParams = useSearchParams();
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
+  const verifiedQuery = searchParams.get('verified') === '1';
   const showLegacyList=searchParams.get('view')!=='world'||createIntent||Boolean(courtParam);
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
@@ -140,6 +142,7 @@ export default function RunsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [skillFilter, setSkillFilter] = useState<'all' | SkillLevel>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | RunType>('all');
+  const [verifiedOnly, setVerifiedOnly] = useState(verifiedQuery);
   const [runSearch, setRunSearch] = useState('');
   const [soloOnly,setSoloOnly]=useState(searchParams.get('solo')==='1');
   const [rookieOnly,setRookieOnly]=useState(searchParams.get('rookie')==='1');
@@ -153,6 +156,8 @@ export default function RunsPage() {
   const [form, setForm] = useState(emptyForm);
   const [staffIntelligence, setStaffIntelligence] = useState(false);
   const [dailyPrefs, setDailyPrefs] = useState<{preferred_format:RunFormat;preferred_type:RunPlayType;watched_courts:string[]}>({preferred_format:'all',preferred_type:'all',watched_courts:[]});
+
+  useEffect(()=>setVerifiedOnly(verifiedQuery),[verifiedQuery]);
 
   useEffect(() => {
     if (!showLegacyList || !db || !user?.id) { setStaffIntelligence(false); return; }
@@ -404,10 +409,11 @@ export default function RunsPage() {
       if(run.isSuggestedCourt||Date.parse(run.starts_at)<=Date.now())return false;
       const skillMatch = skillFilter === 'all' || run.skill_level === skillFilter;
       const typeMatch = typeFilter === 'all' || run.run_type === typeFilter;
+      const verifiedMatch = !verifiedOnly || run.independently_verified === true;
       const courtMatch = !courtParam || run.location_slug === courtParam;
       const words = runSearch.trim().toLowerCase();
       const searchMatch = !words || (run.title + ' ' + run.location + ' ' + (run.description ?? '')).toLowerCase().includes(words);
-      return skillMatch && typeMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run)) && (!rookieOnly || isRookieFriendly(run));
+      return skillMatch && typeMatch && verifiedMatch && courtMatch && searchMatch && (!soloOnly || isSoloJoinable(run)) && (!rookieOnly || isRookieFriendly(run));
     });
     // Registered availability always comes before filled/cancelled events;
     // a player-selected city/format makes this feed relevant without hiding other Virginia courts.
@@ -424,9 +430,9 @@ export default function RunsPage() {
       const capacityB=b.status === 'full' || (b.players?.length ?? 0) >= b.max_players ? 1 : 0;
       return capacityA-capacityB || (order.get(a.id) ?? Infinity)-(order.get(b.id) ?? Infinity);
     });
-  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,courtParam,runSearch,soloOnly,rookieOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
+  },[runs,dailyCandidates,dailyPrefs,skillFilter,typeFilter,verifiedOnly,courtParam,runSearch,soloOnly,rookieOnly,gravityLocation.cityId,gravityLocation.radiusMiles,user?.id]);
 
-  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,runSearch,courtParam,soloOnly,rookieOnly]);
+  useEffect(()=>setVisibleLimit(8),[skillFilter,typeFilter,verifiedOnly,runSearch,courtParam,soloOnly,rookieOnly]);
 
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
@@ -488,10 +494,11 @@ export default function RunsPage() {
           <div className="rch-run-discovery-controls">
             <button type="button" className="rch-run-solo-toggle" aria-pressed={soloOnly} onClick={()=>setSoloOnly(v=>!v)}><FaBasketball aria-hidden="true"/>{soloOnly?'Solo spots only ✓':'Find a solo spot'}</button>
             <a href="#rch-competition" className="rch-run-passport-link"><FaMedal aria-hidden="true"/> My Passport</a>
-            <button type="button" className="rch-run-clear" onClick={()=>{setTypeFilter('all');setSkillFilter('all');setRunSearch('');setSoloOnly(false);setRookieOnly(false);}}>Clear filters</button>
+            <button type="button" className="rch-run-clear" onClick={()=>{setTypeFilter('all');setVerifiedOnly(false);setSkillFilter('all');setRunSearch('');setSoloOnly(false);setRookieOnly(false);}}>Clear filters</button>
           </div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setTypeFilter('all')} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'}>All Runs</button>
+            <button type="button" onClick={() => {setTypeFilter('all');setVerifiedOnly(false);}} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'&&!verifiedOnly}>All Runs</button>
+            <button type="button" onClick={() => setVerifiedOnly(value=>!value)} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={verifiedOnly}><FaShieldHalved aria-hidden="true"/> RCH Verified Runs</button>
             <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#315b86] bg-[#0a1d34] px-3 text-xs font-semibold text-white">
               <option value="all">Any skill level</option>
               <option value="beginner">Beginner</option>
@@ -500,6 +507,7 @@ export default function RunsPage() {
               <option value="elite">Elite</option>
             </select>
             {typeFilter !== 'all' && <span className="min-w-0 rounded-lg bg-[#0d345c] px-3 py-2 text-xs font-bold text-[#a5d5ff]">{runTypeLabels[typeFilter]}</span>}
+            {verifiedOnly&&<span className="min-w-0 rounded-lg bg-[#103a32] px-3 py-2 text-xs font-bold text-[#baf2df]">Organizer and event reviewed by RCH</span>}
             <input aria-label="Search upcoming runs by city or court" type="search" value={runSearch} onChange={event => setRunSearch(event.target.value)}
               placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#315b86] bg-[#081a2e] px-4 text-sm text-white placeholder:text-[#97b3d1] outline-none focus:border-[#4b9fff]" />
           </div>
