@@ -237,6 +237,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  },[db,user?.id]);
 
  const selectedCourt=courts.find(c=>c.slug===selectedSlug)||null;
+ useEffect(()=>{
+  if(screen!=='battle'||!selectedSlug)return;
+  const frame=window.requestAnimationFrame(()=>document.getElementById('rwg-takeover-control')?.scrollIntoView({
+   behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'
+  }));
+  return()=>window.cancelAnimationFrame(frame);
+ },[screen,selectedSlug]);
  // A return from Court Arena restores its selected map pin exactly once.
  useEffect(()=>{
   if(!requestedCourt||!city||loading||restoredCourt.current===requestedCourt)return;
@@ -365,6 +372,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
        controllingCrew={courtStats.crewName} crewLogoUrl={courtStats.crewLogoPath&&db?db.storage.from('rch-crew-logos').getPublicUrl(courtStats.crewLogoPath).data.publicUrl:null} recordedDefenses={courtStats.defenses}
+       takeoverStatus={worldPulse.find(event=>event.court_slug===selectedCourt.slug&&event.status==='pending')?.title.split(' · ')[0]||null}
+       onTakeover={()=>setScreen('battle')}
        loggedIn={Boolean(user)} scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))} onScout={()=>setScoutVersion(n=>n+1)}
        onClose={closeCourtPreview}/>}
      </div>
@@ -420,6 +429,12 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    {screen==='battle'&&<section className="rwg-mode" aria-label="Runs and court battles">
      <span className="rwg-kicker">REAL RUNS / REAL BASKETBALL</span><h2>Find a game. Build your legacy.</h2>
      <p>Join upcoming basketball Runs, then compete for local Master titles and crew territory through verified games. Registered Runs are real events, not simulated matchmaking.</p>
+     {selectedCourt&&<div className="rwg-takeover-selected-court">
+      <div><small>SELECTED TERRITORY</small><strong>{selectedCourt.name}</strong><span>{selectedCourt.locality||city?.name||'Virginia'} · {courtStats.crewName?'Controlled by '+courtStats.crewName:'No verified crew controller'}</span></div>
+      <p>{worldPulse.find(event=>event.court_slug===selectedCourt.slug&&event.status==='pending')?.title.split(' · ')[0]||'The court board below shows the current controller, qualifying crews, and any valid challenge action.'}</p>
+      <button type="button" onClick={()=>setScreen('world')}><FaCompass aria-hidden="true"/> BACK TO COURT MAP</button>
+      {!user&&<Link className="rwg-takeover-signin" href={'/auth/sign-in?next='+encodeURIComponent('/runs?view=world&mode=battle&city='+(city?.id||'')+'&court='+selectedCourt.slug)}>Sign in as a crew captain to request or answer a challenge <FaArrowRight aria-hidden="true"/></Link>}
+     </div>}
      <div className="rwg-mode-links"><Link href="/runs?view=list#rch-upcoming-runs" className="rwg-primary">Find a Run <FaArrowRight/></Link>
       <Link href="/runs?create=1" className="rwg-secondary">Organize a Run</Link>
       <Link href="/crews?intent=mine" className="rwg-secondary">My Crew</Link></div>
@@ -433,7 +448,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div className="rwg-section-head" style={{marginTop:24}}><div><span className="rwg-kicker">THE COMPETITIVE ARENA</span><h2>Defend the crown.</h2></div><Link href="/commonwealth">Commonwealth Cup <FaArrowRight/></Link></div>
      <WorldBattleScene cityName={city?.name||null} courtSlugs={battleCourtSlugs}
        onSelectCourt={slug=>{setScreen('world');chooseCourt(slug);}}/>
-     <CourtDominion initialCourt={selectedSlug||''} showTakeovers/>
+     <div id="rwg-takeover-control" className="rwg-takeover-control"><CourtDominion initialCourt={selectedSlug||''} showTakeovers/></div>
     </section>}
 
    {screen==='season'&&<RunsCompetitiveCircuit journey={journey} journeyLoading={journeyLoading}
