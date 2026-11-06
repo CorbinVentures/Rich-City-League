@@ -12,12 +12,12 @@ type RankedReview={id:string;home_roster:string[];away_roster:string[];status:'p
 type Props={
  runId:string;runType:string;format:string;status:string;capacity:number;past:boolean;suggested:boolean;listingUnknown:boolean;
  registeredIds:readonly string[];checkedInIds:readonly string[];profiles:readonly Person[];
- userId:string|null;scorecardCount:number;host:boolean;
+ userId:string|null;scorecardCount:number;host:boolean;liveGame:boolean;
 };
 
 /** The game lobby only visualizes server records. RSVP != physical attendance.
  * Recorded pickup score != independently confirmed competitive result. */
-export function RunsGameplayJourney({runId,runType,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount,host}:Props){
+export function RunsGameplayJourney({runId,runType,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount,host,liveGame}:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [verified,setVerified]=useState<VerifiedReceipt|null>(null);
  const [verifiedError,setVerifiedError]=useState(false);
@@ -96,7 +96,7 @@ export function RunsGameplayJourney({runId,runType,format,status,capacity,past,s
  // Never mark a player's PLAY / CONFIRM stages complete because another team recorded a scorecard.
  const outstandingReview=rankedReview?.status==='pending'||rankedReview?.status==='rejected';
  const resultVerified=Boolean(verified||rankedReview?.status==='verified');
- const stage=outstandingReview?3:resultVerified?4:checkedIn?2:signedUp?1:0;
+ const stage=outstandingReview?3:resultVerified?4:liveGame?2:checkedIn?2:signedUp?1:0;
  const onHome=Boolean(userId&&rankedReview?.home_roster.includes(userId));
  const mySideConfirmed=Boolean(onHome?rankedReview?.home_confirmed_by:rankedReview?.away_confirmed_by);
  const otherSideConfirmed=Boolean(onHome?rankedReview?.away_confirmed_by:rankedReview?.home_confirmed_by);
@@ -106,6 +106,7 @@ export function RunsGameplayJourney({runId,runType,format,status,capacity,past,s
  !userId?{href:'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId),title:'SIGN IN TO PLAY',desc:'Create your player and register for a real Run'}:
  !signedUp?host?{href:'#rch-run-lobby',title:'MANAGE YOUR GAME',desc:'Host the event and set up teams; hosting is not player check-in'}:{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
  !checkedIn?{href:past?'/runs?view=list#rch-upcoming-runs':'#rch-game-day',title:past?'FIND YOUR NEXT GAME':'GET GAME-DAY READY',desc:past?'This event has ended; do not attempt a late check-in':'Check in at the court using the host’s in-person code'}:
+ liveGame?{href:'#rch-live-game',title:'FOLLOW THE LIVE GAME',desc:'The court score and player stats update as the host logs each play'}:
  !verified?scorecardCount>0&&rankedEligible?{href:'#rch-result-review',title:host?'SUBMIT SCORE FOR REVIEW':'WAIT FOR OFFICIAL SCORE',desc:host?'Send the completed score into independent team confirmation.':'A scorecard is recorded; the host still needs to submit it for review.'}:
  scorecardCount>0?{href:'#rch-next-up',title:'PICKUP SCORE RECORDED',desc:'This run does not use ranked confirmation or match rewards.'}:
  {href:'#rch-next-up',title:queueStatus==='called'?'YOU ARE ON DECK':queueStatus==='playing'?'RECORDED ON COURT':queueStatus==='waiting'?'YOUR NEXT UP QUEUE':'JOIN NEXT UP',desc:queueStatus==='called'?'The host marked you called; report to the court':queueStatus==='playing'?'The host recorded you as playing; no result is verified yet':queueStatus==='waiting'?'Your queue position is available in Next Up':'Get in the real court queue for this Run'}:
@@ -117,7 +118,7 @@ export function RunsGameplayJourney({runId,runType,format,status,capacity,past,s
    {[
     {title:'JOIN',desc:'Roster',target:'#rch-join-action',icon:FaUser},
     {title:'ARRIVE',desc:'Court code',target:'#rch-game-day',icon:FaClock},
-    {title:'PLAY',desc:'On deck',target:'#rch-next-up',icon:FaBasketball},
+    {title:'PLAY',desc:liveGame?'Live score':'Game mode',target:liveGame?'#rch-live-game':'#rch-next-up',icon:FaBasketball},
     {title:'CONFIRM',desc:'Official review',target:'#rch-result-review',icon:FaShieldHalved},
    ].map((step,index)=><a key={step.title} href={step.target} className={stage>index?'complete':stage===index?'current':''} aria-label={step.title+' · '+step.desc}>
     <step.icon aria-hidden="true"/><strong>{step.title}</strong><small>{step.desc}</small>{stage>index&&<FaCircleCheck className="rch-game-stage-check" aria-label="Completed"/>}</a>)}
