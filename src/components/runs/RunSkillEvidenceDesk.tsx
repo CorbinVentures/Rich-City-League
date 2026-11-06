@@ -92,8 +92,29 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
  function selectMatch(id:string){
   setSelectedMatch(id);setSelectedPlayer('');setStats(empty);setNotice('');setError('');
  }
- function selectPlayer(id:string){
+ async function selectPlayer(id:string){
   setSelectedPlayer(id);setStats(empty);setNotice('');setError('');
+  const game=matches.find(item=>item.id===selectedMatch);
+  if(!game||!id)return;
+  const {data,error:actionError}=await db.from('run_game_actions')
+   .select('id,action_type,player_id,score_value,stat_type,undoes_action_id')
+   .eq('game_id',game.game_id).limit(1000);
+  if(actionError){setNotice('Courtside entries could not be imported. Enter the official box score manually.');return;}
+  const rows=(data||[]) as Array<{id:string;action_type:string;player_id:string|null;score_value:number|null;stat_type:string|null;undoes_action_id:string|null}>;
+  const undone=new Set(rows.filter(row=>row.action_type==='undo'&&row.undoes_action_id).map(row=>row.undoes_action_id!));
+  const playerRows=rows.filter(row=>row.player_id===id&&!undone.has(row.id));
+  const totals:Record<StatKey,number>={points:0,rebounds:0,assists:0,three_made:0,three_attempted:0,steals:0,blocks:0,turnovers:0,defensive_stops:0};
+  for(const row of playerRows){
+   if(row.action_type==='score'&&row.score_value){totals.points+=row.score_value;if(row.score_value===3){totals.three_made++;totals.three_attempted++;}}
+   if(row.action_type==='stat'){
+    if(row.stat_type==='rebound')totals.rebounds++;if(row.stat_type==='assist')totals.assists++;
+    if(row.stat_type==='steal')totals.steals++;if(row.stat_type==='block')totals.blocks++;
+    if(row.stat_type==='turnover')totals.turnovers++;if(row.stat_type==='defensive_stop')totals.defensive_stops++;
+    if(row.stat_type==='three_attempted')totals.three_attempted++;
+   }
+  }
+  setStats(Object.fromEntries(Object.entries(totals).map(([key,value])=>[key,String(value)])) as Record<StatKey,string>);
+  setNotice('Imported the live game entries. Check every line against the official evidence before submitting.');
  }
  async function submit(e:React.FormEvent<HTMLFormElement>){
   e.preventDefault();
