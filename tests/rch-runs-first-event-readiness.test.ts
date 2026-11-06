@@ -31,7 +31,8 @@ describe('RUNS Richmond first-event readiness',()=>{
  it('never exposes old attendance earning calls in any mobile entry point',()=>{
   expect(room).toContain("db.rpc('rch_check_in_with_code'");
   expect(room).toContain("db.rpc('rch_issue_run_checkin_code'");
-  expect(room).toContain('IN-PERSON COURT CHECK-IN · +15 XP');
+  expect(room).toContain('IN-PERSON COURT CHECK-IN');
+  expect(room).toContain('partner?.reward_multiplier===2?30:15');
   expect(list).not.toContain("db.rpc('check_in_to_run'");
   expect(room).not.toContain("db.rpc('check_in_to_run'");
   expect(media).not.toContain("db.rpc('claim_latest_run_highlight'");

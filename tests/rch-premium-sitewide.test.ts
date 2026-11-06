@@ -4,6 +4,7 @@ import {join} from 'node:path';
 
 const file=(name:string)=>readFileSync(join(process.cwd(),name),'utf8');
 const layout=file('src/app/layout.tsx');
+const tokens=file('src/app/rch-brand-tokens.css');
 const foundation=file('src/app/rch-premium-foundation.css');
 const chrome=file('src/app/rch-premium-navigation.css');
 const components=file('src/app/rch-premium-components.css');
@@ -17,11 +18,16 @@ const relativeLuminance=(hex:string)=>{
     .map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);
   return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;
 };
+const brandToken=(name:string)=>{
+  const value=tokens.match(new RegExp('--rch-brand-'+name+':\\s*(#[0-9a-f]{6})'))?.[1];
+  if(!value) throw new Error('Missing RCH brand token: '+name);
+  return value;
+};
 const contrast=(a:string,b:string)=>{
   const pair=[relativeLuminance(a),relativeLuminance(b)].sort((x,y)=>y-x);
   return (pair[0]+.05)/(pair[1]+.05);
 };
-describe('RCH premium sitewide design contract',()=>{
+describe('RCH blue-metal sitewide design contract',()=>{
   it('loads after legacy theme rules, for every route rather than one page',()=>{
     for(const path of ['foundation','navigation','components','editorial','discover']){
       expect(layout).toContain(`import './rch-premium-${path}.css'`);
@@ -32,15 +38,16 @@ describe('RCH premium sitewide design contract',()=>{
     expect(layout).toContain('className="rch-premium-app"');
   });
   it('sets dark browser chrome on phones and installed PWAs',()=>{
-    expect(layout).toContain("themeColor: '#0b0c0e'");
+    expect(layout).toContain("themeColor: '"+brandToken('canvas')+"'");
     expect(layout).toContain("colorScheme: 'dark'");
     expect(foundation).toContain('color-scheme:dark!important');
   });
   it('provides readable colors meeting WCAG AA text contrast',()=>{
-    expect(contrast('#f5f9ff','#102841')).toBeGreaterThanOrEqual(4.5);
-    expect(contrast('#bdcfe4','#102841')).toBeGreaterThanOrEqual(4.5);
-    expect(contrast('#9bb6d1','#0b0c0e')).toBeGreaterThanOrEqual(4.5);
-    expect(contrast('#ffffff','#348ffc')).toBeGreaterThan(3);
+    expect(contrast(brandToken('ink'),brandToken('canvas'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(brandToken('copy'),brandToken('surface'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(brandToken('muted'),brandToken('raised'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(brandToken('ink'),brandToken('accent'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(brandToken('accent-text'),brandToken('canvas'))).toBeGreaterThanOrEqual(4.5);
   });
   it('unifies primary navigation and mobile PWA buttons',()=>{
     expect(chrome).toContain('.rcl-universal-sidebar');

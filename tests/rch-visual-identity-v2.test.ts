@@ -6,6 +6,7 @@ const crew=read('src/app/crews/page.tsx');
 const profile=read('src/app/social/profile/[id]/page.tsx');
 const badges=read('src/app/badges/page.tsx');
 const vault=read('src/components/rep/PlaceBadgeVault.tsx');
+const cabinet=read('src/components/rep/BadgeCabinetShowcase.tsx');
 const rep=read('src/components/rep/RepExchangeClient.tsx');
 const css=read('src/app/rch-identity.css');
 
@@ -41,7 +42,8 @@ describe('RCH identity experience v2 product contract',()=>{
   expect(vault).toContain('Artifact details');
   expect(vault).toContain('How to earn');
   expect(vault).toContain('b.award_rule');
-  expect(vault).toContain('togglePin');
+  expect(cabinet).toContain('changePin');
+  expect(cabinet).toContain("db.rpc('rch_set_badge_cabinet_pin'");
  });
  it('keeps spendable wallet separate from achievements and provides precise purchase economics',()=>{
   expect(rep).toContain('rch_rep_wallets');
