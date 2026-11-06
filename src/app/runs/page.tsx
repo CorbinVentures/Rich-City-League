@@ -44,6 +44,7 @@ import {
   FaMedal,
   FaPeopleGroup,
   FaPlus,
+  FaShieldHalved,
   FaTrophy,
   FaVideo,
   FaXmark,
