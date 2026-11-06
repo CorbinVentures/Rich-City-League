@@ -13,7 +13,6 @@ import {
   FaLocationDot,
   FaPeopleGroup,
   FaShareNodes,
-  FaTrophy,
   FaVideo,
 } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
@@ -32,6 +31,7 @@ import {RunsGameplayJourney} from '@/components/runs/RunsGameplayJourney';
 import {RunTeamMatchupBoard} from '@/components/runs/RunTeamMatchupBoard';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
 import { RunSkillEvidenceDesk } from '@/components/runs/RunSkillEvidenceDesk';
+import { RunGameConsole } from '@/components/runs/RunGameConsole';
 import './run-room-game.css';
 
 type Run = {
@@ -54,7 +54,7 @@ type PartnerSession={slug:string;name:string;experience:'park'|'rec';price_cents
 type Profile = { id: string; display_name: string | null; username: string | null; avatar_url?: string | null };
 type Team = { id: string; name: string; sort_order: number };
 type Member = { run_team_id: string; profile_id: string };
-type Game = { id: string; home_run_team_id: string; away_run_team_id: string; home_score: number; away_score: number; status: string; played_at: string | null };
+type Game = { id: string; home_run_team_id: string; away_run_team_id: string; home_score: number; away_score: number; status: string; played_at: string | null; target_score:number; scoring_profile:'one_two_three'|'two_three'; started_at:string|null };
 type Reliability = { profile_id: string; runs_joined: number; verified_checkins: number; reliability_pct: number | null };
 type RunPost = { id: string; author_id: string; body: string; media_urls: string[]; created_at: string; author?: Profile };
 
@@ -90,7 +90,6 @@ export default function RunRoomPage() {
   const [checkInCode,setCheckInCode]=useState('');
   const [hostCourtCode,setHostCourtCode]=useState('');
   const [teamName, setTeamName] = useState('');
-  const [gameDraft, setGameDraft] = useState({ home: '', away: '', homeScore: '', awayScore: '' });
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -104,7 +103,7 @@ export default function RunRoomPage() {
       db.from('run_checkins').select('profile_id').eq('run_id', runId),
       db.from('run_teams').select('id,name,sort_order').eq('run_id', runId).order('sort_order'),
       db.from('run_team_members').select('run_team_id,profile_id').eq('run_id', runId),
-      db.from('run_games').select('id,home_run_team_id,away_run_team_id,home_score,away_score,status,played_at').eq('run_id', runId).order('created_at', { ascending: false }),
+      db.from('run_games').select('id,home_run_team_id,away_run_team_id,home_score,away_score,status,played_at,target_score,scoring_profile,started_at').eq('run_id', runId).order('created_at', { ascending: false }),
       db.from('posts').select('id,author_id,body,media_urls,created_at').eq('run_id', runId).eq('status', 'published').order('created_at', { ascending: false }).limit(40),
       user ? db.from('run_highlight_claims').select('id').eq('run_id', runId).eq('profile_id', user.id).limit(1) : Promise.resolve({ data: [], error: null }),
     ]);
@@ -244,34 +243,6 @@ export default function RunRoomPage() {
     setBusy('');
   };
 
-  const record = async () => {
-    if (!db || !user || !gameDraft.home || !gameDraft.away || gameDraft.home === gameDraft.away) return;
-    const homeScore = Number(gameDraft.homeScore);
-    const awayScore = Number(gameDraft.awayScore);
-    if (!Number.isInteger(homeScore) || !Number.isInteger(awayScore) || homeScore < 0 || awayScore < 0) {
-      setError('Enter valid whole-number scores.');
-      return;
-    }
-    setBusy('game');
-    const { error: insertError } = await db.from('run_games').insert({
-      run_id: runId,
-      home_run_team_id: gameDraft.home,
-      away_run_team_id: gameDraft.away,
-      home_score: homeScore,
-      away_score: awayScore,
-      status: 'completed',
-      played_at: new Date().toISOString(),
-      created_by: user.id,
-    });
-    if (insertError) setError(insertError.message);
-    else {
-      setNotice('Pickup scorecard saved. Rankings, World XP and REP remain pending until independent match confirmation.');
-      setGameDraft({ home: '', away: '', homeScore: '', awayScore: '' });
-      await load();
-    }
-    setBusy('');
-  };
-
   const cancelRun=async()=>{
     if(!db||!run||!user||user.id!==run.host_id||!['open','full'].includes(run.status))return;
     if(games.length>0){
@@ -365,7 +336,8 @@ export default function RunRoomPage() {
         <RunsGameplayJourney runId={run.id} runType={run.run_type} format={run.game_format||'unknown'} status={run.status} capacity={run.max_players}
           suggested={suggestedCourt} listingUnknown={listingStatusUnknown} past={isPastRun}
           registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)} profiles={profiles}
-          userId={user?.id||null} scorecardCount={games.length} host={Boolean(user?.id===run.host_id)}/>
+          userId={user?.id||null} scorecardCount={games.filter(game=>game.status==='completed').length}
+          liveGame={games.some(game=>game.status==='live')} host={Boolean(user?.id===run.host_id)}/>
         <RunTeamMatchupBoard format={run.game_format||'unknown'} teams={teams} members={members}
           profiles={profiles} registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)}
           canManage={canManage} viewerId={user?.id||null} suggested={suggestedCourt||listingStatusUnknown||isPastRun} status={run.status}/>
@@ -374,7 +346,7 @@ export default function RunRoomPage() {
           <div className="mt-5 flex flex-wrap gap-3"><button id="rch-join-action" type="button" onClick={()=>void toggleRegistration()} disabled={busy==='registration'||(user?.id===run.host_id&&!registered)||(!registered&&!canJoin)} className="inline-flex min-h-12 flex-1 items-center justify-center gap-3 rounded-xl border border-[#8bd1ff] bg-[#196cef] px-6 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-55 sm:flex-none"><FaBasketball/>{busy==='registration'?'Updating registration…':registered?(suggestedCourt?'Withdraw Interest':'Leave Run'):joined?'Hosting this Run':canJoin?(suggestedCourt?'REGISTER INTEREST':'JOIN THIS RUN'):run.status==='cancelled'?'Run Cancelled':isPastRun?'Listing Ended':'Registration Closed'}<FaArrowRight/></button><button type="button" onClick={()=>void shareRun()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#4b789a] bg-[#0d304e] px-5 text-xs font-bold"><FaShareNodes/> Invite your crew</button><button type="button" onClick={()=>void load()} className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#436e8d] bg-[#0b2841] px-4 text-xs font-bold text-[#c5e5f8]">Refresh slots</button></div>
           <RunLobbyReadiness format={run.game_format||'unknown'} registered={registeredPlayerIds.length} capacity={run.max_players} status={run.status} suggested={suggestedCourt} past={isPastRun}/>
           <nav aria-label="Game-day sections" className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-           {([{id:'rch-run-lobby',title:'01 · Lobby'},{id:'rch-game-day',title:'02 · Check in'},{id:'rch-next-up',title:'03 · Next Up'},{id:'rch-result-review',title:'04 · Results'},...(canManage?[{id:'rch-host-operations',title:'Host ops'}]:[])] as const).map(step=><a key={step.id} href={'#'+step.id} className="flex min-h-11 items-center justify-center rounded-lg border border-[#375f85] bg-[#061e34] px-2 text-center text-[11px] font-bold text-[#d0e9fb] hover:border-[#91d7ff]">{step.title}</a>)}
+           {([{id:'rch-run-lobby',title:'01 · Lobby'},{id:'rch-game-day',title:'02 · Check in'},{id:'rch-live-game',title:'03 · Game Mode'},{id:'rch-next-up',title:'04 · Next Up'},{id:'rch-result-review',title:'05 · Results'},...(canManage?[{id:'rch-host-operations',title:'Host ops'}]:[])] as const).map(step=><a key={step.id} href={'#'+step.id} className="flex min-h-11 items-center justify-center rounded-lg border border-[#375f85] bg-[#061e34] px-2 text-center text-[11px] font-bold text-[#d0e9fb] hover:border-[#91d7ff]">{step.title}</a>)}
           </nav>
           {canJoin&&!registered&&<p className="mt-3 text-xs font-semibold text-[#d6e9f4]">{suggestedCourt?'Solo players welcome, but joining is not a promise of opponents, a host or open court time.':'Pull up solo — you don&apos;t need a crew to reserve an open roster spot. The host arranges the game.'}</p>}
           {!user&&<p className="mt-3 text-xs text-[#b9d6eb]">Sign in to register, check in and save your verified basketball progression.</p>}
@@ -413,14 +385,9 @@ export default function RunRoomPage() {
               <div className="mt-5 grid gap-3 sm:grid-cols-2">{teams.length ? teams.map((item) => <div key={item.id} className="rounded-2xl border border-white/10 bg-black/20 p-5"><h3 className="font-display text-xl font-black uppercase">{item.name}</h3><div className="mt-3 space-y-2">{members.filter((member) => member.run_team_id === item.id).map((member) => <p key={member.profile_id} className="rounded-xl bg-white/[.03] px-3 py-2 text-xs">{name(member.profile_id)}</p>)}{!members.some((member) => member.run_team_id === item.id) && <p className="text-xs text-white/30">No players assigned.</p>}</div></div>) : <p className="sm:col-span-2 rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/35">The run host can create teams once players arrive.</p>}</div>
             </article>
 
-            <article className="rounded-3xl border border-rcl-orange/15 bg-rcl-orange/[.025] p-6">
-              <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange"><FaTrophy className="mr-1 inline" />Run results</p>
-              <h2 className="mt-1 font-display text-2xl font-black uppercase">Record an unverified score</h2><p className="mt-1 text-xs text-white/60">Scorecards are not ranked results. Opposing checked-in players must separately confirm a game before ratings or awards change.</p>
-              {canManage && teams.length >= 2 && !suggestedCourt && !listingStatusUnknown ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><select aria-label="Away team" value={gameDraft.away} onChange={(event) => setGameDraft((current) => ({ ...current, away: event.target.value }))} className="field"><option value="">Away team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Away team final score" inputMode="numeric" value={gameDraft.awayScore} onChange={(event) => setGameDraft((current) => ({ ...current, awayScore: event.target.value }))} className="field" placeholder="Score" /><select aria-label="Home team" value={gameDraft.home} onChange={(event) => setGameDraft((current) => ({ ...current, home: event.target.value }))} className="field"><option value="">Home team</option>{teams.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><input aria-label="Home team final score" inputMode="numeric" value={gameDraft.homeScore} onChange={(event) => setGameDraft((current) => ({ ...current, homeScore: event.target.value }))} className="field" placeholder="Score" /><button onClick={() => void record()} disabled={busy === 'game'} className="h-11 rounded-xl bg-rcl-orange px-4 text-[10px] font-black uppercase text-black disabled:opacity-40">Record</button></div> : null}
-              <div className="mt-5 space-y-2">{games.length ? games.map((game) => <div key={game.id} className="grid grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-white/10 bg-black/20 p-4"><div><p className="text-[9px] uppercase text-white/30">Away</p><p className="font-black">{team(game.away_run_team_id)}</p></div><p className="font-display text-3xl font-black">{game.away_score}<span className="mx-2 text-white/20">–</span>{game.home_score}</p><div className="text-right"><p className="text-[9px] uppercase text-white/30">Home</p><p className="font-black">{team(game.home_run_team_id)}</p></div></div>) : <p className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-white/35">No pickup results recorded yet.</p>}</div>
-            </article>
           </div>
         </section>
+        {!suggestedCourt&&!listingStatusUnknown&&run.status!=='cancelled'&&<div className="mt-6"><RunGameConsole runId={run.id} canOperate={canManage} format={run.game_format||'unknown'} teams={teams} members={members} profiles={profiles}/></div>}
 
         {!suggestedCourt&&!listingStatusUnknown&&run.status!=='cancelled'&&<>
         <RunCrewEntries runId={run.id} />
