@@ -362,7 +362,7 @@ export default function RunRoomPage() {
       />
 
       <Container maxWidth="xl" className="py-9">
-        <RunsGameplayJourney runId={run.id} format={run.game_format||'unknown'} status={run.status} capacity={run.max_players}
+        <RunsGameplayJourney runId={run.id} runType={run.run_type} format={run.game_format||'unknown'} status={run.status} capacity={run.max_players}
           suggested={suggestedCourt} listingUnknown={listingStatusUnknown} past={isPastRun}
           registeredIds={registeredPlayerIds} checkedInIds={Array.from(checkins)} profiles={profiles}
           userId={user?.id||null} scorecardCount={games.length} host={Boolean(user?.id===run.host_id)}/>
