@@ -8,19 +8,23 @@ import {playerTarget,lobbySnapshot} from '@/lib/runs-gameplay-readiness';
 
 type Person={id:string;display_name:string|null;username:string|null;avatar_url?:string|null};
 type VerifiedReceipt={run_id:string;won:boolean;xp:number;rep:number;verified_at:string};
+type RankedReview={id:string;home_roster:string[];away_roster:string[];status:'pending'|'verified'|'rejected';home_confirmed_by:string|null;away_confirmed_by:string|null;home_score:number;away_score:number;submitted_at:string;verified_at:string|null};
 type Props={
- runId:string;format:string;status:string;capacity:number;past:boolean;suggested:boolean;listingUnknown:boolean;
+ runId:string;runType:string;format:string;status:string;capacity:number;past:boolean;suggested:boolean;listingUnknown:boolean;
  registeredIds:readonly string[];checkedInIds:readonly string[];profiles:readonly Person[];
  userId:string|null;scorecardCount:number;host:boolean;
 };
 
 /** The game lobby only visualizes server records. RSVP != physical attendance.
  * Recorded pickup score != independently confirmed competitive result. */
-export function RunsGameplayJourney({runId,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount,host}:Props){
+export function RunsGameplayJourney({runId,runType,format,status,capacity,past,suggested,listingUnknown,registeredIds,checkedInIds,profiles,userId,scorecardCount,host}:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [verified,setVerified]=useState<VerifiedReceipt|null>(null);
  const [verifiedError,setVerifiedError]=useState(false);
  const [refreshTick,setRefreshTick]=useState(0);
+ const [rankedReview,setRankedReview]=useState<RankedReview|null>(null);
+ const [rankedReviewError,setRankedReviewError]=useState(false);
+ const [rankedReviewLoading,setRankedReviewLoading]=useState(false);
  const [queueStatus,setQueueStatus]=useState<'waiting'|'called'|'playing'|null>(null);
  useEffect(()=>{
   if(!userId||!db){setVerified(null);return;}
@@ -32,6 +36,21 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
   }).catch(()=>{if(alive)setVerifiedError(true);});
   return()=>{alive=false;};
  },[db,runId,userId,scorecardCount,refreshTick]);
+ const rankedEligible=runType==='competitive'&&['1v1','2v2','3v3','4v4','5v5'].includes(format);
+ useEffect(()=>{
+  if(!db||!userId||!rankedEligible||suggested||listingUnknown){setRankedReview(null);setRankedReviewError(false);setRankedReviewLoading(false);return;}
+  let active=true;setRankedReviewLoading(true);setRankedReviewError(false);
+  void db.from('run_ranked_matches')
+   .select('id,home_roster,away_roster,status,home_confirmed_by,away_confirmed_by,home_score,away_score,submitted_at,verified_at')
+   .eq('run_id',runId).order('submitted_at',{ascending:false}).limit(60)
+   .then(({data,error}:{data:RankedReview[]|null;error:unknown})=>{
+    if(!active)return;
+    if(error){setRankedReview(null);setRankedReviewError(true);}
+    else setRankedReview((data||[]).find(match=>match.home_roster.includes(userId)||match.away_roster.includes(userId))||null);
+    setRankedReviewLoading(false);
+   }).catch(()=>{if(active){setRankedReview(null);setRankedReviewError(true);setRankedReviewLoading(false);}});
+  return()=>{active=false;};
+ },[db,runId,userId,rankedEligible,suggested,listingUnknown,refreshTick,scorecardCount]);
  useEffect(()=>{
   if(!db||!userId||suggested||listingUnknown){setQueueStatus(null);return;}
   let active=true;
@@ -75,12 +94,20 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
  const signedUp=Boolean(userId&&registeredIds.includes(userId));
  const unavailable=suggested||listingUnknown||past||!['open','full'].includes(status);
  // Never mark a player's PLAY / CONFIRM stages complete because another team recorded a scorecard.
- const stage=verified?4:checkedIn?2:signedUp?1:0;
- const nextAction=verified?{href:'/runs?view=list#rch-upcoming-runs',title:'FIND YOUR NEXT GAME',desc:'Keep building your verified basketball story'}:
+ const outstandingReview=rankedReview?.status==='pending'||rankedReview?.status==='rejected';
+ const resultVerified=Boolean(verified||rankedReview?.status==='verified');
+ const stage=outstandingReview?3:resultVerified?4:checkedIn?2:signedUp?1:0;
+ const onHome=Boolean(userId&&rankedReview?.home_roster.includes(userId));
+ const mySideConfirmed=Boolean(onHome?rankedReview?.home_confirmed_by:rankedReview?.away_confirmed_by);
+ const otherSideConfirmed=Boolean(onHome?rankedReview?.away_confirmed_by:rankedReview?.home_confirmed_by);
+ const nextAction=rankedReview?.status==='pending'?{href:'#rch-result-review',title:mySideConfirmed?'WAITING ON THE OTHER SIDE':'REVIEW & CONFIRM THE SCORE',desc:mySideConfirmed?'Your side confirmed. The opposing side must confirm before ratings or rewards.':'Check the final score below, then confirm or dispute it.'}:
+ rankedReview?.status==='rejected'?{href:'#rch-result-review',title:host?'REVIEW & RESUBMIT SCORE':'SCORE DISPUTED · HOST REVIEW',desc:host?'Correct the recorded score and submit it for both sides to review.':'The host must correct the score before either side can confirm.'}:
+ resultVerified?{href:'/runs?view=list#rch-upcoming-runs',title:'FIND YOUR NEXT GAME',desc:'Keep building your verified basketball story'}:
  !userId?{href:'/auth/sign-in?next='+encodeURIComponent('/runs/'+runId),title:'SIGN IN TO PLAY',desc:'Create your player and register for a real Run'}:
  !signedUp?host?{href:'#rch-run-lobby',title:'MANAGE YOUR GAME',desc:'Host the event and set up teams; hosting is not player check-in'}:{href:'#rch-join-action',title:unavailable?'EXPLORE OTHER RUNS':'CLAIM YOUR ROSTER SPOT',desc:unavailable?'This listing cannot confirm a game. Find another hosted Run.':'Register for the actual roster; attendance is separate'}:
  !checkedIn?{href:past?'/runs?view=list#rch-upcoming-runs':'#rch-game-day',title:past?'FIND YOUR NEXT GAME':'GET GAME-DAY READY',desc:past?'This event has ended; do not attempt a late check-in':'Check in at the court using the host’s in-person code'}:
- !verified?scorecardCount>0?{href:'#rch-result-review',title:'REVIEW RECORDED SCORE',desc:'Both teams must independently confirm before rewards'}:
+ !verified?scorecardCount>0&&rankedEligible?{href:'#rch-result-review',title:host?'SUBMIT SCORE FOR REVIEW':'WAIT FOR OFFICIAL SCORE',desc:host?'Send the completed score into independent team confirmation.':'A scorecard is recorded; the host still needs to submit it for review.'}:
+ scorecardCount>0?{href:'#rch-next-up',title:'PICKUP SCORE RECORDED',desc:'This run does not use ranked confirmation or match rewards.'}:
  {href:'#rch-next-up',title:queueStatus==='called'?'YOU ARE ON DECK':queueStatus==='playing'?'RECORDED ON COURT':queueStatus==='waiting'?'YOUR NEXT UP QUEUE':'JOIN NEXT UP',desc:queueStatus==='called'?'The host marked you called; report to the court':queueStatus==='playing'?'The host recorded you as playing; no result is verified yet':queueStatus==='waiting'?'Your queue position is available in Next Up':'Get in the real court queue for this Run'}:
  {href:'/runs?view=list#rch-upcoming-runs',title:'PLAY AGAIN',desc:'Find a real hosted game'};
  const safeAction=unavailable&&!verified&&nextAction.href==='#rch-join-action'?{...nextAction,href:'/runs?view=list#rch-upcoming-runs'}:nextAction;
@@ -110,10 +137,15 @@ export function RunsGameplayJourney({runId,format,status,capacity,past,suggested
   {queueStatus&&<p className="rch-game-journey-caution" role="status" aria-live="polite"><FaBasketball aria-hidden="true"/> Your recorded Next Up status: <strong>{queueStatus.toUpperCase()}</strong>. Actual court play and result verification remain separate.</p>}
   {slots===null&&<p className="rch-game-journey-caution">Game format needs host confirmation; roster minimum cannot be determined.</p>}
   {!suggested&&slots!==null&&<p className="rch-game-journey-caution">{roster.guidance}</p>}
-  {verified?<div className="rch-game-verified" role="status"><FaTrophy aria-hidden="true"/><div><strong>{verified.won?'VICTORY VERIFIED':'GAME VERIFIED'}</strong><span>+{verified.xp} World XP · +{verified.rep} credited match REP · independently confirmed for your player</span></div></div>:
-   scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. This does not prove that you played or that a ranked result was verified. No personal reward is assumed.</p>:null}
+  {verified&&<div className="rch-game-verified" role="status"><FaTrophy aria-hidden="true"/><div><strong>{verified.won?'VICTORY VERIFIED':'GAME VERIFIED'}</strong><span>+{verified.xp} World XP · +{verified.rep} credited match REP · independently confirmed for your player</span></div></div>}
+  {!verified&&rankedReview?.status==='verified'&&<div className="rch-game-verified rch-game-verified-sync" role="status" aria-live="polite"><FaTrophy aria-hidden="true"/><div><strong>HOME {rankedReview.home_score}–{rankedReview.away_score} AWAY · VERIFIED</strong><span>Both sides confirmed this result. Syncing your career rewards… No reward is shown until your verified receipt arrives.</span></div></div>}
+  {rankedReview?.status==='pending'&&<div className="rch-ranked-result-card" role="status" aria-live="polite"><div className="rch-ranked-result-top"><div><small>OFFICIAL RESULT · {format} · HOME — AWAY</small><strong>{rankedReview.home_score}<span> — </span>{rankedReview.away_score}</strong></div><span className="rch-ranked-result-badge pending">AWAITING CONFIRMATION</span></div><p>{mySideConfirmed?'YOUR SIDE CONFIRMED · WAITING FOR OPPONENT':otherSideConfirmed?'OPPONENT CONFIRMED · YOUR REVIEW NEEDED':'BOTH SIDES MUST REVIEW'}</p><div className="rch-ranked-result-sides"><span>{rankedReview.home_confirmed_by?'✓ HOME CONFIRMED':'○ HOME PENDING'}</span><span>{rankedReview.away_confirmed_by?'✓ AWAY CONFIRMED':'○ AWAY PENDING'}</span></div></div>}
+  {rankedReview?.status==='rejected'&&<div className="rch-ranked-result-card disputed" role="status" aria-live="polite"><div className="rch-ranked-result-top"><div><small>RESULT NEEDS HOST REVIEW · {format} · HOME — AWAY</small><strong>{rankedReview.home_score}<span> — </span>{rankedReview.away_score}</strong></div><span className="rch-ranked-result-badge disputed">DISPUTED</span></div><p>The score is not final. {host?'Correct it and resubmit for independent confirmation.':'The host must review and resubmit before this game can be verified.'}</p></div>}
+  {!verified&&!rankedReview&&rankedReviewLoading&&<p className="rch-game-journey-caution" role="status">Checking official result status…</p>}
+  {!verified&&!rankedReview&&scorecardCount>0?<p className="rch-game-journey-caution"><FaShieldHalved aria-hidden="true"/> {scorecardCount} pickup scorecard{scorecardCount===1?'':'s'} recorded. {rankedEligible?'This score is not official until the host submits it and both teams confirm.':'This run does not offer ranked score confirmation.'} No personal reward is assumed.</p>:null}
   {userId&&!suggested&&<button type="button" onClick={()=>setRefreshTick(v=>v+1)} className="rch-game-sync" aria-label="Refresh verified game rewards">Refresh verified game status</button>}
   {verifiedError&&<p className="rch-game-journey-caution">Verified career receipts cannot sync right now; no game result is being assumed.</p>}
+  {rankedReviewError&&<p className="rch-game-journey-caution" role="status">Official result status is temporarily unavailable. Check the review desk before treating any score as final.</p>}
   <Link href={safeAction.href} className="rch-game-next"><div><small>YOUR NEXT MOVE</small><strong>{safeAction.title}</strong><span>{safeAction.desc}</span></div><FaArrowRight aria-hidden="true"/></Link>
   {verified&&<div className="rch-game-postgame-actions"><button type="button" onClick={()=>void sharePostgame()}>SHARE VERIFIED RESULT <FaArrowRight aria-hidden="true"/></button><Link className="rch-game-replay" href="/runs?view=world&mode=player">VIEW MYPLAYER CAREER <FaArrowRight aria-hidden="true"/></Link></div>}
   {shareStatus&&<p className="rch-game-journey-caution" role="status">{shareStatus}</p>}

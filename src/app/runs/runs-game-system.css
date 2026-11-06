@@ -51,6 +51,20 @@
 .rch-game-verified strong,.rch-game-verified span{display:block}
 .rch-game-verified strong{font-size:15px;font-weight:1000}
 .rch-game-verified span{margin-top:4px;font-size:11px}
+.rch-game-verified-sync{border-color:#80b8ec;background:linear-gradient(120deg,#103a61,#0b263e)}
+.rch-ranked-result-card{position:relative;overflow:hidden;margin-top:13px;padding:15px;border:1px solid #d3a856;border-radius:14px;background:radial-gradient(ellipse at 100% 0,#463816 0%,#17253a 52%,#0a1726 100%);color:#fff;box-shadow:0 14px 30px #0004}
+.rch-ranked-result-card:before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(#ffe194,#d09335)}
+.rch-ranked-result-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.rch-ranked-result-top>div small{display:block;color:#f3d28a;font-size:9px;font-weight:950;letter-spacing:.12em}
+.rch-ranked-result-top>div strong{display:block;margin-top:4px;font-variant-numeric:tabular-nums;font-size:clamp(28px,6vw,40px);font-weight:1000;letter-spacing:-.04em;line-height:1}
+.rch-ranked-result-top>div strong span{color:#9dbbd4}
+.rch-ranked-result-badge{flex:none;padding:8px 10px;border:1px solid #b8904a;border-radius:999px;background:#573f14;color:#ffe4a3;font-size:9px;font-weight:1000;letter-spacing:.07em;text-align:center}
+.rch-ranked-result-badge.disputed{border-color:#d9817b;background:#552625;color:#ffd4cf}
+.rch-ranked-result-card>p{margin:12px 0 0;color:#d8e8f5;font-size:10px;font-weight:850;letter-spacing:.055em;line-height:1.6}
+.rch-ranked-result-sides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+.rch-ranked-result-sides span{padding:9px;border:1px solid #46637c;border-radius:9px;background:#081b2c;color:#d5e9f7;font-size:9px;font-weight:950;text-align:center}
+.rch-ranked-result-card.disputed{border-color:#a95954;background:radial-gradient(ellipse at 100% 0,#4b2227 0%,#202033 52%,#101522 100%)}
+.rch-ranked-result-card.disputed:before{background:linear-gradient(#ffb1a8,#bd4e54)}
 .rch-game-next{display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:78px;margin-top:18px;padding:14px 16px;border:1px solid #87cbff;border-radius:13px;background:linear-gradient(120deg,#155fbd,#12447a);color:white;text-decoration:none}
 .rch-game-next>svg{flex:none;font-size:20px}
 .rch-game-next small,.rch-game-next strong,.rch-game-next span{display:block}
