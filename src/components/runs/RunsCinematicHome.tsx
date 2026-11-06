@@ -103,6 +103,8 @@ export function RunsCinematicHome({
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
  const [selectedMode,setSelectedMode]=useState<'quick'|'verified'|'takeover'>('quick');
  const [statewideRuns,setStatewideRuns]=useState<WorldRun[]>([]);
+ const [verifiedRunIds,setVerifiedRunIds]=useState<Set<string>>(new Set());
+ const [verifiedRunsLoading,setVerifiedRunsLoading]=useState(false);
  const [finding,setFinding]=useState(false);
  useEffect(()=>{
   // A public basketball court suggestion is not a committed, hosted game.
@@ -130,16 +132,29 @@ export function RunsCinematicHome({
    .finally(()=>{if(active)setFinding(false);});
   return()=>{active=false;};
  },[db,city]);
- const nextRun=(city?runs:statewideRuns).find(run=>run.status==='open')||null;
+ const candidateRuns=city?runs:statewideRuns;
+ useEffect(()=>{
+  const ids=candidateRuns.map(run=>run.id);
+  if(!db||ids.length===0){setVerifiedRunIds(new Set());setVerifiedRunsLoading(false);return;}
+  let active=true;
+  setVerifiedRunsLoading(true);
+  void db.from('rch_run_verifications').select('run_id').in('run_id',ids).eq('verification_status','verified')
+   .then(({data,error}:{data:Array<{run_id:string}>|null;error:unknown})=>{
+    if(active){setVerifiedRunIds(error?new Set():new Set((data||[]).map(row=>row.run_id)));setVerifiedRunsLoading(false);}
+   }).catch(()=>{if(active){setVerifiedRunIds(new Set());setVerifiedRunsLoading(false);}});
+  return()=>{active=false;};
+ },[db,candidateRuns]);
+ const nextRun=candidateRuns.find(run=>run.status==='open')||null;
+ const verifiedRun=candidateRuns.find(run=>run.status==='open'&&verifiedRunIds.has(run.id))||null;
  const progress=journey?.signed_in?worldXpProgress(journey.world_xp):null;
  const displayLevel=progress?.level??null;
  const doubleRep=Boolean(nextRun&&featuredRunIds.includes(nextRun.id));
  const missions=weeklyQuestCatalog.slice(0,3);
  const nextHref=nextRun?'/runs/'+encodeURIComponent(nextRun.id):'/runs?view=list#rch-upcoming-runs';
  const modeBriefing={
-  quick:{index:'01',label:'QUICK RUN',subtitle:'OPEN PLAY',icon:FaBasketball,objective:'Get on a real court.',description:'Choose a hosted game, claim your roster spot, then follow the game-day steps in its lobby. Competitive rewards only count after independent verification.',steps:['Choose a hosted Run','Claim your roster spot','Check in at the court','Play and follow score review'],action:nextRun?'ENTER RUN LOBBY':'FIND A REAL RUN',href:nextHref},
-  verified:{index:'02',label:'VERIFIED RESULT',subtitle:'CAREER PROGRESSION',icon:FaShieldHalved,objective:'Put a real game on your record.',description:'Join the roster, check in with the host, play, and have both sides confirm the score. The result counts for competitive progress after verification clears.',steps:['Join the Run roster','Check in at the court','Both teams confirm the score','Verification clears'],action:nextRun?'OPEN NEXT GAME':'FIND A GAME',href:nextHref},
-  takeover:{index:'03',label:'TERRITORY TAKEOVER',subtitle:'CREW COMPETITION',icon:FaCrown,objective:'Challenge for court control.',description:'A crew captain selects a court and challenges its controlling crew. The defense must accept; a verified crew game determines whether control changes.',steps:['Choose a court','Request a crew challenge','Play after acceptance','Verify the result'],action:'ENTER BATTLE MODE',href:'/runs?view=world&mode=battle'}
+  quick:{index:'01',label:'QUICK RUN',subtitle:'OPEN PLAY',icon:FaBasketball,objective:'Get on a real court.',description:'Choose an open hosted game and follow its lobby. No opponent is simulated. Competitive ratings and rewards require an eligible game and independent score review.',steps:['Choose an open Run','Claim your roster spot','Check in at the court','Play the real game'],action:nextRun?'ENTER RUN LOBBY':'FIND A REAL RUN',href:nextHref},
+  verified:{index:'02',label:'RCH VERIFIED RUN',subtitle:'ORGANIZER-REVIEWED EVENT',icon:FaShieldHalved,objective:'Join an event reviewed by RCH.',description:'RCH reviews the organizer, court source and event readiness. This badge is separate from score verification: game results still need their own review.',steps:['Choose a verified event','Claim your roster spot','Check in with the host','Submit scores for review'],action:verifiedRun?'ENTER VERIFIED RUN':'FIND A VERIFIED RUN',href:verifiedRun?'/runs/'+encodeURIComponent(verifiedRun.id):'/runs?view=list&verified=1#rch-upcoming-runs'},
+  takeover:{index:'03',label:'TERRITORY TAKEOVER',subtitle:'CREW COMPETITION',icon:FaCrown,objective:'Challenge for court control.',description:'Choose a court, then have a crew captain challenge its controller. The other crew must accept; only a verified crew game can change territory.',steps:['Choose a court','Request a crew challenge','Play after acceptance','Verify the result'],action:'SELECT A COURT',href:'/runs?view=world&mode=world'}
  }[selectedMode];
  const ModeIcon=modeBriefing.icon;
  return <section className="rch-gh" aria-label="Runs Game Home">
@@ -174,7 +189,7 @@ export function RunsCinematicHome({
     <div className="rch-gh-mode-select" role="group" aria-label="Select a Runs game mode">
      {([
       ['quick','01','QUICK RUN','Open play',FaBasketball],
-      ['verified','02','VERIFIED RESULT','Build your record',FaShieldHalved],
+      ['verified','02','RCH VERIFIED RUN','Organizer reviewed',FaShieldHalved],
       ['takeover','03','TERRITORY TAKEOVER','Crew competition',FaCrown]
      ] as const).map(([id,index,label,detail,Icon])=><button type="button" key={id} aria-pressed={selectedMode===id} onClick={()=>setSelectedMode(id)} className={'rch-gh-mode-option '+(selectedMode===id?'active':'')}>
        <span className="rch-gh-mode-option-index">{index}</span><Icon aria-hidden="true"/><span className="rch-gh-mode-option-copy"><strong>{label}</strong><small>{detail}</small></span><FaArrowRight className="rch-gh-mode-option-arrow" aria-hidden="true"/>
@@ -187,12 +202,15 @@ export function RunsCinematicHome({
      <p className="rch-gh-briefing-objective"><span>OBJECTIVE</span><strong>{modeBriefing.objective}</strong></p>
      <p className="rch-gh-briefing-description">{modeBriefing.description}</p>
      {selectedMode==='quick'&&nextRun&&<div className="rch-gh-mode-run-target"><span><FaBasketball aria-hidden="true"/> NEXT OPEN GAME</span><strong>{nextRun.title}</strong><small><FaLocationDot aria-hidden="true"/> {nextRun.location||'Court details in event'}</small><small><FaCalendarDays aria-hidden="true"/> {formatWhen(nextRun.starts_at)} · {nextRun.game_format||'Format to be confirmed'}</small></div>}
+     {selectedMode==='verified'&&verifiedRun&&<div className="rch-gh-mode-run-target verified"><span><FaShieldHalved aria-hidden="true"/> RCH VERIFIED EVENT</span><strong>{verifiedRun.title}</strong><small><FaLocationDot aria-hidden="true"/> {verifiedRun.location||'Court details in event'}</small><small><FaCalendarDays aria-hidden="true"/> {formatWhen(verifiedRun.starts_at)} · {verifiedRun.game_format||'Format to be confirmed'}</small></div>}
+     {selectedMode==='verified'&&!verifiedRun&&(verifiedRunsLoading?<p className="rch-gh-briefing-caveat" role="status">Checking upcoming RCH Verified Runs…</p>:<p className="rch-gh-briefing-caveat">No upcoming RCH Verified Run is listed in this area right now. The verified-event filter shows the currently available listings.</p>)}
      <div className="rch-gh-briefing-steps" aria-label="Mode steps">
       {modeBriefing.steps.map((step,index)=><div className="rch-gh-briefing-step" key={step}><span>{String(index+1).padStart(2,'0')}</span><strong>{step}</strong>{index<modeBriefing.steps.length-1&&<i aria-hidden="true"/>}</div>)}
      </div>
-     <Link href={modeBriefing.href} className="rch-gh-mode-cta">{modeBriefing.action} <FaArrowRight aria-hidden="true"/></Link>
+     {selectedMode==='takeover'?<button type="button" onClick={onWorld} className="rch-gh-mode-cta">{modeBriefing.action} <FaArrowRight aria-hidden="true"/></button>:<Link href={modeBriefing.href} className="rch-gh-mode-cta">{modeBriefing.action} <FaArrowRight aria-hidden="true"/></Link>}
      {selectedMode==='quick'&&<small className="rch-gh-briefing-caveat">The Run lobby guides roster, check-in, game-day, and result status.</small>}
-     {selectedMode==='verified'&&<small className="rch-gh-briefing-caveat">RSVP and check-in do not count as a verified result.</small>}
+     {selectedMode==='verified'&&<small className="rch-gh-briefing-caveat">Event verification covers organizer and readiness. It does not guarantee safety or certify the final score.</small>}
+     {selectedMode==='takeover'&&<small className="rch-gh-briefing-caveat">A crew and captain are required. Select a real court, then open its Takeover challenge.</small>}
     </article>
    </div>
   </section>
