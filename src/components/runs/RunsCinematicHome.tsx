@@ -101,6 +101,7 @@ export function RunsCinematicHome({
  onWorld,onMissions,onPlayer,onVault,onBattle,onRules,onReplay
 }:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
+ const [selectedMode,setSelectedMode]=useState<'quick'|'verified'|'takeover'>('quick');
  const [statewideRuns,setStatewideRuns]=useState<WorldRun[]>([]);
  const [finding,setFinding]=useState(false);
  useEffect(()=>{
@@ -135,6 +136,12 @@ export function RunsCinematicHome({
  const doubleRep=Boolean(nextRun&&featuredRunIds.includes(nextRun.id));
  const missions=weeklyQuestCatalog.slice(0,3);
  const nextHref=nextRun?'/runs/'+encodeURIComponent(nextRun.id):'/runs?view=list#rch-upcoming-runs';
+ const modeBriefing={
+  quick:{index:'01',label:'QUICK RUN',subtitle:'OPEN PLAY',icon:FaBasketball,objective:'Get on a real court.',description:'Pick a posted Run, claim an open spot, and meet the host. You can play solo; no crew or simulated matchmaking is required.',steps:['Choose a real hosted Run','Claim your roster spot','Show up and play'],action:'ENTER QUICK PLAY',href:'/runs?view=list#rch-upcoming-runs'},
+  verified:{index:'02',label:'VERIFIED RESULT',subtitle:'CAREER PROGRESSION',icon:FaShieldHalved,objective:'Put a real game on your record.',description:'Join the roster, check in with the host, play, and have both sides confirm the score. The result counts for competitive progress after verification clears.',steps:['Join the Run roster','Check in at the court','Both teams confirm the score','Verification clears'],action:nextRun?'OPEN NEXT GAME':'FIND A GAME',href:nextHref},
+  takeover:{index:'03',label:'TERRITORY TAKEOVER',subtitle:'CREW COMPETITION',icon:FaCrown,objective:'Challenge for court control.',description:'A crew captain selects a court and challenges its controlling crew. The defense must accept; a verified crew game determines whether control changes.',steps:['Choose a court','Request a crew challenge','Play after acceptance','Verify the result'],action:'ENTER BATTLE MODE',href:'/runs?view=world&mode=battle'}
+ }[selectedMode];
+ const ModeIcon=modeBriefing.icon;
  return <section className="rch-gh" aria-label="Runs Game Home">
   <header className="rch-gh-top">
    <div className="rch-gh-wordmark" aria-label="RCH Runs"><span>RCH</span> <em>RUNS</em><FaCrown aria-hidden="true"/></div>
@@ -192,6 +199,34 @@ export function RunsCinematicHome({
     <Link href="/runs?view=list#rch-upcoming-runs" className="rch-gh-game-start-action"><FaBasketball aria-hidden="true"/><strong>FIND A GAME</strong><small>Real hosted Runs only</small></Link>
     <Link href="/runs?view=list&rookie=1#rch-upcoming-runs" className="rch-gh-game-start-action"><FaShieldHalved aria-hidden="true"/><strong>ROOKIE FRIENDLY</strong><small>Start at your level</small></Link>
     <Link href="/runs?create=1" className="rch-gh-game-start-action"><FaPeopleGroup aria-hidden="true"/><strong>HOST A GAME</strong><small>Build the first roster</small></Link>
+   </div>
+  </section>
+
+  <section className="rch-gh-section rch-gh-mode-console" aria-labelledby="rch-game-modes-title">
+   <div className="rch-gh-section-title"><h2 id="rch-game-modes-title">GAME MODE SELECT</h2><button type="button" onClick={onRules}>RULEBOOK <FaArrowRight/></button></div>
+   <p className="rch-gh-game-start-copy">Choose your objective. The briefing shows exactly what happens next.</p>
+   <div className="rch-gh-mode-console-grid">
+    <div className="rch-gh-mode-select" role="group" aria-label="Select a Runs game mode">
+     {([
+      ['quick','01','QUICK RUN','Open play',FaBasketball],
+      ['verified','02','VERIFIED RESULT','Build your record',FaShieldHalved],
+      ['takeover','03','TERRITORY TAKEOVER','Crew competition',FaCrown]
+     ] as const).map(([id,index,label,detail,Icon])=><button type="button" key={id} aria-pressed={selectedMode===id} onClick={()=>setSelectedMode(id)} className={'rch-gh-mode-option '+(selectedMode===id?'active':'')}>
+       <span className="rch-gh-mode-option-index">{index}</span><Icon aria-hidden="true"/><span className="rch-gh-mode-option-copy"><strong>{label}</strong><small>{detail}</small></span><FaArrowRight className="rch-gh-mode-option-arrow" aria-hidden="true"/>
+      </button>)}
+     <div className="rch-gh-mode-select-foot"><FaShieldHalved aria-hidden="true"/><span>REAL PEOPLE · REAL RESULTS · SERVER-VERIFIED PROGRESS</span></div>
+    </div>
+    <article className={'rch-gh-mode-briefing mode-'+selectedMode} aria-live="polite" aria-labelledby="rch-mode-briefing-title">
+     <div className="rch-gh-briefing-top"><span>MODE {modeBriefing.index} / 03</span><span><i aria-hidden="true"/> MODE SELECTED</span></div>
+     <div className="rch-gh-briefing-heading"><span className="rch-gh-briefing-icon"><ModeIcon aria-hidden="true"/></span><div><small>{modeBriefing.subtitle}</small><h3 id="rch-mode-briefing-title">{modeBriefing.label}</h3></div></div>
+     <p className="rch-gh-briefing-objective"><span>OBJECTIVE</span><strong>{modeBriefing.objective}</strong></p>
+     <p className="rch-gh-briefing-description">{modeBriefing.description}</p>
+     <div className="rch-gh-briefing-steps" aria-label="Mode steps">
+      {modeBriefing.steps.map((step,index)=><div className="rch-gh-briefing-step" key={step}><span>{String(index+1).padStart(2,'0')}</span><strong>{step}</strong>{index<modeBriefing.steps.length-1&&<i aria-hidden="true"/>}</div>)}
+     </div>
+     <Link href={modeBriefing.href} className="rch-gh-mode-cta">{modeBriefing.action} <FaArrowRight aria-hidden="true"/></Link>
+     {selectedMode==='verified'&&<small className="rch-gh-briefing-caveat">RSVP and check-in do not count as a verified result.</small>}
+    </article>
    </div>
   </section>
 
