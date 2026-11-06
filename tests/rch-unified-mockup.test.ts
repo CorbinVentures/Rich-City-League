@@ -14,7 +14,7 @@ function contrast(a:string,b:string) {
   const [hi,lo]=[lum(a),lum(b)].sort((a,b)=>b-a);
   return (hi+.05)/(lo+.05);
 }
-describe('approved RCH charcoal/crimson system',()=>{
+describe('RCH blue-metal system',()=>{
   it('keeps actual text/button token pairs above AA normal-text contrast',()=>{
     for(const bg of ['canvas','surface','raised']) for(const fg of ['ink','copy','muted','accent-text']) {
       expect(contrast(tokens['--rch-brand-'+fg],tokens['--rch-brand-'+bg]),`${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
