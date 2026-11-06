@@ -16,6 +16,7 @@ type Props={
  court:WorldCourt;cityId:string;events:readonly WorldRun[];
  belts:readonly CertifiedCourtBelt[];beltLoading:boolean;
  controllingCrew:string|null;crewLogoUrl:string|null;recordedDefenses:number;
+ takeoverStatus:string|null;onTakeover:()=>void;
  loggedIn:boolean;scouted:boolean;onScout:()=>void;
  onClose:()=>void;
 };
@@ -34,7 +35,7 @@ function accessLabel(court:WorldCourt){
 }
 
 /** On-map disclosure, not a new match authority or a modal that remounts the map. */
-export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,loggedIn,scouted,onScout,onClose}:Props){
+export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controllingCrew,crewLogoUrl,recordedDefenses,takeoverStatus,onTakeover,loggedIn,scouted,onScout,onClose}:Props){
  const [expanded,setExpanded]=useState(false);
  const dismiss=useRef<HTMLButtonElement|null>(null);
  const scroller=useRef<HTMLDivElement|null>(null);
@@ -102,6 +103,12 @@ export function RunsCourtPreview({court,cityId,events,belts,beltLoading,controll
      <div><small>COURT TERRITORY · CONTROLLING CREW</small><strong>{controllingCrew||'Unclaimed'}</strong>
       <small>{controllingCrew?recordedDefenses+' recorded successful defenses':'No verified crew controller on record'}</small>
      </div>
+    </div>
+    <div className={'rwg-court-preview-takeover'+(takeoverStatus?' is-active':'')}>
+     <span className="rwg-court-preview-takeover-mark"><FaCrown aria-hidden="true"/></span>
+     <div><small>{takeoverStatus?'LIVE TERRITORY CHALLENGE':'TAKEOVER ARENA'}</small><strong>{takeoverStatus|| (controllingCrew?'Court control can change through a verified crew challenge.':'Court control is unclaimed; review the verified standings.')}</strong></div>
+     <button type="button" onClick={onTakeover}>{takeoverStatus?'OPEN CHALLENGE BOARD':controllingCrew?'CHALLENGE FOR CONTROL':'VIEW COURT STANDINGS'} <FaArrowRight aria-hidden="true"/></button>
+     <p>Only a registered crew captain can request or accept a challenge. Real crew games and verified results determine control.</p>
     </div>
     <div className="rwg-court-preview-next">
      <h3><FaCalendarDays/> NEXT REAL RUN</h3>
