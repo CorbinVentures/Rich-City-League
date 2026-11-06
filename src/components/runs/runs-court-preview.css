@@ -21,6 +21,14 @@
 .rwg-court-preview-territory>div{display:grid;gap:4px;flex:1}
 .rwg-court-preview-territory small{font-size:9px;font-weight:800;color:var(--rch-brand-copy)}
 .rwg-court-preview-territory strong{font-size:15px;font-weight:1000;overflow-wrap:anywhere}
+.rwg-court-preview-takeover{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:9px;padding:11px;border:1px solid var(--rch-brand-border);border-radius:13px;background:radial-gradient(ellipse at 100% 0%,rgb(var(--rch-brand-accent-rgb) / .16),transparent 65%),linear-gradient(135deg,var(--rch-brand-raised),var(--rch-brand-surface))}
+.rwg-court-preview-takeover.is-active{border-color:#d6aa5f;background:radial-gradient(ellipse at 100% 0%,rgb(214 170 95 / .18),transparent 65%),linear-gradient(135deg,#342b1d,var(--rch-brand-surface))}
+.rwg-court-preview-takeover-mark{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--rch-brand-border);border-radius:10px;color:var(--rch-brand-accent-text);font-size:17px}
+.rwg-court-preview-takeover>div{display:grid;gap:4px}
+.rwg-court-preview-takeover>div small{color:var(--rch-brand-accent-text);font-size:8px;font-weight:1000;letter-spacing:.11em}
+.rwg-court-preview-takeover>div strong{color:var(--rch-brand-ink);font-size:10px;line-height:1.45}
+.rwg-court-preview-takeover>button{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:45px;padding:9px;border:1px solid var(--rch-brand-accent-text);border-radius:10px;background:linear-gradient(110deg,var(--rch-brand-accent),var(--rch-brand-accent));color:#fff;font-size:10px;font-weight:1000;letter-spacing:.04em;cursor:pointer}
+.rwg-court-preview-takeover>p{grid-column:1/-1;margin:0;color:var(--rch-brand-copy);font-size:9px;line-height:1.5}
 .rwg-court-preview-next h3,.rwg-court-preview-expanded h3{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px!important;font-weight:950!important;letter-spacing:.035em;color:var(--rch-brand-ink)!important}
 .rwg-court-preview-next>p,.rwg-court-preview-muted{padding:10px 0;font-size:11px;color:var(--rch-brand-copy);line-height:1.6}
 .rwg-court-preview-next>a,.rwg-court-preview-runline{display:flex;align-items:center;gap:8px;justify-content:space-between;min-height:66px;border:1px solid var(--rch-brand-muted);border-radius:10px;background:var(--rch-brand-raised);padding:12px;color:#fff;text-decoration:none}
