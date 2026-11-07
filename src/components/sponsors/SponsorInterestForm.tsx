@@ -19,15 +19,17 @@ type FormState={
 
 export function SponsorInterestForm({initialProduct=''}:{initialProduct?:string}){
   const db=useMemo(()=>getSupabaseClient() as any,[]);
-  const validInitial=sponsorInventoryByCode(initialProduct)?.code??'';
+  const initialInventory=sponsorInventoryByCode(initialProduct);
+  const validInitial=initialInventory?.code??'';
   const [form,setForm]=useState<FormState>({
     businessName:'',contactName:'',contactEmail:'',phone:'',website:'',instagram:'',
-    category:'Automotive',city:'Richmond',region:'central-virginia',inventoryCode:validInitial,budget:'250-499',goals:'',
+    category:'Automotive',city:'Richmond',region:'central-virginia',inventoryCode:validInitial,budget:budgetForPrice(initialInventory?.startingPriceCents),goals:'',
   });
   const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [sent,setSent]=useState(false);
   const selected=sponsorInventoryByCode(form.inventoryCode);
 
   const update=(key:keyof FormState,value:string)=>setForm(current=>({...current,[key]:value}));
+  const chooseInventory=(code:string)=>{const item=sponsorInventoryByCode(code);setForm(current=>({...current,inventoryCode:code,budget:item?.startingPriceCents?budgetForPrice(item.startingPriceCents):current.budget}));};
 
   async function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();setError('');
@@ -84,7 +86,7 @@ export function SponsorInterestForm({initialProduct=''}:{initialProduct?:string}
       <Field label="Budget range"><select value={form.budget} onChange={e=>update('budget',e.target.value)} className="sponsor-input">{SPONSOR_BUDGET_OPTIONS.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></Field>
       <Field label="Website"><input type="url" value={form.website} onChange={e=>update('website',e.target.value)} placeholder="https://" className="sponsor-input"/></Field>
       <Field label="Instagram"><input type="url" value={form.instagram} onChange={e=>update('instagram',e.target.value)} placeholder="https://instagram.com/..." className="sponsor-input"/></Field>
-      <div className="md:col-span-2"><Field label="Opportunity"><select value={form.inventoryCode} onChange={e=>update('inventoryCode',e.target.value)} className="sponsor-input"><option value="">Help me choose</option>{SPONSOR_INVENTORY.map(item=><option key={item.code} value={item.code}>{item.name} — {item.priceLabel}</option>)}</select></Field></div>
+      <div className="md:col-span-2"><Field label="Opportunity"><select value={form.inventoryCode} onChange={e=>chooseInventory(e.target.value)} className="sponsor-input"><option value="">Help me choose</option>{SPONSOR_INVENTORY.map(item=><option key={item.code} value={item.code}>{item.name} — {item.priceLabel}</option>)}</select></Field></div>
       <div className="md:col-span-2"><Field label="What do you want this sponsorship to do?"><textarea value={form.goals} onChange={e=>update('goals',e.target.value)} rows={5} maxLength={2200} placeholder="Examples: drive traffic to our dealership, fill an event, promote an offer, own a recurring RCH category, reach Richmond basketball fans…" className="sponsor-input resize-y"/></Field></div>
     </div>
     {selected&&<div className="mt-5 rounded-2xl border border-rcl-blue/15 bg-black/15 p-4"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-blue">Selected opportunity</p><div className="mt-2 flex flex-wrap items-end justify-between gap-3"><div><b className="font-display text-2xl font-black uppercase">{selected.name}</b><p className="mt-1 max-w-2xl text-xs leading-5 text-white/40">{selected.description}</p>{selected.availabilityLabel&&<p className="mt-2 text-xs font-bold text-rcl-orange">{selected.availabilityLabel} · confirm before agreement</p>}</div><span className="text-sm font-black text-rcl-orange">{selected.priceLabel}</span></div></div>}
@@ -94,4 +96,13 @@ export function SponsorInterestForm({initialProduct=''}:{initialProduct?:string}
   </form>;
 }
 
+function budgetForPrice(cents:number|null|undefined){
+  if(!cents)return '250-499';
+  if(cents<10000)return 'under-100';
+  if(cents<25000)return '100-249';
+  if(cents<50000)return '250-499';
+  if(cents<100000)return '500-999';
+  if(cents<250000)return '1000-2499';
+  return '2500-plus';
+}
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="block"><span className="mb-2 block text-[10px] font-black uppercase tracking-[.15em] text-white/45">{label}</span>{children}</label>;}
