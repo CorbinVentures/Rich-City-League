@@ -67,7 +67,7 @@ async function processSponsorCheckoutEvent(db:any,event:StripeEvent,session:any)
   if(prior&&['processed','ignored','processing'].includes(prior.processing_status))return {received:true,duplicate:true};
   if(prior){
     const {error}=await db.from('network_partner_billing_events').update({
-      event_type:event.type,processing_status:'processing',error_message:null,processed_at:null,
+      event_type:event.type,processing_status:'processing',error_message:null,
     }).eq('id',event.id);
     if(error)throw error;
   }else{
