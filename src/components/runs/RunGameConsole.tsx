@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaArrowRotateLeft, FaBasketball, FaBolt, FaCheck, FaCirclePlay, FaShieldHalved, FaTrophy } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 type Team = { id: string; name: string; sort_order: number };
 type Member = { run_team_id: string; profile_id: string };
@@ -27,9 +28,10 @@ const statLong: Record<string,string> = {
   defensive_stop: 'Defensive stop', three_attempted: 'Missed three',
 };
 
-export function RunGameConsole({ runId, canOperate, format, teams, members, profiles }: {
+export function RunGameConsole({ runId, canOperate: canManage, format, teams, members, profiles }: {
   runId: string; canOperate: boolean; format:string; teams: Team[]; members: Member[]; profiles: Person[];
 }) {
+  const {user} = useAuth();
   const db = useMemo(() => getSupabaseClient(true) as any, []);
   const [games,setGames]=useState<Game[]>([]);
   const [actions,setActions]=useState<Action[]>([]);
@@ -45,6 +47,8 @@ export function RunGameConsole({ runId, canOperate, format, teams, members, prof
   const [busy,setBusy]=useState(false);
   const [notice,setNotice]=useState('');
   const [error,setError]=useState('');
+  const [operatorCanScore,setOperatorCanScore]=useState(false);
+  const canOperate=canManage||operatorCanScore;
 
   const load=useCallback(async()=>{
     if(!db){setLoading(false);return;}
@@ -65,6 +69,14 @@ export function RunGameConsole({ runId, canOperate, format, teams, members, prof
   },[db,runId,selectedGame]);
 
   useEffect(()=>{void load();},[load]);
+  useEffect(()=>{
+    let active=true;
+    if(!db||!user?.id){setOperatorCanScore(false);return;}
+    void db.from('rch_run_operators').select('role').eq('run_id',runId).eq('profile_id',user.id).maybeSingle()
+      .then(({data,error:failure}:any)=>{if(active)setOperatorCanScore(!failure&&['scorekeeper','cohost'].includes(data?.role||''));})
+      .catch(()=>{if(active)setOperatorCanScore(false);});
+    return()=>{active=false;};
+  },[db,runId,user?.id]);
   useEffect(()=>{
     if(!db)return;
     const channel=db.channel('rch-live-game-'+runId)
@@ -152,6 +164,7 @@ export function RunGameConsole({ runId, canOperate, format, teams, members, prof
       <p className="rch-live-game-empty">The host has not started a game yet. When play begins, the live score and Run report will appear here.</p>:
       !game?<div className="rch-live-game-setup">
         <p>Pick the sides and house rules, then start the live board. The game takes place at the real court.</p>
+        {canOperate&&!canManage&&<p className="rch-live-game-message" role="status">You’re assigned as scorekeeper. The host must start the game; the live board will open here automatically.</p>}
         <div className="rch-live-game-setup-grid">
           <label>HOME TEAM<select value={home} onChange={e=>setHome(e.target.value)}><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} · {roster(t.id).length} players</option>)}</select></label>
           <label>AWAY TEAM<select value={away} onChange={e=>setAway(e.target.value)}><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} · {roster(t.id).length} players</option>)}</select></label>
@@ -159,7 +172,7 @@ export function RunGameConsole({ runId, canOperate, format, teams, members, prof
           <label>SCORING<select value={scoringProfile} onChange={e=>setScoringProfile(e.target.value as typeof scoringProfile)}><option value="one_two_three">1s · 2s · 3s</option><option value="two_three">2s · 3s</option></select></label>
         </div>
         {home&&away&&(!roster(home).length||!roster(away).length)&&<p className="mt-3 text-xs font-semibold text-amber-200">Assign at least one registered player to each team before starting.</p>}
-        <button type="button" disabled={busy||!canOperate||!home||!away||home===away||!roster(home).length||!roster(away).length} onClick={()=>void startGame()}><FaCirclePlay/> START LIVE GAME</button>
+        <button type="button" disabled={busy||!canOperate||!canManage||!home||!away||home===away||!roster(home).length||!roster(away).length} onClick={()=>void startGame()}><FaCirclePlay/> START LIVE GAME</button>
       </div>:
       <>
         <div className="rch-live-scoreboard" aria-label="Live basketball score" aria-live="polite">
@@ -170,6 +183,7 @@ export function RunGameConsole({ runId, canOperate, format, teams, members, prof
           <div className="rch-live-score-divider">{game.status==='live'?<FaBolt/>:<FaTrophy/>}</div>
         </div>
         {live&&canOperate&&<div className="rch-live-controls">
+          {operatorCanScore&&!canManage&&<p className="rch-live-game-message" role="status">You’re the assigned scorekeeper. Log each play here; the host handles game setup.</p>}
           <div className="rch-live-control-head"><div><span>COURTSIDE CONTROL</span><h3>Log the next play</h3></div><label>TEAM<select value={activeTeam} onChange={e=>{setActiveTeam(e.target.value);setActivePlayer(roster(e.target.value)[0]||'');}}>{sides.map(side=><option key={side.id} value={side.id}>{teamName(side.id)}</option>)}</select></label></div>
           <label className="rch-live-player-select">WHO MADE THE PLAY?<select value={activePlayer} onChange={e=>setActivePlayer(e.target.value)}><option value="">Select rostered player</option>{activePlayers.map(id=><option key={id} value={id}>{name(id)}</option>)}</select></label>
           <div className="rch-live-score-buttons" aria-label="Add points">
