@@ -13,9 +13,10 @@
 .heroImage{
   inset:0;
   background:
-    linear-gradient(90deg,rgba(4,9,14,.74) 0%,rgba(5,10,16,.48) 38%,rgba(5,10,16,.16) 74%,rgba(5,10,16,.12) 100%),
-    linear-gradient(0deg,rgba(4,9,14,.63),transparent 56%),
-    url('/league/rcl-showtime-hero.webp') center 53% / cover no-repeat;
+    linear-gradient(90deg,rgba(5,10,15,.86) 0%,rgba(5,10,15,.62) 42%,rgba(5,10,15,.2) 100%),
+    linear-gradient(0deg,rgba(5,10,15,.66),transparent 62%),
+    radial-gradient(ellipse at 76% 28%,color-mix(in srgb,var(--team-accent) 42%,transparent),transparent 44%),
+    linear-gradient(140deg,#10202b 0%,#152630 48%,#08131d 100%);
   transform:scale(1.015);
 }
 .heroLighting{
@@ -80,7 +81,7 @@
   max-width:980px;
   color:#f8f5ee;
   font-family:var(--font-display,inherit);
-  font-size:clamp(3rem,8.5vw,8.2rem);
+  font-size:clamp(2.25rem,6.6vw,6.25rem);
   font-weight:950;
   line-height:.88;
   letter-spacing:-.075em;
@@ -207,9 +208,9 @@
   justify-content:space-between;
   padding:clamp(24px,4vw,46px);
   background:
-    linear-gradient(90deg,rgba(4,10,15,.92),rgba(5,12,18,.7) 58%,rgba(5,12,18,.31)),
-    linear-gradient(0deg,rgba(3,8,13,.88),transparent 70%),
-    url('/league/rcl-showtime-hero.webp') center 62% / cover no-repeat;
+    linear-gradient(112deg,rgba(5,10,15,.88),rgba(5,12,18,.56) 60%,rgba(5,12,18,.32)),
+    radial-gradient(ellipse at 86% 20%,color-mix(in srgb,var(--team-accent) 34%,transparent),transparent 42%),
+    linear-gradient(145deg,#101b25,#09121b 68%,#0f1822);
 }
 .matchupScrim{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 32%,color-mix(in srgb,var(--team-accent) 45%,transparent),transparent 34%);opacity:.54;mix-blend-mode:screen}
 .matchupBody,.matchupLink{position:relative;z-index:1}
@@ -269,9 +270,11 @@
   align-items:center;
   justify-content:center;
   gap:18px;
+  position:relative;
+  overflow:hidden;
   background:
-    linear-gradient(90deg,rgba(4,9,14,.7),rgba(4,9,14,.25)),
-    url('/league/rcl-showtime-hero.webp') center / cover no-repeat;
+    radial-gradient(ellipse at 77% 45%,color-mix(in srgb,var(--team-accent) 32%,transparent),transparent 48%),
+    linear-gradient(135deg,#15232d,#09121b 72%);
 }
 .playMark{display:grid;width:58px;height:58px;place-items:center;border:1px solid rgba(255,255,255,.65);border-radius:50%;background:rgba(255,255,255,.09);padding-left:3px;color:#fff;box-shadow:0 0 40px rgba(255,255,255,.12)}
 .filmPlaceholder>div{display:grid;gap:6px}
@@ -295,7 +298,7 @@
   .heroContent{min-height:650px;padding:20px 16px 26px}
   .heroMain{align-items:flex-start}
   .heroLogo{width:132px;height:132px;border-radius:18px}
-  .heroTitle{font-size:clamp(2.9rem,13vw,4.8rem);line-height:.9}
+  .heroTitle{font-size:clamp(1.65rem,7vw,2.45rem);line-height:.98;letter-spacing:-.055em;max-width:100%}
   .heroRecord{min-width:108px;padding:12px 14px}
   .identityCard{min-height:255px;padding:24px 21px}
   .recordCard{min-height:180px}
@@ -351,3 +354,25 @@
 @media(max-width:850px){.depthOrbitOuter{width:84vw;right:-16%}.depthOrbitMiddle{width:66vw;right:-2%}.depthOrbitInner{width:48vw;right:10%}.depthCourt{width:58vw;right:5%}.depthMonogram{right:-3%;top:28%;font-size:14vw}.worldField{opacity:.32}}
 @media(max-width:560px){.depthField{top:8%;height:54%}.depthOrbitOuter{width:86vw;right:-30%;top:48%}.depthOrbitMiddle{width:68vw;right:-10%;top:48%}.depthOrbitInner{width:52vw;right:5%;top:48%}.depthCourt{width:62vw;right:0;top:48%}.depthMonogram{right:-7%;top:32%;font-size:16vw}.heroLogo{transform:perspective(900px) rotateY(-7deg) translate3d(var(--parallax-x,0px),var(--parallax-y,0px),40px)}}
 @media(prefers-reduced-motion:reduce){.worldField,.heroFrame::after,.depthOrbitMiddle,.depthOrbitInner{animation:none}.heroImage{transition:none}}
+
+/* The franchise crest replaces the shared arena photo as the hero artwork. */
+.heroArtwork{position:absolute;z-index:2;top:1%;right:-2%;width:min(60vw,720px);height:min(78vh,720px);pointer-events:none;opacity:.48;transform:perspective(1100px) rotateY(-13deg) rotateX(4deg) translate3d(var(--parallax-x,0px),var(--parallax-y,0px),80px);filter:drop-shadow(0 32px 76px color-mix(in srgb,var(--team-glow) 45%,transparent));will-change:transform}
+.heroArtworkImage{object-fit:contain;object-position:center;mix-blend-mode:screen;filter:saturate(1.18) contrast(1.05)}
+.worldField{opacity:.58}
+.filmPlaceholder{isolation:isolate}
+.filmWatermark{position:absolute!important;z-index:0!important;inset:auto -5% -20% auto!important;width:min(68%,620px)!important;height:120%!important;object-fit:contain;opacity:.24;filter:drop-shadow(0 20px 60px color-mix(in srgb,var(--team-glow) 40%,transparent));mix-blend-mode:screen}
+.filmPlaceholder>*:not(.filmWatermark){position:relative;z-index:1}
+.filmPlaceholder[data-franchise-world="blue-ridge"]{background-image:linear-gradient(145deg,transparent 43%,color-mix(in srgb,var(--team-accent) 28%,transparent) 43.2%,transparent 65%),radial-gradient(ellipse at 70% 70%,color-mix(in srgb,var(--team-secondary) 25%,transparent),transparent 45%),linear-gradient(135deg,#15232d,#09121b)}
+.filmPlaceholder[data-franchise-world="harbor-force"]{background-image:repeating-linear-gradient(170deg,transparent 0 26px,color-mix(in srgb,var(--team-accent) 18%,transparent) 27px 29px,transparent 30px 54px),linear-gradient(135deg,#14202a,#09121b)}
+.filmPlaceholder[data-franchise-world="riverfront-motion"]{background-image:repeating-linear-gradient(155deg,transparent 0 22px,color-mix(in srgb,var(--team-accent) 20%,transparent) 23px 25px,transparent 26px 48px),linear-gradient(135deg,#13251f,#091611)}
+@media(max-width:850px){.heroArtwork{right:-10%;width:min(68vw,520px);height:min(65vh,560px);opacity:.36}}
+@media(max-width:560px){
+ .heroArtwork{top:16%;right:-34%;width:94vw;height:54vh;opacity:.25}
+ .heroTitle{max-width:min(100%,11ch);font-size:clamp(1.6rem,7.4vw,2.35rem);line-height:.96}
+ .heroMain{gap:16px}
+ .heroLogo{width:104px;height:104px}
+ .heroRecord{min-width:96px}
+ .identityCard h2{font-size:clamp(1.7rem,7vw,2.45rem);line-height:.98}
+ .identityGhost{font-size:clamp(3rem,11vw,5rem)}
+}
+@media(prefers-reduced-motion:reduce){.heroArtwork{transform:none;will-change:auto}}
