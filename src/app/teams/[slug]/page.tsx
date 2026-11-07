@@ -6,6 +6,7 @@ import { getTeamDetail, getLeagueSnapshot, getPublicClient } from '@/lib/public-
 import { formatDate, formatTime } from '@/utils/helpers';
 import { getTeamTheme } from '@/lib/team-themes';
 import styles from './team-site.module.css';
+import { FranchiseParallax } from './FranchiseParallax';
 
 export const revalidate = 60;
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const data=await getTeamDetail(slug);if(!data)return{title:'RCL Team',robots:{index:false,follow:false}};const t=data.team;const locationLabel=t.city?.trim()||getTeamTheme(t.slug,t.primary_color,t.secondary_color).homeCity||'Virginia';const locationLine=locationLabel==='Virginia'?'Virginia':`${locationLabel}, Virginia`;const description=`${t.name} official Rich City League franchise page: roster, schedule, results, stats and team news from ${locationLine}.`;return{title:{absolute:`${t.name} | ${locationLine} Basketball | RCL`},description,alternates:{canonical:`/teams/${slug}`},openGraph:{url:`/teams/${slug}`,title:`${t.name} | Rich City League`,description,images:t.logo_url?[{url:t.logo_url,alt:`${t.name} logo`}]:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'RCL — Richmond basketball social'}]},robots:{index:true,follow:true}};}
@@ -57,11 +58,20 @@ export default async function TeamDetailPage({ params, searchParams }: { params:
   const accent=theme.accent;
   const secondary=theme.secondary;
 
-  return <main className="min-h-screen pb-24 text-white" style={{backgroundColor:theme.surface,'--team-accent':accent,'--team-secondary':secondary,'--team-glow':theme.glow} as React.CSSProperties}>
-    <section className={`${styles.heroFrame} relative isolate overflow-hidden`}>
-      <div className={styles.heroImage} aria-hidden="true"/>
-      <div className={styles.heroLighting} aria-hidden="true"/>
-      <div className={styles.heroCourt} aria-hidden="true"/>
+  return <main data-franchise-world={theme.world} className="min-h-screen pb-24 text-white" style={{backgroundColor:theme.surface,backgroundImage:theme.atmosphere,'--team-accent':accent,'--team-secondary':secondary,'--team-glow':theme.glow} as React.CSSProperties}>
+    <section data-franchise-stage={team.slug} data-franchise-world={theme.world} data-motif={theme.motif} className={`${styles.heroFrame} relative isolate overflow-hidden`}>
+      <div className={styles.heroImage} data-depth="0.2" aria-hidden="true"/>
+      <div className={styles.heroLighting} data-depth="0.25" aria-hidden="true"/>
+      <div className={styles.worldField} aria-hidden="true"/>
+      <div className={styles.depthField} aria-hidden="true">
+        <div className={`${styles.depthOrbit} ${styles.depthOrbitOuter}`} data-depth="1.15"/>
+        <div className={`${styles.depthOrbit} ${styles.depthOrbitMiddle}`} data-depth="0.8"/>
+        <div className={`${styles.depthOrbit} ${styles.depthOrbitInner}`} data-depth="0.45"/>
+        <div className={styles.depthCourt} data-depth="0.65"/>
+        <div className={styles.depthMonogram} data-depth="1.35">{theme.displayMark}</div>
+      </div>
+      <div className={styles.heroCourt} data-depth="0.35" aria-hidden="true"/>
+      <FranchiseParallax stageId={team.slug}/>
       
       
       {team.logo_url&&<div className="pointer-events-none absolute -right-12 -top-20 h-[460px] w-[460px] opacity-[.13] blur-[1px] sm:-right-16 sm:h-[650px] sm:w-[650px]" aria-hidden="true"><Image src={team.logo_url} alt="" fill sizes="650px" className="object-contain drop-shadow-[0_0_80px_var(--team-glow)]"/></div>}
@@ -72,7 +82,7 @@ export default async function TeamDetailPage({ params, searchParams }: { params:
       <div className={`${styles.heroContent} relative mx-auto w-full max-w-7xl px-5`}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><Link href="/league" className="text-xs font-black uppercase tracking-[.3em] transition hover:text-white" style={{color:accent}}>← Rich City League</Link><span className="text-xs font-black uppercase tracking-[.28em] text-white/35">{theme.tagline}</span></div>
         <div className={`${styles.heroMain} mt-8 flex min-h-[250px] flex-col justify-end gap-6 sm:flex-row sm:items-end`}>
-          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={240} height={240} sizes="(min-width: 640px) 208px, 160px" className={styles.heroLogo} style={{boxShadow:`0 24px 90px ${theme.glow}55`}}/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
+          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={240} height={240} sizes="(min-width: 640px) 208px, 160px" className={styles.heroLogo} data-depth="1.8" style={{boxShadow:`0 24px 90px ${theme.glow}55`}}/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
           <div className="flex-1"><div className="mb-3 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{backgroundColor:accent,boxShadow:`0 0 16px ${theme.glow}`}}/><span className="text-xs font-black uppercase tracking-[.25em] text-white/40">Official franchise site</span></div><h1 className={styles.heroTitle}>{team.name}</h1><p className="mt-3 text-xs font-black uppercase tracking-[.2em] text-white/55">{locationLine} · {division?.name??'Rich City League'}</p>{team.description&&<p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{team.description}</p>}</div>
           <div className={`${styles.heroRecord} flex gap-3`}><div><p className="text-xs uppercase tracking-widest text-white/40">Record</p><p className="mt-1 font-display text-3xl font-black">{record?`${record.wins}–${record.losses}`:'0–0'}</p></div></div>
         </div>
