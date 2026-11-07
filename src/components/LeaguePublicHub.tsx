@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
+import type {CSSProperties} from 'react';
 import {FaArrowRight,FaCalendarDays,FaRankingStar,FaPlay,FaUsers} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {RCL_PRO_SEASON} from '@/lib/rcl-pro-season';
@@ -58,7 +59,7 @@ export function LeaguePublicHub(){
  const lastFinal=[...state.games].filter(game=>game.status==='completed').sort((a,b)=>new Date(b.scheduled_at).getTime()-new Date(a.scheduled_at).getTime())[0];
  const featured=nextGame??lastFinal;
  const name=(id:string)=>teamMap.get(id)?.name??'Team pending';
- return <main className={styles.home} aria-label="Rich City League">
+ return <section className={styles.home} aria-label="Rich City League">
   <section className={styles.hero}>
    <div className={styles.heroGlow} aria-hidden="true"/><div className={styles.heroCourt} aria-hidden="true"/>
    <div className={styles.heroTop}><span>RICH CITY LEAGUE</span><span>VIRGINIA · EST. 2011</span></div>
@@ -102,12 +103,12 @@ export function LeaguePublicHub(){
    <p className={styles.sectionIntro}>Step into each team’s world: its colors, its people, its schedule, and the story it brings to the league.</p>
    {state.teams.length? <div className={styles.teamGrid}>{state.teams.slice(0,12).map((team,index)=>{
     const theme=getTeamTheme(team.slug,team.primary_color,team.secondary_color);
-    return <Link href={'/teams/'+team.slug} key={team.id} className={styles.teamCard} style={{'--team-accent':theme.accent,'--team-secondary':theme.secondary,'--team-surface':theme.surface,'--team-atmosphere':theme.atmosphere} as React.CSSProperties}>
+    return <Link href={'/teams/'+team.slug} key={team.id} className={styles.teamCard} style={{'--team-accent':theme.accent,'--team-secondary':theme.secondary,'--team-surface':theme.surface,'--team-atmosphere':theme.atmosphere} as CSSProperties}>
      <span className={styles.teamIndex}>{String(index+1).padStart(2,'0')} / 12</span>
      {team.logo_url?<img className={styles.teamLogo} src={team.logo_url} alt="" loading="lazy"/>:<span className={styles.teamMonogram}>{team.name.split(/\s+/).map(part=>part[0]).slice(0,2).join('')}</span>}
      <span className={styles.teamName}>{team.name}</span><span className={styles.teamVisit}>Explore team <FaArrowRight/></span>
     </Link>;
    })}</div>:<p className={styles.feedback}>Team homes are being prepared.</p>}
   </section>
- </main>;
+ </section>;
 }
