@@ -11,7 +11,16 @@ export type SponsorInventoryCode =
   | 'category-exclusive'
   | 'bmf-presenting'
   | 'bmf-championship-partner'
-  | 'bmf-community-partner';
+  | 'bmf-community-partner'
+  | 'rcl-runs-championship-award'
+  | 'rcl-league-championship-award'
+  | 'rcl-team-uniform-partner'
+  | 'rcl-digital-platform-partner'
+  | 'rcl-game-streaming-partner'
+  | 'rcl-game-highlights-partner'
+  | 'rcl-playoff-series-partner'
+  | 'rcl-finals-partner'
+  | 'rcl-social-campaign-partner';
 
 export type SponsorInventoryItem = {
   code:SponsorInventoryCode;
@@ -29,6 +38,8 @@ export type SponsorInventoryItem = {
   idealFor:string;
   featured?:boolean;
   availabilityLabel?:string;
+  lane?:'network'|'rcl-2027';
+  slotCount?:number;
 };
 
 export const SPONSOR_INVENTORY:SponsorInventoryItem[]=[
@@ -210,6 +221,71 @@ export const SPONSOR_INVENTORY:SponsorInventoryItem[]=[
     deliverables:['Community partner recognition','Digital event promotion','Post-event recap placement'],
     idealFor:'Richmond area businesses and community organizations', featured:false, availabilityLabel:'4 proposed slots',
   },
+
+  {
+    code:'rcl-runs-championship-award',name:'Runs 1v1 Championship Award Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'event-spotlight',package:'custom',objective:'event-traffic',durationDays:null,startingPriceCents:150000,priceLabel:'Asking $1,500',slotCount:1,
+    description:'Support the statewide Runs 1v1 championship award and its champion recognition.',
+    deliverables:['2 sponsor posts','4 sponsor stories','Reveal photo','Presentation acknowledgment','90-day listing'],
+    idealFor:'Brands aligned with Virginia streetball and the Runs community',availabilityLabel:'1 proposed slot · identity and event gates apply',
+  },
+  {
+    code:'rcl-league-championship-award',name:'League Championship Award Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'event-spotlight',package:'custom',objective:'event-traffic',durationDays:null,startingPriceCents:250000,priceLabel:'Asking $2,500',slotCount:1,
+    description:'Associate your brand with the 2027 Rich City League championship award and Finals moment.',
+    deliverables:['2 sponsor posts','Championship award reveal','Finals acknowledgment','90-day listing'],
+    idealFor:'Brands seeking a clear association with the League champion',availabilityLabel:'1 proposed slot · season and award gates apply',
+  },
+  {
+    code:'rcl-team-uniform-partner',name:'Team Uniform Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'event-spotlight',package:'custom',objective:'awareness',durationDays:null,startingPriceCents:400000,priceLabel:'Asking $4,000 per team',slotCount:6,
+    description:'Primary uniform placement with a participating Rich City League team.',
+    deliverables:['Primary uniform position','Team and roster acknowledgment','Uniform reveal video','Team posts'],
+    idealFor:'Apparel, footwear, local businesses and team-aligned brands',availabilityLabel:'Up to 6 proposed team slots · uniform production gates apply',
+  },
+  {
+    code:'rcl-digital-platform-partner',name:'Digital Platform Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'network-home',package:'custom',objective:'website-traffic',durationDays:null,startingPriceCents:500000,priceLabel:'Asking $5,000',slotCount:1,
+    description:'A named digital association across the Rich City League platform experience.',
+    deliverables:['League Center sponsor panel','Up to 2 digital placements','Tagged destination URL','Monthly reporting'],
+    idealFor:'Brands seeking a measurable season-long digital presence',availabilityLabel:'1 proposed slot · League Center readiness gate applies',
+  },
+  {
+    code:'rcl-game-streaming-partner',name:'Game Streaming Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'media-feature',package:'custom',objective:'media-views',durationDays:null,startingPriceCents:500000,priceLabel:'Asking $5,000',slotCount:1,
+    description:'Proposed sponsor treatment across rights-cleared Rich City League broadcasts and programs.',
+    deliverables:['Proposed 8 broadcasts or programs','Sponsor slate treatment','Logo integration','Delivery report'],
+    idealFor:'Brands investing in basketball media and video storytelling',availabilityLabel:'1 proposed slot · broadcast rights and production gates apply',
+  },
+  {
+    code:'rcl-game-highlights-partner',name:'Game Highlights Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'media-feature',package:'custom',objective:'media-views',durationDays:null,startingPriceCents:200000,priceLabel:'Asking $2,000',slotCount:1,
+    description:'Sponsor identification on a proposed slate of short-form Rich City League highlights.',
+    deliverables:['Proposed 12 short-form clips','Approved sponsor treatment','League highlight association','Delivery report'],
+    idealFor:'Brands looking for repeatable social-video visibility',availabilityLabel:'1 proposed slot · player, music and media-rights gates apply',
+  },
+  {
+    code:'rcl-playoff-series-partner',name:'Playoff Series Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'event-spotlight',package:'custom',objective:'event-traffic',durationDays:null,startingPriceCents:300000,priceLabel:'Asking $3,000',slotCount:1,
+    description:'Associate your brand with a defined 2027 League playoff series.',
+    deliverables:['Bracket treatment','2 digital placements','Approved venue signage','Series recap recognition'],
+    idealFor:'Brands seeking postseason visibility in a specific event window',availabilityLabel:'1 proposed slot · schedule and venue gates apply',
+  },
+  {
+    code:'rcl-finals-partner',name:'Championship Finals Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'event-spotlight',package:'custom',objective:'event-traffic',durationDays:null,startingPriceCents:500000,priceLabel:'Asking $5,000',slotCount:1,
+    description:'A presenting designation around the 2027 Rich City League Championship Finals.',
+    deliverables:['Finals presenting designation','Championship award acknowledgment','Official recap credit','Defined Finals placements'],
+    idealFor:'A lead brand seeking association with the League’s signature event',availabilityLabel:'1 proposed slot · schedule, venue and rights gates apply',
+  },
+  {
+    code:'rcl-social-campaign-partner',name:'League Social Campaign Partner',eyebrow:'2027 League property',lane:'rcl-2027',kind:'event-partner',
+    placement:'social-feed',package:'custom',objective:'audience-growth',durationDays:null,startingPriceCents:200000,priceLabel:'Asking $2,000',slotCount:1,
+    description:'A defined sponsor campaign across Rich City League social channels during the proposed 90-day term.',
+    deliverables:['90-day campaign term','8 feed posts or Reels','12 stories','End-of-campaign report'],
+    idealFor:'Brands prioritizing social storytelling and season buildup',availabilityLabel:'1 proposed slot · schedule and creative approval gates apply',
+  },
+
 ];
 
 export const SPONSOR_BUDGET_OPTIONS=[
