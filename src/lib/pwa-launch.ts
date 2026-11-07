@@ -12,6 +12,13 @@ export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
   const mobile = /iPhone|iPad|iPod|Android|Mobile/i.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
   if (!standalone || !mobile) return;
+  // Runs has its own lightweight game entrance; do not stack the general
+  // four-second brand film over the game title screen or an active Run room.
+  if (/^\/runs(?:\/|$)/.test(location.pathname)) {
+    root.dataset.rchLaunch = 'done';
+    root.dataset.rchLaunchBoot = 'done';
+    return;
+  }
   root.dataset.rchLaunch = 'active';
   root.dataset.rchLaunchBoot = 'pending';
   window.setTimeout(() => {
