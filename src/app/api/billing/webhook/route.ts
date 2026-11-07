@@ -104,7 +104,7 @@ async function processSponsorCheckoutEvent(db:any,event:StripeEvent,session:any)
       return {received:true,cancelled:true};
     }
 
-    if(!['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type)){
+    if(!['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type ?? '')){
       await db.from('network_partner_billing_events').update({processing_status:'ignored',error_message:null,processed_at:new Date().toISOString()}).eq('id',event.id);
       return {received:true,ignored:true};
     }
