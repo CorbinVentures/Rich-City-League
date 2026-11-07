@@ -18,11 +18,13 @@ describe('Runs 2.0 task-first and verified activity UX',()=>{
    expect(runs).toContain('href="/runs?view=world&mode=world"');
    expect(runs.indexOf('Find a Game')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
  });
- it('never gates player discovery on forced instructions or auto-playing cinematics',()=>{
+ it('keeps the optional first-session title screen dismissible and respects replay preferences',()=>{
    expect(runs).not.toContain('setRulesOpen(true);\n  }, [showLegacyList]');
    expect(directWorld).not.toContain('useEffect(');
    expect(directWorld).toContain('onOpenRules={()=>setRulesOpen(true)}');
-   expect(cinema).toContain('if(!enabled||replayToken===0)return;');
+   expect(cinema).toContain('if(!enabled)return;');
+   expect(cinema).toContain("window.sessionStorage.getItem(INTRO_KEY)==='seen'");
+   expect(cinema).toContain('aria-label="Skip cinematic opening"');
    expect(cinema).toContain('onReplay');
  });
  it('keeps game controls readable and advanced competition reachable',()=>{
