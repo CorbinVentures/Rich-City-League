@@ -5,7 +5,7 @@ import {
   FaArrowRight, FaBullseye, FaChartLine, FaCircleCheck, FaHandshake,
   FaRectangleAd, FaShieldHalved, FaTrophy,
 } from 'react-icons/fa6';
-import { SPONSOR_INVENTORY } from '@/lib/sponsorship';
+import { SPONSOR_INVENTORY, isSelfServeSponsorProduct } from '@/lib/sponsorship';
 
 export const metadata: Metadata={
   title:'Sponsor Rich City Hoops | RCH Sponsor Center',
@@ -50,7 +50,7 @@ export default function SponsorsPage(){
       </section>
 
       <section className="mt-16">
-        <div className="mx-auto max-w-3xl text-center"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Available opportunities</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Choose the outcome first.</h2><p className="mt-3 text-sm leading-6 text-white/45">Every placement remains subject to fit, availability and RCH approval. “From” pricing is a starting point, not a guaranteed media buy.</p></div>
+        <div className="mx-auto max-w-3xl text-center"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Available opportunities</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Choose the outcome first.</h2><p className="mt-3 text-sm leading-6 text-white/45">Fixed-price digital placements can be purchased online and activate automatically after payment. Presenting, event and exclusive partnerships still need a proposal. Starting prices do not promise a specific number of impressions.</p></div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{SPONSOR_INVENTORY.filter(item=>!item.code.startsWith('bmf-')).map(item=><InventoryCard key={item.code} item={item}/>)}</div>
       </section>
 
@@ -63,15 +63,15 @@ export default function SponsorsPage(){
       <section className="mt-16 rounded-3xl border border-rcl-blue/20 bg-[linear-gradient(120deg,rgba(21,159,255,.07),#071522_42%,rgba(249,115,22,.05))] p-7 sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[.85fr_1.15fr] lg:items-center">
           <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">Premium inventory</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Own an RCH property, not a random banner.</h2><p className="mt-4 text-sm leading-6 text-white/45">The strongest sponsorships create a repeated association people can understand. Presenting and exclusive opportunities are negotiated individually so the brand, term, geography and category rights are explicit.</p></div>
-          <div className="grid gap-3 sm:grid-cols-2">{featured.map(item=><Link key={item.code} href={'/sponsors/start?product='+item.code} className="group rounded-2xl border border-white/10 bg-black/15 p-5 transition hover:border-rcl-orange/30"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-orange">{item.eyebrow}</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{item.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p><div className="mt-4 flex items-center justify-between gap-3"><b className="text-xs text-white/70">{item.priceLabel}</b><FaArrowRight className="text-rcl-orange transition group-hover:translate-x-1"/></div></Link>)}</div>
+          <div className="grid gap-3 sm:grid-cols-2">{featured.map(item=><Link key={item.code} href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className="group rounded-2xl border border-white/10 bg-black/15 p-5 transition hover:border-rcl-orange/30"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-orange">{item.eyebrow}</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{item.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p><div className="mt-4 flex items-center justify-between gap-3"><b className="text-xs text-white/70">{item.priceLabel}</b><span className="inline-flex items-center gap-2 text-[9px] font-black uppercase text-rcl-orange">{isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight className="transition group-hover:translate-x-1"/></span></div></Link>)}</div>
         </div>
       </section>
 
       <section className="mt-16">
         <div className="grid gap-4 lg:grid-cols-3">
-          <Step number="01" title="Choose the goal" copy="Traffic, awareness, event attendance, media views, community exposure or longer-term brand association."/>
-          <Step number="02" title="RCH confirms inventory" copy="We review fit, dates, geography, creative, exclusivity conflicts and the exact commercial terms."/>
-          <Step number="03" title="Launch + measure" copy="Approved placements run with disclosure and are measured through RCH Reach wherever the surface supports it."/>
+          <Step number="01" title="Choose the placement" copy="Pick a fixed-price digital package, target region, headline and destination link."/>
+          <Step number="02" title="Checkout reserves it" copy="Pay securely online. The server confirms the package price and records the campaign terms."/>
+          <Step number="03" title="Auto-place + measure" copy="After payment clears, RCH publishes the sponsored placement for its stated term and tracks eligible delivery."/>
         </div>
       </section>
 
@@ -99,7 +99,7 @@ function InventoryCard({item}:{item:(typeof SPONSOR_INVENTORY)[number]}){
     <p className="mt-3 min-h-[60px] text-xs leading-5 text-white/40">{item.description}</p>
     <div className="mt-4 space-y-2 border-t border-white/10 pt-4">{item.deliverables.slice(0,4).map(deliverable=><p key={deliverable} className="flex gap-2 text-[11px] leading-5 text-white/50"><FaCircleCheck className="mt-1 shrink-0 text-rcl-blue"/><span>{deliverable}</span></p>)}</div>
     <p className="mt-4 text-[10px] leading-5 text-white/30"><b className="text-white/50">Good for:</b> {item.idealFor}</p>
-    <Link href={'/sponsors/start?product='+item.code} className={'mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-wide '+(item.featured?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]')}>Request this <FaArrowRight/></Link>
+    <Link href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className={'mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-wide '+(item.featured?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]')}>{isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight/></Link>
   </article>;
 }
 

@@ -232,6 +232,11 @@ export function sponsorInventoryByCode(code:string|null|undefined){
   return SPONSOR_INVENTORY.find(item=>item.code===code)??null;
 }
 
+export function isSelfServeSponsorProduct(itemOrCode:SponsorInventoryItem|string|null|undefined){
+  const item=typeof itemOrCode==='string'?sponsorInventoryByCode(itemOrCode):itemOrCode;
+  return Boolean(item&&item.startingPriceCents!==null&&item.durationDays!==null&&!item.code.startsWith('bmf-')&&(item.kind==='campaign'||item.kind==='featured-partner'));
+}
+
 export function sponsorMoney(cents:number|null){
   if(cents===null)return 'Custom';
   return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(cents/100);

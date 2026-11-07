@@ -67,7 +67,7 @@ export function stripeBillingConfigured(plan?: PaidPlanCode, interval?: Membersh
   return PAID_PLAN_INTERVALS.every(([planCode, billingInterval]) => Boolean(envPrice(planCode, billingInterval)));
 }
 
-async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'; body?: URLSearchParams } = {}): Promise<T> {
+async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'; body?: URLSearchParams; idempotencyKey?: string } = {}): Promise<T> {
   const secret = stripeSecret();
   if (!secret) throw new Error('Stripe billing is not configured.');
   const response = await fetch(`${STRIPE_API}${path}`, {
@@ -75,6 +75,7 @@ async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'
     headers: {
       Authorization: `Bearer ${secret}`,
       ...(options.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+      ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
     },
     body: options.body,
     cache: 'no-store',
@@ -118,6 +119,46 @@ export async function createStripeCheckoutSession(input: {
   if (input.customerId) body.set('customer', input.customerId);
   else if (input.email) body.set('customer_email', input.email);
   return stripeRequest<{ id: string; url: string | null }>('/checkout/sessions', { method: 'POST', body });
+}
+
+export async function createStripeSponsorCheckoutSession(input: {
+  campaignId:string;
+  productCode:string;
+  productName:string;
+  description:string;
+  durationDays:number;
+  priceCents:number;
+  email?:string|null;
+  agreementVersion:string;
+  agreementAcceptedAt:string;
+}) {
+  if (!stripeSecret()) throw new Error('Stripe billing is not configured.');
+  if (!Number.isInteger(input.priceCents) || input.priceCents < 1) throw new Error('A valid sponsor campaign price is required.');
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://richcityhoops.com').replace(/\/$/, '');
+  const body = new URLSearchParams();
+  body.set('mode', 'payment');
+  body.set('payment_method_types[0]', 'card');
+  body.set('client_reference_id', input.campaignId);
+  body.set('success_url', `${site}/sponsors/dashboard?checkout=success`);
+  body.set('cancel_url', `${site}/sponsors/campaigns/new?checkout=cancelled&product=${encodeURIComponent(input.productCode)}`);
+  body.set('line_items[0][price_data][currency]', 'usd');
+  body.set('line_items[0][price_data][unit_amount]', String(input.priceCents));
+  body.set('line_items[0][price_data][product_data][name]', input.productName);
+  body.set('line_items[0][price_data][product_data][description]', `${input.description} Run length: ${input.durationDays} days. One-time purchase.`);
+  body.set('line_items[0][quantity]', '1');
+  if (input.email) body.set('customer_email', input.email);
+  const metadata = {
+    rch_flow:'sponsor_campaign',
+    campaign_id:input.campaignId,
+    product_code:input.productCode,
+    agreement_version:input.agreementVersion,
+    agreement_accepted_at:input.agreementAcceptedAt,
+  };
+  for (const [key,value] of Object.entries(metadata)) {
+    body.set(`metadata[${key}]`, value);
+    body.set(`payment_intent_data[metadata][${key}]`, value);
+  }
+  return stripeRequest<{id:string;url:string|null}>('/checkout/sessions',{method:'POST',body,idempotencyKey:`rch-sponsor-${input.campaignId}`});
 }
 
 export async function createStripePortalSession(customerId: string) {
