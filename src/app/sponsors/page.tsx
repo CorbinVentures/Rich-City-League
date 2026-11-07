@@ -111,7 +111,7 @@ function InventoryCard({item}:{item:(typeof SPONSOR_INVENTORY)[number]}){
     <p className="mt-3 min-h-[60px] text-xs leading-5 text-white/40">{item.description}</p>
     <div className="mt-4 space-y-2 border-t border-white/10 pt-4">{item.deliverables.slice(0,4).map(deliverable=><p key={deliverable} className="flex gap-2 text-[11px] leading-5 text-white/50"><FaCircleCheck className="mt-1 shrink-0 text-rcl-blue"/><span>{deliverable}</span></p>)}</div>
     <p className="mt-4 text-[10px] leading-5 text-white/30"><b className="text-white/50">Good for:</b> {item.idealFor}</p>
-    <Link href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className={'mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-wide '+(item.featured?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]')}>{isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight/></Link>
+    <Link href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className={'mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl text-[10px] font-black uppercase tracking-wide '+(item.featured?'bg-rcl-orange text-black':'bg-rcl-blue text-[#03101a]')}>{item.lane==='rcl-2027'?'Request availability':isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight/></Link>
   </article>;
 }
 
