@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import { getServerSupabaseClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { createStripeSponsorCheckoutSession } from '@/lib/stripe-billing';
@@ -68,7 +69,7 @@ export async function POST(request:Request){
   const admin=getSupabaseAdminClient() as any;
   if(!admin)return NextResponse.json({error:'Sponsor order storage is temporarily unavailable.'},{status:503});
 
-  const campaignId=crypto.randomUUID();
+  const campaignId=randomUUID();
   const acceptedAt=new Date().toISOString();
   const startsAt=new Date();
   const endsAt=new Date(startsAt.getTime()+product.durationDays*24*60*60*1000);
