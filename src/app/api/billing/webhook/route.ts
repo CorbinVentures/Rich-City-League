@@ -57,6 +57,106 @@ function invoiceSubscriptionId(invoice: any) {
   return null;
 }
 
+async function processSponsorCheckoutEvent(db:any,event:StripeEvent,session:any){
+  const campaignId=session?.metadata?.campaign_id;
+  if(!campaignId||!session?.id)throw new Error('Sponsor checkout metadata is incomplete.');
+
+  const {data:prior,error:priorError}=await db.from('network_partner_billing_events')
+    .select('processing_status').eq('id',event.id).maybeSingle();
+  if(priorError)throw priorError;
+  if(prior&&['processed','ignored','processing'].includes(prior.processing_status))return {received:true,duplicate:true};
+  if(prior){
+    const {error}=await db.from('network_partner_billing_events').update({
+      event_type:event.type,processing_status:'processing',error_message:null,processed_at:null,
+    }).eq('id',event.id);
+    if(error)throw error;
+  }else{
+    const {error}=await db.from('network_partner_billing_events').insert({
+      id:event.id,event_type:event.type,processing_status:'processing',error_message:null,
+    });
+    if(error){
+      if(error.code==='23505')return {received:true,duplicate:true};
+      throw error;
+    }
+  }
+
+  try{
+    const {data:campaign,error:campaignError}=await db.from('network_campaigns')
+      .select('id,organization_id,created_by,requested_budget_cents,requested_placement,destination_url,headline,target_regions,requested_starts_at,requested_ends_at,status,payment_status')
+      .eq('id',campaignId).eq('stripe_checkout_session_id',session.id).maybeSingle();
+    if(campaignError)throw campaignError;
+    if(!campaign){
+      await db.from('network_partner_billing_events').update({processing_status:'ignored',error_message:'Sponsor campaign was not found for this checkout session.',processed_at:new Date().toISOString()}).eq('id',event.id);
+      return {received:true,ignored:true};
+    }
+
+    await db.from('network_partner_billing_events').update({
+      organization_id:campaign.organization_id,
+      provider_customer_id:typeof session.customer==='string'?session.customer:session.customer?.id||null,
+    }).eq('id',event.id);
+
+    if(event.type==='checkout.session.expired'||event.type==='checkout.session.async_payment_failed'){
+      if(campaign.payment_status!=='paid'){
+        const {error}=await db.from('network_campaigns').update({status:'cancelled'}).eq('id',campaign.id).neq('payment_status','paid');
+        if(error)throw error;
+      }
+      await db.from('network_partner_billing_events').update({processing_status:'processed',error_message:null,processed_at:new Date().toISOString()}).eq('id',event.id);
+      return {received:true,cancelled:true};
+    }
+
+    if(!['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type)){
+      await db.from('network_partner_billing_events').update({processing_status:'ignored',error_message:null,processed_at:new Date().toISOString()}).eq('id',event.id);
+      return {received:true,ignored:true};
+    }
+    if(session.mode!=='payment'||session.payment_status!=='paid'){
+      await db.from('network_partner_billing_events').update({processing_status:'ignored',error_message:'Checkout is not a completed one-time payment.',processed_at:new Date().toISOString()}).eq('id',event.id);
+      return {received:true,ignored:true};
+    }
+    if(Number(session.amount_total)!==Number(campaign.requested_budget_cents)||String(session.currency||'').toLowerCase()!=='usd'){
+      throw new Error('Sponsor checkout total does not match the reserved campaign price.');
+    }
+
+    const {error:campaignUpdateError}=await db.from('network_campaigns').update({
+      status:'active',payment_status:'paid',entitlement_source:'purchase',
+    }).eq('id',campaign.id);
+    if(campaignUpdateError)throw campaignUpdateError;
+
+    const {data:existingPromotion,error:promotionLookupError}=await db.from('network_promotions')
+      .select('id').eq('campaign_id',campaign.id).limit(1).maybeSingle();
+    if(promotionLookupError)throw promotionLookupError;
+    if(!existingPromotion){
+      const {error:promotionInsertError}=await db.from('network_promotions').insert({
+        organization_id:campaign.organization_id,
+        event_id:null,
+        campaign_id:campaign.id,
+        placement:campaign.requested_placement,
+        headline:campaign.headline,
+        disclosure_label:'Sponsored',
+        destination_url:campaign.destination_url,
+        starts_at:campaign.requested_starts_at,
+        ends_at:campaign.requested_ends_at,
+        target_regions:campaign.target_regions,
+        status:'active',
+        activated_by:campaign.created_by,
+        activated_at:new Date().toISOString(),
+      });
+      if(promotionInsertError)throw promotionInsertError;
+    }
+    const {error:eventUpdateError}=await db.from('network_partner_billing_events').update({
+      processing_status:'processed',error_message:null,processed_at:new Date().toISOString(),
+    }).eq('id',event.id);
+    if(eventUpdateError)throw eventUpdateError;
+    return {received:true,fulfilled:true};
+  }catch(error){
+    await db.from('network_partner_billing_events').update({
+      processing_status:'failed',
+      error_message:error instanceof Error?error.message.slice(0,1000):'Unknown sponsor checkout fulfillment error.',
+      processed_at:new Date().toISOString(),
+    }).eq('id',event.id);
+    throw error;
+  }
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   if (!verifyStripeWebhook(body, request.headers.get('stripe-signature'))) {
@@ -69,6 +169,16 @@ export async function POST(request: Request) {
 
   const db = getSupabaseAdminClient() as any;
   if (!db) return NextResponse.json({ error: 'Server database credentials are unavailable.' }, { status: 503 });
+
+  const checkoutSession=event.data?.object;
+  const sponsorCheckoutTypes=new Set(['checkout.session.completed','checkout.session.expired','checkout.session.async_payment_succeeded','checkout.session.async_payment_failed']);
+  if(sponsorCheckoutTypes.has(event.type)&&checkoutSession?.metadata?.rch_flow==='sponsor_campaign'){
+    try{return NextResponse.json(await processSponsorCheckoutEvent(db,event,checkoutSession));}
+    catch(error){
+      console.error('sponsor checkout fulfillment failed',error);
+      return NextResponse.json({error:'Sponsor checkout fulfillment failed.'},{status:500});
+    }
+  }
 
   const { data: existing } = await db.from('membership_webhook_events').select('processing_status').eq('provider_event_id', event.id).maybeSingle();
   if (existing && ['processed','ignored'].includes(existing.processing_status)) return NextResponse.json({ received: true, duplicate: true });
