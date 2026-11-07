@@ -135,7 +135,7 @@ export function RunOperationsHQ({runId,hostId}:{runId:string;hostId:string}) {
       </div>
       <div className="rounded-2xl border border-[#345571] bg-[#0c2b44] p-4">
         <h3 className="flex items-center gap-2 text-sm font-black uppercase"><FaPeopleGroup/> Run Staff</h3>
-        <p className="mt-1 text-xs text-[#98bcd4]">Officials certify title matches; cohosts and scorekeepers manage assigned preparation tasks. Only the host can edit game records.</p>
+        <p className="mt-1 text-xs text-[#98bcd4]">Scorekeepers and cohosts can run the live scoreboard after the host assigns teams. Only the host or RCH staff can start a game or change team setup.</p>
         <div className="mt-4 space-y-2">{operators.map(o=><div key={o.profile_id} className="flex items-center justify-between gap-2 rounded-lg border border-[#42617a] p-3 text-xs">
           <span className="min-w-0 truncate"><strong>{handles[o.profile_id]||o.profile_id.slice(0,8)}</strong> <span className="ml-1 text-[#8fbbdb]">· {o.role}</span></span>
           {isManager&&<button disabled={Boolean(busy)} onClick={()=>void act(o.profile_id,'rch_manage_run_operator',{p_run:runId,p_profile:o.profile_id,p_role:o.role,p_enable:false},'Operator access removed.')} className="rounded-md border border-[#658097] px-2 py-1 disabled:opacity-50">Remove</button>}

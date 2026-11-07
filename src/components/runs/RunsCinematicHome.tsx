@@ -245,28 +245,15 @@ export function RunsCinematicHome({
    <div><FaMedal/><strong>{player.badges===null?'—':player.badges}</strong><span>RUN BADGES</span></div>
   </div>
 
-  <section className="rch-gh-section" aria-labelledby="rch-game-start" data-rch-runs-pwa-quick-play="true">
-   <div className="rch-gh-section-title"><h2 id="rch-game-start">QUICK PLAY</h2><Link href="/runs?view=list#rch-upcoming-runs">ALL GAMES <FaArrowRight/></Link></div>
-   <p className="rch-gh-game-start-copy">Find a hosted game, bring your crew, or start one yourself. No simulated matchmaking.</p>
-   <div className="rch-gh-game-start-grid">
-    <Link href="/runs?view=list#rch-upcoming-runs" className="rch-gh-game-start-action"><FaBasketball aria-hidden="true"/><strong>FIND A GAME</strong><small>Real hosted Runs only</small></Link>
-    <Link href="/runs?view=list&rookie=1#rch-upcoming-runs" className="rch-gh-game-start-action"><FaShieldHalved aria-hidden="true"/><strong>ROOKIE FRIENDLY</strong><small>Start at your level</small></Link>
-    <Link href="/runs?create=1" className="rch-gh-game-start-action"><FaPeopleGroup aria-hidden="true"/><strong>HOST A GAME</strong><small>Build the first roster</small></Link>
-   </div>
-  </section>
-
-
-
-  <Link href={nextHref} className="rch-gh-play"><FaBasketball/><span>{nextRun?'VIEW RUN DETAILS':'FIND A RUN'}<small>{nextRun?'See date, location and registration':'Browse upcoming basketball games'}</small></span><FaArrowRight/></Link>
-
   <section className="rch-gh-section" aria-labelledby="rch-next-run">
-   <div className="rch-gh-section-title"><h2 id="rch-next-run">NEXT HOSTED RUN</h2><Link href="/runs?view=list#rch-upcoming-runs">VIEW ALL <FaArrowRight/></Link></div>
+   <div className="rch-gh-section-title"><h2 id="rch-next-run">YOUR NEXT PLAY</h2><Link href="/runs?view=list#rch-upcoming-runs">BROWSE RUNS <FaArrowRight/></Link></div>
    {nextRun?<Link className="rch-gh-next-card" href={nextHref}>
     <span className="rch-gh-run-photo" aria-hidden="true"><FaBasketball/></span>
     <span className="rch-gh-run-body"><strong>{nextRun.title}</strong><small><FaLocationDot/> {nextRun.location||'Court details in event'}</small><small><FaCalendarDays/> {formatWhen(nextRun.starts_at)} · {nextRun.game_format}</small></span>
     {doubleRep&&<span className="rch-gh-double">2× VERIFIED REP</span>}
     <FaArrowRight className="rch-gh-run-arrow"/>
-   </Link>:<div className="rch-gh-next-empty">{finding?'Checking real hosted games…':city?'No hosted Runs are scheduled here. Host one or explore public outdoor courts.':'No hosted Runs are scheduled yet. Explore outdoor courts or host the first game.'}</div>}
+   </Link>:<div className="rch-gh-next-empty">{finding?'Checking real hosted games…':city?'No hosted Runs are scheduled here yet. Browse other Runs or host the first game.':'No hosted Runs are scheduled yet. Browse available games or host the first one.'}</div>}
+   <div className="rch-gh-next-actions"><Link href={nextRun?nextHref:'/runs?view=list#rch-upcoming-runs'} className="rch-gh-next-primary"><FaBasketball/>{nextRun?'JOIN NEXT RUN':'FIND A RUN'}<FaArrowRight/></Link><Link href="/runs?create=1" className="rch-gh-next-secondary">HOST A RUN</Link></div>
   </section>
 
   <section className="rch-gh-section" aria-labelledby="rch-quick-actions">
