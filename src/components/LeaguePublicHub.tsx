@@ -2,19 +2,29 @@
 
 import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaCalendarDays,FaRankingStar} from 'react-icons/fa6';
+import type {CSSProperties} from 'react';
+import {FaArrowRight,FaCalendarDays,FaRankingStar,FaPlay,FaUsers} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {RCL_PRO_SEASON} from '@/lib/rcl-pro-season';
+import {getTeamTheme} from '@/lib/team-themes';
 import type {Game,Standing,Team} from '@/types/database';
+import styles from './LeaguePublicHub.module.css';
 
 type LeagueGame=Pick<Game,'id'|'home_team_id'|'away_team_id'|'scheduled_at'|'status'|'home_score'|'away_score'>;
 type LeagueStanding=Pick<Standing,'team_id'|'wins'|'losses'|'rank'>;
-type LeagueTeam=Pick<Team,'id'|'name'|'slug'>;
+type LeagueTeam=Pick<Team,'id'|'name'|'slug'|'logo_url'|'primary_color'|'secondary_color'>;
 type Snapshot={games:LeagueGame[];standings:LeagueStanding[];teams:LeagueTeam[];seasonName:string};
+const EMPTY:Snapshot={games:[],standings:[],teams:[],seasonName:''};
+
+function dateLabel(value:string, includeTime=false){
+ return new Date(value).toLocaleString('en-US',includeTime
+  ?{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}
+  :{month:'short',day:'numeric',year:'numeric'});
+}
 
 export function LeaguePublicHub(){
  const db=useMemo(()=>getSupabaseClient(),[]);
- const [state,setState]=useState<Snapshot>({games:[],standings:[],teams:[],seasonName:''});
+ const [state,setState]=useState<Snapshot>(EMPTY);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState(false);
  useEffect(()=>{
@@ -26,14 +36,14 @@ export function LeaguePublicHub(){
     if(league.error)throw league.error;
     if(!league.data){if(active)setLoading(false);return;}
     const [seasons,teamResult]=await Promise.all([
-      db.from('seasons').select('id,name,status,start_date').eq('league_id',league.data.id).gte('start_date',RCL_PRO_SEASON.startMonth+'-01').in('status',['active','registration','completed']).order('start_date',{ascending:false}).limit(5),
-      db.from('teams').select('id,name,slug').eq('league_id',league.data.id).eq('is_active',true).order('name').limit(32),
+     db.from('seasons').select('id,name,status,start_date').eq('league_id',league.data.id).gte('start_date',RCL_PRO_SEASON.startMonth+'-01').in('status',['active','registration','completed']).order('start_date',{ascending:false}).limit(5),
+     db.from('teams').select('id,name,slug,logo_url,primary_color,secondary_color').eq('league_id',league.data.id).eq('is_active',true).order('name').limit(12),
     ]);
     if(seasons.error||teamResult.error)throw new Error('Unable to retrieve public league schedule');
     const latest=(seasons.data??[]).find(s=>s.status==='active')??(seasons.data??[]).find(s=>s.status==='registration')??seasons.data?.[0];
     const [games,standings]=latest?await Promise.all([
-      db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,home_score,away_score').eq('season_id',latest.id).order('scheduled_at',{ascending:false}).limit(80),
-      db.from('standings').select('team_id,wins,losses,rank').eq('season_id',latest.id).order('rank',{ascending:true}).limit(12),
+     db.from('games').select('id,home_team_id,away_team_id,scheduled_at,status,home_score,away_score').eq('season_id',latest.id).order('scheduled_at',{ascending:false}).limit(80),
+     db.from('standings').select('team_id,wins,losses,rank').eq('season_id',latest.id).order('rank',{ascending:true}).limit(12),
     ]):[{data:[] as LeagueGame[],error:null},{data:[] as LeagueStanding[],error:null}];
     if(games.error||standings.error)throw new Error('Unable to retrieve public league results');
     if(active)setState({games:(games.data??[]) as LeagueGame[],standings:(standings.data??[]) as LeagueStanding[],teams:(teamResult.data??[]) as LeagueTeam[],seasonName:latest?.name??''});
@@ -43,40 +53,62 @@ export function LeaguePublicHub(){
   void load();
   return()=>{active=false;};
  },[db]);
- const teamNames=new Map(state.teams.map(team=>[team.id,team.name]));
+ const teamMap=new Map(state.teams.map(team=>[team.id,team]));
  const byDate=[...state.games].sort((a,b)=>new Date(a.scheduled_at).getTime()-new Date(b.scheduled_at).getTime());
- const nextGame=byDate.find(game=>game.status==='scheduled' && new Date(game.scheduled_at).getTime()>=Date.now());
+ const nextGame=byDate.find(game=>game.status==='scheduled'&&new Date(game.scheduled_at).getTime()>=Date.now());
  const lastFinal=[...state.games].filter(game=>game.status==='completed').sort((a,b)=>new Date(b.scheduled_at).getTime()-new Date(a.scheduled_at).getTime())[0];
  const featured=nextGame??lastFinal;
- const name=(id:string)=>teamNames.get(id)??'Team pending';
- return <section className="rch-league-public-hub" aria-label="Rich City League game day">
-  <div className="rch-league-section-heading"><div><p>THE LEAGUE</p><h2>Game day</h2></div>{state.seasonName&&<span>{state.seasonName}</span>}</div>
-  {error?<p role="status" className="rch-league-feedback">Live league data is temporarily unavailable. The schedule and standings pages remain accessible.</p>:null}
-  {loading?<p role="status" className="rch-league-feedback">Loading league schedule…</p>:
-   <div className="rch-league-score-grid">
-    <article className="rch-league-feature-game">
-     <div className="rch-league-label"><FaCalendarDays aria-hidden="true"/> {nextGame?'NEXT GAME':lastFinal?'LATEST RESULT':'LEAGUE SCHEDULE'}</div>
-     {featured?<><div className="rch-league-versus">
-       <strong>{name(featured.away_team_id)}</strong>
-       <span>{nextGame?'VS':`${featured.away_score} – ${featured.home_score}`}</span>
-       <strong>{name(featured.home_team_id)}</strong>
-      </div><p>{new Date(featured.scheduled_at).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}</p>
-      <Link href={`/games/${featured.id}`}>Game center <FaArrowRight aria-hidden="true"/></Link></>:
-      <><h3>Season updates coming soon</h3><p>Professional season planned for {RCL_PRO_SEASON.startLabel}. Opening-night date and official matchups are not yet published.</p><Link href="/schedule">View schedule <FaArrowRight aria-hidden="true"/></Link></>}
-    </article>
-    <article className="rch-league-standings">
-     <div className="rch-league-label"><FaRankingStar aria-hidden="true"/> STANDINGS</div>
-     {state.standings.length?<div className="rch-league-table">
-      {state.standings.slice(0,5).map((entry,index)=><div key={entry.team_id}>
-        <span>{entry.rank??index+1}</span><strong>{name(entry.team_id)}</strong><span>{entry.wins}–{entry.losses}</span>
-      </div>)}
-     </div>:<p className="rch-league-feedback">Professional-season standings will appear after official games begin in November 2027.</p>}
-     <Link href="/standings">Full standings <FaArrowRight aria-hidden="true"/></Link>
-    </article>
-   </div>}
-  <nav className="rch-league-section-links" aria-label="Rich City League sections">
-   <Link href="/schedule">Schedule</Link><Link href="/teams">Teams</Link><Link href="/players">Players</Link>
-   <Link href="/standings">Standings</Link><Link href="/stats">Stats</Link><Link href="/draft">Draft</Link>
-  </nav>
+ const name=(id:string)=>teamMap.get(id)?.name??'Team pending';
+ return <section className={styles.home} aria-label="Rich City League">
+  <section className={styles.hero}>
+   <div className={styles.heroGlow} aria-hidden="true"/><div className={styles.heroCourt} aria-hidden="true"/>
+   <div className={styles.heroTop}><span>RICH CITY LEAGUE</span><span>VIRGINIA · EST. 2011</span></div>
+   <div className={styles.heroCopy}>
+    <p className={styles.eyebrow}>A league built on the stories behind the game</p>
+    <h1>Every city has a court.<br/><em>Every court has a story.</em></h1>
+    <p className={styles.intro}>Twelve teams. One Virginia stage. Follow the matchups, the moments, and the people who make Rich City League feel like home.</p>
+    <div className={styles.actions}><Link className={styles.primaryAction} href="/schedule">Explore the schedule <FaArrowRight/></Link><Link className={styles.secondaryAction} href="#franchises">Meet the teams</Link></div>
+   </div>
+   <div className={styles.heroStamp} aria-hidden="true"><span>RCL</span><small>RICHMOND<br/>VIRGINIA</small></div>
+   <div className={styles.heroBottom}><span>THE LEAGUE EXPERIENCE</span><span>{RCL_PRO_SEASON.startLabel} SEASON</span></div>
+  </section>
+
+  <section className={styles.editorialNav} aria-label="League destinations">
+   <Link href="/schedule"><span className={styles.navIcon}><FaCalendarDays/></span><span><small>PLAN YOUR SEASON</small><strong>Schedule</strong></span><FaArrowRight className={styles.arrow}/></Link>
+   <Link href="/league/highlights"><span className={styles.navIcon}><FaPlay/></span><span><small>THE MOMENTS THAT STAY</small><strong>Highlights</strong></span><FaArrowRight className={styles.arrow}/></Link>
+   <Link href="/league/community"><span className={styles.navIcon}><FaUsers/></span><span><small>MORE THAN GAME NIGHT</small><strong>Community</strong></span><FaArrowRight className={styles.arrow}/></Link>
+  </section>
+
+  <section className={styles.gameSection} aria-labelledby="game-day-title">
+   <div className={styles.sectionHead}><div><p className={styles.eyebrow}>The season, in motion</p><h2 id="game-day-title">Game day</h2></div><Link href="/schedule">Full schedule <FaArrowRight/></Link></div>
+   {error&&<p role="status" className={styles.feedback}>League information is temporarily unavailable. The schedule remains accessible.</p>}
+   {loading?<p role="status" className={styles.feedback}>Loading league schedule…</p>:
+    <div className={styles.scoreGrid}>
+     <article className={styles.featureGame}>
+      <div className={styles.cardLabel}><FaCalendarDays/> {nextGame?'NEXT GAME':lastFinal?'LATEST RESULT':'SEASON UPDATE'}</div>
+      {featured?<><div className={styles.versus}><strong>{name(featured.away_team_id)}</strong><span>{nextGame?'VS':String(featured.away_score)+' – '+String(featured.home_score)}</span><strong>{name(featured.home_team_id)}</strong></div><p className={styles.date}>{dateLabel(featured.scheduled_at,true)}</p><Link href={'/games/'+featured.id} className={styles.cardLink}>Enter game center <FaArrowRight/></Link></>:
+       <><h3>Next chapter loading.</h3><p>The professional season is planned for {RCL_PRO_SEASON.startLabel}. Confirmed matchups and tipoff details will appear here.</p><Link href="/schedule" className={styles.cardLink}>View season calendar <FaArrowRight/></Link></>}
+     </article>
+     <article className={styles.standings}>
+      <div className={styles.cardLabel}><FaRankingStar/> LEAGUE PICTURE</div>
+      <h3>Where the teams stand</h3>
+      {state.standings.length?<div className={styles.standingRows}>{state.standings.slice(0,5).map((entry,index)=><div key={entry.team_id}><span>{entry.rank??index+1}</span><strong>{name(entry.team_id)}</strong><span>{entry.wins}–{entry.losses}</span></div>)}</div>:<p className={styles.feedback}>Standings will take shape when official season games begin.</p>}
+      <Link href="/standings" className={styles.cardLink}>View all standings <FaArrowRight/></Link>
+     </article>
+    </div>}
+  </section>
+
+  <section id="franchises" className={styles.teamsSection} aria-labelledby="teams-title">
+   <div className={styles.sectionHead}><div><p className={styles.eyebrow}>Twelve homes. One league.</p><h2 id="teams-title">Meet the franchises</h2></div><Link href="/teams">Team directory <FaArrowRight/></Link></div>
+   <p className={styles.sectionIntro}>Step into each team’s world: its colors, its people, its schedule, and the story it brings to the league.</p>
+   {state.teams.length? <div className={styles.teamGrid}>{state.teams.slice(0,12).map((team,index)=>{
+    const theme=getTeamTheme(team.slug,team.primary_color,team.secondary_color);
+    return <Link href={'/teams/'+team.slug} key={team.id} className={styles.teamCard} style={{'--team-accent':theme.accent,'--team-secondary':theme.secondary,'--team-surface':theme.surface,'--team-atmosphere':theme.atmosphere} as CSSProperties}>
+     <span className={styles.teamIndex}>{String(index+1).padStart(2,'0')} / 12</span>
+     {team.logo_url?<img className={styles.teamLogo} src={team.logo_url} alt="" loading="lazy"/>:<span className={styles.teamMonogram}>{team.name.split(/\s+/).map(part=>part[0]).slice(0,2).join('')}</span>}
+     <span className={styles.teamName}>{team.name}</span><span className={styles.teamVisit}>Explore team <FaArrowRight/></span>
+    </Link>;
+   })}</div>:<p className={styles.feedback}>Team homes are being prepared.</p>}
+  </section>
  </section>;
 }
