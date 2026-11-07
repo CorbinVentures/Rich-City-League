@@ -13,6 +13,7 @@ import {
 } from '@/lib/pwa-launch';
 
 const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname) || pathname === '/command' || pathname.startsWith('/command/');
+const runsRoute = (pathname: string) => pathname === '/runs' || pathname.startsWith('/runs/');
 
 /**
  * Installed-app boot: play the entire four-second RCH film once, then
@@ -41,6 +42,7 @@ export function PWALaunchIntro() {
 
     const arm = () => {
       clear();
+      if (runsRoute(window.location.pathname)) return;
       timer = window.setTimeout(() => {
         const root = document.documentElement;
         if (bootInProgress.current || authRoute(window.location.pathname) || root.dataset.rchLaunch === 'active') return;
@@ -65,7 +67,7 @@ export function PWALaunchIntro() {
       let next: URL;
       try { next = new URL(link.href, window.location.href); } catch { return; }
       const current = new URL(window.location.href);
-      if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || authRoute(next.pathname)) return;
+      if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || authRoute(next.pathname) || runsRoute(next.pathname)) return;
       if (next.pathname === current.pathname) return;
       clear();
       timer = window.setTimeout(arm, 0);
