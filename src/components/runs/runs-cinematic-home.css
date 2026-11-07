@@ -217,7 +217,6 @@ html body .rwg-shell .rch-gh-briefing-heading h3{margin:3px 0 0;color:#fff;font-
 @media(prefers-reduced-motion:reduce){.rch-gh-mode-option,.rch-gh-mode-cta{transition:none}.rch-gh-mode-cta:hover{transform:none}}
 
 .rwg-shell .rch-gh-next-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px}
-.rwg-shell .rch-gh-next-primary,.rwg-shell .rch-gh-next-secondary{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:9px;border-radius:12px;padding:0 15px;font-size:11px;font-weight:950;text-decoration:none}
-.rwg-shell .rch-gh-next-primary{background:var(--rch-brand-accent);color:var(--rch-brand-accent-ink,#fff)}
+.rwg-shell .rch-gh-next-secondary{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:9px;border-radius:12px;padding:0 15px;font-size:11px;font-weight:950;text-decoration:none}
 .rwg-shell .rch-gh-next-secondary{border:1px solid var(--rch-brand-muted);background:var(--rch-brand-raised);color:var(--rch-brand-ink)}
 .rwg-shell .rch-gh-next-primary:focus-visible,.rwg-shell .rch-gh-next-secondary:focus-visible{outline:3px solid var(--rch-brand-accent-text);outline-offset:2px}
