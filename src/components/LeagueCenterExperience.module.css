@@ -1,0 +1,92 @@
+.page{min-height:100vh;background:#06101a;color:#f6f3ed;padding-bottom:5rem;overflow:hidden}
+.utilityBar{position:relative;background:#07131f;border-top:3px solid #c4a36a;color:rgba(239,236,229,.62);font-size:9px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+.utilityInner{display:flex;min-height:32px;align-items:center;justify-content:space-between;gap:16px}
+.utilityRight{display:inline-flex;align-items:center;gap:9px}
+.utilityRight i{width:6px;height:6px;border-radius:50%;background:#8eb8dc;box-shadow:0 0 12px #77a8d2}
+.header{position:relative;z-index:30;background:rgba(7,17,28,.97);border-bottom:1px solid rgba(255,255,255,.09);box-shadow:0 14px 36px rgba(0,0,0,.2)}
+.headerMain{display:flex;min-height:88px;align-items:center;gap:26px}
+.brand{display:flex;flex:0 0 auto;align-items:center;gap:12px;color:#f5f0e8;text-decoration:none}
+.emblem{width:48px!important;height:48px!important;object-fit:contain}
+.brandCopy{display:grid;gap:4px}
+.brandCopy strong{font-family:var(--font-display,inherit);font-size:17px;font-weight:850;letter-spacing:.035em;line-height:1}
+.brandCopy strong b{color:#d3b77f;font-weight:850}
+.brandCopy small{color:rgba(243,239,231,.48);font-size:8px;font-weight:800;letter-spacing:.17em}
+.headerRight{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:22px}
+.primaryNav{display:flex;align-items:center;gap:clamp(15px,2vw,29px)}
+.primaryNav a,.mobileNav a{position:relative;display:inline-flex;min-height:44px;align-items:center;color:rgba(240,238,233,.67);font-size:11px;font-weight:700;letter-spacing:.015em;text-decoration:none;transition:color .18s}
+.primaryNav a:hover,.mobileNav a:hover{color:#fff}
+.primaryNav .activeNav,.mobileNav .activeNav{color:#fff}
+.primaryNav .activeNav:after{position:absolute;right:0;bottom:-1px;left:0;height:2px;background:#d0b47a;content:""}
+.draftButton{display:inline-flex;min-height:42px;align-items:center;gap:9px;border:1px solid rgba(208,180,122,.44);border-radius:7px;background:linear-gradient(135deg,rgba(208,180,122,.16),rgba(208,180,122,.06));padding:0 14px;color:#e5cf9d;font-size:10px;font-weight:850;letter-spacing:.055em;text-decoration:none;transition:background .2s,transform .2s}
+.draftButton:hover{transform:translateY(-1px);background:rgba(208,180,122,.2)}
+.draftButton svg:last-child{font-size:9px}
+.memberPill{display:flex;flex:0 0 auto;align-items:center;gap:9px;border-left:1px solid rgba(255,255,255,.11);padding-left:17px}
+.memberAvatar{display:grid;width:32px;height:32px;place-items:center;border:1px solid rgba(208,180,122,.5);border-radius:50%;background:#132538;color:#e4ca90;font-size:13px;font-weight:850}
+.memberIdentity{display:grid;gap:3px;max-width:145px}
+.memberIdentity strong{overflow:hidden;color:#f4f1eb;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.memberIdentity small{color:rgba(239,236,229,.48);font-size:9px}
+.levelPill{border:1px solid rgba(208,180,122,.3);border-radius:5px;padding:5px 6px;color:#d6bd88;font-size:8px;font-weight:850;letter-spacing:.06em;white-space:nowrap}
+.mobileNav{display:none}
+.seasonRibbon{position:relative;background:linear-gradient(90deg,#101f2c,#0b1824 62%,#111b24);border-bottom:1px solid rgba(255,255,255,.07)}
+.ribbonInner{display:flex;min-height:67px;align-items:center;gap:20px}
+.seasonMark{display:inline-flex;align-items:center;gap:8px;color:#d2b678;font-size:9px;font-weight:900;letter-spacing:.14em;white-space:nowrap}
+.seasonMark svg{font-size:12px}
+.ribbonInner p{display:grid;gap:3px;margin:0}
+.ribbonInner p strong{color:#f2eee7;font-size:10px;letter-spacing:.06em}
+.ribbonInner p span{color:rgba(239,236,229,.46);font-size:9px}
+.ribbonDivider{height:28px;border-left:1px solid rgba(255,255,255,.16)}
+.ribbonNote{margin-left:auto;color:rgba(239,236,229,.42);font-size:9px}
+.ribbonInner>a{display:inline-flex;align-items:center;gap:8px;color:#d7c08f;font-size:10px;font-weight:800;text-decoration:none;white-space:nowrap}
+.ribbonInner>a:hover{color:#fff}
+.ribbonInner>a svg{font-size:9px}
+.publicStage{position:relative;padding:28px 0 42px;background:radial-gradient(ellipse at 50% 0,rgba(26,52,75,.3),transparent 58%),linear-gradient(180deg,#091521,#06101a)}
+.publicContainer{position:relative}
+.memberContent{padding-top:34px;padding-bottom:36px;border-top:1px solid rgba(255,255,255,.1)}
+.memberContent>section{position:relative}
+.memberContent h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.03em}
+.visionDetails{max-width:1280px;margin:0 auto;padding:0 24px 24px;color:#eee9df}
+.visionDetails summary{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.025)}
+@media(max-width:1150px){
+ .headerMain{gap:18px}
+ .headerRight{gap:15px}
+ .primaryNav{gap:15px}
+ .memberIdentity{display:none}
+ .memberPill{padding-left:12px}
+}
+@media(max-width:900px){
+ .headerMain{min-height:74px}
+ .headerRight{display:none}
+ .mobileNav{display:block;overflow-x:auto;border-top:1px solid rgba(255,255,255,.07);scrollbar-width:none}
+ .mobileNav::-webkit-scrollbar{display:none}
+ .mobileNav nav{display:flex;width:max-content;min-width:100%;align-items:center;gap:22px;padding:0 20px}
+ .mobileNav a{min-height:42px;font-size:10px}
+ .mobileNav .activeNav:after{position:absolute;right:0;bottom:0;left:0;height:2px;background:#d0b47a;content:""}
+}
+@media(max-width:640px){
+ .utilityBar{font-size:8px;letter-spacing:.12em}
+ .utilityInner{min-height:29px}
+ .utilityInner>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .utilityRight{font-size:7px;white-space:nowrap}
+ .headerMain{min-height:69px;gap:10px;padding-top:8px;padding-bottom:8px}
+ .brand{gap:8px}
+ .emblem{width:40px!important;height:40px!important}
+ .brandCopy strong{font-size:14px}
+ .brandCopy small{font-size:7px;letter-spacing:.12em}
+ .memberPill{gap:6px;margin-left:auto;border-left:0;padding-left:0}
+ .memberAvatar{width:29px;height:29px;font-size:11px}
+ .levelPill{font-size:7px}
+ .mobileNav nav{gap:19px;padding:0 16px}
+ .ribbonInner{min-height:auto;flex-wrap:wrap;gap:9px 13px;padding-top:12px;padding-bottom:12px}
+ .seasonMark{font-size:8px}
+ .ribbonInner p strong{font-size:9px}
+ .ribbonInner p span{font-size:8px}
+ .ribbonDivider{height:22px}
+ .ribbonNote{order:3;width:100%;margin-left:0;font-size:8px}
+ .ribbonInner>a{margin-left:auto;font-size:9px}
+ .publicStage{padding:16px 0 30px}
+ .memberContent{padding-top:28px}
+ .visionDetails{padding-right:16px;padding-left:16px}
+}
+@media(prefers-reduced-motion:reduce){
+ .draftButton,.primaryNav a,.mobileNav a{transition:none}
+}

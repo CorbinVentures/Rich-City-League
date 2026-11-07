@@ -1,6 +1,7 @@
 'use client';
 
 import { LeagueVision } from '@/components/LeagueVision';
+import styles from './LeagueCenterExperience.module.css';
 import { LeaguePublicHub, type LeaguePublicSnapshot } from '@/components/LeaguePublicHub';
 import { ProgramEmblem } from '@/components/ProgramEmblem';
 import { ScorebookAppLink } from '@/components/ScorebookAppLink';
@@ -72,37 +73,60 @@ export function LeagueCenterExperience({initialLeagueSnapshot}:{initialLeagueSna
  },[operator,profile,role,supabase,user]);
 
  const displayName=profile?.display_name||[profile?.first_name,profile?.last_name].filter(Boolean).join(' ')||'RCL Member';
- return <main className="rch-league-site min-h-screen bg-[#03070d] pb-28 text-white">
-  <header className="rch-league-header">
-   <Container maxWidth="xl" className="py-6 sm:py-9">
-    <div className="rch-program-brand-lockup rch-program-league-lockup">
-     <ProgramEmblem program="rich-city-league" className="rch-program-emblem-league" priority/>
-     <div className="rch-program-brand-copy">
-      <p className="rch-league-kicker">VIRGINIA BASKETBALL · OFFICIAL LEAGUE</p>
-      <h1>RICH CITY <span>LEAGUE</span></h1>
-      <p className="rch-league-tagline">Professional season planned for {RCL_PRO_SEASON.startLabel} · Official tryouts summer 2027 · Draft Night follows</p>
-     </div>
+ return <main className={`rch-league-site ${styles.page}`}>
+  <div className={styles.utilityBar}>
+   <Container maxWidth="xl" className={styles.utilityInner}>
+    <span>VIRGINIA BASKETBALL · OFFICIAL LEAGUE</span>
+    <span className={styles.utilityRight}><i/> {RCL_PRO_SEASON.startLabel} SEASON · RICHMOND, VA</span>
+   </Container>
+  </div>
+  <header className={styles.header}>
+   <Container maxWidth="xl" className={styles.headerMain}>
+    <Link href="/league" className={styles.brand} aria-label="Rich City League home">
+     <ProgramEmblem program="rich-city-league" className={styles.emblem} priority/>
+     <span className={styles.brandCopy}><strong>RICH CITY <b>LEAGUE</b></strong><small>VIRGINIA’S ENTERTAINMENT LEAGUE</small></span>
+    </Link>
+    <div className={styles.headerRight}>
+     <nav className={styles.primaryNav} aria-label="League navigation">
+      <Link href="/league" className={styles.activeNav}>Home</Link>
+      <Link href="/schedule">Schedule</Link>
+      <Link href="/standings">Standings</Link>
+      <Link href="/teams">Teams</Link>
+      <Link href="/league/highlights">Highlights</Link>
+      <Link href="/league/community">Community</Link>
+     </nav>
+     <Link href="/draft" className={styles.draftButton}><FaCrown/> Draft Night <FaArrowRight/></Link>
     </div>
-    <div className="rch-league-header-actions">
-     <div className="flex flex-wrap items-center gap-3"><Link href="/commissioners/natwan-young" className="inline-flex min-h-11 items-center rounded-xl border border-[#c9a64b]/40 bg-[#c9a64b]/10 px-4 text-xs font-black uppercase tracking-wide text-[#e8ca76]">Commissioner · Natwan Young</Link></div>
-     <Link href="/schedule">Schedule</Link>
-     <Link href="/teams">Teams</Link>
-     <Link href="/draft">Draft Night</Link>
-    </div>
-    {profile&&<div className="rch-league-member-status">
-      <span>{displayName} · {roleLabel(role)}</span>
-      {state.rep&&<span>XP {state.rep.xp.toLocaleString()} · LVL {state.rep.level}</span>}
+    {profile&&<div className={styles.memberPill}>
+     <span className={styles.memberAvatar}>{displayName.slice(0,1).toUpperCase()}</span>
+     <span className={styles.memberIdentity}><strong>{displayName}</strong><small>{roleLabel(role)}{state.rep? ` · ${state.rep.xp.toLocaleString()} XP` : ''}</small></span>
+     {state.rep&&<span className={styles.levelPill}>LVL {state.rep.level}</span>}
     </div>}
    </Container>
+   <div className={styles.mobileNav}><nav aria-label="League sections">
+    <Link href="/league" className={styles.activeNav}>Home</Link><Link href="/schedule">Schedule</Link><Link href="/standings">Standings</Link><Link href="/teams">Teams</Link><Link href="/league/highlights">Highlights</Link><Link href="/league/community">Community</Link><Link href="/draft">Draft Night</Link>
+   </nav></div>
   </header>
-  <Container maxWidth="xl" className="py-6 sm:py-8"><p className="mb-5 rounded-xl border border-rcl-orange/25 bg-rcl-orange/[.045] px-4 py-3 text-sm text-white/75"><strong className="text-rcl-orange">NOVEMBER 2027 PRO SEASON</strong> · Preseason preparation is underway. Official matchups, tipoff, venues, and league features will be published as they are confirmed. Runs and the Commonwealth Cup are independent year-round competitions.</p><LeaguePublicHub initialSnapshot={initialLeagueSnapshot}/></Container>
-  <Container maxWidth="xl" className="rch-league-member-content py-8 sm:py-10">{error&&<div className="mb-6 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">{error}</div>}
+  <section className={styles.seasonRibbon}>
+   <Container maxWidth="xl" className={styles.ribbonInner}>
+    <span className={styles.seasonMark}><FaBasketball/> 2027 SEASON</span>
+    <p><strong>NOVEMBER 2027</strong><span>Pro season launch</span></p>
+    <span className={styles.ribbonDivider}/>
+    <p><strong>SUMMER 2027</strong><span>Official tryouts</span></p>
+    <span className={styles.ribbonNote}>Runs & Commonwealth Cup remain independent year-round competitions.</span>
+    <Link href="/schedule">Explore schedule <FaArrowRight/></Link>
+   </Container>
+  </section>
+  <section className={styles.publicStage}>
+   <Container maxWidth="xl" className={styles.publicContainer}><LeaguePublicHub initialSnapshot={initialLeagueSnapshot}/></Container>
+  </section>
+  <Container maxWidth="xl" className={`rch-league-member-content ${styles.memberContent}`}>{error&&<div className="mb-6 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm text-amber-100">{error}</div>}
    {role==='player'&&<section><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">My season</p><h2 className="mt-2 font-display text-3xl font-semibold">Play. Track. Climb.</h2><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><StatusTile label="Games logged" value={loading?'—':String(state.stats?.games??0)} detail="Current-season completed games"/><StatusTile label="Scoring" value={loading?'—':`${state.stats?.ppg??0} PPG`} detail={`${state.stats?.rpg??0} RPG · ${state.stats?.apg??0} APG`} accent/><StatusTile label="Defense" value={loading?'—':`${state.stats?.spg??0} SPG`} detail={`${state.stats?.bpg??0} BPG`}/><StatusTile label="Badges" value={loading?'—':String(state.badges.length)} detail={state.badges[0]?.name?`Latest: ${state.badges[0].name}`:'Earned RCL achievements'}/></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><FeatureCard title="Schedule" copy="Know your next matchup and every game on the league calendar." href="/schedule" icon={FaCalendarDays}/><FeatureCard title="Leaderboards" copy="See where your production ranks against the rest of the league." href="/leaderboards" icon={FaListOl}/><FeatureCard title="Player Rankings" copy="Track RCL ranking movement and your competitive position." href="/rankings" icon={FaRankingStar}/><FeatureCard title="Stats + Badges" copy="Open your official numbers, badges and basketball identity." href={user?`/social/profile/${user.id}?tab=stats`:'/stats'} icon={FaTrophy}/></div></section>}
    {operator&&<section><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">Team operations</p><h2 className="mt-2 font-display text-3xl font-semibold">Run your team from RCL.</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-white/45">Official stats flow from the Scorebook into results, player profiles, leaderboards and Fantasy scoring. Coaches operate their team; admins control the league layer.</p>{state.teams.length>0&&<div className="mt-5 flex flex-wrap gap-2">{state.teams.slice(0,12).map(team=><Link key={team.id} href={`/teams/${team.slug}`} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-semibold"><FaShieldHalved className="text-rcl-blue"/>{team.name}</Link>)}</div>}<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><FeatureCard title="Scorebook" copy="Log the game live and push official team and player stats through the platform." href="https://rch-scorebook.vercel.app/" icon={FaChartSimple} eyebrow="Live game operations"/><FeatureCard title="Team Site" copy="Post announcements, game-day photos and team news from one publishing workspace." href="/portal/team" icon={FaImage} eyebrow="Team publishing"/><FeatureCard title="Draft Night" copy={role==='admin'?'Configure the draft, clock, order and rules while coaches make protected selections.':'Scout the board and make your official selection when your team is on the clock.'} href={role==='admin'?'/admin/operations':'/draft'} icon={FaCrown} eyebrow="Roster building"/><FeatureCard title="League Operations" copy="Schedules, rosters, standings and official competition controls for authorized staff." href={role==='admin'?'/admin/operations':'/league'} icon={FaShieldHalved} eyebrow="Organization control"/></div></section>}
    {role==='fan'&&<section><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">Fan experience</p><h2 className="mt-2 font-display text-3xl font-semibold">Follow the teams. Feel every chapter.</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-white/45">Get to know the players, follow your team and stay connected between game nights. Fantasy brings another way to participate, using registered RCL players and official game statistics.</p><div className="mt-6 grid gap-3 sm:grid-cols-3"><StatusTile label="Fantasy teams" value={loading?'—':String(state.fantasy.length)} detail={state.fantasy[0]?.name??'Join public or create private'} accent/><StatusTile label="Fantasy record" value={state.fantasy[0]?`${state.fantasy[0].wins}-${state.fantasy[0].losses}`:'0-0'} detail="Official matchup results"/><StatusTile label="Badges" value={loading?'—':String(state.badges.length)} detail={state.badges[0]?.name?`Latest: ${state.badges[0].name}`:'Fan achievements and REP'}/></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><FeatureCard title="RCL Fantasy" copy="Draft real RCL players, manage your roster and score from official live stats." href="/fantasy" icon={FaTrophy} eyebrow="Rich City Hoops Fantasy"/><FeatureCard title="League Games" copy="Follow the real results driving your fantasy roster and weekly matchups." href="/games" icon={FaBasketball}/><FeatureCard title="Leaderboards" copy="Follow the league's top performers before making roster decisions." href="/leaderboards" icon={FaRankingStar}/><FeatureCard title="Badges + REP" copy="Build your fan identity through participation across the RCL Network." href="/badges" icon={FaBolt}/></div></section>}
    <section className="mt-10 border-t border-white/10 pt-10"><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><Link href="/runs" className="group relative overflow-hidden rounded-2xl border border-rcl-blue/18 bg-[linear-gradient(135deg,#071522,#03070d)] p-6 sm:p-7"><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-rcl-blue/60">For every RCL member</p><h2 className="mt-2 max-w-2xl font-display text-3xl font-semibold">Rich City Open Runs</h2><p className="mt-3 max-w-xl text-sm leading-6 text-white/50">Find real basketball, create a run, claim a spot and turn Network connections into games across Virginia.</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-rcl-blue">Open Runs <FaArrowRight className="transition group-hover:translate-x-1"/></span></Link><div className="rounded-2xl border border-rcl-blue/18 bg-[#071522]/60 p-6"><FaUserGroup className="text-2xl text-rcl-blue"/><h3 className="mt-4 font-display text-xl font-semibold">League directory</h3><p className="mt-2 text-sm leading-6 text-white/45">Players, teams, standings and official league data remain available to every member.</p><div className="mt-5 grid grid-cols-2 gap-2 text-xs font-semibold"><Link className="rounded-xl border border-white/10 p-3 hover:border-rcl-blue/40" href="/players">Players</Link><Link className="rounded-xl border border-white/10 p-3 hover:border-rcl-blue/40" href="/teams">Teams</Link><Link className="rounded-xl border border-white/10 p-3 hover:border-rcl-blue/40" href="/standings">Standings</Link><Link className="rounded-xl border border-white/10 p-3 hover:border-rcl-blue/40" href="/stats">Stats</Link></div></div></div></section>
   </Container>
-  <details className="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
+  <details className={styles.visionDetails}>
    <summary className="min-h-11 cursor-pointer rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold">About the Rich City League vision</summary>
    <LeagueVision/>
   </details>
