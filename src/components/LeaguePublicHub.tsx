@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {useEffect,useMemo,useState} from 'react';
 import type {CSSProperties} from 'react';
 import {FaArrowRight,FaCalendarDays,FaRankingStar,FaPlay,FaUsers} from 'react-icons/fa6';
@@ -60,6 +61,13 @@ export function LeaguePublicHub({initialSnapshot}:{initialSnapshot?:LeaguePublic
  const lastFinal=[...state.games].filter(game=>game.status==='completed').sort((a,b)=>new Date(b.scheduled_at).getTime()-new Date(a.scheduled_at).getTime())[0];
  const featured=nextGame??lastFinal;
  const name=(id:string)=>teamMap.get(id)?.name??'Team pending';
+ const now=Date.now();
+ const liveGames=state.games.filter(game=>game.status==='live').sort((a,b)=>new Date(a.scheduled_at).getTime()-new Date(b.scheduled_at).getTime());
+ const recentFinals=state.games.filter(game=>game.status==='completed').sort((a,b)=>new Date(b.scheduled_at).getTime()-new Date(a.scheduled_at).getTime()).slice(0,2);
+ const upcomingGames=byDate.filter(game=>game.status==='scheduled'&&new Date(game.scheduled_at).getTime()>=now).slice(0,3);
+ const scoreRail=[...liveGames,...recentFinals,...upcomingGames].slice(0,6);
+ const statusLabel=(game:LeagueGame)=>game.status==='live'?'LIVE':game.status==='completed'?'FINAL':'UP NEXT';
+ const teamTheme=(id:string)=>{const team=teamMap.get(id);return getTeamTheme(team?.slug??'',team?.primary_color,team?.secondary_color);};
  return <section className={styles.home} aria-label="Rich City League">
   <section className={styles.hero}>
    <div className={styles.heroGlow} aria-hidden="true"/><div className={styles.heroCourt} aria-hidden="true"/>
@@ -74,10 +82,38 @@ export function LeaguePublicHub({initialSnapshot}:{initialSnapshot?:LeaguePublic
    <div className={styles.heroBottom}><span>THE LEAGUE EXPERIENCE</span><span>{RCL_PRO_SEASON.startLabel} SEASON</span></div>
   </section>
 
-  <section className={styles.editorialNav} aria-label="League destinations">
+  <section className={styles.scoreboard} aria-label="Rich City League scoreboard">
+   <div className={styles.scoreboardHead}>
+    <div><p className={styles.eyebrow}>Around the league</p><h2>Scores &amp; schedule</h2></div>
+    <Link href="/schedule">View full schedule <FaArrowRight/></Link>
+   </div>
+   {scoreRail.length?<div className={styles.scoreRail}>
+    {scoreRail.map(game=>{
+     const live=game.status==='live';const final=game.status==='completed';
+     const away=teamMap.get(game.away_team_id);const home=teamMap.get(game.home_team_id);
+     return <Link href={'/games/'+game.id} key={game.id} className={styles.scoreCard} data-state={live?'live':final?'final':'upcoming'}>
+      <div className={styles.scoreCardTop}><span>{statusLabel(game)}</span><time>{dateLabel(game.scheduled_at)}</time></div>
+      <div className={styles.scoreTeam}>
+       <span className={styles.scoreLogo} style={{'--score-accent':teamTheme(game.away_team_id).accent} as CSSProperties}>{away?.logo_url?<Image src={away.logo_url} alt="" width={34} height={34} sizes="34px"/>:<b>{(away?.name??'T').slice(0,1)}</b>}</span>
+       <strong>{name(game.away_team_id)}</strong>{final||live?<b className={styles.scoreValue}>{game.away_score}</b>:null}
+      </div>
+      <div className={styles.scoreTeam}>
+       <span className={styles.scoreLogo} style={{'--score-accent':teamTheme(game.home_team_id).accent} as CSSProperties}>{home?.logo_url?<Image src={home.logo_url} alt="" width={34} height={34} sizes="34px"/>:<b>{(home?.name??'T').slice(0,1)}</b>}</span>
+       <strong>{name(game.home_team_id)}</strong>{final||live?<b className={styles.scoreValue}>{game.home_score}</b>:null}
+      </div>
+      <span className={styles.scoreCardLink}>{live?'Follow live':final?'Game recap':dateLabel(game.scheduled_at,true)} <FaArrowRight/></span>
+     </Link>;
+    })}
+   </div>:<div className={styles.scoreRailEmpty}><span className={styles.emptyPulse} aria-hidden="true"/><div><small>SEASON OPENER</small><strong>{RCL_PRO_SEASON.startLabel}</strong><p>Official matchups and tipoff details will appear here as they are confirmed.</p></div><Link href="/schedule">Season calendar <FaArrowRight/></Link></div>}
+  </section>
+
+  <section className={styles.editorialBlock}>
+   <div className={styles.sectionHead}><div><p className={styles.eyebrow}>Go deeper</p><h2>More from the league</h2></div></div>
+   <nav className={styles.editorialNav} aria-label="League destinations">
    <Link href="/schedule"><span className={styles.navIcon}><FaCalendarDays/></span><span><small>PLAN YOUR SEASON</small><strong>Schedule</strong></span><FaArrowRight className={styles.arrow}/></Link>
    <Link href="/league/highlights"><span className={styles.navIcon}><FaPlay/></span><span><small>THE MOMENTS THAT STAY</small><strong>Highlights</strong></span><FaArrowRight className={styles.arrow}/></Link>
    <Link href="/league/community"><span className={styles.navIcon}><FaUsers/></span><span><small>MORE THAN GAME NIGHT</small><strong>Community</strong></span><FaArrowRight className={styles.arrow}/></Link>
+   </nav>
   </section>
 
   <section className={styles.gameSection} aria-labelledby="game-day-title">

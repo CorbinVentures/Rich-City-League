@@ -60,3 +60,74 @@
 @media(prefers-reduced-motion:reduce){.teamCard,.teamCard:after,.primaryAction,.secondaryAction,.editorialNav>a{transition:none}.teamCard:hover,.primaryAction:hover,.editorialNav>a:hover{transform:none}}
 
 @media(max-width:680px){.hero{background-position:center,64% center,center}}
+
+/* League media front page: bright editorial canvas, feature-first hierarchy, and score rail. */
+.home{--league-ink:#14212d;--league-muted:#596774;--league-line:rgba(16,31,45,.14);color:var(--league-ink);padding:18px clamp(12px,2vw,24px) 42px;background:#f1f3f5;border-radius:24px}
+.hero{min-height:560px;background:linear-gradient(90deg,rgba(4,11,18,.78) 0%,rgba(5,14,23,.48) 48%,rgba(5,14,23,.12) 100%),url('/league/rcl-showtime-hero.webp') center 53% / cover no-repeat,radial-gradient(ellipse at 77% 38%,rgba(96,133,170,.26),transparent 28%),linear-gradient(115deg,#060d15 4%,#0a1928 55%,#11151d 100%)}
+.editorialBlock{margin:0 auto 54px;max-width:1440px}
+.editorialBlock>.sectionHead{margin-bottom:13px}
+.editorialNav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.editorialNav>a{min-height:88px;border:1px solid #d8dee4;border-radius:14px;background:#fff;padding:14px 16px;box-shadow:0 8px 22px rgba(14,28,42,.04)}
+.editorialNav>a:hover{transform:translateY(-2px);border-color:rgba(154,119,50,.54);background:#fff}
+.editorialNav small{color:#65717d;font-size:8px}
+.editorialNav strong{color:#172431;font-size:16px}
+.navIcon{width:40px;height:40px;background:#f3f6f8;color:#315c84;border-color:#dce4ea}
+.arrow{color:#536573}
+.scoreboard{max-width:1440px;margin:28px auto 42px}
+.scoreboardHead{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 14px}
+.scoreboardHead h2{margin:5px 0 0;color:#15222e;font-family:var(--font-display,inherit);font-size:clamp(22px,3vw,30px);font-weight:850;letter-spacing:-.04em}
+.scoreboardHead>a,.scoreRailEmpty>a{display:inline-flex;align-items:center;gap:8px;color:#345e83;font-size:11px;font-weight:850}
+.scoreRail{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 12px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#aab4bd transparent}
+.scoreCard{position:relative;display:flex;min-width:212px;min-height:164px;flex:1 0 0;flex-direction:column;gap:10px;overflow:hidden;border:1px solid #d9dfe4;border-radius:14px;background:#fff;padding:13px 14px;box-shadow:0 7px 22px rgba(16,31,45,.045);scroll-snap-align:start;transition:transform .2s,border-color .2s,box-shadow .2s}
+.scoreCard:hover{transform:translateY(-3px);border-color:#9caebd;box-shadow:0 13px 28px rgba(16,31,45,.1)}
+.scoreCardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #edf0f2;padding-bottom:9px}
+.scoreCardTop>span{color:#536573;font-size:8px;font-weight:950;letter-spacing:.14em}
+.scoreCardTop time{color:#7b8791;font-size:9px}
+.scoreCard[data-state="live"] .scoreCardTop>span{color:#145da0}
+.scoreTeam{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px;color:#17232e}
+.scoreLogo{display:grid;width:30px;height:30px;place-items:center;overflow:hidden;border:1px solid color-mix(in srgb,var(--score-accent,#486b8b) 36%,transparent);border-radius:50%;background:#f7f8f9;color:var(--score-accent,#486b8b)}
+.scoreLogo img{width:24px;height:24px;object-fit:contain}
+.scoreLogo>b{font-size:12px;font-weight:950}
+.scoreTeam>strong{overflow:hidden;color:#253441;font-size:11px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.scoreValue{color:#17232e;font-size:15px;font-variant-numeric:tabular-nums}
+.scoreCardLink{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:3px;color:#6b7782;font-size:9px;font-weight:750}
+.scoreCardLink svg{color:#42688a}
+.scoreRailEmpty{display:flex;min-height:100px;align-items:center;gap:15px;border:1px solid #d9dfe4;border-radius:14px;background:#fff;padding:16px 20px;box-shadow:0 7px 22px rgba(16,31,45,.04)}
+.scoreRailEmpty>div{display:grid;gap:3px}
+.scoreRailEmpty small{color:#60707e;font-size:8px;font-weight:900;letter-spacing:.15em}
+.scoreRailEmpty strong{color:#1b2a36;font-size:17px}
+.scoreRailEmpty p{margin:0;color:#677581;font-size:12px;line-height:1.5}
+.scoreRailEmpty>a{margin-left:auto;white-space:nowrap}
+.emptyPulse{width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:#b5985f;box-shadow:0 0 0 5px rgba(181,152,95,.13)}
+.gameSection,.teamsSection{margin-bottom:56px}
+.sectionHead h2{color:#14212d}
+.sectionHead>a{color:#315d83}
+.sectionIntro{color:#566571}
+.featureGame,.standings{border-color:#d9dfe4;background:#fff;color:#172431;box-shadow:0 10px 30px rgba(16,31,45,.055)}
+.featureGame{background:radial-gradient(ellipse at 50% 0,rgba(213,180,124,.16),transparent 54%),#fff}
+.cardLabel{color:#886d39}
+.featureGame h3,.standings h3{color:#162530}
+.standingRows>div{border-color:#e4e8eb}
+.standingRows>div>span:first-child{color:#8b713c}
+.feedback{border-color:#d9dfe4;background:#fff;color:#5d6a75}
+@media(max-width:900px){.scoreCard{flex:0 0 228px}}
+@media(max-width:680px){
+ .home{padding:10px 10px 30px;border-radius:18px}
+ .hero{min-height:530px}
+ .scoreboard{margin:30px 0 36px}
+ .scoreboardHead{align-items:center}
+ .scoreboardHead>a{font-size:10px}
+ .scoreRail{margin-right:-10px;padding-right:10px}
+ .scoreCard{flex:0 0 min(78vw,270px)}
+ .scoreRailEmpty{align-items:flex-start;padding:15px}
+ .scoreRailEmpty p{max-width:38ch}
+ .scoreRailEmpty>a{align-self:flex-end;font-size:10px}
+ .editorialBlock{margin-bottom:42px}
+ .editorialNav{display:flex;overflow-x:auto;gap:9px;margin-right:-10px;padding:0 10px 10px 0;scroll-snap-type:x mandatory}
+ .editorialNav>a{flex:0 0 min(78vw,290px);scroll-snap-align:start}
+ .heroStamp{display:none}
+ .sectionHead h2{font-size:clamp(24px,6.7vw,34px)}
+ .gameSection,.teamsSection{margin-bottom:44px}
+}
+@media(max-width:390px){.scoreboardHead h2{font-size:22px}.scoreboardHead>a{font-size:9px}.scoreRailEmpty{flex-wrap:wrap}.scoreRailEmpty>a{margin-left:24px}}
+@media(prefers-reduced-motion:reduce){.scoreCard{transition:none}.scoreCard:hover{transform:none}}
