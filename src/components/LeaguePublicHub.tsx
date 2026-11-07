@@ -13,7 +13,8 @@ import styles from './LeaguePublicHub.module.css';
 type LeagueGame=Pick<Game,'id'|'home_team_id'|'away_team_id'|'scheduled_at'|'status'|'home_score'|'away_score'>;
 type LeagueStanding=Pick<Standing,'team_id'|'wins'|'losses'|'rank'>;
 type LeagueTeam=Pick<Team,'id'|'name'|'slug'|'logo_url'|'primary_color'|'secondary_color'>;
-type Snapshot={games:LeagueGame[];standings:LeagueStanding[];teams:LeagueTeam[];seasonName:string};
+export type LeaguePublicSnapshot={games:LeagueGame[];standings:LeagueStanding[];teams:LeagueTeam[];seasonName:string};
+type Snapshot=LeaguePublicSnapshot;
 const EMPTY:Snapshot={games:[],standings:[],teams:[],seasonName:''};
 
 function dateLabel(value:string, includeTime=false){
@@ -22,10 +23,10 @@ function dateLabel(value:string, includeTime=false){
   :{month:'short',day:'numeric',year:'numeric'});
 }
 
-export function LeaguePublicHub(){
+export function LeaguePublicHub({initialSnapshot}:{initialSnapshot?:LeaguePublicSnapshot}){
  const db=useMemo(()=>getSupabaseClient(),[]);
- const [state,setState]=useState<Snapshot>(EMPTY);
- const [loading,setLoading]=useState(true);
+ const [state,setState]=useState<Snapshot>(initialSnapshot??EMPTY);
+ const [loading,setLoading]=useState(!initialSnapshot);
  const [error,setError]=useState(false);
  useEffect(()=>{
   let active=true;
