@@ -24,7 +24,7 @@ const themes: Record<string, TeamTheme> = {
 };
 const FALLBACK:TeamTheme={accent:'#5e9fc7',secondary:'#d7c69b',glow:'#89c9ed',surface:'#07111a',motif:'basketball',tagline:'Virginia Basketball',atmosphere:'radial-gradient(circle at 70% 5%, rgba(94,159,199,.34), transparent 34%), linear-gradient(145deg,#05090d,#102235 55%,#05090d)'};
 
-function canonicalTeamSlug(slug:string){return slug.toLowerCase().replace(/^la-team-\\d+-/,'');}
+function canonicalTeamSlug(slug:string){return slug.toLowerCase().replace(/^la-team-[0-9]+-/,'');}
 
 export function getTeamTheme(slug:string,primary?:string|null,secondary?:string|null):TeamTheme{
  const base=themes[canonicalTeamSlug(slug)]??FALLBACK;
