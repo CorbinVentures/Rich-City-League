@@ -5,7 +5,7 @@ import {
   FaArrowRight, FaBullseye, FaChartLine, FaCircleCheck, FaHandshake,
   FaRectangleAd, FaShieldHalved, FaTrophy,
 } from 'react-icons/fa6';
-import { SPONSOR_INVENTORY, isSelfServeSponsorProduct } from '@/lib/sponsorship';
+import { SPONSOR_INVENTORY, isSelfServeSponsorProduct, sponsorMoney } from '@/lib/sponsorship';
 
 export const metadata: Metadata={
   title:'Sponsor Rich City Hoops | RCH Sponsor Center',
@@ -14,8 +14,11 @@ export const metadata: Metadata={
 };
 
 export default function SponsorsPage(){
-  const featured=SPONSOR_INVENTORY.filter(item=>item.featured&&!item.code.startsWith('bmf-'));
+  const featured=SPONSOR_INVENTORY.filter(item=>item.featured&&item.lane!=='rcl-2027'&&!item.code.startsWith('bmf-'));
   const bmfPackages=SPONSOR_INVENTORY.filter(item=>item.code.startsWith('bmf-'));
+  const rclInventory=SPONSOR_INVENTORY.filter(item=>item.lane==='rcl-2027');
+  const rclSlotCount=rclInventory.reduce((sum,item)=>sum+(item.slotCount??1),0);
+  const rclAskingCeiling=rclInventory.reduce((sum,item)=>sum+(item.startingPriceCents??0)*(item.slotCount??1),0);
   return <main className="min-h-screen bg-[#03070d] pb-24 text-white">
     <section className="overflow-hidden border-b border-rcl-blue/15 bg-[radial-gradient(circle_at_82%_12%,rgba(21,159,255,.16),transparent_30%),radial-gradient(circle_at_12%_88%,rgba(249,115,22,.10),transparent_27%),linear-gradient(145deg,#071522,#03070d_72%)]">
       <Container maxWidth="xl" className="py-14 sm:py-20 lg:py-24">
@@ -50,8 +53,17 @@ export default function SponsorsPage(){
       </section>
 
       <section className="mt-16">
-        <div className="mx-auto max-w-3xl text-center"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Available opportunities</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Choose the outcome first.</h2><p className="mt-3 text-sm leading-6 text-white/45">Fixed-price digital placements can be purchased online and activate automatically after payment. Presenting, event and exclusive partnerships still need a proposal. Starting prices do not promise a specific number of impressions.</p></div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{SPONSOR_INVENTORY.filter(item=>!item.code.startsWith('bmf-')).map(item=><InventoryCard key={item.code} item={item}/>)}</div>
+        <div className="mx-auto max-w-3xl text-center"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-orange">Available opportunities</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Choose the outcome first.</h2><p className="mt-3 text-sm leading-6 text-white/45">Fixed-price RCH digital placements can be purchased online and activate automatically after payment. The 2027 Rich City League portfolio is listed separately; request availability and written terms before any purchase. Starting rates do not promise a specific number of impressions.</p></div>
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{SPONSOR_INVENTORY.filter(item=>item.lane!=='rcl-2027'&&!item.code.startsWith('bmf-')).map(item=><InventoryCard key={item.code} item={item}/>)}</div>
+      </section>
+
+      <section className="mt-16 overflow-hidden rounded-3xl border border-rcl-blue/20 bg-[radial-gradient(circle_at_82%_0%,rgba(21,159,255,.12),transparent_34%),linear-gradient(135deg,#0b1722,#071522_62%,#03070d)] p-6 sm:p-9" aria-labelledby="rcl-sponsor-heading">
+        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="max-w-3xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">Rich City League · planned 2027 season</p><h2 id="rcl-sponsor-heading" className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">League season inventory.</h2><p className="mt-3 text-sm leading-6 text-white/55">A defined portfolio across teams, the digital platform, video, postseason and championship moments. The current target is a November 2027 season; dates, rights and deliverables remain subject to readiness and written agreement.</p></div>
+          <div className="grid grid-cols-2 gap-3 lg:min-w-[280px]"><Stat value={String(rclInventory.length)} label="properties"/><Stat value={String(rclSlotCount)} label="proposed slots"/><div className="col-span-2 rounded-2xl border border-rcl-orange/20 bg-rcl-orange/[.05] p-4"><p className="text-[9px] font-black uppercase tracking-[.15em] text-rcl-orange">Theoretical full-inventory asking total</p><p className="mt-1 font-display text-3xl font-black">{sponsorMoney(rclAskingCeiling)}</p><p className="mt-1 text-[10px] leading-4 text-white/35">Only if every proposed slot is sold; this is not a revenue forecast.</p></div></div>
+        </div>
+        <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4"><p className="text-xs leading-5 text-white/50">These are proposed asking rates from the 2027 discussion prospectus. Submitting a request does not reserve a slot or charge a card. League properties require availability confirmation and a written agreement because delivery may depend on venue access, uniforms, media rights, player permissions, production and the published schedule. No specific audience size, attendance, views or sponsor results are guaranteed.</p></div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rclInventory.map(item=><InventoryCard key={item.code} item={item}/>)}</div>
       </section>
 
       <section className="mt-16 overflow-hidden rounded-3xl border border-rcl-orange/25 bg-[radial-gradient(circle_at_80%_0%,rgba(249,115,22,.12),transparent_32%),linear-gradient(135deg,#101821,#071522_62%,#03070d)] p-6 sm:p-9" aria-labelledby="bmf-sponsor-heading">
@@ -63,7 +75,7 @@ export default function SponsorsPage(){
       <section className="mt-16 rounded-3xl border border-rcl-blue/20 bg-[linear-gradient(120deg,rgba(21,159,255,.07),#071522_42%,rgba(249,115,22,.05))] p-7 sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[.85fr_1.15fr] lg:items-center">
           <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-rcl-blue">Premium inventory</p><h2 className="mt-2 font-display text-4xl font-black uppercase sm:text-5xl">Own an RCH property, not a random banner.</h2><p className="mt-4 text-sm leading-6 text-white/45">The strongest sponsorships create a repeated association people can understand. Presenting and exclusive opportunities are negotiated individually so the brand, term, geography and category rights are explicit.</p></div>
-          <div className="grid gap-3 sm:grid-cols-2">{featured.map(item=><Link key={item.code} href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className="group rounded-2xl border border-white/10 bg-black/15 p-5 transition hover:border-rcl-orange/30"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-orange">{item.eyebrow}</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{item.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p><div className="mt-4 flex items-center justify-between gap-3"><b className="text-xs text-white/70">{item.priceLabel}</b><span className="inline-flex items-center gap-2 text-[9px] font-black uppercase text-rcl-orange">{isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight className="transition group-hover:translate-x-1"/></span></div></Link>)}</div>
+          <div className="grid gap-3 sm:grid-cols-2">{featured.map(item=><Link key={item.code} href={isSelfServeSponsorProduct(item)?'/sponsors/campaigns/new?product='+item.code:'/sponsors/start?product='+item.code} className="group rounded-2xl border border-white/10 bg-black/15 p-5 transition hover:border-rcl-orange/30"><p className="text-[9px] font-black uppercase tracking-[.16em] text-rcl-orange">{item.eyebrow}</p><h3 className="mt-2 font-display text-2xl font-black uppercase">{item.name}</h3><p className="mt-2 text-xs leading-5 text-white/40">{item.description}</p><div className="mt-4 flex items-center justify-between gap-3"><b className="text-xs text-white/70">{item.priceLabel}</b><span className="inline-flex items-center gap-2 text-[9px] font-black uppercase text-rcl-orange">{item.lane==='rcl-2027'?'Request availability':isSelfServeSponsorProduct(item)?(item.code==='today-in-rch'?'Buy one month':'Buy now'):'Request proposal'} <FaArrowRight className="transition group-hover:translate-x-1"/></span></div></Link>)}</div>
         </div>
       </section>
 
@@ -103,5 +115,6 @@ function InventoryCard({item}:{item:(typeof SPONSOR_INVENTORY)[number]}){
   </article>;
 }
 
+function Stat({value,label}:{value:string;label:string}){return <div className="rounded-2xl border border-rcl-blue/15 bg-black/20 p-4"><p className="font-display text-3xl font-black text-white">{value}</p><p className="mt-1 text-[9px] font-black uppercase tracking-[.14em] text-white/35">{label}</p></div>;}
 function Value({icon,title,copy}:{icon:React.ReactNode;title:string;copy:string}){return <div className="rounded-2xl border border-rcl-blue/15 bg-[#071522]/55 p-5"><span className="text-xl text-rcl-blue">{icon}</span><h3 className="mt-3 font-display text-2xl font-black uppercase">{title}</h3><p className="mt-2 text-xs leading-5 text-white/40">{copy}</p></div>;}
 function Step({number,title,copy}:{number:string;title:string;copy:string}){return <div className="rounded-2xl border border-white/10 bg-white/[.025] p-6"><span className="font-display text-4xl font-black text-rcl-blue/35">{number}</span><h3 className="mt-4 font-display text-2xl font-black uppercase">{title}</h3><p className="mt-2 text-xs leading-5 text-white/40">{copy}</p></div>;}
