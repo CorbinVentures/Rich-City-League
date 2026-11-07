@@ -1,0 +1,314 @@
+.heroFrame{
+  --team-accent:#4e9bd1;
+  position:relative;
+  width:min( calc(100% - 28px), 1680px);
+  min-height:min(80vh,820px);
+  margin:18px auto 0;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:30px;
+  background:#08121b;
+  box-shadow:0 34px 110px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.16);
+}
+.heroImage,.heroLighting,.heroCourt{position:absolute;pointer-events:none}
+.heroImage{
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(4,9,14,.74) 0%,rgba(5,10,16,.48) 38%,rgba(5,10,16,.16) 74%,rgba(5,10,16,.12) 100%),
+    linear-gradient(0deg,rgba(4,9,14,.63),transparent 56%),
+    url('/league/rcl-showtime-hero.webp') center 53% / cover no-repeat;
+  transform:scale(1.015);
+}
+.heroLighting{
+  inset:-15%;
+  background:
+    radial-gradient(ellipse at 73% 17%,color-mix(in srgb,var(--team-accent) 55%,transparent),transparent 35%),
+    linear-gradient(116deg,transparent 45%,rgba(255,255,255,.09) 45.2%,transparent 45.8%);
+  opacity:.38;
+  mix-blend-mode:screen;
+  animation:arenaBreathe 8s ease-in-out infinite alternate;
+}
+.heroCourt{
+  z-index:0;
+  width:min(72vw,930px);
+  aspect-ratio:1;
+  right:-8%;
+  top:12%;
+  border:1px solid color-mix(in srgb,var(--team-accent) 48%,transparent);
+  border-radius:50%;
+  background:
+    linear-gradient(90deg,transparent 49.8%,rgba(236,218,180,.19) 50%,transparent 50.2%),
+    radial-gradient(circle,transparent 0 39%,rgba(236,218,180,.22) 39.2% 39.4%,transparent 39.6%);
+  box-shadow:inset 0 0 0 72px rgba(255,255,255,.018),0 0 90px color-mix(in srgb,var(--team-accent) 22%,transparent);
+  transform:perspective(1100px) rotateX(61deg) rotateZ(-18deg);
+  transform-origin:center;
+  opacity:.6;
+  animation:courtFloat 12s ease-in-out infinite alternate;
+}
+.heroCourt::before,.heroCourt::after{
+  content:"";
+  position:absolute;
+  border:1px solid rgba(236,218,180,.19);
+}
+.heroCourt::before{left:25%;top:25%;width:50%;height:50%;border-radius:50%}
+.heroCourt::after{left:29%;top:0;width:42%;height:29%;border-top:0;border-radius:0 0 50% 50%}
+.heroContent{
+  z-index:2;
+  display:flex;
+  min-height:min(80vh,820px);
+  flex-direction:column;
+  justify-content:space-between;
+  padding:28px clamp(18px,4vw,64px) 46px;
+}
+.heroMain{gap:clamp(20px,3vw,44px)}
+.heroLogo{
+  z-index:2;
+  width:clamp(150px,18vw,250px);
+  height:clamp(150px,18vw,250px);
+  flex:0 0 auto;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.27);
+  border-radius:26px;
+  background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.035) 46%,rgba(0,0,0,.48));
+  object-fit:contain;
+  backdrop-filter:blur(16px);
+  transform:perspective(1100px) rotateY(-11deg) rotateX(4deg) translateZ(24px);
+  transition:transform .55s cubic-bezier(.2,.8,.2,1),filter .55s;
+}
+.heroLogo:hover{transform:perspective(1100px) rotateY(-3deg) rotateX(0) translateZ(42px) scale(1.035);filter:brightness(1.12)}
+.heroTitle{
+  margin:0;
+  max-width:980px;
+  color:#f8f5ee;
+  font-family:var(--font-display,inherit);
+  font-size:clamp(3rem,8.5vw,8.2rem);
+  font-weight:950;
+  line-height:.88;
+  letter-spacing:-.075em;
+  text-transform:uppercase;
+  text-wrap:balance;
+  text-shadow:0 12px 50px rgba(0,0,0,.55);
+}
+.heroRecord{
+  min-width:130px;
+  align-self:flex-end;
+  padding:16px 20px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(0,0,0,.31));
+  backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.heroRecord p:first-child{font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.55)}
+.heroRecord p:last-child{font-size:34px;line-height:1;font-weight:900}
+.homeExperience{
+  display:grid;
+  max-width:1500px;
+  gap:clamp(18px,2vw,28px);
+  margin:0 auto;
+  padding:clamp(24px,4vw,62px) 0 10px;
+}
+.identityGrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(245px,.6fr);gap:18px}
+.identityCard,.recordCard,.matchupCard,.filmRoom{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  box-shadow:0 20px 65px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.identityCard{
+  min-height:275px;
+  padding:clamp(24px,4vw,50px);
+  background:
+    radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--team-accent) 38%,transparent),transparent 38%),
+    linear-gradient(135deg,#14202a,#0c131b 64%,#0a1016);
+}
+.cardKicker{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  color:rgba(255,255,255,.56);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+}
+.cardKicker span{color:var(--team-accent)}
+.identityCard h2{
+  position:relative;
+  z-index:1;
+  margin:32px 0 0;
+  font-family:var(--font-display,inherit);
+  font-size:clamp(2.2rem,5vw,5rem);
+  font-weight:950;
+  line-height:.92;
+  letter-spacing:-.065em;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+.identityCard>p{position:relative;z-index:1;max-width:620px;margin:14px 0 0;color:rgba(255,255,255,.7);font-size:15px;line-height:1.75}
+.identityGhost{
+  position:absolute;
+  right:-22px;
+  bottom:-48px;
+  color:rgba(255,255,255,.035);
+  font-family:var(--font-display,inherit);
+  font-size:clamp(4rem,10vw,10rem);
+  font-weight:950;
+  letter-spacing:-.08em;
+  line-height:.8;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.identityActions{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px;margin-top:25px}
+.identityActions a,.filmLink{
+  display:inline-flex;
+  min-height:44px;
+  align-items:center;
+  gap:12px;
+  padding:0 15px;
+  border:1px solid rgba(255,255,255,.17);
+  border-radius:11px;
+  background:rgba(255,255,255,.045);
+  color:#f7f4ed;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  transition:transform .2s,border-color .2s,background .2s;
+}
+.identityActions a:hover,.filmLink:hover{transform:translateY(-2px);border-color:var(--team-accent);background:rgba(255,255,255,.09)}
+.identityActions a span,.filmLink span{color:var(--team-accent)}
+.recordCard{
+  display:flex;
+  min-height:275px;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:clamp(22px,3vw,34px);
+  background:
+    radial-gradient(ellipse at 90% 8%,color-mix(in srgb,var(--team-accent) 45%,transparent),transparent 44%),
+    linear-gradient(145deg,#101c27,#080e15);
+}
+.recordCard>strong{
+  margin-top:auto;
+  font-family:var(--font-display,inherit);
+  font-size:clamp(4rem,7vw,6.8rem);
+  font-weight:950;
+  line-height:.86;
+  letter-spacing:-.08em;
+}
+.recordLabel{color:rgba(255,255,255,.51);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.recordFooter{display:flex;justify-content:space-between;gap:14px;margin-top:30px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);font-size:11px;color:rgba(255,255,255,.55)}
+.recordFooter b{color:#f7f4ed;text-align:right}
+.matchupCard{
+  display:flex;
+  min-height:390px;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:clamp(24px,4vw,46px);
+  background:
+    linear-gradient(90deg,rgba(4,10,15,.92),rgba(5,12,18,.7) 58%,rgba(5,12,18,.31)),
+    linear-gradient(0deg,rgba(3,8,13,.88),transparent 70%),
+    url('/league/rcl-showtime-hero.webp') center 62% / cover no-repeat;
+}
+.matchupScrim{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 32%,color-mix(in srgb,var(--team-accent) 45%,transparent),transparent 34%);opacity:.54;mix-blend-mode:screen}
+.matchupBody,.matchupLink{position:relative;z-index:1}
+.matchupHead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.matchupHead>span{color:rgba(255,255,255,.44);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.matchupFeature{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+  gap:clamp(12px,4vw,55px);
+  max-width:1000px;
+  margin:50px auto 28px;
+  text-align:center;
+}
+.matchupSide{display:flex;min-width:0;flex-direction:column;align-items:center;gap:10px}
+.matchupSide strong{font-family:var(--font-display,inherit);font-size:clamp(1.2rem,3.5vw,3.2rem);font-weight:950;line-height:.97;letter-spacing:-.045em;text-transform:uppercase}
+.matchupOpponent{filter:saturate(.86)}
+.matchupRole{color:var(--team-accent);font-size:9px;font-weight:900;letter-spacing:.24em}
+.matchupLogo{width:clamp(55px,8vw,94px);height:clamp(55px,8vw,94px);object-fit:contain;filter:drop-shadow(0 14px 28px rgba(0,0,0,.45))}
+.matchupVs{color:rgba(255,255,255,.52);font-family:var(--font-display,inherit);font-size:clamp(1.2rem,3vw,2.8rem);font-weight:900;letter-spacing:.08em}
+.matchupDetails{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:6px;color:rgba(255,255,255,.55);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.matchupDetails b{color:#f7f4ed}
+.matchupWaiting{display:flex;align-items:center;gap:24px;max-width:800px;margin:74px auto 58px}
+.waitingMark{display:grid;width:72px;height:72px;flex:0 0 auto;place-items:center;border:1px solid var(--team-accent);border-radius:50%;color:var(--team-accent);font-size:10px;font-weight:900;letter-spacing:.18em}
+.matchupWaiting h2{margin:0;font-family:var(--font-display,inherit);font-size:clamp(2rem,5vw,4.8rem);font-weight:950;line-height:.93;letter-spacing:-.06em;text-transform:uppercase}
+.matchupWaiting p{max-width:550px;margin:12px 0 0;color:rgba(255,255,255,.61);font-size:14px;line-height:1.7}
+.matchupLink{align-self:flex-start;display:inline-flex;align-items:center;gap:12px;color:var(--team-accent);font-size:10px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}
+.pulseSection{display:grid;grid-template-columns:minmax(180px,.45fr) minmax(0,1.55fr);align-items:end;gap:22px}
+.sectionHeading h2{margin:8px 0 0;font-family:var(--font-display,inherit);font-size:clamp(1.6rem,3vw,2.5rem);font-weight:900;letter-spacing:-.04em;text-transform:uppercase}
+.statBand{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.statBand>div{
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  background:linear-gradient(150deg,rgba(255,255,255,.065),rgba(255,255,255,.018));
+  padding:15px;
+  transition:transform .24s,border-color .24s;
+}
+.statBand>div:hover{transform:translateY(-3px);border-color:var(--team-accent)}
+.filmRoom{
+  display:grid;
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  min-height:330px;
+  background:linear-gradient(145deg,#121d27,#080e14);
+}
+.filmCopy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(24px,4vw,52px)}
+.filmCopy h2{margin:18px 0 0;font-family:var(--font-display,inherit);font-size:clamp(2rem,4vw,4.3rem);font-weight:950;line-height:.95;letter-spacing:-.06em;text-transform:uppercase}
+.filmCopy p{max-width:430px;margin:16px 0 24px;color:rgba(255,255,255,.58);font-size:14px;line-height:1.7}
+.filmLink{background:var(--team-accent);color:#06111a}
+.filmLink span{color:inherit}
+.filmVisual{position:relative;min-height:280px;overflow:hidden;background:#05090d}
+.filmVisual::after{position:absolute;inset:0;border:1px solid rgba(255,255,255,.1);content:"";pointer-events:none}
+.filmMedia{display:block;width:100%;height:100%;min-height:280px;object-fit:cover;background:#05090d}
+.filmCaption{position:absolute;right:16px;bottom:14px;left:16px;z-index:1;padding:13px 15px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(2,7,11,.76);backdrop-filter:blur(12px);font-size:12px;font-weight:800}
+.filmPlaceholder{
+  display:flex;
+  min-height:330px;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  background:
+    linear-gradient(90deg,rgba(4,9,14,.7),rgba(4,9,14,.25)),
+    url('/league/rcl-showtime-hero.webp') center / cover no-repeat;
+}
+.playMark{display:grid;width:58px;height:58px;place-items:center;border:1px solid rgba(255,255,255,.65);border-radius:50%;background:rgba(255,255,255,.09);padding-left:3px;color:#fff;box-shadow:0 0 40px rgba(255,255,255,.12)}
+.filmPlaceholder>div{display:grid;gap:6px}
+.filmPlaceholder b{font-size:10px;letter-spacing:.22em}
+.filmPlaceholder span:last-child{color:rgba(255,255,255,.58);font-size:12px}
+@keyframes arenaBreathe{from{transform:translate3d(-1%,0,0) scale(.98);opacity:.25}to{transform:translate3d(1%,1%,0) scale(1.04);opacity:.48}}
+@keyframes courtFloat{from{transform:perspective(1100px) rotateX(61deg) rotateZ(-18deg) translateY(-5px)}to{transform:perspective(1100px) rotateX(57deg) rotateZ(-14deg) translateY(12px)}}
+@media(max-width:850px){
+  .heroFrame,.heroContent{min-height:700px}
+  .heroCourt{width:110vw;right:-46%;top:-2%;opacity:.37}
+  .heroRecord{align-self:flex-start}
+  .identityGrid{grid-template-columns:1fr}
+  .recordCard{min-height:205px}
+  .pulseSection{grid-template-columns:1fr;align-items:start}
+  .filmRoom{grid-template-columns:1fr}
+  .filmCopy{padding-bottom:18px}
+  .filmVisual{min-height:250px}
+}
+@media(max-width:560px){
+  .heroFrame{width:calc(100% - 16px);min-height:650px;margin-top:8px;border-radius:20px}
+  .heroContent{min-height:650px;padding:20px 16px 26px}
+  .heroMain{align-items:flex-start}
+  .heroLogo{width:132px;height:132px;border-radius:18px}
+  .heroTitle{font-size:clamp(2.9rem,13vw,4.8rem);line-height:.9}
+  .heroRecord{min-width:108px;padding:12px 14px}
+  .identityCard{min-height:255px;padding:24px 21px}
+  .recordCard{min-height:180px}
+  .matchupCard{min-height:360px;padding:22px 18px}
+  .matchupFeature{gap:8px;margin:58px auto 22px}
+  .matchupSide strong{font-size:clamp(1.05rem,5.6vw,1.7rem)}
+  .matchupWaiting{align-items:flex-start;gap:14px;margin:64px auto 48px}
+  .waitingMark{width:54px;height:54px}
+  .statBand{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statBand>div:last-child{grid-column:span 2}
+  .filmPlaceholder{min-height:230px;gap:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .heroLighting,.heroCourt{animation:none}
+  .heroLogo,.identityActions a,.filmLink,.statBand>div{transition:none}
+}

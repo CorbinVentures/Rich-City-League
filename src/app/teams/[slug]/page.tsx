@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTeamDetail, getLeagueSnapshot, getPublicClient } from '@/lib/public-data';
 import { formatDate, formatTime } from '@/utils/helpers';
 import { getTeamTheme } from '@/lib/team-themes';
+import styles from './team-site.module.css';
 
 export const revalidate = 60;
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const data=await getTeamDetail(slug);if(!data)return{title:'RCL Team',robots:{index:false,follow:false}};const t=data.team;const locationLabel=t.city?.trim()||getTeamTheme(t.slug,t.primary_color,t.secondary_color).homeCity||'Virginia';const locationLine=locationLabel==='Virginia'?'Virginia':`${locationLabel}, Virginia`;const description=`${t.name} official Rich City League franchise page: roster, schedule, results, stats and team news from ${locationLine}.`;return{title:{absolute:`${t.name} | ${locationLine} Basketball | RCL`},description,alternates:{canonical:`/teams/${slug}`},openGraph:{url:`/teams/${slug}`,title:`${t.name} | Rich City League`,description,images:t.logo_url?[{url:t.logo_url,alt:`${t.name} logo`}]:[{url:'https://www.richcityhoops.com/opengraph-image?v=20261014',width:1200,height:630,alt:'RCL — Richmond basketball social'}]},robots:{index:true,follow:true}};}
@@ -57,20 +58,23 @@ export default async function TeamDetailPage({ params, searchParams }: { params:
   const secondary=theme.secondary;
 
   return <main className="min-h-screen pb-24 text-white" style={{backgroundColor:theme.surface,'--team-accent':accent,'--team-secondary':secondary,'--team-glow':theme.glow} as React.CSSProperties}>
-    <section className="relative isolate min-h-[440px] overflow-hidden border-b border-white/10">
-      <div className="absolute inset-0 opacity-100" style={{background:`${theme.atmosphere}, radial-gradient(ellipse at 14% 0%, ${accent}32, transparent 43%)`}}/>
-      <div className="pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" style={{backgroundImage:`radial-gradient(ellipse at 50% 115%, transparent 0 34%, ${accent}55 34.2% 34.45%, transparent 34.7%),linear-gradient(90deg,transparent 49.8%,${accent}25 50%,transparent 50.2%),linear-gradient(0deg,transparent 79.8%,${accent}18 80%,transparent 80.2%)`,transform:'perspective(800px) rotateX(8deg)',transformOrigin:'center bottom'}}/>
+    <section className={`${styles.heroFrame} relative isolate overflow-hidden`}>
+      <div className={styles.heroImage} aria-hidden="true"/>
+      <div className={styles.heroLighting} aria-hidden="true"/>
+      <div className={styles.heroCourt} aria-hidden="true"/>
+      
+      
       {team.logo_url&&<div className="pointer-events-none absolute -right-12 -top-20 h-[460px] w-[460px] opacity-[.13] blur-[1px] sm:-right-16 sm:h-[650px] sm:w-[650px]" aria-hidden="true"><Image src={team.logo_url} alt="" fill sizes="650px" className="object-contain drop-shadow-[0_0_80px_var(--team-glow)]"/></div>}
       <div className="absolute inset-x-0 bottom-0 h-px" style={{background:`linear-gradient(90deg,transparent,${accent},transparent)`}}/>
       <div className="absolute -left-8 bottom-[-2.5rem] select-none font-display text-[5rem] font-black uppercase leading-none tracking-[-.08em] text-white/[.025] sm:text-[8rem]" aria-hidden="true">{locationLabel.toUpperCase()}</div>
       <div className="absolute -right-10 top-0 select-none font-display text-[9rem] font-black uppercase leading-none tracking-tighter text-white/[.025] sm:text-[14rem]" aria-hidden="true">{theme.displayMark}</div>
       <div className="absolute inset-0 opacity-[.07] bg-[radial-gradient(circle_at_center,white_1px,transparent_1px)] bg-[length:22px_22px]"/>
-      <div className="relative mx-auto max-w-7xl px-5 pb-8 pt-12 sm:pt-16">
+      <div className={`${styles.heroContent} relative mx-auto w-full max-w-7xl px-5`}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><Link href="/league" className="text-xs font-black uppercase tracking-[.3em] transition hover:text-white" style={{color:accent}}>← Rich City League</Link><span className="text-xs font-black uppercase tracking-[.28em] text-white/35">{theme.tagline}</span></div>
-        <div className="mt-8 flex min-h-[250px] flex-col justify-end gap-6 sm:flex-row sm:items-end">
-          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={240} height={240} sizes="(min-width: 640px) 208px, 160px" className="h-40 w-40 rounded-2xl border border-white/15 bg-black/55 object-contain p-3 shadow-2xl transition-transform duration-700 hover:scale-[1.035] sm:h-52 sm:w-52" style={{boxShadow:`0 24px 90px ${theme.glow}44`,transform:'perspective(1000px) rotateY(-8deg) rotateX(2deg)',transformStyle:'preserve-3d'}}/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
-          <div className="flex-1"><div className="mb-3 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{backgroundColor:accent,boxShadow:`0 0 16px ${theme.glow}`}}/><span className="text-xs font-black uppercase tracking-[.25em] text-white/40">Official franchise site</span></div><h1 className="font-display text-4xl font-black uppercase leading-none drop-shadow-2xl sm:text-6xl">{team.name}</h1><p className="mt-3 text-xs font-black uppercase tracking-[.2em] text-white/55">{locationLine} · {division?.name??'Rich City League'}</p>{team.description&&<p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{team.description}</p>}</div>
-          <div className="flex gap-3"><div className="min-w-28 border border-white/10 bg-black/45 px-5 py-4 text-center backdrop-blur-md" style={{boxShadow:`inset 0 1px 0 ${accent}44`}}><p className="text-xs uppercase tracking-widest text-white/40">Record</p><p className="mt-1 font-display text-3xl font-black">{record?`${record.wins}–${record.losses}`:'0–0'}</p></div></div>
+        <div className={`${styles.heroMain} mt-8 flex min-h-[250px] flex-col justify-end gap-6 sm:flex-row sm:items-end`}>
+          {team.logo_url?<Image src={team.logo_url} alt={`${team.name} logo`} width={240} height={240} sizes="(min-width: 640px) 208px, 160px" className={styles.heroLogo} style={{boxShadow:`0 24px 90px ${theme.glow}55`}}/>:<div className="h-32 w-32 rounded-2xl sm:h-40 sm:w-40" style={{backgroundColor:accent}}/>}
+          <div className="flex-1"><div className="mb-3 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full" style={{backgroundColor:accent,boxShadow:`0 0 16px ${theme.glow}`}}/><span className="text-xs font-black uppercase tracking-[.25em] text-white/40">Official franchise site</span></div><h1 className={styles.heroTitle}>{team.name}</h1><p className="mt-3 text-xs font-black uppercase tracking-[.2em] text-white/55">{locationLine} · {division?.name??'Rich City League'}</p>{team.description&&<p className="mt-4 max-w-2xl text-sm leading-6 text-white/65">{team.description}</p>}</div>
+          <div className={`${styles.heroRecord} flex gap-3`}><div><p className="text-xs uppercase tracking-widest text-white/40">Record</p><p className="mt-1 font-display text-3xl font-black">{record?`${record.wins}–${record.losses}`:'0–0'}</p></div></div>
         </div>
       </div>
     </section>
@@ -80,37 +84,57 @@ export default async function TeamDetailPage({ params, searchParams }: { params:
     </nav>
 
     <div className="mx-auto max-w-7xl px-5 py-9" style={{backgroundImage:`linear-gradient(180deg, ${theme.glow}08, transparent 420px)`}}>
-      {tab==='home'&&<div className="grid gap-6 lg:grid-cols-[1.5fr_.8fr]">
-        <section className="border border-white/10 bg-white/[.025] p-6"><Eyebrow color={accent}>Next game</Eyebrow>{upcoming[0]?<><div className="mt-5 flex items-end justify-between gap-5"><div><p className="text-xs font-black uppercase tracking-widest text-white/40">{formatDate(upcoming[0].scheduled_at)} · {formatTime(upcoming[0].scheduled_at)}</p><h2 className="mt-3 font-display text-3xl font-black uppercase">vs {opponent(upcoming[0])}</h2><p className="mt-2 text-sm text-white/45">{venues.find(v=>v.id===upcoming[0].venue_id)?.name??'Venue TBA'}</p></div><Link href={`/games/${upcoming[0].id}`} className="text-xs font-black uppercase tracking-widest" style={{color:accent}}>Game details →</Link></div></>:<Empty text="No upcoming game is scheduled."/>}</section>
-        <section className="border border-white/10 bg-white/[.025] p-6"><Eyebrow color={accent}>Team quick info</Eyebrow><dl className="mt-5 space-y-4 text-sm"><Row a="Division" b={division?.name??'Pending'}/><Row a="Season" b={currentSeason?.name??'Pending'}/><Row a="Roster" b={`${currentRoster.length} players`}/><Row a="Coaches" b={coaches.length?String(coaches.length):'Pending'}/></dl></section>
-        {announcements.length>0&&<section className="border border-white/10 bg-white/[.025] p-6 lg:col-span-2"><div className="flex items-center justify-between gap-4"><Eyebrow color={accent}>Team announcements</Eyebrow><Link href={`/teams/${team.slug}?view=news`} className="text-xs font-black uppercase" style={{color:accent}}>View all →</Link></div><div className="mt-5 grid gap-3 md:grid-cols-2">{announcements.slice(0,2).map(item=><article key={item.id} className="border border-white/10 bg-black/20 p-5"><div className="flex items-center gap-2"><span className="text-[10px] font-black uppercase tracking-[.2em]" style={{color:accent}}>{item.is_pinned?'Pinned update':'Team update'}</span><time className="text-[10px] uppercase text-white/25">{new Date(item.published_at).toLocaleDateString()}</time></div><h2 className="mt-3 font-display text-2xl font-black uppercase">{item.title}</h2><p className="mt-2 line-clamp-3 text-sm leading-6 text-white/50">{item.body}</p></article>)}</div></section>}
-        <section className="border border-white/10 bg-white/[.025] p-6 lg:col-span-2"><Eyebrow color={accent}>Team pulse</Eyebrow><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">{[['GP',gp],['PPG',avg(totals.pts)],['RPG',avg(totals.reb)],['APG',avg(totals.ast)],['STL',avg(totals.stl)]].map(([k,v])=><Stat key={String(k)} label={String(k)} value={String(v)}/>)}</div></section>
-        <section className="grid gap-4 lg:col-span-2 lg:grid-cols-[1.2fr_.8fr]">
-          <article className="relative overflow-hidden rounded-2xl border border-white/10 p-6 sm:p-8" style={{backgroundImage:`linear-gradient(135deg,${accent}22,transparent 52%),linear-gradient(145deg,#101923,#080d13)`}}>
-            <div className="pointer-events-none absolute -right-8 -top-10 select-none font-display text-7xl font-black uppercase tracking-tight text-white/[.035] sm:text-9xl" aria-hidden="true">{theme.displayMark}</div>
-            <Eyebrow color={accent}>The franchise · {theme.tagline}</Eyebrow>
-            <h2 className="relative mt-4 max-w-2xl font-display text-3xl font-black uppercase sm:text-4xl">{theme.displayMark}</h2>
-            <p className="relative mt-4 max-w-2xl text-sm leading-7 text-white/70">{theme.brandLine}</p>
-            <div className="relative mt-6 flex flex-wrap gap-3">
-              <Link href={`/teams/${team.slug}?view=roster`} className="rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider text-[#07111a]" style={{backgroundColor:accent}}>Meet the roster →</Link>
-              <Link href={`/teams/${team.slug}?view=media`} className="rounded-xl border border-white/15 bg-white/[.04] px-4 py-3 text-xs font-black uppercase tracking-wider">Enter the film room →</Link>
+      {tab==='home'&&<div className={styles.homeExperience}>
+        <section className={styles.identityGrid}>
+          <article className={styles.identityCard}>
+            <div className={styles.cardKicker}>Franchise identity <span>{theme.tagline}</span></div>
+            <h2>{theme.displayMark}</h2>
+            <p>{theme.brandLine}</p>
+            <div className={styles.identityActions}>
+              <Link href={`/teams/${team.slug}?view=roster`}>Meet the roster <span>↗</span></Link>
+              <Link href={`/teams/${team.slug}?view=stats`}>Season numbers <span>↗</span></Link>
             </div>
+            <span className={styles.identityGhost} aria-hidden="true">{team.name}</span>
           </article>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-            <article className="rounded-2xl border border-white/10 bg-white/[.025] p-5">
-              <Eyebrow color={accent}>Last time out</Eyebrow>
-              {recent[0]?<><p className="mt-4 text-xs uppercase tracking-widest text-white/40">{formatDate(recent[0].scheduled_at)}</p><h3 className="mt-2 font-display text-xl font-black uppercase">{recent[0].home_team_id===team.id?'vs':'@'} {opponent(recent[0])}</h3><p className="mt-3 font-display text-3xl font-black">{recent[0].home_team_id===team.id?recent[0].home_score:recent[0].away_score} <span className="text-white/30">—</span> {recent[0].home_team_id===team.id?recent[0].away_score:recent[0].home_score}</p><Link href={`/games/${recent[0].id}`} className="mt-4 inline-block text-xs font-black uppercase tracking-widest" style={{color:accent}}>Game recap →</Link></>:<p className="mt-4 text-sm leading-6 text-white/50">The first official result will take its place here when the season tips off.</p>}
-            </article>
-            <article className="rounded-2xl border border-white/10 bg-white/[.025] p-5">
-              <Eyebrow color={accent}>From the film room</Eyebrow>
-              {teamMedia[0]?<><div className="mt-4 overflow-hidden rounded-xl bg-black/35">{teamMedia[0].media_type==='video'?<video controls preload="metadata" className="aspect-video w-full object-cover" src={teamMedia[0].public_url}/>:<Image src={teamMedia[0].public_url} alt={teamMedia[0].title} width={640} height={360} className="aspect-video w-full object-cover"/>}</div><p className="mt-3 line-clamp-1 text-sm font-bold">{teamMedia[0].title}</p></>:<div className="mt-4 grid min-h-28 place-items-center rounded-xl border border-dashed border-white/10 bg-black/20 px-4 text-center text-xs leading-5 text-white/40">Team highlights and game-night media will live here.</div>}
-              <Link href={`/teams/${team.slug}?view=media`} className="mt-3 inline-block text-xs font-black uppercase tracking-widest" style={{color:accent}}>Open team media →</Link>
-            </article>
+          <article className={styles.recordCard}>
+            <span className={styles.cardKicker}>Season snapshot</span>
+            <strong>{record?`${record.wins}–${record.losses}`:'0–0'}</strong>
+            <span className={styles.recordLabel}>{division?.name??'Division pending'}</span>
+            <div className={styles.recordFooter}><span>Next game</span><b>{upcoming[0]?formatDate(upcoming[0].scheduled_at):'To be announced'}</b></div>
+          </article>
+        </section>
+
+        <section className={styles.matchupCard} aria-labelledby="matchup-title">
+          <div className={styles.matchupScrim} aria-hidden="true"/>
+          <div className={styles.matchupBody}>
+            <div className={styles.matchupHead}><Eyebrow color={accent}>Rich City League · Game night</Eyebrow><span>{currentSeason?.name??'Season schedule'}</span></div>
+            {upcoming[0]?<div className={styles.matchupFeature}>
+              <div className={styles.matchupSide}><span className={styles.matchupRole}>{upcoming[0].home_team_id===team.id?'HOME':'AWAY'}</span>{team.logo_url&&<Image src={team.logo_url} alt="" width={94} height={94} className={styles.matchupLogo}/>}<strong>{team.name}</strong></div>
+              <span className={styles.matchupVs}>VS</span>
+              <div className={`${styles.matchupSide} ${styles.matchupOpponent}`}><span className={styles.matchupRole}>{upcoming[0].home_team_id===team.id?'VISITOR':'HOME'}</span><strong>{opponent(upcoming[0])}</strong></div>
+              <div className={styles.matchupDetails}><b>{formatDate(upcoming[0].scheduled_at)}</b><span>{formatTime(upcoming[0].scheduled_at)} · {venues.find(v=>v.id===upcoming[0].venue_id)?.name??'Venue to be announced'}</span></div>
+            </div>:<div className={styles.matchupWaiting}><span className={styles.waitingMark}>NEXT</span><div><h2 id="matchup-title">The next chapter starts here.</h2><p>Confirmed matchups and tipoff details will appear here when the league schedule is published.</p></div></div>}
+          </div>
+          <Link href="/schedule" className={styles.matchupLink}>Explore the full schedule <span>↗</span></Link>
+        </section>
+
+        <section className={styles.pulseSection}>
+          <div className={styles.sectionHeading}><Eyebrow color={accent}>Performance, in focus</Eyebrow><h2>Team pulse</h2></div>
+          <div className={styles.statBand}><Stat label="GP" value={String(gp)}/><Stat label="PPG" value={avg(totals.pts)}/><Stat label="RPG" value={avg(totals.reb)}/><Stat label="APG" value={avg(totals.ast)}/><Stat label="STL" value={avg(totals.stl)}/></div>
+        </section>
+
+        <section className={styles.filmRoom}>
+          <div className={styles.filmCopy}>
+            <Eyebrow color={accent}>The team film room</Eyebrow>
+            <h2>Moments that make the season.</h2>
+            <p>Official team highlights, player features, and behind-the-scenes footage belong here.</p>
+            <Link href={`/teams/${team.slug}?view=media`} className={styles.filmLink}>Enter the film room <span>↗</span></Link>
+          </div>
+          <div className={styles.filmVisual}>
+            {teamMedia[0]?<>{teamMedia[0].media_type==='video'?<video controls preload="metadata" className={styles.filmMedia} src={teamMedia[0].public_url}/>:<Image src={teamMedia[0].public_url} alt={teamMedia[0].title} width={1000} height={600} className={styles.filmMedia}/>}<div className={styles.filmCaption}>{teamMedia[0].title}</div></>:<div className={styles.filmPlaceholder}><span className={styles.playMark} aria-hidden="true">▶</span><div><b>TEAM FILM</b><span>Ready for game-night footage</span></div></div>}
           </div>
         </section>
-      </div>}
-
-      {tab==='roster'&&<section><Title color={accent}>Team roster</Title>{!currentRoster.length?<Empty text="The official roster will populate here as players are assigned."/>:<div className="mt-6 overflow-hidden border border-white/10"><div className="hidden grid-cols-[70px_1.4fr_.7fr_.7fr_1fr] bg-white/[.04] px-5 py-3 text-xs font-black uppercase tracking-widest text-white/35 sm:grid"><span>#</span><span>Player</span><span>Position</span><span>Height</span><span>Hometown</span></div>{currentRoster.map(r=>{const p=playerById.get(r.player_id);if(!p)return null;const feet=p.height_inches?Math.floor(p.height_inches/12):null;const inches=p.height_inches?p.height_inches%12:null;return <Link href={`/players/${p.id}`} key={r.id} className="grid grid-cols-[55px_1fr] gap-3 border-t border-white/5 px-5 py-4 hover:bg-white/[.03] sm:grid-cols-[70px_1.4fr_.7fr_.7fr_1fr]"><span style={{color:accent}}>{r.jersey_number??p.jersey_number??'—'}</span><span className="font-bold">{p.first_name} {p.last_name}</span><span className="text-white/50">{p.position??'—'}</span><span className="text-white/50">{feet?`${feet}'${inches}"`:'—'}</span><span className="text-white/50">{p.hometown??'—'}</span></Link>})}</div>}</section>}
+      </div>}{tab==='roster'&&<section><Title color={accent}>Team roster</Title>{!currentRoster.length?<Empty text="The official roster will populate here as players are assigned."/>:<div className="mt-6 overflow-hidden border border-white/10"><div className="hidden grid-cols-[70px_1.4fr_.7fr_.7fr_1fr] bg-white/[.04] px-5 py-3 text-xs font-black uppercase tracking-widest text-white/35 sm:grid"><span>#</span><span>Player</span><span>Position</span><span>Height</span><span>Hometown</span></div>{currentRoster.map(r=>{const p=playerById.get(r.player_id);if(!p)return null;const feet=p.height_inches?Math.floor(p.height_inches/12):null;const inches=p.height_inches?p.height_inches%12:null;return <Link href={`/players/${p.id}`} key={r.id} className="grid grid-cols-[55px_1fr] gap-3 border-t border-white/5 px-5 py-4 hover:bg-white/[.03] sm:grid-cols-[70px_1.4fr_.7fr_.7fr_1fr]"><span style={{color:accent}}>{r.jersey_number??p.jersey_number??'—'}</span><span className="font-bold">{p.first_name} {p.last_name}</span><span className="text-white/50">{p.position??'—'}</span><span className="text-white/50">{feet?`${feet}'${inches}"`:'—'}</span><span className="text-white/50">{p.hometown??'—'}</span></Link>})}</div>}</section>}
 
       {tab==='schedule'&&<section><Title color={accent}>{currentSeason?.name??'Current'} schedule</Title><div className="mt-6 space-y-3">{[...games].sort((a,b)=>a.scheduled_at.localeCompare(b.scheduled_at)).map(g=><Link key={g.id} href={`/games/${g.id}`} className="grid gap-3 border border-white/10 bg-white/[.02] p-5 hover:border-white/25 sm:grid-cols-[150px_1fr_150px] sm:items-center"><div><p className="text-xs font-black uppercase" style={{color:accent}}>{g.status}</p><p className="mt-1 text-xs text-white/45">{formatDate(g.scheduled_at)} · {formatTime(g.scheduled_at)}</p></div><p className="font-display text-xl font-black uppercase">{g.home_team_id===team.id?'vs':'@'} {opponent(g)}</p><p className="text-xs uppercase text-white/45 sm:text-right">{venues.find(v=>v.id===g.venue_id)?.name??'TBA'} →</p></Link>)}</div></section>}
 
