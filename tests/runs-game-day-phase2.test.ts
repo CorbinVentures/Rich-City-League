@@ -19,9 +19,12 @@ describe('Runs Full-Game Phase 2: real game-day',()=>{
  });
  it('honestly labels pickup scorecards as separate from independently verified results',()=>{
   const room=source('src/app/runs/[id]/page.tsx');
+  const gameConsole=source('src/components/runs/RunGameConsole.tsx');
   const ranked=source('src/components/runs/RunRankedMatchControl.tsx');
-  expect(room).toContain('Pickup scorecard saved.');
-  expect(room).toContain('Rankings');
+  expect(room).toContain('<RunGameConsole');
+  expect(gameConsole).toContain('FINAL SCORE');
+  expect(gameConsole).toContain('Submit the score for independent confirmation');
+  expect(room).toContain('<RunRankedMatchControl');
   expect(ranked).toContain("db.from('run_ranked_matches')");
   expect(ranked).toContain('run_ranked_matches');
   expect(ranked).toContain('HOME PENDING');

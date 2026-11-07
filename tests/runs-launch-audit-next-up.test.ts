@@ -44,9 +44,9 @@ describe('First Runs launch audit: truthful in-person game loop',()=>{
  });
  it('does not advance personal game stages from a scorecard recorded by someone else',()=>{
   const journey=src('src/components/runs/RunsGameplayJourney.tsx');
-  expect(journey).toContain('const stage=verified?4:checkedIn?2:signedUp?1:0;');
-  expect(journey).not.toContain('stage=verified?4:scorecardCount>0?3');
-  expect(journey).toContain('This does not prove that you played');
+  expect(journey).toContain('const stage=outstandingReview?3:resultVerified?4:liveGame?2:checkedIn?2:signedUp?1:0;');
+  expect(journey).not.toContain('scorecardCount>0?3');
+  expect(journey).toContain('No personal reward is assumed.');
   expect(journey).toContain('get_rch_world_expansion');
  });
  it('does not clear a nine-category pilot without independent review and field safety evidence',()=>{

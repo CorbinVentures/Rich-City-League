@@ -107,7 +107,7 @@ export function RunsCinematicHome({
  onWorld,onMissions,onPlayer,onVault,onBattle,onRules,onReplay
 }:Props){
  const db=useMemo(()=>getSupabaseClient(true) as any,[]);
- const [selectedMode,setSelectedMode]=useState<'quick'|'verified'|'takeover'>('quick');
+ const [selectedMode,setSelectedMode]=useState<'quick'|'verified'|'takeover'|'partners'>('quick');
  const [statewideRuns,setStatewideRuns]=useState<WorldRun[]>([]);
  const [verifiedRunIds,setVerifiedRunIds]=useState<Set<string>>(new Set());
  const [verifiedRunsLoading,setVerifiedRunsLoading]=useState(false);
@@ -160,7 +160,8 @@ export function RunsCinematicHome({
  const modeBriefing={
   quick:{index:'01',label:'QUICK RUN',subtitle:'OPEN PLAY',icon:FaBasketball,objective:'Get on a real court.',description:'Choose an open hosted game and follow its lobby. No opponent is simulated. Competitive ratings and rewards require an eligible game and independent score review.',steps:['Choose an open Run','Claim your roster spot','Check in at the court','Play the real game'],action:nextRun?'ENTER RUN LOBBY':'FIND A REAL RUN',href:nextHref},
   verified:{index:'02',label:'RCH VERIFIED RUN',subtitle:'ORGANIZER-REVIEWED EVENT',icon:FaShieldHalved,objective:'Join an event reviewed by RCH.',description:'RCH reviews the organizer, court source and event readiness. This badge is separate from score verification: game results still need their own review.',steps:['Choose a verified event','Claim your roster spot','Check in with the host','Submit scores for review'],action:verifiedRun?'ENTER VERIFIED RUN':'FIND A VERIFIED RUN',href:verifiedRun?'/runs/'+encodeURIComponent(verifiedRun.id):'/runs?view=list&verified=1#rch-upcoming-runs'},
-  takeover:{index:'03',label:'TERRITORY TAKEOVER',subtitle:'CREW COMPETITION',icon:FaCrown,objective:'Challenge for court control.',description:'Choose a court, then have a crew captain challenge its controller. The other crew must accept; only a verified crew game can change territory.',steps:['Choose a court','Request a crew challenge','Play after acceptance','Verify the result'],action:'SELECT A COURT',href:'/runs?view=world&mode=world'}
+  takeover:{index:'03',label:'TERRITORY TAKEOVER',subtitle:'CREW COMPETITION',icon:FaCrown,objective:'Challenge for court control.',description:'Choose a court, then have a crew captain challenge its controller. The other crew must accept; only a verified crew game can change territory.',steps:['Choose a court','Request a crew challenge','Play after acceptance','Verify the result'],action:'SELECT A COURT',href:'/runs?view=world&mode=world'},
+  partners:{index:'04',label:'PARTNER EVENTS',subtitle:'APPROVED ORGANIZERS',icon:FaPeopleGroup,objective:'Find an event run by a verified partner.',description:'Browse approved Virginia basketball organizations, their event schedules and results. Partner approval does not automatically verify a score; competitive rewards still require independent review.',steps:['Choose an organizer','Review the event details','Join its real roster','Play and post highlights'],action:'EXPLORE PARTNER EVENTS',href:'/runs/partners'}
  }[selectedMode];
  const ModeIcon=modeBriefing.icon;
  return <section className="rch-gh" aria-label="Runs Game Home">
@@ -196,14 +197,15 @@ export function RunsCinematicHome({
      {([
       ['quick','01','QUICK RUN','Open play',FaBasketball],
       ['verified','02','RCH VERIFIED RUN','Organizer reviewed',FaShieldHalved],
-      ['takeover','03','TERRITORY TAKEOVER','Crew competition',FaCrown]
+      ['takeover','03','TERRITORY TAKEOVER','Crew competition',FaCrown],
+      ['partners','04','PARTNER EVENTS','Approved organizers',FaPeopleGroup]
      ] as const).map(([id,index,label,detail,Icon])=><button type="button" key={id} aria-pressed={selectedMode===id} onClick={()=>setSelectedMode(id)} className={'rch-gh-mode-option '+(selectedMode===id?'active':'')}>
        <span className="rch-gh-mode-option-index">{index}</span><Icon aria-hidden="true"/><span className="rch-gh-mode-option-copy"><strong>{label}</strong><small>{detail}</small></span><FaArrowRight className="rch-gh-mode-option-arrow" aria-hidden="true"/>
       </button>)}
      <div className="rch-gh-mode-select-foot"><FaShieldHalved aria-hidden="true"/><span>REAL PEOPLE · REAL RESULTS · SERVER-VERIFIED PROGRESS</span></div>
     </div>
     <article className={'rch-gh-mode-briefing mode-'+selectedMode} aria-live="polite" aria-labelledby="rch-mode-briefing-title">
-     <div className="rch-gh-briefing-top"><span>MODE {modeBriefing.index} / 03</span><span><i aria-hidden="true"/> MODE SELECTED</span></div>
+     <div className="rch-gh-briefing-top"><span>MODE {modeBriefing.index} / 04</span><span><i aria-hidden="true"/> MODE SELECTED</span></div>
      <div className="rch-gh-briefing-heading"><span className="rch-gh-briefing-icon"><ModeIcon aria-hidden="true"/></span><div><small>{modeBriefing.subtitle}</small><h3 id="rch-mode-briefing-title">{modeBriefing.label}</h3></div></div>
      <p className="rch-gh-briefing-objective"><span>OBJECTIVE</span><strong>{modeBriefing.objective}</strong></p>
      <p className="rch-gh-briefing-description">{modeBriefing.description}</p>
@@ -217,6 +219,7 @@ export function RunsCinematicHome({
      {selectedMode==='quick'&&<small className="rch-gh-briefing-caveat">The Run lobby guides roster, check-in, game-day, and result status.</small>}
      {selectedMode==='verified'&&<small className="rch-gh-briefing-caveat">Event verification covers organizer and readiness. It does not guarantee safety or certify the final score.</small>}
      {selectedMode==='takeover'&&<small className="rch-gh-briefing-caveat">A crew and captain are required. Select a real court, then open its Takeover challenge.</small>}
+     {selectedMode==='partners'&&<small className="rch-gh-briefing-caveat">Partner approval confirms the organizer. Review each event’s venue, time, rules and fees before joining.</small>}
     </article>
    </div>
   </section>

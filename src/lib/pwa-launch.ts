@@ -14,7 +14,7 @@ export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   if (!standalone || !mobile) return;
   // Runs has its own lightweight game entrance; do not stack the general
   // four-second brand film over the game title screen or an active Run room.
-  if (/^\/runs(?:\/|$)/.test(location.pathname)) {
+  if (/^\\/runs(?:\\/|$)/.test(location.pathname)) {
     root.dataset.rchLaunch = 'done';
     root.dataset.rchLaunchBoot = 'done';
     return;

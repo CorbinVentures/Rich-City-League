@@ -14,6 +14,12 @@ type Session={run_id:string;experience:'park'|'rec';price_cents:number;reward_mu
 type Metrics={total_sessions:number;upcoming_sessions:number;total_checkins:number;unique_attendees:number;repeat_attendees:number;verified_matches:number;waiting_players:number};
 type SessionForm={title:string;starts:string;location:string;court_slug:string;format:string;experience:'park'|'rec';capacity:number;price:string;description:string};
 const empty:SessionForm={title:'',starts:'',location:'',court_slug:'',format:'5v5',experience:'rec',capacity:20,price:'0',description:''};
+const sessionTemplates:ReadonlyArray<{id:string;label:string;title:string;experience:'park'|'rec';format:string;capacity:number;description:string}>=[
+ {id:'park-5v5',label:'Outdoor pickup · 5v5',title:'Outdoor Community Run',experience:'park',format:'5v5',capacity:20,description:'Organizer: add arrival details, park access information, event rules and participant check-in instructions.'},
+ {id:'rec-5v5',label:'REC session · 5v5',title:'Organized REC Session',experience:'rec',format:'5v5',capacity:20,description:'Organizer: add facility entry details, arrival time, event rules and participant check-in instructions.'},
+ {id:'park-3v3',label:'Competitive · 3v3',title:'3v3 Competitive Run',experience:'park',format:'3v3',capacity:6,description:'Organizer: add arrival details, park access information, matchup rules and participant check-in instructions.'},
+ {id:'park-1v1',label:'1v1 matchup',title:'1v1 Matchup Session',experience:'park',format:'1v1',capacity:2,description:'Organizer: add arrival details, park access information, matchup rules and participant check-in instructions.'},
+];
 const initialMetrics:Metrics={total_sessions:0,upcoming_sessions:0,total_checkins:0,unique_attendees:0,repeat_attendees:0,verified_matches:0,waiting_players:0};
 const fieldClass='mt-2 min-h-11 w-full rounded-xl border border-[#4b718e] bg-[#071b2d] px-3 py-3 text-sm text-white outline-none focus:border-[#66bcff]';
 
@@ -122,6 +128,11 @@ export default function RunsPartnerHeadquarters(){
    <section className="mt-9 rounded-2xl border border-[#356182] bg-[#0b253d] p-5 sm:p-7">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-[#8ec9f6]"><FaCalendarDays/> THE PARK / THE REC</p><h2 className="mt-2 text-2xl font-black uppercase">Event schedule</h2></div>{canManage&&<button onClick={()=>setShowForm(v=>!v)} className="min-h-11 rounded-xl bg-[#348ff5] px-4 text-sm font-black">{showForm?'Close editor':'+ Publish an event'}</button>}</div>
     {showForm&&canManage&&<form onSubmit={e=>void publish(e)} className="mt-5 grid gap-4 rounded-xl border border-[#4c7698] bg-[#091e33] p-5 sm:grid-cols-2">
+     <fieldset className="sm:col-span-2">
+      <legend className="text-xs font-black uppercase tracking-wide text-[#a8d8f7]">Start from an event template</legend>
+      <p className="mt-1 text-[11px] leading-5 text-[#a9c8dd]">Presets save setup time. Confirm the venue, time, facility permission, rules and fees before publishing; a template does not certify the event or any score.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">{sessionTemplates.map(template=><button key={template.id} type="button" onClick={()=>setForm(current=>({...current,title:template.title,experience:template.experience,format:template.format,capacity:template.capacity,price:'0',description:template.description}))} className="min-h-[68px] rounded-xl border border-[#426c8c] bg-[#0b2842] p-3 text-left text-xs font-black text-[#e6f4ff] hover:border-[#80c6f2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#80c6f2]"><span className="block">{template.label}</span><span className="mt-1 block text-[10px] font-normal text-[#a9c8dd]">Prefill session details</span></button>)}</div>
+     </fieldset>
      <div className="sm:col-span-2 grid grid-cols-2 gap-2">
       {(['park','rec'] as const).map(mode=><button type="button" key={mode} aria-pressed={form.experience===mode} onClick={()=>setForm({...form,experience:mode})} className={'min-h-12 rounded-xl border px-4 text-sm font-black '+(form.experience===mode?'border-[#58b4fc] bg-[#2067a3]':'border-[#456d8b]')}>{mode==='park'?'THE PARK · Pickup':'THE REC · Organized'}</button>)}
      </div>

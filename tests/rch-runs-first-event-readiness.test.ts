@@ -39,11 +39,14 @@ describe('RUNS Richmond first-event readiness',()=>{
   expect(list).not.toContain("db.rpc('claim_latest_run_highlight'");
  });
  it('prevents fabricated completed games and locked-score mutation',()=>{
+  const gameConsole=read('src/components/runs/RunGameConsole.tsx');
   expect(sql).toContain('rch_guard_first_event_game_record');
   expect(sql).toContain('m.status in (\'pending\',\'verified\')');
   expect(sql).toContain('Cannot record completed games on suggested open courts');
   expect(sql).toContain('Select two different teams registered for this Run');
-  expect(room).toContain('Record an unverified score');
-  expect(room).toContain('!suggestedCourt&&!listingStatusUnknown');
+  expect(room).toContain('<RunGameConsole');
+  expect(gameConsole).toContain("db.rpc('rch_start_run_game'");
+  expect(gameConsole).toContain("db.rpc('rch_finish_run_game'");
+  expect(gameConsole).toContain('The game takes place at the real court.');
  });
 });

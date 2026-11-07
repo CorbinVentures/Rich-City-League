@@ -40,6 +40,11 @@ describe('RCH verified Runs Partner HQ',()=>{
   expect(hq).toContain('rch_create_runs_partner_session');
   expect(hq).toContain('RunVenuePicker');
  });
+ it('provides reusable event templates without bypassing event or score verification',()=>{
+  for(const label of ['Outdoor pickup · 5v5','REC session · 5v5','Competitive · 3v3','1v1 matchup'])expect(hq).toContain(label);
+  expect(hq).toContain('a template does not certify the event or any score');
+  expect(hq).toContain('rch_create_runs_partner_session');
+ });
  it('provides a public directory and branded schedule, plus private real aggregates',()=>{
   expect(discover).toContain('Approved Runs partners');
   expect(publicPage).toContain("'/runs/'+s.run_id");
