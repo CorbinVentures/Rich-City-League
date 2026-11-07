@@ -124,7 +124,15 @@ export default function RunsPage() {
   const courtParam = searchParams.get('court')?.trim() || '';
   const createIntent = searchParams.get('create') === '1';
   const verifiedQuery = searchParams.get('verified') === '1';
-  const showLegacyList=searchParams.get('view')!=='world'||createIntent||Boolean(courtParam);
+  const [standaloneRunsHome,setStandaloneRunsHome]=useState(false);
+  useEffect(()=>{
+    const nav=navigator as Navigator & {standalone?:boolean};
+    const standalone=window.matchMedia('(display-mode: standalone)').matches||nav.standalone===true;
+    const mobile=/iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    const explicitView=['view','create','court','verified','solo','rookie','competition'].some(key=>searchParams.has(key));
+    setStandaloneRunsHome(standalone&&mobile&&!explicitView);
+  },[searchParams]);
+  const showLegacyList=(searchParams.get('view')!=='world'||createIntent||Boolean(courtParam))&&!standaloneRunsHome;
   const { user } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []);
   const db = supabase as any;

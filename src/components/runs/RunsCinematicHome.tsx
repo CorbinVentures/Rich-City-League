@@ -21,20 +21,22 @@ function formatWhen(value:string){
  return date.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET';
 }
 
-/** An optional replay-only cinematic: real game discovery is never delayed. */
+/** A light, once-per-session title screen that leads straight into real Run play. */
 export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replayToken:number}){
  const [step,setStep]=useState<'done'|'logo'|'world'>('done');
  const skipRef=useRef<HTMLButtonElement>(null);
+ const enterRef=useRef<HTMLButtonElement>(null);
  const close=useCallback(()=>{
   setStep('done');
   try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional session storage. */}
  },[]);
  useEffect(()=>{
-  // Never autoplay a modal before a player can find or host a game.
-  if(!enabled||replayToken===0)return;
+  if(!enabled)return;
+  if(replayToken===0){
+   try{if(window.sessionStorage.getItem(INTRO_KEY)==='seen')return;}catch{/* Continue without optional session storage. */}
+  }
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-   setStep('done');
-   try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional. */}
+   setStep('world');
    return;
   }
   setStep('logo');
@@ -52,7 +54,10 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
   document.body.style.overflow='hidden';
   const keyboard=(event:KeyboardEvent)=>{
    if(event.key==='Escape'){event.preventDefault();close();}
-   if(event.key==='Tab'){event.preventDefault();skipRef.current?.focus();}
+   if(event.key==='Tab'){
+    event.preventDefault();
+    if(document.activeElement===enterRef.current)skipRef.current?.focus();else enterRef.current?.focus();
+   }
   };
   document.addEventListener('keydown',keyboard);
   skipRef.current?.focus();
@@ -69,10 +74,11 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
    <span className="rch-intro-crown" aria-hidden="true"><FaCrown/></span>
    <p className="rch-intro-logo">RCH <em>RUNS</em></p>
    <div className="rch-intro-pulse" aria-hidden="true"><FaBasketball/></div>
-   <strong>{step==='logo'?'THE REAL-WORLD BASKETBALL GAME':'VIRGINIA BUILDS DIFFERENT.'}</strong>
-   <span>REAL RUNS · REAL HOOPERS · RICH CITY</span>
+   <strong>{step==='logo'?'THE REAL-WORLD BASKETBALL GAME':'YOUR CITY. YOUR RUNS.'}</strong>
+   <span>{step==='logo'?'REAL COURTS · REAL HOOPERS':'PLAY IN REAL LIFE. BUILD YOUR RCH LEGACY.'}</span>
+   {step==='world'&&<button ref={enterRef} type="button" className="rch-intro-enter" onClick={close}>ENTER RUNS <FaArrowRight aria-hidden="true"/></button>}
   </div>
-  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip cinematic opening">Skip intro <FaXmark aria-hidden="true"/></button>
+  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip cinematic opening">SKIP <FaXmark aria-hidden="true"/></button>
  </div>;
 }
 
