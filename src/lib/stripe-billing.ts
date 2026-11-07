@@ -134,7 +134,7 @@ export async function createStripeSponsorCheckoutSession(input: {
 }) {
   if (!stripeSecret()) throw new Error('Stripe billing is not configured.');
   if (!Number.isInteger(input.priceCents) || input.priceCents < 1) throw new Error('A valid sponsor campaign price is required.');
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://richcityhoops.com').replace(/\\/$/, '');
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://richcityhoops.com').replace(/\/$/, '');
   const body = new URLSearchParams();
   body.set('mode', 'payment');
   body.set('payment_method_types[0]', 'card');
