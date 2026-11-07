@@ -246,14 +246,14 @@ export function RunsCinematicHome({
   </div>
 
   <section className="rch-gh-section" aria-labelledby="rch-next-run">
-   <div className="rch-gh-section-title"><h2 id="rch-next-run">YOUR NEXT PLAY</h2><Link href="/runs?view=list#rch-upcoming-runs">BROWSE RUNS <FaArrowRight/></Link></div>
+   <div className="rch-gh-section-title"><h2 id="rch-next-run">YOUR NEXT PLAY</h2></div>
    {nextRun?<Link className="rch-gh-next-card" href={nextHref}>
     <span className="rch-gh-run-photo" aria-hidden="true"><FaBasketball/></span>
     <span className="rch-gh-run-body"><strong>{nextRun.title}</strong><small><FaLocationDot/> {nextRun.location||'Court details in event'}</small><small><FaCalendarDays/> {formatWhen(nextRun.starts_at)} · {nextRun.game_format}</small></span>
     {doubleRep&&<span className="rch-gh-double">2× VERIFIED REP</span>}
     <FaArrowRight className="rch-gh-run-arrow"/>
    </Link>:<div className="rch-gh-next-empty">{finding?'Checking real hosted games…':city?'No hosted Runs are scheduled here yet. Browse other Runs or host the first game.':'No hosted Runs are scheduled yet. Browse available games or host the first one.'}</div>}
-   <div className="rch-gh-next-actions"><Link href={nextRun?nextHref:'/runs?view=list#rch-upcoming-runs'} className="rch-gh-next-primary"><FaBasketball/>{nextRun?'JOIN NEXT RUN':'FIND A RUN'}<FaArrowRight/></Link><Link href="/runs?create=1" className="rch-gh-next-secondary">HOST A RUN</Link></div>
+   <div className="rch-gh-next-actions"><Link href="/runs?create=1" className="rch-gh-next-secondary">HOST A RUN</Link></div>
   </section>
 
   <section className="rch-gh-section" aria-labelledby="rch-quick-actions">
