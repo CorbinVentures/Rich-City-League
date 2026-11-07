@@ -11,7 +11,9 @@ export async function generateMetadata({params}:Omit<Props,'children'>):Promise<
  const {data,error}=await db.from('runs')
   .select('id,title,location,starts_at,game_format,status')
   .eq('id',id).maybeSingle();
- if(error||!data)return {title:'RCH Runs',description:fallback};
+ if(error)return {title:'RCH Runs',description:fallback};
+ // A confirmed missing Run must not become an indexable generic detail page.
+ if(!data)return {title:'Run not found | RCH Runs',description:fallback,robots:{index:false,follow:false}};
  const start=new Date(data.starts_at);
  const when=Number.isFinite(start.getTime())?start.toLocaleString('en-US',{
   timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'
