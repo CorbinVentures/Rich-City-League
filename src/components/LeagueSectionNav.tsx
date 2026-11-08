@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaArrowRight, FaBasketball, FaCalendarDays, FaChartColumn, FaChartSimple, FaFilm, FaHouse, FaPeopleGroup, FaShieldHalved } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaCalendarDays, FaChartColumn, FaChartSimple, FaCrown, FaFilm, FaHouse, FaPeopleGroup, FaShieldHalved } from 'react-icons/fa6';
 
 const sections = [
   { label: 'Home', href: '/league', icon: FaHouse, matches: (path: string) => path === '/league' },
@@ -12,6 +12,7 @@ const sections = [
   { label: 'Games', href: '/games', icon: FaBasketball, matches: (path: string) => path === '/games' || path.startsWith('/games/') },
   { label: 'Players', href: '/players', icon: FaPeopleGroup, matches: (path: string) => path === '/players' || path.startsWith('/players/') },
   { label: 'Stats', href: '/stats', icon: FaChartSimple, matches: (path: string) => ['/stats', '/leaderboards', '/rankings'].some((route) => path === route || path.startsWith(`${route}/`)) },
+  { label: 'Fantasy', href: '/fantasy', icon: FaCrown, matches: (path: string) => path === '/fantasy' || path.startsWith('/fantasy/') },
   { label: 'Highlights', href: '/league/highlights', icon: FaFilm, matches: (path: string) => path.startsWith('/league/highlights') },
   { label: 'Community', href: '/league/community', icon: FaPeopleGroup, matches: (path: string) => path.startsWith('/league/community') },
 ];
@@ -40,7 +41,7 @@ export function LeagueSectionNav() {
               </Link>
             );
           })}
-          <Link href="/draft" className="ml-auto hidden min-h-9 shrink-0 items-center gap-2 rounded-lg border border-[#d0b47b]/35 px-3 text-[10px] font-black uppercase tracking-[.08em] text-[#e7cd94] transition hover:bg-[#d0b47b]/10 md:inline-flex">Draft Night <FaArrowRight aria-hidden="true" className="text-[9px]" /></Link>
+          <Link href="/draft" aria-current={pathname === '/draft' || pathname.startsWith('/draft/') ? 'page' : undefined} className="ml-auto hidden min-h-9 shrink-0 items-center gap-2 rounded-lg border border-[#d0b47b]/35 px-3 text-[10px] font-black uppercase tracking-[.08em] text-[#e7cd94] transition hover:bg-[#d0b47b]/10 md:inline-flex">Draft Night <FaArrowRight aria-hidden="true" className="text-[9px]" /></Link>
         </nav>
       </div>
     </section>
