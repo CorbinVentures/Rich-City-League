@@ -87,7 +87,7 @@ export function LeagueCenterExperience({initialLeagueSnapshot}:{initialLeagueSna
     </Link>
     <div className={styles.headerRight}>
      <nav className={styles.primaryNav} aria-label="League navigation">
-      <Link href="/league" className={styles.activeNav}>Home</Link>
+      <Link href="/league" className={styles.activeNav} aria-current="page">Home</Link>
       <Link href="/schedule">Schedule</Link>
       <Link href="/standings">Standings</Link>
       <Link href="/teams">Teams</Link>
@@ -103,7 +103,7 @@ export function LeagueCenterExperience({initialLeagueSnapshot}:{initialLeagueSna
     </div>}
    </Container>
    <div className={styles.mobileNav}><nav aria-label="League sections">
-    <Link href="/league" className={styles.activeNav}>Home</Link><Link href="/schedule">Schedule</Link><Link href="/standings">Standings</Link><Link href="/teams">Teams</Link><Link href="/league/highlights">Highlights</Link><Link href="/league/community">Community</Link><Link href="/draft">Draft Night</Link>
+    <Link href="/league" className={styles.activeNav} aria-current="page">Home</Link><Link href="/schedule">Schedule</Link><Link href="/standings">Standings</Link><Link href="/teams">Teams</Link><Link href="/league/highlights">Highlights</Link><Link href="/league/community">Community</Link><Link href="/draft">Draft Night</Link>
    </nav></div>
   </header>
   <section className={styles.seasonRibbon}>
