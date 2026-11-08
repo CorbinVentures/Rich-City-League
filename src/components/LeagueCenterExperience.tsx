@@ -3,7 +3,6 @@
 import { LeagueVision } from '@/components/LeagueVision';
 import styles from './LeagueCenterExperience.module.css';
 import { LeaguePublicHub, type LeaguePublicSnapshot } from '@/components/LeaguePublicHub';
-import { ProgramEmblem } from '@/components/ProgramEmblem';
 import { ScorebookAppLink } from '@/components/ScorebookAppLink';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -83,7 +82,7 @@ export function LeagueCenterExperience({initialLeagueSnapshot}:{initialLeagueSna
   <header className={styles.header}>
    <Container maxWidth="xl" className={styles.headerMain}>
     <Link href="/league" className={styles.brand} aria-label="Rich City League home">
-     <ProgramEmblem program="rich-city-league" className={styles.emblem} priority/>
+     <span className={styles.leagueMonogram} aria-hidden="true">RCL</span>
      <span className={styles.brandCopy}><strong>RICH CITY <b>LEAGUE</b></strong><small>VIRGINIA’S ENTERTAINMENT LEAGUE</small></span>
     </Link>
     <div className={styles.headerRight}>

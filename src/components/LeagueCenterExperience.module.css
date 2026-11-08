@@ -6,7 +6,7 @@
 .header{position:relative;z-index:30;background:rgba(7,17,28,.97);border-bottom:1px solid rgba(255,255,255,.09);box-shadow:0 14px 36px rgba(0,0,0,.2)}
 .headerMain{display:flex;min-height:88px;align-items:center;gap:26px}
 .brand{display:flex;flex:0 0 auto;align-items:center;gap:12px;color:#f5f0e8;text-decoration:none}
-.emblem{width:48px!important;height:48px!important;object-fit:contain}
+.leagueMonogram{display:grid;width:42px;height:42px;flex:0 0 auto;place-items:center;border:1px solid rgba(200,170,111,.68);border-radius:9px;background:linear-gradient(145deg,#18334d,#0a1623);box-shadow:inset 0 1px rgba(255,255,255,.13),0 6px 16px rgba(0,0,0,.28);color:#e1c88c;font-family:var(--font-display,inherit);font-size:13px;font-weight:950;letter-spacing:-.06em}
 .brandCopy{display:grid;gap:4px}
 .brandCopy strong{font-family:var(--font-display,inherit);font-size:17px;font-weight:850;letter-spacing:.035em;line-height:1}
 .brandCopy strong b{color:#d3b77f;font-weight:850}
@@ -69,7 +69,7 @@
  .utilityRight{font-size:7px;white-space:nowrap}
  .headerMain{min-height:69px;gap:10px;padding-top:8px;padding-bottom:8px}
  .brand{gap:8px}
- .emblem{width:40px!important;height:40px!important}
+ .leagueMonogram{width:38px;height:38px;font-size:12px}
  .brandCopy strong{font-size:14px}
  .brandCopy small{font-size:7px;letter-spacing:.12em}
  .memberPill{gap:6px;margin-left:auto;border-left:0;padding-left:0}
