@@ -11,7 +11,6 @@ const core = [
   ['/join/creators',.8,'weekly'],
   ['/join/organizations',.85,'weekly'],
   ['/league',1,'weekly'],
-  ['/awards',.85,'weekly'],
   ['/richmond-basketball-league',1,'weekly'],
   ['/richmond-basketball-runs',1,'daily'],
   ['/network',.95,'daily'],
@@ -41,8 +40,6 @@ const core = [
   ['/rankings',.8,'daily'],
   ['/coaches',.75,'weekly'],
   ['/runs',1,'daily'],
-  ['/runs/bmf-championship',.9,'weekly'],
-  ['/commissioners/natwan-young',.7,'monthly'],
   ['/draft',.7,'weekly'],
   ['/media',.7,'weekly'],
   ['/shop',.7,'weekly'],
@@ -79,17 +76,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const client: any = publicClient;
     if (client) {
-      const [{ data: players }, { data: organizations }, { data: events }, { data: sites }] = await Promise.all([
+      const [{ data: players }, { data: organizations }, { data: events }, { data: sites }, { data: courts }] = await Promise.all([
         client.from('public_players').select('id').eq('is_active', true).limit(1000),
         client.from('network_organizations').select('slug,updated_at').eq('status', 'active').limit(2000),
         client.from('network_events').select('slug,starts_at').eq('status', 'published').limit(2000),
         client.from('rch_sites').select('slug,updated_at').eq('status', 'published').limit(2000),
+        // The view only exposes verified public outdoor park courts.
+        client.from('rch_runs_outdoor_courts').select('slug').eq('is_active', true).limit(1000),
       ]);
 
       for (const player of players ?? []) entries.push({ url: `${SITE}/players/${player.id}`, changeFrequency: 'weekly', priority: .65 });
       for (const organization of organizations ?? []) if (organization.slug) entries.push({ url: `${SITE}/organizations/${organization.slug}`, lastModified: organization.updated_at ? new Date(organization.updated_at) : undefined, changeFrequency: 'weekly', priority: .75 });
       for (const event of events ?? []) if (event.slug) entries.push({ url: `${SITE}/network/events/${event.slug}`, changeFrequency: 'daily', priority: .7 });
       for (const site of sites ?? []) if (site.slug) entries.push({url: `${SITE}/sites/${site.slug}`,lastModified:site.updated_at?new Date(site.updated_at):undefined,changeFrequency:'weekly',priority:.65});
+      for (const court of courts ?? []) if (court.slug) entries.push({ url: `${SITE}/runs/courts/${encodeURIComponent(court.slug)}`, changeFrequency: 'monthly', priority: .7 });
     }
   } catch {
     // Core launch URLs remain available even if a dynamic data source is degraded.

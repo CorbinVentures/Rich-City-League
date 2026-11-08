@@ -5,7 +5,7 @@ import {FaArrowRight,FaPlay,FaFilm,FaMicrophoneLines} from 'react-icons/fa6';
 
 export const metadata:Metadata={title:'Rich City League Highlights | RCL',description:'Game film, standout plays, player stories and behind-the-scenes moments from Rich City League.',alternates:{canonical:'/league/highlights'}};
 const lanes=[
- {eyebrow:'THE GAME',title:'Plays that shift the night',copy:'Watch the runs, finishes, stops, and sequences that turn a matchup into a memory.',href:'/tv',label:'Explore RCH TV',icon:FaPlay},
+ {eyebrow:'THE GAME',title:'Plays that shift the night',copy:'Watch the runs, finishes, stops, and sequences that turn a matchup into a memory.',href:'/media',label:'Explore RCH TV',icon:FaPlay},
  {eyebrow:'THE PEOPLE',title:'The story behind the jersey',copy:'Player features, team profiles, and the voices shaping each chapter of the league.',href:'/news',label:'Read league stories',icon:FaMicrophoneLines},
  {eyebrow:'THE ARCHIVE',title:'Every season leaves a mark',copy:'Revisit official games, results, and the moments that become part of league history.',href:'/games',label:'Browse game center',icon:FaFilm},
 ];
