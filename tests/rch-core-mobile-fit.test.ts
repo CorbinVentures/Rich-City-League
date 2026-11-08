@@ -28,10 +28,10 @@ describe('RCH screenshot-driven core product fit',()=>{
    const hub=read('src/components/LeaguePublicHub.tsx');
    expect(league).toContain('rch-league-site');
    expect(league).toContain('<LeaguePublicHub initialSnapshot={initialLeagueSnapshot}/>');
-   expect(league.indexOf('<LeaguePublicHub/>')).toBeLessThan(league.indexOf('rch-league-member-content'));
+   expect(league.indexOf('<LeaguePublicHub initialSnapshot={initialLeagueSnapshot}/>')).toBeLessThan(league.indexOf('rch-league-member-content'));
    expect(hub).toContain("eq('slug','rich-city-league')");
    for(const table of ["from('games')","from('standings')","from('teams')"])expect(hub).toContain(table);
-   expect(hub).toContain('Season updates coming soon');
+   expect(hub).toContain('Next chapter loading.');
  });
  it('makes Draft Night readable by scoping the dark surface to its route',()=>{
    const page=read('src/app/draft/page.tsx');
