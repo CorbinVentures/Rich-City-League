@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaArrowRight, FaBasketball, FaCalendarDays, FaChartColumn, FaFilm, FaHouse, FaPeopleGroup, FaShieldHalved } from 'react-icons/fa6';
+import { FaArrowRight, FaBasketball, FaCalendarDays, FaChartColumn, FaChartSimple, FaFilm, FaHouse, FaPeopleGroup, FaShieldHalved } from 'react-icons/fa6';
 
 const sections = [
   { label: 'Home', href: '/league', icon: FaHouse, matches: (path: string) => path === '/league' },
@@ -10,6 +10,8 @@ const sections = [
   { label: 'Standings', href: '/standings', icon: FaChartColumn, matches: (path: string) => path === '/standings' || path.startsWith('/standings/') },
   { label: 'Teams', href: '/teams', icon: FaShieldHalved, matches: (path: string) => path === '/teams' || path.startsWith('/teams/') },
   { label: 'Games', href: '/games', icon: FaBasketball, matches: (path: string) => path === '/games' || path.startsWith('/games/') },
+  { label: 'Players', href: '/players', icon: FaPeopleGroup, matches: (path: string) => path === '/players' || path.startsWith('/players/') },
+  { label: 'Stats', href: '/stats', icon: FaChartSimple, matches: (path: string) => ['/stats', '/leaderboards', '/rankings'].some((route) => path === route || path.startsWith(`${route}/`)) },
   { label: 'Highlights', href: '/league/highlights', icon: FaFilm, matches: (path: string) => path.startsWith('/league/highlights') },
   { label: 'Community', href: '/league/community', icon: FaPeopleGroup, matches: (path: string) => path.startsWith('/league/community') },
 ];
