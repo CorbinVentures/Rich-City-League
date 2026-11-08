@@ -28,8 +28,9 @@ describe('RCH basketball world journey',()=>{
  it('integrates Runs and League directly into the journey',()=>{
   const league=file('src/components/LeagueCenterExperience.tsx');
   const runs=file('src/app/runs/page.tsx');
-  expect(league).toContain('Join Rich City League');
-  expect(league).toContain('href="/league/join"');
+  expect(league).toContain('<LeaguePublicHub initialSnapshot={initialLeagueSnapshot}/>');
+  expect(league).toContain('Rich City Open Runs');
+  expect(league).toContain('href="/runs"');
   expect(runs).toContain('href="/league/join"');
   expect(runs).toContain('Join Rich City League');
   expect(league).toContain('XP {state.rep.xp.toLocaleString()}');

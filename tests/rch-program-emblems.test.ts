@@ -4,7 +4,6 @@ import {join} from 'node:path';
 const text=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 const assets=[
  ['runs','src/app/runs/page.tsx'],
- ['rich-city-league','src/components/LeagueCenterExperience.tsx'],
  ['draft-night','src/app/draft/page.tsx'],
  ['fantasy-league','src/app/fantasy/page.tsx'],
 ] as const;
@@ -23,6 +22,9 @@ describe('RCH program emblems',()=>{
    const page=text(path);
    expect(page).toContain('<ProgramEmblem program="'+program+'"');
   }
+  const leagueJourney=text('src/app/league/join/page.tsx');
+  expect(leagueJourney).toContain("program:'rich-city-league'");
+  expect(leagueJourney).toContain('ProgramEmblem program={program as ProgramEmblemId}');
  });
  it('retains mobile readability: primary text and actions stay visible',()=>{
   const runs=text('src/app/runs/page.tsx');
@@ -32,7 +34,8 @@ describe('RCH program emblems',()=>{
   expect(runs).toContain('Host a Game');
   expect(draft).toContain('LIVE DRAFT BOARD');
   expect(fantasy).toContain('My team');
-  expect(league).toContain('Join the league');
+  expect(league).toContain('VIRGINIA’S ENTERTAINMENT LEAGUE');
+  expect(league).toContain('Rich City Open Runs');
   expect(draft.startsWith("'use client';")).toBe(true);
   expect(fantasy.startsWith("'use client';")).toBe(true);
  });
