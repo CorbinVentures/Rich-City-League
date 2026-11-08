@@ -22,6 +22,13 @@ describe('Weekly SEO: verified public basketball court discovery', () => {
     expect(layout).toContain("robots: { index: false, follow: false }");
   });
 
+  it('applies noindex only to confirmed missing courts', () => {
+    const layout = read('src/app/runs/courts/[slug]/layout.tsx');
+    expect(layout).toContain("if (result.status === 'missing') {");
+    expect(layout).toContain("if (result.status === 'unavailable') {");
+    expect(layout).toContain("return { title: 'Basketball court | Rich City Hoops' };");
+  });
+
   it('does not index confirmed missing individual Runs', () => {
     const layout = read('src/app/runs/[id]/layout.tsx');
     expect(layout).toContain("if(!data)return {title:'Run not found | RCH Runs'");

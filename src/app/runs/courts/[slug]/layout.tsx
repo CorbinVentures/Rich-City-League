@@ -40,11 +40,15 @@ type Props = {
 export async function generateMetadata({ params }: Omit<Props, 'children'>): Promise<Metadata> {
   const { slug } = await params;
   const result = await getCourt(slug);
-  if (result.status !== 'found') {
+  if (result.status === 'missing') {
     return {
       title: 'Basketball court | Rich City Hoops',
       robots: { index: false, follow: false },
     };
+  }
+  if (result.status === 'unavailable') {
+    // Preserve inherited robots metadata while the court service is degraded.
+    return { title: 'Basketball court | Rich City Hoops' };
   }
 
   const { court } = result;
