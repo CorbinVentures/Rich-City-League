@@ -69,19 +69,6 @@ export function LeaguePublicHub({initialSnapshot}:{initialSnapshot?:LeaguePublic
  const statusLabel=(game:LeagueGame)=>game.status==='live'?'LIVE':game.status==='completed'?'FINAL':'UP NEXT';
  const teamTheme=(id:string)=>{const team=teamMap.get(id);return getTeamTheme(team?.slug??'',team?.primary_color,team?.secondary_color);};
  return <section className={styles.home} aria-label="Rich City League">
-  <section className={styles.hero}>
-   <div className={styles.heroGlow} aria-hidden="true"/><div className={styles.heroCourt} aria-hidden="true"/>
-   <div className={styles.heroTop}><span>RICH CITY LEAGUE</span><span>VIRGINIA · EST. 2011</span></div>
-   <div className={styles.heroCopy}>
-    <p className={styles.eyebrow}>A league built on the stories behind the game</p>
-    <h1>Every city has a court.<br/><em>Every court has a story.</em></h1>
-    <p className={styles.intro}>Twelve teams. One Virginia stage. Follow the matchups, the moments, and the people who make Rich City League feel like home.</p>
-    <div className={styles.actions}><Link className={styles.primaryAction} href="/schedule">Explore the schedule <FaArrowRight/></Link><Link className={styles.secondaryAction} href="#franchises">Meet the teams</Link></div>
-   </div>
-   <div className={styles.heroStamp} aria-hidden="true"><span>RCL</span><small>RICHMOND<br/>VIRGINIA</small></div>
-   <div className={styles.heroBottom}><span>THE LEAGUE EXPERIENCE</span><span>{RCL_PRO_SEASON.startLabel} SEASON</span></div>
-  </section>
-
   <section className={styles.scoreboard} aria-label="Rich City League scoreboard">
    <div className={styles.scoreboardHead}>
     <div><p className={styles.eyebrow}>Around the league</p><h2>Scores &amp; schedule</h2></div>
@@ -105,6 +92,19 @@ export function LeaguePublicHub({initialSnapshot}:{initialSnapshot?:LeaguePublic
      </Link>;
     })}
    </div>:<div className={styles.scoreRailEmpty}><span className={styles.emptyPulse} aria-hidden="true"/><div><small>SEASON OPENER</small><strong>{RCL_PRO_SEASON.startLabel}</strong><p>Official matchups and tipoff details will appear here as they are confirmed.</p></div><Link href="/schedule">Season calendar <FaArrowRight/></Link></div>}
+  </section>
+
+  <section className={styles.hero}>
+   <div className={styles.heroGlow} aria-hidden="true"/><div className={styles.heroCourt} aria-hidden="true"/>
+   <div className={styles.heroTop}><span>RICH CITY LEAGUE</span><span>VIRGINIA · EST. 2011</span></div>
+   <div className={styles.heroCopy}>
+    <p className={styles.eyebrow}>A league built on the stories behind the game</p>
+    <h1>Every city has a court.<br/><em>Every court has a story.</em></h1>
+    <p className={styles.intro}>Twelve teams. One Virginia stage. Follow the matchups, the moments, and the people who make Rich City League feel like home.</p>
+    <div className={styles.actions}><Link className={styles.primaryAction} href="/schedule">Explore the schedule <FaArrowRight/></Link><Link className={styles.secondaryAction} href="#franchises">Meet the teams</Link></div>
+   </div>
+   <div className={styles.heroStamp} aria-hidden="true"><span>RCL</span><small>RICHMOND<br/>VIRGINIA</small></div>
+   <div className={styles.heroBottom}><span>THE LEAGUE EXPERIENCE</span><span>{RCL_PRO_SEASON.startLabel} SEASON</span></div>
   </section>
 
   <section className={styles.editorialBlock}>

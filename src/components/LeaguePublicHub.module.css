@@ -131,3 +131,33 @@
 }
 @media(max-width:390px){.scoreboardHead h2{font-size:22px}.scoreboardHead>a{font-size:9px}.scoreRailEmpty{flex-wrap:wrap}.scoreRailEmpty>a{margin-left:24px}}
 @media(prefers-reduced-motion:reduce){.scoreCard{transition:none}.scoreCard:hover{transform:none}}
+
+/* Contrast and sports-homepage hierarchy corrections for real PWA screens. */
+.home{--league-ink:#14212d!important;--league-muted:#4f5e6a!important;--league-line:rgba(16,31,45,.15)!important;color:#14212d!important;background:#f1f3f5!important}
+.home .scoreboard{margin-top:4px}
+.home .scoreboardHead h2,.home .sectionHead h2{color:#15232f!important;text-shadow:none!important}
+.home .eyebrow{color:#526575!important}
+.home .scoreboardHead .eyebrow{color:#526575!important}
+.home .sectionIntro,.home .sectionHead+ p{color:#455662!important}
+.home .editorialNav small{color:#536473!important}
+.home .editorialNav strong{color:#172431!important}
+.home .editorialNav .arrow{color:#365f82!important}
+.home .featureGame,.home .standings{color:#182631!important}
+.home .featureGame h3,.home .standings h3{color:#172431!important}
+.home .featureGame>p,.home .standings>p,.home .feedback,.home .date{color:#4b5a66!important}
+.home .standingRows>div>strong{color:#1c2b37!important}
+.home .standingRows>div>span:last-child{color:#344653!important}
+.home .teamName{max-width:100%;color:#fff!important;font-size:clamp(14px,1.4vw,18px)!important;line-height:1.16!important;overflow-wrap:normal;word-break:normal;hyphens:none;text-shadow:0 2px 12px rgba(0,0,0,.95)!important}
+.home .teamIndex{color:rgba(255,255,255,.78)!important;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.home .teamVisit{color:#f0dcaa!important;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+.home .teamCard:before{background:linear-gradient(180deg,rgba(3,9,15,.08) 12%,rgba(3,9,15,.48) 56%,rgba(3,9,15,.92) 100%)!important}
+.home .hero .eyebrow{color:#edcf90!important}
+.home .hero h1{color:#fff!important;text-shadow:0 3px 22px rgba(0,0,0,.4)}
+.home .hero .intro{color:#f1f4f7!important;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+.home .heroTop,.home .heroBottom{color:rgba(255,255,255,.82)!important;text-shadow:0 1px 5px rgba(0,0,0,.75)}
+.home .cardLink,.home .sectionHead>a,.home .scoreboardHead>a{color:#315d83!important}
+.home .cardLabel{color:#806535!important}
+@media(max-width:680px){
+ .home .scoreboard{margin:8px 0 30px}
+ .home .teamName{font-size:14px!important}
+}
