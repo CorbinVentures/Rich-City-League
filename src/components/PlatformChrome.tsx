@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { AdminControlShortcut } from '@/components/AdminControlShortcut';
 import { RCHDiscoveryStarter } from '@/components/RCHDiscoveryStarter';
+import { LeagueSectionNav } from '@/components/LeagueSectionNav';
 
 export function PlatformChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -38,6 +39,7 @@ export function PlatformChrome({ children }: { children: React.ReactNode }) {
     <>
       <a className="rcl-skip-link" href="#rcl-content">Skip to content</a>
       <SiteHeader />
+      <LeagueSectionNav />
       <AdminControlShortcut />
       <div id="rcl-content" tabIndex={-1} className="rcl-platform-root">
         {pathname === '/today' && <RCHDiscoveryStarter mode="pwa" />}
