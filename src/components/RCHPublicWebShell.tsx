@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
+import { LeagueSectionNav } from '@/components/LeagueSectionNav';
 import { useAuth } from '@/hooks/useAuth';
 import { trackRchConversion } from '@/lib/analytics/conversion';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -199,6 +200,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
       ].map(item => <Link key={item.label} href={item.href} aria-current={item.selected ? 'page' : undefined}><item.icon aria-hidden="true"/><span>{item.label}</span></Link>)}
     </nav>
     <RCHPublicRouteGuide />
+    <LeagueSectionNav />
     <div id="rch-public-content" tabIndex={-1}>{children}</div>
     <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>{user ? 'Your RCH account is active. Keep exploring the website or install the app for the standalone experience.' : 'Browse freely on the web. Create your free profile to save, connect and compete.'}</span></div><Link href={user ? '/my-hoops' : '/app'}>{user ? 'Open My Hoops' : 'Explore the app'} <FaArrowRight aria-hidden="true"/></Link></aside>
     <footer className="rch-public-footer">
