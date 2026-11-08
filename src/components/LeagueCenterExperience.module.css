@@ -1,4 +1,4 @@
-.page{min-height:100vh;background:#06101a;color:#f6f3ed;padding-bottom:5rem;overflow:hidden}
+.page{min-height:100vh;background:#06101a;color:#f6f3ed;padding-bottom:5rem;overflow:hidden;scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .utilityBar{position:relative;background:#07131f;border-top:3px solid #c4a36a;color:rgba(239,236,229,.62);font-size:9px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
 .utilityInner{display:flex;min-height:32px;align-items:center;justify-content:space-between;gap:16px}
 .utilityRight{display:inline-flex;align-items:center;gap:9px}
@@ -63,7 +63,7 @@
  .mobileNav .activeNav:after{position:absolute;right:0;bottom:0;left:0;height:2px;background:#d0b47a;content:""}
 }
 @media(max-width:640px){
- .utilityBar{font-size:8px;letter-spacing:.12em}
+ .utilityBar{display:none}
  .utilityInner{min-height:29px}
  .utilityInner>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .utilityRight{font-size:7px;white-space:nowrap}
@@ -75,16 +75,17 @@
  .memberPill{gap:6px;margin-left:auto;border-left:0;padding-left:0}
  .memberAvatar{width:29px;height:29px;font-size:11px}
  .levelPill{font-size:7px}
- .mobileNav nav{gap:19px;padding:0 16px}
- .ribbonInner{min-height:auto;flex-wrap:wrap;gap:9px 13px;padding-top:12px;padding-bottom:12px}
+ .mobileNav nav{gap:19px;padding:0 16px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+ .ribbonInner{display:grid;grid-template-columns:auto repeat(2,minmax(0,1fr));min-height:0;align-items:center;gap:7px 10px;padding-top:9px;padding-bottom:9px}
  .seasonMark{font-size:8px}
  .ribbonInner p strong{font-size:9px}
  .ribbonInner p span{font-size:8px}
- .ribbonDivider{height:22px}
- .ribbonNote{order:3;width:100%;margin-left:0;font-size:8px}
- .ribbonInner>a{margin-left:auto;font-size:9px}
- .publicStage{padding:16px 0 30px}
+ .ribbonDivider{display:none}
+ .ribbonNote{display:none}
+ .ribbonInner>a{display:none}
+ .publicStage{padding:10px 0 24px}
  .memberContent{padding-top:28px}
+ .page{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
  .visionDetails{padding-right:16px;padding-left:16px}
 }
 @media(prefers-reduced-motion:reduce){

@@ -161,3 +161,12 @@
  .home .scoreboard{margin:8px 0 30px}
  .home .teamName{font-size:14px!important}
 }
+
+/* Public app chrome has a deliberate light content canvas. Override global dark
+   heading rules with the page scope so every league section stays readable. */
+:global(#rch-public-content) .home h2,
+:global(#rch-public-content) .home h3{
+ color:#172431!important;
+ opacity:1!important;
+ text-shadow:none!important;
+}
