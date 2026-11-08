@@ -20,7 +20,7 @@ export function LeagueSectionNav() {
   const pathname = usePathname() || '/';
   const isLeaguePage = pathname === '/league' || pathname.startsWith('/league/');
   const isLeagueDataPage = leagueRoots.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-  if ((!isLeaguePage && !isLeagueDataPage) || pathname === '/league/royaltee' || pathname.startsWith('/league/royaltee/')) return null;
+  if (pathname === '/league' || (!isLeaguePage && !isLeagueDataPage) || pathname === '/league/royaltee' || pathname.startsWith('/league/royaltee/')) return null;
 
   return (
     <section aria-label="Rich City League sections" className="relative z-20 border-y border-white/10 bg-[linear-gradient(105deg,#0c1b2a,#10283a_48%,#0b1927)] text-white shadow-[0_10px_26px_rgba(0,0,0,.16)]">
