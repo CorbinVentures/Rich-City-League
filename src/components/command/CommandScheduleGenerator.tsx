@@ -125,9 +125,9 @@ export function CommandScheduleGenerator() {
  const seasonDivisions=useMemo(()=>divisions.filter(d=>d.season_id===seasonId),[divisions,seasonId]);
  const candidateLinks=useMemo(()=>teamSeasons.filter(ts=>ts.season_id===seasonId&&(divisionId==='all'||(divisionId===NONE?ts.division_id===null:ts.division_id===divisionId))).map(ts=>({link:ts,team:teams.find(t=>t.id===ts.team_id)})).filter((x):x is {link:TeamSeasonRow;team:Row}=>Boolean(x.team)).sort((a,b)=>(a.link.seed??999)-(b.link.seed??999)||a.team.name.localeCompare(b.team.name)),[teamSeasons,seasonId,divisionId,teams]);
  const candidateKey=candidateLinks.map(x=>x.team.id).join('|');
+ const availableEntrantCount=Math.min(32,candidateLinks.length);
  useEffect(()=>{setSelectedTeamIds(candidateLinks.map(x=>x.team.id));setPreview([]);setConflicts([]);},[candidateKey,candidateLinks]);
  useEffect(()=>{if(entrantCount>availableEntrantCount)setEntrantCount(Math.max(2,availableEntrantCount));},[availableEntrantCount,entrantCount]);
- const availableEntrantCount=Math.min(32,candidateLinks.length);
  const orderedSelected=selectedTeamIds.filter((id,index,all)=>all.indexOf(id)===index&&candidateLinks.some(x=>x.team.id===id));
  const chosenForBracket=orderedSelected.slice(0,entrantCount);
 
