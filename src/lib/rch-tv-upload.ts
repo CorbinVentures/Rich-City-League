@@ -49,7 +49,8 @@ type Options = {
   purpose?: 'tv' | 'highlight';
 };
 const checkpointKey = (userId: string, file: File, purpose: 'tv' | 'highlight' = 'tv') =>
-  `rch-tv:tus:${purpose}:${userId}:${file.name}:${file.size}:${file.lastModified}`;
+  purpose === 'tv' ? `rch-tv:tus:${userId}:${file.name}:${file.size}:${file.lastModified}`
+    : `rch-tv:tus:highlight:${userId}:${file.name}:${file.size}:${file.lastModified}`;
 
 function endpointFor(projectUrl: string): string {
   const url = new URL(projectUrl);
