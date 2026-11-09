@@ -471,3 +471,36 @@ html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-w
 html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) .rch-browser-home a:hover {
   border-color: #bdbdbd !important;
 }
+
+/* Neutralize route-specific pink, blue and light treatments left in older page styles. */
+html.rch-premium-root body.rch-premium-app :is(.rch-public-header, .rcl-universal-topbar, .rcl-universal-bottom, .rch-public-mobile-drawer) {
+  background: linear-gradient(145deg, #111111, #090909) !important;
+  border-color: #3b3b3b !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-site, .rch-fantasy-workspace) {
+  background: #070707 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-kicker, .rch-league-header h1 span, .rch-league-section-heading p, .rch-league-label, .rch-league-versus span, .rch-league-table span, .rch-fantasy-kicker) {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-header-actions a.rch-league-join, .rch-fantasy-main-action) {
+  border-color: #d6d6d6 !important;
+  background: linear-gradient(135deg, #d6d6d6, #9f9f9f) !important;
+  color: #090909 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-feature-game a, .rch-league-standings > a, .rch-league-section-links a) {
+  color: #e5e5e5 !important;
+  border-color: #3b3b3b !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root .rch-draft-readable .rcl-draft-hero {
+  background: linear-gradient(130deg, #171717 0%, #090909 75%) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root .rch-draft-readable .rcl-draft-hero .rcl-display span {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-site, .rch-fantasy-workspace) :is([class*="card"], [class*="panel"], [class*="feature"], [class*="module"]) {
+  border-color: #3b3b3b !important;
+  background-color: #111111 !important;
+  color: #fafafa !important;
+}
