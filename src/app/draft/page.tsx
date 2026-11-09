@@ -262,45 +262,46 @@ export default function DraftNightPage() {
 
   return (
     <main className="rcl-draft-platform rch-draft-readable relative min-h-screen overflow-hidden pb-24"><div className="relative z-10">
-      <section className="rcl-draft-hero relative overflow-hidden">
-        <div className="rcl-draft-hero-grid" aria-hidden="true" />
-        <Container maxWidth="xl" className="relative z-10 py-7 sm:py-10 lg:py-12">
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div>
-              <div className="rch-program-brand-lockup rch-program-draft-lockup">
-                <ProgramEmblem program="draft-night" className="rch-program-emblem-draft" priority/>
-                <div className="rch-program-brand-copy">
-              <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · 2027 DRAFT ROOM</p>
-              <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Board.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">2027 franchise lottery order, round-by-round selections, and the live pick clock—all in one place. Official player selections follow the summer 2027 tryouts.</p>
-                </div>
+      <section className="rcl-draft-hero">
+        <Container maxWidth="xl" className="rcl-draft-hero-inner">
+          <div className="rcl-draft-topline">
+            <span>RICH CITY LEAGUE / 2027 DRAFT</span>
+            <Link href="/league">League home <FaArrowRight aria-hidden="true"/></Link>
+          </div>
+          <div className="rcl-draft-hero-row">
+            <div className="rch-program-brand-lockup rch-program-draft-lockup">
+              <ProgramEmblem program="draft-night" className="rch-program-emblem-draft" priority/>
+              <div className="rch-program-brand-copy">
+                <p className="rcl-kicker">THE NEXT GENERATION</p>
+                <h1 className="rcl-display">Draft <span>Night</span></h1>
+                <p className="rcl-draft-description">Franchise order. Future stars. Every selection. The road to the inaugural November 2027 season.</p>
               </div>
-              <nav className="rcl-draft-quicknav mt-4" aria-label="Draft room sections">
-                  <a href={preseasonOrder && (!draft || draft.status === "SETUP") ? "#lottery-board" : "#pick-history"}>Lottery order <FaArrowRight/></a>
-                  <a href="#draft-board">Prospects <FaArrowRight/></a>
-                  <a href="#pick-history">Pick tracker <FaArrowRight/></a>
-                  <Link href="/league/join">Join the league <FaArrowRight/></Link>
-                  <Link href="/fantasy">Fantasy <FaArrowRight/></Link>
-                  <Link href="/league/rules">Proposed League Rules <FaArrowRight/></Link>
-                  <button type="button" onClick={toggleSound} aria-pressed={soundEnabled}>{soundEnabled ? 'Sound on' : 'Sound off'}</button>
-                </nav>
             </div>
-            <div className="rcl-draft-live-card">
-              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE DRAFT BOARD' : 'PRESEASON LOTTERY ORDER'}</span>
-              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'LOTTERY BOARD'}</strong>
-              <small>{currentTeam?.name ?? firstPreviewTeam?.name ?? 'Draft order pending'}</small>
-              <div className="mt-4 flex items-end gap-3"><b>{draft?.status === 'OPEN' ? clock(seconds) : previewPicks.length ? '#01' : '—'}</b><span>{draft?.status === 'OPEN' ? 'remaining' : 'first selection'}</span></div>
+            <div className="rcl-draft-live-card" aria-label="Draft status">
+              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE DRAFT BOARD' : draft?.status === 'COMPLETED' ? 'DRAFT COMPLETE' : '2027 PRESEASON'}</span>
+              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : draft?.status === 'PAUSED' ? 'DRAFT PAUSED' : draft?.status === 'COMPLETED' ? 'ALL PICKS IN' : preseasonOrder ? 'ORDER SET' : 'COMING SOON'}</strong>
+              <small>{draft?.status === 'OPEN' ? currentTeam?.name ?? 'Team pending' : preseasonOrder && (!draft || draft.status === 'SETUP') ? 'Player selections follow tryouts' : 'Official draft not yet live'}</small>
+              {draft?.status === 'OPEN' && <div className="rcl-draft-live-clock"><b>{clock(seconds)}</b><span>remaining</span></div>}
             </div>
           </div>
+          <nav className="rcl-draft-quicknav" aria-label="Draft room sections">
+            <a href={preseasonOrder && (!draft || draft.status === 'SETUP') ? '#lottery-board' : '#pick-history'}>Lottery order</a>
+            <a href="#draft-board">{draft && draft.status !== 'SETUP' ? 'Prospects' : 'How it works'}</a>
+            <a href="#pick-history">Pick tracker</a>
+            <Link href="/fantasy">Fan Fantasy</Link>
+            <Link href="/league/rules">Proposed League Rules</Link>
+            <Link href="/league/join">Join the league</Link>
+            {draft?.status === 'OPEN' && <button type="button" onClick={toggleSound} aria-pressed={soundEnabled}>{soundEnabled ? 'Sound on' : 'Sound off'}</button>}
+          </nav>
         </Container>
       </section>
 
-      <Container maxWidth="xl" className="relative z-10 -mt-7">
+      <Container maxWidth="xl" className="rcl-draft-content">
         <div className="rcl-draft-stat-strip">
           <div><span>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'FIRST PICK'}</span><strong>#{draft?.current_pick ?? (previewPicks.length ? previewPicks[0].pickNumber : '—')}</strong></div>
-          <div><span>ROUND</span><strong>{current?.round_number ?? previewRound}</strong></div>
-          <div><span>SEASON TEAMS</span><strong>{new Set(order.map(row=>row.team_id)).size || preseasonOrder?.first_round_team_ids.length || '—'}</strong></div>
-          <div><span>SELECTED</span><strong>{picks.length}</strong></div>
+          <div><span>ROUNDS</span><strong>{preseasonOrder?.rounds ?? (order.length ? Math.max(...order.map(slot => slot.round_number)) : '—')}</strong></div>
+          <div><span>FRANCHISES</span><strong>{new Set(order.map(row=>row.team_id)).size || preseasonOrder?.first_round_team_ids.length || '—'}</strong></div>
+          <div><span>OFFICIAL PICKS</span><strong>{picks.length}</strong></div>
         </div>
 
         {message && <div role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</div>}
