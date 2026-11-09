@@ -10,7 +10,7 @@ export const revalidate = 60;
 export default async function DivisionsPage() {
   const client = getPublicClient();
   const { data: divisions, error } = client ? await client.from('divisions').select('*').order('name') : { data: [] as Division[], error: null };
-  const rows = (divisions ?? []) as Division[];
+  const rows = (divisions ?? []) as unknown as Division[];
 
   return <main className="min-h-screen bg-rcl-black pb-24 text-white">
     <CorporatePageHero eyebrow="Competition Structure" title="Divisions" accent="Know your lane" description="Explore the official RCL competition groups and move directly into the season each division belongs to." assetKey="league.cover" meta={<div className="min-w-44 rounded-2xl border border-rcl-blue/20 bg-[#071522]/85 px-5 py-4 shadow-xl backdrop-blur"><p className="text-xs font-black uppercase tracking-[.18em] text-white/35">Structure</p><p className="mt-1 font-display text-3xl font-black">{rows.length}<span className="ml-2 text-xs text-white/35">divisions</span></p></div>} />
