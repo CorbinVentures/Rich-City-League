@@ -47,6 +47,13 @@ html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar a, .rcl-uni
 html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar a[aria-current="page"], .rcl-universal-bottom a[aria-current="page"]) {
   color: #fff !important;
 }
+body.rch-premium-app main[data-franchise-world] {
+  --team-accent: #d8d8d8 !important;
+  --team-secondary: #f2f2f2 !important;
+  --team-glow: rgb(255 255 255 / .22) !important;
+  background-color: #070707 !important;
+  background-image: radial-gradient(ellipse at 85% 0%, rgb(255 255 255 / .1), transparent 34rem), linear-gradient(145deg, #111, #070707 68%) !important;
+}
 
 /* The flagship entrance uses a real arena image, treated like a monochrome film still. */
 .rch-public-web .rch-browser-hero {
@@ -196,4 +203,58 @@ html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar a[aria-curr
 @media (prefers-reduced-motion: reduce) {
   .rch-public-web .rch-browser-featured-league,
   .rch-public-web .rch-browser-hero-quick a { transition: none !important; }
+}
+
+
+/* Unposted video thumbnails use a consistent archival film treatment. */
+.rch-tv-poster-fallback {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  align-content: end;
+  gap: 7px;
+  background: #080808;
+}
+.rch-tv-poster-fallback::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(0deg, rgb(0 0 0 / .9), rgb(0 0 0 / .1) 82%),
+    linear-gradient(90deg, rgb(0 0 0 / .56), transparent 85%),
+    url('/league/rcl-showtime-hero.webp') center 55% / cover no-repeat;
+  filter: grayscale(1) contrast(1.14) brightness(.72);
+  transform: scale(1.03);
+  transition: transform .35s ease, filter .35s ease;
+}
+.rch-tv-poster-fallback::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 46%, rgb(255 255 255 / .12) 46.2%, transparent 46.8%);
+}
+.rch-tv-poster-fallback .rch-tv-poster-kicker {
+  color: #d0d0d0;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.rch-tv-poster-fallback .rch-tv-poster-title {
+  max-width: 32ch;
+  color: #fff;
+  font-family: var(--rch-font-display, Impact, sans-serif);
+  font-size: clamp(16px, 2vw, 25px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1.02;
+  text-transform: uppercase;
+  text-shadow: 0 3px 18px #000;
+}
+.rch-tv-poster-fallback:hover::before { transform: scale(1.065); filter: grayscale(1) contrast(1.16) brightness(.82); }
+@media(prefers-reduced-motion:reduce) {
+  .rch-tv-poster-fallback::before { transition:none; }
 }
