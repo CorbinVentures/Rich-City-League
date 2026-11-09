@@ -47,7 +47,7 @@ export function LeagueJoinRegistration(){
     <><p className="mt-2 text-sm text-white/70">An in-app season is accepting registrations. Submitting an application does not guarantee a roster place or tryout selection.</p>
     {authLoading?<p className="mt-3 text-sm text-white/60">Checking your account…</p>
      :user?<RegistrationForm seasons={seasons} divisions={divisions}/>
-     :<Link href="/auth/sign-in?redirect=%2Fleague%2Fjoin%23official-registration" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">Sign in to apply</Link>}
+     :<Link href="/auth/sign-in?redirect=%2Fregister%23official-registration" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-rcl-orange px-4 text-sm font-semibold text-black">Sign in to apply</Link>}
     </>
    :<p className="mt-2 text-sm text-white/65">The professional season is planned for {RCL_PRO_SEASON.startLabel}. Official tryouts are planned for summer 2027; no pro-season registration window is currently open here. Join Rich City Hoops and play Runs in the meantime.</p>}
   <p className="mt-4 text-xs leading-5 text-white/55">League registration and official player tryouts may use different enrollment processes. Confirm eligibility, dates and fees in each official announcement.</p>
