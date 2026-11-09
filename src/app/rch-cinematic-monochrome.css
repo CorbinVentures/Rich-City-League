@@ -64,7 +64,7 @@ body.rch-premium-app main[data-franchise-world] {
   background-image:
     linear-gradient(90deg, rgb(0 0 0 / .94) 0%, rgb(0 0 0 / .73) 37%, rgb(0 0 0 / .32) 74%, rgb(0 0 0 / .58) 100%),
     linear-gradient(0deg, #070707 0%, rgb(7 7 7 / .05) 58%, rgb(7 7 7 / .56) 100%),
-    url('/league/rcl-showtime-hero.webp') !important;
+    url('/images/cinematic/rch-arena-hero.webp') !important;
   background-position: center, center, center 52% !important;
   background-size: cover !important;
   filter: grayscale(1) contrast(1.12) brightness(.82);
@@ -133,7 +133,7 @@ body.rch-premium-app main[data-franchise-world] {
   background:
     linear-gradient(90deg, rgb(0 0 0 / .91), rgb(0 0 0 / .53) 58%, rgb(0 0 0 / .18)),
     linear-gradient(0deg, rgb(0 0 0 / .6), transparent 70%),
-    url('/league/rcl-showtime-hero.webp') center 54% / cover no-repeat;
+    url('/images/cinematic/rch-league-cast.webp') center 54% / cover no-repeat;
   filter: grayscale(1) contrast(1.13) brightness(.78);
   transform: scale(1.015);
 }
@@ -223,7 +223,7 @@ body.rch-premium-app main[data-franchise-world] {
   background:
     linear-gradient(0deg, rgb(0 0 0 / .9), rgb(0 0 0 / .1) 82%),
     linear-gradient(90deg, rgb(0 0 0 / .56), transparent 85%),
-    url('/league/rcl-showtime-hero.webp') center 55% / cover no-repeat;
+    url('/images/cinematic/rch-arena-hero.webp') center 55% / cover no-repeat;
   filter: grayscale(1) contrast(1.14) brightness(.72);
   transform: scale(1.03);
   transition: transform .35s ease, filter .35s ease;
@@ -257,4 +257,68 @@ body.rch-premium-app main[data-franchise-world] {
 .rch-tv-poster-fallback:hover::before { transform: scale(1.065); filter: grayscale(1) contrast(1.16) brightness(.82); }
 @media(prefers-reduced-motion:reduce) {
   .rch-tv-poster-fallback::before { transition:none; }
+}
+
+/* AI-created campaign photography gives each flagship path its own film still. */
+.rch-public-web .rch-browser-feature-runs .rch-browser-feature-art,
+.rch-public-web .rch-browser-event-1 .rch-browser-event-art,
+.rch-public-web .rch-browser-event-3 .rch-browser-event-art {
+  background-image:
+    linear-gradient(0deg, rgb(7 7 7 / .58), rgb(7 7 7 / .08)),
+    url('/images/cinematic/rch-womens-run.webp') !important;
+  background-position: center 43%;
+}
+.rch-public-web .rch-browser-feature-leagues .rch-browser-feature-art,
+.rch-public-web .rch-browser-event-2 .rch-browser-event-art,
+.rch-public-web .rch-browser-feature-social .rch-browser-feature-art,
+.rch-public-web .rch-browser-news-art:empty {
+  background-image:
+    linear-gradient(0deg, rgb(7 7 7 / .58), rgb(7 7 7 / .08)),
+    url('/images/cinematic/rch-league-cast.webp') !important;
+  background-position: center 40%;
+}
+.rch-public-web .rch-browser-feature-media .rch-browser-feature-art,
+.rch-public-web .rch-browser-event-4 .rch-browser-event-art {
+  background-image:
+    linear-gradient(0deg, rgb(7 7 7 / .58), rgb(7 7 7 / .08)),
+    url('/images/cinematic/rch-arena-hero.webp') !important;
+  background-position: center 45%;
+}
+
+/* Bring the same photo-led league identity to the installed PWA home. */
+body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-social-landing-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / .2);
+  border-radius: 28px;
+  background:
+    linear-gradient(90deg, rgb(5 5 5 / .92) 0%, rgb(5 5 5 / .78) 44%, rgb(5 5 5 / .36) 100%),
+    linear-gradient(0deg, rgb(5 5 5 / .48), transparent 60%),
+    url('/images/cinematic/rch-arena-hero.webp') center 50% / cover no-repeat !important;
+}
+body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-league-feature {
+  background:
+    linear-gradient(90deg, rgb(7 7 7 / .94), rgb(7 7 7 / .79) 58%, rgb(7 7 7 / .62)),
+    url('/images/cinematic/rch-league-cast.webp') center 43% / cover no-repeat !important;
+}
+body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth-child(3) {
+  background-image:
+    linear-gradient(0deg, rgb(7 7 7 / .94), rgb(7 7 7 / .72)),
+    url('/images/cinematic/rch-womens-run.webp') !important;
+  background-position: center 40%;
+  background-size: cover;
+}
+body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth-child(3) :is(h3, p, b) {
+  color: #fff !important;
+}
+body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth-child(3) > span {
+  background: rgb(255 255 255 / .14) !important;
+  color: #fff !important;
+}
+@media (max-width: 700px) {
+  body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-social-landing-hero {
+    background-position: center, center, 63% center !important;
+    border-radius: 20px;
+  }
 }

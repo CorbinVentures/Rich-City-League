@@ -40,7 +40,7 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
   return <main className="rcl-social-landing">
     <section className="rcl-social-landing-hero">
       <div className="rcl-landing-copy">
-        <p className="rcl-landing-kicker">RCH · Richmond basketball social</p>
+        <p className="rcl-landing-kicker">RCH · Richmond basketball social · AI-generated campaign photography</p>
         <h1>Your basketball world.<br/><span>All in one place.</span></h1>
         <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
         <div className="rcl-landing-actions">
