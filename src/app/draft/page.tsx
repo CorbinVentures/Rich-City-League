@@ -287,9 +287,14 @@ export default function DraftNightPage() {
             <a href={preseasonOrder && (!draft || draft.status === 'SETUP') ? '#lottery-board' : '#pick-history'}>Lottery order</a>
             <a href="#draft-board">{draft && draft.status !== 'SETUP' ? 'Prospects' : 'How it works'}</a>
             <a href="#pick-history">Pick tracker</a>
-            <Link href="/fantasy">Fan Fantasy</Link>
-            <Link href="/league/rules">Proposed League Rules</Link>
-            <Link href="/league/join">Join the league</Link>
+            <details className="rcl-draft-more">
+              <summary>More <span aria-hidden="true">+</span></summary>
+              <div className="rcl-draft-more-menu">
+                <Link href="/fantasy">Fan Fantasy</Link>
+                <Link href="/league/rules">Proposed League Rules</Link>
+                <Link href="/league/join">Join the league</Link>
+              </div>
+            </details>
             {draft?.status === 'OPEN' && <button type="button" onClick={toggleSound} aria-pressed={soundEnabled}>{soundEnabled ? 'Sound on' : 'Sound off'}</button>}
           </nav>
         </Container>
