@@ -306,15 +306,40 @@ export default function DraftNightPage() {
         {message && <div role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</div>}
 
         {preseasonOrder && (!draft || draft.status === 'SETUP') && (
-          <section id="lottery-board" aria-labelledby="preseason-draft-title" className="rcl-lottery-board mt-6 rounded-3xl border border-white/20 bg-[#151516] p-4 text-white sm:p-7">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+          <section id="lottery-board" aria-labelledby="preseason-draft-title" className="rcl-lottery-board">
+            <div className="rcl-draft-section-head">
               <div>
-                <p className="rcl-kicker">DRAFT LOTTERY · ESTABLISHED PRESEASON ORDER</p>
-                <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">Franchise lottery board</h2>
+                <p className="rcl-kicker">FRANCHISE LOTTERY · ESTABLISHED ORDER</p>
+                <h2 id="preseason-draft-title">The draft order</h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                  {preseasonOrder.season_label} · {preseasonOrder.first_round_team_ids.length} franchise positions · {preseasonOrder.rounds} rounds.
-                  Select a round to view its selections. Even rounds reverse the team order. This draw is a preseason allocation, not a live or completed player draft. Club admission and official eligibility remain subject to approval.
+                  {preseasonOrder.season_label} season · {preseasonOrder.first_round_team_ids.length} franchises · {preseasonOrder.rounds} rounds. Order is assigned; player selections have not begun.
                 </p>
+              </div>
+              <span className="rcl-lottery-status">PRESEASON · ROUND {String(previewRound).padStart(2,'0')}</span>
+            </div>
+            <div className="rcl-lottery-rounds" role="group" aria-label="Preview draft round">
+              {Array.from({ length: preseasonOrder.rounds }, (_, index) => index + 1).map(round => (
+                <button key={round} type="button" onClick={() => setPreviewRound(round)}
+                  aria-pressed={previewRound === round}
+                  className={previewRound === round ? 'rcl-lottery-round active' : 'rcl-lottery-round'}>
+                  Round {round}
+                </button>
+              ))}
+            </div>
+            <ol className="rcl-lottery-grid" aria-label="Franchise pick order">
+              {previewPicks.filter(pick => pick.roundNumber === previewRound).map(pick => {
+                const team = teams.find(item => item.id === pick.teamId);
+                return <li key={pick.pickNumber} className="rcl-lottery-pick">
+                  <span className="rcl-lottery-number">{String(pick.pickNumber).padStart(2,'0')}</span>
+                  <TeamMark team={team} />
+                  <span className="rcl-lottery-team"><small>PICK {pick.pickNumber} · ROUND {pick.roundNumber}</small><strong>{team?.name ?? 'Franchise pending'}</strong></span><span className="rcl-lottery-open">OPEN</span>
+                </li>;
+              })}
+            </ol>
+            <details className="rcl-draft-method">
+              <summary className="cursor-pointer font-semibold text-slate-300">How the order was established</summary>
+              <p className="mt-2 max-w-3xl leading-5">The first round was assigned by a one-time random draw using a recorded seed. Team IDs were ranked by SHA-256 of seed + colon + team ID, lowest hash first. Even rounds reverse the team sequence. This is a published preseason allocation, not an open or finalized playable draft event.</p>
+              <p>Club admission and official eligibility remain subject to approval.</p>
                 {(() => {
                   const coverage = draftRosterCoverage(preseasonOrder.first_round_team_ids.length, preseasonOrder.rounds, 12);
                   return coverage && coverage.remainingPlaces > 0 ? (
@@ -324,32 +349,7 @@ export default function DraftNightPage() {
                     </p>
                   ) : null;
                 })()}
-              </div>
-              <span className="rcl-lottery-status">PRESEASON · NOT LIVE</span>
-            </div>
-            <div className="rcl-lottery-rounds mt-5 flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Preview draft round">
-              {Array.from({ length: preseasonOrder.rounds }, (_, index) => index + 1).map(round => (
-                <button key={round} type="button" onClick={() => setPreviewRound(round)}
-                  aria-pressed={previewRound === round}
-                  className={`rcl-lottery-round shrink-0 min-h-11 rounded-xl border px-4 text-sm font-bold ${previewRound === round ? 'border-white bg-white text-black' : 'border-white/20 bg-white/5 text-white'}`}>
-                  Round {round}
-                </button>
-              ))}
-            </div>
-            <div className="rcl-lottery-grid mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {previewPicks.filter(pick => pick.roundNumber === previewRound).map(pick => {
-                const team = teams.find(item => item.id === pick.teamId);
-                return <div key={pick.pickNumber} className="rcl-lottery-pick flex min-w-0 items-center gap-3 rounded-xl border border-white/15 bg-[#222225] p-3">
-                  <span className="rcl-lottery-number w-12 shrink-0 text-center text-2xl font-black tabular-nums">#{String(pick.pickNumber).padStart(2,'0')}</span>
-                  <TeamMark team={team} />
-                  <span className="min-w-0"><small className="block text-[9px] font-bold uppercase tracking-widest text-white/55">Round {pick.roundNumber} · Selection</small><strong className="block truncate text-sm font-semibold text-white">{team?.name ?? 'Team unavailable'}</strong></span>
-                </div>;
-              })}
-            </div>
-            <details className="mt-5 text-xs text-slate-400">
-              <summary className="cursor-pointer font-semibold text-slate-300">How the order was established</summary>
-              <p className="mt-2 max-w-3xl leading-5">The first round was assigned by a one-time random draw using a recorded seed. Team IDs were ranked by SHA-256 of seed + colon + team ID, lowest hash first. Even rounds reverse the team sequence. This is a published preseason allocation, not an open or finalized playable draft event.</p>
-              <p className="mt-2 break-all font-mono">Draw seed: {preseasonOrder.draw_seed}</p>
+<p className="rcl-draft-seed">Draw seed: <code>{preseasonOrder.draw_seed}</code></p>
             </details>
           </section>
         )}
@@ -398,7 +398,7 @@ export default function DraftNightPage() {
             <div className="rcl-draft-journey-steps"><span><b>01</b> TRYOUTS</span><span><b>02</b> EVALUATION</span><span><b>03</b> DRAFT NIGHT</span></div>
           </section>
         )}
-        {draft && <SeasonDraftScouting teamName={visibleTeam?.name??'this season team'} prospects={scouts} rosterPositions={rosterPositions} isCoach={profile?.role==='coach'} />}
+        {draft && draft.status !== 'SETUP' && <SeasonDraftScouting teamName={visibleTeam?.name??'this season team'} prospects={scouts} rosterPositions={rosterPositions} isCoach={profile?.role==='coach'} />}
         <section id="pick-history" className="rcl-draft-history">
           <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display">Pick tracker</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
           <div className="rcl-pick-history mt-5">
