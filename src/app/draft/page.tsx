@@ -11,11 +11,10 @@ import { draftRosterCoverage } from '@/lib/rcl-governance';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Draft, DraftOrder, DraftPick, PublicPlayer, PublicPlayerIQ, Team, TeamCoach } from '@/types/database';
-import { FaArrowRight, FaBolt, FaCrown, FaMagnifyingGlass, FaShieldHalved, FaUserGroup } from 'react-icons/fa6';
+import { FaArrowRight, FaCrown, FaMagnifyingGlass, FaShieldHalved, FaUserGroup } from 'react-icons/fa6';
 
 type Filter = 'ALL' | 'PG' | 'SG' | 'SF' | 'PF' | 'C';
 type PoolEntry = { player_id: string; eligible: boolean };
-type DraftFeature = { title: string; detail: string; Icon: typeof FaUserGroup };
 
 function playerName(player?: PublicPlayer) {
   return player ? `${player.first_name} ${player.last_name}` : 'Player TBD';
@@ -258,10 +257,10 @@ export default function DraftNightPage() {
     else { setSelected(null); setMessage('Selection submitted. Every RCL viewer is updating now.'); void load(); }
   }
 
-  if (loading) return <main className="min-h-screen"><Container maxWidth="xl" className="py-20"><div className="h-96 animate-pulse rounded-3xl bg-white/5" /></Container></main>;
+  if (loading) return <main className="rcl-draft-platform rch-draft-readable min-h-screen"><Container maxWidth="xl" className="py-8"><div className="h-48 animate-pulse rounded-2xl bg-white/10" aria-label="Loading Draft Night" /></Container></main>;
 
   return (
-    <main className="rcl-draft-platform rch-draft-readable relative min-h-screen overflow-hidden pb-24"><div className="relative z-10">
+    <main className="rcl-draft-platform rch-draft-readable rch-draft-v2 relative min-h-screen overflow-hidden pb-24" data-draft-ui="v2"><div className="relative z-10">
       <section className="rcl-draft-hero">
         <Container maxWidth="xl" className="rcl-draft-hero-inner">
           <div className="rcl-draft-topline">
@@ -355,33 +354,28 @@ export default function DraftNightPage() {
           </section>
         )}
 
-        <section className="rcl-draft-workspace mt-8">
-          <div className="rcl-draft-module rcl-draft-hub">
-            <div className="rcl-module-heading"><span className="rcl-module-icon"><FaCrown /></span><div><small>DRAFT HUB</small><h2>Draft control</h2></div></div>
-            <div className="rcl-draft-countdown"><span>NEXT DRAFT</span><strong>{draft?.status === 'OPEN' ? 'LIVE NOW' : 'RCL SEASON DRAFT'}</strong><div><b>{draft?.current_pick ?? '—'}</b><small>PICK</small><b>{order.length}</b><small>ORDER</small></div></div>
-            <Link href="/draft#draft-board" className="rcl-draft-primary">VIEW DRAFT BOARD <FaArrowRight /></Link>
-            <Link href="/draft#official-draft-rules" className="rcl-draft-secondary">DRAFT RULES</Link>
-          </div>
-
+        {draft && draft.status !== 'SETUP' ? (<>
+          <div className="rcl-draft-section-head rcl-draft-stage-heading"><div><p className="rcl-kicker">OFFICIAL DRAFT ROOM</p><h2>Selections &amp; prospects</h2><p>Eligible players, team controls, and live selections.</p></div></div>
+        <section className="rcl-draft-workspace" aria-label="Official draft room">
           <div id="draft-board" className="rcl-draft-module rcl-draft-board">
-            <div className="rcl-module-heading"><span className="rcl-module-icon"><FaMagnifyingGlass /></span><div><small>DRAFT BOARD</small><h2>Available talent</h2></div></div>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search players..." aria-label="Search draft players" />
-            <div className="rcl-filter-row">{(['ALL','PG','SG','SF','PF','C'] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setFilter(item)} className={filter === item ? 'active' : ''}>{item}</button>)}</div>
+            <div className="rcl-module-heading"><span className="rcl-module-icon"><FaMagnifyingGlass /></span><div><small>DRAFT BOARD</small><h2>Eligible prospects</h2></div></div>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search eligible players..." aria-label="Search draft players" />
+            <div className="rcl-filter-row">{(['ALL','PG','SG','SF','PF','C'] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setFilter(item)} aria-pressed={filter === item} className={filter === item ? 'active' : ''}>{item}</button>)}</div>
             <div className="rcl-prospect-list">
-              {available.slice(0, 8).map((player) => <button type="button" key={player.id} onClick={() => setSelected(player.id)} className={selected === player.id ? 'selected' : ''}>
-                <span className="rcl-rank" aria-label="Available prospect">•</span><span className="rcl-prospect-avatar">{player.photo_url ? <img src={player.photo_url} alt="" /> : player.first_name?.[0]}</span><span className="rcl-prospect-name">{playerName(player)}<small>{player.position ?? '—'}</small></span><b>{ratings.get(player.id) ?? '—'}</b>
+              {available.slice(0, 12).map((player) => <button type="button" key={player.id} onClick={() => setSelected(player.id)} aria-pressed={selected === player.id} className={selected === player.id ? 'selected' : ''}>
+                <span className="rcl-prospect-avatar">{player.photo_url ? <img src={player.photo_url} alt="" /> : player.first_name?.[0]}</span><span className="rcl-prospect-name">{playerName(player)}<small>{player.position ?? '—'}</small></span><b className="rcl-prospect-rating">OVR {ratings.get(player.id) ?? '—'}</b>
               </button>)}
-              {available.length > 8 && <p className="p-3 text-[11px] text-white/40">Showing 8 of {available.length}. Use search or position filters to explore the full eligible pool.</p>}
+              {available.length > 8 && <p className="p-3 text-[11px] text-white/40">Showing 12 of {available.length}. Use search or position filters to explore the full eligible pool.</p>}
               {!available.length && <p className="p-5 text-xs text-white/35">No unassigned eligible prospects match your filters.</p>}
             </div>
           </div>
 
           <div className="rcl-draft-module rcl-team-selection">
             <div className="rcl-module-heading"><span className="rcl-module-icon"><FaCrown /></span><div><small>TEAM SELECTION</small><h2>{currentTeam?.name ?? 'Waiting'}</h2></div></div>
-            <div className="rcl-on-clock"><span>ON THE CLOCK</span><strong>{clock(seconds)}</strong><small>Pick #{draft?.current_pick ?? '—'} · Round {current?.round_number ?? '—'}</small></div>
-            {selectedPlayer ? <div className="rcl-selected-player"><strong>{playerName(selectedPlayer)}</strong><span>{selectedPlayer.position ?? 'Position TBD'} · OVR {ratings.get(selectedPlayer.id) ?? '—'}</span></div> : <div className="rcl-empty-pick">Select a prospect from the board.</div>}
+            <div className="rcl-on-clock"><span>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'DRAFT STATUS'}</span><strong>{draft?.status === 'OPEN' ? clock(seconds) : draft?.status === 'PAUSED' ? 'PAUSED' : draft?.status === 'COMPLETED' ? 'COMPLETE' : 'NOT LIVE'}</strong><small>Pick #{draft?.current_pick ?? '—'} · Round {current?.round_number ?? '—'}</small></div>
+            {selectedPlayer ? <div className="rcl-selected-player"><strong>{playerName(selectedPlayer)}</strong><span>{selectedPlayer.position ?? 'Position TBD'} · OVR {ratings.get(selectedPlayer.id) ?? '—'}</span></div> : <div className="rcl-empty-pick">Choose an eligible prospect from the board.</div>}
             <button type="button" disabled={!selectedPlayer || !isOnClock} onClick={() => void makePick()} className="rcl-draft-primary w-full disabled:cursor-not-allowed disabled:opacity-35">MAKE SELECTION <FaArrowRight /></button>
-            <p className="mt-3 text-xs uppercase tracking-widest text-white/30">{isOnClock ? 'Coach controls enabled' : 'Waiting for the authorized team'}</p>
+            <p className="rcl-draft-hint">{isOnClock ? 'Coach controls enabled' : 'Waiting for the authorized team'}</p>
           </div>
 
           <div className="rcl-draft-module rcl-player-preview">
@@ -398,27 +392,23 @@ export default function DraftNightPage() {
           </div>
         </section>
 
+        </>) : (
+          <section id="draft-board" className="rcl-draft-prelaunch">
+            <div><p className="rcl-kicker">THE ROAD TO DRAFT NIGHT</p><h2>Earn your spot on the board.</h2><p>Official tryouts are planned for summer 2027. Franchise selections follow evaluations and league approval.</p></div>
+            <div className="rcl-draft-journey-steps"><span><b>01</b> TRYOUTS</span><span><b>02</b> EVALUATION</span><span><b>03</b> DRAFT NIGHT</span></div>
+          </section>
+        )}
         {draft && <SeasonDraftScouting teamName={visibleTeam?.name??'this season team'} prospects={scouts} rosterPositions={rosterPositions} isCoach={profile?.role==='coach'} />}
-        <section className="rcl-draft-features mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {([
-            { title: 'PLAYER SCOUTING', detail: 'Profiles, stats, highlights', Icon: FaUserGroup },
-            { title: 'LIVE DRAFTING', detail: 'Real-time selections', Icon: FaCrown },
-            { title: 'TEAM MANAGEMENT', detail: 'Rosters, trades, waivers', Icon: FaShieldHalved },
-            { title: 'ANALYTICS', detail: 'Player rankings & trends', Icon: FaBolt },
-            { title: 'COMMUNITY', detail: 'Discuss, react, follow', Icon: FaUserGroup },
-          ] satisfies DraftFeature[]).map(({ title, detail, Icon }) => <div key={String(title)} className="rcl-draft-feature"><Icon /><div><strong>{title}</strong><span>{detail}</span></div></div>)}
-        </section>
-
-        <section id="pick-history" className="mt-10">
-          <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display mt-2 text-4xl uppercase">Pick tracker</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
+        <section id="pick-history" className="rcl-draft-history">
+          <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display">Pick tracker</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
           <div className="rcl-pick-history mt-5">
             {order.map((slot) => { const pick = picks.find((item) => item.pick_number === slot.pick_number); const team = teams.find((item) => item.id === slot.team_id); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; return <div key={slot.id} className={slot.pick_number === draft?.current_pick ? 'current' : ''}><b>#{slot.pick_number}</b><span className="flex items-center gap-2"><TeamMark team={team} />{team?.name ?? 'TBD'}</span><strong>{player ? playerName(player) : slot.pick_number === draft?.current_pick ? 'ON THE CLOCK' : 'Awaiting selection'}</strong><small>{player?.position ?? '—'} · OVR {player ? ratings.get(player.id) ?? '—' : '—'}</small></div>; })}
-            {!order.length && <p className="p-8 text-center text-sm text-white/35">Official draft order pending.</p>}
+            {!order.length && <p className="p-8 text-center text-sm text-white/35">No official selections yet. The lottery order is not a completed draft.</p>}
           </div>
         </section>
 
-        <section id="rules" className="mt-16 border-t border-white/10 pt-12">
-          <p className="rcl-kicker">THE RCL PATH</p><h2 className="rcl-display mt-3 text-4xl uppercase sm:text-6xl">Evaluation → Draft → Roster → Season</h2>
+        <section id="rules" className="rcl-draft-footer">
+          <p className="rcl-kicker">THE RCL PATH</p><h2 className="rcl-display mt-3 text-4xl uppercase sm:text-6xl">Tryouts. Draft. Spotlight.</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45">Players compete, enter the official pool, hear their name called, join a roster, and start building their Richmond basketball legacy.</p>
         </section>
       </Container>
