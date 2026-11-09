@@ -1,609 +1,259 @@
 /*
- * Draft Night — RCH uniform product treatment.
- * This intentionally loads after the legacy cinematic draft styles.
- * Draft functionality stays intact; only presentation is normalized to
- * the approved Cool · Trustworthy · Basketball Social system.
+ * DRAFT NIGHT / PWA DESIGN AUTHORITY
+ * One self-contained design system, loaded AFTER legacy global themes.
+ * Draft order is a PRESEASON preview; only the official draft event is LIVE.
  */
-
-.rcl-platform-root .rcl-draft-platform {
-  --draft-accent: var(--rcl-orange, var(--rch-brand-accent));
-  background: var(--rcl-v3-canvas) !important;
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-draft-platform::before,
-.rcl-platform-root .rcl-draft-platform::after {
-  display: none !important;
-}
-
-.rcl-platform-root .rcl-draft-platform > div {
-  color: var(--rcl-v3-ink) !important;
-}
-
-/* Hero */
-.rcl-platform-root .rcl-draft-hero {
-  min-height: 0 !important;
-  border-bottom: 1px solid var(--rcl-v3-border) !important;
-  background:
-    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--draft-accent) 12%, transparent), transparent 28rem),
-    linear-gradient(180deg, #FFFFFF 0%, var(--rch-brand-ink) 100%) !important;
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-draft-hero-grid {
-  opacity: .55 !important;
-  background:
-    linear-gradient(90deg, transparent 0 74%, color-mix(in srgb, var(--draft-accent) 8%, transparent) 74% 74.12%, transparent 74.12%),
-    repeating-linear-gradient(135deg, transparent 0 5rem, color-mix(in srgb, var(--draft-accent) 5%, transparent) 5.05rem 5.12rem) !important;
-}
-
-.rcl-platform-root .rcl-draft-hero .rcl-kicker,
-.rcl-platform-root .rcl-draft-platform .rcl-kicker {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-hero .rcl-display,
-.rcl-platform-root .rcl-draft-platform .rcl-display {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-  letter-spacing: -.04em !important;
-  text-shadow: none !important;
-}
-
-.rcl-platform-root .rcl-draft-hero .rcl-display span {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-hero p:not(.rcl-kicker) {
-  color: var(--rcl-v3-copy) !important;
-}
-
-.rcl-platform-root .rcl-draft-live-card {
-  min-width: 15rem !important;
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 20px !important;
-  background: #fff !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: var(--rcl-v3-shadow) !important;
-}
-
-.rcl-platform-root .rcl-draft-live-card .rcl-live {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-live-card strong,
-.rcl-platform-root .rcl-draft-live-card b {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-}
-
-.rcl-platform-root .rcl-draft-live-card b {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-live-card small,
-.rcl-platform-root .rcl-draft-live-card span:last-child {
-  color: var(--rcl-v3-muted) !important;
-}
-
-/* Stat strip */
-.rcl-platform-root .rcl-draft-stat-strip {
-  overflow: hidden !important;
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 20px !important;
-  background: #fff !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: var(--rcl-v3-shadow) !important;
-}
-
-.rcl-platform-root .rcl-draft-stat-strip > div {
-  border-color: var(--rcl-v3-border) !important;
-}
-
-.rcl-platform-root .rcl-draft-stat-strip span {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-draft-stat-strip strong {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-}
-
-/* Main modules */
-.rcl-platform-root .rcl-draft-module {
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 20px !important;
-  background: #fff !important;
-  background-image: none !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: var(--rcl-v3-shadow) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.rcl-platform-root .rcl-draft-module:hover {
-  border-color: color-mix(in srgb, var(--draft-accent) 35%, var(--rcl-v3-border)) !important;
-  box-shadow: var(--rcl-v3-shadow-raised) !important;
-}
-
-.rcl-platform-root .rcl-module-heading small {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-module-heading h2 {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-}
-
-.rcl-platform-root .rcl-module-icon {
-  border-color: color-mix(in srgb, var(--draft-accent) 22%, var(--rcl-v3-border)) !important;
-  background: color-mix(in srgb, var(--draft-accent) 9%, #fff) !important;
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-countdown {
-  border: 1px solid color-mix(in srgb, var(--draft-accent) 14%, var(--rcl-v3-border)) !important;
-  background: color-mix(in srgb, var(--draft-accent) 5%, #fff) !important;
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-draft-countdown > span {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-countdown > strong,
-.rcl-platform-root .rcl-draft-countdown b {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-}
-
-.rcl-platform-root .rcl-draft-countdown small {
-  color: var(--rcl-v3-muted) !important;
-}
-
-/* Buttons */
-.rcl-platform-root .rcl-draft-primary {
-  border: 1px solid var(--draft-accent) !important;
-  background: var(--draft-accent) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--draft-accent) 22%, transparent) !important;
-}
-
-.rcl-platform-root .rcl-draft-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(.97);
-}
-
-.rcl-platform-root .rcl-draft-primary:disabled {
-  border-color: var(--rcl-v3-border) !important;
-  background: var(--rcl-v3-soft) !important;
-  color: var(--rcl-v3-muted) !important;
-  box-shadow: none !important;
-}
-
-.rcl-platform-root .rcl-draft-secondary {
-  border: 1px solid var(--rcl-v3-border) !important;
-  background: #fff !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: none !important;
-}
-
-.rcl-platform-root .rcl-draft-secondary:hover {
-  border-color: color-mix(in srgb, var(--draft-accent) 32%, var(--rcl-v3-border)) !important;
-  background: var(--rcl-v3-primary-soft) !important;
-  color: var(--rcl-v3-primary-deep) !important;
-}
-
-/* Search + filters */
-.rcl-platform-root .rcl-draft-board input {
-  min-height: 44px !important;
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 12px !important;
-  background: var(--rcl-v3-canvas) !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: none !important;
-}
-
-.rcl-platform-root .rcl-draft-board input::placeholder {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-filter-row {
-  gap: .45rem !important;
-  padding: .15rem 0 .65rem !important;
-}
-
-.rcl-platform-root .rcl-filter-row button {
-  min-width: 42px !important;
-  min-height: 38px !important;
-  border: 1px solid var(--rcl-v3-border) !important;
-  background: var(--rcl-v3-soft) !important;
-  color: var(--rcl-v3-slate) !important;
-}
-
-.rcl-platform-root .rcl-filter-row button.active {
-  border-color: var(--draft-accent) !important;
-  background: var(--draft-accent) !important;
-  color: #fff !important;
-}
-
-/* Prospect board */
-.rcl-platform-root .rcl-prospect-list {
-  border-top: 1px solid var(--rcl-v3-border);
-}
-
-.rcl-platform-root .rcl-prospect-list > button {
-  border-color: var(--rcl-v3-border) !important;
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-prospect-list > button:hover,
-.rcl-platform-root .rcl-prospect-list > button.selected {
-  background: color-mix(in srgb, var(--draft-accent) 7%, #fff) !important;
-}
-
-.rcl-platform-root .rcl-rank {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-prospect-avatar {
-  background: var(--rcl-v3-soft) !important;
-  color: var(--rcl-v3-slate) !important;
-}
-
-.rcl-platform-root .rcl-prospect-name {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-prospect-name small,
-.rcl-platform-root .rcl-prospect-list > button > b {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-prospect-list > p {
-  color: var(--rcl-v3-copy) !important;
-}
-
-/* On-the-clock / selection */
-.rcl-platform-root .rcl-on-clock {
-  border-color: color-mix(in srgb, var(--draft-accent) 20%, var(--rcl-v3-border)) !important;
-  background: color-mix(in srgb, var(--draft-accent) 5%, #fff) !important;
-}
-
-.rcl-platform-root .rcl-on-clock span {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-on-clock strong {
-  color: var(--rcl-v3-ink) !important;
-  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
-  font-weight: 900 !important;
-}
-
-.rcl-platform-root .rcl-on-clock small {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-selected-player {
-  border-color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-selected-player strong {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-selected-player span {
-  color: var(--rcl-v3-copy) !important;
-}
-
-.rcl-platform-root .rcl-empty-pick {
-  border-color: var(--rcl-v3-border) !important;
-  background: var(--rcl-v3-canvas) !important;
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-team-selection > p,
-.rcl-platform-root .rcl-my-team > p {
-  color: var(--rcl-v3-muted) !important;
-}
-
-/* Player preview */
-.rcl-platform-root .rcl-player-photo {
-  border: 1px solid var(--rcl-v3-border) !important;
-  background: linear-gradient(145deg, var(--rcl-v3-soft), #fff) !important;
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-player-preview h3 {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-player-preview > p {
-  color: var(--rcl-v3-copy) !important;
-}
-
-.rcl-platform-root .rcl-player-metrics span {
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 10px !important;
-  background: var(--rcl-v3-canvas) !important;
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-player-metrics b {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-preview-empty {
-  min-height: 11rem !important;
-  border: 1px dashed var(--rcl-v3-border);
-  border-radius: 14px;
-  background: var(--rcl-v3-canvas);
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-preview-empty svg {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-preview-empty strong {
-  color: var(--rcl-v3-ink) !important;
-}
-
-/* Roster */
-.rcl-platform-root .rcl-roster-mini > div {
-  border-color: var(--rcl-v3-border) !important;
-}
-
-.rcl-platform-root .rcl-roster-mini b {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-roster-mini span {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-roster-mini small {
-  color: var(--rcl-v3-muted) !important;
-}
-
-/* Feature row */
-.rcl-platform-root .rcl-draft-feature {
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 16px !important;
-  background: #fff !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: var(--rcl-v3-shadow) !important;
-}
-
-.rcl-platform-root .rcl-draft-feature svg {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-draft-feature strong {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-draft-feature span {
-  color: var(--rcl-v3-copy) !important;
-}
-
-/* History */
-.rcl-platform-root .rcl-pick-history {
-  border: 1px solid var(--rcl-v3-border) !important;
-  border-radius: 20px !important;
-  background: #fff !important;
-  color: var(--rcl-v3-ink) !important;
-  box-shadow: var(--rcl-v3-shadow) !important;
-}
-
-.rcl-platform-root .rcl-pick-history > div {
-  border-color: var(--rcl-v3-border) !important;
-}
-
-.rcl-platform-root .rcl-pick-history > div.current {
-  background: color-mix(in srgb, var(--draft-accent) 7%, #fff) !important;
-}
-
-.rcl-platform-root .rcl-pick-history > div > b {
-  color: var(--draft-accent) !important;
-}
-
-.rcl-platform-root .rcl-pick-history span,
-.rcl-platform-root .rcl-pick-history strong {
-  color: var(--rcl-v3-ink) !important;
-}
-
-.rcl-platform-root .rcl-pick-history small {
-  color: var(--rcl-v3-muted) !important;
-}
-
-.rcl-platform-root .rcl-pick-history > p {
-  color: var(--rcl-v3-copy) !important;
-}
-
-/* Rules / closing path */
-.rcl-platform-root .rcl-draft-platform #rules {
-  border-color: var(--rcl-v3-border) !important;
-  margin-top: 3.5rem !important;
-  padding-bottom: 1rem;
-}
-
-.rcl-platform-root .rcl-draft-platform #rules > p:last-child {
-  color: var(--rcl-v3-copy) !important;
-}
-
-/* Direct utility remnants inside the legacy draft markup. */
-.rcl-platform-root .rcl-draft-platform [class*="text-white/"] {
-  color: var(--rcl-v3-copy) !important;
-}
-
-.rcl-platform-root .rcl-draft-platform [class*="border-white/"] {
-  border-color: var(--rcl-v3-border) !important;
-}
-
-.rcl-platform-root .rcl-draft-platform [class*="bg-white/"],
-.rcl-platform-root .rcl-draft-platform [class*="bg-black/"] {
-  background-color: var(--rcl-v3-surface) !important;
-}
-
-/* Mobile: compact cards and keep the fixed RCH bottom nav clear. */
-@media (max-width: 639px) {
-  .rcl-platform-root .rcl-draft-platform {
-    padding-bottom: 7rem !important;
-  }
-
-  .rcl-platform-root .rcl-draft-hero {
-    min-height: 0 !important;
-  }
-
-  .rcl-platform-root .rcl-draft-hero .rcl-display {
-    font-size: clamp(2.35rem, 12vw, 3.25rem) !important;
-    line-height: .96 !important;
-  }
-
-  .rcl-platform-root .rcl-draft-hero .rcl-draft-live-card {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .rcl-platform-root .rcl-draft-stat-strip {
-    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
-  }
-
-  .rcl-platform-root .rcl-draft-stat-strip > div {
-    min-height: 84px;
-    padding: .9rem 1rem !important;
-  }
-
-  .rcl-platform-root .rcl-draft-stat-strip > div:nth-child(2) {
-    border-right: 0 !important;
-  }
-
-  .rcl-platform-root .rcl-draft-stat-strip > div:nth-child(-n+2) {
-    border-bottom: 1px solid var(--rcl-v3-border) !important;
-  }
-
-  .rcl-platform-root .rcl-draft-workspace {
-    gap: .9rem !important;
-  }
-
-  .rcl-platform-root .rcl-draft-module {
-    border-radius: 18px !important;
-    padding: 1rem !important;
-  }
-
-  .rcl-platform-root .rcl-draft-feature {
-    min-height: 72px !important;
-  }
-
-  .rcl-platform-root .rcl-pick-history > div {
-    grid-template-columns: 2.4rem 1fr auto !important;
-    gap: .55rem !important;
-  }
-
-  .rcl-platform-root .rcl-pick-history > div > small {
-    display: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rcl-platform-root .rcl-draft-primary,
-  .rcl-platform-root .rcl-draft-module {
-    transition: none !important;
-  }
-}
-
-/* Draft Room v2 — monochrome franchise lottery, PWA-first. Overrides old blue/pink/light theme. */
-.rcl-platform-root .rcl-draft-platform{--draft-accent:#f4f4f4;background:#0b0b0d!important;color:#f7f7f7!important;color-scheme:dark}
-.rcl-platform-root .rcl-draft-platform>div{color:#f7f7f7!important}
-.rcl-platform-root .rcl-draft-hero{min-height:0!important;border-color:#ffffff24!important;background:linear-gradient(130deg,#171719,#0b0b0d 60%,#222225)!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-hero-grid{opacity:.15!important;filter:grayscale(1)}
-.rcl-platform-root .rcl-draft-hero .rcl-display,.rcl-platform-root .rcl-draft-platform .rcl-display{color:#fff!important;text-shadow:none!important}
-.rcl-platform-root .rcl-draft-hero .rcl-display span{color:#fff!important}
-.rcl-platform-root .rcl-draft-hero .rcl-kicker,.rcl-platform-root .rcl-draft-platform .rcl-kicker{color:#dedee0!important}
-.rcl-platform-root .rcl-draft-hero p:not(.rcl-kicker){color:#c9c9cd!important}
-.rcl-program-draft-lockup{align-items:center}
-.rcl-program-draft-lockup .rch-program-brand-copy{min-width:0}
-.rcl-draft-quicknav{display:flex;flex-wrap:wrap;gap:8px}
-.rcl-draft-quicknav>a,.rcl-draft-quicknav>button{display:inline-flex;min-height:42px;align-items:center;justify-content:center;gap:7px;border:1px solid #ffffff4b;border-radius:9px;background:#252527;padding:0 12px;color:#eee;font-size:11px;font-weight:800;white-space:nowrap}
-.rcl-draft-quicknav>a:first-child{background:#ededed;color:#141414;border-color:#ededed}
-.rcl-draft-quicknav>a:hover,.rcl-draft-quicknav>button:hover{border-color:#fff}
-.rcl-platform-root .rcl-draft-live-card{min-width:190px!important;border-color:#ffffff33!important;border-radius:14px!important;background:#212123!important;color:#fff!important;box-shadow:none!important}
-.rcl-platform-root .rcl-draft-live-card .rcl-live{color:#d4d4d6!important}
-.rcl-platform-root .rcl-draft-live-card :is(strong,b){color:#fff!important}
-.rcl-platform-root .rcl-draft-live-card small,.rcl-platform-root .rcl-draft-live-card span:last-child{color:#bfc0c4!important}
-.rcl-platform-root .rcl-draft-stat-strip{border:1px solid #ffffff31!important;border-radius:14px!important;background:#171719!important;box-shadow:none!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-stat-strip>div{border-color:#ffffff20!important}
-.rcl-platform-root .rcl-draft-stat-strip span{color:#bdbdc0!important}
-.rcl-platform-root .rcl-draft-stat-strip strong{color:#fff!important}
-.rcl-lottery-board{border:1px solid #ffffff30!important;border-radius:16px!important;background:#171719!important;box-shadow:none!important;scroll-margin-top:96px}
-.rcl-lottery-board .rcl-display{font-size:clamp(24px,4vw,40px)!important;line-height:1.13!important}
-.rcl-lottery-board .rcl-kicker{font-size:10px!important}
-.rcl-lottery-board p{color:#c9c9cb}
-.rcl-lottery-status{display:inline-flex;align-items:center;min-height:34px;border:1px solid #ffffff50;border-radius:7px;padding:0 10px;color:#f5f5f5;font-size:10px;font-weight:850;letter-spacing:.09em;white-space:nowrap}
-.rcl-lottery-rounds{scrollbar-width:thin;scrollbar-color:#858585 transparent}
-.rcl-lottery-round{font-size:11px!important}
-.rcl-lottery-pick{border-color:#ffffff2a!important;background:#242426!important}
-.rcl-lottery-number{color:#fff}
-.rcl-lottery-pick:hover{border-color:#ffffff90!important;background:#29292c!important}
-.rcl-platform-root .rcl-draft-module{border:1px solid #ffffff30!important;border-radius:16px!important;background:#1a1a1d!important;background-image:none!important;box-shadow:none!important;color:#f6f6f6!important}
-.rcl-platform-root .rcl-draft-module:hover{border-color:#ffffff60!important;box-shadow:none!important}
-.rcl-platform-root .rcl-module-heading h2,.rcl-platform-root .rcl-draft-module :is(h2,h3){color:#f4f4f4!important}
-.rcl-platform-root .rcl-module-heading small,.rcl-platform-root .rcl-draft-module :is(small,p){color:#bdbdc1!important}
-.rcl-platform-root .rcl-module-icon{border-color:#ffffff30!important;background:#ffffff13!important;color:#eee!important}
-.rcl-platform-root .rcl-draft-countdown{border-color:#ffffff2b!important;background:#27272a!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-countdown>span{color:#cacacd!important}
-.rcl-platform-root .rcl-draft-countdown :is(strong,b){color:#fff!important}
-.rcl-platform-root .rcl-draft-countdown small{color:#ceced1!important}
-.rcl-platform-root .rcl-draft-primary{border-color:#f5f5f5!important;background:#f5f5f5!important;color:#131314!important;box-shadow:none!important}
-.rcl-platform-root .rcl-draft-primary:disabled{border-color:#ffffff2b!important;background:#323235!important;color:#9d9da1!important}
-.rcl-platform-root .rcl-draft-secondary{border-color:#ffffff50!important;background:#262629!important;color:#f3f3f3!important}
-.rcl-platform-root .rcl-draft-secondary:hover{border-color:#fff!important;background:#303034!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-board input{border-color:#ffffff43!important;background:#252528!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-board input::placeholder{color:#aaaab0!important}
-.rcl-platform-root .rcl-filter-row button{border-color:#ffffff35!important;background:#2b2b2d!important;color:#ececee!important}
-.rcl-platform-root .rcl-filter-row button.active{background:#f6f6f6!important;border-color:#fff!important;color:#111!important}
-.rcl-platform-root .rcl-prospect-list{border-color:#ffffff24!important}
-.rcl-platform-root .rcl-prospect-list>button{border-color:#ffffff22!important;color:#fff!important}
-.rcl-platform-root .rcl-prospect-list>button:hover,.rcl-platform-root .rcl-prospect-list>button.selected{background:#ffffff18!important}
-.rcl-platform-root .rcl-rank{color:#fff!important}
-.rcl-platform-root .rcl-prospect-avatar{background:#37373a!important;color:#fff!important}
-.rcl-platform-root .rcl-prospect-name{color:#fff!important}
-.rcl-platform-root .rcl-prospect-name small,.rcl-platform-root .rcl-prospect-list>button>b{color:#bbb!important}
-.rcl-platform-root .rcl-on-clock{border-color:#ffffff3a!important;background:#262628!important}
-.rcl-platform-root .rcl-on-clock :is(span,strong,small){color:#f3f3f3!important}
-.rcl-platform-root .rcl-selected-player,.rcl-platform-root .rcl-empty-pick,.rcl-platform-root .rcl-preview-empty{border-color:#ffffff28!important;background:#242427!important;color:#efefef!important}
-.rcl-platform-root .rcl-draft-feature{border-color:#ffffff2a!important;background:#18181a!important;color:#fff!important}
-.rcl-platform-root .rcl-draft-feature svg{color:#e5e5e6!important}
-.rcl-platform-root .rcl-pick-history{border-color:#ffffff29!important;background:#161618!important}
-.rcl-platform-root .rcl-pick-history>div{border-color:#ffffff25!important;color:#fff!important}
-.rcl-platform-root .rcl-pick-history>div.current{background:#303034!important}
-.rcl-platform-root .rcl-pick-history :is(strong,b){color:#f6f6f6!important}
-.rcl-platform-root .rcl-pick-history small,.rcl-platform-root .rcl-pick-history>p{color:#bcbcc0!important}
-.rcl-platform-root .rcl-draft-platform #rules{border-color:#ffffff27!important}
-.rcl-platform-root .rcl-draft-platform [class*="text-white/"]{color:#bfbfc2!important}
-.rcl-platform-root .rcl-draft-platform [class*="border-white/"]{border-color:#ffffff2a!important}
-.rcl-platform-root .rcl-draft-platform [class*="bg-white/"],.rcl-platform-root .rcl-draft-platform [class*="bg-black/"]{background-color:#252528!important}
-@media(max-width:639px){
- .rcl-platform-root .rcl-draft-hero .rcl-display{font-size:clamp(31px,9vw,42px)!important;line-height:1!important}
- .rcl-platform-root .rcl-draft-hero .rcl-display+p{margin-top:10px}
- .rcl-program-draft-lockup .rch-program-emblem-draft{max-width:68px;max-height:68px;flex-shrink:0}
- .rcl-draft-quicknav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
- .rcl-draft-quicknav>a,.rcl-draft-quicknav>button{min-width:0;min-height:42px;padding:0 7px;font-size:10px}
- .rcl-platform-root .rcl-draft-live-card{width:100%;padding:14px!important}
- .rcl-platform-root .rcl-draft-stat-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- .rcl-platform-root .rcl-draft-stat-strip>div{min-height:72px;padding:12px!important}
- .rcl-lottery-grid{grid-template-columns:1fr}
- .rcl-lottery-pick{min-height:67px}
- .rcl-lottery-board{margin-top:12px!important;padding:15px!important}
- .rcl-lottery-status{font-size:9px}
- .rcl-draft-features{display:none}
- .rcl-platform-root .rcl-draft-module{padding:15px!important}
- .rcl-platform-root .rcl-pick-history>div{min-width:0}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable {
+  --draft-ink:#f5f5f6;
+  --draft-muted:#c0c0c5;
+  --draft-faint:#aaaab0;
+  --draft-line:#3a3a3d;
+  --draft-surface:#171719;
+  --draft-raised:#222225;
+  --draft-accent:#ededee;
+  display:block;
+  min-width:0;
+  max-width:100%;
+  overflow-x:clip;
+  background:#0c0c0e!important;
+  color:var(--draft-ink)!important;
+  color-scheme:dark;
+  padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+}
+.rcl-platform-root main.rch-draft-readable *,
+.rcl-platform-root main.rch-draft-readable *::before,
+.rcl-platform-root main.rch-draft-readable *::after {box-sizing:border-box}
+.rcl-platform-root main.rch-draft-readable :is(h1,h2,h3,p){max-width:100%;overflow-wrap:break-word}
+.rcl-platform-root main.rch-draft-readable a:focus-visible,
+.rcl-platform-root main.rch-draft-readable button:focus-visible,
+.rcl-platform-root main.rch-draft-readable summary:focus-visible,
+.rcl-platform-root main.rch-draft-readable input:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.rcl-platform-root main.rch-draft-readable a{color:inherit}
+.rcl-platform-root main.rch-draft-readable .rcl-kicker{margin:0;color:#bfc0c3!important;font-family:inherit;font-size:10px;font-weight:850;letter-spacing:.13em;line-height:1.5;text-transform:uppercase}
+.rcl-platform-root main.rch-draft-readable .rcl-display{margin:0;color:#f6f6f7!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;font-weight:900!important;letter-spacing:-.055em!important;line-height:1.05!important;text-shadow:none!important}
+.rcl-platform-root main.rch-draft-readable .rcl-display span{color:#f6f6f7!important;text-shadow:none!important}
+
+/* Compact identity / status hero: no full-page empty gradient. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-hero{
+  min-height:0!important;
+  border-top:0;
+  border-bottom:1px solid #3a3a3d!important;
+  background:linear-gradient(118deg,#18181b,#101012 72%,#202023)!important;
+  color:#fafafa!important;
+}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hero::before,
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hero::after{display:none!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hero-inner{padding-top:18px;padding-bottom:16px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;color:#d6d6d9;font-size:10px;font-weight:800;letter-spacing:.12em}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-topline a{display:inline-flex;min-height:28px;align-items:center;gap:6px;color:#e4e4e6;font-size:11px;font-weight:800;letter-spacing:0;text-decoration:none;white-space:nowrap}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-topline a svg{font-size:10px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hero-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,250px);gap:20px;align-items:center}
+.rcl-platform-root main.rch-draft-readable .rch-program-draft-lockup{display:flex;align-items:center;gap:15px;max-width:none;min-width:0}
+.rcl-platform-root main.rch-draft-readable .rch-program-draft-lockup .rch-program-brand-copy{min-width:0}
+.rcl-platform-root main.rch-draft-readable .rch-program-emblem-draft{width:74px!important;min-width:74px;max-width:74px;height:auto;filter:grayscale(1) contrast(1.1)}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hero .rcl-display{font-size:clamp(35px,4.4vw,56px)!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-description{max-width:44ch!important;margin:7px 0 0!important;color:#d6d6d9!important;font-size:13px!important;line-height:1.55!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card{min-width:0!important;width:100%;min-height:0!important;padding:14px 16px!important;border:1px solid #55555a!important;border-radius:13px!important;background:#242426!important;background-image:none!important;color:#fff!important;box-shadow:none!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-card .rcl-live{display:block;color:#d5d5d9!important;font-size:10px!important;font-weight:850;letter-spacing:.14em}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-card strong{display:block;margin:5px 0 0;color:#fff!important;font-family:inherit!important;font-size:clamp(21px,2vw,27px)!important;font-weight:900!important;letter-spacing:-.025em;line-height:1.06}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-card small{display:block;margin-top:5px;color:#d3d3d6!important;font-size:11px!important;line-height:1.45;letter-spacing:0!important;text-transform:none!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock b{color:#fff!important;font-family:inherit!important;font-size:24px!important;font-variant-numeric:tabular-nums}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock span{color:#ddd!important;font-size:11px}
+
+/* Three destinations remain visible; secondary links stay in a compact More menu. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav>a,
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav>button,
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary{
+  display:inline-flex;min-height:42px;align-items:center;justify-content:center;
+  border:1px solid #59595d!important;border-radius:9px;
+  background:#232326!important;background-image:none!important;
+  padding:0 13px;color:#ececee!important;font-size:12px;font-weight:750;line-height:1.25;text-decoration:none;
+}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav>a:first-child{border-color:#eee!important;background:#e9e9eb!important;color:#101012!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more{position:relative}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary{gap:9px;cursor:pointer;list-style:none}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary::-webkit-details-marker{display:none}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu{position:absolute;z-index:40;top:calc(100% + 6px);right:0;display:grid;gap:2px;width:210px;border:1px solid #606064;border-radius:11px;background:#242427;box-shadow:0 10px 22px #0008;padding:6px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu a{display:flex;min-height:42px;align-items:center;border-radius:7px;padding:8px 10px;color:#f5f5f6;font-size:12px;font-weight:700;text-decoration:none}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu a:hover{background:#3a3a3d}
+
+/* Competition strip uses actual data; prevents false live impression. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-content{padding-top:14px}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0;border:1px solid #3a3a3e!important;border-radius:13px!important;background:#18181a!important;box-shadow:none!important;overflow:hidden;color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip>div{min-width:0;padding:13px 15px!important;border-right:1px solid #37373b!important;min-height:69px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip>div:last-child{border-right:0!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip span{display:block;color:#bebec2!important;font-size:10px!important;font-weight:800!important;letter-spacing:.07em!important;line-height:1.25}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip strong{display:block;margin-top:5px;color:#fff!important;font-family:inherit!important;font-size:21px!important;line-height:1;font-weight:900!important;font-variant-numeric:tabular-nums}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-alert{margin-top:12px;border:1px solid #827b69;border-radius:11px;background:#2a2924;padding:12px 14px;color:#fff;font-size:13px;line-height:1.5}
+
+/* Franchises: a numbered board, not a scattered collection of white cards. */
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-board{scroll-margin-top:100px;margin-top:15px;padding:20px;border:1px solid #505055!important;border-radius:15px!important;background:#171719!important;background-image:none!important;box-shadow:none!important;color:#f5f5f6!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-section-head h2{margin:5px 0 0;color:#fff!important;font-family:inherit!important;font-size:clamp(24px,3vw,34px)!important;line-height:1.07!important;font-weight:900!important;letter-spacing:-.04em}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-section-head p:not(.rcl-kicker){margin:9px 0 0;max-width:60ch;color:#d0d0d4!important;font-size:13px!important;line-height:1.5}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-status{display:inline-block;margin-left:8px;color:#e7e7e9!important;font-size:9px!important;font-weight:800;letter-spacing:.06em;white-space:nowrap}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-rounds{display:flex;gap:7px;overflow-x:auto;margin-top:17px;padding:0 0 8px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#666 transparent}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-rounds button{flex:0 0 auto;min-height:42px;scroll-snap-align:start;border:1px solid #5b5b60!important;border-radius:8px!important;background:#28282b!important;background-image:none!important;color:#eee!important;padding:0 16px!important;font-size:12px;font-weight:800}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-rounds button.active{border-color:#e9e9ea!important;background:#eeeef0!important;color:#141416!important}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 0;padding:0;list-style:none}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-pick{display:grid;grid-template-columns:42px 36px minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0;min-height:77px;padding:12px;border:1px solid #47474c!important;border-radius:11px;background:#242427!important;background-image:none!important;color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-pick:first-child{border-color:#85858b!important;background:#2e2e32!important}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-number{font-size:25px;color:#fff!important;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-pick .rcl-lottery-team{display:block;min-width:0}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-team small{display:block;color:#cacacf!important;font-size:9px!important;font-weight:800;letter-spacing:.08em}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-team strong{display:block;min-width:0;margin-top:4px;color:#fff!important;font-size:14px!important;line-height:1.3;font-weight:800;overflow-wrap:break-word}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-open{color:#c5c5c9;font-size:10px;font-weight:800;letter-spacing:.1em}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-pick img{width:36px;height:36px;object-fit:contain}
+.rcl-platform-root main.rch-draft-readable .rcl-lottery-pick .rcl-lottery-number+span{filter:grayscale(1)}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method{margin-top:17px;border-top:1px solid #3c3c40;padding-top:12px;color:#c6c6ca!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method summary{cursor:pointer;min-height:38px;display:flex;align-items:center;font-size:12px;font-weight:800;color:#e8e8e9!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method summary::marker{color:#f1f1f1}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method p{margin:8px 0;color:#c8c8cd!important;font-size:12px!important;line-height:1.6}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method code{white-space:normal;overflow-wrap:anywhere;font-size:10px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-method a{color:#fff!important;text-decoration:underline}
+
+/* Before official opening: one focused progression panel, no empty staff dashboards. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-prelaunch{scroll-margin-top:100px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;margin-top:15px;border:1px solid #414145;border-radius:15px;background:#151517;padding:20px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-prelaunch h2{margin:5px 0;color:#fff!important;font-size:clamp(20px,3vw,27px)!important;font-weight:900;letter-spacing:-.035em}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-prelaunch p:not(.rcl-kicker){margin:7px 0 0;max-width:55ch;color:#c7c7cc!important;font-size:13px;line-height:1.6}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-journey-steps{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-journey-steps span{display:inline-flex;align-items:center;gap:6px;min-height:42px;border:1px solid #48484d;border-radius:8px;background:#27272a;padding:7px 11px;color:#f5f5f5;font-size:10px;font-weight:850;white-space:nowrap}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-journey-steps b{color:#c5c5ca;font-size:10px}
+
+/* Active draft board. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-stage-heading{margin-top:23px;margin-bottom:12px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-workspace{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:0}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-module{min-width:0;border:1px solid #414145!important;border-radius:14px!important;background:#18181a!important;background-image:none!important;box-shadow:none!important;color:#fff!important;padding:17px!important}
+.rcl-platform-root main.rch-draft-readable .rcl-module-heading{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.rcl-platform-root main.rch-draft-readable .rcl-module-icon{display:grid;width:36px;height:36px;min-width:36px;place-items:center;border:1px solid #505055!important;border-radius:9px;background:#28282b!important;color:#eee!important}
+.rcl-platform-root main.rch-draft-readable .rcl-module-heading small{display:block;color:#bfc0c5!important;font-size:10px!important;font-weight:850;letter-spacing:.11em}
+.rcl-platform-root main.rch-draft-readable .rcl-module-heading h2{margin:3px 0 0;color:#fff!important;font-size:17px!important;font-weight:850;line-height:1.2}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-board{scroll-margin-top:100px}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-board input{width:100%;min-height:44px;margin:0 0 10px;border:1px solid #65656b!important;border-radius:9px;background:#2a2a2d!important;background-image:none!important;padding:10px 12px;color:#fff!important;font-size:14px!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-board input::placeholder{color:#bbbcc0!important}
+.rcl-platform-root main.rch-draft-readable .rcl-filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:9px;scrollbar-width:thin}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-filter-row button{flex:0 0 auto;min-height:40px;min-width:43px;border:1px solid #59595f!important;border-radius:8px;background:#28282a!important;background-image:none!important;color:#eee!important;font-size:12px;font-weight:800}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-filter-row button.active{border-color:#eee!important;background:#eee!important;color:#141415!important}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-list{max-height:370px;overflow-y:auto;border-top:1px solid #414145}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-prospect-list>button{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:11px;min-height:58px;width:100%;border:0!important;border-bottom:1px solid #37373b!important;background:transparent!important;background-image:none!important;padding:8px;color:#fff!important;text-align:left}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-list>button.selected{background:#343438!important;box-shadow:inset 3px 0 #eee}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-avatar{display:grid;width:38px;height:38px;place-items:center;overflow:hidden;border-radius:50%;background:#303034!important;color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-avatar img{width:100%;height:100%;object-fit:cover}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-name{min-width:0;white-space:normal;color:#fff!important;font-size:13px!important;font-weight:800;line-height:1.3}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-name small{display:block;margin-top:3px;color:#c4c4c7!important;font-size:10px!important}
+.rcl-platform-root main.rch-draft-readable .rcl-prospect-rating{color:#ddd!important;font-size:11px!important;white-space:nowrap}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-hint{margin-top:10px;color:#c7c7cb!important;font-size:12px!important;line-height:1.5!important;letter-spacing:0!important;text-transform:none!important}
+.rcl-platform-root main.rch-draft-readable .rcl-on-clock{padding:13px;border:1px solid #5b5b60!important;border-radius:11px;background:#262629!important}
+.rcl-platform-root main.rch-draft-readable .rcl-on-clock span{color:#e5e5e8!important;font-size:10px;font-weight:850}
+.rcl-platform-root main.rch-draft-readable .rcl-on-clock strong{display:block;margin:5px 0;color:#fff!important;font-family:inherit!important;font-size:26px!important;font-weight:900}
+.rcl-platform-root main.rch-draft-readable .rcl-on-clock small{color:#c9c9ce!important;font-size:11px}
+.rcl-platform-root main.rch-draft-readable .rcl-empty-pick{display:grid;min-height:63px;place-items:center;margin:11px 0;border:1px dashed #55555a;border-radius:9px;background:#222225!important;padding:9px;color:#c9c9cf!important;font-size:12px}
+.rcl-platform-root main.rch-draft-readable .rcl-selected-player{margin:11px 0;border-color:#eee!important;padding:9px 11px}
+.rcl-platform-root main.rch-draft-readable .rcl-selected-player strong{color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-selected-player span{color:#d3d3d6!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-primary{display:flex;align-items:center;justify-content:center;min-height:46px;width:100%;border:1px solid #eee!important;border-radius:9px;background:#eee!important;background-image:none!important;color:#101011!important;font-size:12px!important;font-weight:900}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-primary:disabled{border-color:#3d3d41!important;background:#2e2e31!important;color:#aaaab0!important;box-shadow:none!important;cursor:not-allowed}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-secondary{display:flex;justify-content:center;align-items:center;min-height:44px;border:1px solid #66666a!important;border-radius:9px;background:#28282b!important;color:#eee!important;font-size:12px!important;font-weight:850}
+.rcl-platform-root main.rch-draft-readable .rcl-player-photo{height:110px;border:1px solid #424246!important;border-radius:10px;background:#262629!important;color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-player-preview h3{color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-player-preview>p{color:#c4c4c9!important}
+.rcl-platform-root main.rch-draft-readable .rcl-player-metrics{gap:6px}
+.rcl-platform-root main.rch-draft-readable .rcl-player-metrics span{min-width:0;border:1px solid #424247!important;border-radius:8px;background:#262629!important;color:#c8c8ce!important;font-size:10px!important;overflow-wrap:anywhere}
+.rcl-platform-root main.rch-draft-readable .rcl-player-metrics b{color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-preview-empty{min-height:125px;border:1px dashed #434348!important;border-radius:10px;background:#202023!important}
+.rcl-platform-root main.rch-draft-readable .rcl-preview-empty :is(span,strong,svg){color:#dedee1!important}
+.rcl-platform-root main.rch-draft-readable .rcl-roster-mini>div{border-color:#39393c!important}
+.rcl-platform-root main.rch-draft-readable .rcl-roster-mini :is(b,span,small){color:#e4e4e6!important}
+
+/* Pick tracker is a real reading surface on phone, not a four-column overflow. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-history{scroll-margin-top:100px;margin-top:24px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-history>.flex{margin-bottom:11px}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-history h2{font-size:clamp(24px,3vw,32px)!important}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-pick-history{overflow:hidden;border:1px solid #414145!important;border-radius:13px;background:#171719!important;box-shadow:none!important;color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>div{display:grid;grid-template-columns:50px minmax(0,1.2fr) minmax(0,1fr) 95px;gap:12px;align-items:center;min-width:0;padding:12px 14px;border-bottom:1px solid #343438!important}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>div.current{background:#2d2d31!important}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>b{color:#eee!important;font-variant-numeric:tabular-nums;font-size:15px}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>span{display:flex;min-width:0;align-items:center;gap:8px;color:#fff!important;font-size:12px;overflow-wrap:break-word}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>span img{width:32px;height:32px;object-fit:contain}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history strong{min-width:0;color:#fff!important;font-size:12px!important;font-weight:800!important;text-transform:none!important;overflow-wrap:break-word}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history small{color:#c4c4c8!important;font-size:11px!important}
+.rcl-platform-root main.rch-draft-readable .rcl-pick-history>p{margin:0;padding:18px;color:#c8c8cd!important;font-size:13px;line-height:1.5}
+
+/* Closing legal/status copy should stay secondary and legible. */
+.rcl-platform-root main.rch-draft-readable .rcl-draft-footer{margin-top:30px;padding:22px 0 20px;border-top:1px solid #39393d!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-footer h2{margin:7px 0;color:#fff!important;font-size:clamp(25px,4vw,36px)!important;line-height:1.15!important}
+.rcl-platform-root main.rch-draft-readable .rcl-draft-footer>p:last-child{margin-top:9px;color:#c6c6cb!important;font-size:13px!important;line-height:1.65}
+
+/* iPads: retain genuine two-column board; avoid default three-up squeeze. */
+@media(max-width:1023px){
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-hero-row{grid-template-columns:minmax(0,1fr) 205px;gap:14px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-workspace{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rcl-platform-root main.rch-draft-readable .rcl-my-team{grid-column:span 2}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-prelaunch{grid-template-columns:1fr}
+}
+/* Installed iOS PWA viewport: shorter hero, readable touch targets, no horizontal overflow. */
+@media(max-width:640px){
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable{padding-bottom:calc(108px + env(safe-area-inset-bottom))!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-hero-inner{padding-top:11px;padding-bottom:12px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-topline{margin-bottom:10px;font-size:9px;letter-spacing:.08em}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-topline a{font-size:10px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-hero-row{grid-template-columns:minmax(0,1fr);gap:10px}
+ .rcl-platform-root main.rch-draft-readable .rch-program-draft-lockup{gap:11px;align-items:center}
+ .rcl-platform-root main.rch-draft-readable .rch-program-emblem-draft{width:52px!important;min-width:52px;max-width:52px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-hero .rcl-display{font-size:clamp(29px,9.5vw,39px)!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-description{font-size:12px!important;line-height:1.45!important;margin-top:5px!important}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 9px;padding:10px 12px!important;border-radius:10px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card .rcl-live{grid-column:1;font-size:9px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card strong{grid-column:1;font-size:18px!important;margin:1px 0 0}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card small{grid-column:1;min-width:0;font-size:10px!important;margin:1px 0 0}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock{grid-column:2;grid-row:1/4;align-items:center}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock b{font-size:20px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav{flex-wrap:nowrap;gap:7px;margin-top:10px;overflow-x:auto;overflow-y:visible;padding:0 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav::-webkit-scrollbar{display:none}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav>a,
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary{flex:0 0 auto;min-height:42px;padding:0 11px;font-size:11px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu{position:fixed;top:auto;bottom:calc(84px + env(safe-area-inset-bottom));right:16px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-content{padding-top:10px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip>div{padding:10px 8px!important;min-height:61px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip span{font-size:9px!important;letter-spacing:0!important;line-height:1.2}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip strong{font-size:17px!important;margin-top:6px}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-board{margin-top:11px;padding:14px;border-radius:12px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-section-head{display:block}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-section-head h2{font-size:26px!important;margin-top:4px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-section-head p:not(.rcl-kicker){font-size:12px!important;margin-top:6px}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-status{margin-left:5px;font-size:8px!important;white-space:normal}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-rounds{margin-top:12px}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-rounds button{min-height:42px;padding:0 13px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-grid{grid-template-columns:minmax(0,1fr);gap:7px;margin-top:6px}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-lottery-pick{min-height:65px;grid-template-columns:31px 32px minmax(0,1fr) auto;gap:8px;padding:10px;border-radius:9px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-number{font-size:22px}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-pick img{width:31px;height:31px}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-team strong{font-size:13px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-open{font-size:9px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-method{margin-top:12px;padding-top:8px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-prelaunch{grid-template-columns:1fr;padding:16px;margin-top:11px;gap:10px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-journey-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-journey-steps span{display:flex;min-width:0;justify-content:center;gap:4px;padding:6px 4px;font-size:9px;white-space:normal;text-align:center}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-workspace{grid-template-columns:minmax(0,1fr);gap:10px}
+ .rcl-platform-root main.rch-draft-readable .rcl-my-team{grid-column:auto}
+ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-module{padding:14px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-player-photo{height:95px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-history{margin-top:20px}
+ .rcl-platform-root main.rch-draft-readable .rcl-pick-history>div{display:grid!important;grid-template-columns:36px minmax(0,1fr)!important;gap:3px 9px!important;padding:10px 12px!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>b{grid-column:1;grid-row:1/4;align-self:center}
+ .rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>span{grid-column:2;min-width:0}
+ .rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>strong{grid-column:2;min-width:0}
+ .rcl-platform-root main.rch-draft-readable .rcl-pick-history>div>small{grid-column:2;display:block!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-footer{margin-top:23px;padding-top:18px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-footer h2{font-size:27px!important}
+}
+@media(max-width:360px){
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-pick{grid-template-columns:29px 29px minmax(0,1fr)!important}
+ .rcl-platform-root main.rch-draft-readable .rcl-lottery-open{display:none}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip span{font-size:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .rcl-platform-root main.rch-draft-readable :is(a,button,.rcl-lottery-pick){scroll-behavior:auto;transition:none!important}
 }
-@media(prefers-reduced-motion:reduce){.rcl-draft-quicknav>a,.rcl-lottery-pick{transition:none!important}}
