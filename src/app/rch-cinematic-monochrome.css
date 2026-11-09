@@ -1,0 +1,199 @@
+/* Cinematic black, white and grey authority for the RCH website and installed PWA. */
+:root {
+  --rch-brand-canvas: #070707 !important;
+  --rch-brand-surface: #111111 !important;
+  --rch-brand-raised: #1b1b1b !important;
+  --rch-brand-border: #3b3b3b !important;
+  --rch-brand-accent: #bdbdbd !important;
+  --rch-brand-accent-text: #f3f3f3 !important;
+  --rch-brand-muted: #a7a7a7 !important;
+  --rch-brand-copy: #d6d6d6 !important;
+  --rch-brand-ink: #fafafa !important;
+  --rch-brand-canvas-rgb: 7 7 7 !important;
+  --rch-brand-surface-rgb: 17 17 17 !important;
+  --rch-brand-raised-rgb: 27 27 27 !important;
+  --rch-brand-border-rgb: 59 59 59 !important;
+  --rch-brand-accent-rgb: 189 189 189 !important;
+  --rch-brand-accent-text-rgb: 243 243 243 !important;
+  --rch-brand-muted-rgb: 167 167 167 !important;
+  --rch-brand-copy-rgb: 214 214 214 !important;
+  --rch-brand-ink-rgb: 250 250 250 !important;
+  --rch-canvas: #070707 !important;
+  --rch-surface: #111111 !important;
+  --rch-ink: #fafafa !important;
+  --rch-copy: #d6d6d6 !important;
+  --rch-muted: #a7a7a7 !important;
+  --rch-line: #3b3b3b !important;
+  --rcl-basket-orange: #bdbdbd !important;
+  --rcl-basket-yellow: #f3f3f3 !important;
+  color-scheme: dark;
+}
+html,
+body,
+body.rch-premium-app {
+  background: #070707;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web, .rcl-public-web) {
+  background-color: #070707 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rch-public-header, .rcl-universal-topbar, .rcl-universal-bottom) {
+  background-color: #090909 !important;
+  border-color: #393939 !important;
+  color: #f5f5f5 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar a, .rcl-universal-bottom a) {
+  color: #e8e8e8;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-universal-topbar a[aria-current="page"], .rcl-universal-bottom a[aria-current="page"]) {
+  color: #fff !important;
+}
+
+/* The flagship entrance uses a real arena image, treated like a monochrome film still. */
+.rch-public-web .rch-browser-hero {
+  min-height: clamp(560px, 78vh, 820px);
+  background: #070707 !important;
+}
+.rch-public-web .rch-browser-hero-art {
+  background-image:
+    linear-gradient(90deg, rgb(0 0 0 / .94) 0%, rgb(0 0 0 / .73) 37%, rgb(0 0 0 / .32) 74%, rgb(0 0 0 / .58) 100%),
+    linear-gradient(0deg, #070707 0%, rgb(7 7 7 / .05) 58%, rgb(7 7 7 / .56) 100%),
+    url('/league/rcl-showtime-hero.webp') !important;
+  background-position: center, center, center 52% !important;
+  background-size: cover !important;
+  filter: grayscale(1) contrast(1.12) brightness(.82);
+}
+.rch-public-web .rch-browser-hero::after {
+  background:
+    linear-gradient(115deg, transparent 46%, rgb(255 255 255 / .08) 46.2%, transparent 46.8%),
+    radial-gradient(ellipse at 78% 18%, rgb(255 255 255 / .14), transparent 48%),
+    linear-gradient(90deg, transparent 35%, rgb(0 0 0 / .2) 100%) !important;
+}
+.rch-public-web .rch-browser-hero h1 em,
+.rch-public-web .rch-browser-eyebrow span,
+.rch-public-web .rch-browser-hero-quick a > svg:first-child,
+.rch-public-web .rch-browser-hero-quick a > svg:last-child {
+  color: #f3f3f3 !important;
+}
+.rch-public-web .rch-browser-hero-quick a {
+  border-color: rgb(255 255 255 / .24) !important;
+  background: rgb(9 9 9 / .84) !important;
+  backdrop-filter: blur(14px);
+}
+.rch-public-web .rch-browser-hero-quick a:hover {
+  border-color: #f5f5f5 !important;
+  background: rgb(28 28 28 / .94) !important;
+}
+
+/* Cinematic monochrome panels keep photography expressive without tinting logos. */
+.rch-public-web :is(.rch-browser-event-art, .rch-browser-news-art, .rch-browser-feature-art) {
+  filter: grayscale(1) contrast(1.08);
+}
+.rch-public-web .rch-browser-empty {
+  border-color: #3b3b3b !important;
+  background: linear-gradient(135deg, #171717, #0b0b0b) !important;
+  color: #e4e4e4 !important;
+}
+.rch-public-web :is(.rch-browser-button-primary, .rch-public-app-cta) {
+  border-color: #f3f3f3 !important;
+  background: linear-gradient(135deg, #e7e7e7, #a8a8a8) !important;
+  color: #090909 !important;
+  box-shadow: 0 12px 30px rgb(255 255 255 / .12) !important;
+}
+
+/* Give the Rich City League a clear flagship moment on the public homepage. */
+.rch-public-web .rch-browser-featured-league {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  min-height: clamp(300px, 42vw, 520px);
+  align-content: end;
+  gap: 12px;
+  width: min(calc(100% - 40px), 1450px);
+  margin: 34px auto 42px;
+  padding: clamp(28px, 6vw, 76px);
+  border: 1px solid rgb(255 255 255 / .24);
+  border-radius: 24px;
+  color: #fafafa;
+  background: #090909;
+  box-shadow: 0 32px 90px rgb(0 0 0 / .48);
+}
+.rch-public-web .rch-browser-featured-league::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / .91), rgb(0 0 0 / .53) 58%, rgb(0 0 0 / .18)),
+    linear-gradient(0deg, rgb(0 0 0 / .6), transparent 70%),
+    url('/league/rcl-showtime-hero.webp') center 54% / cover no-repeat;
+  filter: grayscale(1) contrast(1.13) brightness(.78);
+  transform: scale(1.015);
+}
+.rch-public-web .rch-browser-featured-league::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(116deg, transparent 43%, rgb(255 255 255 / .1) 43.2%, transparent 43.7%);
+}
+.rch-public-web .rch-browser-featured-league > :is(p, h2, div, a) {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+}
+.rch-public-web .rch-browser-featured-league > p:first-child {
+  margin: 0;
+  color: #d0d0d0;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+.rch-public-web .rch-browser-featured-league h2 {
+  margin: 0;
+  color: #fff !important;
+  font-family: var(--rch-font-display, Impact, sans-serif);
+  font-size: clamp(38px, 7vw, 86px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.045em !important;
+  line-height: .92 !important;
+  text-transform: uppercase;
+  text-shadow: 0 6px 34px rgb(0 0 0 / .5);
+}
+.rch-public-web .rch-browser-featured-league p:not(:first-child) {
+  max-width: 620px;
+  margin: 0;
+  color: #e1e1e1;
+  font-size: clamp(14px, 1.5vw, 18px);
+  line-height: 1.6;
+}
+.rch-public-web .rch-browser-featured-league .rch-browser-button {
+  width: fit-content;
+  margin-top: 10px;
+}
+
+@media (max-width: 700px) {
+  .rch-public-web .rch-browser-hero { min-height: auto; }
+  .rch-public-web .rch-browser-hero-container {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 54px;
+    padding-bottom: 38px;
+  }
+  .rch-public-web .rch-browser-hero-quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rch-public-web .rch-browser-hero-quick a { min-height: 74px; }
+  .rch-public-web .rch-browser-featured-league {
+    width: min(calc(100% - 24px), 1450px);
+    min-height: 420px;
+    margin-block: 22px 30px;
+    padding: 28px 22px;
+    border-radius: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rch-public-web .rch-browser-featured-league,
+  .rch-public-web .rch-browser-hero-quick a { transition: none !important; }
+}
