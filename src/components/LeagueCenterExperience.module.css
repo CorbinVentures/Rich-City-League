@@ -91,3 +91,47 @@
 @media(prefers-reduced-motion:reduce){
  .draftButton,.primaryNav a,.mobileNav a{transition:none}
 }
+
+/* Unified league broadcast shell: one black/graphite identity in app and PWA. */
+.page{background:#0b0b0d;color:#f6f6f7}
+.utilityBar{background:#131315;border-top-color:#999;color:#c8c8cb}
+.utilityRight i{background:#eee;box-shadow:none}
+.header{background:#111113;border-bottom-color:#ffffff24;box-shadow:none}
+.headerMain{min-height:74px}
+.brand{color:#f8f8f8}
+.leagueMonogram{border-color:#ffffff56;background:#222225;color:#fff;box-shadow:none}
+.brandCopy strong b{color:#f6f6f6}
+.brandCopy small{color:#bcbcc0}
+.primaryNav a,.mobileNav a{color:#bcbcc0}
+.primaryNav .activeNav:after,.mobileNav .activeNav:after{background:#f1f1f1}
+.draftButton{border-color:#ffffff4a;background:#232326;color:#f5f5f5}
+.draftButton:hover{background:#323236}
+.memberAvatar{border-color:#ffffff65;background:#242426;color:#fff}
+.memberIdentity small{color:#c3c3c6}
+.levelPill{border-color:#ffffff36;color:#eee}
+.seasonRibbon{background:#151517;border-bottom-color:#ffffff1f}
+.seasonMark,.ribbonInner>a{color:#f4f4f4}
+.ribbonInner p strong{color:#f1f1f1}
+.ribbonInner p span,.ribbonNote{color:#b8b8ba}
+.publicStage{padding:18px 0 30px;background:transparent}
+.memberContent{border-top-color:#ffffff26}
+.memberContent h2{color:#f8f8f8}
+.visionDetails{color:#e5e5e6}
+.visionDetails summary{background:#1a1a1c;border-color:#ffffff2b}
+@media(max-width:767px){
+ .utilityBar{display:none}
+ .headerMain{min-height:66px;gap:10px}
+ .brandCopy strong{font-size:clamp(12px,3.6vw,16px);line-height:1.1}
+ .brandCopy small{font-size:8px;letter-spacing:.08em}
+ .leagueMonogram{width:40px;height:40px}
+ .memberPill{margin-left:auto;border-left:0;padding-left:0}
+ .memberIdentity{display:none}
+ .levelPill{font-size:8px}
+ .mobileNav{border-top:1px solid #ffffff1a}
+ .mobileNav nav{scrollbar-width:none}
+ .mobileNav nav::-webkit-scrollbar{display:none}
+ .publicStage{padding:10px 0 20px}
+ .ribbonInner{min-height:54px;gap:11px}
+ .seasonMark{font-size:9px}
+ .ribbonInner p span{font-size:9px}
+}
