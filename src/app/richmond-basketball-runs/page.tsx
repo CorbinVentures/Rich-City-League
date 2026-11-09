@@ -19,7 +19,8 @@ export default async function RichmondBasketballRunsPage() {
   let upcoming = typeof db === 'undefined' ? [] : (openRuns ?? []);
   let listingsUnavailable = false;
   if (db && upcoming.length) {
-    const {data: suggestions, error: suggestionError} = await db
+    // This table is present in production migrations but absent from the generated client types.
+    const {data: suggestions, error: suggestionError} = await (db as any)
       .from('rch_weekend_circuit_events').select('run_id')
       .in('run_id', upcoming.map(run => run.id));
     if (suggestionError) {
