@@ -7,7 +7,7 @@ import type { Division, Season } from '@/types/database';
 
 type RegistrationField = { key: string; label: string; type: 'text'|'textarea'|'number'|'date'|'select'|'checkbox'; required?: boolean; options?: string[] };
 
-function feeLabel(cents: number | null, currency: string) {
+function feeLabel(cents: number | null | undefined, currency: string) {
   if (cents == null) return 'Pricing not configured';
   if (cents === 0) return 'No registration fee';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(cents / 100);
