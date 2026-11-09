@@ -170,3 +170,40 @@
  opacity:1!important;
  text-shadow:none!important;
 }
+
+
+/* Monochrome broadcast direction and readable scoreboard empties. */
+.home{
+  --league-ink:#f7f7f7;
+  --league-muted:#b7b7b7;
+  --league-line:rgba(255,255,255,.16);
+}
+.scoreboard{
+  border-color:rgba(255,255,255,.18) !important;
+  background:linear-gradient(145deg,#161616,#0a0a0a 76%) !important;
+  color:#f7f7f7 !important;
+}
+.scoreboardHead h2,.scoreboardHead p,.scoreRailEmpty :is(small,strong,p),.scoreRailEmpty>a{
+  color:#f3f3f3 !important;
+  opacity:1 !important;
+}
+.scoreRailEmpty{
+  border-color:rgba(255,255,255,.2) !important;
+  background:linear-gradient(145deg,#202020,#101010) !important;
+  color:#f3f3f3 !important;
+}
+.hero{
+  border-color:rgba(255,255,255,.25) !important;
+  filter:grayscale(1) contrast(1.05);
+}
+.primaryAction{background:#ededed !important;color:#111 !important}
+.eyebrow,.sectionHead>a,.cardLabel,.cardLink,.navIcon,.hero h1 em,.heroStamp small{
+  color:#e4e4e4 !important;
+}
+.secondaryAction,.editorialNav>a,.featureGame,.standings,.feedback{
+  border-color:rgba(255,255,255,.18) !important;
+}
+.teamCard{
+  --team-accent:#d4d4d4 !important;
+  --team-secondary:#f2f2f2 !important;
+}
