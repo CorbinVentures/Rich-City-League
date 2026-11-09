@@ -12,7 +12,11 @@ import {weeklyQuestCatalog,worldQuestProgress,worldXpProgress,type WorldJourney}
 import type {WorldRun} from '@/lib/runs-world-game';
 import './runs-cinematic-home.css';
 
-const INTRO_KEY='rch-runs-cinematic-intro-session-v1';
+const INTRO_KEY='rch-runs-bmf-belt-intro-session-v1';
+const RUNS_BMF_BELT='/runs/championships/bmf-belt.webp';
+const INTRO_HOLD_MS=1050;
+const INTRO_IMAGE_FALLBACK_MS=1850;
+const INTRO_SPLIT_MS=780;
 
 function formatWhen(value:string){
  const date=new Date(value);
@@ -21,63 +25,90 @@ function formatWhen(value:string){
 }
 
 /** A light, once-per-session title screen that leads straight into real Run play. */
+/** RCH Runs' own lightweight championship-belt reveal, matching the PWA opening.
+ * Once per session on the Runs game home, and always available through Replay.
+ * Never blocks live games, links, deep links, or reduced-motion users. */
 export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replayToken:number}){
- const [step,setStep]=useState<'done'|'logo'|'world'>('done');
+ const [phase,setPhase]=useState<'done'|'reveal'|'opening'>('done');
+ const [imageReady,setImageReady]=useState(false);
+ const [imageFailed,setImageFailed]=useState(false);
  const skipRef=useRef<HTMLButtonElement>(null);
- const enterRef=useRef<HTMLButtonElement>(null);
  const close=useCallback(()=>{
-  setStep('done');
-  try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional session storage. */}
+  setPhase('done');
+  try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Session storage is optional. */}
  },[]);
+
+ useEffect(()=>{
+  if(!enabled){setPhase('done');return;}
+  if(replayToken===0){
+   try{if(window.sessionStorage.getItem(INTRO_KEY)==='seen')return;}catch{/* Continue when storage is unavailable. */}
+  }
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){close();return;}
+  setImageReady(false);
+  setImageFailed(false);
+  setPhase('reveal');
+ },[enabled,replayToken,close]);
+
+ useEffect(()=>{
+  if(phase!=='reveal')return;
+  // Open when the image has had time to paint; never trap visitors on slow networks.
+  const timer=window.setTimeout(()=>setPhase('opening'),imageReady||imageFailed?INTRO_HOLD_MS:INTRO_IMAGE_FALLBACK_MS);
+  return()=>window.clearTimeout(timer);
+ },[phase,imageReady,imageFailed]);
+
+ useEffect(()=>{
+  if(phase!=='opening')return;
+  const timer=window.setTimeout(close,INTRO_SPLIT_MS);
+  return()=>window.clearTimeout(timer);
+ },[phase,close]);
+
  useEffect(()=>{
   if(!enabled)return;
-  if(replayToken===0){
-   try{if(window.sessionStorage.getItem(INTRO_KEY)==='seen')return;}catch{/* Continue without optional session storage. */}
-  }
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-   setStep('world');
-   return;
-  }
-  setStep('logo');
-  const next=window.setTimeout(()=>setStep('world'),1450);
-  const done=window.setTimeout(()=>{
-   setStep('done');
-   try{window.sessionStorage.setItem(INTRO_KEY,'seen');}catch{/* Optional. */}
-  },2650);
-  return()=>{window.clearTimeout(next);window.clearTimeout(done);};
- },[enabled,replayToken]);
- useEffect(()=>{
-  if(!enabled||step==='done')return;
-  const prevOverflow=document.body.style.overflow;
-  const prevFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  if(phase==='done')return;
+  const previousOverflow=document.body.style.overflow;
+  const previousFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   document.body.style.overflow='hidden';
   const keyboard=(event:KeyboardEvent)=>{
    if(event.key==='Escape'){event.preventDefault();close();}
-   if(event.key==='Tab'){
-    event.preventDefault();
-    if(document.activeElement===enterRef.current)skipRef.current?.focus();else enterRef.current?.focus();
-   }
+   if(event.key==='Tab'){event.preventDefault();skipRef.current?.focus();}
   };
   document.addEventListener('keydown',keyboard);
-  skipRef.current?.focus();
+  skipRef.current?.focus({preventScroll:true});
   return()=>{
    document.removeEventListener('keydown',keyboard);
-   document.body.style.overflow=prevOverflow;
-   prevFocus?.focus({preventScroll:true});
+   document.body.style.overflow=previousOverflow;
+   previousFocus?.focus({preventScroll:true});
   };
- },[enabled,step,close]);
- if(!enabled||step==='done')return null;
- return <div className={'rch-intro-overlay stage-'+step} role="dialog" aria-modal="true" aria-label="Entering RCH Runs">
-  <div className="rch-intro-court" aria-hidden="true"/>
-  <div className="rch-intro-stage" aria-live="off">
-   <span className="rch-intro-crown" aria-hidden="true"><FaCrown/></span>
-   <p className="rch-intro-logo">RCH <em>RUNS</em></p>
-   <div className="rch-intro-pulse" aria-hidden="true"><FaBasketball/></div>
-   <strong>{step==='logo'?'THE REAL-WORLD BASKETBALL GAME':'YOUR CITY. YOUR RUNS.'}</strong>
-   <span>{step==='logo'?'REAL COURTS · REAL HOOPERS':'PLAY IN REAL LIFE. BUILD YOUR RCH LEGACY.'}</span>
-   {step==='world'&&<button ref={enterRef} type="button" className="rch-intro-enter" onClick={close}>ENTER RUNS <FaArrowRight aria-hidden="true"/></button>}
+ },[enabled,phase,close]);
+
+ if(!enabled||phase==='done')return null;
+ return <div className={'rch-intro-overlay rch-bmf-opening '+(phase==='opening'?'is-opening':'is-revealing')}
+   role="dialog" aria-modal="true" aria-label="Opening RCH Runs">
+  <div className="rch-intro-curtain rch-intro-curtain-left" aria-hidden="true"/>
+  <div className="rch-intro-curtain rch-intro-curtain-right" aria-hidden="true"/>
+  <div className="rch-intro-spotlight" aria-hidden="true"/>
+  <div className="rch-intro-belt" aria-hidden="true">
+   {imageFailed?
+    <div className="rch-intro-fallback"><FaCrown/><strong>RCH RUNS</strong><span>BMF CHAMPION</span></div>:
+    <>
+     <div className="rch-intro-belt-half rch-intro-belt-left">
+      <img src={RUNS_BMF_BELT} alt="" draggable={false} fetchPriority="high"
+       onLoad={()=>setImageReady(true)} onError={()=>setImageFailed(true)}/>
+     </div>
+     <div className="rch-intro-belt-half rch-intro-belt-right">
+      <img src={RUNS_BMF_BELT} alt="" draggable={false} fetchPriority="high"
+       onError={()=>setImageFailed(true)}/>
+     </div>
+    </>}
   </div>
-  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip cinematic opening">SKIP <FaXmark aria-hidden="true"/></button>
+  <div className="rch-intro-caption" aria-hidden="true">
+   <span>RICH CITY HOOPS PRESENTS</span>
+   <strong>RCH RUNS</strong>
+   <small>REAL COURTS. REAL COMPETITION. REAL LEGACY.</small>
+  </div>
+  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip cinematic opening">
+   Skip intro <FaXmark aria-hidden="true"/>
+  </button>
  </div>;
 }
 

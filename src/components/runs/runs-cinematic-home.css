@@ -81,26 +81,95 @@ html body .rwg-shell .rch-gh-section-title h2{color:white!important;font-size:18
 .rwg-shell .rch-gh-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;color:var(--rch-brand-muted);font-size:9px;letter-spacing:.05em}
 .rwg-shell .rch-gh-footer button{display:inline-flex;align-items:center;gap:7px;min-height:40px;background:transparent;border:0;color:var(--rch-brand-copy);font-weight:800}
 
-/* True intro: decorative image is illustrative only and never represents a court location or live activity. */
-.rch-intro-overlay{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;background:var(--rch-brand-canvas);color:#fff;isolation:isolate;overflow:hidden}
-.rch-intro-court{position:absolute;inset:0;background:linear-gradient(0deg,var(--rch-brand-canvas),rgb(var(--rch-brand-canvas-rgb) / 0.467) 50%,rgb(var(--rch-brand-canvas-rgb) / 0.627)),url('/rch-runs-night-court.svg') center/cover no-repeat;filter:saturate(1.35);transform:scale(1.07);animation:rch-intro-enter 2.65s ease-out both}
-.rch-intro-overlay:after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,rgb(var(--rch-brand-accent-rgb) / 0.267),transparent 60%)}
-.rch-intro-stage{position:relative;z-index:2;text-align:center;padding:22px;display:flex;align-items:center;flex-direction:column;gap:14px}
-.rch-intro-crown{color:#fdd68f;font-size:38px;filter:drop-shadow(0 0 12px #e29c56)}
-.rch-intro-logo{font-size:clamp(50px,10vw,100px);font-weight:1000;font-style:italic;letter-spacing:-.09em;line-height:.95;text-shadow:0 7px 35px #000;animation:rch-intro-logo 1.15s both}
-.rch-intro-logo em{color:var(--rch-brand-accent);font-style:italic}
-.rch-intro-pulse{display:grid;place-items:center;width:68px;height:68px;border:1px solid var(--rch-brand-accent-text);border-radius:50%;font-size:32px;color:var(--rch-brand-copy);background:rgb(var(--rch-brand-raised-rgb) / 0.733);box-shadow:0 0 28px rgb(var(--rch-brand-accent-rgb) / 0.32);animation:rch-intro-pulse .8s ease-out 1}
-.rch-intro-stage strong{font-size:clamp(12px,3vw,20px);letter-spacing:.18em;color:#ffda9c;font-weight:950}
-.rch-intro-stage>span:last-child{font-size:11px;font-weight:850;letter-spacing:.23em;color:var(--rch-brand-accent-text)}
-.rch-intro-overlay.stage-world .rch-intro-stage{animation:rch-intro-world .6s both}
-.rch-intro-skip{position:absolute;z-index:4;top:calc(env(safe-area-inset-top) + 19px);right:18px;display:flex;align-items:center;gap:9px;padding:11px 14px;border:1px solid var(--rch-brand-muted);border-radius:11px;background:rgb(var(--rch-brand-surface-rgb) / 0.867);color:white;font-size:12px;font-weight:800;cursor:pointer}
-.rch-intro-enter{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:210px;min-height:52px;margin-top:12px;padding:13px 22px;border:1px solid var(--rch-brand-accent-text);border-radius:13px;background:linear-gradient(110deg,var(--rch-brand-accent),var(--rch-brand-border));box-shadow:0 7px 28px rgb(var(--rch-brand-accent-rgb) / .3),inset 0 1px rgb(var(--rch-brand-ink-rgb) / .4);color:#fff;font-size:13px;font-weight:1000;letter-spacing:.1em;cursor:pointer}
-.rch-intro-enter:active{transform:scale(.98)}
-@keyframes rch-intro-enter{from{transform:scale(1.15);opacity:.3}to{transform:scale(1);opacity:1}}
-@keyframes rch-intro-logo{from{opacity:0;transform:translateY(22px) scale(.88)}to{opacity:1;transform:none}}
-@keyframes rch-intro-pulse{50%{box-shadow:0 0 70px rgb(var(--rch-brand-accent-rgb) / 0.678);transform:scale(1.07)}}
-@keyframes rch-intro-world{from{opacity:.3;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.rch-intro-overlay *{animation:none!important;transition:none!important}.rch-intro-enter:active{transform:none}}
+/* Runs belt opening: the crown opens like the PWA launch while the real game
+ * is already mounted underneath. No GPU-heavy video or artificial match data. */
+.rch-intro-overlay.rch-bmf-opening{
+ position:fixed;inset:0;z-index:2147482998;display:block;width:100%;height:100vh;height:100dvh;
+ overflow:hidden;isolation:isolate;background:transparent;color:#fff;touch-action:none;
+ contain:layout paint;
+}
+.rch-bmf-opening .rch-intro-curtain{
+ position:absolute;z-index:1;top:0;bottom:0;width:50.1%;
+ background:radial-gradient(ellipse 150% 80% at 50% 46%,#222021 0%,#0e0d0e 55%,#040405 100%);
+ transition:transform .78s cubic-bezier(.65,0,.22,1);
+ will-change:transform;
+}
+.rch-bmf-opening .rch-intro-curtain-left{left:0}
+.rch-bmf-opening .rch-intro-curtain-right{right:0}
+.rch-bmf-opening .rch-intro-spotlight{
+ position:absolute;inset:0;z-index:2;pointer-events:none;
+ background:radial-gradient(ellipse 55% 52% at 50% 45%,rgba(148,98,30,.16),transparent 78%);
+ transition:opacity .48s ease;
+}
+.rch-bmf-opening .rch-intro-belt{
+ position:absolute;z-index:3;top:47%;left:50%;width:min(94vw,940px);
+ max-height:68dvh;aspect-ratio:4/3;transform:translate(-50%,-50%);
+ pointer-events:none;animation:rch-bmf-appear .52s ease-out both;
+}
+.rch-bmf-opening .rch-intro-belt-half{
+ position:absolute;inset:0;overflow:hidden;will-change:transform,opacity;
+ transition:transform .78s cubic-bezier(.65,0,.22,1),opacity .65s ease;
+}
+.rch-bmf-opening .rch-intro-belt-left{clip-path:inset(0 50% 0 0)}
+.rch-bmf-opening .rch-intro-belt-right{clip-path:inset(0 0 0 50%)}
+.rch-bmf-opening .rch-intro-belt-half img{
+ display:block;width:100%;height:100%;object-fit:contain;
+ user-select:none;-webkit-user-drag:none;pointer-events:none;
+ filter:drop-shadow(0 14px 24px rgba(0,0,0,.5));
+}
+.rch-bmf-opening .rch-intro-fallback{
+ display:grid;height:100%;place-content:center;gap:7px;text-align:center;
+ color:#e7c37c;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+}
+.rch-bmf-opening .rch-intro-fallback svg{margin:0 auto;font-size:38px}
+.rch-bmf-opening .rch-intro-fallback strong{font-size:clamp(34px,9vw,72px);font-weight:950}
+.rch-bmf-opening .rch-intro-fallback span{font-size:clamp(12px,3.5vw,20px)}
+.rch-bmf-opening .rch-intro-caption{
+ position:absolute;z-index:4;left:12px;right:12px;bottom:clamp(58px,10dvh,105px);
+ display:grid;justify-items:center;gap:5px;text-align:center;pointer-events:none;
+ transition:opacity .4s ease,transform .5s ease;
+}
+.rch-bmf-opening .rch-intro-caption>span{
+ color:#bcb9b9;font-size:10px;font-weight:800;letter-spacing:.22em;
+}
+.rch-bmf-opening .rch-intro-caption>strong{
+ color:#eee;font-size:clamp(22px,4vw,37px);font-weight:950;letter-spacing:-.05em;
+}
+.rch-bmf-opening .rch-intro-caption>small{
+ color:#c8c4c0;font-size:9px;font-weight:800;letter-spacing:.12em;
+}
+.rch-bmf-opening .rch-intro-skip{
+ position:absolute;z-index:6;top:calc(env(safe-area-inset-top,0px) + 17px);
+ right:calc(env(safe-area-inset-right,0px) + 15px);
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-height:44px;border:1px solid rgba(255,255,255,.5);border-radius:999px;
+ background:rgba(18,18,19,.9)!important;padding:0 15px;
+ color:#f4f4f5!important;font-size:12px;font-weight:800;cursor:pointer;
+}
+.rch-bmf-opening .rch-intro-skip:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.rch-bmf-opening.is-opening .rch-intro-curtain-left{transform:translateX(-102%)}
+.rch-bmf-opening.is-opening .rch-intro-curtain-right{transform:translateX(102%)}
+.rch-bmf-opening.is-opening .rch-intro-belt-left{transform:translateX(-110vw);opacity:0}
+.rch-bmf-opening.is-opening .rch-intro-belt-right{transform:translateX(110vw);opacity:0}
+.rch-bmf-opening.is-opening .rch-intro-fallback{opacity:0;transition:opacity .2s}
+.rch-bmf-opening.is-opening .rch-intro-spotlight,
+.rch-bmf-opening.is-opening .rch-intro-caption,
+.rch-bmf-opening.is-opening .rch-intro-skip{opacity:0;pointer-events:none}
+.rch-bmf-opening.is-opening .rch-intro-caption{transform:translateY(12px)}
+@keyframes rch-bmf-appear{
+ from{opacity:0;transform:translate(-50%,-47%) scale(.965)}
+ to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@media(max-width:650px){
+ .rch-bmf-opening .rch-intro-belt{width:98vw;top:44%;max-height:58dvh}
+ .rch-bmf-opening .rch-intro-caption{bottom:clamp(80px,13dvh,120px)}
+ .rch-bmf-opening .rch-intro-caption>span{font-size:9px}
+ .rch-bmf-opening .rch-intro-caption>strong{font-size:26px}
+ .rch-bmf-opening .rch-intro-caption>small{font-size:8px;letter-spacing:.08em}
+}
+@media(prefers-reduced-motion:reduce){
+ .rch-bmf-opening *{animation:none!important;transition:none!important}
+}
 
 @media(max-width:650px){
  .rwg-shell .rch-gh{margin-bottom:95px}
