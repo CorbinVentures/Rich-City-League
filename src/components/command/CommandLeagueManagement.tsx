@@ -5,6 +5,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { LeagueSetupWorkbench } from '@/components/league/LeagueSetupWorkbench';
 import { LeagueOperationsWorkbench } from '@/components/league/LeagueOperationsWorkbench';
 import { CommandScheduleGenerator } from '@/components/command/CommandScheduleGenerator';
+import { LeagueRegistrationSettings } from '@/components/command/LeagueRegistrationSettings';
 import { FaArrowUpRightFromSquare, FaBasketball, FaCalendarDays, FaRotate, FaUserGroup, FaUsers, FaClipboardList } from 'react-icons/fa6';
 
 type Row = Record<string, any>;
@@ -12,7 +13,7 @@ const dateTime = (value?:string|null) => value ? new Date(value).toLocaleString(
 
 export function CommandLeagueManagement() {
  const db=useMemo(()=>getSupabaseClient() as any,[]);
- const [workspace,setWorkspace]=useState<'overview'|'setup'|'operations'|'schedule'>('overview');
+ const [workspace,setWorkspace]=useState<'overview'|'setup'|'operations'|'schedule'|'registration'>('overview');
  const [teams,setTeams]=useState<Row[]>([]);
  const [seasons,setSeasons]=useState<Row[]>([]);
  const [teamSeasons,setTeamSeasons]=useState<Row[]>([]);
@@ -96,9 +97,9 @@ export function CommandLeagueManagement() {
 
  return <div className="space-y-6">
   <div className="flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2" role="tablist" aria-label="League management workspaces">
-   {[['overview','Overview'],['setup','League setup'],['operations','Game & roster operations'],['schedule','Schedule generator']].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={workspace===key} onClick={()=>setWorkspace(key as 'overview'|'setup'|'operations'|'schedule')} className={'rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition '+(workspace===key?'bg-blue-500/20 text-blue-100':'text-white/45 hover:bg-white/[.05] hover:text-white')}>{label}</button>)}
+   {[['overview','Overview'],['setup','League setup'],['operations','Game & roster operations'],['schedule','Schedule generator'],['registration','Registration settings']].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={workspace===key} onClick={()=>setWorkspace(key as 'overview'|'setup'|'operations'|'schedule'|'registration')} className={'rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition '+(workspace===key?'bg-blue-500/20 text-blue-100':'text-white/45 hover:bg-white/[.05] hover:text-white')}>{label}</button>)}
   </div>
-  {workspace==='schedule'?<CommandScheduleGenerator/>:workspace==='setup'?<LeagueSetupWorkbench/>:workspace==='operations'?<LeagueOperationsWorkbench/>:<>
+  {workspace==='schedule'?<CommandScheduleGenerator/>:workspace==='setup'?<LeagueSetupWorkbench/>:workspace==='operations'?<LeagueOperationsWorkbench/>:workspace==='registration'?<LeagueRegistrationSettings/>:<>
   <section className="rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_90%_0%,rgba(59,130,246,.20),transparent_28rem),linear-gradient(145deg,#0d1726,#080c13)] p-5 sm:p-7">
    <div className="flex flex-wrap items-start justify-between gap-5">
     <div className="max-w-3xl">

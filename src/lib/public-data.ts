@@ -136,7 +136,7 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
   return {
     leagues: leagues.data ?? [],
     seasons: seasons.data ?? [],
-    divisions: divisions.data ?? [],
+    divisions: (divisions.data ?? []) as unknown as Division[],
     teams: teams.data ?? [],
     teamSeasons: teamSeasons.data ?? [],
     games: (games.data ?? []).map(normalizeGame),
