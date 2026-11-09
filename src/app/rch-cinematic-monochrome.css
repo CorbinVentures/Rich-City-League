@@ -316,6 +316,109 @@ body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth
   background: rgb(255 255 255 / .14) !important;
   color: #fff !important;
 }
+
+/* Route-aware visual coverage for pages without their own photo hero. */
+.rch-route-visual-band {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: clamp(98px, 13vw, 156px);
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: hidden;
+  margin: 0 auto 14px;
+  padding: 12px clamp(14px, 2.4vw, 30px);
+  border: 1px solid rgb(255 255 255 / .16);
+  border-radius: 16px;
+  background-color: #080808;
+  background-position: center 46%;
+  background-size: cover;
+  color: #fff;
+  box-shadow: 0 16px 42px rgb(0 0 0 / .22);
+}
+.rch-route-visual-band::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, rgb(0 0 0 / .48), transparent 68%), linear-gradient(0deg, rgb(0 0 0 / .62), transparent 62%);
+}
+.rch-route-visual-band > span {
+  color: rgb(255 255 255 / .86);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .17em;
+  text-align: right;
+  text-shadow: 0 2px 12px rgb(0 0 0 / .9);
+  text-transform: uppercase;
+}
+.rch-route-visual-band i { color: #cfcfcf; font-style: normal; }
+.rch-route-visual-band--league {
+  background-image: url('/images/cinematic/rch-arena-hero.webp');
+  background-position: center 48%;
+}
+.rch-route-visual-band--runs {
+  background-image: url('/images/cinematic/rch-outdoor-run.webp');
+  background-position: center 50%;
+}
+.rch-route-visual-band--media {
+  background-image: url('/images/cinematic/rch-media-production.webp');
+  background-position: center 46%;
+}
+.rch-route-visual-band--coaching {
+  background-image: url('/images/cinematic/rch-coaching-session.webp');
+  background-position: center 43%;
+}
+.rch-route-visual-band--community {
+  background-image: url('/images/cinematic/rch-community-huddle.webp');
+  background-position: center 42%;
+}
+.rch-route-visual-band--operations {
+  background-image: url('/images/cinematic/rch-league-operations.webp');
+  background-position: center 45%;
+}
+
+/* Pages with built-in editorial headers use the same subject-matched photo set. */
+[data-rch-visual-category="league"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .92), rgb(4 4 4 / .64) 58%, rgb(4 4 4 / .32)), url('/images/cinematic/rch-arena-hero.webp') !important;
+  background-position: center, center 46% !important;
+  background-size: cover !important;
+}
+[data-rch-visual-category="runs"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .91), rgb(4 4 4 / .65) 58%, rgb(4 4 4 / .34)), url('/images/cinematic/rch-outdoor-run.webp') !important;
+  background-position: center, center 50% !important;
+  background-size: cover !important;
+}
+[data-rch-visual-category="media"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .91), rgb(4 4 4 / .66) 58%, rgb(4 4 4 / .34)), url('/images/cinematic/rch-media-production.webp') !important;
+  background-position: center, center 46% !important;
+  background-size: cover !important;
+}
+[data-rch-visual-category="coaching"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .92), rgb(4 4 4 / .67) 58%, rgb(4 4 4 / .34)), url('/images/cinematic/rch-coaching-session.webp') !important;
+  background-position: center, center 44% !important;
+  background-size: cover !important;
+}
+[data-rch-visual-category="community"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .92), rgb(4 4 4 / .67) 58%, rgb(4 4 4 / .34)), url('/images/cinematic/rch-community-huddle.webp') !important;
+  background-position: center, center 44% !important;
+  background-size: cover !important;
+}
+[data-rch-visual-category="operations"] :is(.rcl-shared-page-hero, .rcl-cinematic-page-hero) {
+  background-image: linear-gradient(90deg, rgb(4 4 4 / .92), rgb(4 4 4 / .67) 58%, rgb(4 4 4 / .34)), url('/images/cinematic/rch-league-operations.webp') !important;
+  background-position: center, center 44% !important;
+  background-size: cover !important;
+}
+
+@media (max-width: 700px) {
+  .rch-route-visual-band {
+    min-height: 82px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .rch-route-visual-band > span { font-size: 8px; letter-spacing: .12em; }
+}
 @media (max-width: 700px) {
   body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-social-landing-hero {
     background-position: center, center, 63% center !important;
