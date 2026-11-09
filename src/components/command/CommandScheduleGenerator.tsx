@@ -104,7 +104,7 @@ export function CommandScheduleGenerator() {
   setLoading(true);setError('');
   try{
    const [seasonQ,teamQ,divisionQ,teamSeasonQ,venueQ]=await Promise.all([
-    db.from('seasons').select('id,name,status').order('start_date',{ascending:false}).limit(100),
+    db.from('seasons').select('id,name,status,start_date,end_date').order('start_date',{ascending:false}).limit(100),
     db.from('teams').select('id,name,short_name,is_active').eq('is_active',true).order('name').limit(500),
     db.from('divisions').select('id,season_id,name').order('name').limit(250),
     db.from('team_seasons').select('team_id,season_id,division_id,seed').limit(1000),
@@ -196,6 +196,16 @@ export function CommandScheduleGenerator() {
    if(!result.fixtures.length)throw new Error('There are not enough RCH teams assigned to this season/division to make a schedule.');
    if(result.fixtures.length>250)throw new Error('This run would create more than 250 games. Generate one division or a smaller block at a time.');
    const sorted=[...result.fixtures].sort((a,b)=>a.round-b.round||String(a.divisionId||'').localeCompare(String(b.divisionId||'')));
+   if(format!=='tournament'){
+    const selectedSeason=seasons.find(s=>s.id===seasonId);
+    if(selectedSeason?.start_date||selectedSeason?.end_date){
+     const outsideWindow=sorted.some(f=>{
+      const date=localDatePlus(startDate,(f.round-1)*daysBetweenRounds);
+      return Boolean((selectedSeason.start_date&&date<selectedSeason.start_date)||(selectedSeason.end_date&&date>selectedSeason.end_date));
+     });
+     if(outsideWindow)throw new Error('This regular-season or playoff schedule extends outside the selected season dates. Adjust the first game date or round spacing before generating it.');
+    }
+   }
    const counts=new Map<number,number>();
    const runId=newId();
    const proposed=sorted.map(f=>{
