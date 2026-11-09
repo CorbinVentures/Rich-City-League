@@ -9,76 +9,77 @@ import {
   RCH_LAUNCH_FALLBACK_MS,
   RCH_LAUNCH_MIN_DISPLAY_MS,
   RCH_LAUNCH_ROUTE_DELAY_MS,
-  startRchLaunchAutoplay,
 } from '@/lib/pwa-launch';
 
-const authRoute = (pathname: string) => /^\/auth(?:\/|$)/.test(pathname) || pathname === '/command' || pathname.startsWith('/command/');
-const runsRoute = (pathname: string) => pathname === '/runs' || pathname.startsWith('/runs/');
+const BELT_IMAGE = '/brand/rcl-championship-belt.webp';
+const BOOT_HOLD_MS = 650;
+const SPLIT_DURATION_MS = 760;
+
+const protectedRoute = (path: string) =>
+  /^\/auth(?:\/|$)/.test(path) || path === '/command' || path.startsWith('/command/');
+const runsRoute = (path: string) => path === '/runs' || path.startsWith('/runs/');
 
 /**
- * Installed-app boot: play the entire four-second RCH film once, then
- * reveal the ready page. Route transitions: only show for slow navigation,
- * and never hold the user for a full film on each click.
+ * A lightweight championship-belt reveal for an installed RCH mobile PWA.
+ * The transparent belt and charcoal curtains split from the middle, revealing
+ * the already-rendered page. No video, audio or heavy animation libraries.
  */
 export function PWALaunchIntro() {
   const pathname = usePathname();
   const mounted = useRef(false);
   const bootInProgress = useRef(false);
-  const bootVideoFinished = useRef(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const autoplayRequestedRef = useRef<HTMLVideoElement | null>(null);
+  const beltLoaded = useRef(false);
+  const beltFailed = useRef(false);
   const checkReadyRef = useRef<() => void>(() => {});
   const dismissRef = useRef<() => void>(() => {});
-  const [videoVisible, setVideoVisible] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [opening, setOpening] = useState(false);
 
+  // Keep the existing fast-navigation contract: only delayed client-side
+  // transitions get a short loader. The cinematic split is for cold boot.
   useEffect(() => {
-    let timer: number | undefined;
-    let navigationSafety: number | undefined;
+    let armTimer: number | undefined;
+    let safetyTimer: number | undefined;
     const clear = () => {
-      if (timer !== undefined) window.clearTimeout(timer);
-      if (navigationSafety !== undefined) window.clearTimeout(navigationSafety);
+      if (armTimer !== undefined) window.clearTimeout(armTimer);
+      if (safetyTimer !== undefined) window.clearTimeout(safetyTimer);
     };
-
     const arm = () => {
       clear();
       if (runsRoute(window.location.pathname)) return;
-      timer = window.setTimeout(() => {
+      armTimer = window.setTimeout(() => {
         const root = document.documentElement;
-        if (bootInProgress.current || authRoute(window.location.pathname) || root.dataset.rchLaunch === 'active') return;
+        if (bootInProgress.current || protectedRoute(window.location.pathname) || root.dataset.rchLaunch === 'active') return;
         root.dataset.rchLaunch = 'active';
-        setVideoReady(false);
-        setVideoVisible(true);
-        // A cancelled client-side navigation must never hold a stale overlay.
-        navigationSafety = window.setTimeout(() => {
-          if (root.dataset.rchLaunch === 'active' && !bootInProgress.current) {
+        setOpening(false);
+        setVisible(true);
+        safetyTimer = window.setTimeout(() => {
+          if (!bootInProgress.current && root.dataset.rchLaunch === 'active') {
             root.dataset.rchLaunch = 'done';
-            setVideoVisible(false);
+            setVisible(false);
           }
         }, RCH_LAUNCH_FALLBACK_MS);
       }, RCH_LAUNCH_ROUTE_DELAY_MS);
     };
-
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (!(event.target instanceof Element)) return;
-      const link = event.target.closest<HTMLAnchorElement>('a[href]');
-      if (!link || link.hasAttribute('download') || (link.getAttribute('target') && link.getAttribute('target') !== '_self')) return;
+      const anchor = event.target.closest<HTMLAnchorElement>('a[href]');
+      if (!anchor || anchor.hasAttribute('download') || (anchor.getAttribute('target') && anchor.getAttribute('target') !== '_self')) return;
       let next: URL;
-      try { next = new URL(link.href, window.location.href); } catch { return; }
+      try { next = new URL(anchor.href, window.location.href); } catch { return; }
       const current = new URL(window.location.href);
-      if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || authRoute(next.pathname) || runsRoute(next.pathname)) return;
+      if (next.origin !== current.origin || !['http:', 'https:'].includes(next.protocol) || protectedRoute(next.pathname) || runsRoute(next.pathname)) return;
       if (next.pathname === current.pathname) return;
       clear();
-      timer = window.setTimeout(arm, 0);
+      armTimer = window.setTimeout(arm, 0);
     };
-
     document.addEventListener('click', onClick, true);
     window.addEventListener('popstate', arm);
     return () => {
+      clear();
       document.removeEventListener('click', onClick, true);
       window.removeEventListener('popstate', arm);
-      clear();
     };
   }, [pathname]);
 
@@ -87,78 +88,89 @@ export function PWALaunchIntro() {
     const firstMount = !mounted.current;
     mounted.current = true;
 
-    if (authRoute(pathname)) {
+    if (protectedRoute(pathname) || runsRoute(pathname)) {
       bootInProgress.current = false;
       root.dataset.rchLaunch = 'done';
       root.dataset.rchLaunchBoot = 'done';
-      setVideoVisible(false);
+      setVisible(false);
       return;
     }
 
-    // Bootstrap marks only a cold-start installed mobile PWA with this flag.
-    // An ordinary browser load must not force a four-second advertisement.
-    const isBoot = firstMount && root.dataset.rchLaunchBoot === 'pending';
-    if (firstMount && !isBoot) return;
+    const boot = firstMount && root.dataset.rchLaunchBoot === 'pending';
+    if (firstMount && !boot) return;
 
-    let cancelled = false;
-    let routeCanDismiss = false;
+    let stopped = false;
+    let holdFinished = false;
+    let routeReady = false;
+    let splitStarted = false;
     let observer: MutationObserver | undefined;
-    let revealDelay: number | undefined;
-    let minimumTime: number | undefined;
-    let initialCheck: number | undefined;
-    let fallback: number | undefined;
-
+    const timeouts: number[] = [];
+    const later = (fn: () => void, ms: number) => {
+      const timeout = window.setTimeout(fn, ms);
+      timeouts.push(timeout);
+    };
     const dismiss = () => {
-      if (cancelled) return;
-      cancelled = true;
+      if (stopped) return;
+      stopped = true;
       bootInProgress.current = false;
       root.dataset.rchLaunch = 'done';
       root.dataset.rchLaunchBoot = 'done';
-      setVideoVisible(false);
-      videoRef.current?.pause();
+      setVisible(false);
       observer?.disconnect();
-      if (revealDelay !== undefined) window.clearTimeout(revealDelay);
-      if (minimumTime !== undefined) window.clearTimeout(minimumTime);
-      if (initialCheck !== undefined) window.clearTimeout(initialCheck);
-      if (fallback !== undefined) window.clearTimeout(fallback);
+      timeouts.forEach(id => window.clearTimeout(id));
     };
+    dismissRef.current = dismiss;
 
     const checkReady = () => {
-      if (cancelled) return;
-      if (canDismissLaunch(isLaunchContentReady(document), isBoot, bootVideoFinished.current, routeCanDismiss)) {
+      if (stopped || !canDismissLaunch(isLaunchContentReady(document), boot, holdFinished, routeReady)) return;
+      if (boot) {
+        if (!beltLoaded.current && !beltFailed.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (splitStarted) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          dismiss();
+          return;
+        }
+        splitStarted = true;
+        setOpening(true);
+        later(dismiss, SPLIT_DURATION_MS);
+      } else {
         dismiss();
       }
     };
-    dismissRef.current = dismiss;
+
     checkReadyRef.current = checkReady;
 
-    if (isBoot) {
+    if (boot) {
       bootInProgress.current = true;
-      bootVideoFinished.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       root.dataset.rchLaunch = 'active';
-      setVideoReady(false);
-      if (!bootVideoFinished.current) setVideoVisible(true);
-      // Safety fallback only: slow loads must not cut off a playing video at 4s.
-      fallback = window.setTimeout(dismiss, RCH_LAUNCH_BOOT_FALLBACK_MS);
+      setOpening(false);
+      setVisible(true);
+      later(() => {
+        holdFinished = true;
+        checkReady();
+      }, BOOT_HOLD_MS);
+      // Never block account access when an image or a content request stalls.
+      later(dismiss, RCH_LAUNCH_BOOT_FALLBACK_MS);
     } else if (root.dataset.rchLaunch === 'active') {
-      routeCanDismiss = false;
-      minimumTime = window.setTimeout(() => {
-        routeCanDismiss = true;
+      setOpening(false);
+      setVisible(true);
+      later(() => {
+        routeReady = true;
         checkReady();
       }, RCH_LAUNCH_MIN_DISPLAY_MS);
-      fallback = window.setTimeout(dismiss, RCH_LAUNCH_FALLBACK_MS);
+      later(dismiss, RCH_LAUNCH_FALLBACK_MS);
     } else {
-      routeCanDismiss = true;
+      routeReady = true;
       if (!isLaunchContentReady(document)) {
-        revealDelay = window.setTimeout(() => {
-          if (!cancelled && !isLaunchContentReady(document)) {
+        later(() => {
+          if (!stopped && !isLaunchContentReady(document)) {
             root.dataset.rchLaunch = 'active';
-            setVideoReady(false);
-            setVideoVisible(true);
+            setOpening(false);
+            setVisible(true);
           }
         }, RCH_LAUNCH_ROUTE_DELAY_MS);
       }
-      fallback = window.setTimeout(dismiss, RCH_LAUNCH_FALLBACK_MS);
+      later(dismiss, RCH_LAUNCH_FALLBACK_MS);
     }
 
     observer = new MutationObserver(checkReady);
@@ -168,79 +180,32 @@ export function PWALaunchIntro() {
       attributes: true,
       attributeFilter: ['aria-busy', 'data-rch-launch-pending'],
     });
-    initialCheck = window.setTimeout(checkReady, 0);
+    later(checkReady, 0);
 
     return () => {
-      cancelled = true;
+      stopped = true;
       observer?.disconnect();
-      if (revealDelay !== undefined) window.clearTimeout(revealDelay);
-      if (minimumTime !== undefined) window.clearTimeout(minimumTime);
-      if (initialCheck !== undefined) window.clearTimeout(initialCheck);
-      if (fallback !== undefined) window.clearTimeout(fallback);
+      timeouts.forEach(id => window.clearTimeout(id));
     };
   }, [pathname]);
 
-  const requestVideoAutoplay = (video: HTMLVideoElement) => {
-    if (document.documentElement.dataset.rchLaunch !== 'active') return;
-    // loadeddata and canplay can fire together on Safari; one play() call
-    // avoids cancelling its own pending start with an AbortError.
-    if (autoplayRequestedRef.current === video) return;
-    autoplayRequestedRef.current = video;
-    void startRchLaunchAutoplay(video).then((started) => {
-      if (!started && autoplayRequestedRef.current === video) {
-        // Some iOS modes refuse even muted inline autoplay. Do not show
-        // WebKit's native play button or block entry waiting for a tap.
-        dismissRef.current();
-      }
-    });
-  };
-
-  const onVideoEnded = () => {
-    if (bootInProgress.current) {
-      bootVideoFinished.current = true;
-      checkReadyRef.current();
-    } else {
-      // Slow route changes can replay; they do not have to complete one loop.
-      const video = videoRef.current;
-      if (video && document.documentElement.dataset.rchLaunch === 'active') {
-        video.currentTime = 0;
-        autoplayRequestedRef.current = null;
-        requestVideoAutoplay(video);
-      }
-    }
-  };
-
   return (
-    <div className="rch-launch" role="status" aria-label="Rich City Hoops is loading" aria-busy="true">
+    <div className={'rch-launch' + (opening ? ' is-opening' : '')} role="status" aria-label="Opening Rich City League" aria-busy={visible && !opening}>
+      <div className="rch-launch-door rch-launch-door-left" aria-hidden="true" />
+      <div className="rch-launch-door rch-launch-door-right" aria-hidden="true" />
+      {visible && (
+        <div className="rch-launch-belt" aria-hidden="true">
+          <div className="rch-launch-belt-half rch-launch-belt-left">
+            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
+          </div>
+          <div className="rch-launch-belt-half rch-launch-belt-right">
+            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
+          </div>
+        </div>
+      )}
       <button type="button" className="rch-launch-skip" onClick={() => dismissRef.current()}>
-        Skip animation
+        Skip intro
       </button>
-      <div className="rch-launch-brand" aria-hidden="true">
-        {videoVisible && (
-          <video
-            ref={videoRef}
-            className={'rch-launch-video' + (videoReady ? ' is-ready' : '')}
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            onLoadedData={(event) => requestVideoAutoplay(event.currentTarget)}
-            onCanPlay={(event) => requestVideoAutoplay(event.currentTarget)}
-            onPlaying={() => setVideoReady(true)}
-            onEnded={onVideoEnded}
-            onError={() => {
-              // Broken or unsupported media must never leave the app stuck
-              // at a poster frame (or require manual playback).
-              dismissRef.current();
-            }}
-          >
-            <source src="/brand/rch-loader.mp4?v=full-intro-20261010" type="video/mp4" />
-          </video>
-        )}
-      </div>
     </div>
   );
 }

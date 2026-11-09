@@ -1,4 +1,4 @@
-/** Installed PWA launch shows the entire 4-second film; route navigation stays fast. */
+/** Installed PWA cold launch shows the championship belt reveal; route navigation stays fast. */
 export const RCH_LAUNCH_ROUTE_DELAY_MS = 325;
 export const RCH_LAUNCH_FALLBACK_MS = 4000;
 export const RCH_LAUNCH_BOOT_FALLBACK_MS = 12000;
@@ -13,7 +13,7 @@ export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   const mobile = /iPhone|iPad|iPod|Android|Mobile/i.test(nav.userAgent) || (nav.platform === 'MacIntel' && nav.maxTouchPoints > 1);
   if (!standalone || !mobile) return;
   // Runs has its own lightweight game entrance; do not stack the general
-  // four-second brand film over the game title screen or an active Run room.
+  // championship-belt reveal over the game title screen or an active Run room.
   if (/^\\/runs(?:\\/|$)/.test(location.pathname)) {
     root.dataset.rchLaunch = 'done';
     root.dataset.rchLaunchBoot = 'done';
@@ -22,7 +22,7 @@ export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   root.dataset.rchLaunch = 'active';
   root.dataset.rchLaunchBoot = 'pending';
   window.setTimeout(() => {
-    // Fail safe only if React never mounts or the video stalls.
+    // Fail safe if React never mounts, the image fails, or the page stalls.
     if (root.dataset.rchLaunchBoot === 'pending') {
       root.dataset.rchLaunch = 'done';
       root.dataset.rchLaunchBoot = 'done';
@@ -35,34 +35,12 @@ export function isLaunchContentReady(root: ParentNode): boolean {
   return Boolean(content?.querySelector('main') && !content.querySelector('[aria-busy="true"], [data-rch-launch-pending="true"]'));
 }
 
-/**
- * The opening sequence is gated by the actual video end event, never by
- * hydration or a short elapsed-time minimum. Route loaders do not wait 4s.
- */
+/** Only start the reveal after the page is ready and its minimum hold is complete. */
 export function canDismissLaunch(
   contentReady: boolean,
   isBoot: boolean,
-  videoFinished: boolean,
+  bootHoldFinished: boolean,
   routeCanDismiss: boolean,
 ): boolean {
-  return contentReady && (isBoot ? videoFinished : routeCanDismiss);
-}
-
-/**
- * Request silent inline autoplay explicitly: WebKit may not promote muted
- * React attributes into its playback policy until the media element loads.
- * The caller must remove its loader if a device still denies playback,
- * never leave a native "tap to play" prompt over the entire app.
- */
-export async function startRchLaunchAutoplay(video: Pick<HTMLVideoElement, 'autoplay' | 'muted' | 'defaultMuted' | 'playsInline' | 'play'>): Promise<boolean> {
-  video.autoplay = true;
-  video.defaultMuted = true;
-  video.muted = true;
-  video.playsInline = true;
-  try {
-    await video.play();
-    return true;
-  } catch {
-    return false;
-  }
+  return contentReady && (isBoot ? bootHoldFinished : routeCanDismiss);
 }
