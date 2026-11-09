@@ -37,8 +37,8 @@ describe('Installed PWA Runs Gameplay Activation parity',()=>{
   expect(upgrade).toContain("if (!isStandaloneMode()) return;");
   expect(upgrade).toContain("window.location.replace(url.toString())");
   expect(upgrade).toContain("refreshGuard === version");
-  expect(sw).toContain("rcl-static-v13");
-  expect(sw).toContain("SW_VERSION = 'v13'");
+  expect(sw).toContain("rcl-static-v14");
+  expect(sw).toContain("SW_VERSION = 'v14'");
   expect(sw).toContain("fetch(request, { cache: 'no-store' })");
  });
  it('preserves social-first installed PWA launch',()=>{
