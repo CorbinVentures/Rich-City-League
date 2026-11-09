@@ -186,4 +186,3 @@ export function LeagueOperationsWorkbench() {
       </table></div>
     </section>}
 }
-}
