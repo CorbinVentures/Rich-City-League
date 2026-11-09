@@ -11,7 +11,7 @@ export function SeasonDraftScouting({
   const fit=bestFit(scored);
   const availableWithEvidence=scored.filter(item=>item.grade!==null);
   const positions=['PG','SG','SF','PF','C'];
-  return <section aria-label="Draft scouting intelligence" className="mt-7 rounded-3xl border border-rcl-blue/20 bg-[linear-gradient(145deg,#0e1921,#080b11)] p-5 text-white sm:p-6">
+  return <section aria-label="Draft scouting intelligence" className="rch-draft-intelligence mt-7 rounded-3xl border border-white/20 bg-[#18181a] p-5 text-white sm:p-6">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaBrain/> RCH Front Office</p>
       <h2 className="mt-2 font-display text-3xl font-black uppercase">Draft Intelligence</h2>
