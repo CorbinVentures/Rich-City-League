@@ -1,5 +1,4 @@
-/* RCH blue-metal visual system. Shared presentation layers consume these
-   tokens; semantic success, warning, team and partner colors stay separate. */
+/* RCH monochrome visual system. Semantic status, team and partner colors stay separate. */
 @font-face {
   font-family: 'RCH Condensed';
   src: url('/fonts/barlow-condensed-800.ttf') format('truetype');

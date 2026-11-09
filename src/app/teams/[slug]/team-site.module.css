@@ -376,3 +376,45 @@
  .identityGhost{font-size:clamp(3rem,11vw,5rem)}
 }
 @media(prefers-reduced-motion:reduce){.heroArtwork{transform:none;will-change:auto}}
+
+
+/* The franchise artwork remains team-specific; the presentation shell stays monochrome. */
+.heroFrame{
+  overflow:hidden;
+}
+.heroImage{
+  background:
+    linear-gradient(90deg,rgba(4,4,4,.88) 0%,rgba(4,4,4,.66) 42%,rgba(4,4,4,.28) 100%),
+    linear-gradient(0deg,rgba(4,4,4,.72),transparent 62%),
+    radial-gradient(ellipse at 76% 28%,rgba(255,255,255,.22),transparent 44%),
+    linear-gradient(140deg,#161616 0%,#101010 48%,#080808 100%) !important;
+}
+.heroLighting{
+  background:
+    radial-gradient(ellipse at 73% 17%,rgba(255,255,255,.24),transparent 35%),
+    linear-gradient(116deg,transparent 45%,rgba(255,255,255,.12) 45.2%,transparent 45.8%) !important;
+}
+.heroCourt{border-color:rgba(255,255,255,.24) !important;box-shadow:inset 0 0 0 72px rgba(255,255,255,.018),0 0 90px rgba(255,255,255,.1) !important}
+.depthMonogram{
+  right:clamp(18px,4vw,60px) !important;
+  left:auto !important;
+  max-width:68%;
+  overflow:hidden;
+  font-size:clamp(5rem,17vw,14rem) !important;
+  line-height:.82 !important;
+  text-align:right;
+  white-space:nowrap;
+  text-overflow:clip;
+}
+.identityGhost{
+  right:0 !important;
+  max-width:100%;
+  overflow:hidden;
+  font-size:clamp(3rem,8vw,8rem) !important;
+}
+
+@media(max-width:700px){
+  .depthMonogram{right:16px !important;max-width:80%;font-size:clamp(4rem,22vw,8rem) !important}
+  .heroFrame,.heroContent{min-height:660px !important}
+  .heroLogo{width:clamp(118px,34vw,170px);height:clamp(118px,34vw,170px)}
+}

@@ -23,8 +23,8 @@ type Props = {news:News[];events:Event[];runs:Run[];suggestedRuns?:Run[];listing
 type Opportunity = {id:string;href:string;title:string;starts_at:string;location:string;type:string;art:string;host_name?:string|null;rsvp_count?:number|null;max_players?:number|null;game_format?:string|null};
 
 const cards = [
-  { title: 'Runs', label: 'Find your next game', detail: 'Find and organize runs near you.', href: '/runs', icon: FaBasketball, variant: 'runs' },
   { title: 'Leagues', label: 'Pro season · Nov 2027', detail: 'Virginia franchises preparing for the November 2027 season.', href: '/league', icon: FaTrophy, variant: 'leagues' },
+  { title: 'Runs', label: 'Find your next game', detail: 'Find and organize runs near you.', href: '/runs', icon: FaBasketball, variant: 'runs' },
   { title: 'Discover', label: 'Your basketball world', detail: 'Training, tryouts and opportunities.', href: '/discover', icon: FaCompass, variant: 'discover' },
   { title: 'RCH TV', label: 'Every story matters', detail: 'Games, highlights and original content.', href: '/media', icon: FaVideo, variant: 'media' },
   { title: 'Social', label: 'Stay connected', detail: 'Players, coaches and basketball culture.', href: '/pulse', icon: FaUsers, variant: 'social' },
@@ -61,21 +61,33 @@ export function RCHBrowserHomepage({ news, events, runs, suggestedRuns = [], lis
           <p className="rch-browser-eyebrow">RICH CITY HOOPS <span>·</span> VIRGINIA BASKETBALL</p>
           <h1 id="rch-browser-hero-heading">YOUR CITY.<br/>YOUR COURT.<br/><em>YOUR LEGACY.</em></h1>
           <p className="rch-browser-hero-mantra">FIND A RUN <i>•</i> BUILD YOUR NAME <i>•</i> STAY CONNECTED</p>
-          <p className="rch-browser-hero-description">Find real basketball runs, connect with Virginia players and build your basketball identity—all in one community.</p>
+          <p className="rch-browser-hero-description">Twelve franchises. One Virginia stage. Follow the players, matchups, and stories building the Rich City League—alongside a statewide basketball community.</p>
           <div className="rch-browser-hero-actions">
-            <Link className="rch-browser-button rch-browser-button-primary" href="/runs">Find a Run <FaCompass aria-hidden="true" /></Link>
+            <Link className="rch-browser-button rch-browser-button-primary" href="/league">Enter the League <FaTrophy aria-hidden="true" /></Link>
             <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-outline" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_hero" memberLabel="My Basketball" memberHref="/my-hoops" />
           </div>
           <p className="rch-browser-hero-footnote">Community membership is free. Explore before signing up.</p>
         </div>
         <div className="rch-browser-hero-quick" aria-label="Popular places to start">
+          <Link href="/league"><FaTrophy/><span><b>ENTER THE LEAGUE</b><small>Twelve teams · November 2027</small></span><FaArrowRight/></Link>
+          <Link href="/media"><FaVideo/><span><b>WATCH RCH TV</b><small>Games, highlights and stories</small></span><FaArrowRight/></Link>
           <Link href="/runs"><FaLocationDot/><span><b>FIND RUNS</b><small>Explore upcoming games</small></span><FaArrowRight/></Link>
-          <Link href="/league"><FaTrophy/><span><b>EXPLORE THE LEAGUE</b><small>Pro season planned · Nov 2027</small></span><FaArrowRight/></Link>
-          <Link href="/players"><FaUsers/><span><b>FIND PLAYERS</b><small>See real player profiles</small></span><FaArrowRight/></Link>
-          <Link href="/pulse"><FaUserGroup/><span><b>CONNECT</b><small>Culture, creators and fans</small></span><FaArrowRight/></Link>
+          <Link href="/players"><FaUsers/><span><b>MEET THE PLAYERS</b><small>Real Virginia basketball profiles</small></span><FaArrowRight/></Link>
         </div>
       </div>
       <div className="rch-browser-hero-corner" aria-hidden="true">MORE THAN<br/>A GAME</div>
+    </section>
+
+    <section className="rch-browser-featured-league" aria-labelledby="rch-featured-league-title">
+      <p>Rich City League · Flagship competition</p>
+      <div>
+        <h2 id="rch-featured-league-title">Twelve teams.<br/>One Virginia stage.</h2>
+        <p>Meet the franchises, follow the players, and stay with every story as game night gets closer.</p>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <Link className="rch-browser-button rch-browser-button-primary" href="/league">Explore Rich City League <FaArrowRight aria-hidden="true" /></Link>
+        <Link className="rch-browser-button rch-browser-button-outline" href="/media">Watch RCH TV <FaPlay aria-hidden="true" /></Link>
+      </div>
     </section>
 
     <section className="rch-browser-section" id="whats-happening">

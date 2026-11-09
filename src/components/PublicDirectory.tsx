@@ -66,7 +66,10 @@ function MediaVideo({ item }: { item: MediaItem }) {
   if (!playing) return <button type="button" onClick={() => setPlaying(true)}
     aria-label={`Play ${item.title}`} className="group relative h-full w-full overflow-hidden bg-[#020408] text-white">
     {item.posterUrl?<img src={item.posterUrl} loading="lazy" alt="" className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.025]"/>:
-      <div className="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_center,rgba(26,155,220,.13),#020408_68%)]"><span className="text-xs font-bold uppercase tracking-wide text-white/45">RCH TV</span></div>}
+      <div className="rch-tv-poster-fallback grid h-full w-full place-items-end p-4 text-left sm:p-5">
+        <span className="rch-tv-poster-kicker">Rich City Hoops TV · Virginia Basketball</span>
+        <strong className="rch-tv-poster-title">{item.title}</strong>
+      </div>}
     <span className="absolute inset-0 grid place-items-center bg-black/15"><span className="grid h-14 w-14 place-items-center rounded-full border border-white/40 bg-black/65 text-white shadow-xl"><FaPlay aria-hidden="true"/></span></span>
   </button>;
   if (failed) return <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-4 text-center">
