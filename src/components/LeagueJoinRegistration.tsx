@@ -32,7 +32,7 @@ export function LeagueJoinRegistration(){
       ? await db.from('divisions').select('*').in('season_id',open.map(season=>season.id)).order('name')
       : {data:[] as Division[],error:null};
     if(divisionsResult.error)throw divisionsResult.error;
-    if(live){setSeasons(open);setDivisions((divisionsResult.data??[]) as Division[]);setError(false);}
+    if(live){setSeasons(open);setDivisions((divisionsResult.data??[]) as unknown as Division[]);setError(false);}
    }catch{if(live)setError(true);}
    finally{if(live)setLoading(false);}
   }
