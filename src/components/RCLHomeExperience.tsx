@@ -42,12 +42,12 @@ export function RCLHomeExperience({teams,games,standings,members,news,posts,stan
           <Link href="/social" className="rcl-landing-secondary"><FaPlay/> See what&apos;s happening</Link>
           <Link href="/app" className="rcl-landing-secondary"><FaDownload/> Get the RCH App</Link>
         </div>
-        <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>
+        <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Active users</span><span>League</span><span>Merch</span></div>
       </div>
 
       <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
         <div className="rcl-landing-phone-top"><b>RCH</b><span>For You</span><i>•••</i></div>
-        <div className="rcl-landing-story-row">{featured.slice(0,4).map(player=><span key={player.id}>{player.photo_url?<Image src={player.photo_url} alt="" width={64} height={64}/>:<b>{player.first_name[0]}{player.last_name[0]}</b>}</span>)}</div>
+        <div className="rcl-landing-story-row">{featured.slice(0,4).map(member=><span key={member.id}>{member.avatar_url?<Image src={member.avatar_url} alt="" width={64} height={64}/>:<b>{(member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH').split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase()}</b>}</span>)}</div>
         <div className="rcl-landing-preview-post">
           <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>
           <strong>Basketball here is bigger than a schedule.</strong>
@@ -80,7 +80,7 @@ export function RCLHomeExperience({teams,games,standings,members,news,posts,stan
       <div className="rcl-landing-section-head"><div><p>People first</p><h2>Faces make the network feel alive.</h2></div><Link href="/discover">See active users <FaArrowRight/></Link></div>
       <div className="rcl-people-row">{featured.map(member=>{
         const name=member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH Member';
-        const initials=name.split(/\\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+        const initials=name.split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
         return <Link href={'/social/profile/'+member.id} key={member.id} className="rcl-person-card">
           <div>{member.avatar_url?<img src={member.avatar_url} alt="" loading="lazy"/>:<span>{initials}</span>}</div>
           <p><small>Active user</small><b>{name}</b><em>{member.role || 'RCH Community Profile'}</em></p>
