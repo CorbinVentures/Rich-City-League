@@ -61,149 +61,103 @@
 
 @media(max-width:680px){.hero{background-position:center,64% center,center}}
 
-/* League media front page: bright editorial canvas, feature-first hierarchy, and score rail. */
-.home{--league-ink:#14212d;--league-muted:#596774;--league-line:rgba(16,31,45,.14);color:var(--league-ink);padding:18px clamp(12px,2vw,24px) 42px;background:#f1f3f5;border-radius:24px}
-.hero{min-height:560px;background:linear-gradient(90deg,rgba(4,11,18,.78) 0%,rgba(5,14,23,.48) 48%,rgba(5,14,23,.12) 100%),url('/images/cinematic/rch-arena-hero.webp') center 53% / cover no-repeat,radial-gradient(ellipse at 77% 38%,rgba(96,133,170,.26),transparent 28%),linear-gradient(115deg,#060d15 4%,#0a1928 55%,#11151d 100%)}
-.editorialBlock{margin:0 auto 54px;max-width:1440px}
-.editorialBlock>.sectionHead{margin-bottom:13px}
-.editorialNav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
-.editorialNav>a{min-height:88px;border:1px solid #d8dee4;border-radius:14px;background:#fff;padding:14px 16px;box-shadow:0 8px 22px rgba(14,28,42,.04)}
-.editorialNav>a:hover{transform:translateY(-2px);border-color:rgba(154,119,50,.54);background:#fff}
-.editorialNav small{color:#65717d;font-size:8px}
-.editorialNav strong{color:#172431;font-size:16px}
-.navIcon{width:40px;height:40px;background:#f3f6f8;color:#315c84;border-color:#dce4ea}
-.arrow{color:#536573}
-.scoreboard{max-width:1440px;margin:28px auto 42px}
-.scoreboardHead{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 14px}
-.scoreboardHead h2{margin:5px 0 0;color:#15222e;font-family:var(--font-display,inherit);font-size:clamp(22px,3vw,30px);font-weight:850;letter-spacing:-.04em}
-.scoreboardHead>a,.scoreRailEmpty>a{display:inline-flex;align-items:center;gap:8px;color:#345e83;font-size:11px;font-weight:850}
-.scoreRail{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 12px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#aab4bd transparent}
-.scoreCard{position:relative;display:flex;min-width:212px;min-height:164px;flex:1 0 0;flex-direction:column;gap:10px;overflow:hidden;border:1px solid #d9dfe4;border-radius:14px;background:#fff;padding:13px 14px;box-shadow:0 7px 22px rgba(16,31,45,.045);scroll-snap-align:start;transition:transform .2s,border-color .2s,box-shadow .2s}
-.scoreCard:hover{transform:translateY(-3px);border-color:#9caebd;box-shadow:0 13px 28px rgba(16,31,45,.1)}
-.scoreCardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #edf0f2;padding-bottom:9px}
-.scoreCardTop>span{color:#536573;font-size:8px;font-weight:950;letter-spacing:.14em}
-.scoreCardTop time{color:#7b8791;font-size:9px}
-.scoreCard[data-state="live"] .scoreCardTop>span{color:#145da0}
-.scoreTeam{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px;color:#17232e}
-.scoreLogo{display:grid;width:30px;height:30px;place-items:center;overflow:hidden;border:1px solid color-mix(in srgb,var(--score-accent,#486b8b) 36%,transparent);border-radius:50%;background:#f7f8f9;color:var(--score-accent,#486b8b)}
-.scoreLogo img{width:24px;height:24px;object-fit:contain}
-.scoreLogo>b{font-size:12px;font-weight:950}
-.scoreTeam>strong{overflow:hidden;color:#253441;font-size:11px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
-.scoreValue{color:#17232e;font-size:15px;font-variant-numeric:tabular-nums}
-.scoreCardLink{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:3px;color:#6b7782;font-size:9px;font-weight:750}
-.scoreCardLink svg{color:#42688a}
-.scoreRailEmpty{display:flex;min-height:100px;align-items:center;gap:15px;border:1px solid #d9dfe4;border-radius:14px;background:#fff;padding:16px 20px;box-shadow:0 7px 22px rgba(16,31,45,.04)}
-.scoreRailEmpty>div{display:grid;gap:3px}
-.scoreRailEmpty small{color:#60707e;font-size:8px;font-weight:900;letter-spacing:.15em}
-.scoreRailEmpty strong{color:#1b2a36;font-size:17px}
-.scoreRailEmpty p{margin:0;color:#677581;font-size:12px;line-height:1.5}
-.scoreRailEmpty>a{margin-left:auto;white-space:nowrap}
-.emptyPulse{width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:#b5985f;box-shadow:0 0 0 5px rgba(181,152,95,.13)}
-.gameSection,.teamsSection{margin-bottom:56px}
-.sectionHead h2{color:#14212d}
-.sectionHead>a{color:#315d83}
-.sectionIntro{color:#566571}
-.featureGame,.standings{border-color:#d9dfe4;background:#fff;color:#172431;box-shadow:0 10px 30px rgba(16,31,45,.055)}
-.featureGame{background:radial-gradient(ellipse at 50% 0,rgba(213,180,124,.16),transparent 54%),#fff}
-.cardLabel{color:#886d39}
-.featureGame h3,.standings h3{color:#162530}
-.standingRows>div{border-color:#e4e8eb}
-.standingRows>div>span:first-child{color:#8b713c}
-.feedback{border-color:#d9dfe4;background:#fff;color:#5d6a75}
-@media(max-width:900px){.scoreCard{flex:0 0 228px}}
+
+/* RCH TV / League shared broadcast canvas. One color system; no nested light panel. */
+.home{--league-ink:#f7f7f7;--league-muted:#b9b9bd;--league-line:rgba(255,255,255,.15);min-width:0;padding:0 0 32px;background:transparent;color:var(--league-ink)}
+.home :is(h2,h3){color:#f7f7f7}
+.home .eyebrow{color:#c4c4c7}
+.home .hero .eyebrow{color:#fff}
+.home .sectionHead h2,.home .scoreboardHead h2{color:#fff!important;text-shadow:none}
+:global(#rch-public-content) .home :is(h2,h3){color:#f7f7f7!important}
+.scoreboard{max-width:1440px;margin:0 auto 24px;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:#141416;padding:18px;box-shadow:0 14px 45px rgba(0,0,0,.15)}
+.scoreboardHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.scoreboardHead h2{margin:5px 0 0;font-size:clamp(22px,3vw,30px);font-weight:850;letter-spacing:-.04em}
+.scoreboardHead>a,.scoreRailEmpty>a{display:inline-flex;align-items:center;gap:6px;color:#fff;font-size:11px;font-weight:800}
+.scoreRail{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 9px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#666 transparent}
+.scoreCard{display:flex;flex:1 0 215px;min-height:158px;flex-direction:column;gap:9px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:#202023;padding:13px 14px;scroll-snap-align:start;transition:border-color .2s,transform .2s}
+.scoreCard:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.4)}
+.scoreCardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.13);padding-bottom:8px}
+.scoreCardTop>span{color:#dedee0;font-size:9px;font-weight:900;letter-spacing:.13em}
+.scoreCardTop time{color:#b4b4ba;font-size:10px}
+.scoreCard[data-state="live"] .scoreCardTop>span{color:#fff}
+.scoreTeam{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px;color:#fff}
+.scoreLogo{display:grid;width:30px;height:30px;place-items:center;overflow:hidden;border:1px solid rgba(255,255,255,.19);border-radius:50%;background:#303033;color:#fff}
+.scoreLogo img{width:25px;height:25px;object-fit:contain}
+.scoreLogo b{font-size:12px;font-weight:900}
+.scoreTeam strong{overflow:hidden;color:#fff;font-size:11px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.scoreValue{color:#fff;font-size:15px;font-variant-numeric:tabular-nums}
+.scoreCardLink{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:auto;color:#cfcfd1;font-size:10px;font-weight:750}
+.scoreRailEmpty{display:flex;min-height:130px;align-items:center;gap:16px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:#202023;padding:18px}
+.scoreRailEmpty>div{display:grid;gap:5px;min-width:0}
+.scoreRailEmpty small{color:#c7c7ca;font-size:10px;font-weight:850;letter-spacing:.14em}
+.scoreRailEmpty strong{color:#fff;font-size:20px}
+.scoreRailEmpty p{margin:0;max-width:58ch;color:#c2c2c6;font-size:13px;line-height:1.55}
+.scoreRailEmpty>a{flex-shrink:0;margin-left:auto;white-space:nowrap}
+.emptyPulse{width:10px;height:10px;flex-shrink:0;border-radius:50%;background:#eee;box-shadow:0 0 0 5px #ffffff16}
+.hero{min-height:470px;border-color:rgba(255,255,255,.16);border-radius:20px;filter:grayscale(1) contrast(1.08);background:linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.55) 54%,rgba(0,0,0,.08)),url('/images/cinematic/rch-arena-hero.webp') center 53% / cover no-repeat}
+.heroCopy{max-width:700px;padding:122px 38px 100px}
+.hero h1{max-width:640px;color:#fff;font-size:clamp(36px,6vw,70px)}
+.hero h1 em{color:#fff}
+.hero .intro{color:#ececee}
+.primaryAction{background:#ededed;color:#0b0b0c}
+.primaryAction:hover{background:#fff}
+.secondaryAction{border-color:#ffffff75;color:#fff}
+.secondaryAction:hover{border-color:#fff;background:#ffffff1a}
+.heroTop,.heroBottom{color:#e2e2e4}
+.heroStamp{border-color:#eee;color:#fff}
+.heroStamp small{color:#e4e4e5}
+.editorialBlock{margin:30px auto 42px}
+.editorialNav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 0}
+.editorialNav>a{min-height:86px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:#171719;padding:15px}
+.editorialNav>a:hover{border-color:#f5f5f5;background:#222225}
+.navIcon{width:40px;height:40px;border-color:#ffffff31;background:#ffffff14;color:#eee}
+.editorialNav small{color:#c0c0c4;font-size:9px}
+.editorialNav strong{color:#fff;font-size:17px}
+.arrow{color:#ddd}
+.gameSection,.teamsSection{margin-bottom:42px}
+.sectionHead h2{font-size:clamp(26px,4vw,38px)}
+.sectionHead>a,.cardLink{color:#f3f3f3}
+.sectionIntro{color:#bdbdc1}
+.featureGame,.standings{min-height:226px;border-color:rgba(255,255,255,.14);background:#19191c;color:#fff;box-shadow:none}
+.featureGame{background:linear-gradient(145deg,#242426,#131315)}
+.cardLabel{color:#d2d2d5}
+.versus span{color:#ddd}
+.featureGame h3,.standings h3{color:#fff}
+.featureGame>p,.standings>p,.date{color:#c2c2c5}
+.standingRows>div{border-color:rgba(255,255,255,.12)}
+.standingRows>div>span:first-child{color:#f1f1f1}
+.feedback{border-color:rgba(255,255,255,.15);background:#19191c;color:#c4c4c6}
+.teamCard{border-color:rgba(255,255,255,.24);box-shadow:none}
+.teamCard:hover{border-color:#fff;box-shadow:0 14px 32px #0007}
+.teamCard:before{background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.50) 55%,rgba(0,0,0,.9))}
+.teamIndex{color:#eee}
+.teamName{max-width:90%;color:#fff;font-size:clamp(14px,1.4vw,18px);line-height:1.15;text-shadow:0 2px 12px #000}
+.teamVisit{color:#f4f4f4}
 @media(max-width:680px){
- .home{padding:10px 10px 30px;border-radius:18px}
- .hero{min-height:530px}
- .scoreboard{margin:30px 0 36px}
+ .home{padding:0 0 25px}
+ .scoreboard{margin:0 0 16px;padding:13px;border-radius:16px}
  .scoreboardHead{align-items:center}
- .scoreboardHead>a{font-size:10px}
- .scoreRail{margin-right:-10px;padding-right:10px}
- .scoreCard{flex:0 0 min(78vw,270px)}
- .scoreRailEmpty{align-items:flex-start;padding:15px}
- .scoreRailEmpty p{max-width:38ch}
- .scoreRailEmpty>a{align-self:flex-end;font-size:10px}
- .editorialBlock{margin-bottom:42px}
- .editorialNav{display:flex;overflow-x:auto;gap:9px;margin-right:-10px;padding:0 10px 10px 0;scroll-snap-type:x mandatory}
- .editorialNav>a{flex:0 0 min(78vw,290px);scroll-snap-align:start}
+ .scoreboardHead h2{font-size:23px}
+ .scoreRail{margin-right:-13px;padding-right:13px}
+ .scoreCard{flex:0 0 min(75vw,265px)}
+ .scoreRailEmpty{flex-wrap:wrap;align-items:flex-start;gap:9px;padding:15px}
+ .scoreRailEmpty>a{width:100%;margin-left:0;padding-top:8px}
+ .hero{min-height:360px;border-radius:16px;background-position:center,60% center}
+ .heroTop,.heroBottom{left:17px;right:17px;font-size:8px;letter-spacing:.11em}
+ .heroTop{top:17px}.heroBottom{bottom:17px}
+ .heroCopy{padding:95px 19px 72px}
+ .hero h1{font-size:clamp(32px,9.5vw,48px);line-height:1.03}
+ .hero .intro{margin-top:14px;font-size:13px;line-height:1.55}
  .heroStamp{display:none}
- .sectionHead h2{font-size:clamp(24px,6.7vw,34px)}
- .gameSection,.teamsSection{margin-bottom:44px}
+ .actions{gap:9px;margin-top:18px}
+ .primaryAction,.secondaryAction{min-height:44px;padding:0 13px;font-size:11px}
+ .editorialNav{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px}
+ .editorialNav>a{min-height:70px}
+ .scoreGrid{grid-template-columns:1fr}
+ .teamGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .teamCard{min-height:180px;padding:13px}
+ .teamLogo{width:65px;height:65px;right:12px;top:32px}
+ .teamName{font-size:14px}
 }
-@media(max-width:390px){.scoreboardHead h2{font-size:22px}.scoreboardHead>a{font-size:9px}.scoreRailEmpty{flex-wrap:wrap}.scoreRailEmpty>a{margin-left:24px}}
+@media(max-width:390px){.teamGrid{grid-template-columns:1fr}.teamCard{min-height:153px}.scoreboardHead h2{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.scoreCard{transition:none}.scoreCard:hover{transform:none}}
-
-/* Contrast and sports-homepage hierarchy corrections for real PWA screens. */
-.home{--league-ink:#14212d!important;--league-muted:#4f5e6a!important;--league-line:rgba(16,31,45,.15)!important;color:#14212d!important;background:#f1f3f5!important}
-.home .scoreboard{margin-top:4px}
-.home .scoreboardHead h2,.home .sectionHead h2{color:#15232f!important;text-shadow:none!important}
-.home .eyebrow{color:#526575!important}
-.home .scoreboardHead .eyebrow{color:#526575!important}
-.home .sectionIntro,.home .sectionHead+ p{color:#455662!important}
-.home .editorialNav small{color:#536473!important}
-.home .editorialNav strong{color:#172431!important}
-.home .editorialNav .arrow{color:#365f82!important}
-.home .featureGame,.home .standings{color:#182631!important}
-.home .featureGame h3,.home .standings h3{color:#172431!important}
-.home .featureGame>p,.home .standings>p,.home .feedback,.home .date{color:#4b5a66!important}
-.home .standingRows>div>strong{color:#1c2b37!important}
-.home .standingRows>div>span:last-child{color:#344653!important}
-.home .teamName{max-width:100%;color:#fff!important;font-size:clamp(14px,1.4vw,18px)!important;line-height:1.16!important;overflow-wrap:normal;word-break:normal;hyphens:none;text-shadow:0 2px 12px rgba(0,0,0,.95)!important}
-.home .teamIndex{color:rgba(255,255,255,.78)!important;text-shadow:0 1px 4px rgba(0,0,0,.8)}
-.home .teamVisit{color:#f0dcaa!important;text-shadow:0 1px 4px rgba(0,0,0,.9)}
-.home .teamCard:before{background:linear-gradient(180deg,rgba(3,9,15,.08) 12%,rgba(3,9,15,.48) 56%,rgba(3,9,15,.92) 100%)!important}
-.home .hero .eyebrow{color:#edcf90!important}
-.home .hero h1{color:#fff!important;text-shadow:0 3px 22px rgba(0,0,0,.4)}
-.home .hero .intro{color:#f1f4f7!important;text-shadow:0 1px 6px rgba(0,0,0,.45)}
-.home .heroTop,.home .heroBottom{color:rgba(255,255,255,.82)!important;text-shadow:0 1px 5px rgba(0,0,0,.75)}
-.home .cardLink,.home .sectionHead>a,.home .scoreboardHead>a{color:#315d83!important}
-.home .cardLabel{color:#806535!important}
-@media(max-width:680px){
- .home .scoreboard{margin:8px 0 30px}
- .home .teamName{font-size:14px!important}
-}
-
-/* Public app chrome has a deliberate light content canvas. Override global dark
-   heading rules with the page scope so every league section stays readable. */
-:global(#rch-public-content) .home h2,
-:global(#rch-public-content) .home h3{
- color:#172431!important;
- opacity:1!important;
- text-shadow:none!important;
-}
-
-
-/* Monochrome broadcast direction and readable scoreboard empties. */
-.home{
-  --league-ink:#f7f7f7;
-  --league-muted:#b7b7b7;
-  --league-line:rgba(255,255,255,.16);
-}
-.scoreboard{
-  border-color:rgba(255,255,255,.18) !important;
-  background:linear-gradient(145deg,#161616,#0a0a0a 76%) !important;
-  color:#f7f7f7 !important;
-}
-.scoreboardHead h2,.scoreboardHead p,.scoreRailEmpty :is(small,strong,p),.scoreRailEmpty>a{
-  color:#f3f3f3 !important;
-  opacity:1 !important;
-}
-.scoreRailEmpty{
-  border-color:rgba(255,255,255,.2) !important;
-  background:linear-gradient(145deg,#202020,#101010) !important;
-  color:#f3f3f3 !important;
-}
-.hero{
-  border-color:rgba(255,255,255,.25) !important;
-  filter:grayscale(1) contrast(1.05);
-}
-.primaryAction{background:#ededed !important;color:#111 !important}
-.eyebrow,.sectionHead>a,.cardLabel,.cardLink,.navIcon,.hero h1 em,.heroStamp small{
-  color:#e4e4e4 !important;
-}
-.secondaryAction,.editorialNav>a,.featureGame,.standings,.feedback{
-  border-color:rgba(255,255,255,.18) !important;
-}
-.teamCard{
-  --team-accent:#d4d4d4 !important;
-  --team-secondary:#f2f2f2 !important;
-}
