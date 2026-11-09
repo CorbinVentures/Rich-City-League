@@ -27,7 +27,7 @@ export default async function RichmondBasketballRunsPage() {
       upcoming = [];
       listingsUnavailable = true;
     } else {
-      const suggestedIds = new Set((suggestions ?? []).map(row => row.run_id));
+      const suggestedIds = new Set((suggestions ?? []).map((row: {run_id: string}) => row.run_id));
       upcoming = upcoming.filter(run => !suggestedIds.has(run.id));
     }
   }
