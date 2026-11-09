@@ -67,7 +67,7 @@ export function stripeBillingConfigured(plan?: PaidPlanCode, interval?: Membersh
   return PAID_PLAN_INTERVALS.every(([planCode, billingInterval]) => Boolean(envPrice(planCode, billingInterval)));
 }
 
-async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'; body?: URLSearchParams; idempotencyKey?: string } = {}): Promise<T> {
+async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'; body?: URLSearchParams; idempotencyKey?: string; stripeVersion?: string } = {}): Promise<T> {
   const secret = stripeSecret();
   if (!secret) throw new Error('Stripe billing is not configured.');
   const response = await fetch(`${STRIPE_API}${path}`, {
@@ -76,6 +76,7 @@ async function stripeRequest<T>(path: string, options: { method?: 'GET' | 'POST'
       Authorization: `Bearer ${secret}`,
       ...(options.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
       ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
+      ...(options.stripeVersion ? { 'Stripe-Version': options.stripeVersion } : {}),
     },
     body: options.body,
     cache: 'no-store',
@@ -119,6 +120,57 @@ export async function createStripeCheckoutSession(input: {
   if (input.customerId) body.set('customer', input.customerId);
   else if (input.email) body.set('customer_email', input.email);
   return stripeRequest<{ id: string; url: string | null }>('/checkout/sessions', { method: 'POST', body });
+}
+
+export async function createStripeRegistrationCheckoutSession(input: {
+  paymentId: string;
+  registrationId: string;
+  userId: string;
+  email: string;
+  amountCents: number;
+  currency: string;
+  seasonName: string;
+  divisionName: string;
+}) {
+  if (!stripeSecret()) throw new Error('Stripe registration payments are not configured.');
+  if (!Number.isInteger(input.amountCents) || input.amountCents < 50) throw new Error('Registration payments must be at least $0.50.');
+  if (!/^[a-z]{3}$/.test(input.currency)) throw new Error('A valid payment currency is required.');
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || 'https://richcityhoops.com').replace(/\/$/, '');
+  const suffix = Array.from(crypto.randomBytes(8), value => String.fromCharCode(97 + (value % 26))).join('');
+  const body = new URLSearchParams();
+  body.set('mode', 'payment');
+  body.set('client_reference_id', input.paymentId);
+  body.set('success_url', `${site}/register?checkout=success&registration=${encodeURIComponent(input.registrationId)}`);
+  body.set('cancel_url', `${site}/register?checkout=cancelled&registration=${encodeURIComponent(input.registrationId)}`);
+  body.set('line_items[0][price_data][currency]', input.currency);
+  body.set('line_items[0][price_data][unit_amount]', String(input.amountCents));
+  body.set('line_items[0][price_data][product_data][name]', `Rich City League · ${input.divisionName} registration`);
+  body.set('line_items[0][price_data][product_data][description]', input.seasonName);
+  body.set('line_items[0][quantity]', '1');
+  body.set('customer_email', input.email);
+  body.set('metadata[rch_flow]', 'league_registration');
+  body.set('metadata[payment_id]', input.paymentId);
+  body.set('metadata[registration_id]', input.registrationId);
+  body.set('metadata[user_id]', input.userId);
+  body.set('integration_identifier', `rich-city-league-registration-${suffix}`);
+  return stripeRequest<{ id: string; url: string | null; expires_at?: number | null }>('/checkout/sessions', {
+    method: 'POST',
+    body,
+    idempotencyKey: `rch-reg-${input.paymentId}`,
+    stripeVersion: '2026-09-30.endive',
+  });
+}
+
+export async function retrieveStripeCheckoutSession(sessionId: string) {
+  return stripeRequest<{
+    id: string;
+    url: string | null;
+    status: 'open' | 'complete' | 'expired' | null;
+    payment_status: 'paid' | 'unpaid' | 'no_payment_required' | null;
+    amount_total: number | null;
+    currency: string | null;
+    payment_intent: string | { id: string } | null;
+  }>(`/checkout/sessions/${encodeURIComponent(sessionId)}`);
 }
 
 export async function createStripeSponsorCheckoutSession(input: {
