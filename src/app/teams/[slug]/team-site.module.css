@@ -380,8 +380,6 @@
 
 /* The franchise artwork remains team-specific; the presentation shell stays monochrome. */
 .heroFrame{
-  --team-accent:#d8d8d8 !important;
-  --team-secondary:#f2f2f2 !important;
   overflow:hidden;
 }
 .heroImage{
@@ -414,7 +412,7 @@
   overflow:hidden;
   font-size:clamp(3rem,8vw,8rem) !important;
 }
-.heroLogo{filter:grayscale(1) contrast(1.06)}
+
 @media(max-width:700px){
   .depthMonogram{right:16px !important;max-width:80%;font-size:clamp(4rem,22vw,8rem) !important}
   .heroFrame,.heroContent{min-height:660px !important}
