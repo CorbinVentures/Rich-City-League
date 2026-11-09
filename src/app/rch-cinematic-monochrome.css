@@ -425,3 +425,49 @@ body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth
     border-radius: 20px;
   }
 }
+
+
+/* One neutral RCH palette across every public page and installed app route. */
+:root {
+  --rcl-social-canvas: #070707 !important;
+  --rcl-social-surface: #111111 !important;
+  --rcl-social-soft: #1b1b1b !important;
+  --rcl-social-border: #3b3b3b !important;
+  --rcl-social-text: #fafafa !important;
+  --rcl-social-text-2: #d6d6d6 !important;
+  --rcl-social-muted: #a7a7a7 !important;
+  --rcl-social-primary: #bdbdbd !important;
+  --rcl-social-primary-deep: #8f8f8f !important;
+  --rcl-social-gold: #bdbdbd !important;
+  --draft-accent: #bdbdbd !important;
+  --season-accent: #bdbdbd !important;
+  --season-accent-2: #f3f3f3 !important;
+}
+html[data-season-theme] { --season-accent: #bdbdbd !important; --season-accent-2: #f3f3f3 !important; }
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web, .rcl-public-web) {
+  background-color: #070707 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card, .rcl-world-card, .rcl-lifestyle-card, .rcl-pulse-grid > a, .rcl-league-scoreboard, .rcl-draft-hero, .rcl-draft-live-card, .rcl-draft-stat-strip, .rcl-draft-module, .rcl-draft-countdown, .rch-browser-featured-league, .rch-browser-section > a, .rch-browser-home article) {
+  border-color: #3b3b3b !important;
+  background-color: #111111 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card, .rcl-world-card, .rcl-lifestyle-card, .rcl-pulse-grid > a, .rcl-league-scoreboard, .rcl-draft-hero, .rcl-draft-live-card, .rcl-draft-stat-strip, .rcl-draft-module, .rcl-draft-countdown, .rch-browser-featured-league, .rch-browser-section > a, .rch-browser-home article) :is(h1,h2,h3,h4,p,b,strong,small,span,em) {
+  color: inherit;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-draft-hero .rcl-display span, .rcl-draft-live-card .rcl-live, .rcl-draft-live-card b, .rcl-draft-countdown > span, .rcl-kicker, .rcl-module-icon, .rch-browser-eyebrow span) {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-landing-primary, .rcl-draft-platform .rcl-primary, .rcl-draft-platform button, .rch-browser-button-primary) {
+  border-color: #d6d6d6 !important;
+  background: linear-gradient(135deg, #d6d6d6, #9f9f9f) !important;
+  color: #090909 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card > div, .rcl-landing-story-row > span) {
+  background-color: #1b1b1b !important;
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) .rch-browser-home a:hover {
+  border-color: #bdbdbd !important;
+}
