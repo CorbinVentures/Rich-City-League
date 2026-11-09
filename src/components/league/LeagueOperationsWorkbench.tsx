@@ -184,5 +184,5 @@ export function LeagueOperationsWorkbench() {
           </tr>;
         })}</tbody>
       </table></div>
-    </section>}
+    </section>}</Container></div>;
 }
