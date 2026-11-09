@@ -1,0 +1,116 @@
+'use client';
+
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getSupabaseClient } from '@/lib/supabase';
+import { FaArrowUpRightFromSquare, FaBasketball, FaCalendarDays, FaRotate, FaUserGroup, FaUsers, FaClipboardList } from 'react-icons/fa6';
+
+type Row = Record<string, any>;
+const dateTime = (value?:string|null) => value ? new Date(value).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'}) : '—';
+
+export function CommandLeagueManagement() {
+ const db=useMemo(()=>getSupabaseClient() as any,[]);
+ const [teams,setTeams]=useState<Row[]>([]);
+ const [seasons,setSeasons]=useState<Row[]>([]);
+ const [teamSeasons,setTeamSeasons]=useState<Row[]>([]);
+ const [rosters,setRosters]=useState<Row[]>([]);
+ const [games,setGames]=useState<Row[]>([]);
+ const [venues,setVenues]=useState<Row[]>([]);
+ const [registrations,setRegistrations]=useState<Row[]>([]);
+ const [loading,setLoading]=useState(true);
+ const loaded=useRef(false);
+ const [refreshing,setRefreshing]=useState(false);
+ const [error,setError]=useState('');
+
+ const load = useCallback(async () => {
+  if(!db){setError('RCH data connection is unavailable.');setLoading(false);return;}
+  if(loaded.current)setRefreshing(true);else setLoading(true);
+  setError('');
+  try{
+   const [teamQ,seasonQ,teamSeasonQ,rosterQ,gameQ,venueQ,registrationQ]=await Promise.all([
+    db.from('teams').select('id,name,city,is_active').eq('is_active',true).order('name').limit(250),
+    db.from('seasons').select('id,name,start_date,end_date,status,registration_open').order('start_date',{ascending:false}).limit(80),
+    db.from('team_seasons').select('id,team_id,season_id,division_id').limit(500),
+    db.from('rosters').select('id,team_season_id,player_id,joined_at,left_at').is('left_at',null).limit(1000),
+    db.from('games').select('id,season_id,home_team_id,away_team_id,venue_id,scheduled_at,status,home_score,away_score').order('scheduled_at',{ascending:true}).limit(500),
+    db.from('venues').select('id,name,city').limit(250),
+    db.from('registrations').select('id,status').limit(1000),
+   ]);
+   const failed=[teamQ,seasonQ,teamSeasonQ,rosterQ,gameQ,venueQ,registrationQ].find(result=>result.error);
+   if(failed?.error)throw new Error(failed.error.message);
+   setTeams(teamQ.data??[]);setSeasons(seasonQ.data??[]);setTeamSeasons(teamSeasonQ.data??[]);
+   setRosters(rosterQ.data??[]);setGames(gameQ.data??[]);setVenues(venueQ.data??[]);
+   setRegistrations(registrationQ.data??[]);
+  }catch(e){setError(e instanceof Error?e.message:'League records could not be loaded.');}
+  finally{loaded.current=true;setLoading(false);setRefreshing(false);}
+ },[db]);
+
+ useEffect(()=>{void load();},[load]);
+
+ const activeRosterCount=rosters.length;
+ const upcomingGames=games.filter(g=>new Date(g.scheduled_at).getTime()>=Date.now()&&!['completed','final','finished','cancelled'].includes(String(g.status).toLowerCase()));
+ const teamName=(id:string)=>teams.find(t=>t.id===id)?.name||'Team TBD';
+ const rosterCount=(teamSeasonId:string)=>rosters.filter(r=>r.team_season_id===teamSeasonId).length;
+ const teamSeasonCount=(teamId:string)=>teamSeasons.filter(ts=>ts.team_id===teamId).length;
+ const venueName=(id:string|null)=>venues.find(v=>v.id===id)?.name||'Venue TBD';
+ const nextGames=upcomingGames.slice(0,8);
+ const activeRegistrations=registrations.filter(r=>!['cancelled','withdrawn','rejected'].includes(String(r.status||'').toLowerCase())).length;
+
+ const tools=[
+  {title:'League setup',description:'Build seasons, divisions, and team assignments in RCH.',href:'/admin/league-setup',icon:<FaCalendarDays/>},
+  {title:'League operations',description:'Run tryouts, drafts, requests, discipline, and roster decisions.',href:'/admin/operations',icon:<FaClipboardList/>},
+  {title:'Teams, rosters & game stats',description:'Manage native RCH rosters, game records, score updates, and player stats.',href:'/portal/operations',icon:<FaUsers/>},
+ ];
+
+ return <div className="space-y-6">
+  <section className="rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_90%_0%,rgba(59,130,246,.20),transparent_28rem),linear-gradient(145deg,#0d1726,#080c13)] p-5 sm:p-7">
+   <div className="flex flex-wrap items-start justify-between gap-5">
+    <div className="max-w-3xl">
+     <p className="text-[11px] font-black uppercase tracking-[.2em] text-blue-300">LEAGUE CONTROL · RCH COMMAND</p>
+     <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Run the league here.</h2>
+     <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">Command Center is the staff hub for Rich City League. RCH owns the league records and workflows: seasons, teams, registrations, rosters, schedules, results, and game operations.</p>
+    </div>
+    <button type="button" onClick={()=>void load()} disabled={refreshing||loading} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white/70 hover:bg-white/[.08] disabled:opacity-50"><FaRotate className={refreshing?'animate-spin':''}/> {refreshing?'Refreshing':'Refresh league data'}</button>
+   </div>
+   <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    {[
+     {label:'ACTIVE TEAMS',value:teams.length,detail:'RCH-owned team records',icon:<FaBasketball/>},
+     {label:'SEASONS',value:seasons.length,detail:'RCH season records',icon:<FaCalendarDays/>},
+     {label:'ACTIVE ROSTER',value:activeRosterCount,detail:teamSeasons.filter(ts=>rosterCount(ts.id)>0).length+' team seasons with players',icon:<FaUserGroup/>},
+     {label:'UPCOMING GAMES',value:upcomingGames.length,detail:activeRegistrations+' active registration records',icon:<FaCalendarDays/>},
+    ].map(card=><div key={card.label} className="rounded-xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between text-[10px] font-black tracking-[.15em] text-white/40"><span>{card.label}</span><span className="text-blue-300">{card.icon}</span></div><strong className="mt-3 block font-display text-3xl font-black text-white">{loading?'—':card.value}</strong><small className="mt-1 block text-xs text-white/40">{card.detail}</small></div>)}
+   </div>
+  </section>
+
+  {error&&<div role="alert" className="rounded-xl border border-red-300/20 bg-red-300/[.06] px-4 py-3 text-sm text-red-100/80">League records did not load: {error}</div>}
+
+  <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
+   <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">NATIVE RCH WORKFLOWS</p><h3 className="mt-2 font-display text-2xl font-black uppercase">League management tools</h3><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Open the first-party league workflows. Each tool operates on RCH records and remains protected by the platform’s current role permissions.</p></div>
+   <div className="mt-5 grid gap-3 lg:grid-cols-3">
+    {tools.map(tool=><Link key={tool.href} href={tool.href} className="group rounded-xl border border-white/10 bg-black/20 p-4 transition hover:border-blue-300/30 hover:bg-blue-300/[.04]"><div className="flex items-center justify-between text-blue-300"><span>{tool.icon}</span><FaArrowUpRightFromSquare className="text-xs opacity-50 transition group-hover:opacity-100"/></div><h4 className="mt-4 font-display text-lg font-black uppercase">{tool.title}</h4><p className="mt-2 text-xs leading-5 text-white/45">{tool.description}</p><span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-200">Open tool <FaArrowUpRightFromSquare/></span></Link>)}
+   </div>
+  </section>
+
+  <div className="grid gap-6 xl:grid-cols-2">
+   <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
+    <div className="flex items-end justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">SEASON PLANNING</p><h3 className="mt-2 font-display text-xl font-black uppercase">RCH seasons</h3></div><span className="text-[10px] font-black uppercase tracking-wider text-white/35">{seasons.length} TOTAL</span></div>
+    <div className="mt-4 space-y-2">
+     {seasons.slice(0,8).map(season=><div key={season.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/5 bg-black/20 px-3 py-3"><div><strong className="text-sm">{season.name}</strong><small className="mt-1 block text-[10px] text-white/35">{season.start_date||'Start TBD'} – {season.end_date||'End TBD'}</small></div><span className="rounded-full bg-white/[.06] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white/55">{season.status||'planned'}</span></div>)}
+     {!seasons.length&&!loading&&<p className="rounded-lg border border-dashed border-white/10 p-4 text-sm text-white/40">No seasons have been created in RCH yet.</p>}
+    </div>
+   </section>
+
+   <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
+    <div className="flex items-end justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">SCHEDULE DESK</p><h3 className="mt-2 font-display text-xl font-black uppercase">Upcoming games</h3></div><span className="text-[10px] font-black uppercase tracking-wider text-white/35">{nextGames.length} SHOWN</span></div>
+    <div className="mt-4 space-y-2">
+     {nextGames.length?nextGames.map(game=><div key={game.id} className="rounded-lg border border-white/5 bg-black/20 px-3 py-3"><div className="flex flex-wrap items-center justify-between gap-2"><strong className="text-sm">{teamName(game.home_team_id)} <span className="text-white/30">vs</span> {teamName(game.away_team_id)}</strong><span className="text-[9px] font-black uppercase tracking-wider text-blue-200">{String(game.status||'scheduled').toUpperCase()}</span></div><div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-white/40"><span>{dateTime(game.scheduled_at)}</span><span>{venueName(game.venue_id)}</span></div></div>):<p className="rounded-lg border border-dashed border-white/10 p-4 text-sm text-white/40">No future game records yet. Use league setup and operations to build the RCH schedule.</p>}
+   </div>
+   </section>
+  </div>
+
+  <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
+   <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">TEAM & ROSTER DESK</p><h3 className="mt-2 font-display text-xl font-black uppercase">RCH teams</h3><p className="mt-2 text-xs text-white/45">Team assignments and active rosters are counted from RCH season records.</p></div><Link href="/admin/league-setup" className="rounded-lg border border-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-white">Manage teams and seasons <FaArrowUpRightFromSquare className="ml-1 inline"/></Link></div>
+   <div className="mt-4 overflow-x-auto"><table className="min-w-[540px] w-full text-left text-xs"><thead className="text-[9px] font-black uppercase tracking-[.15em] text-white/35"><tr><th className="pb-2">TEAM</th><th className="pb-2">CITY</th><th className="pb-2">SEASONS</th><th className="pb-2">ACTIVE PLAYERS</th></tr></thead><tbody>{teams.map(team=>{const links=teamSeasons.filter(ts=>ts.team_id===team.id);const linkIds=new Set(links.map(ts=>ts.id));const playersInTeam=rosters.filter(r=>linkIds.has(r.team_season_id)).length;return <tr key={team.id} className="border-t border-white/5"><td className="py-3 font-semibold text-white/80">{team.name}</td><td className="py-3 text-white/45">{team.city||'—'}</td><td className="py-3 text-white/45">{teamSeasonCount(team.id)}</td><td className="py-3 text-white/45">{playersInTeam}</td></tr>})}</tbody></table>{!teams.length&&!loading&&<p className="mt-3 text-sm text-white/40">No active RCH teams found.</p>}</div>
+  </section>
+ </div>;
+}

@@ -2,7 +2,7 @@
 // Every shortcut maps to an existing module or to its validated record form.
 export type CommandArea =
  'overview'|'analytics'|'intelligence'|'revenue'|'finance'|'venues'|'concessions'|'trades'|
- 'stories'|'entertainment'|'operations'|'franchises'|'audit';
+ 'stories'|'entertainment'|'operations'|'league-management'|'franchises'|'audit';
 export type CommandCaptureKind =
  'budgets'|'ledger'|'venues'|'bookings'|'inventory'|'concession_sales'|'trades'|'tasks';
 export type CommandAction = {
@@ -30,6 +30,7 @@ export const commandActions:CommandAction[]=[
  {id:'sale',title:'Sell a concession item',description:'Record a sale and reduce inventory atomically',area:'concessions',kind:'concession_sales',keywords:'sell snack snacks beverage soda water popcorn hotdog concessions pos transaction'},
  {id:'restock',title:'Check concession stock',description:'Review margins and low-stock inventory',area:'concessions',keywords:'buy wholesale stock snack water beverage reorder catalog concession pricing'},
  {id:'new-item',title:'Add a concession item',description:'Set stock, cost, sale price and reorder threshold',area:'concessions',kind:'inventory',keywords:'add product inventory snack concession menu price'},
+ {id:'league-management',title:'Open league management',description:'Review RCH teams, seasons, rosters, schedules and registrations',area:'league-management',keywords:'league setup team season roster registration schedule game operations'},
  {id:'franchise',title:'Check franchise value',description:'Inspect attendance, revenue and team valuation',area:'franchises',keywords:'franchise team worth valuation value sponsorship attendance ranking'},
  {id:'trade',title:'Propose a player trade',description:'Open the league front-office proposal form',area:'trades',kind:'trades',keywords:'roster player movement transfer trade proposal'},
  {id:'new-task',title:'Assign an operations task',description:'Capture a categorized staff assignment',area:'operations',kind:'tasks',keywords:'add task to do deadline due work staff assignment urgent'},
@@ -43,6 +44,7 @@ export const areaSuggestions:Record<CommandArea,string[]>={
  revenue:['game-revenue','income'],
  venues:['gym-search','book-gym','new-gym'],
  concessions:['sale','restock','new-item'],
+ 'league-management':['league-management','game-plan','gym-search'],
  franchises:['franchise','trade'],
  trades:['trade','franchise'],
  stories:['storyboard','show'],
