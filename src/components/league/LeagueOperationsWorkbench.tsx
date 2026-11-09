@@ -168,7 +168,7 @@ export function LeagueOperationsWorkbench() {
               <details className="mt-2 text-xs text-blue-100/70"><summary className="cursor-pointer">Application details</summary><div className="mt-2 space-y-1 rounded bg-black/20 p-2">
                 <p>Emergency contact: {String(emergency?.name || '—')} · {String(emergency?.phone || '—')} · {String(emergency?.relationship || '')}</p>
                 {response?.waiver_body_snapshot && <p>Waiver: {response.waiver_title} v{response.waiver_version}; signed by {response.signed_name || '—'} on {response.waiver_accepted_at ? new Date(response.waiver_accepted_at).toLocaleString() : '—'}</p>}
-                {response?.registration_fields_snapshot?.map((field, index) => <p key={index}>{String(field.label || field.key)}: {String(field.answer ?? '—')}</p>)}
+                {response?.registration_fields_snapshot?.map((field: any, index: number) => <p key={index}>{String(field.label || field.key)}: {String(field.answer ?? '—')}</p>)}
               </div></details>
             </td>
             <td className="py-4 text-gray-400">{new Date(registration.submitted_at).toLocaleDateString()}</td>
