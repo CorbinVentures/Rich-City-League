@@ -3,7 +3,7 @@
  * One self-contained design system, loaded AFTER legacy global themes.
  * Draft order is a PRESEASON preview; only the official draft event is LIVE.
  */
-html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable {
+html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable[data-draft-ui="v2"] {
   --draft-ink:#f5f5f6;
   --draft-muted:#c0c0c5;
   --draft-faint:#aaaab0;
