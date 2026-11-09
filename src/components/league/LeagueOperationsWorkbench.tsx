@@ -12,7 +12,7 @@ export function LeagueOperationsWorkbench() {
   const { profile, loading: authLoading } = useAuth();
   const client = useMemo(() => getSupabaseClient(), []);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [registrationResponses, setRegistrationResponses] = useState<RegistrationResponse[]>([]);
+  const [registrationResponses, setRegistrationResponses] = useState<any[]>([]);
   const [registrationPayments, setRegistrationPayments] = useState<Array<{ registration_id:string; status:string; amount_cents:number; currency:string; created_at:string }>>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [players, setPlayers] = useState<PublicPlayer[]>([]);
@@ -56,7 +56,7 @@ export function LeagueOperationsWorkbench() {
         const resultError = [registrationResult, gameResult, playerResult, teamResult, divisionsResult, teamSeasonResult, rosterResult, statResult, coachResult, responseResult, paymentResult].find((result) => result.error)?.error;
         if (resultError) throw new Error('Unable to load league operations.');
         setRegistrations(registrationResult.data ?? []);
-        setRegistrationResponses((responseResult.data ?? []) as RegistrationResponse[]);
+        setRegistrationResponses((responseResult.data ?? []) as any[]);
         setRegistrationPayments((paymentResult.data ?? []) as Array<{ registration_id:string; status:string; amount_cents:number; currency:string; created_at:string }>);
         const loadedGames = (gameResult.data ?? []) as Game[];
         setGames(profile?.role === 'coach'
