@@ -40,6 +40,7 @@ alter table public.divisions
 create table if not exists public.registration_responses (
   registration_id uuid primary key references public.registrations(id) on delete cascade,
   custom_answers jsonb not null default '{}'::jsonb,
+  registration_fields_snapshot jsonb not null default '[]'::jsonb,
   eligibility_answers jsonb not null default '{}'::jsonb,
   waiver_title text,
   waiver_body_snapshot text,
@@ -52,6 +53,8 @@ create table if not exists public.registration_responses (
   updated_at timestamptz not null default now(),
   constraint registration_responses_custom_answers_object
     check (jsonb_typeof(custom_answers) = 'object'),
+  constraint registration_responses_fields_snapshot_array
+    check (jsonb_typeof(registration_fields_snapshot) = 'array'),
   constraint registration_responses_eligibility_object
     check (jsonb_typeof(eligibility_answers) = 'object'),
   constraint registration_responses_fee_nonnegative
