@@ -1,6 +1,7 @@
 import { runInNewContext } from 'node:vm';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS, startRchLaunchAutoplay } from '../src/lib/pwa-launch';
+import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
 
 function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1 }: {
   path?: string;
@@ -46,7 +47,7 @@ describe('page launch intro', () => {
     result.timers.at(-1)?.callback();
     expect(result.dataset.rchLaunch).toBe('done');
   });
-  it('requires the actual final video frame before dismissing an installed-app intro', () => {
+  it('requires page readiness and the minimum hold before opening the PWA', () => {
     expect(canDismissLaunch(true, true, false, true)).toBe(false);
     expect(canDismissLaunch(true, true, true, false)).toBe(true);
     expect(canDismissLaunch(false, true, true, true)).toBe(false);
@@ -55,25 +56,18 @@ describe('page launch intro', () => {
     expect(canDismissLaunch(true, false, false, false)).toBe(false);
     expect(RCH_LAUNCH_FALLBACK_MS).toBe(4000);
   });
-  it('forces muted, inline autoplay before requesting play', async () => {
-    const video = {
-      autoplay: false, muted: false, defaultMuted: false, playsInline: false,
-      play() {
-        expect(this.autoplay).toBe(true);
-        expect(this.muted).toBe(true);
-        expect(this.defaultMuted).toBe(true);
-        expect(this.playsInline).toBe(true);
-        return Promise.resolve();
-      },
-    };
-    await expect(startRchLaunchAutoplay(video)).resolves.toBe(true);
-  });
-  it('reports blocked autoplay rather than requiring a tap', async () => {
-    const video = {
-      autoplay: false, muted: false, defaultMuted: false, playsInline: false,
-      play: () => Promise.reject(new Error('NotAllowedError: iOS policy blocked autoplay')),
-    };
-    await expect(startRchLaunchAutoplay(video)).resolves.toBe(false);
+  it('uses the transparent championship belt image and a CSS split rather than the old video', () => {
+    const component = readFileSync('src/components/PWALaunchIntro.tsx', 'utf8');
+    const styles = readFileSync('src/app/rch-launch.css', 'utf8');
+    expect(existsSync('public/brand/rcl-championship-belt.webp')).toBe(true);
+    expect(component).toContain("const BELT_IMAGE = '/brand/rcl-championship-belt.webp'");
+    expect(component).toContain('rch-launch-belt-left');
+    expect(component).toContain('rch-launch-belt-right');
+    expect(component).not.toContain('<video');
+    expect(component).toContain('prefers-reduced-motion');
+    expect(component).toContain('beltLoaded.current');
+    expect(styles).toContain('.rch-launch.is-opening .rch-launch-door-left');
+    expect(styles).toContain('.rch-launch.is-opening .rch-launch-door-right');
   });
   it('waits for main content and feed readiness, not photos or unrelated widgets', () => {
     function documentState(main: boolean, pending: boolean) {
