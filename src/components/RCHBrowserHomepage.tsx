@@ -66,7 +66,7 @@ export function RCHBrowserHomepage({ news, events, runs, suggestedRuns = [], lis
             <Link className="rch-browser-button rch-browser-button-primary" href="/league">Enter the League <FaTrophy aria-hidden="true" /></Link>
             <RCHBrowserAccountLink className="rch-browser-button rch-browser-button-outline" guestHref="/auth/sign-up?next=%2Fruns" guestLabel="Join Free" trackingContext="home_hero" memberLabel="My Basketball" memberHref="/my-hoops" />
           </div>
-          <p className="rch-browser-hero-footnote">Community membership is free. Explore before signing up.</p>
+          <p className="rch-browser-hero-footnote">AI-generated promotional imagery · Community membership is free. Explore before signing up.</p>
         </div>
         <div className="rch-browser-hero-quick" aria-label="Popular places to start">
           <Link href="/league"><FaTrophy/><span><b>ENTER THE LEAGUE</b><small>Twelve teams · November 2027</small></span><FaArrowRight/></Link>
