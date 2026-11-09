@@ -1,9 +1,9 @@
-const CACHE_NAME = 'rcl-static-v13';
-const SW_VERSION = 'v13';
+const CACHE_NAME = 'rcl-static-v14';
+const SW_VERSION = 'v14';
 const STATIC_ASSETS = [
-  '/favicon.svg?v=black-r-1',
-  '/icon?v=black-r-1',
-  '/apple-icon?v=black-r-1',
+  '/favicon.svg?v=blue-metal-1',
+  '/icon?v=blue-metal-1',
+  '/apple-icon?v=blue-metal-1',
 ];
 
 self.addEventListener('install', (event) => {
@@ -68,8 +68,8 @@ self.addEventListener('push', (event) => {
     updateBadge(badgeCount),
     self.registration.showNotification(title, {
       body: payload.body || 'New RCL activity needs your attention.',
-      icon: '/icon?v=black-r-1',
-      badge: '/favicon.svg?v=black-r-1',
+      icon: '/icon?v=blue-metal-1',
+      badge: '/favicon.svg?v=blue-metal-1',
       tag: payload.tag || 'rcl-notification',
       renotify: true,
       data: {
@@ -179,7 +179,7 @@ function offlineResponse() {
 </head>
 <body>
   <main>
-    <img src="/icon?v=black-r-1" alt="">
+    <img src="/icon?v=blue-metal-1" alt="">
     <small>RCL NETWORK</small>
     <h1>You’re offline</h1>
     <p>Live scores, messages, posts and member data need a connection. Reconnect, then try again.</p>
