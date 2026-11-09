@@ -276,14 +276,17 @@ export default function DraftNightPage() {
                 </div>
               </div>
               <nav className="rcl-draft-quicknav mt-4" aria-label="Draft room sections">
-                  <a href="#lottery-board">Lottery order <FaArrowRight/></a>
+                  <a href={preseasonOrder && (!draft || draft.status === "SETUP") ? "#lottery-board" : "#pick-history"}>Lottery order <FaArrowRight/></a>
                   <a href="#draft-board">Prospects <FaArrowRight/></a>
                   <a href="#pick-history">Pick tracker <FaArrowRight/></a>
+                  <Link href="/league/join">Join the league <FaArrowRight/></Link>
+                  <Link href="/fantasy">Fantasy <FaArrowRight/></Link>
+                  <Link href="/league/rules">Proposed League Rules <FaArrowRight/></Link>
                   <button type="button" onClick={toggleSound} aria-pressed={soundEnabled}>{soundEnabled ? 'Sound on' : 'Sound off'}</button>
                 </nav>
             </div>
             <div className="rcl-draft-live-card">
-              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE SELECTION' : 'PRESEASON LOTTERY ORDER'}</span>
+              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE DRAFT BOARD' : 'PRESEASON LOTTERY ORDER'}</span>
               <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'LOTTERY BOARD'}</strong>
               <small>{currentTeam?.name ?? firstPreviewTeam?.name ?? 'Draft order pending'}</small>
               <div className="mt-4 flex items-end gap-3"><b>{draft?.status === 'OPEN' ? clock(seconds) : previewPicks.length ? '#01' : '—'}</b><span>{draft?.status === 'OPEN' ? 'remaining' : 'first selection'}</span></div>
@@ -310,7 +313,7 @@ export default function DraftNightPage() {
                 <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">Franchise lottery board</h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-300">
                   {preseasonOrder.season_label} · {preseasonOrder.first_round_team_ids.length} franchise positions · {preseasonOrder.rounds} rounds.
-                  Select a round to view its selections. Even rounds reverse the team order. This draw is a preseason allocation, not a live or completed player draft.
+                  Select a round to view its selections. Even rounds reverse the team order. This draw is a preseason allocation, not a live or completed player draft. Club admission and official eligibility remain subject to approval.
                 </p>
                 {(() => {
                   const coverage = draftRosterCoverage(preseasonOrder.first_round_team_ids.length, preseasonOrder.rounds, 12);
