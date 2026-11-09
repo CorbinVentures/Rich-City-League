@@ -157,6 +157,87 @@ async function processSponsorCheckoutEvent(db:any,event:StripeEvent,session:any)
   }
 }
 
+async function processLeagueRegistrationCheckoutEvent(db: any, event: StripeEvent, session: any) {
+  const paymentId = session?.metadata?.payment_id;
+  const registrationId = session?.metadata?.registration_id;
+  if (!paymentId || !registrationId || !session?.id) throw new Error('Registration checkout metadata is incomplete.');
+
+  const { data: prior, error: priorError } = await db.from('registration_payment_events')
+    .select('processing_status').eq('provider_event_id', event.id).maybeSingle();
+  if (priorError) throw priorError;
+  if (prior && ['processed', 'ignored', 'processing'].includes(prior.processing_status)) return { received: true, duplicate: true };
+  if (prior) {
+    const { error } = await db.from('registration_payment_events').update({
+      processing_status: 'processing', error_message: null, processed_at: null,
+    }).eq('provider_event_id', event.id);
+    if (error) throw error;
+  } else {
+    const { error } = await db.from('registration_payment_events').insert({
+      provider_event_id: event.id, payment_id: paymentId, event_type: event.type, processing_status: 'processing',
+    });
+    if (error) {
+      if (error.code === '23505') return { received: true, duplicate: true };
+      throw error;
+    }
+  }
+
+  try {
+    const { data: payment, error: paymentError } = await db.from('payments')
+      .select('id,registration_id,amount_cents,currency,status,provider_checkout_session_id')
+      .eq('id', paymentId).eq('registration_id', registrationId).maybeSingle();
+    if (paymentError) throw paymentError;
+    if (!payment) throw new Error('Registration payment record was not found.');
+    const { data: registration, error: registrationError } = await db.from('registrations')
+      .select('id,applicant_id').eq('id', registrationId).maybeSingle();
+    if (registrationError) throw registrationError;
+    if (!registration || session.metadata.user_id !== registration.applicant_id) throw new Error('Registration payment ownership could not be verified.');
+    if (Number(session.amount_total) !== Number(payment.amount_cents) || String(session.currency || '').toLowerCase() !== String(payment.currency || '').toLowerCase()) {
+      throw new Error('Stripe amount or currency did not match the saved registration fee.');
+    }
+    if (payment.provider_checkout_session_id && payment.provider_checkout_session_id !== session.id) {
+      throw new Error('Stripe checkout session does not match the payment record.');
+    }
+
+    let nextStatus: 'paid' | 'failed' | null = null;
+    let paidAt: string | null = null;
+    let intentId: string | null = null;
+    if (event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed') {
+      nextStatus = 'failed';
+    } else if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type || '') && session.payment_status === 'paid') {
+      nextStatus = 'paid';
+      paidAt = new Date().toISOString();
+      intentId = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id || null;
+    }
+
+    if (nextStatus && payment.status !== 'paid') {
+      const patch: Record<string, unknown> = {
+        status: nextStatus,
+        provider: 'stripe',
+        provider_checkout_session_id: session.id,
+        ...(nextStatus === 'paid' ? { paid_at: paidAt, provider_payment_id: intentId } : {}),
+      };
+      const { error } = await db.from('payments').update(patch).eq('id', payment.id).neq('status', 'paid');
+      if (error) throw error;
+    } else if (!payment.provider_checkout_session_id) {
+      const { error } = await db.from('payments').update({ provider: 'stripe', provider_checkout_session_id: session.id }).eq('id', payment.id);
+      if (error) throw error;
+    }
+
+    const { error: eventError } = await db.from('registration_payment_events').update({
+      processing_status: 'processed', error_message: null, processed_at: new Date().toISOString(),
+    }).eq('provider_event_id', event.id);
+    if (eventError) throw eventError;
+    return { received: true, payment_status: nextStatus || payment.status };
+  } catch (error) {
+    await db.from('registration_payment_events').update({
+      processing_status: 'failed',
+      error_message: error instanceof Error ? error.message.slice(0, 1000) : 'Unknown registration payment webhook error.',
+      processed_at: new Date().toISOString(),
+    }).eq('provider_event_id', event.id);
+    throw error;
+  }
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   if (!verifyStripeWebhook(body, request.headers.get('stripe-signature'))) {
@@ -171,7 +252,15 @@ export async function POST(request: Request) {
   if (!db) return NextResponse.json({ error: 'Server database credentials are unavailable.' }, { status: 503 });
 
   const checkoutSession=event.data?.object;
-  const sponsorCheckoutTypes=new Set(['checkout.session.completed','checkout.session.expired','checkout.session.async_payment_succeeded','checkout.session.async_payment_failed']);
+  const checkoutTypes=new Set(['checkout.session.completed','checkout.session.expired','checkout.session.async_payment_succeeded','checkout.session.async_payment_failed']);
+  if(checkoutTypes.has(event.type)&&checkoutSession?.metadata?.rch_flow==='league_registration'){
+    try{return NextResponse.json(await processLeagueRegistrationCheckoutEvent(db,event,checkoutSession));}
+    catch(error){
+      console.error('league registration checkout fulfillment failed',error);
+      return NextResponse.json({error:'Registration payment confirmation failed.'},{status:500});
+    }
+  }
+  const sponsorCheckoutTypes=checkoutTypes;
   if(sponsorCheckoutTypes.has(event.type)&&checkoutSession?.metadata?.rch_flow==='sponsor_campaign'){
     try{return NextResponse.json(await processSponsorCheckoutEvent(db,event,checkoutSession));}
     catch(error){
