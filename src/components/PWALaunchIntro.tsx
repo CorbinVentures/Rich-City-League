@@ -27,6 +27,9 @@ export function PWALaunchIntro() {
   const pathname = usePathname();
   const mounted = useRef(false);
   const bootInProgress = useRef(false);
+  const beltLoaded = useRef(false);
+  const beltFailed = useRef(false);
+  const checkReadyRef = useRef<() => void>(() => {});
   const dismissRef = useRef<() => void>(() => {});
   const [visible, setVisible] = useState(false);
   const [opening, setOpening] = useState(false);
@@ -113,13 +116,14 @@ export function PWALaunchIntro() {
       root.dataset.rchLaunchBoot = 'done';
       setVisible(false);
       observer?.disconnect();
-      timeouts.forEach(window.clearTimeout);
+      timeouts.forEach(id => window.clearTimeout(id));
     };
     dismissRef.current = dismiss;
 
     const checkReady = () => {
       if (stopped || !isLaunchContentReady(document)) return;
       if (boot) {
+        if (!beltLoaded.current && !beltFailed.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (!holdFinished || splitStarted) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           dismiss();
@@ -132,6 +136,8 @@ export function PWALaunchIntro() {
         dismiss();
       }
     };
+
+    checkReadyRef.current = checkReady;
 
     if (boot) {
       bootInProgress.current = true;
@@ -178,7 +184,7 @@ export function PWALaunchIntro() {
     return () => {
       stopped = true;
       observer?.disconnect();
-      timeouts.forEach(window.clearTimeout);
+      timeouts.forEach(id => window.clearTimeout(id));
     };
   }, [pathname]);
 
@@ -189,10 +195,10 @@ export function PWALaunchIntro() {
       {visible && (
         <div className="rch-launch-belt" aria-hidden="true">
           <div className="rch-launch-belt-half rch-launch-belt-left">
-            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" />
+            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
           </div>
           <div className="rch-launch-belt-half rch-launch-belt-right">
-            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" />
+            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
           </div>
         </div>
       )}
