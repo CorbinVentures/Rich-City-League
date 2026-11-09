@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
-
-const LEAGUE_REGISTRATION_URL = 'https://vba.leagueapps.com/leagues';
+import { LeagueJoinRegistration } from '@/components/LeagueJoinRegistration';
 
 export const metadata: Metadata = {
   title: { absolute: 'Richmond Basketball League Registration | Rich City League' },
@@ -26,33 +25,34 @@ export default function RegisterPage() {
             Join the basketball community today. The next Rich City League professional season is planned for {RCL_PRO_SEASON.startLabel}, with official tryouts planned for summer 2027. Exact dates and professional registration availability have not been announced.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
-            <a href={LEAGUE_REGISTRATION_URL} rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-xl bg-orange-500 px-6 text-sm font-black uppercase tracking-wide text-[#09101a] hover:bg-orange-400">
-              View external league listings ↗
+            <a href="#official-registration" className="inline-flex min-h-12 items-center rounded-xl bg-orange-500 px-6 text-sm font-black uppercase tracking-wide text-[#09101a] hover:bg-orange-400">
+              Check registration availability
             </a>
             <Link href="/auth/sign-up" className="inline-flex min-h-12 items-center rounded-xl border border-white/25 px-6 text-sm font-bold hover:border-white/60">
               Create a free RCH profile
             </Link>
           </div>
           <p className="mt-4 text-sm text-white/55">
-            League registration uses an external LeagueApps portal. An RCH community profile is a separate signup.
+            League applications and season availability are managed through the RCH platform.
           </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 py-14">
-        <h2 className="font-display text-3xl font-black uppercase sm:text-4xl">Before you register</h2>
+        <LeagueJoinRegistration />
+        <h2 className="mt-12 font-display text-3xl font-black uppercase sm:text-4xl">How RCH registration works</h2>
         <div className="mt-7 grid gap-4 md:grid-cols-3">
           <article className="rounded-2xl border border-white/15 bg-white/[.035] p-6">
-            <h3 className="font-display text-xl font-black uppercase">1. Check availability</h3>
-            <p className="mt-3 text-sm leading-7 text-white/70">Open the registration portal to see current league opportunities and confirm eligibility, schedules and pricing.</p>
+            <h3 className="font-display text-xl font-black uppercase">1. Check RCH availability</h3>
+            <p className="mt-3 text-sm leading-7 text-white/70">Check the RCH registration area for any open league season and its eligible divisions.</p>
           </article>
           <article className="rounded-2xl border border-white/15 bg-white/[.035] p-6">
-            <h3 className="font-display text-xl font-black uppercase">2. Complete registration</h3>
-            <p className="mt-3 text-sm leading-7 text-white/70">Follow the portal instructions for the competition you select. A visit to this page does not reserve a place.</p>
+            <h3 className="font-display text-xl font-black uppercase">2. Apply in RCH</h3>
+            <p className="mt-3 text-sm leading-7 text-white/70">Submit your application through RCH. An application does not reserve a roster place or guarantee tryout selection.</p>
           </article>
           <article className="rounded-2xl border border-white/15 bg-white/[.035] p-6">
-            <h3 className="font-display text-xl font-black uppercase">3. Stay connected</h3>
-            <p className="mt-3 text-sm leading-7 text-white/70">Follow teams, player profiles, games and Richmond basketball stories on RCH, and install the app for social features.</p>
+            <h3 className="font-display text-xl font-black uppercase">3. Follow your status</h3>
+            <p className="mt-3 text-sm leading-7 text-white/70">The league reviews applications and publishes next steps through RCH. Keep your RCH profile active for updates.</p>
           </article>
         </div>
         <div className="mt-12 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold text-orange-300">
