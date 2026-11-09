@@ -63,7 +63,8 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
  },[phase,close]);
 
  useEffect(()=>{
-  if(!enabled||phase==='done')return;
+  if(!enabled)return;
+  if(phase==='done')return;
   const previousOverflow=document.body.style.overflow;
   const previousFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
   document.body.style.overflow='hidden';
@@ -105,7 +106,7 @@ export function RunsCinematicIntro({enabled,replayToken}:{enabled:boolean;replay
    <strong>RCH RUNS</strong>
    <small>REAL COURTS. REAL COMPETITION. REAL LEGACY.</small>
   </div>
-  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip Runs opening">
+  <button ref={skipRef} type="button" className="rch-intro-skip" onClick={close} aria-label="Skip cinematic opening">
    Skip intro <FaXmark aria-hidden="true"/>
   </button>
  </div>;
