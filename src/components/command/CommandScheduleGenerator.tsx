@@ -130,6 +130,7 @@ export function CommandScheduleGenerator() {
  useEffect(()=>{if(entrantCount>availableEntrantCount)setEntrantCount(Math.max(2,availableEntrantCount));},[availableEntrantCount,entrantCount]);
  const orderedSelected=selectedTeamIds.filter((id,index,all)=>all.indexOf(id)===index&&candidateLinks.some(x=>x.team.id===id));
  const chosenForBracket=orderedSelected.slice(0,entrantCount);
+ const eligibleTeamLabel=(id:string)=>teams.find(t=>t.id===id)?.name||'Unknown team';
 
  function toggleTeam(id:string) {
   setSelectedTeamIds(items=>items.includes(id)?items.filter(x=>x!==id):[...items,id]);
