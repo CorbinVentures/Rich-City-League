@@ -210,11 +210,11 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-rea
  .rcl-platform-root main.rch-draft-readable .rcl-draft-live-card small{grid-column:1;min-width:0;font-size:10px!important;margin:1px 0 0}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock{grid-column:2;grid-row:1/4;align-items:center}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-live-clock b{font-size:20px!important}
- .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav{flex-wrap:nowrap;gap:7px;margin-top:10px;overflow-x:auto;overflow-y:visible;padding:0 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 64px;gap:5px;margin-top:10px;overflow:visible;padding:0}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav::-webkit-scrollbar{display:none}
  html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-readable .rcl-draft-quicknav>a,
- .rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary{flex:0 0 auto;min-height:42px;padding:0 11px;font-size:11px}
- .rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu{position:fixed;top:auto;bottom:calc(84px + env(safe-area-inset-bottom));right:16px}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-more>summary{min-width:0;min-height:44px;width:100%;padding:4px;font-size:10px;white-space:normal;text-align:center}
+ .rcl-platform-root main.rch-draft-readable .rcl-draft-more-menu{position:absolute;top:calc(100% + 7px);bottom:auto;right:0}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-content{padding-top:10px}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip>div{padding:10px 8px!important;min-height:61px}
  .rcl-platform-root main.rch-draft-readable .rcl-draft-stat-strip span{font-size:9px!important;letter-spacing:0!important;line-height:1.2}
@@ -257,3 +257,11 @@ html.rch-premium-root body.rch-premium-app .rcl-platform-root main.rch-draft-rea
 @media(prefers-reduced-motion:reduce){
  .rcl-platform-root main.rch-draft-readable :is(a,button,.rcl-lottery-pick){scroll-behavior:auto;transition:none!important}
 }
+
+/* RCL scouting intelligence inherits the same neutral broadcast UI in live mode. */
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence{margin-top:15px;border:1px solid #46464b!important;border-radius:14px!important;background:#18181a!important;background-image:none!important;color:#f6f6f7!important;padding:17px!important}
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence :is(h2,h3){color:#fff!important}
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence [class*="text-rcl-"]{color:#d2d2d6!important}
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence [class*="bg-rcl-"]{background-color:#28282b!important}
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence article{border-color:#45454a!important;background:#242426!important}
+.rcl-platform-root main.rch-draft-readable .rch-draft-intelligence p{color:#d0d0d4!important;line-height:1.5}
