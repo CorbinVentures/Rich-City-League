@@ -8,6 +8,7 @@ import { LeagueSectionNav } from '@/components/LeagueSectionNav';
 import { useAuth } from '@/hooks/useAuth';
 import { trackRchConversion } from '@/lib/analytics/conversion';
 import { getSupabaseClient } from '@/lib/supabase';
+import { getRCHVisualCategory, RCHRouteVisualBand } from '@/components/RCHRouteVisuals';
 import type { ReactNode } from 'react';
 import {
   FaArrowRight, FaBars, FaXmark, FaMagnifyingGlass,
@@ -35,6 +36,7 @@ function browserNavHref(href: string, signedIn: boolean) {
 
 export function RCHPublicWebShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
+  const visualCategory = getRCHVisualCategory(pathname);
   const { user, profile, loading: authLoading } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
@@ -106,7 +108,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     closeMenu();
     menuButtonRef.current?.focus();
   };
-  return <div className="rcl-platform-root rch-public-web min-h-svh">
+  return <div className="rcl-platform-root rch-public-web min-h-svh" data-rch-visual-category={visualCategory}>
     <a className="rcl-skip-link" href="#rch-public-content">Skip to content</a>
     <header className="rch-public-header">
       <div className="rch-public-header-inner">
@@ -201,7 +203,10 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     </nav>
     <RCHPublicRouteGuide />
     <LeagueSectionNav />
-    <div id="rch-public-content" tabIndex={-1}>{children}</div>
+    <div id="rch-public-content" data-rch-visual-category={visualCategory} tabIndex={-1}>
+      <RCHRouteVisualBand category={visualCategory} pathname={pathname} rootId="rch-public-content" />
+      {children}
+    </div>
     <aside className="rch-browser-web-to-app" aria-label="Explore the RCH app"><div><b>RCH IS BETTER WHEN YOU&apos;RE PART OF IT.</b><span>{user ? 'Your RCH account is active. Keep exploring the website or install the app for the standalone experience.' : 'Browse freely on the web. Create your free profile to save, connect and compete.'}</span></div><Link href={user ? '/my-hoops' : '/app'}>{user ? 'Open My Hoops' : 'Explore the app'} <FaArrowRight aria-hidden="true"/></Link></aside>
     <footer className="rch-public-footer">
       <div className="rch-public-footer-inner">
