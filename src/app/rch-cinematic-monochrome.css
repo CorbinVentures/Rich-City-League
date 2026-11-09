@@ -425,3 +425,82 @@ body.rch-premium-app .rcl-platform-root:not(.rch-public-web) .rcl-world-card:nth
     border-radius: 20px;
   }
 }
+
+
+/* One neutral RCH palette across every public page and installed app route. */
+:root {
+  --rcl-social-canvas: #070707 !important;
+  --rcl-social-surface: #111111 !important;
+  --rcl-social-soft: #1b1b1b !important;
+  --rcl-social-border: #3b3b3b !important;
+  --rcl-social-text: #fafafa !important;
+  --rcl-social-text-2: #d6d6d6 !important;
+  --rcl-social-muted: #a7a7a7 !important;
+  --rcl-social-primary: #bdbdbd !important;
+  --rcl-social-primary-deep: #8f8f8f !important;
+  --rcl-social-gold: #bdbdbd !important;
+  --draft-accent: #bdbdbd !important;
+  --season-accent: #bdbdbd !important;
+  --season-accent-2: #f3f3f3 !important;
+}
+html[data-season-theme] { --season-accent: #bdbdbd !important; --season-accent-2: #f3f3f3 !important; }
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web, .rcl-public-web) {
+  background-color: #070707 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card, .rcl-world-card, .rcl-lifestyle-card, .rcl-pulse-grid > a, .rcl-league-scoreboard, .rcl-draft-hero, .rcl-draft-live-card, .rcl-draft-stat-strip, .rcl-draft-module, .rcl-draft-countdown, .rch-browser-featured-league, .rch-browser-section > a, .rch-browser-home article) {
+  border-color: #3b3b3b !important;
+  background-color: #111111 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card, .rcl-world-card, .rcl-lifestyle-card, .rcl-pulse-grid > a, .rcl-league-scoreboard, .rcl-draft-hero, .rcl-draft-live-card, .rcl-draft-stat-strip, .rcl-draft-module, .rcl-draft-countdown, .rch-browser-featured-league, .rch-browser-section > a, .rch-browser-home article) :is(h1,h2,h3,h4,p,b,strong,small,span,em) {
+  color: inherit;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-draft-hero .rcl-display span, .rcl-draft-live-card .rcl-live, .rcl-draft-live-card b, .rcl-draft-countdown > span, .rcl-kicker, .rcl-module-icon, .rch-browser-eyebrow span) {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-landing-primary, .rcl-draft-platform .rcl-primary, .rcl-draft-platform button, .rch-browser-button-primary) {
+  border-color: #d6d6d6 !important;
+  background: linear-gradient(135deg, #d6d6d6, #9f9f9f) !important;
+  color: #090909 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) :is(.rcl-person-card > div, .rcl-landing-story-row > span) {
+  background-color: #1b1b1b !important;
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app :is(.rcl-platform-root, .rch-public-web) .rch-browser-home a:hover {
+  border-color: #bdbdbd !important;
+}
+
+/* Neutralize route-specific pink, blue and light treatments left in older page styles. */
+html.rch-premium-root body.rch-premium-app :is(.rch-public-header, .rcl-universal-topbar, .rcl-universal-bottom, .rch-public-mobile-drawer) {
+  background: linear-gradient(145deg, #111111, #090909) !important;
+  border-color: #3b3b3b !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-site, .rch-fantasy-workspace) {
+  background: #070707 !important;
+  color: #fafafa !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-kicker, .rch-league-header h1 span, .rch-league-section-heading p, .rch-league-label, .rch-league-versus span, .rch-league-table span, .rch-fantasy-kicker) {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-header-actions a.rch-league-join, .rch-fantasy-main-action) {
+  border-color: #d6d6d6 !important;
+  background: linear-gradient(135deg, #d6d6d6, #9f9f9f) !important;
+  color: #090909 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-feature-game a, .rch-league-standings > a, .rch-league-section-links a) {
+  color: #e5e5e5 !important;
+  border-color: #3b3b3b !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root .rch-draft-readable .rcl-draft-hero {
+  background: linear-gradient(130deg, #171717 0%, #090909 75%) !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root .rch-draft-readable .rcl-draft-hero .rcl-display span {
+  color: #d6d6d6 !important;
+}
+html.rch-premium-root body.rch-premium-app .rcl-platform-root :is(.rch-league-site, .rch-fantasy-workspace) :is([class*="card"], [class*="panel"], [class*="feature"], [class*="module"]) {
+  border-color: #3b3b3b !important;
+  background-color: #111111 !important;
+  color: #fafafa !important;
+}

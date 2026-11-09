@@ -22,7 +22,9 @@ describe('public homepage SSR and anonymous-cache contract', () => {
     expect(home).toContain(".eq('author.profile_visibility', 'public')");
     expect(home).toContain(".eq('author.is_active', true)");
     expect(home).toContain(".is('target_profile_id', null)");
-    expect(home).toContain("client.from('public_players')");
+    expect(home).toContain("(client as any).from('profiles')");
+    expect(home).toContain(".eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false)");
+    expect(home).not.toContain("client.from('public_players')");
     expect(home).toContain(".eq('is_automated', false)");
     expect(home).toContain("seasons.filter(isRclProSeasonRecord)");
     expect(home).toContain("const confirmedRuns=suggestionsKnown?");

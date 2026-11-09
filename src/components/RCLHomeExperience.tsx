@@ -11,49 +11,43 @@ import {
 type Team={id:string;name:string;logo_url?:string|null};
 type Game={id:string;home_team_id:string;away_team_id:string;scheduled_at:string;venue_id?:string|null;status:string;home_score:number;away_score:number};
 type Standing={id:string;team_id:string;wins:number;losses:number;rank?:number|null};
-type Player={id:string;first_name:string;last_name:string;photo_url?:string|null;position?:string|null;jersey_number?:string|null};
 type News={id:string;slug:string;title:string;published_at?:string|null};
 type Post={id:string;body:string;author?:{display_name?:string|null;first_name?:string|null;last_name?:string|null}|null};
-type Stat={player_id:string;points:number;assists:number};
-type Props={teams:Team[];games:Game[];standings:Standing[];players:Player[];stats:Stat[];news:News[];posts:Post[];standingsLabel?:string};
+type Member={id:string;display_name?:string|null;first_name?:string|null;last_name?:string|null;avatar_url?:string|null;role?:string|null};
+type Props={teams:Team[];games:Game[];standings:Standing[];members:Member[];news:News[];posts:Post[];standingsLabel?:string};
 
 const worldCards=[
   {title:'Social',copy:'Highlights, conversations, stories and the people shaping basketball around you.',href:'/social',icon:FaComments},
-  {title:'Discover',copy:'Find players, teams, organizations, events and basketball opportunities without digging through ten different apps.',href:'/discover',icon:FaCompass},
+  {title:'Discover',copy:'Find active users, teams, organizations, events and basketball opportunities without digging through ten different apps.',href:'/discover',icon:FaCompass},
   {title:'Runs',copy:'See where people are hooping, join the run and keep the night alive through Run Tape.',href:'/runs',icon:FaLocationDot},
 ];
 
-export function RCLHomeExperience({teams,games,standings,players,stats,news,posts,standingsLabel}:Props){
+export function RCLHomeExperience({teams,games,standings,members,news,posts,standingsLabel}:Props){
   const {user}=useAuth();
   const team=(id:string)=>teams.find(item=>item.id===id);
   const now=Date.now();
   const next=[...games].filter(game=>!['completed','cancelled'].includes(game.status)&&new Date(game.scheduled_at).getTime()>=now)
     .sort((a,b)=>new Date(a.scheduled_at).getTime()-new Date(b.scheduled_at).getTime()).slice(0,2);
   const topStandings=[...standings].sort((a,b)=>(a.rank??99)-(b.rank??99)).slice(0,4);
-  const featured=players.slice(0,4);
-  const statMap=new Map<string,{gp:number;points:number;assists:number}>();
-  for(const row of stats){
-    const current=statMap.get(row.player_id)??{gp:0,points:0,assists:0};
-    current.gp+=1;current.points+=Number(row.points)||0;current.assists+=Number(row.assists)||0;statMap.set(row.player_id,current);
-  }
+  const featured=members.slice(0,4);
 
   return <main className="rcl-social-landing">
     <section className="rcl-social-landing-hero">
       <div className="rcl-landing-copy">
         <p className="rcl-landing-kicker">RCH · Richmond basketball social</p>
         <h1>Your basketball world.<br/><span>All in one place.</span></h1>
-        <p className="rcl-landing-lede">Connect with players. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
+        <p className="rcl-landing-lede">Connect with active users. Share highlights. Find runs. Follow what matters. Rich City League lives here as the flagship competition inside a bigger basketball community.</p>
         <div className="rcl-landing-actions">
           <Link href={user?'/social':'/auth/sign-up'} className="rcl-landing-primary">{user?'Open your feed':'Join free'} <FaArrowRight/></Link>
           <Link href="/social" className="rcl-landing-secondary"><FaPlay/> See what&apos;s happening</Link>
           <Link href="/app" className="rcl-landing-secondary"><FaDownload/> Get the RCH App</Link>
         </div>
-        <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Players</span><span>League</span><span>Merch</span></div>
+        <div className="rcl-landing-proof"><span>Social</span><span>Runs</span><span>Active users</span><span>League</span><span>Merch</span></div>
       </div>
 
       <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
         <div className="rcl-landing-phone-top"><b>RCH</b><span>For You</span><i>•••</i></div>
-        <div className="rcl-landing-story-row">{featured.slice(0,4).map(player=><span key={player.id}>{player.photo_url?<Image src={player.photo_url} alt="" width={64} height={64}/>:<b>{player.first_name[0]}{player.last_name[0]}</b>}</span>)}</div>
+        <div className="rcl-landing-story-row">{featured.slice(0,4).map(member=><span key={member.id}>{member.avatar_url?<Image src={member.avatar_url} alt="" width={64} height={64} unoptimized/>:<b>{(member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH').split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase()}</b>}</span>)}</div>
         <div className="rcl-landing-preview-post">
           <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>
           <strong>Basketball here is bigger than a schedule.</strong>
@@ -83,15 +77,15 @@ export function RCLHomeExperience({teams,games,standings,players,stats,news,post
     </section>
 
     <section className="rcl-landing-section">
-      <div className="rcl-landing-section-head"><div><p>People first</p><h2>Faces make the network feel alive.</h2></div><Link href="/players">See players <FaArrowRight/></Link></div>
-      <div className="rcl-people-row">{featured.map(player=>{
-        const s=statMap.get(player.id);
-        const ppg=s&&s.gp?s.points/s.gp:0;
-        return <Link href={'/players/'+player.id} key={player.id} className="rcl-person-card">
-          <div>{player.photo_url?<Image src={player.photo_url} alt={`${player.first_name} ${player.last_name}`} width={540} height={540}/>:<span>{player.first_name[0]}{player.last_name[0]}</span>}</div>
-          <p><small>{player.position??'Player'}{player.jersey_number?` · #${player.jersey_number}`:''}</small><b>{player.first_name} {player.last_name}</b><em>{s?.gp?`${ppg.toFixed(1)} PPG`:'RCL Profile'}</em></p>
+      <div className="rcl-landing-section-head"><div><p>People first</p><h2>Faces make the network feel alive.</h2></div><Link href="/discover">See active users <FaArrowRight/></Link></div>
+      <div className="rcl-people-row">{featured.map(member=>{
+        const name=member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH Member';
+        const initials=name.split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+        return <Link href={'/social/profile/'+member.id} key={member.id} className="rcl-person-card">
+          <div>{member.avatar_url?<img src={member.avatar_url} alt="" loading="lazy"/>:<span>{initials}</span>}</div>
+          <p><small>Active user</small><b>{name}</b><em>{member.role || 'RCH Community Profile'}</em></p>
         </Link>;
-      })}{!featured.length&&<div className="rcl-calm-empty">Player profiles will appear here as the community grows.</div>}</div>
+      })}{!featured.length&&<div className="rcl-calm-empty">Active public profiles will appear here as the community grows.</div>}</div>
     </section>
 
     <section className="rcl-landing-section rcl-community-pulse">
