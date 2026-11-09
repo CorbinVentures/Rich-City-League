@@ -128,7 +128,7 @@ export function RCHBrowserHomepage({ news, events, runs, suggestedRuns = [], lis
           <p className="px-3 pt-3 text-sm font-black">{person.display_name || [person.first_name,person.last_name].filter(Boolean).join(' ') || 'RCH Member'}</p>
           <p className="px-3 pb-3 text-xs text-white/60">{person.role || 'Member'}</p>
         </Link>)}
-      </div> : <p className="mt-4 text-white/70">Member profiles with public photos will appear here as the community grows.</p>}
+      </div> : <p className="mt-4 text-white/70">Active public profiles will appear here as the community grows.</p>}
       {activity.length>0 && <div className="mt-5 grid gap-3 md:grid-cols-3">
         {activity.slice(0,3).map(post => <Link key={post.id} href="/pulse" className="rounded-xl border border-white/15 bg-white/[.04] p-5 text-white hover:border-rose-400">
           <p className="text-xs font-black uppercase text-rose-300">{post.author_name} · Public post</p>
