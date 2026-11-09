@@ -64,7 +64,7 @@ export function LeagueOperationsWorkbench() {
           : loadedGames);
         setPlayers((playerResult.data ?? []) as PublicPlayer[]);
         setTeams(teamResult.data ?? []);
-        setDivisions((divisionsResult.data ?? []) as Division[]);
+        setDivisions((divisionsResult.data ?? []) as unknown as Division[]);
         setTeamSeasons(teamSeasonResult.data ?? []);
         const loadedTeamIds = profile?.role === 'coach'
           ? ((coachResult.data ?? []) as Array<{ team_id: string }>).map((item) => item.team_id)
