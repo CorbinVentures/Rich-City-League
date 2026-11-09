@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 
   let eligibilityAnswers: Record<string, number | null> = { age_at_season_start: null };
   if (dateOfBirth) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth) || Number.isNaN(Date.parse(dateOfBirth + 'T00:00:00Z'))) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth) || Number.isNaN(Date.parse(dateOfBirth + 'T00:00:00Z')) || new Date(dateOfBirth + 'T00:00:00Z').toISOString().slice(0, 10) !== dateOfBirth) {
       return NextResponse.json({ error: 'Enter a valid date of birth.' }, { status: 400 });
     }
     const age = ageOn(dateOfBirth, season.start_date);
