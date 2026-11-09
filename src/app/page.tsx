@@ -31,7 +31,7 @@ async function loadPublicHomepageData() {
           .order('created_at', { ascending: false }).limit(3),
         (client as any).from('network_events').select('id,slug,title,starts_at,city,state,event_type').eq('status','published').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(8),
         (client as any).from('runs').select('id,title,starts_at,location,court_name,game_format,host_id,max_players').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(32),
-        (client as any).from('profiles').select('id,display_name,first_name,last_name,avatar_url,role').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).not('avatar_url','is',null).order('updated_at',{ascending:false}).limit(12),
+        (client as any).from('profiles').select('id,display_name,first_name,last_name,avatar_url,role').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).order('updated_at',{ascending:false}).limit(12),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
@@ -62,7 +62,7 @@ async function loadPublicHomepageData() {
   const confirmedRuns=suggestionsKnown?enrichedRuns.filter(row=>!suggestionIds.has(row.id)):[];
   const suggestedRuns=suggestionsKnown?enrichedRuns.filter(row=>suggestionIds.has(row.id)):[];
 
-  const publicMembers=memberRows.filter(row=>Boolean(row.avatar_url?.trim())).slice(0,6);
+  const publicMembers=memberRows.slice(0,6);
   const publicActivity=postRows.filter(row=>typeof row.body==='string' && row.body.trim()).map(row=>({
     id:row.id,body:row.body.slice(0,220),author_name:row.author?.display_name || [row.author?.first_name,row.author?.last_name].filter(Boolean).join(' ') || 'RCH Member',
   }));
