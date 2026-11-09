@@ -46,9 +46,11 @@ type Options = {
   token: () => Promise<string>;
   signal: AbortSignal;
   progress: (percent: number) => void;
+  purpose?: 'tv' | 'highlight';
 };
-const checkpointKey = (userId: string, file: File) =>
-  `rch-tv:tus:${userId}:${file.name}:${file.size}:${file.lastModified}`;
+const checkpointKey = (userId: string, file: File, purpose: 'tv' | 'highlight' = 'tv') =>
+  purpose === 'tv' ? `rch-tv:tus:${userId}:${file.name}:${file.size}:${file.lastModified}`
+    : `rch-tv:tus:highlight:${userId}:${file.name}:${file.size}:${file.lastModified}`;
 
 function endpointFor(projectUrl: string): string {
   const url = new URL(projectUrl);
@@ -66,18 +68,23 @@ function delay(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-export async function uploadRchTvVideo({file,userId,projectUrl,token,signal,progress}:Options):Promise<{storagePath:string;objectPath:string}> {
-  const invalid = rchTvFileError(file);
-  if (invalid || !rchTvIsVideo(file)) throw new Error(invalid || 'Unsupported video file.');
+export async function uploadRchTvVideo({file,userId,projectUrl,token,signal,progress,purpose='tv'}:Options):Promise<{storagePath:string;objectPath:string}> {
+  const mime = rchTvVideoMimeType(file);
+  const invalid = purpose === 'highlight'
+    ? (!mime ? 'Choose an MP4, MOV or WebM clip.' : file.size <= 0 ? 'Choose a nonempty video.' : file.size > 250 * 1024 * 1024 ? 'Highlight clips must be 250 MB or smaller.' : null)
+    : rchTvFileError(file);
+  if (invalid || !mime) throw new Error(invalid || 'Unsupported video file.');
+  const folder = purpose === 'highlight' ? 'highlights' : 'rch-tv';
+  const bucket = purpose === 'highlight' ? 'rch-player-highlights' : RCH_TV_VIDEO_BUCKET;
   const endpoint = endpointFor(projectUrl);
   const origin = new URL(endpoint).origin;
-  const key = checkpointKey(userId,file);
+  const key = checkpointKey(userId,file,purpose);
   let checkpoint:Checkpoint|null = null;
   try {
     const saved = window.localStorage.getItem(key);
     const parsed = saved ? JSON.parse(saved) as Checkpoint : null;
     if (parsed && typeof parsed.path === 'string' && typeof parsed.url === 'string'
-        && parsed.path.startsWith(`${userId}/rch-tv/`) && new URL(parsed.url).origin === origin) checkpoint=parsed;
+        && parsed.path.startsWith(`${userId}/${folder}/`) && new URL(parsed.url).origin === origin) checkpoint=parsed;
   } catch {}
 
   const headers = async () => ({ Authorization:`Bearer ${await token()}`, 'Tus-Resumable':'1.0.0' });
@@ -96,11 +103,10 @@ export async function uploadRchTvVideo({file,userId,projectUrl,token,signal,prog
     if (offset===null) checkpoint=null;
   }
   if (!checkpoint) {
-    const mime = rchTvVideoMimeType(file)!;
     const ext = mime === 'video/quicktime' ? 'mov' : mime === 'video/webm' ? 'webm' : 'mp4';
-    const path=`${userId}/rch-tv/${crypto.randomUUID()}.${ext}`;
+    const path=`${userId}/${folder}/${crypto.randomUUID()}.${ext}`;
     const metadata=[
-      ['bucketName',RCH_TV_VIDEO_BUCKET],['objectName',path],
+      ['bucketName',bucket],['objectName',path],
       ['contentType',mime],['cacheControl','3600'],
     ].map(([k,v])=>`${k} ${btoa(v)}`).join(',');
     const started=await fetch(endpoint,{
@@ -150,8 +156,8 @@ export async function uploadRchTvVideo({file,userId,projectUrl,token,signal,prog
     if (!successful) throw new Error(`Upload interrupted. Re-select the same video to resume. ${String(previousError??'')}`);
   }
   // The checkpoint is removed after media DB insertion succeeds.
-  return {storagePath:`${RCH_TV_VIDEO_STORAGE_PREFIX}${checkpoint.path}`,objectPath:checkpoint.path};
+  return {storagePath:purpose === 'highlight' ? checkpoint.path : `${RCH_TV_VIDEO_STORAGE_PREFIX}${checkpoint.path}`,objectPath:checkpoint.path};
 }
-export function clearRchTvCheckpoint(userId:string,file:File):void {
-  try {window.localStorage.removeItem(checkpointKey(userId,file));} catch {}
+export function clearRchTvCheckpoint(userId:string,file:File,purpose:'tv'|'highlight'='tv'):void {
+  try {window.localStorage.removeItem(checkpointKey(userId,file,purpose));} catch {}
 }
