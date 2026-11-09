@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 import { LeagueSetupWorkbench } from '@/components/league/LeagueSetupWorkbench';
 import { LeagueOperationsWorkbench } from '@/components/league/LeagueOperationsWorkbench';
+import { CommandScheduleGenerator } from '@/components/command/CommandScheduleGenerator';
 import { FaArrowUpRightFromSquare, FaBasketball, FaCalendarDays, FaRotate, FaUserGroup, FaUsers, FaClipboardList } from 'react-icons/fa6';
 
 type Row = Record<string, any>;
@@ -11,7 +12,7 @@ const dateTime = (value?:string|null) => value ? new Date(value).toLocaleString(
 
 export function CommandLeagueManagement() {
  const db=useMemo(()=>getSupabaseClient() as any,[]);
- const [workspace,setWorkspace]=useState<'overview'|'setup'|'operations'>('overview');
+ const [workspace,setWorkspace]=useState<'overview'|'setup'|'operations'|'schedule'>('overview');
  const [teams,setTeams]=useState<Row[]>([]);
  const [seasons,setSeasons]=useState<Row[]>([]);
  const [teamSeasons,setTeamSeasons]=useState<Row[]>([]);
@@ -62,13 +63,14 @@ export function CommandLeagueManagement() {
   {title:'League setup',description:'Build seasons, divisions, teams, team assignments, and game schedules in RCH.',panel:'setup' as const,icon:<FaCalendarDays/>},
   {title:'League operations',description:'Run tryouts, drafts, requests, discipline, and roster decisions.',panel:'operations' as const,icon:<FaClipboardList/>},
   {title:'Teams, rosters & game stats',description:'Manage native RCH rosters, game records, score updates, and player stats.',panel:'operations' as const,icon:<FaUsers/>},
+  {title:'Schedule generator',description:'Generate and review regular-season, playoff, and tournament schedules.',panel:'schedule' as const,icon:<FaCalendarDays/>},
  ];
 
  return <div className="space-y-6">
   <div className="flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2" role="tablist" aria-label="League management workspaces">
-   {[['overview','Overview'],['setup','League setup'],['operations','Game & roster operations']].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={workspace===key} onClick={()=>setWorkspace(key as 'overview'|'setup'|'operations')} className={'rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition '+(workspace===key?'bg-blue-500/20 text-blue-100':'text-white/45 hover:bg-white/[.05] hover:text-white')}>{label}</button>)}
+   {[['overview','Overview'],['setup','League setup'],['operations','Game & roster operations'],['schedule','Schedule generator']].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={workspace===key} onClick={()=>setWorkspace(key as 'overview'|'setup'|'operations'|'schedule')} className={'rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition '+(workspace===key?'bg-blue-500/20 text-blue-100':'text-white/45 hover:bg-white/[.05] hover:text-white')}>{label}</button>)}
   </div>
-  {workspace==='setup'?<LeagueSetupWorkbench/>:workspace==='operations'?<LeagueOperationsWorkbench/>:<>
+  {workspace==='schedule'?<CommandScheduleGenerator/>:workspace==='setup'?<LeagueSetupWorkbench/>:workspace==='operations'?<LeagueOperationsWorkbench/>:<>
   <section className="rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_90%_0%,rgba(59,130,246,.20),transparent_28rem),linear-gradient(145deg,#0d1726,#080c13)] p-5 sm:p-7">
    <div className="flex flex-wrap items-start justify-between gap-5">
     <div className="max-w-3xl">
