@@ -50,7 +50,7 @@ export function LeagueOperationsWorkbench() {
           supabase.from('rosters').select('*').is('left_at', null),
           supabase.from('player_game_stats').select('*'),
           profile?.role === 'coach' ? supabase.from('team_coaches').select('team_id').eq('profile_id', profile.id) : Promise.resolve({ data: [], error: null }),
-          isStaff ? supabase.from('registration_responses').select('*').limit(1000) : Promise.resolve({ data: [], error: null }),
+          isStaff ? (supabase as any).from('registration_responses').select('*').limit(1000) : Promise.resolve({ data: [], error: null }),
           isStaff ? supabase.from('payments').select('registration_id,status,amount_cents,currency,created_at').order('created_at',{ascending:false}).limit(2000) : Promise.resolve({ data: [], error: null }),
         ]);
         const resultError = [registrationResult, gameResult, playerResult, teamResult, divisionsResult, teamSeasonResult, rosterResult, statResult, coachResult, responseResult, paymentResult].find((result) => result.error)?.error;
