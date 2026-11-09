@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   isLaunchContentReady,
+  canDismissLaunch,
   RCH_LAUNCH_BOOT_FALLBACK_MS,
   RCH_LAUNCH_FALLBACK_MS,
   RCH_LAUNCH_MIN_DISPLAY_MS,
@@ -121,10 +122,10 @@ export function PWALaunchIntro() {
     dismissRef.current = dismiss;
 
     const checkReady = () => {
-      if (stopped || !isLaunchContentReady(document)) return;
+      if (stopped || !canDismissLaunch(isLaunchContentReady(document), boot, holdFinished, routeReady)) return;
       if (boot) {
         if (!beltLoaded.current && !beltFailed.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (!holdFinished || splitStarted) return;
+        if (splitStarted) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           dismiss();
           return;
@@ -132,7 +133,7 @@ export function PWALaunchIntro() {
         splitStarted = true;
         setOpening(true);
         later(dismiss, SPLIT_DURATION_MS);
-      } else if (routeReady) {
+      } else {
         dismiss();
       }
     };
