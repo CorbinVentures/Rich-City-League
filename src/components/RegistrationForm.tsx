@@ -64,7 +64,7 @@ export function RegistrationForm({ seasons, divisions }: { seasons: Season[]; di
     let live = true;
     async function confirmPayment() {
       if (!supabase) return;
-      const { data, error } = await supabase.from('payments').select('status').eq('registration_id', returnedId).order('created_at', { ascending: false }).limit(1);
+      const { data, error } = await supabase.from('payments').select('status').eq('registration_id', returnedId as string).order('created_at', { ascending: false }).limit(1);
       if (!live) return;
       if (error || !data?.length || data[0].status === 'pending') setMessage('Stripe returned you to RCH. Payment confirmation is still processing; refresh this page in a moment.');
       else if (data[0].status === 'paid') setMessage('Payment confirmed. Your league application is now pending staff review.');
