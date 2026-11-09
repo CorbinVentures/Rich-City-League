@@ -47,7 +47,7 @@ export function RCLHomeExperience({teams,games,standings,members,news,posts,stan
 
       <div className="rcl-landing-phone" aria-label="Preview of the RCL social experience">
         <div className="rcl-landing-phone-top"><b>RCH</b><span>For You</span><i>•••</i></div>
-        <div className="rcl-landing-story-row">{featured.slice(0,4).map(member=><span key={member.id}>{member.avatar_url?<Image src={member.avatar_url} alt="" width={64} height={64}/>:<b>{(member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH').split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase()}</b>}</span>)}</div>
+        <div className="rcl-landing-story-row">{featured.slice(0,4).map(member=><span key={member.id}>{member.avatar_url?<Image src={member.avatar_url} alt="" width={64} height={64} unoptimized/>:<b>{(member.display_name || [member.first_name,member.last_name].filter(Boolean).join(' ') || 'RCH').split(/\s+/).map(part=>part[0]).filter(Boolean).slice(0,2).join('').toUpperCase()}</b>}</span>)}</div>
         <div className="rcl-landing-preview-post">
           <div><span className="rcl-preview-avatar">R</span><p><b>Rich City League</b><small>Flagship League · Richmond</small></p></div>
           <strong>Basketball here is bigger than a schedule.</strong>
