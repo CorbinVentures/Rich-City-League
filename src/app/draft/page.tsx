@@ -270,23 +270,23 @@ export default function DraftNightPage() {
               <div className="rch-program-brand-lockup rch-program-draft-lockup">
                 <ProgramEmblem program="draft-night" className="rch-program-emblem-draft" priority/>
                 <div className="rch-program-brand-copy">
-              <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · DRAFT NIGHT</p>
-              <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Night.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">The inaugural professional season is planned for November 2027. Explore the established franchise draft order now; official selections follow the 2027 tryouts.</p>
+              <p className="rcl-kicker"><FaBolt /> RICH CITY LEAGUE · 2027 DRAFT ROOM</p>
+              <h1 className="rcl-display mt-3 text-5xl uppercase leading-[.92] sm:text-6xl lg:text-7xl">Draft <span className="text-rcl-orange">Board.</span></h1>
+              <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">2027 franchise lottery order, round-by-round selections, and the live pick clock—all in one place. Official player selections follow the summer 2027 tryouts.</p>
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-                <Link href="/league/join" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-orange px-4 text-black">Join Rich City League <FaArrowRight/></Link>
-                <Link href="/fantasy" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Fan Fantasy <FaArrowRight/></Link>
-                <Link href="/league/rules" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 px-4 text-white">Proposed League Rules</Link>
-              </div>
-              <button type="button" onClick={toggleSound} aria-pressed={soundEnabled} className="mt-4 min-h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-xs font-black uppercase tracking-wider text-white/75">{soundEnabled ? 'Mute draft sounds' : 'Enable draft sounds'}</button>
+              <nav className="rcl-draft-quicknav mt-4" aria-label="Draft room sections">
+                  <a href="#lottery-board">Lottery order <FaArrowRight/></a>
+                  <a href="#draft-board">Prospects <FaArrowRight/></a>
+                  <a href="#pick-history">Pick tracker <FaArrowRight/></a>
+                  <button type="button" onClick={toggleSound} aria-pressed={soundEnabled}>{soundEnabled ? 'Sound on' : 'Sound off'}</button>
+                </nav>
             </div>
             <div className="rcl-draft-live-card">
-              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE DRAFT BOARD' : 'DRAFT NIGHT PREVIEW'}</span>
-              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : draft?.status ?? 'PRESEASON'}</strong>
+              <span className="rcl-live">{draft?.status === 'OPEN' ? 'LIVE SELECTION' : 'PRESEASON LOTTERY ORDER'}</span>
+              <strong>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'LOTTERY BOARD'}</strong>
               <small>{currentTeam?.name ?? firstPreviewTeam?.name ?? 'Draft order pending'}</small>
-              <div className="mt-4 flex items-end gap-3"><b>{clock(seconds)}</b><span>remaining</span></div>
+              <div className="mt-4 flex items-end gap-3"><b>{draft?.status === 'OPEN' ? clock(seconds) : previewPicks.length ? '#01' : '—'}</b><span>{draft?.status === 'OPEN' ? 'remaining' : 'first selection'}</span></div>
             </div>
           </div>
         </Container>
@@ -294,8 +294,8 @@ export default function DraftNightPage() {
 
       <Container maxWidth="xl" className="relative z-10 -mt-7">
         <div className="rcl-draft-stat-strip">
-          <div><span>NEXT PICK</span><strong>#{draft?.current_pick ?? '—'}</strong></div>
-          <div><span>ROUND</span><strong>{current?.round_number ?? '—'}</strong></div>
+          <div><span>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'FIRST PICK'}</span><strong>#{draft?.current_pick ?? (previewPicks.length ? previewPicks[0].pickNumber : '—')}</strong></div>
+          <div><span>ROUND</span><strong>{current?.round_number ?? previewRound}</strong></div>
           <div><span>SEASON TEAMS</span><strong>{new Set(order.map(row=>row.team_id)).size || preseasonOrder?.first_round_team_ids.length || '—'}</strong></div>
           <div><span>SELECTED</span><strong>{picks.length}</strong></div>
         </div>
@@ -303,14 +303,14 @@ export default function DraftNightPage() {
         {message && <div role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</div>}
 
         {preseasonOrder && (!draft || draft.status === 'SETUP') && (
-          <section aria-labelledby="preseason-draft-title" className="mt-8 rounded-3xl border border-rcl-orange/25 bg-[#121821] p-5 text-white shadow-xl sm:p-8">
+          <section id="lottery-board" aria-labelledby="preseason-draft-title" className="rcl-lottery-board mt-6 rounded-3xl border border-white/20 bg-[#151516] p-4 text-white sm:p-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="rcl-kicker">ESTABLISHED PRESEASON ORDER · NOT LIVE</p>
-                <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">{preseasonOrder.season_label} Draft Order</h2>
+                <p className="rcl-kicker">DRAFT LOTTERY · ESTABLISHED PRESEASON ORDER</p>
+                <h2 id="preseason-draft-title" className="rcl-display mt-2 text-3xl uppercase sm:text-4xl">Franchise lottery board</h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                  {preseasonOrder.first_round_team_ids.length} listed team identities · {preseasonOrder.rounds} rounds · {previewPicks.length} preview selections.
-                  Snake format: every even-numbered round reverses the previous order. Club admission and official eligibility remain subject to approval.
+                  {preseasonOrder.season_label} · {preseasonOrder.first_round_team_ids.length} franchise positions · {preseasonOrder.rounds} rounds.
+                  Select a round to view its selections. Even rounds reverse the team order. This draw is a preseason allocation, not a live or completed player draft.
                 </p>
                 {(() => {
                   const coverage = draftRosterCoverage(preseasonOrder.first_round_team_ids.length, preseasonOrder.rounds, 12);
@@ -322,24 +322,24 @@ export default function DraftNightPage() {
                   ) : null;
                 })()}
               </div>
-              <span className="rounded-full border border-rcl-orange/30 bg-rcl-orange/10 px-3 py-2 text-xs font-black tracking-wider text-rcl-orange">CLOCK NOT STARTED</span>
+              <span className="rcl-lottery-status">PRESEASON · NOT LIVE</span>
             </div>
-            <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Preview draft round">
+            <div className="rcl-lottery-rounds mt-5 flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Preview draft round">
               {Array.from({ length: preseasonOrder.rounds }, (_, index) => index + 1).map(round => (
                 <button key={round} type="button" onClick={() => setPreviewRound(round)}
                   aria-pressed={previewRound === round}
-                  className={`min-h-11 rounded-xl border px-4 text-sm font-bold ${previewRound === round ? 'border-rcl-orange bg-rcl-orange text-black' : 'border-white/15 bg-white/5 text-slate-200'}`}>
+                  className={`rcl-lottery-round shrink-0 min-h-11 rounded-xl border px-4 text-sm font-bold ${previewRound === round ? 'border-white bg-white text-black' : 'border-white/20 bg-white/5 text-white'}`}>
                   Round {round}
                 </button>
               ))}
             </div>
-            <div className="mt-5 grid gap-2 md:grid-cols-2">
+            <div className="rcl-lottery-grid mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {previewPicks.filter(pick => pick.roundNumber === previewRound).map(pick => {
                 const team = teams.find(item => item.id === pick.teamId);
-                return <div key={pick.pickNumber} className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
-                  <span className="w-12 shrink-0 text-center text-xl font-black tabular-nums text-rcl-orange">#{pick.pickNumber}</span>
+                return <div key={pick.pickNumber} className="rcl-lottery-pick flex min-w-0 items-center gap-3 rounded-xl border border-white/15 bg-[#222225] p-3">
+                  <span className="rcl-lottery-number w-12 shrink-0 text-center text-2xl font-black tabular-nums">#{String(pick.pickNumber).padStart(2,'0')}</span>
                   <TeamMark team={team} />
-                  <span className="min-w-0 truncate text-sm font-semibold">{team?.name ?? 'Team unavailable'}</span>
+                  <span className="min-w-0"><small className="block text-[9px] font-bold uppercase tracking-widest text-white/55">Round {pick.roundNumber} · Selection</small><strong className="block truncate text-sm font-semibold text-white">{team?.name ?? 'Team unavailable'}</strong></span>
                 </div>;
               })}
             </div>
@@ -395,7 +395,7 @@ export default function DraftNightPage() {
         </section>
 
         {draft && <SeasonDraftScouting teamName={visibleTeam?.name??'this season team'} prospects={scouts} rosterPositions={rosterPositions} isCoach={profile?.role==='coach'} />}
-        <section className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="rcl-draft-features mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {([
             { title: 'PLAYER SCOUTING', detail: 'Profiles, stats, highlights', Icon: FaUserGroup },
             { title: 'LIVE DRAFTING', detail: 'Real-time selections', Icon: FaCrown },
@@ -405,8 +405,8 @@ export default function DraftNightPage() {
           ] satisfies DraftFeature[]).map(({ title, detail, Icon }) => <div key={String(title)} className="rcl-draft-feature"><Icon /><div><strong>{title}</strong><span>{detail}</span></div></div>)}
         </section>
 
-        <section className="mt-16">
-          <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display mt-2 text-4xl uppercase">Draft history</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
+        <section id="pick-history" className="mt-10">
+          <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display mt-2 text-4xl uppercase">Pick tracker</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
           <div className="rcl-pick-history mt-5">
             {order.map((slot) => { const pick = picks.find((item) => item.pick_number === slot.pick_number); const team = teams.find((item) => item.id === slot.team_id); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; return <div key={slot.id} className={slot.pick_number === draft?.current_pick ? 'current' : ''}><b>#{slot.pick_number}</b><span className="flex items-center gap-2"><TeamMark team={team} />{team?.name ?? 'TBD'}</span><strong>{player ? playerName(player) : slot.pick_number === draft?.current_pick ? 'ON THE CLOCK' : 'Awaiting selection'}</strong><small>{player?.position ?? '—'} · OVR {player ? ratings.get(player.id) ?? '—' : '—'}</small></div>; })}
             {!order.length && <p className="p-8 text-center text-sm text-white/35">Official draft order pending.</p>}
