@@ -21,7 +21,6 @@ import './rcl-site-uniform.css';
 import './rcl-mockup-system.css';
 import './rcl-presentation-polish.css';
 import './rcl-seasonal-themes.css';
-import './rcl-draft-uniform.css';
 import './rcl-social-search-stories.css';
 import './rcl-social-composer.css';
 import './rcl-messaging.css';
@@ -67,6 +66,8 @@ import './rch-program-emblems.css';
 import './rch-court-flare.css';
 import './rch-blue-metal.css';
 import './rch-cinematic-monochrome.css';
+// Route-scoped Draft PWA authority must load after the legacy visual themes.
+import './rcl-draft-uniform.css';
 import { PWALaunchIntro } from '@/components/PWALaunchIntro';
 import { PWA_LAUNCH_BOOTSTRAP } from '@/lib/pwa-launch';
 import { RCLVisualSystem } from '@/components/RCLVisualSystem';
