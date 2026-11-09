@@ -52,7 +52,7 @@ export function LeagueSetupWorkbench() {
     const firstError=[l.error,s.error,d.error,t.error,ts.error,g.error,p.error,r.error].find(Boolean);
     if (firstError) setError(firstError.message);
     else {
-      const ls=(l.data??[]) as League[], ss=(s.data??[]) as Season[], ds=(d.data??[]) as Division[], ts1=(t.data??[]) as Team[], tss=(ts.data??[]) as TeamSeason[];
+      const ls=(l.data??[]) as League[], ss=(s.data??[]) as Season[], ds=(d.data??[]) as unknown as Division[], ts1=(t.data??[]) as Team[], tss=(ts.data??[]) as TeamSeason[];
       // Preserve historical teams in storage, but never present them as active
       // franchises or options when creating assignments and upcoming games.
       const activeTeams=ts1.filter(t=>t.is_active);
