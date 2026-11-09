@@ -21,13 +21,10 @@ async function loadPublicHomepageData() {
   const previewStandings = seasonStandings.filter(item=>item.division_id === divisionId);
   const standingsLabel = [season?.name ?? `Pro season planned · ${RCL_PRO_SEASON.startLabel}`, divisions.find(item=>item.id === divisionId)?.name].filter(Boolean).join(' · ');
   const proSeasonGames = season ? games.filter(game => game.season_id === season.id) : [];
-  const completedGameIds = new Set(proSeasonGames.filter(game => game.status === 'completed').map(game => game.id));
 
-  // The landing page displays just six players and three posts. Never fetch an
-  // unused player-IQ ranking or 1,000 unrelated game-stat rows for first paint.
-  const [{ data: playersRaw }, { data: postsRaw }, { data: eventsRaw }, { data: runsRaw }, { data: membersRaw }] = client
+  // Fetch active public profiles for the homepage member showcase, plus a small set of current content.
+  const [{ data: postsRaw }, { data: eventsRaw }, { data: runsRaw }, { data: membersRaw }] = client
     ? await Promise.all([
-        client.from('public_players').select('id,first_name,last_name,photo_url,position,jersey_number').eq('is_active', true).order('last_name').limit(6),
         (client as any).from('posts').select('id,body,created_at,author:profiles!posts_author_id_fkey!inner(display_name,first_name,last_name)')
           .eq('author.profile_visibility', 'public').eq('author.is_active', true)
           .eq('status', 'published').eq('is_automated', false).is('target_profile_id', null)
@@ -36,7 +33,7 @@ async function loadPublicHomepageData() {
         (client as any).from('runs').select('id,title,starts_at,location,court_name,game_format,host_id,max_players').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at',{ascending:true}).limit(32),
         (client as any).from('profiles').select('id,display_name,first_name,last_name,avatar_url,role').eq('is_active',true).eq('profile_visibility','public').eq('is_system_account',false).not('avatar_url','is',null).order('updated_at',{ascending:false}).limit(12),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   type RunRow = {id:string;host_id:string;title:string;starts_at:string;location:string;court_name:string|null;game_format:string|null;max_players:number|null};
   type MemberRow = {id:string;display_name:string|null;first_name:string|null;last_name:string|null;avatar_url:string|null;role:string|null};
@@ -70,13 +67,6 @@ async function loadPublicHomepageData() {
     id:row.id,body:row.body.slice(0,220),author_name:row.author?.display_name || [row.author?.first_name,row.author?.last_name].filter(Boolean).join(' ') || 'RCH Member',
   }));
 
-  const playerIds = (playersRaw ?? []).map(player => player.id).filter((id): id is string => Boolean(id));
-  const { data: statsRaw } = client && playerIds.length && completedGameIds.size
-    ? await client.from('player_game_stats').select('game_id,player_id,points,assists')
-        .in('player_id', playerIds).in('game_id', [...completedGameIds]).limit(250)
-    : { data: [] };
-  const currentStats = statsRaw ?? [];
-
   // Cache contains only published/anonymous data from the public Supabase client.
   // Do not reference cookies, headers, privileged clients or member sessions here.
   return {
@@ -85,7 +75,6 @@ async function loadPublicHomepageData() {
     standings: previewStandings,
     standingsLabel,
     news,
-    players: playersRaw ?? [],
     posts: postsRaw ?? [],
     events: eventsRaw ?? [],
     confirmedRuns,
@@ -93,7 +82,6 @@ async function loadPublicHomepageData() {
     listingsVerified: suggestionsKnown,
     members: publicMembers,
     activity: publicActivity,
-    stats: currentStats,
   };
 }
 
@@ -118,7 +106,6 @@ export default async function HomePage() {
       standings: [],
       standingsLabel: `Pro season planned · ${RCL_PRO_SEASON.startLabel}`,
       news: [],
-      players: [],
       posts: [],
       events: [],
       confirmedRuns: [],
@@ -126,7 +113,6 @@ export default async function HomePage() {
       listingsVerified: false,
       members: [],
       activity: [],
-      stats: [],
     };
   }
   return (
@@ -148,8 +134,7 @@ export default async function HomePage() {
         games={data.games}
         standings={data.standings}
         standingsLabel={data.standingsLabel}
-        players={data.players as any}
-        stats={data.stats as any}
+        members={data.members as any}
         news={data.news}
         posts={data.posts as any}
       />
