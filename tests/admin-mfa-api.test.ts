@@ -16,17 +16,11 @@ describe('MFA on server-side administrator API operations', () => {
     expect(transfer).toContain("Authenticator verification required for financial transfers.");
   });
 
-  it('requires verified AAL2 for interactive LeagueApps admin operations, without granting cron admin rights', () => {
-    expect(leagueApps).toContain("if (isCron) {");
-    expect(leagueApps).toContain("if (action !== 'sync-competition') return unauthorized(");
-    const interactive = leagueApps.indexOf('  } else {\n    const supabase = await getServerSupabaseClient(bearerToken);');
-    const assurance = leagueApps.indexOf('auth.mfa.getAuthenticatorAssuranceLevel()', interactive);
-    const deny = leagueApps.indexOf("assurance?.currentLevel !== 'aal2'", assurance);
-    const profile = leagueApps.indexOf("from('profiles').select('role')", deny);
-    expect(interactive).toBeGreaterThan(-1);
-    expect(assurance).toBeGreaterThan(interactive);
-    expect(deny).toBeGreaterThan(assurance);
-    expect(profile).toBeGreaterThan(deny);
+  it('keeps the retired LeagueApps synchronization endpoint unavailable', () => {
+    expect(leagueApps).toContain('LeagueApps synchronization has been retired.');
+    expect(leagueApps).toContain('{ status: 410 }');
+    expect(leagueApps).not.toContain('getServerSupabaseClient');
+    expect(leagueApps).not.toContain('sync-competition');
   });
 });
 
