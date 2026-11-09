@@ -31,7 +31,7 @@ function validateFieldAnswers(fields: Field[], input: unknown) {
     const required = candidate.required === true;
     const raw = source[key];
     const blank = raw == null || raw === '' || (typeof raw === 'string' && !raw.trim());
-    if (required && blank) throw new Error('Complete the required question: ' + label + '.');
+    if (required && (blank || (type === 'checkbox' && raw !== true))) throw new Error('Complete the required question: ' + label + '.');
     if (blank) { snapshot.push({ key, label, type, required, options: candidate.options ?? [], answer: null }); continue; }
     if (type === 'checkbox') {
       if (typeof raw !== 'boolean') throw new Error('Answer the question: ' + label + '.');
