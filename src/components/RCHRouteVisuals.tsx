@@ -60,9 +60,8 @@ export function RCHRouteVisualBand({ category, pathname, rootId }: {
     <div
       className={`rch-route-visual-band rch-route-visual-band--${category}`}
       role="img"
-      aria-label={`AI-generated promotional basketball imagery for ${categoryLabels[category]}.`}
+      aria-label={categoryLabels[category]}
     >
-      <span aria-hidden="true">AI-GENERATED CAMPAIGN IMAGE <i>·</i> {categoryLabels[category]}</span>
     </div>
   );
 }
