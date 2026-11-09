@@ -302,13 +302,13 @@ export default function DraftNightPage() {
 
       <Container maxWidth="xl" className="rcl-draft-content">
         <div className="rcl-draft-stat-strip">
-          <div><span>{draft?.status === 'OPEN' ? 'ON THE CLOCK' : 'FIRST PICK'}</span><strong>#{draft?.current_pick ?? (previewPicks.length ? previewPicks[0].pickNumber : '—')}</strong></div>
+          <div><span>STATUS</span><strong>{draft?.status === 'OPEN' ? 'LIVE' : draft?.status === 'PAUSED' ? 'PAUSED' : draft?.status === 'COMPLETED' ? 'FINAL' : 'PRESEASON'}</strong></div>
           <div><span>ROUNDS</span><strong>{preseasonOrder?.rounds ?? (order.length ? Math.max(...order.map(slot => slot.round_number)) : '—')}</strong></div>
           <div><span>FRANCHISES</span><strong>{new Set(order.map(row=>row.team_id)).size || preseasonOrder?.first_round_team_ids.length || '—'}</strong></div>
           <div><span>OFFICIAL PICKS</span><strong>{picks.length}</strong></div>
         </div>
 
-        {message && <div role="status" className="mt-5 rounded-xl border border-rcl-orange/30 bg-rcl-orange/10 p-4 text-sm text-rcl-orange">{message}</div>}
+        {message && <div role="status" className="rcl-draft-alert">{message}</div>}
 
         {preseasonOrder && (!draft || draft.status === 'SETUP') && (
           <section id="lottery-board" aria-labelledby="preseason-draft-title" className="rcl-lottery-board">
@@ -370,7 +370,7 @@ export default function DraftNightPage() {
               {available.slice(0, 12).map((player) => <button type="button" key={player.id} onClick={() => setSelected(player.id)} aria-pressed={selected === player.id} className={selected === player.id ? 'selected' : ''}>
                 <span className="rcl-prospect-avatar">{player.photo_url ? <img src={player.photo_url} alt="" /> : player.first_name?.[0]}</span><span className="rcl-prospect-name">{playerName(player)}<small>{player.position ?? '—'}</small></span><b className="rcl-prospect-rating">OVR {ratings.get(player.id) ?? '—'}</b>
               </button>)}
-              {available.length > 8 && <p className="p-3 text-[11px] text-white/40">Showing 12 of {available.length}. Use search or position filters to explore the full eligible pool.</p>}
+              {available.length > 12 && <p className="p-3 text-[11px] text-white/40">Showing 12 of {available.length}. Use search or position filters to explore the full eligible pool.</p>}
               {!available.length && <p className="p-5 text-xs text-white/35">No unassigned eligible prospects match your filters.</p>}
             </div>
           </div>
@@ -408,7 +408,7 @@ export default function DraftNightPage() {
           <div className="flex items-end justify-between gap-4"><div><p className="rcl-kicker">Official selections</p><h2 className="rcl-display">Pick tracker</h2></div><span className="text-xs uppercase tracking-widest text-white/35">{picks.length} selected</span></div>
           <div className="rcl-pick-history mt-5">
             {order.map((slot) => { const pick = picks.find((item) => item.pick_number === slot.pick_number); const team = teams.find((item) => item.id === slot.team_id); const player = pick ? players.find((item) => item.id === pick.player_id) : undefined; return <div key={slot.id} className={slot.pick_number === draft?.current_pick ? 'current' : ''}><b>#{slot.pick_number}</b><span className="flex items-center gap-2"><TeamMark team={team} />{team?.name ?? 'TBD'}</span><strong>{player ? playerName(player) : slot.pick_number === draft?.current_pick ? 'ON THE CLOCK' : 'Awaiting selection'}</strong><small>{player?.position ?? '—'} · OVR {player ? ratings.get(player.id) ?? '—' : '—'}</small></div>; })}
-            {!order.length && <p className="p-8 text-center text-sm text-white/35">No official selections yet. The lottery order is not a completed draft.</p>}
+            {!order.length && <p className="rcl-draft-history-empty">No official selections yet. The lottery order above shows franchises, not drafted players.</p>}
           </div>
         </section>
 
