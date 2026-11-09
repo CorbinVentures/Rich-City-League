@@ -1,8 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
+import { LeagueSetupWorkbench } from '@/components/league/LeagueSetupWorkbench';
+import { LeagueOperationsWorkbench } from '@/components/league/LeagueOperationsWorkbench';
 import { FaArrowUpRightFromSquare, FaBasketball, FaCalendarDays, FaRotate, FaUserGroup, FaUsers, FaClipboardList } from 'react-icons/fa6';
 
 type Row = Record<string, any>;
@@ -10,6 +11,7 @@ const dateTime = (value?:string|null) => value ? new Date(value).toLocaleString(
 
 export function CommandLeagueManagement() {
  const db=useMemo(()=>getSupabaseClient() as any,[]);
+ const [workspace,setWorkspace]=useState<'overview'|'setup'|'operations'>('overview');
  const [teams,setTeams]=useState<Row[]>([]);
  const [seasons,setSeasons]=useState<Row[]>([]);
  const [teamSeasons,setTeamSeasons]=useState<Row[]>([]);
@@ -57,12 +59,16 @@ export function CommandLeagueManagement() {
  const activeRegistrations=registrations.filter(r=>!['cancelled','withdrawn','rejected'].includes(String(r.status||'').toLowerCase())).length;
 
  const tools=[
-  {title:'League setup',description:'Build seasons, divisions, and team assignments in RCH.',href:'/admin/league-setup',icon:<FaCalendarDays/>},
-  {title:'League operations',description:'Run tryouts, drafts, requests, discipline, and roster decisions.',href:'/admin/operations',icon:<FaClipboardList/>},
-  {title:'Teams, rosters & game stats',description:'Manage native RCH rosters, game records, score updates, and player stats.',href:'/portal/operations',icon:<FaUsers/>},
+  {title:'League setup',description:'Build seasons, divisions, teams, team assignments, and game schedules in RCH.',panel:'setup' as const,icon:<FaCalendarDays/>},
+  {title:'League operations',description:'Run tryouts, drafts, requests, discipline, and roster decisions.',panel:'operations' as const,icon:<FaClipboardList/>},
+  {title:'Teams, rosters & game stats',description:'Manage native RCH rosters, game records, score updates, and player stats.',panel:'operations' as const,icon:<FaUsers/>},
  ];
 
  return <div className="space-y-6">
+  <div className="flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-black/20 p-2" role="tablist" aria-label="League management workspaces">
+   {[['overview','Overview'],['setup','League setup'],['operations','Game & roster operations']].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={workspace===key} onClick={()=>setWorkspace(key as 'overview'|'setup'|'operations')} className={'rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider transition '+(workspace===key?'bg-blue-500/20 text-blue-100':'text-white/45 hover:bg-white/[.05] hover:text-white')}>{label}</button>)}
+  </div>
+  {workspace==='setup'?<LeagueSetupWorkbench/>:workspace==='operations'?<LeagueOperationsWorkbench/>:<>
   <section className="rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_90%_0%,rgba(59,130,246,.20),transparent_28rem),linear-gradient(145deg,#0d1726,#080c13)] p-5 sm:p-7">
    <div className="flex flex-wrap items-start justify-between gap-5">
     <div className="max-w-3xl">
@@ -87,7 +93,7 @@ export function CommandLeagueManagement() {
   <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
    <div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">NATIVE RCH WORKFLOWS</p><h3 className="mt-2 font-display text-2xl font-black uppercase">League management tools</h3><p className="mt-2 max-w-2xl text-xs leading-5 text-white/45">Open the first-party league workflows. Each tool operates on RCH records and remains protected by the platform’s current role permissions.</p></div>
    <div className="mt-5 grid gap-3 lg:grid-cols-3">
-    {tools.map(tool=><Link key={tool.href} href={tool.href} className="group rounded-xl border border-white/10 bg-black/20 p-4 transition hover:border-blue-300/30 hover:bg-blue-300/[.04]"><div className="flex items-center justify-between text-blue-300"><span>{tool.icon}</span><FaArrowUpRightFromSquare className="text-xs opacity-50 transition group-hover:opacity-100"/></div><h4 className="mt-4 font-display text-lg font-black uppercase">{tool.title}</h4><p className="mt-2 text-xs leading-5 text-white/45">{tool.description}</p><span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-200">Open tool <FaArrowUpRightFromSquare/></span></Link>)}
+    {tools.map(tool=><button key={tool.title} type="button" onClick={()=>setWorkspace(tool.panel)} className="group rounded-xl border border-white/10 bg-black/20 p-4 text-left transition hover:border-blue-300/30 hover:bg-blue-300/[.04]"><div className="flex items-center justify-between text-blue-300"><span>{tool.icon}</span><FaArrowUpRightFromSquare className="text-xs opacity-50 transition group-hover:opacity-100"/></div><h4 className="mt-4 font-display text-lg font-black uppercase">{tool.title}</h4><p className="mt-2 text-xs leading-5 text-white/45">{tool.description}</p><span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-200">Open workspace <FaArrowUpRightFromSquare/></span></button>)}
    </div>
   </section>
 
@@ -109,8 +115,9 @@ export function CommandLeagueManagement() {
   </div>
 
   <section className="rounded-2xl border border-white/10 bg-white/[.025] p-5 sm:p-6">
-   <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">TEAM & ROSTER DESK</p><h3 className="mt-2 font-display text-xl font-black uppercase">RCH teams</h3><p className="mt-2 text-xs text-white/45">Team assignments and active rosters are counted from RCH season records.</p></div><Link href="/admin/league-setup" className="rounded-lg border border-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-white">Manage teams and seasons <FaArrowUpRightFromSquare className="ml-1 inline"/></Link></div>
+   <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-300">TEAM & ROSTER DESK</p><h3 className="mt-2 font-display text-xl font-black uppercase">RCH teams</h3><p className="mt-2 text-xs text-white/45">Team assignments and active rosters are counted from RCH season records.</p></div><button type="button" onClick={()=>setWorkspace('setup')} className="rounded-lg border border-white/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/60 hover:text-white">Manage teams and seasons <FaArrowUpRightFromSquare className="ml-1 inline"/></button></div>
    <div className="mt-4 overflow-x-auto"><table className="min-w-[540px] w-full text-left text-xs"><thead className="text-[9px] font-black uppercase tracking-[.15em] text-white/35"><tr><th className="pb-2">TEAM</th><th className="pb-2">CITY</th><th className="pb-2">SEASONS</th><th className="pb-2">ACTIVE PLAYERS</th></tr></thead><tbody>{teams.map(team=>{const links=teamSeasons.filter(ts=>ts.team_id===team.id);const linkIds=new Set(links.map(ts=>ts.id));const playersInTeam=rosters.filter(r=>linkIds.has(r.team_season_id)).length;return <tr key={team.id} className="border-t border-white/5"><td className="py-3 font-semibold text-white/80">{team.name}</td><td className="py-3 text-white/45">{team.city||'—'}</td><td className="py-3 text-white/45">{teamSeasonCount(team.id)}</td><td className="py-3 text-white/45">{playersInTeam}</td></tr>})}</tbody></table>{!teams.length&&!loading&&<p className="mt-3 text-sm text-white/40">No active RCH teams found.</p>}</div>
   </section>
+  </>}
  </div>;
 }
