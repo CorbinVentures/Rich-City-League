@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RCHPublicRouteGuide } from '@/components/RCHPublicRouteGuide';
+import { RCHHomepageRegistrationModal } from '@/components/RCHHomepageRegistrationModal';
 import { LeagueSectionNav } from '@/components/LeagueSectionNav';
 import { useAuth } from '@/hooks/useAuth';
 import { trackRchConversion } from '@/lib/analytics/conversion';
@@ -193,6 +194,7 @@ export function RCHPublicWebShell({ children }: { children: ReactNode }) {
     </div>}
     {user && pathname === '/' && <div className="rch-browser-signed-in" role="status"><span><strong>WELCOME BACK.</strong> You are signed in to Rich City Hoops.</span><Link href="/profile">My Profile <FaArrowRight aria-hidden="true"/></Link></div>}
     {signOutError && <p role="alert" className="rch-browser-auth-error">{signOutError}</p>}
+    {pathname === '/' && <RCHHomepageRegistrationModal authenticated={Boolean(user)} loading={authLoading} />}
     <nav className="rch-mockup-mobile-nav" aria-label="RCH mobile navigation">
       {[
         { label: 'Home', href: '/', icon: FaHouse, selected: pathname === '/' || pathname === '/social' },
