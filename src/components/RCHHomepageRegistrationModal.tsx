@@ -146,7 +146,7 @@ export function RCHHomepageRegistrationModal({
               ref={signupRef}
               href="/auth/sign-up"
               onClick={() => {
-                trackRchConversion('join_click', 'home_registration_popup');
+                trackRchConversion('join_click', 'home_hero');
                 dismiss();
               }}
               className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black uppercase tracking-wide text-[#0b0d11] transition hover:bg-[#dfe3e8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
