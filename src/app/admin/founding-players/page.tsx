@@ -24,7 +24,7 @@ export default async function FoundingPlayerCommandPage() {
   if (staff?.role !== 'admin') return <main className="mx-auto max-w-4xl p-8"><h1>Restricted staff workspace</h1><p>Only authorized administrators may view this dashboard.</p></main>;
 
   const [profilesResult, checkinsResult, highlightsResult, tryoutsResult] = await Promise.all([
-    supabase.from('profiles').select('id, username, display_name, first_name, last_name, location, position, onboarding_complete, is_active, created_at').order('created_at', { ascending: false }).limit(500),
+    supabase.from('profiles').select('id, username, display_name, first_name, last_name, location, position, onboarding_complete, is_active, created_at').eq('is_system_account', false).order('created_at', { ascending: false }).limit(500),
     supabase.from('run_checkins').select('profile_id, run_id').limit(5000),
     supabase.from('player_highlights').select('id, uploaded_by, status').limit(5000),
     supabase.from('tryout_registrations').select('id').limit(5000),
@@ -43,7 +43,7 @@ export default async function FoundingPlayerCommandPage() {
     ['Active accounts', profiles.filter(p => p.is_active).length],
     ['Verified Runs participants', runParticipants.size],
     ['Submitted highlights', highlights.length],
-    ['Highlight contributors', highlightCreators.size],
+    ['Highlight uploaders', highlightCreators.size],
     ['Tryout registrations', tryouts.length],
   ];
 
