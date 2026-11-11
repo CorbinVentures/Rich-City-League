@@ -3142,6 +3142,122 @@ export type Database = {
           },
         ]
       }
+      player_highlights: {
+        Row: {
+          category: string
+          clip_url: string | null
+          created_at: string
+          featured: boolean
+          game_id: string | null
+          id: string
+          media_id: string | null
+          player_id: string
+          status: string
+          thumbnail_url: string | null
+          title: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category?: string
+          clip_url?: string | null
+          created_at?: string
+          featured?: boolean
+          game_id?: string | null
+          id?: string
+          media_id?: string | null
+          player_id: string
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          clip_url?: string | null
+          created_at?: string
+          featured?: boolean
+          game_id?: string | null
+          id?: string
+          media_id?: string | null
+          player_id?: string
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_highlights_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_live_state"
+            referencedColumns: ["game_id"]
+          },
+          {
+            foreignKeyName: "player_highlights_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_highlights_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_highlights_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_card_live"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "player_highlights_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_passports"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "player_highlights_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_highlights_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "teammate_history"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "player_highlights_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "teammate_history"
+            referencedColumns: ["teammate_player_id"]
+          },
+          {
+            foreignKeyName: "player_highlights_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_highlights_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "rep_dimension_summary"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       player_badges: {
         Row: {
           badge_id: string
@@ -3876,6 +3992,8 @@ export type Database = {
           friend_request_policy: string
           id: string
           is_active: boolean
+          is_system_account: boolean
+          onboarding_complete: boolean
           is_vip: boolean
           jersey_number: string | null
           last_name: string | null
@@ -3899,6 +4017,8 @@ export type Database = {
           friend_request_policy?: string
           id: string
           is_active?: boolean
+          is_system_account?: boolean
+          onboarding_complete?: boolean
           is_vip?: boolean
           jersey_number?: string | null
           last_name?: string | null
@@ -3922,6 +4042,8 @@ export type Database = {
           friend_request_policy?: string
           id?: string
           is_active?: boolean
+          is_system_account?: boolean
+          onboarding_complete?: boolean
           is_vip?: boolean
           jersey_number?: string | null
           last_name?: string | null
@@ -4330,6 +4452,52 @@ export type Database = {
             columns: ["team_season_id"]
             isOneToOne: false
             referencedRelation: "team_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      run_checkins: {
+        Row: {
+          checked_in_at: string
+          created_at: string
+          id: string
+          profile_id: string
+          run_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          run_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "run_checkins_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "run_checkins_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "rep_dimension_summary"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "run_checkins_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "runs"
             referencedColumns: ["id"]
           },
         ]
