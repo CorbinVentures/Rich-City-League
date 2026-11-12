@@ -1,6 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Division, Game, League, PlayerGameStats, PublicPlayer, PublicPlayerIQ, Roster, Season, Standing, Team, TeamCoach, TeamGameStats, TeamSeason, Venue } from '@/types/database';
 import { getSupabaseConfig } from '@/lib/supabase-config';
+import { founderInterview } from '@/lib/featured-news';
+import type { FeatureInterview } from '@/lib/featured-news';
 
 type PublicClient = SupabaseClient<Database>;
 type QueryResult<T> = { data: T; error: { message: string } | null };
@@ -69,6 +71,7 @@ export type PublicNews = Database['public']['Tables']['news']['Row'] & {
   seo_keywords?: string[] | null;
   generated_by_model?: string | null;
   editorial_confidence?: number | string | null;
+  feature_interview?: FeatureInterview;
 };
 
 export function getPublicClient(): PublicClient | null {
@@ -83,21 +86,27 @@ export function getPublicClient(): PublicClient | null {
 }
 
 export async function getPublishedNews(limit = 100): Promise<PublicNews[]> {
+  const safeLimit = Math.max(1, Math.min(500, limit));
   const client = getPublicClient() as any;
-  if (!client) return [];
+  if (!client) return [founderInterview].slice(0, safeLimit);
   const { data, error } = await client.from('news')
     .select('*')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(Math.max(1, Math.min(500, limit)));
+    .limit(safeLimit);
   if (error) {
     console.error('Published news query failed', error);
-    return [];
+    return [founderInterview].slice(0, safeLimit);
   }
-  return (data ?? []) as PublicNews[];
+
+  const stories = ((data ?? []) as PublicNews[]).filter((item) => item.slug !== founderInterview.slug);
+  return [...stories, founderInterview]
+    .sort((a, b) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime())
+    .slice(0, safeLimit);
 }
 
 export async function getNewsBySlug(slug: string): Promise<PublicNews | null> {
+  if (slug === founderInterview.slug) return founderInterview;
   const client = getPublicClient() as any;
   if (!client || !slug) return null;
   const { data, error } = await client.from('news')
@@ -113,7 +122,7 @@ export async function getNewsBySlug(slug: string): Promise<PublicNews | null> {
 }
 
 export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
-  const empty: LeagueSnapshot = { leagues: [], seasons: [], divisions: [], teams: [], teamSeasons: [], games: [], standings: [], news: [], venues: [] };
+  const empty: LeagueSnapshot = { leagues: [], seasons: [], divisions: [], teams: [], teamSeasons: [], games: [], standings: [], news: [founderInterview] as LeagueSnapshot['news'], venues: [] };
   const client = getPublicClient();
   if (!client) return empty;
 
@@ -141,7 +150,9 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
     teamSeasons: teamSeasons.data ?? [],
     games: (games.data ?? []).map(normalizeGame),
     standings: standings.data ?? [],
-    news: news.data ?? [],
+    news: [...(news.data ?? []).filter((item) => item.slug !== founderInterview.slug), founderInterview]
+      .sort((a, b) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime())
+      .slice(0, 6) as LeagueSnapshot['news'],
     venues: venues.data ?? [],
   };
 }
