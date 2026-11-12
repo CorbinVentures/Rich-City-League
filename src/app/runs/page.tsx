@@ -19,6 +19,7 @@ import { rankSoloRuns, isSoloJoinable, runShareText } from '@/lib/runs-social-di
 import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
+import {SybRunsPartnerSpotlight} from '@/components/runs/SybRunsPartnerSpotlight';
 import './runs-arena.css';
 import './visual-experience.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -462,6 +463,7 @@ export default function RunsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--rch-brand-accent)] px-4 py-3 text-sm font-black text-white"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
             <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
+            <Link href="/runs/partners/syb-hoop-richmond" aria-label="Open the official SYB 1v1 partner page" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#7b2730] bg-[#160b0e] px-4 py-3 text-sm font-black text-white hover:border-[#f51f31]"><span className="font-black italic text-[#ff3446]">SYB</span> 1v1 Circuit <FaArrowRight aria-hidden="true"/></Link>
           </div>
         </section>}
         
