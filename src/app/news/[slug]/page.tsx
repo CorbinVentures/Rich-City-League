@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Container } from '@/components/Container';
 import { NetworkSponsoredPlacement } from '@/components/network/NetworkSponsoredPlacement';
-import { getNewsBySlug } from '@/lib/public-data';
+import { getNewsBySlug, type PublicNews } from '@/lib/public-data';
 import { formatDate } from '@/utils/helpers';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -21,6 +21,118 @@ function categoryLabel(value?: string | null) {
 
 function stringArray(value: unknown) {
   return Array.isArray(value) ? value.map(item => String(item)).filter(Boolean) : [];
+}
+
+function FeatureInterviewQuestionList({
+  questions,
+  startAt = 0,
+}: {
+  questions: NonNullable<PublicNews['feature_interview']>['questions'];
+  startAt?: number;
+}) {
+  return <div className="divide-y divide-white/10 border-y border-white/10">
+    {questions.map((item, index) => <section key={item.question} className="grid gap-4 py-7 sm:grid-cols-[3rem_1fr] sm:gap-6">
+      <p className="font-display text-2xl font-black text-rcl-orange">{String(startAt + index + 1).padStart(2, '0')}</p>
+      <div>
+        <h3 className="font-display text-xl font-black leading-tight text-white sm:text-2xl">{item.question}</h3>
+        <p className="mt-4 text-base leading-7 text-white/65 sm:text-[17px] sm:leading-8">{item.answer}</p>
+      </div>
+    </section>)}
+  </div>;
+}
+
+function FeatureInterviewArticle({
+  item,
+  section,
+  coverImageUrl,
+}: {
+  item: PublicNews;
+  section: string;
+  coverImageUrl: string;
+}) {
+  const feature = item.feature_interview;
+  if (!feature) return null;
+  const paragraphs = item.body.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean);
+  const firstHalf = feature.questions.slice(0, 5);
+  const secondHalf = feature.questions.slice(5);
+  const communityPhoto = feature.photos[0];
+  const eventPhoto = feature.photos[1];
+
+  return <article className="mx-auto w-full max-w-6xl">
+    <header className="mx-auto max-w-5xl text-center">
+      <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[.18em]">
+        <span className="text-rcl-orange">{section}</span><span className="text-white/20">•</span>
+        <span className="text-white/40">{item.published_at ? formatDate(item.published_at) : 'RCH Newsroom'}</span>
+        <span className="text-white/20">•</span><span className="text-white/40">A Rich City Hoops founder interview</span>
+      </div>
+      <p className="mt-7 text-xs font-black uppercase tracking-[.24em] text-rcl-blue">{feature.kicker}</p>
+      <h1 className="mx-auto mt-5 max-w-5xl font-display text-4xl font-black leading-[.98] sm:text-6xl lg:text-7xl">{item.title}</h1>
+      {item.excerpt && <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/55 sm:text-xl">{item.excerpt}</p>}
+      <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-[10px] font-black uppercase tracking-[.16em] text-white/35">
+        <span>Virginia-wide</span><span>Free to join</span><span>Built for the basketball community</span>
+      </div>
+    </header>
+
+    <div className="mt-10 grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-12">
+      <figure className="relative mx-auto aspect-square w-full max-w-[620px] overflow-hidden rounded-3xl border border-white/10 bg-[#08090c] shadow-2xl">
+        <Image src={coverImageUrl} alt="Founder portrait of De’Vaughn Corbin in Rich City League campaign artwork." fill priority sizes="(max-width: 1024px) 100vw, 620px" className="object-contain" />
+      </figure>
+      <div className="mx-auto max-w-xl">
+        <p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-orange">The vision</p>
+        <div className="mt-5 space-y-5 text-base leading-7 text-white/70 sm:text-[17px] sm:leading-8">
+          {paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+        </div>
+        <div className="mt-7 flex flex-wrap gap-2">
+          {['Find a Run', 'Track your games', 'Build your community'].map((label) => <span key={label} className="rounded-full border border-white/10 bg-white/[.03] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/55">{label}</span>)}
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-14 grid items-center gap-8 lg:grid-cols-[.8fr_1.2fr] lg:gap-12">
+      <blockquote className="rounded-3xl border border-rcl-orange/25 bg-gradient-to-br from-rcl-orange/[.12] to-white/[.02] p-7 sm:p-10">
+        <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The reason behind the work</p>
+        <p className="mt-5 font-display text-3xl font-black leading-tight text-white sm:text-4xl">{feature.pullQuote}</p>
+        <footer className="mt-6 text-xs font-black uppercase tracking-[.18em] text-white/40">De’Vaughn Corbin · Founder, Rich City Hoops</footer>
+      </blockquote>
+      {communityPhoto && <figure className="mx-auto w-full max-w-[460px]">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-white/10 bg-white/[.03]">
+          <Image src={communityPhoto.src} alt={communityPhoto.alt} fill sizes="(max-width: 1024px) 100vw, 460px" className="object-cover" />
+        </div>
+        <figcaption className="mt-3 text-xs leading-5 text-white/40">{communityPhoto.caption}</figcaption>
+      </figure>}
+    </div>
+
+    <section className="mx-auto mt-16 max-w-4xl">
+      <div className="mb-7"><p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-blue">The conversation</p><h2 className="mt-2 font-display text-3xl font-black sm:text-4xl">A platform built from the ground up</h2></div>
+      <FeatureInterviewQuestionList questions={firstHalf} />
+    </section>
+
+    {eventPhoto && <section className="mt-16 grid items-center gap-8 rounded-3xl border border-white/10 bg-white/[.025] p-5 sm:p-8 lg:grid-cols-[.85fr_1.15fr] lg:gap-12">
+      <figure className="mx-auto w-full max-w-[390px]">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+          <Image src={eventPhoto.src} alt={eventPhoto.alt} fill sizes="(max-width: 1024px) 100vw, 390px" className="object-cover" />
+        </div>
+        <figcaption className="mt-3 text-xs leading-5 text-white/40">{eventPhoto.caption}</figcaption>
+      </figure>
+      <div className="max-w-xl"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">The statewide play</p><h2 className="mt-3 font-display text-3xl font-black leading-tight sm:text-4xl">One home court can connect you to the whole state.</h2><p className="mt-5 text-base leading-7 text-white/60 sm:text-lg sm:leading-8">Start at the park or local gym where you already hoop. From there, follow players in other cities, meet new groups through organized Runs, and give your usual crew a place to build its identity through Runs Crews and territory challenges.</p></div>
+    </section>}
+
+    <section className="mx-auto mt-16 max-w-4xl">
+      <div className="mb-7"><p className="text-[10px] font-black uppercase tracking-[.22em] text-rcl-blue">Open to every level</p><h2 className="mt-2 font-display text-3xl font-black sm:text-4xl">What players and organizers should know</h2></div>
+      <FeatureInterviewQuestionList questions={secondHalf} startAt={firstHalf.length} />
+    </section>
+
+    <aside className="mt-16 overflow-hidden rounded-3xl border border-rcl-blue/20 bg-gradient-to-br from-[#102336] via-[#090c11] to-[#15100b] p-7 sm:p-10">
+      <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue">Your next move</p>
+      <div className="mt-3 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div><h2 className="font-display text-3xl font-black sm:text-4xl">Bring your people to the court.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55 sm:text-base">Create a free profile, find or host a Run, and invite the friends you already play with. Organizations can register to explore the website builder, scorebook and promotion resources.</p></div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/runs" className="rounded-xl bg-rcl-blue px-5 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:brightness-110">Explore Runs <span aria-hidden="true">→</span></Link>
+          <Link href="/register" className="rounded-xl border border-white/20 bg-white/[.04] px-5 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:border-white/40">Create a profile</Link>
+        </div>
+      </div>
+    </aside>
+  </article>;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -46,7 +158,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       publishedTime:item.published_at || undefined,
       section:categoryLabel(item.category),
-      images:[{url:socialCover,width:1200,height:630,alt:`Editorial cover: ${item.title}`}],
+      images:[{url:socialCover,width:item.feature_interview ? 1254 : 1200,height:item.feature_interview ? 1254 : 630,alt:item.feature_interview ? 'Founder portrait of De’Vaughn Corbin in Rich City League campaign artwork.' : `Editorial cover: ${item.title}`}],
     },
     twitter: {
       card:'summary_large_image',
@@ -93,7 +205,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     '@type':'NewsArticle',
     headline:item.title,
     description:item.seo_description || item.excerpt || undefined,
-    image:[new URL(coverImageUrl, 'https://www.richcityhoops.com').toString()],
+    image:[coverImageUrl,...(item.feature_interview?.photos.map(photo => photo.src) ?? [])].map((url) => new URL(url, 'https://www.richcityhoops.com').toString()),
     datePublished:item.published_at || undefined,
     dateModified:item.updated_at || item.published_at || undefined,
     articleSection:section,
@@ -114,7 +226,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   return <main className="min-h-screen bg-rcl-black text-white">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify([articleSchema,breadcrumbSchema])}} />
-    <Container maxWidth="lg" className="py-14 sm:py-16">
+    {item.feature_interview ? (
+      <Container maxWidth="xl" className="py-14 sm:py-16">
+        <FeatureInterviewArticle item={item} section={section} coverImageUrl={coverImageUrl} />
+      </Container>
+    ) : (
+      <Container maxWidth="lg" className="py-14 sm:py-16">
       <div className="max-w-3xl">
         <div className="flex flex-wrap items-center gap-3 text-xs font-black uppercase tracking-[.16em]">
           <span className="text-rcl-orange">{section}</span>
@@ -160,6 +277,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         <p className="text-xs font-black uppercase tracking-[.22em] text-rcl-gold">Keep exploring the 804</p>
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold">{related.map(([href,label])=><Link href={href} key={href}>{label} →</Link>)}</div>
       </aside>
-    </Container>
+      </Container>
+    )}
   </main>;
 }
