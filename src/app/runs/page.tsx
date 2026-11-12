@@ -463,10 +463,11 @@ export default function RunsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--rch-brand-accent)] px-4 py-3 text-sm font-black text-white"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
             <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
-            <Link href="/runs/partners/syb-hoop-richmond" aria-label="Open the official SYB 1v1 partner page" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#7b2730] bg-[#160b0e] px-4 py-3 text-sm font-black text-white hover:border-[#f51f31]"><span className="font-black italic text-[#ff3446]">SYB</span> 1v1 Circuit <FaArrowRight aria-hidden="true"/></Link>
+
           </div>
         </section>}
         
+        {view==='runs'&&<SybRunsPartnerSpotlight/>}
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
           <Link href="/runs?view=world&mode=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
