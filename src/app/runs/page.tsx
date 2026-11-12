@@ -19,6 +19,7 @@ import { rankSoloRuns, isSoloJoinable, runShareText } from '@/lib/runs-social-di
 import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
+import {SybRunsPartnerSpotlight} from '@/components/runs/SybRunsPartnerSpotlight';
 import './runs-arena.css';
 import './visual-experience.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -462,9 +463,11 @@ export default function RunsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--rch-brand-accent)] px-4 py-3 text-sm font-black text-white"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
             <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
+
           </div>
         </section>}
         
+        {view==='runs'&&<SybRunsPartnerSpotlight/>}
         <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
           <Link href="/runs?view=world&mode=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
           <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>

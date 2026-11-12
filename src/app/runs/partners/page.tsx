@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {FaArrowRight,FaBasketball,FaBuilding,FaCircleCheck,FaCrown,FaLocationDot,FaShieldHalved,FaUsers} from 'react-icons/fa6';
+import {FaArrowRight,FaBasketball,FaBuilding,FaCircleCheck,FaLocationDot,FaShieldHalved,FaUsers} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
+import {SybBrandMark} from '@/components/runs/SybBrandMark';
+import {SybRunsPartnerSpotlight} from '@/components/runs/SybRunsPartnerSpotlight';
 
 type Partner={id:string;slug:string;name:string;city:string;description:string;instagram_url:string|null;logo_url:string|null;brand_color:string;owner_id:string;status:string;reward_multiplier:number};
 const empty={name:'',city:'',description:'',instagram:'',logo:''};
@@ -55,6 +57,10 @@ export default function RunsPartnersPage(){
   setBusy(false);
  }
  const myHqs=[...mine,...managed.filter(p=>!mine.some(m=>m.id===p.id))];
+ const displayedPartners=[...partners].sort((a,b)=>{
+  const sybPriority=Number(b.slug==='syb-hoop-richmond')-Number(a.slug==='syb-hoop-richmond');
+  return sybPriority||a.city.localeCompare(b.city)||a.name.localeCompare(b.name);
+ });
  return <main className="min-h-screen bg-[#061320] px-4 pb-28 pt-8 text-white sm:px-8">
   <div className="mx-auto max-w-6xl">
    <Link href="/runs" className="text-xs font-bold text-[#91cfff]">← Back to Runs</Link>
@@ -68,6 +74,7 @@ export default function RunsPartnersPage(){
      {reviewAccess&&<Link href="/runs/partners/review" className="inline-flex min-h-11 items-center rounded-xl border border-[#6490b2] px-5 text-sm font-bold text-[#c2e6ff]">Operations approvals →</Link>}
     </div>
    </div>
+   {partners.some(p=>p.slug==='syb-hoop-richmond'&&p.status==='approved')&&<SybRunsPartnerSpotlight/>}
    {error&&<p role="alert" className="mt-4 rounded-xl border border-red-400/40 p-3 text-sm text-red-200">{error}</p>}
    {message&&<p role="status" className="mt-4 rounded-xl border border-emerald-500/40 p-3 text-sm text-emerald-200">{message}</p>}
    {open&&<form onSubmit={e=>void apply(e)} className="mt-5 grid gap-4 rounded-2xl border border-[#3a6c92] bg-[#0c2741] p-5 sm:grid-cols-2">
@@ -91,9 +98,9 @@ export default function RunsPartnersPage(){
    <section className="mt-10">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[11px] font-black uppercase tracking-[.2em] text-[#78bff5]">Discover organizers</p><h2 className="mt-1 text-2xl font-black uppercase">Approved Runs partners</h2></div><span className="rounded-full border border-[#356285] px-4 py-2 text-xs text-[#bfdbef]">{partners.length} live HQs</span></div>
     {loading?<p className="mt-6 text-sm text-[#b8d1e7]">Loading partner network…</p>:!partners.length?<div className="mt-5 rounded-2xl border border-dashed border-[#3a6081] bg-[#0b2236] p-8 text-center"><FaUsers className="mx-auto text-3xl text-[#69b9f5]"/><h3 className="mt-3 text-xl font-black">The partner network is opening</h3><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#aac6dc]">Verified community organizers will appear here after RCH approves their partnership. No organizations are being represented as confirmed partners before that review.</p></div>:
-     <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{partners.map(p=><Link href={'/runs/partners/'+p.slug} key={p.id} className={'group overflow-hidden rounded-2xl border '+(p.slug==='syb-hoop-richmond'?'border-[#651923] bg-[#100d0e] hover:border-[#f51f31]':'border-[#2e5776] bg-[#0c263f] hover:border-[#6eb7e9]')}>
-      <div style={{background:'linear-gradient(130deg,'+p.brand_color+'35,#081e32)'}} className="flex h-28 items-center justify-center border-b border-[#2e5776]">{p.logo_url?<img src={p.logo_url} alt={p.name+' logo'} loading="lazy" referrerPolicy="no-referrer" className="h-20 w-20 rounded-xl object-contain"/>:p.slug==='syb-hoop-richmond'?<div className="flex flex-col items-center text-[#ff3446]"><FaCrown className="text-base"/><span className="text-3xl font-black italic tracking-[-.08em]">SYB</span><small className="text-[7px] font-black uppercase tracking-[.15em] text-white">Support Your Brothers</small></div>:<FaBasketball className="text-5xl text-white/70"/>}</div>
-      <div className="p-5"><p className="flex items-center gap-1 text-[11px] font-black uppercase text-[#7ce7c1]"><FaShieldHalved/> RCH verified organization</p><h3 className="mt-2 text-xl font-black">{p.name}</h3><p className="mt-2 flex items-center gap-1 text-xs text-[#abd2e9]"><FaLocationDot/>{p.city}, Virginia</p>{p.reward_multiplier===2&&<span className="mt-3 inline-flex rounded-full border border-[#edca71]/50 bg-[#392d13] px-3 py-1 text-[10px] font-black uppercase text-[#ffe5a2]">2× event XP / REP</span>}<p className="mt-3 line-clamp-2 text-sm leading-6 text-[#b4cada]">{p.description||'Basketball runs and organized competitive sessions.'}</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-black text-[#8fcfff]">Explore events <FaArrowRight/></span></div>
+     <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{displayedPartners.map(p=><Link href={'/runs/partners/'+p.slug} key={p.id} className={'group overflow-hidden rounded-2xl border '+(p.slug==='syb-hoop-richmond'?'border-[#651923] bg-[#100d0e] hover:border-[#f51f31]':'border-[#2e5776] bg-[#0c263f] hover:border-[#6eb7e9]')}>
+      <div style={{background:'linear-gradient(130deg,'+p.brand_color+'35,#081e32)'}} className="flex h-28 items-center justify-center border-b border-[#2e5776]">{p.logo_url?<img src={p.logo_url} alt={p.name+' logo'} loading="lazy" referrerPolicy="no-referrer" className="h-20 w-20 rounded-xl object-contain"/>:p.slug==='syb-hoop-richmond'?<SybBrandMark className="h-20 w-20 rounded-xl"/>:<FaBasketball className="text-5xl text-white/70"/>}</div>
+      <div className="p-5"><p className="flex items-center gap-1 text-[11px] font-black uppercase text-[#7ce7c1]"><FaShieldHalved/> {p.slug==='syb-hoop-richmond'?'Official RCH Runs 1v1 partner':'RCH verified organization'}</p><h3 className="mt-2 text-xl font-black">{p.name}</h3><p className="mt-2 flex items-center gap-1 text-xs text-[#abd2e9]"><FaLocationDot/>{p.city}, Virginia</p>{p.reward_multiplier===2&&<span className="mt-3 inline-flex rounded-full border border-[#edca71]/50 bg-[#392d13] px-3 py-1 text-[10px] font-black uppercase text-[#ffe5a2]">2× event XP / REP</span>}<p className="mt-3 line-clamp-2 text-sm leading-6 text-[#b4cada]">{p.description||'Basketball runs and organized competitive sessions.'}</p><span className="mt-4 inline-flex items-center gap-1 text-sm font-black text-[#8fcfff]">Explore events <FaArrowRight/></span></div>
      </Link>)}</div>}
    </section>
    <div className="mt-9 rounded-2xl border border-[#345c7c] bg-[#092039] p-5 text-xs leading-6 text-[#b9cfe1]"><FaCircleCheck className="mr-2 inline text-[#68d6a7]"/>One player account connects to RCH verified match history, courts, crew standings, REP and mastery badges. Partner-session fees are organizer-set and paid outside RCH; no payments are processed through this dashboard.</div>
