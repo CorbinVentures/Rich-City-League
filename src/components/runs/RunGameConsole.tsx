@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { FaArrowRotateLeft, FaBasketball, FaBolt, FaCheck, FaCirclePlay, FaShieldHalved, FaTrophy } from 'react-icons/fa6';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,8 +29,8 @@ const statLong: Record<string,string> = {
   defensive_stop: 'Defensive stop', three_attempted: 'Missed three',
 };
 
-export function RunGameConsole({ runId, canOperate: canManage, format, teams, members, profiles }: {
-  runId: string; canOperate: boolean; format:string; teams: Team[]; members: Member[]; profiles: Person[];
+export function RunGameConsole({ runId, canOperate: canManage, format, teams, members, profiles, partnerName, brandColor }: {
+  runId: string; canOperate: boolean; format:string; teams: Team[]; members: Member[]; profiles: Person[]; partnerName?:string|null; brandColor?:string|null;
 }) {
   const {user} = useAuth();
   const db = useMemo(() => getSupabaseClient(true) as any, []);
@@ -49,6 +50,7 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
   const [error,setError]=useState('');
   const [operatorCanScore,setOperatorCanScore]=useState(false);
   const canOperate=canManage||operatorCanScore;
+  const consoleStyle={'--score-accent':brandColor||'#46b1ff'} as CSSProperties;
 
   const load=useCallback(async()=>{
     if(!db){setLoading(false);return;}
@@ -98,6 +100,8 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
   const name=(id:string)=>profiles.find(p=>p.id===id)?.display_name||profiles.find(p=>p.id===id)?.username||'RCH Player';
   const teamName=(id:string)=>teams.find(t=>t.id===id)?.name||'Team';
   const roster=(teamId:string)=>members.filter(m=>m.run_team_id===teamId).map(m=>m.profile_id);
+  const isOneOnOne=format==='1v1';
+  const scoringPlayer=isOneOnOne?(roster(activeTeam)[0]||''):activePlayer;
   useEffect(()=>{
     if(!liveId)return;
     if(activeTeam!==liveHomeTeamId&&activeTeam!==liveAwayTeamId){setActiveTeam(liveHomeTeamId);setActivePlayer(members.find(m=>m.run_team_id===liveHomeTeamId)?.profile_id||'');}
@@ -123,14 +127,15 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
   async function startGame(){
     if(!db){setError('Game mode is unavailable right now.');return;}
     if(!home||!away||home===away){setError('Choose two different teams.');return;}
+    if(isOneOnOne&&(roster(home).length!==1||roster(away).length!==1)){setError('A 1v1 board needs exactly one registered player assigned to each side.');return;}
     setBusy(true);setError('');setNotice('');
     const {data,error:failure}=await db.rpc('rch_start_run_game',{p_run:runId,p_home_team:home,p_away_team:away,p_target_score:target,p_scoring_profile:scoringProfile});
     if(failure)setError(failure.message);else{setSelectedGame(data);setActiveTeam(home);setActivePlayer(roster(home)[0]||'');setNotice('Game is live. Score updates are shared with everyone in the Run.');await load();}
     setBusy(false);
   }
   async function recordScore(teamId:string,points:number){
-    if(!game||!activePlayer||!activePlayers.includes(activePlayer)){setError('Select a rostered player for this team before recording the basket.');return;}
-    await action({p_game:game.id,p_action:'score',p_team:teamId,p_player:activePlayer,p_score:points});
+    if(!game||!scoringPlayer||!roster(activeTeam).includes(scoringPlayer)){setError('Select the correct side and confirm its player before recording the basket.');return;}
+    await action({p_game:game.id,p_action:'score',p_team:teamId,p_player:scoringPlayer,p_score:points});
   }
   async function action(args:Record<string,unknown>){
     if(!db){setError('Game mode is unavailable right now.');return;}
@@ -152,18 +157,19 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
   const sides=game?[{id:game.home_run_team_id,score:game.home_score},{id:game.away_run_team_id,score:game.away_score}]:[];
   const eventsByTeam=(teamId:string)=>actions.filter(a=>a.team_id===teamId&&a.action_type!=='undo');
   const recap=game?.status==='completed';
+  const targetReached=Boolean(live&&Math.max(live.home_score,live.away_score)>=live.target_score);
 
-  return <section id="rch-live-game" className="rch-live-game" aria-label="Runs live game mode">
+  return <section id="rch-live-game" style={consoleStyle} className={'rch-live-game'+(isOneOnOne?' rch-live-game-1v1':'')} aria-label={isOneOnOne?(partnerName||'RCH')+' 1v1 quick scorekeeper':'Runs live game mode'}>
     <div className="rch-live-game-heading">
-      <div><p>RCH RUNS · COURTSIDE</p><h2>{live?'LIVE GAME MODE':recap?'FINAL GAME REPORT':'START A GAME'}</h2></div>
-      <span className={'rch-live-game-pill '+(live?'is-live':'')}><i aria-hidden="true"/>{live?'LIVE SCORE':'REAL COURT · VERIFIED RESULTS'}</span>
+      <div><p>{isOneOnOne?(partnerName||'RCH RUNS').toUpperCase()+' · 1V1 COURTSIDE SCOREKEEPER':'RCH RUNS · COURTSIDE'}</p><h2>{live?(isOneOnOne?'LIVE 1V1 SCOREBOARD':'LIVE GAME MODE'):recap?'FINAL GAME REPORT':'START A GAME'}</h2></div>
+      <span className={'rch-live-game-pill '+(live?'is-live':'')}><i aria-hidden="true"/>{live?'LIVE SCORE':isOneOnOne?'FAST SCORE · FIRST TO 11':'REAL COURT · VERIFIED RESULTS'}</span>
     </div>
     {error&&<p className="rch-live-game-message is-error" role="alert">{error}</p>}
     {notice&&<p className="rch-live-game-message" role="status">{notice}</p>}
     {loading?<p className="rch-live-game-empty" role="status">Opening the scoreboard…</p>:!game&&!canOperate?
       <p className="rch-live-game-empty">The host has not started a game yet. When play begins, the live score and Run report will appear here.</p>:
       !game?<div className="rch-live-game-setup">
-        <p>Pick the sides and house rules, then start the live board. The game takes place at the real court.</p>
+        <p>{isOneOnOne?'Assign exactly one player to each side. Start the clock-free board, tap the basket value, and use Undo if a score needs correcting.':'Pick the sides and house rules, then start the live board. The game takes place at the real court.'}</p>
         {canOperate&&!canManage&&<p className="rch-live-game-message" role="status">You’re assigned as scorekeeper. The host must start the game; the live board will open here automatically.</p>}
         <div className="rch-live-game-setup-grid">
           <label>HOME TEAM<select value={home} onChange={e=>setHome(e.target.value)}><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} · {roster(t.id).length} players</option>)}</select></label>
@@ -172,27 +178,28 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
           <label>SCORING<select value={scoringProfile} onChange={e=>setScoringProfile(e.target.value as typeof scoringProfile)}><option value="one_two_three">1s · 2s · 3s</option><option value="two_three">2s · 3s</option></select></label>
         </div>
         {home&&away&&(!roster(home).length||!roster(away).length)&&<p className="mt-3 text-xs font-semibold text-amber-200">Assign at least one registered player to each team before starting.</p>}
-        <button type="button" disabled={busy||!canOperate||!canManage||!home||!away||home===away||!roster(home).length||!roster(away).length} onClick={()=>void startGame()}><FaCirclePlay/> START LIVE GAME</button>
+        <button type="button" disabled={busy||!canOperate||!canManage||!home||!away||home===away||!roster(home).length||!roster(away).length||(isOneOnOne&&(roster(home).length!==1||roster(away).length!==1))} onClick={()=>void startGame()}><FaCirclePlay/> {isOneOnOne?'START 1V1 SCOREBOARD':'START LIVE GAME'}</button>
       </div>:
       <>
-        <div className="rch-live-scoreboard" aria-label="Live basketball score" aria-live="polite">
+        <div className={'rch-live-scoreboard'+(isOneOnOne?' is-1v1':'')} aria-label="Live basketball score" aria-live="polite">
           {sides.map((side,index)=><div key={side.id} className={'rch-live-side '+(index===0?'is-home':'is-away')}>
             <span>{index===0?'HOME':'AWAY'}</span><strong>{teamName(side.id)}</strong><b>{side.score}</b>
             <small>{game.status==='live'&&side.score>=game.target_score?'GAME POINT':game.status==='completed'?'FINAL':game.target_score+' POINT TARGET'}</small>
           </div>)}
           <div className="rch-live-score-divider">{game.status==='live'?<FaBolt/>:<FaTrophy/>}</div>
         </div>
-        {live&&canOperate&&<div className="rch-live-controls">
+        {targetReached&&<p className="rch-live-target-hit" role="status"><FaTrophy/> TARGET REACHED · scoring is paused. Confirm the final, then save it for official review.</p>}
+        {live&&canOperate&&<div className={'rch-live-controls'+(isOneOnOne?' is-1v1':'')}>
           {operatorCanScore&&!canManage&&<p className="rch-live-game-message" role="status">You’re the assigned scorekeeper. Log each play here; the host handles game setup.</p>}
-          <div className="rch-live-control-head"><div><span>COURTSIDE CONTROL</span><h3>Log the next play</h3></div><label>TEAM<select value={activeTeam} onChange={e=>{setActiveTeam(e.target.value);setActivePlayer(roster(e.target.value)[0]||'');}}>{sides.map(side=><option key={side.id} value={side.id}>{teamName(side.id)}</option>)}</select></label></div>
-          <label className="rch-live-player-select">WHO MADE THE PLAY?<select value={activePlayer} onChange={e=>setActivePlayer(e.target.value)}><option value="">Select rostered player</option>{activePlayers.map(id=><option key={id} value={id}>{name(id)}</option>)}</select></label>
-          <div className="rch-live-score-buttons" aria-label="Add points">
-            {[1,2,...(game.scoring_profile==='one_two_three'?[3]:[])].map(points=><button type="button" key={points} disabled={busy||!activePlayer} onClick={()=>void recordScore(activeTeam,points)}><b>+{points}</b><span>{points===1?'FREE THROW':points===3?'THREE':'BUCKET'}</span></button>)}
+          <div className="rch-live-control-head"><div><span>{isOneOnOne?'QUICK SCOREKEEPER':'COURTSIDE CONTROL'}</span><h3>{isOneOnOne?'Choose the scorer':'Log the next play'}</h3></div>{!isOneOnOne&&<label>TEAM<select value={activeTeam} onChange={e=>{setActiveTeam(e.target.value);setActivePlayer(roster(e.target.value)[0]||'');}}>{sides.map(side=><option key={side.id} value={side.id}>{teamName(side.id)}</option>)}</select></label>}</div>
+          {isOneOnOne?<div className="rch-live-1v1-sides" aria-label="Select which player scored">{sides.map((side,index)=><button type="button" key={side.id} aria-pressed={activeTeam===side.id} onClick={()=>setActiveTeam(side.id)} className={activeTeam===side.id?'is-selected':''}><span>{index===0?'HOME':'AWAY'}</span><strong>{teamName(side.id)}</strong><small>{roster(side.id).map(name).join(', ')||'No player assigned'}</small></button>)}</div>:<label className="rch-live-player-select">WHO MADE THE PLAY?<select value={activePlayer} onChange={e=>setActivePlayer(e.target.value)}><option value="">Select rostered player</option>{activePlayers.map(id=><option key={id} value={id}>{name(id)}</option>)}</select></label>}
+          <div className={'rch-live-score-buttons'+(isOneOnOne?' is-1v1':'')} aria-label="Add points">
+            {[1,2,...(game.scoring_profile==='one_two_three'?[3]:[])].map(points=><button type="button" key={points} disabled={busy||!scoringPlayer||targetReached} onClick={()=>void recordScore(activeTeam,points)}><b>+{points}</b><span>{points===1?'FREE THROW':points===3?'THREE':'BUCKET'}</span></button>)}
           </div>
-          <div className="rch-live-stat-row"><span>ADD PLAYER STAT</span>{statActions.filter(([key])=>!(format==='1v1'&&key==='assist')).map(([key,label])=><button type="button" key={key} disabled={busy||!activePlayer} onClick={()=>void action({p_game:game.id,p_action:'stat',p_team:activeTeam,p_player:activePlayer,p_stat:key})}>{label}</button>)}</div>
+          <div className="rch-live-stat-row"><span>ADD PLAYER STAT</span>{statActions.filter(([key])=>!(format==='1v1'&&key==='assist')).map(([key,label])=><button type="button" key={key} disabled={busy||!scoringPlayer} onClick={()=>void action({p_game:game.id,p_action:'stat',p_team:activeTeam,p_player:scoringPlayer,p_stat:key})}>{label}</button>)}</div>
           <div className="rch-live-admin-actions">
             <button type="button" disabled={busy||!lastAction} onClick={()=>lastAction&&void action({p_game:game.id,p_action:'undo',p_undo:lastAction.id})}><FaArrowRotateLeft/> UNDO LAST PLAY</button>
-            <button type="button" disabled={busy} onClick={()=>void finish()}><FaCheck/> FINALIZE GAME</button>
+            <button type="button" disabled={busy} onClick={()=>void finish()}><FaCheck/> {isOneOnOne&&game.status==='live'&&Math.max(game.home_score,game.away_score)>=game.target_score?'SAVE FINAL SCORE':'FINALIZE GAME'}</button>
           </div>
         </div>}
         {recap&&<div className="rch-live-final-status"><FaShieldHalved/> FINAL SCORE · {game.home_score===game.away_score?'This friendly game ended tied. A winner is required for ranked ratings.':'Submit the score for independent confirmation in Official Score Review below.'}</div>}
