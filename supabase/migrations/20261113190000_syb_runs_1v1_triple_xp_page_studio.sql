@@ -116,6 +116,85 @@ $$;
 revoke all on function public.can_manage_run_roster(uuid) from public,anon;
 grant execute on function public.can_manage_run_roster(uuid) to authenticated;
 
+-- Partner managers can see the independent review state for their own official
+-- events. Public users still see verified rows only; players can confirm only
+-- their own side through review_ranked_run_result.
+drop policy if exists "approved partner managers read ranked run results" on public.run_ranked_matches;
+create policy "approved partner managers read ranked run results"
+  on public.run_ranked_matches for select to authenticated
+  using (exists(
+    select 1
+    from public.rch_runs_partner_sessions s
+    join public.rch_runs_partners p on p.id=s.partner_id and p.status='approved'
+    join public.rch_runs_partner_members pm
+      on pm.partner_id=p.id and pm.profile_id=(select auth.uid()) and pm.role='manager'
+    where s.run_id=run_ranked_matches.run_id
+  ));
+
+create or replace function public.submit_ranked_run_result(p_game uuid)
+returns uuid language plpgsql security definer set search_path='' as $$
+declare
+  v_actor uuid:=auth.uid();
+  v_game public.run_games%rowtype;
+  v_run public.runs%rowtype;
+  v_size integer;
+  v_home uuid[];
+  v_away uuid[];
+  v_id uuid;
+begin
+  if v_actor is null then raise exception 'Sign in to submit a result'; end if;
+  select * into v_game from public.run_games where id=p_game for update;
+  if not found then raise exception 'Game not found'; end if;
+  select * into v_run from public.runs where id=v_game.run_id;
+  if not public.can_manage_run_roster(v_run.id) then
+    raise exception 'Only the run host, approved partner manager or RCH staff can submit game results';
+  end if;
+  if v_run.run_type<>'competitive' or v_run.status='cancelled'
+     or v_run.game_format not in ('1v1','2v2','3v3','4v4','5v5') then
+    raise exception 'Only structured 1v1–5v5 competitive runs are rated';
+  end if;
+  if v_game.status<>'completed' or v_game.home_score=v_game.away_score
+     or v_run.starts_at>now() or v_run.starts_at<now()-interval '14 days' then
+    raise exception 'Complete a non-tied game within 14 days of the run';
+  end if;
+  v_size:=split_part(v_run.game_format,'v',1)::integer;
+  select array_agg(m.profile_id order by m.profile_id) into v_home
+    from public.run_team_members m where m.run_id=v_run.id and m.run_team_id=v_game.home_run_team_id;
+  select array_agg(m.profile_id order by m.profile_id) into v_away
+    from public.run_team_members m where m.run_id=v_run.id and m.run_team_id=v_game.away_run_team_id;
+  if coalesce(array_length(v_home,1),0)<>v_size or coalesce(array_length(v_away,1),0)<>v_size then
+    raise exception 'Both teams need exactly % assigned players before submitting',v_size;
+  end if;
+  if (select count(*) from public.run_checkins c
+      where c.run_id=v_run.id and c.profile_id=any(v_home))<>v_size
+    or (select count(*) from public.run_checkins c
+      where c.run_id=v_run.id and c.profile_id=any(v_away))<>v_size then
+    raise exception 'Each rostered player must check in before the result can be rated';
+  end if;
+  if exists(select 1 from public.run_ranked_matches m
+      where m.run_id=v_run.id and m.status='verified'
+        and m.home_team_id in (v_game.home_run_team_id,v_game.away_run_team_id)
+        and m.away_team_id in (v_game.home_run_team_id,v_game.away_run_team_id)
+      group by m.run_id having count(*)>=3) then
+    raise exception 'At most three games between these teams per run can affect ratings';
+  end if;
+  insert into public.run_ranked_matches(
+    game_id,run_id,game_format,home_team_id,away_team_id,home_score,away_score,home_roster,away_roster,submitted_by
+  ) values (
+    p_game,v_run.id,v_run.game_format,v_game.home_run_team_id,v_game.away_run_team_id,
+    v_game.home_score,v_game.away_score,v_home,v_away,v_actor
+  )
+  on conflict (game_id) do update set
+    home_score=excluded.home_score,away_score=excluded.away_score,
+    home_roster=excluded.home_roster,away_roster=excluded.away_roster,
+    status='pending',home_confirmed_by=null,away_confirmed_by=null,
+    submitted_by=excluded.submitted_by,submitted_at=now(),rejected_at=null
+    where public.run_ranked_matches.status='rejected'
+  returning id into v_id;
+  if v_id is null then raise exception 'This game already has an open or verified review'; end if;
+  return v_id;
+end $$;
+
 drop policy if exists "run hosts manage teams" on public.run_teams;
 create policy "run hosts and partner managers manage teams"
   on public.run_teams for all to authenticated
