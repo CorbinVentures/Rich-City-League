@@ -102,7 +102,7 @@ export default function PartnerRunsPublicPage(){
 
    <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#5b2028] bg-[#100b0d] shadow-[0_28px_100px_rgba(245,31,49,.14)]">
     <div className="absolute inset-0" aria-hidden="true" style={{backgroundImage:'radial-gradient(circle at 18% 28%,'+accent+'44,transparent 34%),linear-gradient(115deg,#080708 0%,#190b0f 52%,#07090c 100%)'}}/>
-    {settings.hero_image_url&&<img src={settings.hero_image_url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-40"/>}
+    {(settings.hero_image_url||isSyb)&&<img src={settings.hero_image_url||'/images/syb-1v1-circuit-hero.webp'} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-45"/>}
     <div aria-hidden="true" className="pointer-events-none absolute -right-24 top-1/2 h-[28rem] w-[28rem] -translate-y-1/2 rounded-full border border-white/[.09] sm:right-8">
      <div className="absolute inset-10 rounded-full border border-white/[.08]"/>
      <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/[.08]"/>
