@@ -4,7 +4,7 @@ import { describe,expect,it } from 'vitest';
 const read=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
 describe('RCH TV game day safety and authorization',()=>{
  it('atomically prevents duplicate billable sessions and keeps the ledger private',()=>{
-  const migration=read('supabase/migrations/20261031022500_rch_tv_recording_safety_ledger.sql');
+  const migration=read('supabase/migrations/20261031022712_rch_tv_recording_safety_ledger.sql');
   expect(migration).toContain('rch_tv_one_live_recording_idx');
   expect(migration).toContain('on public.rch_tv_recordings ((true))');
   expect(migration).toContain("('reserved','starting','active','stopping')");

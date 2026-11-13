@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const get=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=get('supabase/migrations/20261027021500_rch_sites_free_appointments.sql');
+const migration=get('supabase/migrations/20261027023621_rch_sites_free_appointments.sql');
 const api=get('src/app/api/rch-sites/appointments/route.ts');
 const customer=get('src/components/sites/RchSiteBookingClient.tsx');
 const manager=get('src/app/network/dashboard/sites/appointments/page.tsx');

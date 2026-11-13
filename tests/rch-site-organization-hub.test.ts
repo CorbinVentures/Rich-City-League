@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 const file=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=file('supabase/migrations/20261027040000_rch_sites_organization_inbox.sql');
+const migration=file('supabase/migrations/20261027034014_rch_sites_organization_inbox.sql');
 const api=file('src/app/api/rch-sites/inquiries/route.ts');
 const form=file('src/components/sites/RchSiteInquiryClient.tsx');
 const inbox=file('src/app/network/dashboard/sites/people/page.tsx');

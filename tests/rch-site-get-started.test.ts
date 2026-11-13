@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {isBrowserPublicRoute} from '../src/lib/rch-mobile-experience';
 
 const file=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=file('supabase/migrations/20261028001200_rch_site_self_serve_starter_drafts.sql');
+const migration=file('supabase/migrations/20261028005805_rch_site_self_serve_starter_drafts.sql');
 const api=file('src/app/api/rch-sites/starter/route.ts');
 const screen=file('src/components/sites/RchSiteStarterClient.tsx');
 const start=file('src/app/website-creator/start/page.tsx');

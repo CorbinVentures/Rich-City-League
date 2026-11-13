@@ -5,7 +5,7 @@ import {nextUpEligibility} from '../src/lib/runs-next-up-eligibility';
 import {assessPilot,PILOT_CATEGORIES,type PilotEvidence} from '../src/lib/runs-pilot-quality-gate';
 
 const src=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=src('supabase/migrations/20261030173000_rch_runs_in_person_queue_gate.sql');
+const migration=src('supabase/migrations/20261030160118_rch_runs_in_person_queue_gate.sql');
 
 describe('First Runs launch audit: truthful in-person game loop',()=>{
  it('does not treat an RSVP, guest or suggested game as queue attendance',()=>{

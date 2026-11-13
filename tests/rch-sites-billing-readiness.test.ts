@@ -8,7 +8,7 @@ const auth=source('src/lib/rch-sites-billing-auth.ts');
 const checkout=source('src/app/api/rch-sites/billing/checkout/route.ts');
 const webhook=source('src/app/api/rch-sites/billing/webhook/route.ts');
 const portal=source('src/app/api/rch-sites/billing/portal/route.ts');
-const migration=source('supabase/migrations/20261028031000_rch_sites_dedicated_stripe_billing_rails.sql');
+const migration=source('supabase/migrations/20261028033138_rch_sites_dedicated_stripe_billing_rails.sql');
 const billingUi=source('src/app/network/dashboard/sites/billing/page.tsx');
 
 describe('RCH Sites Stripe billing readiness — staged, not silently enabled',()=>{

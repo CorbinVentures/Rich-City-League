@@ -2,7 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 
 const read=(path:string)=>readFileSync(path,'utf8');
-const sql=read('supabase/migrations/20261029001500_rch_sites_amateur_program_operations.sql');
+const sql=read('supabase/migrations/20261028235451_rch_sites_amateur_program_operations.sql');
 const api=read('src/app/api/rch-sites/amateur/route.ts');
 const manager=read('src/app/network/dashboard/sites/programs/page.tsx');
 const publicUi=read('src/app/sites/[slug]/programs/page.tsx');
