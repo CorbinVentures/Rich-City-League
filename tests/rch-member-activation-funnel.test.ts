@@ -27,7 +27,7 @@ describe('RCH public member activation',()=>{
   });
   it('tracks only anonymous session actions',()=>{
     const tracker=read('src/lib/analytics/conversion.ts');
-    const migration=read('supabase/migrations/20261031043000_rch_member_activation_funnel.sql');
+    const migration=read('supabase/migrations/20261031034215_rch_member_activation_funnel.sql');
     expect(tracker).toContain("'home_view'");
     expect(tracker).toContain("'first_action_click'");
     expect(migration).toContain('first_action_click');

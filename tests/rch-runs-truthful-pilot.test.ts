@@ -9,7 +9,7 @@ describe('RUNS truthful-pilot gating',()=>{
  const world=read('src/components/runs/RunsWorldGame.tsx');
  const home=read('src/components/runs/RunsCinematicHome.tsx');
  const room=read('src/app/runs/[id]/page.tsx');
- const migration=read('supabase/migrations/20261029170000_rch_runs_truthful_pilot.sql');
+ const migration=read('supabase/migrations/20261029165123_rch_runs_truthful_pilot.sql');
  it('keeps automated weekend court suggestions separate from player-hosted discovery',()=>{
   expect(list).toContain('isSuggestedCourt:suggestedCourtIds.has(run.id)');
   expect(list).toContain('if(run.isSuggestedCourt||Date.parse(run.starts_at)<=Date.now())return false;');

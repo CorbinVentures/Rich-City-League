@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {normalizeOrganizationPayPalLink,normalizePayPalOffering,MAX_PAYPAL_OFFERINGS} from '../src/lib/rch-site-paypal';
 
 const file=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=file('supabase/migrations/20261027033500_rch_sites_external_paypal_offerings.sql');
+const migration=file('supabase/migrations/20261027030925_rch_sites_external_paypal_offerings.sql');
 const api=file('src/app/api/rch-sites/paypal/route.ts');
 const manage=file('src/app/network/dashboard/sites/payments/page.tsx');
 const publicPage=file('src/app/sites/[slug]/pay/page.tsx');

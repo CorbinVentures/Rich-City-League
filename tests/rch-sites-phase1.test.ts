@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {isRchSiteSlug,normalizeRchSiteDraft} from '../src/lib/rch-site-builder';
 
 const read=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
-const migration=read('supabase/migrations/20261026213500_rch_sites_phase1_publishing.sql');
+const migration=read('supabase/migrations/20261027020848_rch_sites_phase1_publishing.sql');
 const api=read('src/app/api/rch-sites/route.ts');
 const publicRoute=read('src/app/sites/[slug]/page.tsx');
 const studio=read('src/app/network/dashboard/sites/page.tsx');

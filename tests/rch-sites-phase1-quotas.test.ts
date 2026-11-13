@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
-const migration=read('supabase/migrations/20261027205500_rch_site_subscription_booking_quotas.sql');
+const migration=read('supabase/migrations/20261028005752_rch_sites_subscription_booking_quotas.sql');
 const pgTap=read('supabase/tests/rch_sites_subscription_booking_quotas_test.sql');
 const api=read('src/app/api/rch-sites/appointments/route.ts');
 const ui=read('src/app/network/dashboard/sites/appointments/page.tsx');

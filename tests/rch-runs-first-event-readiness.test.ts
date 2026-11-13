@@ -2,7 +2,7 @@ import {describe,expect,it} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 const read=(p:string)=>readFileSync(join(process.cwd(),p),'utf8');
-const sql=read('supabase/migrations/20261029190000_rch_runs_first_event_attendance_guard.sql');
+const sql=read('supabase/migrations/20261029172756_rch_runs_first_event_attendance_guard.sql');
 const room=read('src/app/runs/[id]/page.tsx');
 const list=read('src/app/runs/page.tsx');
 const media=read('src/app/runs/[id]/highlight/page.tsx');

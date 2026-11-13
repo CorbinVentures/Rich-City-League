@@ -3,7 +3,6 @@
 -- the time window, without in-person proof. Keep its implementation for legacy
 -- award idempotency, but route every member through host-issued court codes.
 
-begin;
 
 -- Production retains legacy runs.capacity, and the Run creation client submits it.
 -- Add the same optional-legacy field on clean local/staging builds so first-event
@@ -164,4 +163,3 @@ create trigger rch_first_event_game_record_guard
  before insert or update on public.run_games for each row
  execute function public.rch_guard_first_event_game_record();
 
-commit;

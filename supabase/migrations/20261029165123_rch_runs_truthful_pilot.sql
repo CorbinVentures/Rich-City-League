@@ -1,7 +1,6 @@
 -- RCH Runs truth-in-listings pilot — 2026-10-29
 -- Preserves existing RSVPs, check-ins, verified results, court records and
 -- reward receipts. A municipal park record is not a hosted basketball event.
-begin;
 
 -- Richmond is the supervised pilot market. Keep public court discovery statewide,
 -- but pause generation of unstaffed weekend Run records outside Richmond.
@@ -71,4 +70,3 @@ select cron.schedule(
  'select public.rch_expire_abandoned_circuit_runs();'
 );
 select public.rch_expire_abandoned_circuit_runs();
-commit;
