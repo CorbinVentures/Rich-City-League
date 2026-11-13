@@ -44,6 +44,41 @@
   --metal-ink: #14465e;
   --metal-glow: rgba(91, 237, 255, .38);
 }
+.scene[data-brand='syb'] {
+  --metal-light: #f2f2f3;
+  --metal-mid: #f51f31;
+  --metal-dark: #351117;
+  --metal-ink: #09090a;
+  --metal-glow: rgba(245, 31, 49, .34);
+}
+.scene[data-brand='syb'][data-badge-code='syb_first_w'] {
+  --metal-light: #fff2b2;
+  --metal-mid: #d9a734;
+  --metal-dark: #735018;
+  --metal-ink: #30200c;
+  --metal-glow: rgba(255, 200, 76, .38);
+}
+.scene[data-brand='syb'][data-badge-code='syb_run_it_back'] {
+  --metal-light: #f4faff;
+  --metal-mid: #9caec6;
+  --metal-dark: #46566f;
+  --metal-ink: #192536;
+  --metal-glow: rgba(178, 221, 255, .34);
+}
+.scene[data-brand='syb'][data-badge-code='syb_two_deep'] {
+  --metal-light: #ffe3e5;
+  --metal-mid: #f51f31;
+  --metal-dark: #4c0e16;
+  --metal-ink: #110709;
+  --metal-glow: rgba(245, 31, 49, .44);
+}
+.scene[data-brand='syb'][data-badge-code='syb_road_tested'] {
+  --metal-light: #dce8ed;
+  --metal-mid: #72818b;
+  --metal-dark: #202930;
+  --metal-ink: #10191e;
+  --metal-glow: rgba(127, 180, 202, .36);
+}
 
 .aura {
   position: absolute;

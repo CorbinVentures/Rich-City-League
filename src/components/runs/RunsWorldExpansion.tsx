@@ -4,12 +4,14 @@ import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {getSupabaseClient} from '@/lib/supabase';
 import {worldMilestoneCatalog,worldXpProgress,type WorldJourney} from '@/lib/runs-world-progression';
+import {getSybBadgeConcept} from '@/lib/syb-badges';
 import './runs-world-expansion.css';
 
 type Receipt={id:string;run_id:string;court_slug:string|null;court_name:string|null;verified_at:string;game_format:string;won:boolean;xp:number;first_court:boolean;rep:number;badges:string[];territory:string|null;crown:string|null};
 type Reward={code:string;title:string;price:number;delivery:string};
 type Expansion={receipts:Receipt[];arenas:{court_slug:string;court_name:string;games:number;wins:number}[];weekly_courts:number;weekly_teammates:number;weekly_crew_games:number;loadout:{banner?:string|null;reward_goal?:string|null};wallet:number;rewards:Reward[]};
-const title=(s:string)=>s.replaceAll('_',' ');
+const title=(s:string)=>getSybBadgeConcept(s)?.name||s.split('_').map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ');
+const badgeLabel=(code:string)=>{const badge=getSybBadgeConcept(code);return badge?'SYB · '+badge.name:title(code);};
 
 export function RunsWorldExpansion({mode,journey,revision}:{mode:'world'|'battle'|'missions'|'vault'|'player';journey:WorldJourney|null;revision:number}){
  const [data,setData]=useState<Expansion|null>(null);
@@ -70,7 +72,7 @@ export function RunsWorldExpansion({mode,journey,revision}:{mode:'world'|'battle
     <p className="rwx-reveal-note">{latest.won?'This win is recorded in your real competitive history.':'Your effort counts. The next game builds your basketball career.'}</p>
     <p>{latest.court_name||'Court'} · {latest.game_format} · {new Date(latest.verified_at).toLocaleDateString('en-US',{timeZone:'America/New_York'})}</p>
     <div className="rwx-stats"><div><strong>+{latest.xp}</strong><span>World XP</span></div><div><strong>+{latest.rep}</strong><span>Match REP credited</span></div><div><strong>{latest.first_court?'NEW':'✓'}</strong><span>{latest.first_court?'Verified court unlocked':'Verified game'}</span></div></div>
-    {latest.badges.length>0&&<p className="rwx-earned">Badges earned: {latest.badges.map(title).join(' · ')}</p>}
+    {latest.badges.length>0&&<p className="rwx-earned">Badges earned: {latest.badges.map(badgeLabel).join(' · ')}</p>}
     {latest.crown&&<p className="rwx-earned">Crown achievement: {title(latest.crown)}</p>}
     {latest.territory&&<p className="rwx-earned">Territory result: {latest.territory} won the court battle.</p>}
     <p>Weekly progress: {journey?.weekly_verified_games??'—'} verified games · {data.weekly_courts} courts · {data.weekly_teammates} different teammates.</p>

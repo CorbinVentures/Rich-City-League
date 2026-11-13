@@ -115,6 +115,7 @@ export default function PartnerRunsPublicPage(){
      <Link href="#partner-schedule" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">EVENTS</Link>
      {isSyb&&settings.show_leaderboard&&<Link href="#partner-leaderboard" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">RANKINGS</Link>}
      {isSyb&&settings.show_video&&videoEmbed&&<Link href="#syb-film" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">THE TAPE</Link>}
+     {isSyb&&managed&&<Link href={'/runs/partners/'+partner.slug+'/badge-lab'} className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">BADGE DESIGN</Link>}
      {managed&&<Link href={'/runs/partners/'+partner.slug+'/hq'} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 px-4 text-[10px] font-black uppercase tracking-wider transition hover:border-[var(--partner-accent)] hover:bg-white/5">Customize page <FaArrowRight/></Link>}
     </div>
    </nav>

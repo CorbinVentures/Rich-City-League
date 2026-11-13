@@ -1,0 +1,42 @@
+.sybBackdrop { --syb-energy-rgb: 245,31,49; background-color: #050506; }
+.sybBackdrop[data-syb-badge='syb_first_w'] { --syb-energy-rgb: 217,167,52; }
+.sybBackdrop[data-syb-badge='syb_run_it_back'] { --syb-energy-rgb: 156,174,198; }
+.sybBackdrop[data-syb-badge='syb_two_deep'] { --syb-energy-rgb: 245,31,49; }
+.sybBackdrop[data-syb-badge='syb_road_tested'] { --syb-energy-rgb: 127,180,202; }
+.sybBackdrop::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%,rgba(var(--syb-energy-rgb),.13),transparent 54%),linear-gradient(180deg,#050506 3%,#10080a 48%,#050506 100%); }
+.sybOrbit { border-color: rgba(var(--syb-energy-rgb),.26) !important; }
+.sybPulse { border-color: rgba(var(--syb-energy-rgb),.34) !important; }
+.sybSlash { position: absolute; z-index: 1; top: 47%; left: -10%; width: 120%; height: 2px; opacity: 0; pointer-events: none; background: linear-gradient(90deg,transparent,#ff3447 25%,#fff 50%,#ff3447 75%,transparent); box-shadow: 0 0 18px #f51f31,0 0 55px #f51f3177; transform: scaleX(.02); animation: sybSlash .5s .12s cubic-bezier(.2,.8,.2,1) both; }
+.sybBackdrop[data-syb-badge='syb_first_w'] .sybSlash { background: linear-gradient(90deg,transparent,#d9a734 25%,#fff5cf 50%,#d9a734 75%,transparent); box-shadow: 0 0 18px #d9a734,0 0 55px #d9a73477; }
+.sybBackdrop[data-syb-badge='syb_run_it_back'] .sybSlash { background: linear-gradient(90deg,transparent,#9caec6 25%,#fff 50%,#9caec6 75%,transparent); box-shadow: 0 0 18px #9caec6,0 0 55px #9caec677; }
+.sybBackdrop[data-syb-badge='syb_road_tested'] .sybSlash { background: linear-gradient(90deg,transparent,#7fb4ca 25%,#fff 50%,#7fb4ca 75%,transparent); box-shadow: 0 0 18px #7fb4ca,0 0 55px #7fb4ca77; }
+.sybCourt { position: absolute; z-index: 0; top: 31%; left: 50%; width: min(92vw,34rem); aspect-ratio: 1; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; transform: translate(-50%,-50%) perspective(440px) rotateX(64deg); }
+.sybCourt::before,.sybCourt::after { content: ''; position: absolute; border: 1px solid rgba(255,255,255,.07); }
+.sybCourt::before { inset: 15% 25%; }
+.sybCourt::after { top: 0; bottom: 0; left: 50%; border-left: 0; }
+.sybContent { position: relative; z-index: 2; }
+.sybKicker { animation: sybRise .42s .15s both; }
+.sybMedal { animation: sybCrest .82s cubic-bezier(.16,.9,.25,1.15) both; }
+.sybBackdrop[data-syb-badge='syb_run_it_back'] .sybMedal { animation-name: sybRivalryCrest; }
+.sybBackdrop[data-syb-badge='syb_two_deep'] .sybMedal { animation-name: sybDoubleCrest; animation-duration: 1s; }
+.sybBackdrop[data-syb-badge='syb_road_tested'] .sybMedal { animation-name: sybRoadCrest; }
+.sybName { animation: sybRise .46s .45s both; }
+.sybDescription { animation: sybRise .46s .54s both; }
+.sybProof { animation: sybRise .46s .62s both; }
+.sybContinue { animation: sybRise .46s .7s both; }
+.sybReceipt { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 7px; max-width: 38rem; margin: 22px auto 0; animation: sybRise .46s .6s both; }
+.sybReceipt span { min-width: 0; padding: 10px 8px; border: 1px solid #ffffff16; border-radius: 10px; background: #ffffff08; text-align: center; }
+.sybReceipt small,.sybReceipt b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sybReceipt small { color: #ff7982; font-size: 7px; font-weight: 1000; letter-spacing: .14em; }
+.sybReceipt b { margin-top: 5px; color: #f0f0f1; font-size: 9px; font-weight: 900; }
+@keyframes sybSlash { 0% { opacity: 0; transform: scaleX(.02); } 20% { opacity: 1; } 100% { opacity: 0; transform: scaleX(1); } }
+@keyframes sybCrest { 0% { opacity: 0; transform: translateY(-54px) scale(1.28) rotate(-9deg); filter: brightness(2) blur(4px); } 58% { opacity: 1; transform: translateY(7px) scale(.94) rotate(2deg); filter: brightness(1.45); } 78% { transform: translateY(-3px) scale(1.02) rotate(-1deg); filter: brightness(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: none; } }
+@keyframes sybRivalryCrest { 0% { opacity: 0; transform: translateY(-36px) scale(1.2) rotateY(-110deg); filter: brightness(1.8) blur(3px); } 58% { opacity: 1; transform: translateY(5px) scale(.96) rotateY(18deg); filter: brightness(1.35); } 100% { opacity: 1; transform: translateY(0) scale(1) rotateY(0); filter: none; } }
+@keyframes sybDoubleCrest { 0% { opacity: 0; transform: translateY(-58px) scale(1.3); filter: brightness(2) blur(4px); } 38% { opacity: 1; transform: translateY(7px) scale(.93); filter: brightness(1.5); } 52% { transform: translateY(-7px) scale(1.04); } 66% { transform: translateY(4px) scale(.98); } 82% { transform: translateY(-2px) scale(1.01); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: none; } }
+@keyframes sybRoadCrest { 0% { opacity: 0; transform: translate(-65px,-16px) scale(1.22) rotate(-12deg); filter: brightness(1.8) blur(4px); } 56% { opacity: 1; transform: translate(7px,4px) scale(.96) rotate(2deg); filter: brightness(1.35); } 100% { opacity: 1; transform: translate(0,0) scale(1) rotate(0); filter: none; } }
+@keyframes sybRise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 540px) { .sybReceipt { grid-template-columns: repeat(2,minmax(0,1fr)); max-width: 23rem; } }
+@media (prefers-reduced-motion: reduce) {
+ .sybBackdrop *, .sybBackdrop *::before, .sybBackdrop *::after { animation: none !important; transition: none !important; }
+ .sybSlash { display: none; }
+}
