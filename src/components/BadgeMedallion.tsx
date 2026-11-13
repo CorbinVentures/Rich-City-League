@@ -3,7 +3,7 @@ import type { IconType } from 'react-icons';
 import {
   FaAward, FaBasketball, FaBolt, FaBullseye, FaCrown, FaDumbbell,
   FaFireFlameCurved, FaGem, FaHandshake, FaLocationDot, FaMedal,
-  FaShieldHalved, FaStar, FaTrophy, FaUsers,
+  FaShieldHalved, FaStar, FaTrophy, FaUsers, FaRepeat,
 } from 'react-icons/fa6';
 import styles from './BadgeMedallion.module.css';
 
@@ -14,6 +14,9 @@ export type BadgeVisualData = {
   tier?: string | null;
   category?: string | null;
   requirement_type?: string | null;
+  brand?: 'rch'|'syb';
+  code?: string;
+  mark?: string;
 };
 
 type MedalSize = 'xs' | 'sm' | 'md' | 'lg';
@@ -29,6 +32,13 @@ export function normalizeBadgeTier(value?: string | null) {
 
 // Vector crests replace emoji, so the same collectible art works across platforms.
 export function badgeCrest(badge: BadgeVisualData): IconType {
+  const iconKey=(badge.icon||'').toLowerCase();
+  if (iconKey==='basketball') return FaBasketball;
+  if (iconKey==='trophy') return FaTrophy;
+  if (iconKey==='repeat') return FaRepeat;
+  if (iconKey==='bolt') return FaBolt;
+  if (iconKey==='location') return FaLocationDot;
+  if (iconKey==='crown') return FaCrown;
   const text = [badge.name, badge.category, badge.requirement_type].filter(Boolean).join(' ').toLowerCase();
   if (/founder|royal|king|queen|champion|mvp|legend/.test(text)) return FaCrown;
   if (/diamond|elite|platinum/.test(text)) return FaGem;
@@ -60,9 +70,11 @@ export function BadgeMedallion({ badge, size = 'md', className = '' }: {
     <div
       className={[styles.scene, className].filter(Boolean).join(' ')}
       data-tier={tier}
+      data-brand={badge.brand||'rch'}
+      data-badge-code={badge.code}
       style={{ '--medal-size': dimension } as CSSProperties}
       role="img"
-      aria-label={(badge.name || 'Rich City Hoops achievement') + ', ' + tier + ' badge'}
+      aria-label={(badge.brand==='syb'?'SYB circuit: ':'')+(badge.name || 'Rich City Hoops achievement') + ', ' + tier + ' badge'}
     >
       <span className={styles.aura} aria-hidden="true" />
       <span className={styles.coin} aria-hidden="true">
@@ -71,9 +83,9 @@ export function BadgeMedallion({ badge, size = 'md', className = '' }: {
         <span className={styles.face}>
           <span className={styles.rim} />
           <span className={styles.inner}>
-            <span className={styles.topBrand}>RCH</span>
+            <span className={styles.topBrand}>{badge.brand==='syb'?'SYB':'RCH'}</span>
             <Icon className={styles.crest} />
-            <span className={styles.rank}>{TIER_MARKS[tier]}</span>
+            <span className={styles.rank}>{badge.mark||TIER_MARKS[tier]}</span>
           </span>
           <span className={styles.glint} />
           <span className={styles.spark} />

@@ -5,11 +5,15 @@ import {FaChartLine,FaMedal,FaShareNodes,FaTrophy} from 'react-icons/fa6';
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 import SkillMasteryCollection from '@/components/rep/SkillMasteryCollection';
+import {BadgeMedallion} from '@/components/BadgeMedallion';
+import {getSybBadgeConcept} from '@/lib/syb-badges';
 
 type Rating={game_format:string;rating:number;games:number;wins:number;losses:number;provisional:boolean};
 type Result={id:string;game_format:string;verified_at:string;court_name:string;rating_before:number;rating_after:number;won:boolean};
 type Passport={ratings:Rating[];run_rep:number;verified_games:number;badges:string[];last_results:Result[];open_appeals:number};
 const empty:Passport={ratings:[],run_rep:0,verified_games:0,badges:[],last_results:[],open_appeals:0};
+const legacyBadgeNames:Record<string,string>={first_win:'First Win',run_veteran:'Run Veteran',court_defender:'Court Defender',takeover_artist:'Takeover Artist'};
+function badgeLabel(code:string){return legacyBadgeNames[code]||code.split('_').map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ');}
 
 export function RunPassport(){
  const {user}=useAuth();
@@ -77,7 +81,16 @@ export function RunPassport(){
       <div><span className={'font-black '+(r.won?'text-emerald-300':'text-[#d5dfeb]')}>{r.won?'WIN':'LOSS'} · {r.game_format}</span><span className="ml-2 text-[#b0c9dc]">{r.court_name} · {new Date(r.verified_at).toLocaleDateString()}</span></div>
       <span className="font-black">{r.rating_before} → {r.rating_after}</span>
     </div>)}</div>:<p className="mt-3 rounded-xl border border-dashed border-[#416486] p-4 text-xs text-[#a7c1d9]">Your first independently verified game will appear here.</p>}
-    {data.badges.length>0&&<div className="mt-5 flex flex-wrap gap-2">{data.badges.map(b=><span key={b} className="rounded-full border border-[#9f8055] bg-[#564222]/40 px-3 py-1.5 text-xs font-bold text-[#ffe3aa]">{b.replaceAll('_',' ')}</span>)}</div>}
+    {data.badges.length>0&&<div className="mt-5">
+     <h3 className="text-sm font-black uppercase tracking-wide">Earned Run badges</h3>
+     <div className="mt-3 flex flex-wrap gap-2">{data.badges.map(code=>{
+      const badge=getSybBadgeConcept(code);
+      return badge?.awardable?<article key={code} className="flex min-w-[190px] items-center gap-2 rounded-xl border border-[#f51f31]/35 bg-[#180b0e] px-2 py-1.5">
+       <BadgeMedallion badge={{brand:'syb',code:badge.code,mark:badge.mark,name:badge.name,icon:badge.icon,tier:'gold'}} size="xs"/>
+       <span><small className="block text-[9px] font-black uppercase tracking-[.12em] text-[#ff7d86]">SYB 1v1 Circuit</small><strong className="text-xs">{badge.name}</strong></span>
+      </article>:<span key={code} className="rounded-full border border-[#9f8055] bg-[#564222]/40 px-3 py-1.5 text-xs font-bold text-[#ffe3aa]">{badgeLabel(code)}</span>;
+     })}</div>
+    </div>}
     {data.open_appeals>0&&<p className="mt-4 text-xs font-bold text-[#f2d1a6]">{data.open_appeals} integrity review(s) in progress</p>}
     <p className="mt-4 text-[11px] leading-5 text-[#99bbd7]">Only you can view this detailed Passport. Public Run rankings continue to respect your profile privacy settings.</p>
     <SkillMasteryCollection />

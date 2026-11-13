@@ -4,10 +4,12 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import {FaAward,FaBasketball,FaCheck,FaCrown,FaLocationDot,FaPlus,FaShieldHalved,FaTrash,FaTrophy} from 'react-icons/fa6';
 import {getSupabaseClient} from '@/lib/supabase';
 import {useAuth} from '@/hooks/useAuth';
+import {getSybBadgeConcept,SYB_AWARDABLE_BADGE_CODES} from '@/lib/syb-badges';
+import {BadgeMedallion} from '@/components/BadgeMedallion';
 
 type PlaceAward={id:string;badge_code:string;place_label:string};
 type Blueprint={code:string;display_name:string;description:string;tier:string};
-type Pin={badge_kind:'skill'|'world'|'location'|'achievement';badge_key:string;slot:number};
+type Pin={badge_kind:'skill'|'world'|'location'|'achievement'|'run';badge_key:string;slot:number};
 type Option={kind:Pin['badge_kind'];key:string;name:string;detail:string;tier?:string;category:string};
 type Skill={badge_code:string;badge_name:string;description:string;tier:string;tier_index:number};
 type Journey={signed_in:boolean;milestones:Record<string,boolean>};
@@ -20,6 +22,10 @@ const worldCatalog=[
  {key:'crown_defender',name:'Crown Defender',detail:'Defended a Court Master title'},
 ];
 const joinBadge=(row:any)=>Array.isArray(row.badge)?row.badge[0]:row.badge;
+const runBadgeVisual=(code:string)=>{
+ const badge=getSybBadgeConcept(code);
+ return badge?.awardable?{brand:'syb' as const,code:badge.code,mark:badge.mark,name:badge.name,icon:badge.icon,tier:'gold'}:null;
+};
 
 export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:string;awards:PlaceAward[];blueprints:Blueprint[]}){
  const {user}=useAuth();
@@ -35,12 +41,13 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
  const load=useCallback(async()=>{
   if(!db||!target){setPins([]);setOptions([]);setLoading(false);return;}
   setLoading(true);
-  const [pinResult,skillResult,fanResult,coachResult,playerResult]=await Promise.all([
+  const [pinResult,skillResult,fanResult,coachResult,playerResult,runAwardsResult]=await Promise.all([
    db.from('rch_badge_cabinet_pins').select('badge_kind,badge_key,slot').eq('profile_id',target).order('slot'),
    db.rpc('get_rch_skill_mastery',{p_profile:target}),
    db.from('fan_badges').select('badge_id,earned_at,badge:badges(name,description,tier,category)').eq('profile_id',target).order('earned_at',{ascending:false}).limit(80),
    db.from('coach_badges').select('badge_id,earned_at,badge:badges(name,description,tier,category)').eq('profile_id',target).order('earned_at',{ascending:false}).limit(80),
    db.from('players').select('id').eq('profile_id',target).eq('is_active',true).maybeSingle(),
+   owner?db.from('rch_run_badge_awards').select('badge_code,awarded_at').eq('profile_id',target).in('badge_code',SYB_AWARDABLE_BADGE_CODES).order('awarded_at',{ascending:false}):Promise.resolve({data:[]}),
   ]);
   const next:Option[]=[];
   const blueprintsByCode=new Map(blueprints.map(b=>[b.code,b]));
@@ -50,6 +57,10 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
   }
   for(const row of ((skillResult.data||[]) as Skill[])){
    if(row.tier_index>0)next.push({kind:'skill',key:row.badge_code,name:row.badge_name,detail:row.description,tier:row.tier,category:'Skill'});
+  }
+  for(const row of ((runAwardsResult.data||[]) as {badge_code:string}[])){
+   const badge=getSybBadgeConcept(row.badge_code);
+   if(badge?.awardable)next.push({kind:'run',key:badge.code,name:badge.name,detail:badge.requirement,tier:badge.tier,category:'SYB Circuit'});
   }
   const achievementRows:any[]=[...(fanResult.data||[]),...(coachResult.data||[])];
   const playerId=playerResult.data?.id;
@@ -99,9 +110,13 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
    const milestone=worldCatalog.find(item=>item.key===pin.badge_key);
    if(milestone)return {kind:'world',key:milestone.key,name:milestone.name,detail:milestone.detail,tier:'Verified',category:'World'};
   }
+  if(pin.badge_kind==='run'){
+   const badge=getSybBadgeConcept(pin.badge_key);
+   if(badge?.awardable)return {kind:'run',key:badge.code,name:badge.name,detail:badge.requirement,tier:badge.tier,category:'SYB Circuit'};
+  }
   return undefined;
  };
- const badgeIcon=(kind:Pin['badge_kind'])=>kind==='skill'?FaBasketball:kind==='world'?FaCrown:kind==='location'?FaLocationDot:FaAward;
+ const badgeIcon=(kind:Pin['badge_kind'])=>kind==='skill'?FaBasketball:kind==='world'?FaCrown:kind==='location'?FaLocationDot:kind==='run'?FaBasketball:FaAward;
 
  return <section aria-label="Featured mixed-type badge showcase" className="mt-7 rounded-3xl border border-[#9a7b49] bg-[radial-gradient(circle_at_top_right,#342c20,#0b1826_65%)] p-4 text-white sm:p-6">
   <div className="flex flex-wrap items-end justify-between gap-3">
@@ -118,8 +133,9 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
     const pin=pins.find(item=>item.slot===slot);
     const option=pin?optionFor(pin):undefined;
     const Icon=pin?badgeIcon(pin.badge_kind):FaPlus;
+    const medal=pin?.badge_kind==='run'?runBadgeVisual(pin.badge_key):null;
     return <article key={slot} className="rounded-2xl border border-[#806a46]/70 bg-[#0d1b28] p-3 text-center">
-     <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-[#d6b56d] bg-[radial-gradient(circle_at_30%_20%,#78633b,#1b2027_65%)] text-2xl text-[#ffe7a9]"><Icon aria-hidden="true"/></div>
+     <div className="mx-auto grid h-16 w-16 place-items-center overflow-hidden rounded-full border-2 border-[#d6b56d] bg-[radial-gradient(circle_at_30%_20%,#78633b,#1b2027_65%)] text-2xl text-[#ffe7a9]">{medal?<BadgeMedallion badge={medal} size="xs"/>:<Icon aria-hidden="true"/>}</div>
      <p className="mt-3 text-[9px] font-black uppercase tracking-[.15em] text-[#d6b56d]">{pin?(option?.category||pin.badge_kind):'Legacy slot '+slot}</p>
      <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-black">{pin?(option?.name||pin.badge_key.replaceAll('_',' ')):'Open slot'}</h3>
      <p className="mt-1 line-clamp-2 min-h-8 text-[10px] leading-4 text-[#a7b6c5]">{option?.detail|| (pin?'Earned badge on this profile':'Choose a badge below to feature it.')}</p>
@@ -135,8 +151,9 @@ export function BadgeCabinetShowcase({profileId,awards,blueprints}:{profileId?:s
      {options.map(option=>{
       const pinned=pins.some(pin=>pin.badge_kind===option.kind&&pin.badge_key===option.key);
       const Icon=badgeIcon(option.kind);
+      const medal=option.kind==='run'?runBadgeVisual(option.key):null;
       return <article key={option.kind+':'+option.key} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 p-3">
-       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#806a46] text-[#f2d39a]"><Icon aria-hidden="true"/></div>
+       <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-[#806a46] text-[#f2d39a]">{medal?<BadgeMedallion badge={medal} size="xs"/>:<Icon aria-hidden="true"/>}</div>
        <div className="min-w-0 flex-1"><p className="text-[9px] font-black uppercase tracking-wide text-[#b6c6d5]">{option.category}{option.tier?' · '+option.tier:''}</p><strong className="block truncate text-xs">{option.name}</strong><small className="block truncate text-[10px] text-[#aab7c4]">{option.detail}</small></div>
        <button type="button" disabled={busy!==null||pinned||pins.length>=5} onClick={()=>void changePin(option,false)} aria-label={'Pin to Top Five: '+option.name} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[#a27d3a] text-[#f2d39a] disabled:cursor-not-allowed disabled:opacity-40">{pinned?<FaCheck/>:<FaPlus/>}</button>
       </article>;

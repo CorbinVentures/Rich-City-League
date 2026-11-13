@@ -6,6 +6,7 @@ import {FaBasketball,FaBolt,FaCrown,FaLocationDot,FaTrophy} from 'react-icons/fa
 import {useAuth} from '@/hooks/useAuth';
 import {getSupabaseClient} from '@/lib/supabase';
 import {CourtMasterTitles} from '@/components/runs/CourtMasterTitles';
+import {getSybBadgeConcept} from '@/lib/syb-badges';
 
 type Court={slug:string;name:string;locality:string};
 type Master={division:string;rank:number;profile_id:string;player_name:string;games:number;wins:number;win_pct:number;ppg:number;is_master:boolean};
@@ -14,6 +15,7 @@ type Challenge={id:string;challenger_crew_id:string;defender_crew_id:string;stat
 type Run={id:string;title:string;starts_at:string;game_format:string};
 type Rep={profile_id:string;player_name:string;run_rep:number};
 type Mine={id:string;name:string};
+const runBadgeLabel=(code:string)=>getSybBadgeConcept(code)?.name||({first_win:'First Win',run_veteran:'Run Veteran',court_defender:'Court Defender',takeover_artist:'Takeover Artist',scorer_20:'20-Point Scorer',glass_cleaner:'Glass Cleaner',floor_general:'Floor General'} as Record<string,string>)[code]||code.split('_').map(part=>part.charAt(0).toUpperCase()+part.slice(1)).join(' ');
 
 export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCourt?:string;showTakeovers?:boolean}){
  const {user}=useAuth();
@@ -150,6 +152,6 @@ export function CourtDominion({initialCourt='',showTakeovers=false}:{initialCour
    </div>
   </div>:<p className="border-t border-[#315978] p-6 text-sm text-[#afd0e6]">Select any Virginia basketball court to see three player Master ladders and the current crew stamp. No fabricated winners are shown.</p>}
   <div className="border-t border-[#315978] p-5 sm:p-7"><h3 className="flex items-center gap-2 font-black uppercase"><FaTrophy className="text-[#90daee]"/> Statewide Run REP</h3>
-   {badges.length>0&&<div className="mt-3 flex flex-wrap gap-2" aria-label="Your verified Run badges">{badges.map(b=><span key={b} className="rounded-full border border-[#c49b63] bg-[#55401e]/40 px-3 py-1.5 text-xs font-black text-[#f6d89a]">{({first_win:"First Win",run_veteran:"Run Veteran",court_defender:"Court Defender",takeover_artist:"Takeover Artist",scorer_20:"20-Point Scorer",glass_cleaner:"Glass Cleaner",floor_general:"Floor General"} as Record<string,string>)[b]||b}</span>)}</div>}<p className="mt-2 text-xs leading-5 text-[#adccdf]">Verified wins: 30 REP · losses: 10 REP · successful Takeover defense: 90 REP (3×). Independently approved box scores earn up to 30 additional stat REP and scoring, rebounding or playmaking badges. None determines Cup titles or crew court ownership.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{repBoard.length?repBoard.map((row,i)=><div key={row.profile_id} className="flex justify-between rounded-lg border border-[#345675] p-3 text-xs"><span>#{i+1} {row.player_name}</span><strong className="text-[#f2d58e]">{row.run_rep} REP</strong></div>):<span className="text-xs text-[#95b9d5]">Verified games will establish the leaderboard.</span>}</div></div>
+   {badges.length>0&&<div className="mt-3 flex flex-wrap gap-2" aria-label="Your verified Run badges">{badges.map(code=>{const syb=getSybBadgeConcept(code);return <span key={code} className={'rounded-full border px-3 py-1.5 text-xs font-black '+(syb?'border-[#f51f31]/55 bg-[#351117]/50 text-[#ff9ca5]':'border-[#c49b63] bg-[#55401e]/40 text-[#f6d89a]')}>{syb?'SYB · ':''}{runBadgeLabel(code)}</span>;})}</div>}<p className="mt-2 text-xs leading-5 text-[#adccdf]">Verified wins: 30 REP · losses: 10 REP · successful Takeover defense: 90 REP (3×). Independently approved box scores earn up to 30 additional stat REP and scoring, rebounding or playmaking badges. None determines Cup titles or crew court ownership.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{repBoard.length?repBoard.map((row,i)=><div key={row.profile_id} className="flex justify-between rounded-lg border border-[#345675] p-3 text-xs"><span>#{i+1} {row.player_name}</span><strong className="text-[#f2d58e]">{row.run_rep} REP</strong></div>):<span className="text-xs text-[#95b9d5]">Verified games will establish the leaderboard.</span>}</div></div>
  </section>;
 }
