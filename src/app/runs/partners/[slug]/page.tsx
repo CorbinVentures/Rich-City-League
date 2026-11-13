@@ -17,6 +17,8 @@ type LeaderboardEntry={rank:number;profile_id:string;player_name:string;username
 type PublicStats={events:number;upcoming_events:number;verified_matchups:number;ranked_players:number;leaderboard:LeaderboardEntry[]};
 const defaultSettings:PageSettings={eyebrow:'OFFICIAL RUNS PARTNER · RVA 1V1 CIRCUIT',headline:'Every matchup has a story.',subheadline:'The talk. The records. The moment the ball goes up.',hero_image_url:'',featured_video_url:'https://www.youtube.com/watch?v=ir8I6M2MXqk',featured_video_label:'CARI VS WICK',cta_label:'Explore the circuit',show_schedule:true,show_leaderboard:true,show_video:true,show_results:true,callout_title:'ONE COURT. EVERY RECORD.',callout_body:'Follow the official SYB 1v1 circuit, see verified records, and bring your next matchup to the floor.'};
 const emptyStats:PublicStats={events:0,upcoming_events:0,verified_matchups:0,ranked_players:0,leaderboard:[]};
+function isSybDesignPreview(){return typeof window!=='undefined'&&window.location.hostname.endsWith('.vercel.app');}
+function sybPreviewPartner():Partner{return{id:'preview-syb',slug:'syb-hoop-richmond',owner_id:'',name:'SYB HOOPS',city:'Richmond',description:'RVA’s 1v1 basketball stage. SYB brings the matchups, the records, and the energy.',instagram_url:'https://www.instagram.com/sybhoop/',logo_url:null,brand_color:'#f51f31',status:'approved',reward_multiplier:3,page_settings:defaultSettings};}
 function youtubeEmbedUrl(value:string){
  try{
   const url=new URL(value);
@@ -41,17 +43,32 @@ export default function PartnerRunsPublicPage(){
  const [managed,setManaged]=useState(false);
  const [stats,setStats]=useState<PublicStats|null>(null);
  const [statsError,setStatsError]=useState('');
+ const [previewMode,setPreviewMode]=useState(false);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  useEffect(()=>{
-  if(!db||!slug){setLoading(false);return;}
+  setPreviewMode(false);
+  if(!slug){setLoading(false);return;}
+  if(!db){
+   if(slug==='syb-hoop-richmond'&&isSybDesignPreview()){
+    setPartner(sybPreviewPartner());
+    setPreviewMode(true);
+    setStatsError('Live SYB data is unavailable in this design preview.');
+   }
+   setLoading(false);return;
+  }
   let active=true;
   void (async()=>{
    const {data,error:failure}=await db.from('rch_runs_partners')
     .select('id,slug,owner_id,name,city,description,instagram_url,logo_url,brand_color,status,reward_multiplier,page_settings')
     .eq('slug',slug).maybeSingle();
    if(!active)return;
-   if(failure||!data){setError('This Runs organization is not available.');setLoading(false);return;}
+   if(failure||!data){
+    if(slug==='syb-hoop-richmond'&&isSybDesignPreview()){
+     setPartner(sybPreviewPartner());setPreviewMode(true);setStatsError('Live SYB data is unavailable in this design preview.');setLoading(false);return;
+    }
+    setError('This Runs organization is not available.');setLoading(false);return;
+   }
    const p=data as Partner;
    setPartner(p);
    if(user?.id){
@@ -80,66 +97,149 @@ export default function PartnerRunsPublicPage(){
  const upcoming=sessions.filter(s=>new Date(s.run.starts_at).getTime()>=Date.now()-2*3600000&&s.run.status!=='completed');
  const recent=sessions.filter(s=>!upcoming.includes(s)).slice(-6).reverse();
  const isSyb=partner.slug==='syb-hoop-richmond';
- const settings={...defaultSettings,...(isSyb?partner.page_settings||{}:{...partner.page_settings,show_leaderboard:false,show_video:false})} as PageSettings;
+ const partnerSettings=partner.page_settings||{};
+ const settings={...defaultSettings,...partnerSettings,...(!isSyb?{eyebrow:'RCH RUNS PARTNER',headline:partnerSettings.headline||partner.name,subheadline:partnerSettings.subheadline||partner.description||'Community basketball runs, competitive play, and organized sessions.',show_leaderboard:false,show_video:false}:{})} as PageSettings;
  const accent=partner.brand_color||'#f51f31';
  const brandStyle={'--partner-accent':accent} as CSSProperties;
  const videoEmbed=settings.show_video?youtubeEmbedUrl(settings.featured_video_url):null;
  const publicStats=stats||emptyStats;
- return <main style={brandStyle} className={'min-h-screen px-4 pb-28 pt-7 text-white sm:px-8 '+(isSyb?'bg-[#070708]':'bg-[#071829]')}>
-  <div className="mx-auto max-w-6xl">
-   <Link href="/runs/partners" className="text-xs font-bold text-[#9ed6ff]">← Runs Partner Network</Link>
-   <header className={'mt-5 overflow-hidden rounded-3xl border '+(isSyb?'border-[#651923] bg-[#100d0e] shadow-[0_20px_80px_rgba(245,31,49,.12)]':'border-[#3c678b] bg-[#09243c]')}>
-    <div className="relative h-36 overflow-hidden sm:h-52" style={{backgroundImage:'radial-gradient(circle at 75% 30%,'+accent+' 0%,#5b111a 26%,#090809 76%)',backgroundColor:'#090809'}}>
-     {settings.hero_image_url&&<><img src={settings.hero_image_url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-50"/><div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/35 to-black/60"/></>}
-     <div className="absolute bottom-4 left-5 flex items-center gap-2 sm:left-8"><span className="rounded-full border border-white/30 bg-black/50 px-3 py-1 text-[10px] font-black uppercase tracking-[.18em] text-white">{isSyb?settings.eyebrow:'RCH RUNS PARTNER'}</span>{isSyb&&<span className="rounded-full bg-[var(--partner-accent)] px-3 py-1 text-[10px] font-black uppercase text-white">{partner.reward_multiplier}× event XP</span>}</div>
+ return <main style={brandStyle} className={'min-h-screen px-4 pb-20 pt-5 text-white sm:px-8 '+(isSyb?'bg-[#070708]':'bg-[#071829]')}>
+  <div className="mx-auto max-w-7xl">
+   {previewMode&&<div role="status" className="mb-4 rounded-xl border border-amber-200/25 bg-amber-100/5 px-4 py-3 text-xs font-bold leading-5 text-amber-100">Design preview · live SYB events, stats and rankings are unavailable in this deployment. No sample records are shown.</div>}
+   <nav aria-label="Runs partner navigation" className="flex items-center justify-between gap-4">
+    <Link href="/runs/partners" className="flex min-h-11 items-center gap-3 text-xs font-black uppercase tracking-[.15em] text-white/75 transition hover:text-white">
+     <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-lg border border-white/15 bg-black">{isSyb?<SybBrandMark className="h-full w-full"/>:partner.logo_url?<img src={partner.logo_url} alt="" className="h-full w-full object-contain"/>:<FaBasketball className="text-[#9bd4ff]"/>}</span>
+     <span><span className="block">RCH RUNS</span><small className="mt-0.5 block text-[9px] tracking-[.2em] text-white/45">PARTNER NETWORK</small></span>
+    </Link>
+    <div className="flex items-center gap-2 sm:gap-4">
+     <Link href="#partner-schedule" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">EVENTS</Link>
+     {isSyb&&settings.show_leaderboard&&<Link href="#partner-leaderboard" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">RANKINGS</Link>}
+     {isSyb&&settings.show_video&&videoEmbed&&<Link href="#syb-film" className="hidden text-xs font-bold text-white/65 hover:text-white sm:block">THE TAPE</Link>}
+     {managed&&<Link href={'/runs/partners/'+partner.slug+'/hq'} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 px-4 text-[10px] font-black uppercase tracking-wider transition hover:border-[var(--partner-accent)] hover:bg-white/5">Customize page <FaArrowRight/></Link>}
     </div>
-    <div className="px-5 pb-7 sm:px-8">
-     <div className="-mt-12 flex flex-wrap items-end justify-between gap-4">
-      <div className="flex flex-wrap items-end gap-4">
-       <div className={'grid h-24 w-24 place-items-center overflow-hidden rounded-2xl border-4 sm:h-32 sm:w-32 '+(isSyb?'border-[#651923] bg-[#090809]':'border-[#09243c] bg-[#143452]')}>{partner.logo_url?<img src={partner.logo_url} alt={partner.name+' logo'} referrerPolicy="no-referrer" className="h-full w-full object-contain"/>:isSyb?<SybBrandMark className="h-full w-full"/>:<FaBasketball className="text-5xl text-[#b7dcfc]"/>}</div>
-       <div className="pb-1"><p className={'flex items-center gap-1 text-xs font-black uppercase '+(isSyb?'text-[var(--partner-accent)]':'text-[#80eac2]')}><FaShieldHalved/> {partner.status==='approved'?(isSyb?'Official RCH Runs 1v1 partner':'RCH verified Runs partner'):'Awaiting verification'}</p><h1 className="mt-1 text-3xl font-black uppercase sm:text-5xl" style={isSyb?{color:'#fff',textShadow:'0 0 24px '+accent+'88'}:undefined}>{partner.name}</h1>{isSyb&&<p className="mt-2 max-w-2xl text-lg font-black leading-tight text-white sm:text-xl">{settings.headline}</p>}<p className="mt-2 flex items-center gap-1 text-xs text-[#a5cce8]"><FaLocationDot/>{partner.city}, Virginia</p></div>
+   </nav>
+
+   <header className="relative mt-5 overflow-hidden rounded-[2rem] border border-[#5b2028] bg-[#100b0d] shadow-[0_28px_100px_rgba(245,31,49,.14)]">
+    <div className="absolute inset-0" aria-hidden="true" style={{backgroundImage:'radial-gradient(circle at 18% 28%,'+accent+'44,transparent 34%),linear-gradient(115deg,#080708 0%,#190b0f 52%,#07090c 100%)'}}/>
+    {(settings.hero_image_url||isSyb)&&<img src={settings.hero_image_url||'/images/syb-1v1-circuit-hero.webp'} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-45"/>}
+    <div aria-hidden="true" className="pointer-events-none absolute -right-24 top-1/2 h-[28rem] w-[28rem] -translate-y-1/2 rounded-full border border-white/[.09] sm:right-8">
+     <div className="absolute inset-10 rounded-full border border-white/[.08]"/>
+     <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/[.08]"/>
+     <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[.1]"/>
+    </div>
+    <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/65"/>
+    <div className="relative z-10 grid gap-9 px-5 py-8 sm:px-9 sm:py-10 lg:min-h-[440px] lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:px-14">
+     <div className="max-w-3xl">
+      <div className="flex flex-wrap items-center gap-2">
+       <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/35 px-3 py-2 text-[9px] font-black uppercase tracking-[.2em] text-white/90"><FaShieldHalved className="text-[var(--partner-accent)]"/> {settings.eyebrow||'OFFICIAL RCH RUNS 1V1 PARTNER'}</span>
+       {partner.status==='approved'&&<span className="rounded-full bg-[var(--partner-accent)] px-3 py-2 text-[9px] font-black uppercase tracking-[.12em] text-white">Verified partner</span>}
       </div>
-      <Link href="#partner-schedule" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 py-3 text-xs font-black uppercase text-white">{settings.cta_label||'Explore the circuit'} <FaArrowRight/></Link>
+      <p className="mt-7 text-[11px] font-black uppercase tracking-[.35em] text-[var(--partner-accent)]">{isSyb?'SYBHOOPS / RVA 1V1 CIRCUIT':partner.name+' / RCH RUNS PARTNER'}</p>
+      <h1 className="mt-3 max-w-3xl text-5xl font-black uppercase leading-[.9] tracking-[-.055em] sm:text-6xl lg:text-7xl" style={{textShadow:'0 0 38px '+accent+'55'}}>{settings.headline}</h1>
+      <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#e7dadd] sm:text-lg">{isSyb?settings.subheadline:partner.description||settings.subheadline}</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+       <span className="rounded-full border border-[#f51f31]/50 bg-[#f51f31]/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white">{partner.reward_multiplier}× XP on {isSyb?'official SYB':'partner'} events</span>
+       <span className="rounded-full border border-white/15 bg-black/25 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/75">Verified results only</span>
+      </div>
+      <div className="mt-7 flex flex-wrap gap-3">
+       <Link href="#partner-schedule" className="inline-flex min-h-12 items-center gap-3 rounded-xl bg-[var(--partner-accent)] px-5 text-xs font-black uppercase tracking-wider text-white shadow-[0_8px_30px_rgba(245,31,49,.28)] transition hover:-translate-y-0.5 hover:brightness-110">{settings.cta_label||'Find the next matchup'} <FaArrowRight/></Link>
+       {settings.show_leaderboard&&<Link href="#partner-leaderboard" className="inline-flex min-h-12 items-center gap-3 rounded-xl border border-white/20 bg-black/25 px-5 text-xs font-black uppercase tracking-wider text-white transition hover:border-white/40 hover:bg-white/5"><FaTrophy className="text-[#ff5967]"/> View the board</Link>}
+      </div>
      </div>
-     <p className="mt-5 max-w-3xl text-sm leading-7 text-[#c4d6e7]">{partner.description||'Community basketball runs, competitive play, and organized sessions.'}</p>
-     {isSyb&&<p className="mt-3 max-w-3xl text-sm leading-6 text-[#e0d1d3]">{settings.subheadline}</p>}
-     {partner.reward_multiplier>1&&<p className="mt-4 inline-flex rounded-full border border-[#edca71]/50 bg-[#392d13] px-3 py-2 text-[10px] font-black uppercase text-[#ffe5a2]">{partner.reward_multiplier}× XP / REP on partner event rewards · free RCH profile required</p>}
-     <div className="mt-5 flex flex-wrap gap-3">{partner.instagram_url&&<a href={partner.instagram_url} target="_blank" rel="noopener noreferrer" className={'inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-xs font-black '+(isSyb?'border-[#f51f31]/70 text-white hover:bg-[#f51f31]/10':'border-[#4f85a5] text-[#cceeff]')}><FaInstagram/> Instagram ↗</a>}{managed&&<Link href={'/runs/partners/'+partner.slug+'/hq'} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black">Open Partner HQ <FaArrowRight/></Link>}</div>
+
+     <div className="mx-auto w-full max-w-sm lg:ml-auto">
+      <div className="rounded-[1.6rem] border border-white/15 bg-black/55 p-5 shadow-2xl backdrop-blur-md sm:p-6">
+       <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[.2em] text-white/55"><FaCrown className="text-[var(--partner-accent)]"/> Official event card</span>
+        <span className="rounded-full border border-[#ff3447]/40 bg-[#f51f31]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-[#ff8791]">RVA</span>
+       </div>
+       <div className="mt-5 flex items-end justify-between gap-3">
+        <div><p className="text-[9px] font-black uppercase tracking-[.2em] text-white/45">Reward multiplier</p><p className="mt-1 text-5xl font-black leading-none tracking-tight text-white">{partner.reward_multiplier}<span className="ml-1 text-2xl text-[var(--partner-accent)]">×</span></p></div>
+        <div className="pb-1 text-right"><p className="text-[9px] font-black uppercase tracking-[.2em] text-white/45">Circuit</p><p className="mt-1 text-sm font-black uppercase text-white">{partner.city} · 1V1</p></div>
+       </div>
+       {isSyb&&settings.show_leaderboard&&<div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="rounded-xl border border-white/10 bg-white/[.04] p-3"><small className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wider text-white/45"><FaShieldHalved/> Verified games</small><strong className="mt-2 block text-2xl font-black tabular-nums">{statsError?'—':publicStats.verified_matchups}</strong></div>
+        <div className="rounded-xl border border-white/10 bg-white/[.04] p-3"><small className="flex items-center gap-2 text-[9px] font-black uppercase tracking-wider text-white/45"><FaUsers/> Players ranked</small><strong className="mt-2 block text-2xl font-black tabular-nums">{statsError?'—':publicStats.ranked_players}</strong></div>
+       </div>}
+       {isSyb&&settings.show_leaderboard&&<div className="mt-3 rounded-xl border border-[#f51f31]/25 bg-[#f51f31]/[.06] p-3.5">
+        <small className="block text-[9px] font-black uppercase tracking-[.16em] text-[#ff7a86]">Top of the board</small>
+        {statsError?<p className="mt-2 text-xs leading-5 text-white/70">Official stats are temporarily unavailable.</p>:publicStats.leaderboard[0]?<div className="mt-2 flex items-center justify-between gap-3"><strong className="truncate text-sm font-black">{publicStats.leaderboard[0].player_name}</strong><span className="shrink-0 font-mono text-xs font-bold text-white">{publicStats.leaderboard[0].wins}–{publicStats.leaderboard[0].losses}</span></div>:<p className="mt-2 text-xs leading-5 text-white/70">The first verified result will open the SYB record board.</p>}
+       </div>}
+      </div>
+     </div>
+    </div>
+    <div className="relative z-10 grid grid-cols-3 border-t border-white/10 bg-black/30">
+     <div className="px-3 py-4 text-center sm:py-5"><small className="block text-[8px] font-black uppercase tracking-[.2em] text-white/40">Official partner</small><strong className="mt-1 block text-[10px] font-black uppercase tracking-wider sm:text-xs">RCH RUNS</strong></div>
+     <div className="border-x border-white/10 px-3 py-4 text-center sm:py-5"><small className="block text-[8px] font-black uppercase tracking-[.2em] text-white/40">Home court</small><strong className="mt-1 block text-[10px] font-black uppercase tracking-wider sm:text-xs">{partner.city}, VA</strong></div>
+     <div className="px-3 py-4 text-center sm:py-5"><small className="block text-[8px] font-black uppercase tracking-[.2em] text-white/40">Player rewards</small><strong className="mt-1 block text-[10px] font-black uppercase tracking-wider text-[#ff7a86] sm:text-xs">{partner.reward_multiplier}× XP</strong></div>
     </div>
    </header>
 
-   {isSyb&&settings.show_video&&videoEmbed&&<section className="mt-7 overflow-hidden rounded-3xl border border-[#651923] bg-[#100d0e]">
-    <div className="grid lg:grid-cols-[.85fr_1.15fr]">
-     <div className="flex flex-col justify-center p-6 sm:p-8"><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.24em] text-[var(--partner-accent)]"><FaCrown/> {settings.eyebrow||'SYBHOOPS · RVA 1V1'}</p><h2 className="mt-3 text-3xl font-black uppercase leading-none sm:text-4xl">Featured matchup</h2><p className="mt-4 max-w-md text-sm leading-6 text-[#d3c8ca]">{settings.subheadline}</p><p className="mt-4 flex items-center gap-2 text-xs font-black uppercase text-white"><FaPlay className="text-[var(--partner-accent)]"/> {settings.featured_video_label||'SYB FEATURE'}</p><a href="https://www.youtube.com/@SUPPORTYOURBROTHERS" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 py-3 text-xs font-black uppercase text-white hover:brightness-110">Watch SYBHOOPS <FaArrowRight/></a></div>
+   {isSyb&&<section aria-label="SYB circuit stats" className="mt-5">
+    {statsError?<p role="status" className="rounded-2xl border border-amber-300/25 bg-amber-300/5 p-4 text-sm text-amber-100">{statsError}</p>:<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+     {([{label:'Events hosted',value:publicStats.events,icon:<FaCalendarDays/>},{label:'Upcoming runs',value:publicStats.upcoming_events,icon:<FaBolt/>},{label:'Verified 1v1s',value:publicStats.verified_matchups,icon:<FaShieldHalved/>},{label:'Players ranked',value:publicStats.ranked_players,icon:<FaUsers/>}] as {label:string;value:number;icon:ReactNode}[]).map(item=><article key={item.label} className="rounded-2xl border border-[#3b2226] bg-[linear-gradient(145deg,#171012,#0d0c0e)] p-4 sm:p-5"><span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[.16em] text-white/45">{item.icon}{item.label}</span><strong className="mt-3 block text-3xl font-black tabular-nums tracking-tight">{item.value}</strong><span className="mt-1 block text-[9px] font-bold uppercase tracking-wider text-white/30">RCH verified data</span></article>)}
+    </div>}
+   </section>}
+
+   {settings.show_schedule&&<section id="partner-schedule" className="mt-14 scroll-mt-8">
+    <div className="flex flex-wrap items-end justify-between gap-4">
+     <div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.25em] text-[var(--partner-accent)]"><FaBolt/> {isSyb?'THE SYB CIRCUIT':'PARTNER EVENTS'}</p><h2 className="mt-2 text-3xl font-black uppercase tracking-tight sm:text-4xl">{isSyb?'The next matchup':'Upcoming sessions'}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">{isSyb?'Official 1v1 events, real opponents, and every result tracked in one place. Join through your free RCH profile and earn triple XP on eligible SYB events.':'Find the next organized run from this RCH partner.'}</p></div>
+     {partner.instagram_url&&<a href={partner.instagram_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-[10px] font-black uppercase tracking-wider text-white/75 transition hover:border-[var(--partner-accent)] hover:text-white"><FaInstagram/> Follow SYB <FaArrowRight/></a>}
+    </div>
+    {!upcoming.length?<div className="relative mt-5 overflow-hidden rounded-[1.6rem] border border-dashed border-[#65303a] bg-[radial-gradient(circle_at_85%_10%,#321217,#100d0f_55%)] p-6 sm:p-9">
+     <div aria-hidden="true" className="absolute -right-10 -top-12 h-56 w-56 rounded-full border border-white/[.07]"/>
+     <div className="relative max-w-2xl"><span className="inline-flex items-center gap-2 rounded-full bg-white/[.06] px-3 py-2 text-[9px] font-black uppercase tracking-[.18em] text-white/60"><FaCalendarDays/> Event board</span><h3 className="mt-4 text-2xl font-black uppercase sm:text-3xl">The next matchup is waiting to be posted.</h3><p className="mt-3 text-sm leading-6 text-white/55">{isSyb?'No official SYB session is published in Runs right now. Follow SYB for the next drop, then come back here to join and track it.':'This partner has not published its next session yet. Check back for updates.'}</p><div className="mt-5 flex flex-wrap gap-3">{partner.instagram_url&&<a href={partner.instagram_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 text-xs font-black uppercase">Follow the drop <FaArrowRight/></a>}<Link href="/runs/partners" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase text-white/80">Explore all runs <FaArrowRight/></Link></div></div>
+    </div>:<div className="mt-5 grid gap-4 lg:grid-cols-2">{upcoming.map((s,index)=><Link key={s.run_id} href={'/runs/'+s.run_id+(s.run.game_format==='1v1'?'#rch-live-game':'')} className="group relative overflow-hidden rounded-[1.5rem] border border-[#4d252b] bg-[linear-gradient(130deg,#1b1012,#0e0e10_65%)] p-5 transition hover:-translate-y-1 hover:border-[var(--partner-accent)] hover:shadow-[0_20px_60px_rgba(245,31,49,.12)] sm:p-6">
+     <div aria-hidden="true" className="absolute -right-8 -top-16 h-48 w-48 rounded-full border border-white/[.06] transition group-hover:border-[var(--partner-accent)]/30"/>
+     <div className="relative">
+      <div className="flex flex-wrap items-center justify-between gap-2"><span className="rounded-full bg-[var(--partner-accent)] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider">{isSyb?'SYB official run':'Partner run'}</span><span className="text-[10px] font-black uppercase tracking-wider text-white/55">{s.run.game_format}</span></div>
+      <div className="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+       <div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white/45"><FaCalendarDays className="text-[var(--partner-accent)]"/>{new Date(s.run.starts_at).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})}</p><h3 className="mt-3 text-2xl font-black uppercase leading-tight">{s.run.title}</h3>{s.run.description&&<p className="mt-2 max-w-xl text-xs leading-5 text-white/55">{s.run.description}</p>}</div>
+       <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 sm:min-w-32"><small className="block text-[8px] font-black uppercase tracking-widest text-white/40">Event XP</small><strong className="mt-1 block text-xl font-black text-[#ff7a86]">{s.reward_multiplier}×</strong></div>
+      </div>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+       <span className="flex items-center gap-2 text-xs text-white/65"><FaLocationDot className="text-[var(--partner-accent)]"/>{s.run.location}</span>
+       <span className="inline-flex items-center gap-2 text-xs font-black uppercase text-white transition group-hover:text-[#ff7a86]">{s.price_cents?'$'+(s.price_cents/100).toFixed(2):'Free'} <span className="text-white/30">/</span> {s.run.game_format==='1v1'?'Open Run Room + Scorekeeper':'Open event'} <FaArrowRight/></span>
+      </div>
+     </div>
+    </Link>)}</div>}
+   </section>}
+
+   {isSyb&&<section aria-label="SYB quick scorekeeper" className="mt-6 grid gap-5 rounded-[1.7rem] border border-[#57232a] bg-[linear-gradient(115deg,#1a0e11,#0c0c0e)] p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7">
+    <div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.24em] text-[var(--partner-accent)]"><FaBasketball/> FAST 1V1 SCOREKEEPING</p><h2 className="mt-2 text-2xl font-black uppercase">Keep the game moving.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">Every official 1v1 Run Room has a live courtside board. Scorekeepers can select the scorer, tap 1s, 2s, or 3s, undo a correction, and send the final score for RCH review.</p></div>
+    <Link href={upcoming.find(s=>s.run.game_format==='1v1')?'/runs/'+upcoming.find(s=>s.run.game_format==='1v1')!.run_id+'#rch-live-game':'#partner-schedule'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--partner-accent)] px-5 text-xs font-black uppercase tracking-wider text-white transition hover:brightness-110">{upcoming.some(s=>s.run.game_format==='1v1')?'Open the live scorekeeper':'See official events'} <FaArrowRight/></Link>
+   </section>}
+
+   {isSyb&&settings.show_leaderboard&&<section id="partner-leaderboard" className="mt-14 scroll-mt-8 overflow-hidden rounded-[1.8rem] border border-[#54242b] bg-[linear-gradient(145deg,#150d0f,#090a0c_75%)]">
+    <div className="border-b border-white/10 p-5 sm:p-8"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.25em] text-[var(--partner-accent)]"><FaTrophy/> SYB OFFICIAL 1V1 RECORDS</p><h2 className="mt-2 text-3xl font-black uppercase tracking-tight sm:text-4xl">The leaderboard</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">Every spot is earned. Only confirmed SYB results count toward this board.</p></div><span className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-white/60"><FaShieldHalved className="text-[var(--partner-accent)]"/> Verified only</span></div></div>
+    {statsError?<p role="status" className="m-5 rounded-xl border border-amber-300/25 bg-amber-300/5 p-4 text-sm text-amber-100">{statsError}</p>:publicStats.leaderboard.length?<div className="p-5 sm:p-8">
+     <div className="grid gap-3 md:grid-cols-3">{publicStats.leaderboard.slice(0,3).map((player,index)=><article key={player.profile_id} className={'relative overflow-hidden rounded-2xl border p-4 sm:p-5 '+(index===0?'border-[#f51f31]/55 bg-[radial-gradient(circle_at_85%_10%,#45121b,#160d10_68%)] md:-translate-y-2':'border-white/10 bg-white/[.035]')}>
+      <div className="flex items-start justify-between"><span className="text-[9px] font-black uppercase tracking-[.2em] text-white/45">Rank {String(player.rank).padStart(2,'0')}</span>{index===0&&<FaCrown className="text-[#ff5967]"/>}</div>
+      <div className="mt-4 flex items-center gap-3">{player.avatar_url?<img src={player.avatar_url} alt="" className="h-12 w-12 rounded-full border border-white/15 object-cover"/>:<span className="grid h-12 w-12 place-items-center rounded-full border border-[#6d2931] bg-[#210e12] text-sm font-black text-[#ff8791]">{player.player_name.slice(0,1).toUpperCase()}</span>}<div className="min-w-0"><h3 className="truncate text-lg font-black uppercase">{player.player_name}</h3>{player.username&&<p className="truncate text-xs text-white/45">@{player.username}</p>}</div></div>
+      <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4"><div><small className="text-[8px] font-black uppercase tracking-wider text-white/40">Record</small><strong className="mt-1 block text-sm font-black">{player.wins}–{player.losses}</strong></div><div><small className="text-[8px] font-black uppercase tracking-wider text-white/40">Win rate</small><strong className="mt-1 block text-sm font-black">{formatPct(player.win_pct)}%</strong></div><div><small className="text-[8px] font-black uppercase tracking-wider text-white/40">Games</small><strong className="mt-1 block text-sm font-black">{player.games}</strong></div></div>
+     </article>)}</div>
+     {publicStats.leaderboard.length>3&&<div className="mt-5 overflow-hidden rounded-2xl border border-white/10"><div className="grid grid-cols-[55px_1fr_80px_70px] bg-white/[.04] px-4 py-3 text-[8px] font-black uppercase tracking-wider text-white/40 sm:grid-cols-[70px_1fr_110px_90px_100px]"><span>Rank</span><span>Player</span><span>Record</span><span className="sm:hidden">Win %</span><span className="hidden sm:block">Win rate</span><span className="hidden sm:block">Points</span></div>{publicStats.leaderboard.slice(3).map(player=><div key={player.profile_id} className="grid grid-cols-[55px_1fr_80px_70px] items-center border-t border-white/[.07] px-4 py-3 text-xs sm:grid-cols-[70px_1fr_110px_90px_100px]"><span className="font-mono font-bold text-[#ff8791]">#{player.rank}</span><span className="min-w-0 truncate font-bold">{player.player_name}{player.username&&<small className="ml-2 hidden text-white/40 sm:inline">@{player.username}</small>}</span><span className="font-mono font-bold">{player.wins}–{player.losses}</span><span>{formatPct(player.win_pct)}%</span><span className="hidden sm:block">{player.points_for}–{player.points_against}</span></div>)}</div>}
+    </div>:<div className="p-7 sm:p-10"><div className="mx-auto max-w-xl text-center"><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-[#6d2931] bg-[#210e12] text-2xl text-[var(--partner-accent)]"><FaBasketball/></span><p className="mt-5 text-[9px] font-black uppercase tracking-[.25em] text-[#ff7a86]">The record board is live</p><h3 className="mt-2 text-2xl font-black uppercase">The first spot is still open.</h3><p className="mt-3 text-sm leading-6 text-white/55">SYB’s leaderboard fills with confirmed results from official events. No made-up numbers. No unverified records. Just the work on the court.</p><Link href="#partner-schedule" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 text-xs font-black uppercase">Find your matchup <FaArrowRight/></Link></div></div>}
+   </section>}
+
+   {isSyb&&settings.show_video&&videoEmbed&&<section id="syb-film" className="mt-14 scroll-mt-8 overflow-hidden rounded-[1.8rem] border border-[#54242b] bg-[#100c0e]">
+    <div className="grid lg:grid-cols-[.72fr_1.28fr]">
+     <div className="flex flex-col justify-center p-6 sm:p-9"><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.25em] text-[var(--partner-accent)]"><FaPlay/> SYBHOOPS · THE TAPE</p><h2 className="mt-3 text-3xl font-black uppercase leading-[.95] sm:text-4xl">Featured matchup</h2><p className="mt-4 text-sm leading-6 text-white/55">{settings.subheadline}</p><p className="mt-5 flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-white"><FaCrown className="text-[var(--partner-accent)]"/>{settings.featured_video_label||'SYB FEATURE'}</p><a href="https://www.youtube.com/@SUPPORTYOURBROTHERS" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-11 w-fit items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 text-xs font-black uppercase">More SYB film <FaArrowRight/></a></div>
      <div className="aspect-video bg-black"><iframe className="h-full w-full" src={videoEmbed} title={'SYBHOOPS — '+settings.featured_video_label} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div>
     </div>
    </section>}
 
-   {isSyb&&settings.show_leaderboard&&<section className="mt-8 overflow-hidden rounded-3xl border border-[#4d1a20] bg-[linear-gradient(145deg,#160d0f,#090a0c_68%)]">
-    <div className="border-b border-white/10 p-5 sm:p-7"><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.24em] text-[var(--partner-accent)]"><FaTrophy/> SYB OFFICIAL 1V1 RECORDS</p><h2 className="mt-2 text-2xl font-black uppercase sm:text-3xl">The leaderboard</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#c1b3b6]">Only independently confirmed 1v1 results from official SYB events count here. The scorekeeper saves the game; RCH’s result review makes it count.</p></div><span className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase text-[#e6dadd]">ALL-TIME · VERIFIED</span></div>
-     {!statsError&&<div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">{([['Events',publicStats.events,<FaCalendarDays key="events"/>],['Upcoming',publicStats.upcoming_events,<FaBolt key="upcoming"/>],['Verified 1v1 games',publicStats.verified_matchups,<FaShieldHalved key="verified-games"/>],['Players ranked',publicStats.ranked_players,<FaUsers key="ranked-players"/>]] as [string,number,ReactNode][]).map(([label,value,icon])=><div key={label} className="rounded-2xl border border-[#4b2429] bg-black/30 p-4"><span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-[#b99da2]">{icon}{label}</span><strong className="mt-2 block text-3xl font-black tabular-nums text-white">{value}</strong></div>)}</div>}
-    </div>
-    {statsError?<p role="status" className="m-5 rounded-xl border border-amber-300/25 bg-amber-300/5 p-4 text-sm text-amber-100">{statsError}</p>:publicStats.leaderboard.length?<div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left"><thead className="bg-white/[.03] text-[10px] uppercase tracking-wider text-[#bca9ae]"><tr><th className="px-5 py-3">Rank / player</th><th className="px-3 py-3">Record</th><th className="px-3 py-3">Win %</th><th className="px-3 py-3">Points</th><th className="px-5 py-3 text-right">Last result</th></tr></thead><tbody>{publicStats.leaderboard.map((player,index)=><tr key={player.profile_id} className="border-t border-white/[.07]"><td className="px-5 py-4"><div className="flex items-center gap-3"><span className={'grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-black '+(index===0?'bg-[var(--partner-accent)] text-white':'bg-white/10 text-[#eadfe1]')}>{player.rank}</span>{player.avatar_url?<img src={player.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover"/>:<span className="grid h-10 w-10 place-items-center rounded-full bg-[#211316] text-xs font-black text-[#ff8c98]">{player.player_name.slice(0,1).toUpperCase()}</span>}<span><strong className="block text-sm font-black">{player.player_name}</strong>{player.username&&<small className="text-xs text-[#b99ea4]">@{player.username}</small>}</span></div></td><td className="px-3 py-4 font-mono text-sm font-bold">{player.wins}–{player.losses}</td><td className="px-3 py-4 text-sm">{formatPct(player.win_pct)}%</td><td className="px-3 py-4 text-sm tabular-nums">{player.points_for}–{player.points_against}</td><td className="px-5 py-4 text-right text-xs text-[#bca9ae]">{player.latest_match_at?new Date(player.latest_match_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—'}</td></tr>)}</tbody></table></div>:<div className="p-7 sm:p-9"><div className="mx-auto max-w-xl text-center"><span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-[#6d2931] bg-[#210e12] text-2xl text-[var(--partner-accent)]"><FaBasketball/></span><h3 className="mt-4 text-xl font-black uppercase">The first record is still open</h3><p className="mt-2 text-sm leading-6 text-[#c5b3b7]">SYB hasn’t posted a verified 1v1 result on Runs yet. Publish the next event, run the live board, and the leaderboard fills itself after RCH’s official score review.</p><Link href="#partner-schedule" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--partner-accent)] px-4 py-3 text-xs font-black uppercase">{settings.cta_label||'Find the next matchup'} <FaArrowRight/></Link></div></div>}
+   {isSyb&&settings.callout_title&&settings.callout_body&&<section className="mt-8 grid gap-5 rounded-[1.7rem] border border-white/10 bg-[linear-gradient(115deg,#171012,#0a0b0d)] p-5 sm:grid-cols-[.75fr_1.25fr] sm:items-center sm:p-8">
+    <div><p className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[.22em] text-[var(--partner-accent)]"><FaChartLine/> HOW SYB RUNS WORK</p><h2 className="mt-3 text-2xl font-black uppercase leading-tight">{settings.callout_title}</h2></div>
+    <div><p className="text-sm leading-7 text-white/60">{settings.callout_body}</p><p className="mt-4 rounded-xl border border-[#f51f31]/20 bg-[#f51f31]/[.06] p-3 text-xs font-bold leading-5 text-white/75">Check in through your free RCH profile, record the final score, and submit the result for confirmation. Official SYB events award {partner.reward_multiplier}× eligible XP.</p></div>
    </section>}
 
-   {isSyb&&settings.callout_title&&settings.callout_body&&<section className="mt-7 rounded-3xl border border-[#512028] bg-[radial-gradient(circle_at_85%_25%,#351217,#110c0d_62%)] p-6 sm:p-8"><p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.2em] text-[var(--partner-accent)]"><FaChartLine/> SYBHOOPS · OFFICIAL RUNS PARTNER</p><h2 className="mt-3 text-2xl font-black uppercase sm:text-3xl">{settings.callout_title}</h2><p className="mt-3 max-w-3xl text-sm leading-7 text-[#d2c2c5]">{settings.callout_body}</p></section>}
+   {settings.show_results&&!!recent.length&&<section className="mt-14"><div className="flex items-end justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.25em] text-[var(--partner-accent)]">THE ARCHIVE</p><h2 className="mt-2 text-3xl font-black uppercase">Results & Run Tape</h2><p className="mt-2 text-sm leading-6 text-white/50">Past events, official scores, and player-posted highlights.</p></div><FaChartLine className="mb-1 text-2xl text-[var(--partner-accent)]"/></div><div className="mt-5 grid gap-3 sm:grid-cols-2">{recent.map(s=><Link key={s.run_id} href={'/runs/'+s.run_id} className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.035] p-4 transition hover:border-[var(--partner-accent)]/50 hover:bg-white/[.06]"><span className="min-w-0"><strong className="block truncate text-sm font-black uppercase">{s.run.title}</strong><small className="mt-1 block text-xs text-white/45">{new Date(s.run.starts_at).toLocaleDateString()} · Official event archive</small></span><FaArrowRight className="shrink-0 text-white/40 transition group-hover:translate-x-1 group-hover:text-[var(--partner-accent)]"/></Link>)}</div></section>}
 
-   {settings.show_schedule&&<section id="partner-schedule" className="mt-8 scroll-mt-20">
-    <p className={'text-xs font-black uppercase tracking-widest '+(isSyb?'text-[var(--partner-accent)]':'text-[#79bdec]')}>{isSyb?'SYB PRESENTS · OFFICIAL 1V1 RUNS':'The REC · Organized games'}</p>
-    <h2 className="mt-2 text-2xl font-black uppercase">{isSyb?'The next matchup':'Upcoming sessions'}</h2>
-    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#acc8da]">{isSyb?'Find the next SYB 1v1 event, join through your free RCH profile, and track every confirmed result on this page. Every SYB event awards triple eligible XP/REP.':'Real-world basketball. Create a free RCH player profile to join, record your games, earn eligible rewards and share Run Tape highlights. Results and competitive rewards still follow RCH confirmation rules.'}</p>
-    {!upcoming.length?<div className={'mt-5 rounded-2xl border border-dashed p-7 text-sm '+(isSyb?'border-[#651923] bg-[#100d0e] text-[#e1c9cc]':'border-[#3a6686] bg-[#0b263e] text-[#b2ccdf]')}>{isSyb?'No sessions have been published in this Runs HQ yet. Follow @sybhoop for current matchups while SYB adds its next event here.':'No upcoming sessions published by this organizer yet. Follow their page and check back for the next drop.'}</div>:<div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{upcoming.map(s=><Link key={s.run_id} href={'/runs/'+s.run_id} className={'rounded-2xl border p-5 transition '+(isSyb?'border-[#4e171d] bg-[#110f10] hover:border-[var(--partner-accent)]':'border-[#365d7c] bg-[#0c2740] hover:border-[#80c3f7]')}>
-     <div className="flex items-center justify-between gap-2"><span className={'rounded-full px-3 py-1 text-[10px] font-black uppercase '+(isSyb?'bg-[var(--partner-accent)] text-white':'bg-[#195f99]')}>{s.experience==='rec'?'THE REC · Organized':'THE PARK · Pickup'}</span><span className="text-xs font-black text-[#97d2fa]">{s.run.game_format}</span></div>
-     <h3 className="mt-4 text-xl font-black">{s.run.title}</h3>{isSyb&&s.run.description&&<p className="mt-2 line-clamp-2 text-xs leading-5 text-[#c5b4b7]">{s.run.description}</p>}
-     {s.reward_multiplier>1&&<p className="mt-2 inline-flex rounded-full border border-[#edca71]/50 bg-[#392d13] px-3 py-1 text-[10px] font-black uppercase text-[#ffe5a2]">{s.reward_multiplier}× event XP / REP</p>}
-     <p className="mt-3 flex items-center gap-2 text-xs text-[#c0d9e9]"><FaCalendarDays/>{new Date(s.run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',weekday:'short',hour:'numeric',minute:'2-digit'})}</p>
-     <p className="mt-2 flex items-start gap-2 text-xs text-[#bbd2e1]"><FaLocationDot className="shrink-0"/>{s.run.location}</p>
-     <div className="mt-4 flex items-center justify-between border-t border-[#365777] pt-4 text-sm"><span className="font-black">{s.price_cents?'$'+(s.price_cents/100).toFixed(2):'Free'} <small className="block font-normal text-[#9fbacc]">{s.price_cents?'Paid to organizer':'No advertised fee'}</small></span><span className={'inline-flex items-center gap-1 font-black '+(isSyb?'text-[var(--partner-accent)]':'text-[#8ed2ff]')}>View Run <FaArrowRight/></span></div>
-    </Link>)}</div>}
-   </section>}
-
-   {settings.show_results&&!!recent.length&&<section className="mt-10"><h2 className="text-xl font-black uppercase">Results & Run Tape</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#acc8da]">Open a past event to view its recorded scores and player-posted highlights.</p><div className="mt-4 grid gap-2 sm:grid-cols-2">{recent.map(s=><Link key={s.run_id} href={'/runs/'+s.run_id} className="flex items-center justify-between rounded-xl border border-[#2f5878] bg-[#0b243c] p-4 text-sm"><span><strong className="block">{s.run.title}</strong><small className="text-[#a6c9e4]">{new Date(s.run.starts_at).toLocaleDateString()} · Results & highlights</small></span><FaArrowRight className="text-[#95d0fa]"/></Link>)}</div></section>}
-   <div className="mt-9 flex items-start gap-3 rounded-2xl border border-[#365d7d] p-5 text-xs leading-6 text-[#aac8dd]"><FaUsers className="mt-1 shrink-0 text-[#8acafa]"/><span>Partner organizers control their own schedules, facilities and event fees. RCH does not certify game statistics simply because a session appears here; competitive badges and rankings still require independently verified results.</span></div>
+   <footer className="mt-14 flex flex-col gap-4 border-t border-white/10 py-7 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
+    <p className="max-w-2xl leading-6">SYB organizers control their own schedule, venues, and event fees. RCH verifies competitive results before they count toward official rankings.</p>
+    <Link href="/runs/partners" className="inline-flex min-h-10 items-center gap-2 font-black uppercase tracking-wider text-white/70 transition hover:text-white"><FaShieldHalved className="text-[var(--partner-accent)]"/> RCH Runs Partner Network <FaArrowRight/></Link>
+   </footer>
   </div>
  </main>;
 }
