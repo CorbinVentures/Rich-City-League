@@ -1,3 +1,54 @@
+-- The payments table predates tracked migrations in production. Create its
+-- canonical base here so a clean database can replay registration workflows.
+DO $$
+BEGIN
+  CREATE TYPE public.payment_status AS ENUM ('pending', 'paid', 'failed', 'refunded', 'waived');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+  IF to_regclass('public.payments') IS NULL THEN
+    CREATE TABLE public.payments (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      registration_id uuid NOT NULL REFERENCES public.registrations(id) ON DELETE CASCADE,
+      amount_cents integer NOT NULL CHECK (amount_cents >= 0),
+      currency text NOT NULL DEFAULT 'usd',
+      status public.payment_status NOT NULL DEFAULT 'pending',
+      provider text,
+      provider_payment_id text,
+      paid_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT payments_provider_payment_id_key UNIQUE (provider_payment_id)
+    );
+
+    ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+    REVOKE ALL ON TABLE public.payments FROM anon;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.payments TO authenticated;
+    GRANT ALL ON TABLE public.payments TO service_role;
+
+    CREATE POLICY "staff manage payments"
+      ON public.payments FOR ALL TO authenticated
+      USING (public.is_staff_or_admin())
+      WITH CHECK (public.is_staff_or_admin());
+
+    CREATE POLICY "users view own payments"
+      ON public.payments FOR SELECT TO authenticated
+      USING (
+        EXISTS (
+          SELECT 1
+          FROM public.registrations r
+          WHERE r.id = payments.registration_id
+            AND r.applicant_id = (SELECT auth.uid())
+        )
+        OR public.is_staff_or_admin()
+      );
+  END IF;
+END
+$$;
+
 alter table public.divisions
   add column if not exists min_registration_age smallint,
   add column if not exists max_registration_age smallint,
