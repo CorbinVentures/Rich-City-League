@@ -380,7 +380,7 @@ begin
   perform public.unlock_run_badges(actor);
   return case when awarded then v_reward else 0 end;
 end $$;
-grant execute on function public.check_in_to_run(uuid) to authenticated;
+revoke all on function public.check_in_to_run(uuid) from public,anon,authenticated;
 
 create or replace function public.claim_latest_run_highlight(p_run uuid)
 returns table(rep_awarded integer,post_id uuid) language plpgsql security definer set search_path=public as $$

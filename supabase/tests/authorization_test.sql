@@ -114,13 +114,13 @@ $$, '42501', 'Referral totals are computed by the server',
 select lives_ok($$
   update public.profiles set bio='Basketball member' where id=auth.uid()
 $$, 'ordinary members may still edit normal profile fields');
-select throws_ok($
+select throws_ok($registration$
   insert into public.registrations
     (id, season_id, division_id, applicant_id, first_name, last_name, email)
   values
     ('22222222-aaaa-aaaa-aaaa-222222222222', '77777777-7777-7777-7777-777777777777',
      '99999999-9999-9999-9999-999999999999', auth.uid(), 'Test', 'Player', 'player@example.test')
-$, '42501', null, 'members cannot bypass the validated registration endpoint');
+$registration$, '42501', null, 'members cannot bypass the validated registration endpoint');
 select throws_ok($$
   insert into public.registrations
     (season_id, division_id, applicant_id, first_name, last_name, email)
