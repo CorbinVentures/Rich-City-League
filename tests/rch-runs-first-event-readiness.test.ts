@@ -27,7 +27,8 @@ describe('RUNS Richmond first-event readiness',()=>{
   expect(room).toContain("db.rpc('rch_claim_checked_in_run_highlight'");
   expect(room).toContain('35*Math.max(partner?.reward_multiplier||1,weekendDoubleRep?2:1)');
   expect(media).toContain('35 * rewardMultiplier');
-  expect(media).toContain('rch_runs_partner_sessions').toContain('rch_weekend_circuit_events');
+  expect(media).toContain('rch_runs_partner_sessions');
+  expect(media).toContain('rch_weekend_circuit_events');
  });
  it('never exposes old attendance earning calls in any mobile entry point',()=>{
   expect(room).toContain("db.rpc('rch_check_in_with_code'");
