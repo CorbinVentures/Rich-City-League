@@ -107,63 +107,63 @@ export function RunOperationsHQ({runId,hostId}:{runId:string;hostId:string}) {
   };
 
   if(!user||!loaded||!canAccess)return null;
-  return <section aria-labelledby="rch-runs-ops-title" className="mt-6 rounded-3xl border border-[#376a89] bg-[#071f34] p-5 text-white sm:p-7">
+  return <section aria-labelledby="rch-runs-ops-title" className="mt-6 rounded-3xl border border-[#616161] bg-[#1b1b1b] p-5 text-white sm:p-7">
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.18em] text-[#94d2ff]"><FaClipboardCheck/> RCH Runs · Organizer OS</p>
+        <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.18em] text-[#c8c8c8]"><FaClipboardCheck/> RCH Runs · Organizer OS</p>
         <h2 id="rch-runs-ops-title" className="mt-2 text-2xl font-black uppercase">Run Operations HQ</h2>
-        <p className="mt-2 max-w-2xl text-sm text-[#a9c7da]">Scoped officials, accountable preparation and championship review. Every change is recorded in an administrative audit trail.</p>
+        <p className="mt-2 max-w-2xl text-sm text-[#c2c2c2]">Scoped officials, accountable preparation and championship review. Every change is recorded in an administrative audit trail.</p>
       </div>
-      <span className="rounded-full border border-[#4d7898] px-3 py-1 text-xs font-bold">{isManager?'Run manager':ownRole}</span>
+      <span className="rounded-full border border-[#717171] px-3 py-1 text-xs font-bold">{isManager?'Run manager':ownRole}</span>
     </div>
-    {!available&&<p role="alert" className="mt-4 rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-sm">The new Organizer OS database migration is not active yet. Existing run tools remain available.</p>}
-    {feedback&&<p role="status" className="mt-4 rounded-lg border border-[#4b7ea2] bg-[#0d3552] p-3 text-sm">{feedback}</p>}
+    {!available&&<p role="alert" className="mt-4 rounded-lg border border-gray-500/40 bg-gray-950/30 p-3 text-sm">The new Organizer OS database migration is not active yet. Existing run tools remain available.</p>}
+    {feedback&&<p role="status" className="mt-4 rounded-lg border border-[#767676] bg-[#2f2f2f] p-3 text-sm">{feedback}</p>}
     {available&&<div className="mt-6 grid gap-5 lg:grid-cols-2">
-      <div className="rounded-2xl border border-[#345571] bg-[#0c2b44] p-4">
+      <div className="rounded-2xl border border-[#505050] bg-[#262626] p-4">
         <h3 className="flex items-center gap-2 text-sm font-black uppercase"><FaCircleCheck/> Game Day Readiness</h3>
-        <p className="mt-1 text-xs text-[#98bcd4]">{taskRows.filter(t=>t.completed).length} of {tasks.length} checks completed</p>
+        <p className="mt-1 text-xs text-[#b6b6b6]">{taskRows.filter(t=>t.completed).length} of {tasks.length} checks completed</p>
         <div className="mt-4 space-y-2">{tasks.map(task=>{
           const record=taskRows.find(t=>t.task_code===task.code);
           return <button type="button" key={task.code} disabled={Boolean(busy)}
             onClick={()=>void act(task.code,'rch_set_run_operation',{p_run:runId,p_task:task.code,p_complete:!record?.completed,p_note:record?.note??''},task.label+' updated.')}
             aria-pressed={Boolean(record?.completed)}
-            className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-[#42617a] bg-[#082033] px-3 py-2 text-left text-xs font-semibold disabled:opacity-50">
-            <span className={'grid h-5 w-5 shrink-0 place-items-center rounded border '+(record?.completed?'border-emerald-400 bg-emerald-500/20 text-emerald-300':'border-[#7896aa] text-[#c1d6e4]')}>{record?.completed?'✓':''}</span>
+            className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-[#5c5c5c] bg-[#1c1c1c] px-3 py-2 text-left text-xs font-semibold disabled:opacity-50">
+            <span className={'grid h-5 w-5 shrink-0 place-items-center rounded border '+(record?.completed?'border-gray-400 bg-gray-500/20 text-gray-300':'border-[#919191] text-[#d3d3d3]')}>{record?.completed?'✓':''}</span>
             {task.label}
           </button>;
         })}</div>
       </div>
-      <div className="rounded-2xl border border-[#345571] bg-[#0c2b44] p-4">
+      <div className="rounded-2xl border border-[#505050] bg-[#262626] p-4">
         <h3 className="flex items-center gap-2 text-sm font-black uppercase"><FaPeopleGroup/> Run Staff</h3>
-        <p className="mt-1 text-xs text-[#98bcd4]">Scorekeepers and cohosts can run the live scoreboard after the host assigns teams. Only the host or RCH staff can start a game or change team setup.</p>
-        <div className="mt-4 space-y-2">{operators.map(o=><div key={o.profile_id} className="flex items-center justify-between gap-2 rounded-lg border border-[#42617a] p-3 text-xs">
-          <span className="min-w-0 truncate"><strong>{handles[o.profile_id]||o.profile_id.slice(0,8)}</strong> <span className="ml-1 text-[#8fbbdb]">· {o.role}</span></span>
-          {isManager&&<button disabled={Boolean(busy)} onClick={()=>void act(o.profile_id,'rch_manage_run_operator',{p_run:runId,p_profile:o.profile_id,p_role:o.role,p_enable:false},'Operator access removed.')} className="rounded-md border border-[#658097] px-2 py-1 disabled:opacity-50">Remove</button>}
+        <p className="mt-1 text-xs text-[#b6b6b6]">Scorekeepers and cohosts can run the live scoreboard after the host assigns teams. Only the host or RCH staff can start a game or change team setup.</p>
+        <div className="mt-4 space-y-2">{operators.map(o=><div key={o.profile_id} className="flex items-center justify-between gap-2 rounded-lg border border-[#5c5c5c] p-3 text-xs">
+          <span className="min-w-0 truncate"><strong>{handles[o.profile_id]||o.profile_id.slice(0,8)}</strong> <span className="ml-1 text-[#b4b4b4]">· {o.role}</span></span>
+          {isManager&&<button disabled={Boolean(busy)} onClick={()=>void act(o.profile_id,'rch_manage_run_operator',{p_run:runId,p_profile:o.profile_id,p_role:o.role,p_enable:false},'Operator access removed.')} className="rounded-md border border-[#7c7c7c] px-2 py-1 disabled:opacity-50">Remove</button>}
         </div>)}
-        {!operators.length&&<p className="rounded-lg border border-dashed border-[#42617a] p-3 text-xs text-[#a6c9e2]">No additional officials appointed.</p>}
+        {!operators.length&&<p className="rounded-lg border border-dashed border-[#5c5c5c] p-3 text-xs text-[#c3c3c3]">No additional officials appointed.</p>}
         </div>
-        {isManager&&<div className="mt-4 space-y-3 border-t border-[#345571] pt-4">
-          <label className="block text-xs font-bold text-[#a7c9e1]">RCH member username
-            <input value={username} onChange={e=>setUsername(e.target.value)} placeholder="@username" maxLength={60} className="mt-2 min-h-11 w-full rounded-lg border border-[#51738e] bg-[#061827] px-3 text-sm text-white"/>
+        {isManager&&<div className="mt-4 space-y-3 border-t border-[#505050] pt-4">
+          <label className="block text-xs font-bold text-[#c4c4c4]">RCH member username
+            <input value={username} onChange={e=>setUsername(e.target.value)} placeholder="@username" maxLength={60} className="mt-2 min-h-11 w-full rounded-lg border border-[#6e6e6e] bg-[#151515] px-3 text-sm text-white"/>
           </label>
-          <select value={role} onChange={e=>setRole(e.target.value as Operator['role'])} aria-label="Assign run role" className="min-h-11 w-full rounded-lg border border-[#51738e] bg-[#061827] px-3 text-sm text-white">
+          <select value={role} onChange={e=>setRole(e.target.value as Operator['role'])} aria-label="Assign run role" className="min-h-11 w-full rounded-lg border border-[#6e6e6e] bg-[#151515] px-3 text-sm text-white">
             <option value="official">Independent official</option><option value="cohost">Cohost</option><option value="scorekeeper">Scorekeeper</option>
           </select>
-          <button disabled={Boolean(busy)||!username.trim()} onClick={()=>void addOperator()} className="min-h-11 rounded-lg bg-[#4cacf3] px-4 text-xs font-black text-[#041e32] disabled:opacity-50">Appoint member</button>
+          <button disabled={Boolean(busy)||!username.trim()} onClick={()=>void addOperator()} className="min-h-11 rounded-lg bg-[#9d9d9d] px-4 text-xs font-black text-[#1a1a1a] disabled:opacity-50">Appoint member</button>
         </div>}
       </div>
     </div>}
-    {available&&takeoverCount>0&&<div className="mt-5 rounded-2xl border border-[#997741] bg-[#262a28] p-4">
-      <h3 className="flex items-center gap-2 text-sm font-black uppercase text-[#ffe0a3]"><FaShieldHalved/> Independent Takeover Certification</h3>
-      <p className="mt-2 text-xs leading-5 text-[#e6d5b5]">An accepted Crew Takeover must have an official who is neither a player, score submitter nor member of either crew. The official certifies the match before the final opponent confirmation activates ratings and transfers territory.</p>
-      {canCertify&&<div className="mt-4 space-y-3">{matches.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#7b6951] p-3">
+    {available&&takeoverCount>0&&<div className="mt-5 rounded-2xl border border-[#7a7a7a] bg-[#292929] p-4">
+      <h3 className="flex items-center gap-2 text-sm font-black uppercase text-[#e2e2e2]"><FaShieldHalved/> Independent Takeover Certification</h3>
+      <p className="mt-2 text-xs leading-5 text-[#d6d6d6]">An accepted Crew Takeover must have an official who is neither a player, score submitter nor member of either crew. The official certifies the match before the final opponent confirmation activates ratings and transfers territory.</p>
+      {canCertify&&<div className="mt-4 space-y-3">{matches.map(m=><div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#6b6b6b] p-3">
         <span className="text-sm font-bold">Pending result · {m.home_score} – {m.away_score}</span>
-        {attested.some(a=>a.match_id===m.id)?<span className="text-xs font-bold text-emerald-200">Official proof recorded</span>:
-          <button disabled={Boolean(busy)} onClick={()=>void act(m.id,'rch_certify_ranked_title_match',{p_match:m.id,p_note:''},'Official certification recorded. Competitors can now finalize the verified result.')} className="min-h-10 rounded-lg bg-[#efd49a] px-4 text-xs font-black text-[#241706] disabled:opacity-50">Certify Takeover Result</button>}
+        {attested.some(a=>a.match_id===m.id)?<span className="text-xs font-bold text-gray-200">Official proof recorded</span>:
+          <button disabled={Boolean(busy)} onClick={()=>void act(m.id,'rch_certify_ranked_title_match',{p_match:m.id,p_note:''},'Official certification recorded. Competitors can now finalize the verified result.')} className="min-h-10 rounded-lg bg-[#d6d6d6] px-4 text-xs font-black text-[#191919] disabled:opacity-50">Certify Takeover Result</button>}
       </div>)}
-      {!matches.length&&<p className="text-xs text-[#d9c7a7]">No pending ranked result to certify yet.</p>}
+      {!matches.length&&<p className="text-xs text-[#c9c9c9]">No pending ranked result to certify yet.</p>}
       </div>}
-      {!canCertify&&<p className="mt-3 text-xs text-[#d9c7a7]">Only an appointed independent official can certify from this panel. Authorized RCH staff can oversee results through administrative tools.</p>}
+      {!canCertify&&<p className="mt-3 text-xs text-[#c9c9c9]">Only an appointed independent official can certify from this panel. Authorized RCH staff can oversee results through administrative tools.</p>}
     </div>}
   </section>;
 }

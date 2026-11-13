@@ -227,32 +227,32 @@ export default function RunHighlightPublisher() {
   };
 
   if (!run) {
-    return <main className="min-h-screen bg-[#03070d] p-6 text-white"><Container maxWidth="md"><p className="rounded-3xl border border-white/10 p-10 text-center text-white/45">{error || 'Loading Run Tape…'}</p></Container></main>;
+    return <main className="min-h-screen bg-[#070707] p-6 text-white"><Container maxWidth="md"><p className="rounded-3xl border border-white/10 p-10 text-center text-white/45">{error || 'Loading Run Tape…'}</p></Container></main>;
   }
 
   return (
-    <main className="min-h-screen bg-[#03070d] pb-28 text-white">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#03070d]/95 backdrop-blur-xl">
+    <main className="min-h-screen bg-[#070707] pb-28 text-white">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070707]/95 backdrop-blur-xl">
         <Container maxWidth="lg" className="flex h-16 items-center gap-3 px-3 sm:h-20 sm:px-4">
           <Link href={`/runs/${run.id}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 text-white/60" aria-label="Back to Run Room"><FaArrowLeft /></Link>
           <div className="min-w-0 flex-1"><p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-orange">RCL Run Tape</p><h1 className="truncate font-display text-xl font-black uppercase sm:text-2xl">{run.title}</h1></div>
-          {participant && <span className="hidden items-center gap-1.5 rounded-xl border border-emerald-400/20 bg-emerald-400/[.05] px-3 py-2 text-[10px] font-black uppercase text-emerald-300 sm:inline-flex"><FaCircleCheck />Participant</span>}
+          {participant && <span className="hidden items-center gap-1.5 rounded-xl border border-gray-400/20 bg-gray-400/[.05] px-3 py-2 text-[10px] font-black uppercase text-gray-300 sm:inline-flex"><FaCircleCheck />Participant</span>}
         </Container>
       </header>
 
       <Container maxWidth="lg" className="py-6 sm:py-9">
-        <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.12),transparent_36%),#07111b] p-5 sm:p-7">
+        <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgb(123 123 123 / .12),transparent_36%),#101010] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaBasketball className="mr-1 inline" />{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Show what happened.</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Players who checked in with their host-issued court code can earn one +{35 * rewardMultiplier} XP highlight reward after publishing eligible media. A joined roster spot alone does not award points.</p>
         </section>
 
-        <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#07111b] p-2">
+        <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#101010] p-2">
           <button type="button" onClick={() => switchMode('clip')} className={`rounded-xl border px-4 py-3 text-left ${mode === 'clip' ? 'border-rcl-orange/35 bg-rcl-orange/[.08]' : 'border-transparent text-white/40'}`}><span className="flex items-center gap-2 text-xs font-black uppercase"><FaVideo />Drop a Clip</span><small className="mt-1 block text-[10px] text-white/30">One video · up to 50 MB</small></button>
           <button type="button" onClick={() => switchMode('moment')} className={`rounded-xl border px-4 py-3 text-left ${mode === 'moment' ? 'border-rcl-blue/35 bg-rcl-blue/[.08]' : 'border-transparent text-white/40'}`}><span className="flex items-center gap-2 text-xs font-black uppercase"><FaCamera />Post Photos</span><small className="mt-1 block text-[10px] text-white/30">Up to {SOCIAL_MAX_IMAGES} photos</small></button>
         </div>
 
-        <form onSubmit={publish} className="overflow-hidden rounded-3xl border border-white/10 bg-[#08131e]">
+        <form onSubmit={publish} className="overflow-hidden rounded-3xl border border-white/10 bg-[#111111]">
           <div className="space-y-5 p-5 sm:p-7">
             <div>
               <label className="text-[10px] font-black uppercase tracking-[.18em] text-white/35">Caption / context</label>
@@ -267,13 +267,13 @@ export default function RunHighlightPublisher() {
               {mode === 'moment' && files.length > 0 && files.length < SOCIAL_MAX_IMAGES && <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-black text-white/55">+ Add more photos</button>}
             </div>
 
-            {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Rostered participant.</b> After a host-issued in-person check-in, an eligible published highlight may earn +{35 * rewardMultiplier} XP. Media can still be shared without a reward.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. XP rewards require a verified court-code check-in.</div>}
+            {participant ? <div className="rounded-2xl border border-gray-400/15 bg-gray-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-gray-300">Rostered participant.</b> After a host-issued in-person check-in, an eligible published highlight may earn +{35 * rewardMultiplier} XP. Media can still be shared without a reward.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. XP rewards require a verified court-code check-in.</div>}
 
             <label className="flex min-h-12 items-start gap-3 rounded-xl border border-white/15 bg-white/[.03] p-3 text-xs leading-5 text-white/75">
-              <input type="checkbox" required checked={mediaPermission} onChange={e=>setMediaPermission(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#e65782]"/>
+              <input type="checkbox" required checked={mediaPermission} onChange={e=>setMediaPermission(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#797979]"/>
               <span>I have permission to share this footage and any identifiable people shown. I will not present an unverified guest or celebrity appearance as confirmed, or expose someone&apos;s live location.</span>
             </label>
-            {error && <p className="rounded-2xl border border-red-400/20 bg-red-400/[.05] p-4 text-sm text-red-100">{error}</p>}
+            {error && <p className="rounded-2xl border border-gray-400/20 bg-gray-400/[.05] p-4 text-sm text-gray-100">{error}</p>}
             {progress && <p className="text-xs font-black uppercase tracking-wider text-rcl-blue">{progress}</p>}
 
             <button disabled={busy || !files.length || !mediaPermission} className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-rcl-orange px-5 py-4 text-sm font-black uppercase tracking-wider text-black disabled:opacity-45">{busy ? progress || 'Publishing…' : <><FaBasketball />Publish to Run Tape</>}</button>

@@ -60,12 +60,12 @@
 }
 .rch-arena-panel {
   background:linear-gradient(160deg,var(--rch-brand-surface) 0%,var(--rch-brand-surface) 100%);
-  box-shadow:0 12px 30px rgba(0,0,0,.21);
+  box-shadow:0 12px 30px rgb(0 0 0 / .21);
 }
 .rch-arena-game-card {
   border:1px solid rgb(var(--rch-brand-accent-rgb) / .40)!important;
   background:linear-gradient(160deg,rgb(var(--rch-brand-surface-rgb) / .98),rgb(var(--rch-brand-surface-rgb) / .99))!important;
-  box-shadow:0 6px 26px rgba(0,0,0,.15);
+  box-shadow:0 6px 26px rgb(0 0 0 / .15);
 }
 .rch-arena-shell .rch-arena-game-card:hover {
   border-color:var(--rch-brand-accent)!important;
@@ -123,9 +123,9 @@
   font-size: 19px;
   font-variant-numeric: tabular-nums;
 }
-.rch-run-rank-gold { background: #f7c54d; color: var(--rch-brand-surface); }
+.rch-run-rank-gold { background: #c7c7c7; color: var(--rch-brand-surface); }
 .rch-run-rank-silver { background: var(--rch-brand-copy); color: var(--rch-brand-surface); }
-.rch-run-rank-bronze { background: #dda26e; color: var(--rch-brand-surface); }
+.rch-run-rank-bronze { background: #ababab; color: var(--rch-brand-surface); }
 .rch-run-rank-regular { background: var(--rch-brand-raised); color: var(--rch-brand-ink); }
 .rch-run-rank-details { min-width: 0; }
 .rch-run-rank-name {
@@ -153,14 +153,14 @@
   text-transform: uppercase;
 }
 .rch-run-rank-status-sample {
-  border-color: #c19641;
-  background: rgba(123, 81, 23, .27);
-  color: #f9d989;
+  border-color: #999999;
+  background: rgb(86 86 86 / .27);
+  color: #dadada;
 }
 .rch-run-rank-status-verified {
-  border-color: #439e7f;
-  background: rgba(32, 109, 80, .24);
-  color: #b6ffe1;
+  border-color: #888888;
+  background: rgb(91 91 91 / .24);
+  color: #ededed;
 }
 .rch-run-rank-location {
   margin-top: 5px;

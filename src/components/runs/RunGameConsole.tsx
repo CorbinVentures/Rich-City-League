@@ -50,7 +50,7 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
   const [error,setError]=useState('');
   const [operatorCanScore,setOperatorCanScore]=useState(false);
   const canOperate=canManage||operatorCanScore;
-  const consoleStyle={'--score-accent':brandColor||'#46b1ff'} as CSSProperties;
+  const consoleStyle={'--score-accent':brandColor||'#a0a0a0'} as CSSProperties;
 
   const load=useCallback(async()=>{
     if(!db){setLoading(false);return;}
@@ -177,7 +177,7 @@ export function RunGameConsole({ runId, canOperate: canManage, format, teams, me
           <label>TARGET SCORE<select value={target} onChange={e=>setTarget(Number(e.target.value))}>{[11,15,21,25].map(n=><option key={n} value={n}>{n} points</option>)}</select></label>
           <label>SCORING<select value={scoringProfile} onChange={e=>setScoringProfile(e.target.value as typeof scoringProfile)}><option value="one_two_three">1s · 2s · 3s</option><option value="two_three">2s · 3s</option></select></label>
         </div>
-        {home&&away&&(!roster(home).length||!roster(away).length)&&<p className="mt-3 text-xs font-semibold text-amber-200">Assign at least one registered player to each team before starting.</p>}
+        {home&&away&&(!roster(home).length||!roster(away).length)&&<p className="mt-3 text-xs font-semibold text-gray-200">Assign at least one registered player to each team before starting.</p>}
         <button type="button" disabled={busy||!canOperate||!canManage||!home||!away||home===away||!roster(home).length||!roster(away).length||(isOneOnOne&&(roster(home).length!==1||roster(away).length!==1))} onClick={()=>void startGame()}><FaCirclePlay/> {isOneOnOne?'START 1V1 SCOREBOARD':'START LIVE GAME'}</button>
       </div>:
       <>

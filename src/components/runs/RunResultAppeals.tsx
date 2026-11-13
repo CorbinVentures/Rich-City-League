@@ -55,38 +55,38 @@ export function RunResultAppeals({runId,hostId}:{runId:string;hostId:string}){
    else{setNotice('Your case is in the RCH integrity review queue.');setDetails('');setMatch('');setRevision(v=>v+1);}
    setBusy(false);
  };
- return <section aria-label="Run score disputes and appeals" className="mt-6 rounded-3xl border border-[#4c587a] bg-[#101a2e] p-5 text-white sm:p-7">
-   <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#b2c8ff]"><FaShieldHalved/> RCH Competition Integrity</p>
+ return <section aria-label="Run score disputes and appeals" className="mt-6 rounded-3xl border border-[#585858] bg-[#191919] p-5 text-white sm:p-7">
+   <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#c7c7c7]"><FaShieldHalved/> RCH Competition Integrity</p>
    <h2 className="mt-2 text-2xl font-black uppercase">Fair Play &amp; Appeals</h2>
-   <p className="mt-2 max-w-2xl text-sm leading-6 text-[#a4b7da]">Involved players and the host may report scoring, eligibility, conduct or integrity concerns within 14 days. Staff adjudication is recorded. Verified ratings cannot be silently overwritten.</p>
-   {error&&<p role="alert" className="mt-4 rounded-xl border border-rose-500/40 p-3 text-sm text-rose-200">{error}</p>}
-   {notice&&<p role="status" className="mt-4 rounded-xl border border-[#5984b0] p-3 text-sm">{notice}</p>}
-   {cases.length>0&&<div className="mt-4 space-y-2">{cases.map(c=><div key={c.id} className="rounded-xl border border-[#3f5679] bg-[#0d2035] p-3 text-xs">
-      <span className="font-black uppercase text-[#a7caf8]">{c.status.replaceAll('_',' ')}</span>
+   <p className="mt-2 max-w-2xl text-sm leading-6 text-[#b5b5b5]">Involved players and the host may report scoring, eligibility, conduct or integrity concerns within 14 days. Staff adjudication is recorded. Verified ratings cannot be silently overwritten.</p>
+   {error&&<p role="alert" className="mt-4 rounded-xl border border-gray-500/40 p-3 text-sm text-gray-200">{error}</p>}
+   {notice&&<p role="status" className="mt-4 rounded-xl border border-[#7e7e7e] p-3 text-sm">{notice}</p>}
+   {cases.length>0&&<div className="mt-4 space-y-2">{cases.map(c=><div key={c.id} className="rounded-xl border border-[#545454] bg-[#1d1d1d] p-3 text-xs">
+      <span className="font-black uppercase text-[#c6c6c6]">{c.status.replaceAll('_',' ')}</span>
       <span className="ml-2">{reasons.find(r=>r[0]===c.reason)?.[1]||c.reason}</span>
-      <span className="ml-2 text-[#a3b6d0]">{new Date(c.created_at).toLocaleDateString()}</span>
-      {c.resolution_notes&&<p className="mt-2 leading-5 text-[#bccce1]">{c.resolution_notes}</p>}
+      <span className="ml-2 text-[#b4b4b4]">{new Date(c.created_at).toLocaleDateString()}</span>
+      {c.resolution_notes&&<p className="mt-2 leading-5 text-[#cacaca]">{c.resolution_notes}</p>}
    </div>)}</div>}
    {eligible.length>0&&<div className="mt-5 grid gap-3 md:grid-cols-2">
      <label className="text-xs font-black">Match
-      <select value={match} onChange={e=>setMatch(e.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-[#506580] bg-[#07182b] px-3 text-sm text-white">
+      <select value={match} onChange={e=>setMatch(e.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-[#626262] bg-[#161616] px-3 text-sm text-white">
        <option value="">Select your match</option>
        {eligible.filter(m=>!openCase(m.id)).map(m=><option key={m.id} value={m.id}>{new Date(m.submitted_at).toLocaleDateString()} · {m.home_score}–{m.away_score} · {m.status}</option>)}
       </select>
      </label>
      <label className="text-xs font-black">Reason
-      <select value={reason} onChange={e=>setReason(e.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-[#506580] bg-[#07182b] px-3 text-sm text-white">
+      <select value={reason} onChange={e=>setReason(e.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-[#626262] bg-[#161616] px-3 text-sm text-white">
        {reasons.map(([value,label])=><option value={value} key={value}>{label}</option>)}
       </select>
      </label>
      <label className="text-xs font-black md:col-span-2">Explain what happened
       <textarea value={details} onChange={e=>setDetails(e.target.value.slice(0,1800))} rows={3} maxLength={1800}
-       placeholder="Include the correct score, what you witnessed and any available evidence…" className="mt-2 w-full rounded-lg border border-[#506580] bg-[#07182b] p-3 text-sm text-white"/>
+       placeholder="Include the correct score, what you witnessed and any available evidence…" className="mt-2 w-full rounded-lg border border-[#626262] bg-[#161616] p-3 text-sm text-white"/>
      </label>
      <div className="md:col-span-2">
-       <button type="button" disabled={busy||!selected||details.trim().length<15} onClick={()=>void submit()} className="flex min-h-11 items-center gap-2 rounded-xl bg-[#7395e8] px-5 text-xs font-black text-[#091428] disabled:opacity-50"><FaFlag/> Submit integrity case</button>
+       <button type="button" disabled={busy||!selected||details.trim().length<15} onClick={()=>void submit()} className="flex min-h-11 items-center gap-2 rounded-xl bg-[#949494] px-5 text-xs font-black text-[#131313] disabled:opacity-50"><FaFlag/> Submit integrity case</button>
      </div>
    </div>}
-   {eligible.length===0&&cases.length===0&&<p className="mt-4 text-xs text-[#95add0]">An official ranked result will unlock appeals for its participants and host.</p>}
+   {eligible.length===0&&cases.length===0&&<p className="mt-4 text-xs text-[#aaaaaa]">An official ranked result will unlock appeals for its participants and host.</p>}
  </section>;
 }

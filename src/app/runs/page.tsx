@@ -451,7 +451,7 @@ export default function RunsPage() {
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="rch-program-brand-lockup">
             <ProgramEmblem program="runs" className="rch-program-emblem-runs" priority/>
-            <div><h1 className="text-3xl font-black">Runs</h1><p className="mt-1 text-sm text-[#d3deef]">Find your next game.</p></div></div>
+            <div><h1 className="text-3xl font-black">Runs</h1><p className="mt-1 text-sm text-[#dddddd]">Find your next game.</p></div></div>
         </header>
       </Container>
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
@@ -476,15 +476,15 @@ export default function RunsPage() {
             <button type="button" className="rch-ux-quicklink" onClick={() => setView(view === 'runs' ? 'rewards' : 'runs')}>{view === 'runs' ? 'REP Rewards' : 'Back to Runs'}</button>
           </div>
         </details>
-        {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#366b9b] bg-[#102d4d] p-3 text-xs font-semibold text-[#cae6ff]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#84caff]">Clear court filter</Link></div>}
+        {courtParam&&selectedCourt&&<div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#636363] bg-[#292929] p-3 text-xs font-semibold text-[#e2e2e2]"><FaLocationDot/>{selectedCourt.name}<Link href="/runs" className="ml-auto text-[#bfbfbf]">Clear court filter</Link></div>}
         {view === 'runs' && <GravityLocationPicker compact className="mb-4" />}
         {view === 'runs' && <RunQuickPlay runs={visibleRuns} loading={loading} rookieOnly={rookieOnly} onRookieChange={setRookieOnly} soloOnly={soloOnly} onSoloChange={setSoloOnly}/>}
-        {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#c8eaff]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
+        {notice && <div className="mb-5 flex items-center gap-2 rounded-xl border border-rcl-blue/20 bg-rcl-blue/[.07] px-4 py-3 text-sm text-[#e4e4e4]"><FaCircleCheck className="shrink-0" />{notice}<button onClick={() => setNotice('')} className="ml-auto text-white/35"><FaXmark /></button></div>}
         {createdRuns.length > 0 && <section aria-label="Share your new runs" className="mb-5 rounded-2xl border border-rcl-blue/30 bg-rcl-blue/[.07] p-5">
           <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-rcl-blue">Your schedule is live</p><p className="mt-1 text-sm text-white/60">Every date has its own RSVP and invitation.</p></div><button type="button" onClick={() => setCreatedRuns([])} aria-label="Dismiss new runs" className="rounded-lg border border-white/10 p-2 text-white/60"><FaXmark /></button></div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">{createdRuns.map(run=><div key={run.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rcl-blue/15 bg-[#071522] px-4 py-3"><div><p className="font-semibold text-sm">{run.title}</p><p className="text-xs text-white/45">{new Date(run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p></div><div className="flex gap-2"><ShareRunButton id={run.id} title={run.title}/><Link href={`/runs/${run.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View</Link></div></div>)}</div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{createdRuns.map(run=><div key={run.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rcl-blue/15 bg-[#131313] px-4 py-3"><div><p className="font-semibold text-sm">{run.title}</p><p className="text-xs text-white/45">{new Date(run.starts_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p></div><div className="flex gap-2"><ShareRunButton id={run.id} title={run.title}/><Link href={`/runs/${run.id}`} className="rounded-xl border border-rcl-blue/30 px-3 py-2.5 text-xs font-semibold text-rcl-blue">View</Link></div></div>)}</div>
         </section>}
-        {error && <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-red-200">{error}</div>}
+        {error && <div className="mb-5 rounded-xl border border-gray-400/20 bg-gray-400/5 px-4 py-3 text-sm text-gray-200">{error}</div>}
 
         {view === 'runs' && <section id="rch-upcoming-runs" className="mt-7 scroll-mt-20">
           <RCHSectionHeader eyebrow="FIND YOUR NEXT GAME" title="Player-hosted Runs" description="Actual member-hosted games and organizer events. Suggested public-court meetups appear separately below." action={{href:'/runs/partners',label:'Explore organizers'}}/>
@@ -496,17 +496,17 @@ export default function RunsPage() {
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => {setTypeFilter('all');setVerifiedOnly(false);}} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={typeFilter === 'all'&&!verifiedOnly}>All Runs</button>
             <button type="button" onClick={() => setVerifiedOnly(value=>!value)} className="rch-arena-upcoming-filter min-h-10 rounded-xl px-3 text-xs font-bold" aria-pressed={verifiedOnly}><FaShieldHalved aria-hidden="true"/> RCH Verified Runs</button>
-            <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#315b86] bg-[#0a1d34] px-3 text-xs font-semibold text-white">
+            <select aria-label="Filter by skill level" value={skillFilter} onChange={event => setSkillFilter(event.target.value as typeof skillFilter)} className="min-h-10 max-w-[170px] rounded-xl border border-[#555555] bg-[#1b1b1b] px-3 text-xs font-semibold text-white">
               <option value="all">Any skill level</option>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
               <option value="elite">Elite</option>
             </select>
-            {typeFilter !== 'all' && <span className="min-w-0 rounded-lg bg-[#0d345c] px-3 py-2 text-xs font-bold text-[#a5d5ff]">{runTypeLabels[typeFilter]}</span>}
-            {verifiedOnly&&<span className="min-w-0 rounded-lg bg-[#103a32] px-3 py-2 text-xs font-bold text-[#baf2df]">Organizer and event reviewed by RCH</span>}
+            {typeFilter !== 'all' && <span className="min-w-0 rounded-lg bg-[#2f2f2f] px-3 py-2 text-xs font-bold text-[#cecece]">{runTypeLabels[typeFilter]}</span>}
+            {verifiedOnly&&<span className="min-w-0 rounded-lg bg-[#303030] px-3 py-2 text-xs font-bold text-[#e5e5e5]">Organizer and event reviewed by RCH</span>}
             <input aria-label="Search upcoming runs by city or court" type="search" value={runSearch} onChange={event => setRunSearch(event.target.value)}
-              placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#315b86] bg-[#081a2e] px-4 text-sm text-white placeholder:text-[#97b3d1] outline-none focus:border-[#4b9fff]" />
+              placeholder="Search courts, cities or run names" className="min-h-11 w-full flex-1 basis-[220px] rounded-xl border border-[#555555] bg-[#181818] px-4 text-sm text-white placeholder:text-[#afafaf] outline-none focus:border-[#949494]" />
           </div>
 
           {soloOnly&&!loading&&visibleRuns.length>0&&<p role="status" className="rch-run-solo-explainer">{visibleRuns.length} open {visibleRuns.length===1?'Run':'Runs'} taking individual RSVPs. No crew required to register.</p>}
@@ -522,12 +522,12 @@ export default function RunsPage() {
           <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">My run recommendations</summary>
           {view === 'runs' && !loading&&<RunDailyCircuit runs={dailyCandidates} cityId={gravityLocation.cityId} radiusMiles={gravityLocation.radiusMiles} onPreferencesChange={setDailyPrefs}/>}
         </details>
-        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Suggested weekend open courts" className="mb-5 rounded-2xl border border-[#eebc5a]/40 bg-[#1c2032] p-4 sm:p-5">
+        {view === 'runs' && runs.some(run=>run.weekendMultiplier===2) && <section aria-label="Suggested weekend open courts" className="mb-5 rounded-2xl border border-[#c0c0c0]/40 bg-[#202020] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#ffd47a]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OUTDOOR COURTS</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#d3deef]">These are public court ideas, not scheduled games, reserved space or a promise of players. Visiting a suggested court alone earns no bonus; eligible 2× verified-game REP requires an independently confirmed game; check-ins and highlights remain 1×.</p></div>
-            <span className="rounded-xl border border-[#ffd47a]/50 px-3 py-2 text-xs font-black text-[#ffdb94]">COURT IDEAS · NOT EVENTS</span>
+            <div><p className="text-xs font-black uppercase tracking-[.15em] text-[#d7d7d7]">RCH Weekend Circuit · Two courts per city</p><h2 className="mt-1 text-xl font-black text-white">SUGGESTED OUTDOOR COURTS</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#dddddd]">These are public court ideas, not scheduled games, reserved space or a promise of players. Visiting a suggested court alone earns no bonus; eligible 2× verified-game REP requires an independently confirmed game; check-ins and highlights remain 1×.</p></div>
+            <span className="rounded-xl border border-[#d7d7d7]/50 px-3 py-2 text-xs font-black text-[#dedede]">COURT IDEAS · NOT EVENTS</span>
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.isSuggestedCourt&&run.weekendMultiplier===2&&run.status!=='cancelled'&&Date.parse(run.starts_at)>Date.now()).slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#d0b46a]/20 bg-[#091629] px-3 py-3 text-sm font-bold text-white hover:border-[#ffd47a]/60"><span><span className="block text-xs font-bold text-[#ffda90]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}<small className="block text-xs font-normal text-[#d3deef]">Open-court suggestion · no confirmed organizer</small></span><FaArrowRight aria-hidden="true"/></Link>)}</div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">{runs.filter(run=>run.isSuggestedCourt&&run.weekendMultiplier===2&&run.status!=='cancelled'&&Date.parse(run.starts_at)>Date.now()).slice(0,4).map(run=><Link key={run.id} href={'/runs/'+run.id} className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-[#b5b5b5]/20 bg-[#151515] px-3 py-3 text-sm font-bold text-white hover:border-[#d7d7d7]/60"><span><span className="block text-xs font-bold text-[#dddddd]">{new Date(run.starts_at).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>{run.location}<small className="block text-xs font-normal text-[#dddddd]">Open-court suggestion · no confirmed organizer</small></span><FaArrowRight aria-hidden="true"/></Link>)}</div>
         </section>}
 
         {view==='runs'&&<>
@@ -576,7 +576,7 @@ export default function RunsPage() {
             <RewardRule icon={<FaMedal />} value="Badges" title="Build your run résumé" detail="Players and fans unlock different badges from participation, check-ins and highlights." />
           </div>
           <div className="mt-7 flex items-end justify-between gap-3"><div><p className="text-xs font-semibold text-white/32">OPEN RUN ACHIEVEMENTS</p><h2 className="mt-1 text-xl font-semibold">Badges earned in the real world</h2></div><Link href="/badges" className="text-xs font-semibold text-rcl-blue">All RCL badges</Link></div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{badges.map((badge) => <article key={badge.id} className="rounded-2xl border border-rcl-blue/12 bg-[#09131d]/72 p-5"><div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-blue/12 bg-rcl-blue/[.06] text-xl">{badge.icon}</span><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{badge.name}</h3><span className="rounded-full border border-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/35">{badge.tier}</span></div><p className="mt-2 text-xs leading-5 text-white/42">{badge.description}</p></div></div></article>)}</div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{badges.map((badge) => <article key={badge.id} className="rounded-2xl border border-rcl-blue/12 bg-[#121212]/72 p-5"><div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rcl-blue/12 bg-rcl-blue/[.06] text-xl">{badge.icon}</span><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{badge.name}</h3><span className="rounded-full border border-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/35">{badge.tier}</span></div><p className="mt-2 text-xs leading-5 text-white/42">{badge.description}</p></div></div></article>)}</div>
           <div className="mt-6 rounded-2xl border border-rcl-blue/14 bg-rcl-blue/[.045] p-5"><div className="flex gap-3"><FaVideo className="mt-0.5 shrink-0 text-rcl-blue" /><div><h3 className="font-semibold">Highlight bonus workflow</h3><p className="mt-1 text-sm leading-6 text-white/45">Join the run, play, then post a photo or video to RCL Social within 72 hours. Return to the run card and tap <b className="text-white/70">Claim highlight REP</b>. Normal social-post REP still applies separately.</p><Link href="/social?compose=1" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-rcl-blue">Post a highlight <FaArrowUpRightFromSquare /></Link></div></div></div>
         </section>}
       </Container>
@@ -617,21 +617,21 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
     <div className="rch-ux-game-cover">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-[11px] font-black uppercase tracking-wider text-[#b7e2ff]">{experience} · {run.game_format}</span>
-        {run.weekendMultiplier===2&&<span className="rounded-full border border-[#ffe3a2]/60 bg-[#473410] px-2.5 py-1 text-[11px] font-black text-[#ffe3a2]">2× VERIFIED REP</span>}
+        <span className="text-[11px] font-black uppercase tracking-wider text-[#dbdbdb]">{experience} · {run.game_format}</span>
+        {run.weekendMultiplier===2&&<span className="rounded-full border border-[#e4e4e4]/60 bg-[#353535] px-2.5 py-1 text-[11px] font-black text-[#e4e4e4]">2× VERIFIED REP</span>}
         <RCHStatusChip status={effectiveStatus}/>
       </div>
-      <Link href={'/runs/'+run.id} className="mt-5 text-white hover:text-[#bfe7ff]"><h3 className="rch-ux-game-title">{run.title}</h3></Link>
+      <Link href={'/runs/'+run.id} className="mt-5 text-white hover:text-[#e0e0e0]"><h3 className="rch-ux-game-title">{run.title}</h3></Link>
     </div>
     <div className="rch-ux-game-body">
-      {run.weekendMultiplier===2&&<p className="text-xs leading-5 text-[#ffe3a2]">Featured weekend community drop-in · Court access and staffing are not guaranteed.</p>}
-      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#3d8c88] bg-[#123e45] px-3 py-2 text-xs font-bold text-[#bbf3e4]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
-      {run.partner?.reward_multiplier===2&&<span className="inline-flex self-start rounded-lg border border-[#b8903c]/60 bg-[#392d13] px-3 py-2 text-xs font-black text-[#ffe5a2]">2× eligible verified game rewards</span>}
+      {run.weekendMultiplier===2&&<p className="text-xs leading-5 text-[#e4e4e4]">Featured weekend community drop-in · Court access and staffing are not guaranteed.</p>}
+      {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#7b7b7b] bg-[#353535] px-3 py-2 text-xs font-bold text-[#e6e6e6]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
+      {run.partner?.reward_multiplier===2&&<span className="inline-flex self-start rounded-lg border border-[#929292]/60 bg-[#2e2e2e] px-3 py-2 text-xs font-black text-[#e6e6e6]">2× eligible verified game rewards</span>}
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-xs text-[#b7d2e5]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
+        <span className="text-xs text-[#cecece]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
         {isSoloJoinable(run)&&<span className="rch-run-availability">{run.max_players-count} open {run.max_players-count===1?'spot':'spots'} · Solo RSVP</span>}
-        {run.partner&&<span className="text-xs font-black text-[#f7d79c]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
+        {run.partner&&<span className="text-xs font-black text-[#dadada]">{run.partner.price_cents?'$'+(run.partner.price_cents/100).toFixed(2)+' · pay organizer':'Free session'}</span>}
       </div>
       <div className="rch-ux-game-cta">
         <div className="rch-run-card-primary">
@@ -643,9 +643,9 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
           <a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(run.location)} className="rch-ux-game-secondary" target="_blank" rel="noopener noreferrer">Directions <FaArrowUpRightFromSquare aria-hidden="true"/></a>
         </div>
       </div>
-      <details className="group border-t border-[#315573] pt-3">
-        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#b9dcf2]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
-        <p className="mb-3 text-xs leading-5 text-[#bed6e6]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
+      <details className="group border-t border-[#505050] pt-3">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-bold text-[#d6d6d6]">Host, share &amp; other actions <span aria-hidden="true" className="transition-transform group-open:rotate-180">⌄</span></summary>
+        <p className="mb-3 text-xs leading-5 text-[#d2d2d2]">Hosted by {run.partner?.name||run.host?.display_name||run.host?.username||'RCH member'}{run.verified_host?' · RCH verified host':''}</p>
         <div className="flex flex-wrap gap-2">
           {checkInOpen&&(joined||host)&&<button disabled={checkedIn||busy===`checkin-${run.id}`} onClick={()=>void onCheckIn(run)} className="rch-ux-btn-secondary">{checkedIn?'Checked in ✓':'Court-code check-in'}</button>}
           {(joined||host)&&highlightWindow&&<><Link href="/social?compose=1" className="rch-ux-btn-secondary">Post highlight</Link><button disabled={highlightClaimed||busy===`highlight-${run.id}`} onClick={()=>void onClaimHighlight(run)} className="rch-ux-btn-secondary">{highlightClaimed?'Highlight reward claimed':'Claim highlight after check-in'}</button></>}
@@ -656,7 +656,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
 }
 
 function RewardRule({ icon, value, title, detail }: { icon: React.ReactNode; value: string; title: string; detail: string }) {
-  return <article className="rounded-2xl border border-rcl-blue/14 bg-[#09131d]/72 p-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/[.07] text-rcl-blue">{icon}</span><div><p className="text-xs font-semibold text-rcl-blue">{value}</p><h3 className="font-semibold">{title}</h3></div></div><p className="mt-3 text-sm leading-6 text-white/42">{detail}</p></article>;
+  return <article className="rounded-2xl border border-rcl-blue/14 bg-[#121212]/72 p-5"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-rcl-blue/[.07] text-rcl-blue">{icon}</span><div><p className="text-xs font-semibold text-rcl-blue">{value}</p><h3 className="font-semibold">{title}</h3></div></div><p className="mt-3 text-sm leading-6 text-white/42">{detail}</p></article>;
 }
 
 function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onSubmit }: {
@@ -692,31 +692,31 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
       className="fixed inset-0 z-[1200] flex h-[100dvh] items-center justify-center bg-black/80 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm sm:p-6"
       onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
     >
-      <section role="dialog" aria-modal="true" aria-labelledby="rch-create-run-title" className="rch-run-create-dialog flex max-h-full min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#28547d] bg-[#09121b] text-white shadow-2xl sm:rounded-3xl">
-        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-[#28547d] px-5 py-4 sm:px-7">
+      <section role="dialog" aria-modal="true" aria-labelledby="rch-create-run-title" className="rch-run-create-dialog flex max-h-full min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#4e4e4e] bg-[#111111] text-white shadow-2xl sm:rounded-3xl">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-[#4e4e4e] px-5 py-4 sm:px-7">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[#91cef2]">Open Runs</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[.14em] text-[#c4c4c4]">Open Runs</p>
             <h2 id="rch-create-run-title" className="mt-1 text-xl font-semibold leading-tight sm:text-2xl">Create basketball activity</h2>
           </div>
-          <button type="button" aria-label="Close activity form" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#28547d] text-[#c5dbf1]"><FaXmark /></button>
+          <button type="button" aria-label="Close activity form" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#4e4e4e] text-[#d8d8d8]"><FaXmark /></button>
         </header>
         <form id="rch-create-run-form" onSubmit={onSubmit} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7">
           <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
-      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
+      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
       <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
-      <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
-      <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none" /></label>
-      <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>2v2</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
-      <label><span className="text-xs font-semibold text-white/42">Competition level</span><select value={form.skill_level} onChange={(event) => setForm({ ...form, skill_level: event.target.value as SkillLevel })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value="all">Everyone</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="elite">Elite</option></select></label>
-      <label><span className="text-xs font-semibold text-white/42">Capacity</span><input type="number" min={2} max={50} value={form.max_players} onChange={(event) => setForm({ ...form, max_players: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm" /></label>
-      <label><span className="text-xs font-semibold text-white/42">Schedule</span><select value={form.repeat_weeks} onChange={event=>setForm({...form,repeat_weeks:Number(event.target.value) as 1|4})} className="mt-2 w-full rounded-xl border border-white/10 bg-[#08111a] px-4 py-3 text-sm"><option value={1}>One run</option><option value={4}>Repeat weekly · 4 weeks</option></select><small className="mt-2 block text-xs text-white/40">Each date has its own RSVP.</small></label>
-      <label className="flex items-end"><span className="flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-white/10 bg-[#050b11] px-4 text-xs text-white/55"><input type="checkbox" checked={form.allow_fan_checkin} onChange={(event) => setForm({ ...form, allow_fan_checkin: event.target.checked })} className="accent-[#91cef2]" /> Allow fan check-ins</span></label>
-      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Details</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows={3} placeholder="Competition level, winners-stay rules, jerseys, parking, meetup details…" className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#050b11] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#101010] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>2v2</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
+      <label><span className="text-xs font-semibold text-white/42">Competition level</span><select value={form.skill_level} onChange={(event) => setForm({ ...form, skill_level: event.target.value as SkillLevel })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#101010] px-4 py-3 text-sm"><option value="all">Everyone</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="elite">Elite</option></select></label>
+      <label><span className="text-xs font-semibold text-white/42">Capacity</span><input type="number" min={2} max={50} value={form.max_players} onChange={(event) => setForm({ ...form, max_players: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm" /></label>
+      <label><span className="text-xs font-semibold text-white/42">Schedule</span><select value={form.repeat_weeks} onChange={event=>setForm({...form,repeat_weeks:Number(event.target.value) as 1|4})} className="mt-2 w-full rounded-xl border border-white/10 bg-[#101010] px-4 py-3 text-sm"><option value={1}>One run</option><option value={4}>Repeat weekly · 4 weeks</option></select><small className="mt-2 block text-xs text-white/40">Each date has its own RSVP.</small></label>
+      <label className="flex items-end"><span className="flex min-h-[46px] w-full items-center gap-3 rounded-xl border border-white/10 bg-[#0a0a0a] px-4 text-xs text-white/55"><input type="checkbox" checked={form.allow_fan_checkin} onChange={(event) => setForm({ ...form, allow_fan_checkin: event.target.checked })} className="accent-[#c4c4c4]" /> Allow fan check-ins</span></label>
+      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Details</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows={3} placeholder="Competition level, winners-stay rules, jerseys, parking, meetup details…" className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
           </div>
         </form>
-        <footer className="shrink-0 border-t border-[#28547d] bg-[#09121b] px-5 py-3 sm:px-7">
-          <button type="submit" form="rch-create-run-form" disabled={busy} className="min-h-12 w-full rounded-xl bg-[#217ef5] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
+        <footer className="shrink-0 border-t border-[#4e4e4e] bg-[#111111] px-5 py-3 sm:px-7">
+          <button type="submit" form="rch-create-run-form" disabled={busy} className="min-h-12 w-full rounded-xl bg-[#737373] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Publishing…' : form.repeat_weeks === 4 ? 'Post 4 weekly runs' : form.run_type === 'social' ? 'Post meetup' : 'Post run'}</button>
         </footer>
       </section>
     </div>,

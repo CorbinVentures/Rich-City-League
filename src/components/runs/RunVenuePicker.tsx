@@ -97,21 +97,21 @@ export function RunVenuePicker({ selected, onSelect, onClear, initialQuery='' }:
         <button type="button" onClick={() => { onClear(); setQuery(''); setIsSearching(true); }} className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white">Change</button>
       </div>
       {selected.verification_status === 'community' || selected.access_type === 'varies'
-        ? <p className="mt-3 text-xs leading-5 text-amber-200">Access is unconfirmed. Check before you go.</p>
-        : <p className="mt-3 text-xs leading-5 text-slate-200">Public court listing · confirm park hours before arrival.</p>}
+        ? <p className="mt-3 text-xs leading-5 text-gray-200">Access is unconfirmed. Check before you go.</p>
+        : <p className="mt-3 text-xs leading-5 text-gray-200">Public court listing · confirm park hours before arrival.</p>}
       <a href={runVenueDirections(selected)} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-rcl-blue">View directions <FaArrowUpRightFromSquare/></a>
     </div>}
-    {isSearching && <div className="rch-venue-search-panel mt-2 rounded-xl border border-white/15 bg-[#070e17] p-3">
+    {isSearching && <div className="rch-venue-search-panel mt-2 rounded-xl border border-white/15 bg-[#0d0d0d] p-3">
       <label className="relative block">
         <FaMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/50"/>
         <input type="search" autoComplete="off" aria-label="Search basketball venues"
           value={query} onChange={event => setQuery(event.target.value)}
           placeholder="Search parks or cities"
-          className="min-h-11 w-full rounded-lg border border-white/20 bg-[#030b13] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/45 outline-none focus:border-rcl-blue"/>
+          className="min-h-11 w-full rounded-lg border border-white/20 bg-[#0a0a0a] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/45 outline-none focus:border-rcl-blue"/>
       </label>
       <p className="mt-2 text-[11px] leading-5 text-white/55">{query.trim() ? 'Choose a matching court' : 'Outdoor courts across Virginia'}</p>
       {busy && <p role="status" className="px-2 py-3 text-xs text-white/65">Finding venues…</p>}
-      {error && <p role="alert" className="px-2 py-3 text-xs text-amber-200">{error}</p>}
+      {error && <p role="alert" className="px-2 py-3 text-xs text-gray-200">{error}</p>}
       {!busy && !error && query.trim().length !== 1 && <div className="mt-2 max-h-52 space-y-1 overflow-y-auto" role="group" aria-label="Court search results">
         {results.map(venue => <button type="button" key={venue.slug} onClick={() => { onSelect(venue); setIsSearching(false); setQuery(''); }}
           className="flex w-full items-start gap-3 rounded-lg border border-transparent px-3 py-3 text-left hover:border-rcl-blue/30 hover:bg-white/[.06] focus:border-rcl-blue/50">
