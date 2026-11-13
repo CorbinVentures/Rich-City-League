@@ -28,7 +28,7 @@
 .rwg-map-zero{position:absolute;z-index:3;top:71px;left:12px;max-width:min(350px,calc(100% - 24px));border:1px solid #dfbb78;border-radius:13px;background:#192b39ef;padding:12px 15px;color:#f7e1ae;font-size:12px;line-height:1.5}
 .rwg-geography-notice{margin-top:13px;border:1px solid #b99858;border-radius:15px;background:#342e21;padding:13px 17px;display:flex;gap:10px;align-items:start;color:#f2dda8;font-size:12px;line-height:1.55}
 .rwg-geography-notice svg{flex:0 0 auto;margin-top:3px}
-.rwg-coverage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}
+.rwg-coverage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:13px}
 .rwg-coverage>div{display:grid;gap:7px;border:1px solid #2e678c;border-radius:15px;background:#0d2c48;padding:13px}
 .rwg-coverage strong{font-size:clamp(20px,3.4vw,30px);font-weight:1000;line-height:1}
 .rwg-coverage small{font-size:10px;color:#bbd6e8;font-weight:800;line-height:1.35}

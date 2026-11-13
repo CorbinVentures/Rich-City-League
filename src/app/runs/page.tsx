@@ -36,7 +36,6 @@ import {
   FaArrowUpRightFromSquare,
   FaArrowRight,
   FaBasketball,
-  FaBookOpen,
   FaCalendarDays,
   FaCircleCheck,
   FaDumbbell,
@@ -456,23 +455,11 @@ export default function RunsPage() {
         </header>
       </Container>
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
-        {view==='runs'&&<section aria-labelledby="rch-runs-start" className="mb-4 rounded-2xl border border-[#3e7295] bg-[linear-gradient(110deg,#123b59,#071a2c_76%)] px-4 py-5 sm:px-6 sm:py-6">
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#a9d5ed]">Real courts · Real people</p>
-          <h2 id="rch-runs-start" className="mt-2 text-2xl font-black uppercase tracking-tight text-white sm:text-3xl">Find a game. Build your legacy.</h2>
-          <p className="mt-2 max-w-2xl text-sm text-[#d3e5f2]">Join an actual hosted Run, organize one yourself, or discover outdoor courts. Park suggestions are not confirmed games.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <a href="#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--rch-brand-accent)] px-4 py-3 text-sm font-black text-white"><FaBasketball aria-hidden="true"/> Find a Game <FaArrowRight aria-hidden="true"/></a>
-            <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#9ac4dc] bg-[#12354f] px-4 py-3 text-sm font-bold text-white"><FaPlus aria-hidden="true"/> Host a Game</button>
-
-          </div>
+        {view==='runs'&&<section aria-labelledby="rch-runs-start" className="rch-run-quick-hero">
+          <div><span>RCH RUNS · GAME BOARD</span><h2 id="rch-runs-start">Find or host your next pickup.</h2></div>
+          <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}><FaPlus aria-hidden="true"/> HOST PICKUP</button>
         </section>}
-        
         {view==='runs'&&<SybRunsPartnerSpotlight/>}
-        <nav aria-label="Runs quick actions" className="rch-run-primary-actions">
-          <Link href="/runs?view=world&mode=world" className="rch-ux-quicklink"><FaLocationDot aria-hidden="true"/> Explore Courts</Link>
-          <Link href="/crews?intent=mine" className="rch-ux-quicklink" aria-label="Open my crew dashboard or create a crew"><FaPeopleGroup aria-hidden="true"/> My Crew</Link>
-          <button type="button" className="rch-ux-quicklink" onClick={() => setRulesOpen(true)}><FaBookOpen aria-hidden="true"/> How It Works</button>
-        </nav>
         <details className="rch-run-extras">
           <summary>More run tools</summary>
           <div className="rch-run-extra-links">
