@@ -10,7 +10,7 @@ const screen=file('src/components/sites/RchSiteStarterClient.tsx');
 const start=file('src/app/website-creator/start/page.tsx');
 const marketing=file('src/app/website-creator/page.tsx');
 const legacy=file('src/app/network/partners/apply/page.tsx');
-const intervalMigration=file('supabase/migrations/20261028024000_rch_sites_starter_billing_preference.sql');
+const intervalMigration=file('supabase/migrations/20261028024654_rch_sites_starter_billing_preference.sql');
 
 describe('RCH Sites Get Started: design-first private onboarding',()=>{
   it('opens the builder in the normal browser without unlocking private dashboard URLs',()=>{
