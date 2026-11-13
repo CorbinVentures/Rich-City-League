@@ -289,3 +289,129 @@ html body .rwg-shell .rch-gh-briefing-heading h3{margin:3px 0 0;color:#fff;font-
 .rwg-shell .rch-gh-next-secondary{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:9px;border-radius:12px;padding:0 15px;font-size:11px;font-weight:950;text-decoration:none}
 .rwg-shell .rch-gh-next-secondary{border:1px solid var(--rch-brand-muted);background:var(--rch-brand-raised);color:var(--rch-brand-ink)}
 .rwg-shell .rch-gh-next-primary:focus-visible,.rwg-shell .rch-gh-next-secondary:focus-visible{outline:3px solid var(--rch-brand-accent-text);outline-offset:2px}
+
+/* Runs 2D arcade lobby: illustrated court first, two clear moves, real data. */
+.rwg-shell .rch-arcade-home{--arcade-line:#83caff;--arcade-panel:#071a2a;--arcade-copy:#c8dff0;max-width:1080px;margin:0 auto 20px;color:#fff}
+.rwg-shell .rch-arcade-top{align-items:center;padding:9px 2px 13px}
+.rch-arcade-location{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:6px 10px;border:1px solid #55748c;background:#0b2235;color:#e8f5ff;font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.rch-arcade-location i{width:7px;height:7px;background:#ffc86e;box-shadow:0 0 0 3px #ffc86e30}
+.rch-arcade-hero{position:relative;isolation:isolate;display:flex;min-height:480px;overflow:hidden;flex-direction:column;justify-content:space-between;border:2px solid #5c8fb0;border-radius:12px;background:#081827;box-shadow:5px 5px 0 #020912,0 18px 50px #0007}
+.rch-arcade-scene{position:absolute;z-index:-2;inset:0;background-image:url('/rch-runs-2d-world.svg');background-position:center 54%;background-size:cover;image-rendering:pixelated}
+.rch-arcade-hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#06121ef2 0%,#071725e8 36%,#07172572 61%,#07172512 100%),linear-gradient(0deg,#06121ed9 0%,transparent 44%),repeating-linear-gradient(0deg,transparent 0 15px,#d5edff0a 15px 16px)}
+.rch-arcade-hero-top{display:flex;justify-content:space-between;gap:10px;padding:15px 17px;color:#e4f5ff;font-size:9px;font-weight:950;letter-spacing:.11em}
+.rch-arcade-hero-top span{display:inline-flex;align-items:center;gap:7px}
+.rch-arcade-hero-top svg{color:#ffc86e}
+.rch-arcade-copy{position:relative;z-index:1;width:min(60%,600px);padding:20px 24px 110px}
+.rch-arcade-eyebrow{display:block;color:#ffd48a;font-size:10px;font-weight:1000;letter-spacing:.2em}
+html body .rwg-shell .rch-arcade-copy h1{margin:8px 0 12px!important;color:white!important;font-size:clamp(42px,7vw,76px)!important;font-weight:1000!important;font-style:italic!important;letter-spacing:-.075em!important;line-height:.91!important;text-shadow:4px 4px 0 #07121d!important}
+.rch-arcade-copy h1 em{color:#96d5ff;font-style:italic}
+.rch-arcade-copy>p{max-width:35ch;margin:0;color:#e3eff7;font-size:13px;line-height:1.5;text-shadow:0 2px 5px #000}
+.rch-arcade-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
+.rch-arcade-actions a{display:inline-flex;min-height:48px;align-items:center;justify-content:center;gap:9px;padding:11px 14px;border:1px solid #b6e3ff;border-radius:7px;color:#fff;text-decoration:none;font-size:11px;font-weight:1000;letter-spacing:.06em;box-shadow:0 4px 0 #020a12;transition:transform .15s,filter .15s}
+.rch-arcade-actions a:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.rch-arcade-primary{background:linear-gradient(180deg,#3288c4,#155b90)}
+.rch-arcade-secondary{background:#152b3c}
+.rch-arcade-player-hud{position:absolute;z-index:2;right:16px;bottom:15px;display:flex;width:min(330px,38%);min-height:84px;align-items:center;gap:11px;padding:10px;border:1px solid #89bedc;border-radius:8px;background:#061725ed;color:white;text-align:left;box-shadow:4px 4px 0 #020912;cursor:pointer}
+.rch-arcade-player-avatar{display:grid;flex:none;width:49px;height:49px;place-items:center;overflow:hidden;border:2px solid #ffd48a;background:#183954;color:#ffd48a;font-size:19px}
+.rch-arcade-player-avatar img{width:100%;height:100%;object-fit:cover}
+.rch-arcade-player-copy{display:grid;min-width:0;flex:1;gap:3px}
+.rch-arcade-player-copy small{color:#91d2ff;font-size:8px;font-weight:1000;letter-spacing:.14em}
+.rch-arcade-player-copy strong{overflow:hidden;color:#fff;font-size:12px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}
+.rch-arcade-player-copy>span{color:#c7deed;font-size:9px;font-weight:850}
+.rch-arcade-player-copy progress{width:100%;height:5px;margin-top:2px;accent-color:#87ceff}
+.rch-arcade-hud-arrow{flex:none;color:#b8e5ff}
+.rch-arcade-pixel-label{position:absolute;top:48%;right:8%;color:#ffe0aa;font-size:12px;font-weight:1000;letter-spacing:.24em;text-shadow:2px 2px #142735;transform:rotate(-7deg)}
+.rch-arcade-next,.rch-arcade-empty{position:relative;display:flex;align-items:center;gap:12px;min-height:91px;margin-top:13px;padding:12px;border:1px solid #416b88;border-radius:8px;background:#091d2d;color:white;text-decoration:none;box-shadow:3px 3px 0 #020912}
+.rch-arcade-next:before,.rch-arcade-empty:before{content:"";position:absolute;top:0;left:0;width:5px;height:100%;background:#5fb7f0}
+.rch-arcade-next:hover{border-color:#a7dfff;background:#0d2940}
+.rch-arcade-next-icon{display:grid;flex:none;width:53px;height:53px;place-items:center;border:1px solid #89c8ef;background:#123a56;color:#ffc86e;font-size:22px}
+.rch-arcade-next-copy{display:grid;min-width:0;flex:1;gap:4px}
+.rch-arcade-next-copy small{color:#a6ddff;font-size:8px;font-weight:1000;letter-spacing:.15em}
+.rch-arcade-next-copy strong{overflow:hidden;font-size:14px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}
+.rch-arcade-next-copy>span{display:block;overflow:hidden;color:#c4d7e6;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.rch-arcade-next-copy>span svg{margin-right:5px;color:#ffd48a}
+.rch-arcade-next-format{padding:7px 8px;border:1px solid #517894;background:#10283a;color:#fff;font-size:9px;font-weight:950;white-space:nowrap}
+.rch-arcade-next-arrow{flex:none;color:#a7ddff}
+.rch-arcade-empty>span:nth-child(2){display:grid;flex:1;gap:3px}
+.rch-arcade-empty strong{font-size:12px}
+.rch-arcade-empty small{color:#b7d0e1;font-size:10px}
+.rch-arcade-empty>a{display:inline-flex;min-height:42px;align-items:center;gap:7px;padding:9px 10px;border:1px solid #8ecfff;background:#125b90;color:white;font-size:9px;font-weight:950;text-decoration:none}
+.rch-arcade-doors{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:13px}
+.rch-arcade-doors>a,.rch-arcade-doors>button{display:flex;min-width:0;min-height:77px;align-items:center;gap:9px;padding:9px;border:1px solid #345b77;border-radius:8px;background:#0a1e2f;color:white;text-align:left;text-decoration:none;box-shadow:3px 3px 0 #020912;cursor:pointer;transition:transform .15s,border-color .15s}
+.rch-arcade-doors>a:hover,.rch-arcade-doors>button:hover{border-color:#8acfff;transform:translateY(-2px)}
+.rch-arcade-doors>a>span:nth-child(2),.rch-arcade-doors>button>span:nth-child(2){display:grid;min-width:0;flex:1;gap:4px}
+.rch-arcade-doors small{color:#98ccec;font-size:8px;font-weight:950;letter-spacing:.1em}
+.rch-arcade-doors strong{font-size:10px;font-weight:1000;letter-spacing:.03em}
+.rch-arcade-doors>svg{flex:none;color:#b7e5ff;font-size:12px}
+.rch-arcade-door-art{display:grid;flex:none;width:42px;height:42px;place-items:center;border:1px solid #497b9f;background:#153950;color:#bde8ff;font-size:18px}
+.rch-arcade-door-art.crown,.rch-arcade-door-art.trophy{border-color:#91744b;background:#382d1d;color:#ffd88e}
+.rch-arcade-door-art.crew{border-color:#5b7a55;background:#1c3528;color:#b8edb0}
+.rch-arcade-home :is(a,button):focus-visible{outline:3px solid #ffe0a3;outline-offset:3px}
+@media(max-width:760px){
+ .rch-arcade-hero{min-height:500px}
+ .rch-arcade-scene{background-position:62% center}
+ .rch-arcade-hero:before{background:linear-gradient(90deg,#06121ef5 0%,#071725d9 55%,#07172545 100%),linear-gradient(0deg,#06121ef2 0%,transparent 57%),repeating-linear-gradient(0deg,transparent 0 15px,#d5edff0a 15px 16px)}
+ .rch-arcade-copy{width:80%;padding:35px 18px 145px}
+ .rch-arcade-player-hud{right:12px;bottom:12px;width:min(330px,72%)}
+ .rch-arcade-pixel-label{top:43%;right:7%;font-size:10px}
+ .rch-arcade-doors{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+}
+@media(max-width:460px){
+ .rch-arcade-top{gap:6px}
+ .rch-arcade-top .rch-arcade-location{display:none}
+ .rch-arcade-hero{min-height:530px}
+ .rch-arcade-hero-top{padding:12px;font-size:7px}
+ .rch-arcade-copy{width:100%;padding:34px 15px 150px}
+ html body .rwg-shell .rch-arcade-copy h1{font-size:clamp(43px,12vw,58px)!important}
+ .rch-arcade-copy>p{max-width:29ch;font-size:12px}
+ .rch-arcade-actions{gap:7px}
+ .rch-arcade-actions a{flex:1;min-height:46px;padding:8px 7px;font-size:9px}
+ .rch-arcade-player-hud{left:11px;right:11px;bottom:11px;width:auto;min-height:75px}
+ .rch-arcade-player-avatar{width:42px;height:42px}
+ .rch-arcade-next,.rch-arcade-empty{gap:8px;padding:9px}
+ .rch-arcade-next-icon{width:43px;height:43px;font-size:18px}
+ .rch-arcade-next-copy strong{font-size:12px}
+ .rch-arcade-next-copy>span{font-size:9px}
+ .rch-arcade-next-format{font-size:7px;padding:5px}
+ .rch-arcade-empty>a{min-height:38px;padding:7px;font-size:8px}
+ .rch-arcade-door-art{width:35px;height:35px;font-size:15px}
+ .rch-arcade-doors>a,.rch-arcade-doors>button{min-height:68px;gap:7px;padding:7px}
+ .rch-arcade-doors strong{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.rch-arcade-actions a,.rch-arcade-doors>a,.rch-arcade-doors>button{transition:none}.rch-arcade-actions a:hover,.rch-arcade-doors>a:hover,.rch-arcade-doors>button:hover{transform:none}}
+
+/* Compact game HUD and six visual doors for all Runs home progress paths. */
+.rwg-shell .rch-arcade-player-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
+.rwg-shell .rch-arcade-player-stats>div{display:flex;min-width:0;min-height:44px;align-items:center;gap:8px;padding:7px 10px;border:1px solid #345c78;border-radius:7px;background:#091c2b;box-shadow:3px 3px 0 #020912}
+.rwg-shell .rch-arcade-player-stats svg{flex:none;color:#ffd48a;font-size:14px}
+.rwg-shell .rch-arcade-player-stats strong{color:#fff;font-size:12px;font-weight:1000;font-variant-numeric:tabular-nums}
+.rwg-shell .rch-arcade-player-stats small{overflow:hidden;color:#a9cde3;font-size:8px;font-weight:950;letter-spacing:.08em;text-overflow:ellipsis;white-space:nowrap}
+.rwg-shell .rch-arcade-doors{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rwg-shell .rch-arcade-door-art.verified{border-color:#62a7ce;background:#10334b;color:#aee3ff}
+.rwg-shell .rch-arcade-door-art.medal{border-color:#9a804f;background:#3a301d;color:#ffda91}
+.rwg-shell .rch-arcade-next-bonus{flex:none;padding:6px 7px;border:1px solid #b99255;background:#382c19;color:#ffdc98;font-size:8px;font-weight:1000;white-space:nowrap}
+.rwg-shell .rch-arcade-missions{margin-top:10px;border:1px solid #345c78;border-radius:7px;background:#081a29;color:#fff;box-shadow:3px 3px 0 #020912}
+.rwg-shell .rch-arcade-missions>summary{display:flex;min-height:43px;align-items:center;justify-content:space-between;gap:10px;padding:8px 11px;cursor:pointer;list-style:none}
+.rwg-shell .rch-arcade-missions>summary::-webkit-details-marker{display:none}
+.rwg-shell .rch-arcade-missions>summary>span{display:inline-flex;align-items:center;gap:7px;color:#e9f5fc;font-size:9px;font-weight:1000;letter-spacing:.1em}
+.rwg-shell .rch-arcade-missions>summary>span svg{color:#ffd48a}
+.rwg-shell .rch-arcade-missions>summary>small{display:inline-flex;align-items:center;gap:5px;color:#a9d9f5;font-size:9px;font-weight:850}
+.rwg-shell .rch-arcade-mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 8px 9px}
+.rwg-shell .rch-arcade-mission-grid button{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:3px 7px;min-width:0;padding:8px;border:1px solid #345c78;border-radius:6px;background:#0c2435;color:#fff;text-align:left}
+.rwg-shell .rch-arcade-mission-grid button>span{grid-row:span 2;display:grid;width:28px;height:28px;place-items:center;border:1px solid #527a95;background:#153951;color:#ffd48a}
+.rwg-shell .rch-arcade-mission-grid button strong{overflow:hidden;font-size:9px;font-weight:950;text-overflow:ellipsis;white-space:nowrap}
+.rwg-shell .rch-arcade-mission-grid button small{color:#a9d9f5;font-size:8px;font-weight:900}
+.rwg-shell .rch-arcade-mission-grid button progress{grid-column:1/-1;width:100%;height:4px;margin-top:3px;accent-color:#87ceff}
+.rwg-shell .rch-arcade-replay{cursor:pointer}
+@media(max-width:760px){
+ .rwg-shell .rch-arcade-doors{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rwg-shell .rch-arcade-mission-grid{grid-template-columns:1fr}
+}
+@media(max-width:460px){
+ .rwg-shell .rch-arcade-player-stats{gap:5px}
+ .rwg-shell .rch-arcade-player-stats>div{min-height:39px;gap:5px;padding:5px}
+ .rwg-shell .rch-arcade-player-stats svg{font-size:12px}
+ .rwg-shell .rch-arcade-player-stats strong{font-size:10px}
+ .rwg-shell .rch-arcade-player-stats small{font-size:7px}
+ .rwg-shell .rch-arcade-next-bonus{font-size:7px;padding:4px}
+}

@@ -7,6 +7,7 @@ import './runs-global-nav.css';
 import './runs-game-system.css';
 import './runs-game-day.css';
 import './runs-game-world-scenes.css';
+import './runs-arcade-skin.css';
 
 export const metadata: Metadata = {
   title: { absolute: 'Pickup Basketball Runs in Virginia | Rich City Hoops' },
@@ -15,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function RunsLayout({children}:{children:ReactNode}){
-  return <><RunsGameChrome/>{children}<RunsGlobalNav/><RunRoomLauncher/></>;
+  return <div className="rch-runs-arcade-ui"><RunsGameChrome/>{children}<RunsGlobalNav/><RunRoomLauncher/></div>;
 }
