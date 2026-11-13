@@ -50,7 +50,7 @@ type Run = {
   status: string;
 };
 
-type PartnerSession={slug:string;name:string;experience:'park'|'rec';price_cents:number;reward_multiplier:number};
+type PartnerSession={slug:string;name:string;brand_color:string;experience:'park'|'rec';price_cents:number;reward_multiplier:number};
 type Profile = { id: string; display_name: string | null; username: string | null; avatar_url?: string | null };
 type Team = { id: string; name: string; sort_order: number };
 type Member = { run_team_id: string; profile_id: string };
@@ -120,8 +120,8 @@ export default function RunRoomPage() {
     setWeekendDoubleRep(Boolean(weekend?.bonus_enabled));
     const {data:linked}=await db.from('rch_runs_partner_sessions').select('partner_id,experience,price_cents,reward_multiplier').eq('run_id',runId).maybeSingle();
     if(linked){
-      const {data:org}=await db.from('rch_runs_partners').select('slug,name,status').eq('id',linked.partner_id).eq('status','approved').maybeSingle();
-      setPartner(org?{slug:org.slug,name:org.name,experience:linked.experience,price_cents:linked.price_cents,reward_multiplier:linked.reward_multiplier}:null);
+      const {data:org}=await db.from('rch_runs_partners').select('slug,name,brand_color,status').eq('id',linked.partner_id).eq('status','approved').maybeSingle();
+      setPartner(org?{slug:org.slug,name:org.name,brand_color:org.brand_color,experience:linked.experience,price_cents:linked.price_cents,reward_multiplier:linked.reward_multiplier}:null);
     }else setPartner(null);
     const playerIds = (playersResult.data ?? []).map((item: any) => item.profile_id) as string[];
     setRegisteredPlayerIds(playerIds);
@@ -156,7 +156,7 @@ export default function RunRoomPage() {
     setHighlightClaimed(Boolean((claimResult.data ?? []).length));
 
     if (user) {
-      const { data } = await db.rpc('can_manage_run', { target_run: runId });
+      const { data } = await db.rpc('can_manage_run_roster', { target_run: runId });
       setCanManage(Boolean(data));
     } else {
       setCanManage(false);
@@ -353,16 +353,16 @@ export default function RunRoomPage() {
           <p className="mt-3 text-[10px] leading-5 text-[#9cbdd5]"><FaCircleCheck className="mr-1 inline"/> In-person code check-ins grant legacy XP only. Competitive REP, ratings and Court Master titles require independently confirmed game results and separate official certification.</p>
         </section>
         {user?.id===run.host_id&&['open','full'].includes(run.status)&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[.025] p-4"><div><p className="text-xs font-black text-[#d3e6f3]">Host event control</p><p className="mt-1 text-xs text-white/65">Bad weather or no usable court? Cancel before play, then contact your registered players directly.</p></div><button type="button" disabled={busy==='cancel'||games.length>0} onClick={()=>void cancelRun()} className="min-h-11 rounded-xl border border-red-300/40 bg-red-900/20 px-4 text-xs font-bold text-red-200 disabled:opacity-40">Cancel hosted Run</button></div>}
-        {partner&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4288b5] bg-[#0a3453] p-4"><div><p className="text-[11px] font-black uppercase tracking-wider text-[#92d2ff]">Official Runs Partner · {partner.experience==='rec'?'The REC':'The PARK'}</p><p className="mt-1 text-lg font-black text-white">Organized by {partner.name}</p><p className="mt-1 text-xs text-[#bdd7e9]">{partner.price_cents?'Advertised organizer fee $'+(partner.price_cents/100).toFixed(2)+' · Pay the organizer directly':'Free session · No advertised entry fee'} · RCH verifies competitive results separately</p>{partner.reward_multiplier===2&&<p className="mt-2 text-xs font-black text-[#ffe5a2]">2× event XP / REP · in-person attendance and verified game/stat rewards</p>}</div><Link href={'/runs/partners/'+partner.slug} className="rounded-xl border border-[#73b6e3] px-4 py-2 text-xs font-bold text-[#cbeaff]">Partner HQ profile →</Link></div>}
+        {partner&&<div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4288b5] bg-[#0a3453] p-4"><div><p className="text-[11px] font-black uppercase tracking-wider text-[#92d2ff]">Official Runs Partner · {partner.experience==='rec'?'The REC':'The PARK'}</p><p className="mt-1 text-lg font-black text-white">Organized by {partner.name}</p><p className="mt-1 text-xs text-[#bdd7e9]">{partner.price_cents?'Advertised organizer fee $'+(partner.price_cents/100).toFixed(2)+' · Pay the organizer directly':'Free session · No advertised entry fee'} · RCH verifies competitive results separately</p>{partner.reward_multiplier>1&&<p className="mt-2 text-xs font-black text-[#ffe5a2]">{partner.reward_multiplier}× event XP / REP · attendance, verified games/stats and Run Tape highlights</p>}</div><Link href={'/runs/partners/'+partner.slug} className="rounded-xl border border-[#73b6e3] px-4 py-2 text-xs font-bold text-[#cbeaff]">Partner HQ profile →</Link></div>}
         {notice && <p className="mb-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] p-4 text-sm text-emerald-100">{notice}</p>}
         {error && <p className="mb-5 rounded-2xl border border-red-400/20 bg-red-400/[.06] p-4 text-sm text-red-100">{error}</p>}
 
         <section id="rch-game-day" className="mb-6 grid scroll-mt-36 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Game day check-in and media">
           {canIssueCode&&<div className="rounded-2xl border border-[#77a3c6] bg-[#102c42] p-4 sm:col-span-2"><p className="text-[10px] font-black uppercase tracking-wider text-[#b8ddf6]">HOST · IN-PERSON CHECK-IN</p><p className="mt-1 text-sm text-white">Issue a one-time event code when you reach the court. Show it only to players who are physically present. Reissuing invalidates the previous code.</p><button type="button" onClick={()=>void issueCourtCode()} disabled={busy==='issue-code'} className="mt-3 min-h-11 rounded-xl bg-rcl-orange px-4 text-xs font-black text-black disabled:opacity-50">{busy==='issue-code'?'Issuing…':hostCourtCode?'Rotate court code':'Generate court code'}</button>{hostCourtCode&&<p className="mt-3 rounded-xl bg-black/30 p-3 font-mono text-xl font-black tracking-[.16em] text-[#bce8ff]" aria-label="Current court check-in code">{hostCourtCode}</p>}</div>}
-          {checkInOpen&&(joined||registered)&&<div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/[.05] p-4 sm:col-span-2"><label htmlFor="rch-court-code" className="text-xs font-black text-emerald-200">IN-PERSON COURT CHECK-IN · +{partner?.reward_multiplier===2?30:15} XP</label>{user&&checkins.has(user.id)?<p className="mt-2 text-sm text-emerald-200">Checked in ✓</p>:<><p className="mt-2 text-xs text-white/70">Ask the host for the current code at the court. RSVP alone does not confirm attendance.</p><div className="mt-3 flex flex-wrap gap-2"><input id="rch-court-code" aria-label="In-person court code" autoComplete="off" spellCheck={false} maxLength={12} value={checkInCode} onChange={event=>setCheckInCode(event.target.value.toUpperCase().replace(/[^A-F0-9]/g,''))} placeholder="12-character court code" className="min-h-11 min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-[#0b2332] px-3 font-mono text-sm text-white placeholder:text-white/50" /><button type="button" onClick={()=>void checkIn()} disabled={busy==='checkin'||checkInCode.length!==12} className="min-h-11 rounded-xl bg-emerald-700 px-4 text-sm font-black text-white disabled:opacity-40">{busy==='checkin'?'Checking in…':'Check in'}</button></div></>}</div>}
+          {checkInOpen&&(joined||registered)&&<div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/[.05] p-4 sm:col-span-2"><label htmlFor="rch-court-code" className="text-xs font-black text-emerald-200">IN-PERSON COURT CHECK-IN · +{15*Math.max(partner?.reward_multiplier||1,weekendDoubleRep?2:1)} XP</label>{user&&checkins.has(user.id)?<p className="mt-2 text-sm text-emerald-200">Checked in ✓</p>:<><p className="mt-2 text-xs text-white/70">Ask the host for the current code at the court. RSVP alone does not confirm attendance.</p><div className="mt-3 flex flex-wrap gap-2"><input id="rch-court-code" aria-label="In-person court code" autoComplete="off" spellCheck={false} maxLength={12} value={checkInCode} onChange={event=>setCheckInCode(event.target.value.toUpperCase().replace(/[^A-F0-9]/g,''))} placeholder="12-character court code" className="min-h-11 min-w-0 flex-1 rounded-xl border border-emerald-400/30 bg-[#0b2332] px-3 font-mono text-sm text-white placeholder:text-white/50" /><button type="button" onClick={()=>void checkIn()} disabled={busy==='checkin'||checkInCode.length!==12} className="min-h-11 rounded-xl bg-emerald-700 px-4 text-sm font-black text-white disabled:opacity-40">{busy==='checkin'?'Checking in…':'Check in'}</button></div></>}</div>}
           <Link href={`/runs/${run.id}/highlight?mode=clip`} className="rounded-2xl border border-rcl-orange/20 bg-rcl-orange/[.05] p-4"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-orange">Run Tape</span><strong className="mt-1 flex items-center gap-2 text-sm"><FaVideo />Drop a clip</strong></Link>
           <Link href={`/runs/${run.id}/highlight?mode=moment`} className="rounded-2xl border border-rcl-blue/20 bg-rcl-blue/[.05] p-4"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">Run Tape</span><strong className="mt-1 flex items-center gap-2 text-sm"><FaCamera />Post photos</strong></Link>
-          {joined && highlightWindow && <button type="button" onClick={() => void claimHighlight()} disabled={highlightClaimed || busy === 'highlight'} className="rounded-2xl border border-rcl-blue/20 bg-white/[.025] p-4 text-left disabled:opacity-55"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">Verified highlight</span><strong className="mt-1 block text-sm">{highlightClaimed ? 'Reward claimed ✓' : 'Claim +35 XP'}</strong></button>}
+          {joined && highlightWindow && <button type="button" onClick={() => void claimHighlight()} disabled={highlightClaimed || busy === 'highlight'} className="rounded-2xl border border-rcl-blue/20 bg-white/[.025] p-4 text-left disabled:opacity-55"><span className="text-[10px] font-black uppercase tracking-wider text-rcl-blue">Verified highlight</span><strong className="mt-1 block text-sm">{highlightClaimed ? 'Reward claimed ✓' : `Claim +${35*Math.max(partner?.reward_multiplier||1,weekendDoubleRep?2:1)} XP`}</strong></button>}
         </section>
 
         <section id="rch-run-lobby" className="grid scroll-mt-36 gap-6 lg:grid-cols-[.75fr_1.25fr]" aria-label="Run roster and floor">
@@ -387,12 +387,12 @@ export default function RunRoomPage() {
 
           </div>
         </section>
-        {!suggestedCourt&&!listingStatusUnknown&&run.status!=='cancelled'&&<div className="mt-6"><RunGameConsole runId={run.id} canOperate={canManage} format={run.game_format||'unknown'} teams={teams} members={members} profiles={profiles}/></div>}
+        {!suggestedCourt&&!listingStatusUnknown&&run.status!=='cancelled'&&<div className="mt-6"><RunGameConsole runId={run.id} canOperate={canManage} format={run.game_format||'unknown'} teams={teams} members={members} profiles={profiles} partnerName={partner?.name} brandColor={partner?.brand_color}/></div>}
 
         {!suggestedCourt&&!listingStatusUnknown&&run.status!=='cancelled'&&<>
         <RunCrewEntries runId={run.id} />
         <RunCrewTeamLinker runId={run.id} />
-        <div id="rch-result-review" className="scroll-mt-36"><RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} /></div>
+        <div id="rch-result-review" className="scroll-mt-36"><RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} canManageRun={canManage} /></div>
         <RunSkillEvidenceDesk runId={run.id} />
         <div id="rch-host-operations" className="scroll-mt-36"><RunOperationsHQ runId={run.id} hostId={run.host_id} /></div>
         <RunVerifiedSignal runId={run.id} />

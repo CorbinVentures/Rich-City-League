@@ -13,9 +13,9 @@ export function SybRunsPartnerSpotlight(){
      <span className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-black uppercase tracking-[.12em] text-[#d4c8ca]">SYB 1v1 circuit</span>
     </div>
     <h2 id="syb-runs-partner-heading" className="mt-3 text-xl font-black uppercase tracking-tight text-white sm:text-2xl">SYB’s 1v1 circuit has a home here.</h2>
-    <p className="mt-2 max-w-3xl text-sm leading-6 text-[#d1c5c7]">Find SYB event listings, join through a free RCH profile, follow posted results, and share Run Tape highlights. Eligible SYB event activity earns 2× XP/REP.</p>
+    <p className="mt-2 max-w-3xl text-sm leading-6 text-[#d1c5c7]">Find SYB event listings, join through a free RCH profile, follow posted results, and share Run Tape highlights. Eligible SYB event activity earns 3× XP/REP across court check-ins, verified game/stat results and Run Tape highlights.</p>
     <div className="mt-4 flex flex-wrap gap-2">
-     <Link href="/runs/partners/syb-hoop-richmond" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#f51f31] px-4 py-3 text-sm font-black text-white transition hover:bg-[#d91426]">Open SYB circuit <FaArrowRight aria-hidden="true"/></Link>
+     <Link href="/runs/partners/syb-hoop-richmond" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#f51f31] px-4 py-3 text-sm font-black text-white transition hover:bg-[#d91426]">Open official 1v1 circuit <FaArrowRight aria-hidden="true"/></Link>
      <a href="https://www.instagram.com/sybhoop/" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#73313a] px-4 py-3 text-sm font-bold text-white transition hover:border-[#f51f31]"><FaInstagram aria-hidden="true"/> Follow @sybhoop</a>
     </div>
    </div>

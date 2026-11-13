@@ -44,7 +44,7 @@ values
 set role authenticated;
 select set_config('request.jwt.claim.sub','ae210000-0000-4000-8000-000000000003',true);
 select throws_ok($$select public.rch_issue_run_checkin_code('ae220000-0000-4000-8000-000000000001')$$,
- 'P0001','Only the host or RCH staff may issue a court check-in code','Other members cannot issue a host code');
+ 'P0001','Only the host, approved partner manager or RCH staff may issue a court check-in code','Other members cannot issue a host code');
 
 select set_config('request.jwt.claim.sub','ae210000-0000-4000-8000-000000000001',true);
 select is(length(public.rch_issue_run_checkin_code('ae220000-0000-4000-8000-000000000001')),12,

@@ -14,8 +14,8 @@ type Review = {
   home_confirmed_by:string|null;away_confirmed_by:string|null;home_score:number;away_score:number;
 };
 
-export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:{
-  runId:string;hostId:string;runType:string;format:string|null;games:Game[];teams:Team[];
+export function RunRankedMatchControl({runId,hostId,runType,format,games,teams,canManageRun=false}:{
+  runId:string;hostId:string;runType:string;format:string|null;games:Game[];teams:Team[];canManageRun?:boolean;
 }) {
   const {user}=useAuth();
   const db=useMemo(()=>getSupabaseClient() as any,[]);
@@ -87,7 +87,7 @@ export function RunRankedMatchControl({runId,hostId,runType,format,games,teams}:
         const onHome=Boolean(user&&review?.home_roster.includes(user.id));
         const onAway=Boolean(user&&review?.away_roster.includes(user.id));
         const canConfirm=review?.status==='pending'&&((onHome&&!review.home_confirmed_by)||(onAway&&!review.away_confirmed_by));
-        const canSubmit=Boolean(user?.id===hostId&&(!review||review.status==='rejected'));
+        const canSubmit=Boolean((user?.id===hostId||canManageRun)&&(!review||review.status==='rejected'));
         return <article key={game.id} className="rounded-2xl border border-[#365b7d] bg-[#07182a]/85 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0"><p className="text-xs font-bold text-[#a8c7e7]">{label(game.home_run_team_id)} vs {label(game.away_run_team_id)}</p>

@@ -25,14 +25,16 @@ describe('RUNS Richmond first-event readiness',()=>{
   expect(sql).toContain('revoke all on function public.claim_latest_run_highlight(uuid) from public,anon,authenticated;');
   expect(media).toContain("db.rpc('rch_claim_checked_in_run_highlight'");
   expect(room).toContain("db.rpc('rch_claim_checked_in_run_highlight'");
-  expect(room).toContain('Claim +35 XP');
-  expect(media).toContain('+35 XP');
+  expect(room).toContain('35*Math.max(partner?.reward_multiplier||1,weekendDoubleRep?2:1)');
+  expect(media).toContain('35 * rewardMultiplier');
+  expect(media).toContain('rch_runs_partner_sessions');
+  expect(media).toContain('rch_weekend_circuit_events');
  });
  it('never exposes old attendance earning calls in any mobile entry point',()=>{
   expect(room).toContain("db.rpc('rch_check_in_with_code'");
   expect(room).toContain("db.rpc('rch_issue_run_checkin_code'");
   expect(room).toContain('IN-PERSON COURT CHECK-IN');
-  expect(room).toContain('partner?.reward_multiplier===2?30:15');
+  expect(room).toContain('15*Math.max(partner?.reward_multiplier||1,weekendDoubleRep?2:1)');
   expect(list).not.toContain("db.rpc('check_in_to_run'");
   expect(room).not.toContain("db.rpc('check_in_to_run'");
   expect(media).not.toContain("db.rpc('claim_latest_run_highlight'");

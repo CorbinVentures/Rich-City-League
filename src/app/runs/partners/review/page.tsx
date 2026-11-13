@@ -13,7 +13,7 @@ export default function RunsPartnerReviewPage(){
  const [loading,setLoading]=useState(true);
  const [partners,setPartners]=useState<Review[]>([]);
  const [notes,setNotes]=useState<Record<string,string>>({});
- const [multipliers,setMultipliers]=useState<Record<string,1|2>>({});
+ const [multipliers,setMultipliers]=useState<Record<string,1|2|3>>({});
  const [busy,setBusy]=useState('');
  const [error,setError]=useState('');
  const [notice,setNotice]=useState('');
@@ -26,7 +26,7 @@ export default function RunsPartnerReviewPage(){
    .in('status',['pending','approved','declined','suspended']).order('created_at',{ascending:false}).limit(150);
   if(failure)setError(failure.message);
   setPartners((rows??[]) as Review[]);
-  setMultipliers(current=>Object.fromEntries((rows??[]).map((x:Review)=>[x.id,current[x.id]??(x.reward_multiplier===2?2:1)])) as Record<string,1|2>);
+  setMultipliers(current=>Object.fromEntries((rows??[]).map((x:Review)=>[x.id,current[x.id]??(x.reward_multiplier===3?3:x.reward_multiplier===2?2:1)])) as Record<string,1|2|3>);
   setLoading(false);
  },[db,user?.id]);
  useEffect(()=>{void load();},[load]);
@@ -43,7 +43,7 @@ export default function RunsPartnerReviewPage(){
  if(!allowed)return <main className="min-h-screen bg-[#061727] p-8 text-white"><p role="alert">You do not have RCH operations permission for partner approvals.</p><Link href="/runs/partners" className="text-[#91cfff]">Partner directory</Link></main>;
  return <main className="min-h-screen bg-[#061727] px-4 pb-28 pt-8 text-white sm:px-8"><div className="mx-auto max-w-5xl">
   <Link href="/runs/partners" className="text-xs font-bold text-[#8cc7fc]">← Partner network</Link>
-  <header className="mt-5 rounded-2xl border border-[#426e90] bg-[#0b2a45] p-6"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8acafc]"><FaClipboardCheck/> RCH Operations · Restricted</p><h1 className="mt-3 text-3xl font-black uppercase">Partner application review</h1><p className="mt-3 max-w-2xl text-sm text-[#bfd5e8]">Confirm the organization and its authorized RCH account before approval. Organization approval publishes the partner page; it does not certify a host, venue, event, score or result. Choose whether its approved Runs receive 1× or 2× eligible event rewards.</p></header>
+  <header className="mt-5 rounded-2xl border border-[#426e90] bg-[#0b2a45] p-6"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8acafc]"><FaClipboardCheck/> RCH Operations · Restricted</p><h1 className="mt-3 text-3xl font-black uppercase">Partner application review</h1><p className="mt-3 max-w-2xl text-sm text-[#bfd5e8]">Confirm the organization and its authorized RCH account before approval. Organization approval publishes the partner page; it does not certify a host, venue, event, score or result. Choose whether its approved Runs receive 1×, 2× or 3× eligible event rewards.</p></header>
   {error&&<p role="alert" className="mt-5 rounded-xl border border-red-400/40 p-4 text-sm text-red-200">{error}</p>}
   {notice&&<p role="status" className="mt-5 rounded-xl border border-emerald-500/40 p-4 text-sm text-emerald-200">{notice}</p>}
   <div className="mt-6 space-y-4">{partners.map(p=><article key={p.id} className="rounded-2xl border border-[#38627e] bg-[#0b253e] p-5">
@@ -53,7 +53,7 @@ export default function RunsPartnerReviewPage(){
    <p className="mt-2 text-xs text-[#a6c7db]">Owner profile: {p.owner_id}</p>
    {p.review_note&&<p className="mt-3 text-xs text-[#a7c2d5]">Previous review: {p.review_note}</p>}
    <label className="mt-4 block text-xs font-bold">Independent review evidence / decision note<textarea rows={2} minLength={8} maxLength={500} className="mt-2 w-full rounded-xl border border-[#507594] bg-[#061a2d] px-3 py-3 text-sm" value={notes[p.id]??''} onChange={e=>setNotes({...notes,[p.id]:e.target.value})} placeholder="Describe verified organizer identity, facilities, terms and evidence…"/></label>
-   <label className="mt-4 block max-w-sm text-xs font-bold">Eligible event rewards<select className="mt-2 w-full rounded-xl border border-[#507594] bg-[#061a2d] px-3 py-3 text-sm" value={multipliers[p.id]??1} onChange={e=>setMultipliers({...multipliers,[p.id]:Number(e.target.value) as 1|2})}><option value={1}>1× standard rewards</option><option value={2}>2× event XP / REP</option></select><span className="mt-2 block text-[11px] font-normal leading-5 text-[#9fbdd3]">At 2×, code-verified attendance and eligible verified game/stat rewards are doubled. Highlights stay standard rate; results keep RCH’s verification flow.</span></label>
+   <label className="mt-4 block max-w-sm text-xs font-bold">Eligible event rewards<select className="mt-2 w-full rounded-xl border border-[#507594] bg-[#061a2d] px-3 py-3 text-sm" value={multipliers[p.id]??1} onChange={e=>setMultipliers({...multipliers,[p.id]:Number(e.target.value) as 1|2|3})}><option value={1}>1× standard rewards</option><option value={2}>2× event XP / REP</option><option value={3}>3× event XP / REP</option></select><span className="mt-2 block text-[11px] font-normal leading-5 text-[#9fbdd3]">Eligible event rewards include code-verified attendance, independently verified game/stat results, and event Run Tape highlights. RCH’s result review remains in place.</span></label>
    <div className="mt-4 flex flex-wrap gap-2"><button disabled={Boolean(busy)||(notes[p.id]||'').trim().length<8} onClick={()=>void review(p,'approved')} className="min-h-10 rounded-lg bg-[#348de7] px-4 text-xs font-black disabled:opacity-40">{p.status==='approved'?'Save approval':'Approve organization'}</button><button disabled={Boolean(busy)||(notes[p.id]||'').trim().length<8} onClick={()=>void review(p,'declined')} className="min-h-10 rounded-lg border border-[#a7776d] px-4 text-xs font-bold text-[#f6c2b6] disabled:opacity-40">Decline</button><button disabled={Boolean(busy)||(notes[p.id]||'').trim().length<8} onClick={()=>void review(p,'suspended')} className="min-h-10 rounded-lg border border-[#9d8555] px-4 text-xs font-bold text-[#f0dbaa] disabled:opacity-40">Suspend</button></div>
   </article>)}{!partners.length&&<p className="rounded-xl border border-dashed border-[#3d6786] p-8 text-sm text-[#b8cfe0]">No partner applications yet.</p>}</div>
  </div></main>;

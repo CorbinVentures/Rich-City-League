@@ -114,13 +114,13 @@ $$, '42501', 'Referral totals are computed by the server',
 select lives_ok($$
   update public.profiles set bio='Basketball member' where id=auth.uid()
 $$, 'ordinary members may still edit normal profile fields');
-select lives_ok($$
+select throws_ok($registration$
   insert into public.registrations
     (id, season_id, division_id, applicant_id, first_name, last_name, email)
   values
     ('22222222-aaaa-aaaa-aaaa-222222222222', '77777777-7777-7777-7777-777777777777',
      '99999999-9999-9999-9999-999999999999', auth.uid(), 'Test', 'Player', 'player@example.test')
-$$, 'authenticated users can create their own valid registration');
+$registration$, '42501', null, 'members cannot bypass the validated registration endpoint');
 select throws_ok($$
   insert into public.registrations
     (season_id, division_id, applicant_id, first_name, last_name, email)
@@ -181,8 +181,8 @@ select lives_ok($$
      null, null, 'Staff', 'Managed', 'staff-managed@example.test')
 $$, 'authorized staff access remains functional');
 update public.registrations set status = 'approved'
-where id = '22222222-aaaa-aaaa-aaaa-222222222222';
-select is((select status from public.registrations where id = '22222222-aaaa-aaaa-aaaa-222222222222'),
+where id = '11111111-aaaa-aaaa-aaaa-111111111111';
+select is((select status from public.registrations where id = '11111111-aaaa-aaaa-aaaa-111111111111'),
   'approved'::public.registration_status, 'staff can manage another users registration');
 
 select set_config('request.jwt.claim.sub', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true);

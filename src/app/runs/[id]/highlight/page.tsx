@@ -38,6 +38,7 @@ export default function RunHighlightPublisher() {
 
   const [run, setRun] = useState<Run | null>(null);
   const [participant, setParticipant] = useState(false);
+  const [rewardMultiplier, setRewardMultiplier] = useState(1);
   const [mode, setMode] = useState<Mode>('clip');
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<Preview[]>([]);
@@ -62,6 +63,16 @@ export default function RunHighlightPublisher() {
       }
       const nextRun = (data ?? null) as Run | null;
       setRun(nextRun);
+      setRewardMultiplier(1);
+      if (nextRun) {
+        const [partnerReward, weekendReward] = await Promise.all([
+          db.from('rch_runs_partner_sessions').select('reward_multiplier').eq('run_id', runId).maybeSingle(),
+          db.from('rch_weekend_circuit_events').select('bonus_enabled').eq('run_id', runId).maybeSingle(),
+        ]);
+        const partnerMultiplier = Number(partnerReward.data?.reward_multiplier) || 1;
+        const weekendMultiplier = weekendReward.data?.bonus_enabled ? 2 : 1;
+        setRewardMultiplier(Math.max(partnerMultiplier, weekendMultiplier));
+      }
       if (!user || !nextRun) {
         setParticipant(false);
         return;
@@ -233,7 +244,7 @@ export default function RunHighlightPublisher() {
         <section className="mb-5 rounded-3xl border border-rcl-blue/15 bg-[radial-gradient(circle_at_90%_10%,rgba(59,130,246,.12),transparent_36%),#07111b] p-5 sm:p-7">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-rcl-blue"><FaBasketball className="mr-1 inline" />{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p>
           <h2 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Show what happened.</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Players who checked in with their host-issued court code can earn one +35 XP highlight reward after publishing eligible media. A joined roster spot alone does not award points.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/45">Upload directly from your phone. Your clip or photo set appears in RCL Social and stays attached to this Run Room. Players who checked in with their host-issued court code can earn one +{35 * rewardMultiplier} XP highlight reward after publishing eligible media. A joined roster spot alone does not award points.</p>
         </section>
 
         <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#07111b] p-2">
@@ -256,7 +267,7 @@ export default function RunHighlightPublisher() {
               {mode === 'moment' && files.length > 0 && files.length < SOCIAL_MAX_IMAGES && <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-black text-white/55">+ Add more photos</button>}
             </div>
 
-            {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Rostered participant.</b> After a host-issued in-person check-in, an eligible published highlight may earn +35 XP. Media can still be shared without a reward.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. XP rewards require a verified court-code check-in.</div>}
+            {participant ? <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[.04] p-4 text-xs leading-5 text-white/50"><b className="text-emerald-300">Rostered participant.</b> After a host-issued in-person check-in, an eligible published highlight may earn +{35 * rewardMultiplier} XP. Media can still be shared without a reward.</div> : <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/40">You can still contribute media to this Run Tape. XP rewards require a verified court-code check-in.</div>}
 
             <label className="flex min-h-12 items-start gap-3 rounded-xl border border-white/15 bg-white/[.03] p-3 text-xs leading-5 text-white/75">
               <input type="checkbox" required checked={mediaPermission} onChange={e=>setMediaPermission(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#e65782]"/>
