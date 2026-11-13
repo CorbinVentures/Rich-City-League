@@ -82,47 +82,47 @@ export function CourtPulseFeed({ courtSlug }: { courtSlug: string }) {
   return <section id="rch-court-pulse" className="mt-7 scroll-mt-32" aria-label="Court Pulse: published basketball moments">
     <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
       <div>
-        <p className="text-xs font-black uppercase tracking-[.16em] text-[#ff768c]">From this court</p>
-        <h2 className="mt-1 font-display text-2xl font-black uppercase text-[#f5f5f3]">Court Pulse</h2>
+        <p className="text-xs font-black uppercase tracking-[.16em] text-[#959595]">From this court</p>
+        <h2 className="mt-1 font-display text-2xl font-black uppercase text-[#f5f5f5]">Court Pulse</h2>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {communitySlug && <Link href={'/communities/' + encodeURIComponent(communitySlug)}
-          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[#44484e] px-3 text-xs font-bold text-[#d0d1d4]">
+          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[#484848] px-3 text-xs font-bold text-[#d1d1d1]">
           Court community
         </Link>}
         <Link href={'/runs?court=' + encodeURIComponent(courtSlug)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#44484e] px-3 text-xs font-bold text-[#f5f5f3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff768c]">
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#484848] px-3 text-xs font-bold text-[#f5f5f5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#959595]">
           Find a game <FaArrowRight aria-hidden="true"/>
         </Link>
       </div>
     </div>
-    {loading ? <div role="status" className="rounded-lg border border-[#44484e] bg-[#141618] p-5 text-sm text-[#d0d1d4]">Loading real court activity…</div>
-      : unavailable ? <div role="status" className="rounded-lg border border-[#44484e] bg-[#141618] p-5 text-sm text-[#d0d1d4]">Court moments are unavailable. You can still find upcoming games.</div>
-      : moments.length === 0 ? <div className="flex items-center gap-3 rounded-lg border border-[#44484e] bg-[#141618] p-5">
-        <FaBasketball className="shrink-0 text-[#ff768c]" aria-hidden="true"/>
-        <p className="text-sm text-[#d0d1d4]">No published court moments yet. Find the next game or join the court community.</p>
+    {loading ? <div role="status" className="rounded-lg border border-[#484848] bg-[#161616] p-5 text-sm text-[#d1d1d1]">Loading real court activity…</div>
+      : unavailable ? <div role="status" className="rounded-lg border border-[#484848] bg-[#161616] p-5 text-sm text-[#d1d1d1]">Court moments are unavailable. You can still find upcoming games.</div>
+      : moments.length === 0 ? <div className="flex items-center gap-3 rounded-lg border border-[#484848] bg-[#161616] p-5">
+        <FaBasketball className="shrink-0 text-[#959595]" aria-hidden="true"/>
+        <p className="text-sm text-[#d1d1d1]">No published court moments yet. Find the next game or join the court community.</p>
       </div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {moments.map((moment) => {
           const image = courtPulseImageUrl(moment.media_urls, process.env.NEXT_PUBLIC_SUPABASE_URL);
-          return <article key={moment.kind + ':' + moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#44484e] bg-[#141618]">
+          return <article key={moment.kind + ':' + moment.id} className="min-w-0 overflow-hidden rounded-lg border border-[#484848] bg-[#161616]">
             {image && <Link href={moment.href} aria-label="Open published court post">
               <img src={image} alt="Published basketball moment" loading="lazy" className="aspect-video w-full object-cover"/>
             </Link>}
             <div className="p-4">
-              <div className="mb-2 flex items-center gap-2 text-xs text-[#a6a8ad]">
+              <div className="mb-2 flex items-center gap-2 text-xs text-[#a8a8a8]">
                 {image ? <FaCamera aria-hidden="true"/> : <FaBasketball aria-hidden="true"/>}
                 <span>{moment.kind === 'run' ? 'Run-linked post' : 'Court community'}</span>
               </div>
-              {moment.authorName ? <Link href={'/social/profile/' + moment.author_id} className="text-xs font-bold text-[#ff768c]">{moment.authorName}</Link>
-                : <span className="text-xs font-bold text-[#d0d1d4]">Community post</span>}
-              {moment.body && <p className="mt-2 line-clamp-2 break-words text-sm text-[#f5f5f3]">{moment.body}</p>}
-              <Link href={moment.href} className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-[#f5f5f3]">
+              {moment.authorName ? <Link href={'/social/profile/' + moment.author_id} className="text-xs font-bold text-[#959595]">{moment.authorName}</Link>
+                : <span className="text-xs font-bold text-[#d1d1d1]">Community post</span>}
+              {moment.body && <p className="mt-2 line-clamp-2 break-words text-sm text-[#f5f5f5]">{moment.body}</p>}
+              <Link href={moment.href} className="mt-3 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-[#f5f5f5]">
                 View moment <FaArrowRight aria-hidden="true"/>
               </Link>
             </div>
           </article>;
         })}
       </div>}
-    <p className="mt-2 text-xs text-[#a6a8ad]">Showing published Run-linked posts and visible court-community discussions. Posts do not verify attendance or game results.</p>
+    <p className="mt-2 text-xs text-[#a8a8a8]">Showing published Run-linked posts and visible court-community discussions. Posts do not verify attendance or game results.</p>
   </section>;
 }

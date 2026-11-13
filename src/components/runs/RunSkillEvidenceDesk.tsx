@@ -145,44 +145,44 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
   setBusy(false);
  }
  if(!uid||!authorized)return null;
- return <section aria-label="Skill Engine official game scorekeeping" className="my-6 rounded-3xl border border-[#537693] bg-[#091f35] p-5 text-white sm:p-6">
+ return <section aria-label="Skill Engine official game scorekeeping" className="my-6 rounded-3xl border border-[#717171] bg-[#1c1c1c] p-5 text-white sm:p-6">
   <div className="flex items-start gap-3">
-   <FaClipboardCheck className="mt-1 shrink-0 text-2xl text-[#f2ce83]"/>
-   <div><p className="text-[10px] font-black uppercase tracking-widest text-[#9acaf0]">Official scorekeeper · Skill Engine V2</p>
+   <FaClipboardCheck className="mt-1 shrink-0 text-2xl text-[#d0d0d0]"/>
+   <div><p className="text-[10px] font-black uppercase tracking-widest text-[#c3c3c3]">Official scorekeeper · Skill Engine V2</p>
     <h2 className="mt-2 font-display text-2xl font-black">Match-Level Skill Evidence</h2>
-    <p className="mt-2 text-sm leading-6 text-[#b2cee1]">Record each player&apos;s actual stats from a verified game. A different authorized official must approve the evidence. A Run RSVP, personal claim or generic event box score cannot earn a competitive badge.</p>
+    <p className="mt-2 text-sm leading-6 text-[#c9c9c9]">Record each player&apos;s actual stats from a verified game. A different authorized official must approve the evidence. A Run RSVP, personal claim or generic event box score cannot earn a competitive badge.</p>
    </div>
   </div>
-  {loading&&<p className="mt-4 text-sm text-[#c4daed]" role="status">Loading official matches…</p>}
-  {!loading&&!matches.length&&<p className="mt-4 rounded-xl border border-[#46647f] p-4 text-sm text-[#c2d7e8]">No independently verified matches yet. Finish a real game and confirm the result before recording badge statistics.</p>}
-  {error&&<p role="alert" className="mt-4 rounded-xl border border-amber-500/40 p-3 text-sm text-amber-200">{error}</p>}
-  {notice&&<p role="status" className="mt-4 rounded-xl border border-emerald-400/30 p-3 text-sm text-emerald-200">{notice}</p>}
+  {loading&&<p className="mt-4 text-sm text-[#d7d7d7]" role="status">Loading official matches…</p>}
+  {!loading&&!matches.length&&<p className="mt-4 rounded-xl border border-[#606060] p-4 text-sm text-[#d4d4d4]">No independently verified matches yet. Finish a real game and confirm the result before recording badge statistics.</p>}
+  {error&&<p role="alert" className="mt-4 rounded-xl border border-gray-500/40 p-3 text-sm text-gray-200">{error}</p>}
+  {notice&&<p role="status" className="mt-4 rounded-xl border border-gray-400/30 p-3 text-sm text-gray-200">{notice}</p>}
   {!!matches.length&&<form onSubmit={e=>void submit(e)} className="mt-5 space-y-4">
    <div className="grid gap-3 sm:grid-cols-2">
     <label className="block text-xs font-bold">Verified game
      <select value={selectedMatch} onChange={e=>selectMatch(e.target.value)}
-      className="mt-2 min-h-11 w-full rounded-xl border border-[#456f90] bg-[#102d47] px-3 text-sm">
+      className="mt-2 min-h-11 w-full rounded-xl border border-[#686868] bg-[#292929] px-3 text-sm">
       <option value="">Select verified match</option>
       {matches.map(m=><option key={m.id} value={m.id}>{m.game_format} · {m.home_score}–{m.away_score} · {new Date(m.verified_at).toLocaleDateString()}</option>)}
      </select>
     </label>
     <label className="block text-xs font-bold">Verified participant
      <select value={selectedPlayer} onChange={e=>selectPlayer(e.target.value)} disabled={!match}
-      className="mt-2 min-h-11 w-full rounded-xl border border-[#456f90] bg-[#102d47] px-3 text-sm disabled:opacity-40">
+      className="mt-2 min-h-11 w-full rounded-xl border border-[#686868] bg-[#292929] px-3 text-sm disabled:opacity-40">
       <option value="">Select rostered player</option>
       {players.map(p=><option key={p} value={p}>{names[p]||'Verified player'}</option>)}
      </select>
     </label>
    </div>
-   {activeReceipt&&<div className="rounded-xl border border-[#426586] bg-[#132d43] p-3 text-xs">
-    <p className="font-bold uppercase tracking-wider text-[#e5c17e]">Existing evidence: {activeReceipt.review_status}</p>
-    <p className="mt-1 text-[#bed2e2]">{activeReceipt.points} PTS · {activeReceipt.rebounds??'—'} REB · {activeReceipt.assists??'—'} AST</p>
+   {activeReceipt&&<div className="rounded-xl border border-[#606060] bg-[#292929] p-3 text-xs">
+    <p className="font-bold uppercase tracking-wider text-[#c4c4c4]">Existing evidence: {activeReceipt.review_status}</p>
+    <p className="mt-1 text-[#cfcfcf]">{activeReceipt.points} PTS · {activeReceipt.rebounds??'—'} REB · {activeReceipt.assists??'—'} AST</p>
     {activeReceipt.review_status==='pending'&&<div className="mt-3 flex flex-wrap gap-2">
-     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(true)} className="min-h-11 rounded-lg bg-[#91dbbf] px-4 text-xs font-black text-[#092d2b] disabled:opacity-40"><FaCheck className="mr-1 inline"/> Certify independently</button>
-     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(false)} className="min-h-11 rounded-lg border border-[#ac8080] px-4 text-xs font-bold disabled:opacity-40">Reject</button>
-     {activeReceipt.recorded_by===uid&&<span className="self-center text-[#c3d4e1]">A different authorized reviewer must approve your entry.</span>}
+     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(true)} className="min-h-11 rounded-lg bg-[#c9c9c9] px-4 text-xs font-black text-[#252525] disabled:opacity-40"><FaCheck className="mr-1 inline"/> Certify independently</button>
+     <button disabled={busy||activeReceipt.recorded_by===uid} type="button" onClick={()=>void review(false)} className="min-h-11 rounded-lg border border-[#898989] px-4 text-xs font-bold disabled:opacity-40">Reject</button>
+     {activeReceipt.recorded_by===uid&&<span className="self-center text-[#d1d1d1]">A different authorized reviewer must approve your entry.</span>}
     </div>}
-    {activeReceipt.review_status==='verified'&&<p className="mt-2 text-emerald-200">Locked verified receipt. Corrections require audited staff revocation.</p>}
+    {activeReceipt.review_status==='verified'&&<p className="mt-2 text-gray-200">Locked verified receipt. Corrections require audited staff revocation.</p>}
    </div>}
    {match&&selectedPlayer&&activeReceipt?.review_status!=='verified'&&<div>
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -190,21 +190,21 @@ export function RunSkillEvidenceDesk({runId}:{runId:string}){
       <input type="number" min="0" max="250" step="1" inputMode="numeric" required={field==='points'}
        value={stats[field]} onChange={e=>setStats(s=>({...s,[field]:e.target.value}))}
        placeholder={field==='points'?'Required':'Not tracked'}
-       className="mt-2 min-h-11 w-full rounded-xl border border-[#456b8a] bg-[#102d45] px-3 text-sm"/>
+       className="mt-2 min-h-11 w-full rounded-xl border border-[#656565] bg-[#292929] px-3 text-sm"/>
      </label>)}
     </div>
     <label className="mt-4 block text-xs font-bold">Official evidence reference (required)
      <textarea value={sourceNote} onChange={e=>setSourceNote(e.target.value)} required minLength={10} maxLength={300}
       placeholder="Identify the official scorebook game, scorer sheet, or certified match evidence."
-      rows={2} className="mt-2 w-full rounded-xl border border-[#456b8a] bg-[#102d45] p-3 text-sm"/>
+      rows={2} className="mt-2 w-full rounded-xl border border-[#656565] bg-[#292929] p-3 text-sm"/>
     </label>
     <button disabled={busy||sourceNote.trim().length<10} type="submit"
-     className="mt-4 min-h-11 rounded-xl bg-[#f3cb7e] px-5 text-sm font-black text-[#241908] disabled:opacity-40">
+     className="mt-4 min-h-11 rounded-xl bg-[#cecece] px-5 text-sm font-black text-[#1a1a1a] disabled:opacity-40">
      <FaBasketball className="mr-2 inline"/> Submit for independent review
     </button>
-    <p className="mt-2 text-xs text-[#a7c1d4]">Leave genuinely untracked stats blank—never substitute a zero. Badges are recalculated from verified match receipts only.</p>
+    <p className="mt-2 text-xs text-[#bdbdbd]">Leave genuinely untracked stats blank—never substitute a zero. Badges are recalculated from verified match receipts only.</p>
    </div>}
   </form>}
-  <p className="mt-5 flex items-center gap-2 text-xs text-[#a3bacd]"><FaShieldHalved/> Final score, roster, on-site check-in, independent review and completed event status are mandatory.</p>
+  <p className="mt-5 flex items-center gap-2 text-xs text-[#b6b6b6]"><FaShieldHalved/> Final score, roster, on-site check-in, independent review and completed event status are mandatory.</p>
  </section>;
 }

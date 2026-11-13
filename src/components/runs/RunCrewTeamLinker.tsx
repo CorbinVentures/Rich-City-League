@@ -47,18 +47,18 @@ export function RunCrewTeamLinker({runId}:{runId:string}){
     setBusy(false);
     if(!error)setReload(v=>v+1);
   }
-  return <section className="mt-5 rounded-3xl border border-[#417bb1] bg-[#0b2740] p-5 text-white sm:p-6" aria-label="Assign crew to Run team">
-    <h3 className="flex items-center gap-2 text-lg font-black uppercase"><FaPeopleGroup className="text-[#8ec9ff]"/> Crew match identity</h3>
-    <p className="mt-2 text-sm text-[#bed7ea]">Captain of {crew.name}: connect your assembled Run team before submitting its first competitive result. The crew must be registered, and every player on the selected team must be on your crew roster.</p>
-    {assigned?<p className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-900/20 p-3 text-xs font-bold text-emerald-200"><FaCircleCheck/> Linked to {teams.find(t=>t.id===assigned.run_team_id)?.name||'your Run team'}. Verified match results will count for crew standings during qualifying.</p>:
+  return <section className="mt-5 rounded-3xl border border-[#737373] bg-[#232323] p-5 text-white sm:p-6" aria-label="Assign crew to Run team">
+    <h3 className="flex items-center gap-2 text-lg font-black uppercase"><FaPeopleGroup className="text-[#c0c0c0]"/> Crew match identity</h3>
+    <p className="mt-2 text-sm text-[#d3d3d3]">Captain of {crew.name}: connect your assembled Run team before submitting its first competitive result. The crew must be registered, and every player on the selected team must be on your crew roster.</p>
+    {assigned?<p className="mt-4 flex items-center gap-2 rounded-xl border border-gray-400/30 bg-gray-900/20 p-3 text-xs font-bold text-gray-200"><FaCircleCheck/> Linked to {teams.find(t=>t.id===assigned.run_team_id)?.name||'your Run team'}. Verified match results will count for crew standings during qualifying.</p>:
     <div className="mt-4 flex flex-wrap items-center gap-2">
-      <select className="min-h-11 min-w-48 flex-1 rounded-xl border border-[#476b88] bg-[#071728] px-3 text-sm text-white" aria-label="Choose your crew Run team" value={team} onChange={e=>setTeam(e.target.value)}>
+      <select className="min-h-11 min-w-48 flex-1 rounded-xl border border-[#656565] bg-[#151515] px-3 text-sm text-white" aria-label="Choose your crew Run team" value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Choose an assembled team</option>{freeTeams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
-      <button type="button" disabled={!team||busy} onClick={()=>void attach()} className="min-h-11 rounded-xl bg-[#68bcff] px-4 text-xs font-black text-[#051b2c] disabled:opacity-50">{busy?'Linking…':'Confirm crew team'}</button>
+      <button type="button" disabled={!team||busy} onClick={()=>void attach()} className="min-h-11 rounded-xl bg-[#afafaf] px-4 text-xs font-black text-[#181818] disabled:opacity-50">{busy?'Linking…':'Confirm crew team'}</button>
     </div>}
-    {!teams.length&&<p className="mt-3 text-xs text-[#b4cade]">Ask the run host to create and assign teams in the Run Room first.</p>}
-    {message&&<p role="status" className="mt-3 text-xs text-[#ffdfa4]">{message}</p>}
-    <Link href="/crews" className="mt-3 inline-block text-xs font-black text-[#8ccaff] underline">Crew HQ and roster</Link>
+    {!teams.length&&<p className="mt-3 text-xs text-[#c7c7c7]">Ask the run host to create and assign teams in the Run Room first.</p>}
+    {message&&<p role="status" className="mt-3 text-xs text-[#e2e2e2]">{message}</p>}
+    <Link href="/crews" className="mt-3 inline-block text-xs font-black text-[#c1c1c1] underline">Crew HQ and roster</Link>
   </section>;
 }

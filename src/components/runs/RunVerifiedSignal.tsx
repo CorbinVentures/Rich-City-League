@@ -18,12 +18,12 @@ export function RunVerifiedSignal({runId}:{runId:string}){
   return()=>{alive=false;};
  },[db,runId]);
  if(!verified)return null;
- return <section aria-label="Official RCH Verified Run designation" className="mt-6 rounded-2xl border border-emerald-400/40 bg-[#102e32] p-4 text-white">
+ return <section aria-label="Official RCH Verified Run designation" className="mt-6 rounded-2xl border border-gray-400/40 bg-[#282828] p-4 text-white">
   <div className="flex flex-wrap items-center gap-2">
-   <FaShieldHalved className="text-emerald-300"/>
-   <strong className="text-sm font-black uppercase text-emerald-200">RCH Verified Run</strong>
-   <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-bold uppercase text-emerald-100">Organizer reviewed</span>
+   <FaShieldHalved className="text-gray-300"/>
+   <strong className="text-sm font-black uppercase text-gray-200">RCH Verified Run</strong>
+   <span className="rounded-full bg-gray-500/15 px-2 py-1 text-[10px] font-bold uppercase text-gray-100">Organizer reviewed</span>
   </div>
-  <p className="mt-2 text-xs leading-5 text-[#bad7d4]">RCH staff reviewed the organizer, court source, event preparation and officiating requirements where applicable. This does not guarantee player safety or verify future match results. <Link href="/runs/hosts" className="font-black text-[#a6f0e1] underline">About RCH standards</Link></p>
+  <p className="mt-2 text-xs leading-5 text-[#d1d1d1]">RCH staff reviewed the organizer, court source, event preparation and officiating requirements where applicable. This does not guarantee player safety or verify future match results. <Link href="/runs/hosts" className="font-black text-[#dfdfdf] underline">About RCH standards</Link></p>
  </section>;
 }

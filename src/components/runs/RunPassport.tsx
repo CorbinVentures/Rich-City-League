@@ -45,22 +45,22 @@ export function RunPassport(){
  }
  if(!user)return null;
  const ladder=['1v1','2v2','3v3','4v4','5v5'];
- return <section aria-label="Your basketball Run Passport" className="my-6 overflow-hidden rounded-3xl border border-[#426c97] bg-[linear-gradient(135deg,#102c4d,#061727)] p-5 text-white sm:p-7">
+ return <section aria-label="Your basketball Run Passport" className="my-6 overflow-hidden rounded-3xl border border-[#666666] bg-[linear-gradient(135deg,#282828,#151515)] p-5 text-white sm:p-7">
   <div className="flex flex-wrap items-center justify-between gap-3">
-   <div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-[#93d4ff]"><FaMedal/> Personal Basketball Identity</p>
+   <div><p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.16em] text-[#c9c9c9]"><FaMedal/> Personal Basketball Identity</p>
     <h2 className="mt-2 font-display text-2xl font-black uppercase sm:text-3xl">Your Run Passport</h2>
-    <p className="mt-2 text-sm text-[#a7c4df]">Your basketball identity: verified games, competitive Rank, earned badges and spendable REP. Social XP is separate.</p></div>
+    <p className="mt-2 text-sm text-[#c0c0c0]">Your basketball identity: verified games, competitive Rank, earned badges and spendable REP. Social XP is separate.</p></div>
    <div className="rch-run-passport-actions">
-    <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black">{expanded?'Hide Passport':'View Passport'}</button>
-    <button type="button" disabled={loading||Boolean(error)} onClick={()=>void shareMyPassport()} className="min-h-11 rounded-xl border border-[#5784aa] px-4 text-xs font-black disabled:opacity-50"><FaShareNodes className="mr-1 inline" aria-hidden="true"/> Share my stats</button>
+    <button type="button" onClick={()=>setExpanded(v=>!v)} aria-expanded={expanded} className="min-h-11 rounded-xl border border-[#7d7d7d] px-4 text-xs font-black">{expanded?'Hide Passport':'View Passport'}</button>
+    <button type="button" disabled={loading||Boolean(error)} onClick={()=>void shareMyPassport()} className="min-h-11 rounded-xl border border-[#7d7d7d] px-4 text-xs font-black disabled:opacity-50"><FaShareNodes className="mr-1 inline" aria-hidden="true"/> Share my stats</button>
    </div>
   </div>
-  {error&&<p role="status" className="mt-4 text-xs text-amber-200">{error}</p>}
-  {shareStatus&&<p role="status" className="mt-3 text-xs text-[#a7c7e5]">{shareStatus}</p>}
-  {loading&&<p className="mt-3 text-xs text-[#aac9e2]">Loading verified history…</p>}
+  {error&&<p role="status" className="mt-4 text-xs text-gray-200">{error}</p>}
+  {shareStatus&&<p role="status" className="mt-3 text-xs text-[#c2c2c2]">{shareStatus}</p>}
+  {loading&&<p className="mt-3 text-xs text-[#c4c4c4]">Loading verified history…</p>}
   {!loading&&<div className="mt-5 grid grid-cols-3 gap-2">
-   {[['Run REP',data.run_rep],['Verified games',data.verified_games],['Earned badges',data.badges.length]].map(([label,value])=><div key={label} className="rounded-xl border border-[#42688c] bg-[#0b263d] p-3">
-     <span className="block text-xl font-black">{value}</span><span className="text-[11px] text-[#a7c7e5]">{label}</span>
+   {[['Run REP',data.run_rep],['Verified games',data.verified_games],['Earned badges',data.badges.length]].map(([label,value])=><div key={label} className="rounded-xl border border-[#636363] bg-[#222222] p-3">
+     <span className="block text-xl font-black">{value}</span><span className="text-[11px] text-[#c2c2c2]">{label}</span>
    </div>)}
   </div>}
   {expanded&&<div className="mt-6">
@@ -68,33 +68,33 @@ export function RunPassport(){
     <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
      {ladder.map(f=>{
       const r=data.ratings.find(x=>x.game_format===f);
-      return <div key={f} className="rounded-xl border border-[#416486] bg-[#082135] p-3">
-       <span className="text-xs font-black text-[#aad9ff]">{f}</span>
+      return <div key={f} className="rounded-xl border border-[#5f5f5f] bg-[#1d1d1d] p-3">
+       <span className="text-xs font-black text-[#d2d2d2]">{f}</span>
        <p className="mt-1 text-2xl font-black">{r?.rating??'—'}</p>
-       <p className="mt-1 text-[11px] text-[#a5bfd8]">{r? r.wins+' W · '+r.losses+' L':'No ranked games yet'}</p>
-       {r?.provisional&&<span className="text-[10px] font-bold text-[#f0ce87]">Provisional · under 5 games</span>}
+       <p className="mt-1 text-[11px] text-[#bbbbbb]">{r? r.wins+' W · '+r.losses+' L':'No ranked games yet'}</p>
+       {r?.provisional&&<span className="text-[10px] font-bold text-[#d0d0d0]">Provisional · under 5 games</span>}
       </div>;
      })}
     </div>
     <h3 className="mt-6 flex items-center gap-2 text-sm font-black uppercase"><FaTrophy/> Recent Verified Performances</h3>
-    {data.last_results.length?<div className="mt-3 space-y-2">{data.last_results.map(r=><div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#416486] bg-[#082135] p-3 text-xs">
-      <div><span className={'font-black '+(r.won?'text-emerald-300':'text-[#d5dfeb]')}>{r.won?'WIN':'LOSS'} · {r.game_format}</span><span className="ml-2 text-[#b0c9dc]">{r.court_name} · {new Date(r.verified_at).toLocaleDateString()}</span></div>
+    {data.last_results.length?<div className="mt-3 space-y-2">{data.last_results.map(r=><div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#5f5f5f] bg-[#1d1d1d] p-3 text-xs">
+      <div><span className={'font-black '+(r.won?'text-gray-300':'text-[#dedede]')}>{r.won?'WIN':'LOSS'} · {r.game_format}</span><span className="ml-2 text-[#c5c5c5]">{r.court_name} · {new Date(r.verified_at).toLocaleDateString()}</span></div>
       <span className="font-black">{r.rating_before} → {r.rating_after}</span>
-    </div>)}</div>:<p className="mt-3 rounded-xl border border-dashed border-[#416486] p-4 text-xs text-[#a7c1d9]">Your first independently verified game will appear here.</p>}
+    </div>)}</div>:<p className="mt-3 rounded-xl border border-dashed border-[#5f5f5f] p-4 text-xs text-[#bdbdbd]">Your first independently verified game will appear here.</p>}
     {data.badges.length>0&&<div className="mt-5">
      <h3 className="text-sm font-black uppercase tracking-wide">Earned Run badges</h3>
      <div className="mt-3 flex flex-wrap gap-2">{data.badges.map(code=>{
       const badge=getSybBadgeConcept(code);
-      return badge?.awardable?<article key={code} className="flex min-w-[190px] items-center gap-2 rounded-xl border border-[#f51f31]/35 bg-[#180b0e] px-2 py-1.5">
+      return badge?.awardable?<article key={code} className="flex min-w-[190px] items-center gap-2 rounded-xl border border-[#4e4e4e]/35 bg-[#0e0e0e] px-2 py-1.5">
        <BadgeMedallion badge={{brand:'syb',code:badge.code,mark:badge.mark,name:badge.name,icon:badge.icon,tier:'gold'}} size="xs"/>
-       <span><small className="block text-[9px] font-black uppercase tracking-[.12em] text-[#ff7d86]">SYB 1v1 Circuit</small><strong className="text-xs">{badge.name}</strong></span>
-      </article>:<span key={code} className="rounded-full border border-[#9f8055] bg-[#564222]/40 px-3 py-1.5 text-xs font-bold text-[#ffe3aa]">{badgeLabel(code)}</span>;
+       <span><small className="block text-[9px] font-black uppercase tracking-[.12em] text-[#999999]">SYB 1v1 Circuit</small><strong className="text-xs">{badge.name}</strong></span>
+      </article>:<span key={code} className="rounded-full border border-[#838383] bg-[#444444]/40 px-3 py-1.5 text-xs font-bold text-[#e5e5e5]">{badgeLabel(code)}</span>;
      })}</div>
     </div>}
-    {data.open_appeals>0&&<p className="mt-4 text-xs font-bold text-[#f2d1a6]">{data.open_appeals} integrity review(s) in progress</p>}
-    <p className="mt-4 text-[11px] leading-5 text-[#99bbd7]">Only you can view this detailed Passport. Public Run rankings continue to respect your profile privacy settings.</p>
+    {data.open_appeals>0&&<p className="mt-4 text-xs font-bold text-[#d5d5d5]">{data.open_appeals} integrity review(s) in progress</p>}
+    <p className="mt-4 text-[11px] leading-5 text-[#b6b6b6]">Only you can view this detailed Passport. Public Run rankings continue to respect your profile privacy settings.</p>
     <SkillMasteryCollection />
-    <p className="mt-4 text-xs text-[#a7c1d9]">Skill ratings change only after independent opponent verification, not RSVPs or highlights. Start with a real hosted game.</p>
+    <p className="mt-4 text-xs text-[#bdbdbd]">Skill ratings change only after independent opponent verification, not RSVPs or highlights. Start with a real hosted game.</p>
    </div>}
  </section>;
 }

@@ -336,8 +336,8 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       onBattle={()=>setScreen('battle')} onRules={onOpenRules}
       onReplay={()=>setIntroReplay(n=>n+1)}/>}
 
-   {screen==='world'&&<div className="rwg-world-game-tip mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#385a72] bg-[#0c263b] px-4 py-3 text-sm">
-     <p className="text-[#cfe2ef]"><FaLocationDot className="mr-2 inline" aria-hidden="true"/>Tap a court pin to see games and territory.</p>
+   {screen==='world'&&<div className="rwg-world-game-tip mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#555555] bg-[#222222] px-4 py-3 text-sm">
+     <p className="text-[#dfdfdf]"><FaLocationDot className="mr-2 inline" aria-hidden="true"/>Tap a court pin to see games and territory.</p>
      <Link href="/runs?view=list#rch-upcoming-runs" className="inline-flex min-h-11 items-center gap-2 font-bold text-[var(--rch-brand-accent-text)]">Find hosted games <FaArrowRight aria-hidden="true"/></Link>
    </div>}
 

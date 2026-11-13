@@ -149,24 +149,24 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     try{
      map.addSource('rch-unverified-leads',{type:'geojson',data:{type:'FeatureCollection',features:[]},cluster:true,clusterRadius:40,clusterMaxZoom:13});
      map.addLayer({id:'rch-lead-cluster',type:'circle',source:'rch-unverified-leads',filter:['has','point_count'],
-      paint:{'circle-color':'#607b91','circle-opacity':0.53,'circle-stroke-color':'#c2d5de','circle-stroke-width':1,'circle-radius':['step',['get','point_count'],10,25,15,100,20]}});
+      paint:{'circle-color':'#777777','circle-opacity':0.53,'circle-stroke-color':'#d2d2d2','circle-stroke-width':1,'circle-radius':['step',['get','point_count'],10,25,15,100,20]}});
      map.addLayer({id:'rch-lead-circles',type:'circle',source:'rch-unverified-leads',filter:['!',['has','point_count']],
-      paint:{'circle-color':'#7c91a1','circle-opacity':0.48,'circle-radius':['interpolate',['linear'],['zoom'],5,2,13,6],'circle-stroke-color':'#cee1eb','circle-stroke-width':1}});
+      paint:{'circle-color':'#8e8e8e','circle-opacity':0.48,'circle-radius':['interpolate',['linear'],['zoom'],5,2,13,6],'circle-stroke-color':'#dedede','circle-stroke-width':1}});
     }catch{/* Verified court markers still work independently. */}
     // The outline is sourced directly from the official 2026 Census
     // polygon. This must not be replaced with our old fictional SVG outline.
     try{
      map.addSource('rch-vdot-virginia',{type:'geojson',data:REAL_VIRGINIA_MAP.stateOutline});
      map.addLayer({id:'rch-vdot-outline',type:'line',source:'rch-vdot-virginia',
-      paint:{'line-color':'#80D4FA','line-width':['interpolate',['linear'],['zoom'],5,1.7,11,3],
+      paint:{'line-color':'#c5c5c5','line-width':['interpolate',['linear'],['zoom'],5,1.7,11,3],
        'line-opacity':0.85}});
     }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
      map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
-      paint:{'fill-color':'#47A7E8','fill-opacity':0.09}});
+      paint:{'fill-color':'#979797','fill-opacity':0.09}});
      map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
-      paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
+      paint:{'line-color':'#cfcfcf','line-width':2.4,'line-dasharray':[2,2]}});
     }catch{/* Do not claim verified county outline if GIS data is unavailable. */}
     const remembered=savedCamera(cityRef.current);
     if(remembered)map.easeTo({...remembered,center:remembered.center,duration:0});
@@ -188,8 +188,8 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
    else map.fitBounds([[city.lon-0.15,city.lat-0.11],[city.lon+0.15,city.lat+0.11]],{padding:40,duration});
    if(city.id==='chesterfield'&&!map.getSource('rch-chesterfield-vgin'))try{
     map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
-    map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',paint:{'fill-color':'#47A7E8','fill-opacity':0.09}});
-    map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',paint:{'line-color':'#9BDAFF','line-width':2.4,'line-dasharray':[2,2]}});
+    map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',paint:{'fill-color':'#979797','fill-opacity':0.09}});
+    map.addLayer({id:'rch-chesterfield-line',type:'line',source:'rch-chesterfield-vgin',paint:{'line-color':'#cfcfcf','line-width':2.4,'line-dasharray':[2,2]}});
    }catch{/* map still remains geographically referenced */}
   }else if(remembered)map.easeTo({center:remembered.center,zoom:remembered.zoom,pitch:remembered.pitch,bearing:remembered.bearing,duration});
   else map.fitBounds([[-83.75,36.45],[-75.05,39.55]],{padding:24,duration});

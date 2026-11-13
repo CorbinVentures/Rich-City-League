@@ -12,13 +12,13 @@ export function RunsGameLobby({city,journey,signedIn,loading,onExplore,onMission
   <div className="rgl-atmosphere" aria-hidden="true">
    <div className="rgl-orbit"/><div className="rgl-orbit orbit-two"/>
    <svg className="rgl-court" viewBox="0 0 620 760" fill="none">
-    <defs><linearGradient id="rgl-floor" x1="0" y1="0" x2="620" y2="760" gradientUnits="userSpaceOnUse"><stop stopColor="#174870"/><stop offset="1" stopColor="#081c34"/></linearGradient></defs>
-    <rect x="45" y="35" width="530" height="690" rx="8" fill="url(#rgl-floor)" stroke="#65c9f5" strokeWidth="3"/>
-    <path d="M45 380H575M212 35V196H408V35M212 725V564H408V725" stroke="#82d9ff" strokeWidth="3"/>
-    <circle cx="310" cy="380" r="76" stroke="#82d9ff" strokeWidth="3"/><circle cx="310" cy="380" r="51" stroke="#3986af" strokeWidth="2"/>
-    <path d="M212 196A98 98 0 0 0 408 196M212 564A98 98 0 0 1 408 564M85 35V87A225 225 0 0 0 535 87V35M85 725V673A225 225 0 0 1 535 673V725" stroke="#82d9ff" strokeWidth="3"/>
-    <path d="M273 85H347M273 675H347" stroke="#ffd18a" strokeWidth="7"/>
-    <circle cx="310" cy="100" r="13" stroke="#ffd18a" strokeWidth="4"/><circle cx="310" cy="660" r="13" stroke="#ffd18a" strokeWidth="4"/>
+    <defs><linearGradient id="rgl-floor" x1="0" y1="0" x2="620" y2="760" gradientUnits="userSpaceOnUse"><stop stopColor="#404040"/><stop offset="1" stopColor="#191919"/></linearGradient></defs>
+    <rect x="45" y="35" width="530" height="690" rx="8" fill="url(#rgl-floor)" stroke="#b7b7b7" strokeWidth="3"/>
+    <path d="M45 380H575M212 35V196H408V35M212 725V564H408V725" stroke="#c9c9c9" strokeWidth="3"/>
+    <circle cx="310" cy="380" r="76" stroke="#c9c9c9" strokeWidth="3"/><circle cx="310" cy="380" r="51" stroke="#797979" strokeWidth="2"/>
+    <path d="M212 196A98 98 0 0 0 408 196M212 564A98 98 0 0 1 408 564M85 35V87A225 225 0 0 0 535 87V35M85 725V673A225 225 0 0 1 535 673V725" stroke="#c9c9c9" strokeWidth="3"/>
+    <path d="M273 85H347M273 675H347" stroke="#d6d6d6" strokeWidth="7"/>
+    <circle cx="310" cy="100" r="13" stroke="#d6d6d6" strokeWidth="4"/><circle cx="310" cy="660" r="13" stroke="#d6d6d6" strokeWidth="4"/>
    </svg>
    <span className="rgl-court-badge"><FaCrown/></span>
   </div>

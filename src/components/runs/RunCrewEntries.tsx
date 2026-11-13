@@ -25,12 +25,12 @@ export function RunCrewEntries({runId}:{runId:string}){
     return ()=>{active=false;};
   },[db,runId]);
   if(!crews.length)return null;
-  return <section className="mt-6 rounded-3xl border border-[#336b95] bg-[#0d2740] p-5 sm:p-6">
-    <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8ecaff]"><FaPeopleGroup/> Registered crews</p>
-    <p className="mt-2 text-sm text-[#b6d7ed]">These crews have entered the Run. Players still RSVP individually and only verified Cup games affect competition standings.</p>
+  return <section className="mt-6 rounded-3xl border border-[#626262] bg-[#232323] p-5 sm:p-6">
+    <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#c1c1c1]"><FaPeopleGroup/> Registered crews</p>
+    <p className="mt-2 text-sm text-[#d2d2d2]">These crews have entered the Run. Players still RSVP individually and only verified Cup games affect competition standings.</p>
     <div className="mt-4 flex flex-wrap gap-3">{crews.map(crew=>{
       const logo=crew.logo_path?db.storage.from('rch-crew-logos').getPublicUrl(crew.logo_path).data.publicUrl:null;
-      return <Link href={'/crews?crew='+crew.id} key={crew.id} className="flex min-w-48 items-center gap-3 rounded-xl border border-[#436e92] bg-[#0b1c30] p-3 hover:border-[#8cc7fa]"><span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#173b58]">{logo?<img src={logo} alt="" className="h-full w-full object-contain"/>:<FaBasketball/>}</span><span><strong className="block text-sm text-white">{crew.name}</strong><small className="text-xs text-[#a7c9e2]">{crew.city}</small></span></Link>;
+      return <Link href={'/crews?crew='+crew.id} key={crew.id} className="flex min-w-48 items-center gap-3 rounded-xl border border-[#676767] bg-[#1a1a1a] p-3 hover:border-[#bebebe]"><span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-[#353535]">{logo?<img src={logo} alt="" className="h-full w-full object-contain"/>:<FaBasketball/>}</span><span><strong className="block text-sm text-white">{crew.name}</strong><small className="text-xs text-[#c4c4c4]">{crew.city}</small></span></Link>;
     })}</div>
   </section>;
 }

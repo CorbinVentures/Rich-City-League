@@ -101,66 +101,66 @@ export function RunDailyCircuit({runs,cityId,radiusMiles,onPreferencesChange,now
  const dateLabel=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'long',month:'short',day:'numeric'}).format(new Date(clock));
  const openRuns=runs.filter(run=>scoreDailyRun(run,context).isJoinable).length;
  const playbook=getDailyPlaybook(clock);
- return <section id="rch-daily-circuit" aria-labelledby="rch-daily-circuit-title" className="mb-6 overflow-hidden rounded-3xl border border-[#3b83b5] bg-[radial-gradient(ellipse_at_90%_0%,#1c4267,#071b30_68%)] text-white shadow-[0_15px_55px_rgba(0,13,36,.3)]">
-  <div className="border-b border-[#335c83] p-5 sm:p-7">
+ return <section id="rch-daily-circuit" aria-labelledby="rch-daily-circuit-title" className="mb-6 overflow-hidden rounded-3xl border border-[#777777] bg-[radial-gradient(ellipse_at_90%_0%,#3d3d3d,#071b30_68%)] text-white shadow-[0_15px_55px_rgba(0,13,36,.3)]">
+  <div className="border-b border-[#565656] p-5 sm:p-7">
    <div className="flex flex-wrap items-start justify-between gap-3">
     <div>
-     <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.21em] text-[#81c6fc]"><FaClock/> DAILY CIRCUIT · {dateLabel}</p>
-     <h2 id="rch-daily-circuit-title" className="mt-3 text-3xl font-black uppercase leading-none tracking-tight sm:text-4xl">YOUR CITY. <span className="text-[#78c2fa]">YOUR NEXT MOVE.</span></h2>
-     <p className="mt-3 max-w-2xl text-sm leading-6 text-[#bcd8ed]">Fresh real-world basketball opportunities every Virginia day. Find a matchup, discover a new court and build your verified résumé. No manufactured games or pressure to check in.</p>
+     <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[.21em] text-[#bbbbbb]"><FaClock/> DAILY CIRCUIT · {dateLabel}</p>
+     <h2 id="rch-daily-circuit-title" className="mt-3 text-3xl font-black uppercase leading-none tracking-tight sm:text-4xl">YOUR CITY. <span className="text-[#b6b6b6]">YOUR NEXT MOVE.</span></h2>
+     <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d4d4d4]">Fresh real-world basketball opportunities every Virginia day. Find a matchup, discover a new court and build your verified résumé. No manufactured games or pressure to check in.</p>
     </div>
-    <span className="rounded-xl border border-[#508bbb] bg-[#123c5c] px-3 py-2 text-xs font-black text-[#c1e7ff]">{openRuns} open {openRuns===1?'Run':'Runs'}</span>
+    <span className="rounded-xl border border-[#828282] bg-[#353535] px-3 py-2 text-xs font-black text-[#e1e1e1]">{openRuns} open {openRuns===1?'Run':'Runs'}</span>
    </div>
    <div className="mt-5 flex flex-wrap gap-3">
-    <label className="text-[11px] font-black uppercase text-[#abd3ef]">My game
-     <select aria-label="Preferred Runs game format" value={prefs.preferred_format} disabled={busy} onChange={e=>void update({...prefs,preferred_format:e.target.value as RunFormat})} className="mt-2 block min-h-11 min-w-32 rounded-xl border border-[#467c9d] bg-[#0a2b45] px-3 text-sm font-bold text-white">
+    <label className="text-[11px] font-black uppercase text-[#cdcdcd]">My game
+     <select aria-label="Preferred Runs game format" value={prefs.preferred_format} disabled={busy} onChange={e=>void update({...prefs,preferred_format:e.target.value as RunFormat})} className="mt-2 block min-h-11 min-w-32 rounded-xl border border-[#737373] bg-[#262626] px-3 text-sm font-bold text-white">
       {formats.map(f=><option key={f} value={f}>{formatLabel(f)}</option>)}
      </select>
     </label>
-    <label className="text-[11px] font-black uppercase text-[#abd3ef]">My vibe
-     <select aria-label="Preferred Runs style" value={prefs.preferred_type} disabled={busy} onChange={e=>void update({...prefs,preferred_type:e.target.value as RunPlayType})} className="mt-2 block min-h-11 min-w-32 rounded-xl border border-[#467c9d] bg-[#0a2b45] px-3 text-sm font-bold text-white">
+    <label className="text-[11px] font-black uppercase text-[#cdcdcd]">My vibe
+     <select aria-label="Preferred Runs style" value={prefs.preferred_type} disabled={busy} onChange={e=>void update({...prefs,preferred_type:e.target.value as RunPlayType})} className="mt-2 block min-h-11 min-w-32 rounded-xl border border-[#737373] bg-[#262626] px-3 text-sm font-bold text-white">
       {types.map(t=><option key={t} value={t}>{typeLabel(t)}</option>)}
      </select>
     </label>
-    <Link href="/runs/partners" className="self-end rounded-xl border border-[#467c9d] px-4 py-3 text-xs font-black text-[#bde4ff]">Explore organizers <FaArrowRight className="ml-1 inline"/></Link>
+    <Link href="/runs/partners" className="self-end rounded-xl border border-[#737373] px-4 py-3 text-xs font-black text-[#dedede]">Explore organizers <FaArrowRight className="ml-1 inline"/></Link>
    </div>
-   {error&&<p role="alert" className="mt-4 rounded-lg border border-red-400/50 p-3 text-xs text-red-200">{error}</p>}
-   {notice&&<p role="status" className="mt-4 text-xs font-semibold text-[#b0ebce]">{notice}</p>}
+   {error&&<p role="alert" className="mt-4 rounded-lg border border-gray-400/50 p-3 text-xs text-gray-200">{error}</p>}
+   {notice&&<p role="status" className="mt-4 text-xs font-semibold text-[#dcdcdc]">{notice}</p>}
   </div>
   <div className="grid gap-3 p-4 sm:p-6 lg:grid-cols-3">
-   {display.length?display.map(({run,headline,tagline,icon:Icon})=>run&&<article key={run.id} className="flex h-full flex-col rounded-2xl border border-[#315f86] bg-[#0b2843] p-5">
-    <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-[#87cbfb]"><Icon/> {headline}</p>
-    <p className="mt-1 text-xs text-[#a4c8df]">{tagline}</p>
+   {display.length?display.map(({run,headline,tagline,icon:Icon})=>run&&<article key={run.id} className="flex h-full flex-col rounded-2xl border border-[#585858] bg-[#242424] p-5">
+    <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-[#c0c0c0]"><Icon/> {headline}</p>
+    <p className="mt-1 text-xs text-[#c2c2c2]">{tagline}</p>
     <h3 className="mt-4 text-xl font-black leading-tight">{run.title}</h3>
-    <p className="mt-2 flex items-start gap-2 text-xs text-[#c2d6e5]"><FaLocationDot className="mt-0.5 shrink-0"/>{run.location}</p>
-    <p className="mt-2 flex items-start gap-2 text-xs text-[#c2d6e5]"><FaCalendarDays className="mt-0.5 shrink-0"/>{new Date(run.starts_at).toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} · {run.game_format}</p>
-    <div className="mt-4 flex flex-wrap gap-1.5">{scoreDailyRun(run,context).reasons.map(reason=><span key={reason} className="rounded-full border border-[#3c6688] bg-[#123b59] px-2 py-1 text-[10px] font-semibold text-[#bce2fc]">{reason}</span>)}</div>
+    <p className="mt-2 flex items-start gap-2 text-xs text-[#d3d3d3]"><FaLocationDot className="mt-0.5 shrink-0"/>{run.location}</p>
+    <p className="mt-2 flex items-start gap-2 text-xs text-[#d3d3d3]"><FaCalendarDays className="mt-0.5 shrink-0"/>{new Date(run.starts_at).toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} · {run.game_format}</p>
+    <div className="mt-4 flex flex-wrap gap-1.5">{scoreDailyRun(run,context).reasons.map(reason=><span key={reason} className="rounded-full border border-[#606060] bg-[#343434] px-2 py-1 text-[10px] font-semibold text-[#dcdcdc]">{reason}</span>)}</div>
     <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
-     <Link href={'/runs/'+run.id} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#2788e8] px-4 text-xs font-black">View Run <FaArrowRight/></Link>
-     {run.location_slug&&<button type="button" disabled={busy||!user} onClick={()=>void update({...prefs,watched_courts:prefs.watched_courts.includes(run.location_slug!)?prefs.watched_courts.filter(c=>c!==run.location_slug):[...prefs.watched_courts,run.location_slug!]},run.location_slug,!prefs.watched_courts.includes(run.location_slug!))} className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-[#6096b5] px-3 text-[11px] font-bold text-[#b9ddf5] disabled:opacity-50"><FaEye/> {prefs.watched_courts.includes(run.location_slug!)?'Watching':'Watch court'}</button>}
+     <Link href={'/runs/'+run.id} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#7a7a7a] px-4 text-xs font-black">View Run <FaArrowRight/></Link>
+     {run.location_slug&&<button type="button" disabled={busy||!user} onClick={()=>void update({...prefs,watched_courts:prefs.watched_courts.includes(run.location_slug!)?prefs.watched_courts.filter(c=>c!==run.location_slug):[...prefs.watched_courts,run.location_slug!]},run.location_slug,!prefs.watched_courts.includes(run.location_slug!))} className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-[#8d8d8d] px-3 text-[11px] font-bold text-[#d7d7d7] disabled:opacity-50"><FaEye/> {prefs.watched_courts.includes(run.location_slug!)?'Watching':'Watch court'}</button>}
     </div>
-   </article>):<div className="rounded-2xl border border-dashed border-[#3a6c93] bg-[#0c2942] p-7 text-[#c0d7e9] lg:col-span-3">
-     <FaBasketball className="text-3xl text-[#72bcf3]"/><h3 className="mt-3 text-xl font-black">The next chapter is yours to start.</h3><p className="mt-2 max-w-lg text-sm leading-6">No available scheduled runs match the current feed yet. Host a real court session or discover Virginia organizers—nothing here is simulated.</p><Link href="/runs?create=1" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#288be9] px-5 text-xs font-black">Host the first Run <FaArrowRight className="ml-2"/></Link>
+   </article>):<div className="rounded-2xl border border-dashed border-[#646464] bg-[#252525] p-7 text-[#d3d3d3] lg:col-span-3">
+     <FaBasketball className="text-3xl text-[#b0b0b0]"/><h3 className="mt-3 text-xl font-black">The next chapter is yours to start.</h3><p className="mt-2 max-w-lg text-sm leading-6">No available scheduled runs match the current feed yet. Host a real court session or discover Virginia organizers—nothing here is simulated.</p><Link href="/runs?create=1" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#7d7d7d] px-5 text-xs font-black">Host the first Run <FaArrowRight className="ml-2"/></Link>
     </div>}
   </div>
-  <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#946d34] bg-[linear-gradient(110deg,#40321d,#122e47)] p-5 sm:mx-6 sm:p-6">
-   <div className="max-w-2xl"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#ffe09d]"><FaCrown/> TODAY&apos;S PLAYBOOK · REAL-WORLD CHALLENGE</p><h3 className="mt-2 text-xl font-black uppercase sm:text-2xl">{playbook.headline}</h3><p className="mt-2 text-sm leading-6 text-[#f2e3c6]">{playbook.message}</p><p className="mt-2 text-[11px] text-[#c9b998]">Daily inspiration, not a scheduled game, automatic reward or verified victory. Play responsibly, confirm venue access and log real results.</p></div>
-   <Link href={'/runs?create=1&format='+playbook.format+'&mode='+playbook.mode} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-[#eed197] px-4 text-xs font-black text-[#2b210f]">{playbook.callToAction} <FaArrowRight/></Link>
+  <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#717171] bg-[linear-gradient(110deg,#333333,#2a2a2a)] p-5 sm:mx-6 sm:p-6">
+   <div className="max-w-2xl"><p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-[#e2e2e2]"><FaCrown/> TODAY&apos;S PLAYBOOK · REAL-WORLD CHALLENGE</p><h3 className="mt-2 text-xl font-black uppercase sm:text-2xl">{playbook.headline}</h3><p className="mt-2 text-sm leading-6 text-[#e4e4e4]">{playbook.message}</p><p className="mt-2 text-[11px] text-[#bababa]">Daily inspiration, not a scheduled game, automatic reward or verified victory. Play responsibly, confirm venue access and log real results.</p></div>
+   <Link href={'/runs?create=1&format='+playbook.format+'&mode='+playbook.mode} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-[#d3d3d3] px-4 text-xs font-black text-[#222222]">{playbook.callToAction} <FaArrowRight/></Link>
   </div>
-  <div className="grid gap-3 border-t border-[#315779] bg-[#081c30]/80 p-4 sm:grid-cols-2 sm:p-6">
-   <div className="rounded-xl border border-[#365a75] bg-[#0b273e] p-4">
-    <p className="flex items-center gap-2 text-xs font-black uppercase text-[#f7d58d]"><FaTrophy/> Your verified competition</p>
-    {user?<><p className="mt-3 text-2xl font-black">{mine?mine.rating+' rating':'First ranked game ahead'}</p><p className="mt-1 text-xs leading-5 text-[#b4cee1]">{mine?mine.game_format+' · '+mine.games+' verified games · '+mine.wins+' wins':'Play a real opponent-confirmed match to start an official rating. Playing, posting or buying REP cannot produce wins.'}</p><Link href="/runs#rch-ranked-heading" className="mt-3 inline-flex items-center gap-1 text-xs font-black text-[#9fd5fa]">View official ladders <FaArrowRight/></Link></>:
-    <p className="mt-3 text-xs leading-5 text-[#b4cee1]">Sign in to see your real rating, verified games and competition progress.</p>}
+  <div className="grid gap-3 border-t border-[#515151] bg-[#191919]/80 p-4 sm:grid-cols-2 sm:p-6">
+   <div className="rounded-xl border border-[#545454] bg-[#232323] p-4">
+    <p className="flex items-center gap-2 text-xs font-black uppercase text-[#d7d7d7]"><FaTrophy/> Your verified competition</p>
+    {user?<><p className="mt-3 text-2xl font-black">{mine?mine.rating+' rating':'First ranked game ahead'}</p><p className="mt-1 text-xs leading-5 text-[#cacaca]">{mine?mine.game_format+' · '+mine.games+' verified games · '+mine.wins+' wins':'Play a real opponent-confirmed match to start an official rating. Playing, posting or buying REP cannot produce wins.'}</p><Link href="/runs#rch-ranked-heading" className="mt-3 inline-flex items-center gap-1 text-xs font-black text-[#cccccc]">View official ladders <FaArrowRight/></Link></>:
+    <p className="mt-3 text-xs leading-5 text-[#cacaca]">Sign in to see your real rating, verified games and competition progress.</p>}
    </div>
-   <div className="rounded-xl border border-[#365a75] bg-[#0b273e] p-4">
-    <p className="flex items-center gap-2 text-xs font-black uppercase text-[#9ccfff]"><FaCrown/> Your court watch</p>
+   <div className="rounded-xl border border-[#545454] bg-[#232323] p-4">
+    <p className="flex items-center gap-2 text-xs font-black uppercase text-[#c8c8c8]"><FaCrown/> Your court watch</p>
     <p className="mt-3 text-2xl font-black">{courtCards.length?courtCards.length+' watched '+(courtCards.length===1?'court':'courts'):'Find your home court'}</p>
-    <p className="mt-1 text-xs leading-5 text-[#b4cee1]">{courtCards.length?titles.length?titles.length+' recorded court master titles across your watched courts.':'Your courts are saved. Court title records appear after verified championships.':'Watch a mapped court to keep its Runs and verified competition close to the top.'}</p>
-    {!!courtCards.length&&<div className="mt-3 flex flex-wrap gap-2">{courtCards.slice(0,4).map(court=><Link href={'/runs?court='+encodeURIComponent(court)} key={court} className="rounded-lg border border-[#47728b] px-2 py-1.5 text-[11px] font-bold text-[#b2dafa]">{court.replaceAll('-',' ')} →</Link>)}</div>}
-    {!user&&<Link href="/auth/sign-in?next=%2Fruns" className="mt-3 inline-block text-xs font-black text-[#9bd7ff]">Sign in to follow courts <FaArrowRight className="ml-1 inline"/></Link>}
+    <p className="mt-1 text-xs leading-5 text-[#cacaca]">{courtCards.length?titles.length?titles.length+' recorded court master titles across your watched courts.':'Your courts are saved. Court title records appear after verified championships.':'Watch a mapped court to keep its Runs and verified competition close to the top.'}</p>
+    {!!courtCards.length&&<div className="mt-3 flex flex-wrap gap-2">{courtCards.slice(0,4).map(court=><Link href={'/runs?court='+encodeURIComponent(court)} key={court} className="rounded-lg border border-[#6b6b6b] px-2 py-1.5 text-[11px] font-bold text-[#d4d4d4]">{court.replaceAll('-',' ')} →</Link>)}</div>}
+    {!user&&<Link href="/auth/sign-in?next=%2Fruns" className="mt-3 inline-block text-xs font-black text-[#cdcdcd]">Sign in to follow courts <FaArrowRight className="ml-1 inline"/></Link>}
    </div>
   </div>
-  <p className="px-5 pb-4 text-[10px] leading-5 text-[#8fadbf]">Daily rotation: {virginiaCircuitDay(clock)} · Recommendations use selected Virginia city, time, open spots, your chosen format and watched courts. They never change verified results, grant REP, or penalize rest days. You control your settings.</p>
+  <p className="px-5 pb-4 text-[10px] leading-5 text-[#a8a8a8]">Daily rotation: {virginiaCircuitDay(clock)} · Recommendations use selected Virginia city, time, open spots, your chosen format and watched courts. They never change verified results, grant REP, or penalize rest days. You control your settings.</p>
  </section>;
 }
