@@ -1,5 +1,8 @@
 begin;
 
+-- Keep the old direct XP check-in RPC disabled; official Runs check-ins use host codes.
+revoke all on function public.check_in_to_run(uuid) from public,anon,authenticated;
+
 alter table public.rch_runs_partners
   add column if not exists page_settings jsonb not null default '{}'::jsonb;
 alter table public.rch_runs_partners
