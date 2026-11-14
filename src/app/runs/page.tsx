@@ -457,7 +457,7 @@ export default function RunsPage() {
       <Container maxWidth="xl" className="px-3 pb-10 pt-3 sm:px-5 sm:pt-5">
         {view==='runs'&&<section aria-labelledby="rch-runs-start" className="rch-run-quick-hero">
           <div><span>RCH RUNS · GAME BOARD</span><h2 id="rch-runs-start">Find or host your next pickup.</h2></div>
-          <button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}><FaPlus aria-hidden="true"/> HOST PICKUP</button>
+          <div className="flex flex-wrap items-center gap-2"><Link href="/runs?view=world&amp;tutorial=1" className="min-h-11 inline-flex items-center justify-center rounded-xl border border-[#777] px-4 py-2 text-xs font-black tracking-wide text-white hover:bg-white/10">HOW TO PLAY</Link><button type="button" onClick={() => openCreateForCourt(selectedCourt ?? undefined)}><FaPlus aria-hidden="true"/> HOST PICKUP</button></div>
         </section>}
         {view==='runs'&&<SybRunsPartnerSpotlight/>}
         <details className="rch-run-extras">
