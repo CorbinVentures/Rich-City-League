@@ -65,6 +65,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [introReplay,setIntroReplay]=useState(0);
  const [tutorialsOpen,setTutorialsOpen]=useState(false);
  useEffect(()=>{setScreen(selectedMode);},[selectedMode]);
+ useEffect(()=>{if(searchParams.get("tutorial")==="1")setTutorialsOpen(true);},[searchParams]);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
  const [runs,setRuns]=useState<WorldRun[]>([]);
