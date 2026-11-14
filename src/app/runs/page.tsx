@@ -20,6 +20,7 @@ import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import {SybRunsPartnerSpotlight} from '@/components/runs/SybRunsPartnerSpotlight';
+import { SybLiveStream } from '@/components/media/SybLiveStream';
 import './runs-arena.css';
 import './visual-experience.css';
 import { RunVenuePicker, runVenueLocation, type RunVenue as Court } from '@/components/runs/RunVenuePicker';
@@ -443,7 +444,7 @@ export default function RunsPage() {
 
   // People looking for Runs land on upcoming real games. The cinematic court
   // world remains available by explicit choice, without interrupting first use.
-  if(!showLegacyList)return <><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
+  if(!showLegacyList)return <><SybLiveStream variant="runs" /><RunsWorldGame onOpenRules={() => setRulesOpen(true)} introEnabled={!rulesOpen} /><RunsRulesIntro open={rulesOpen} onClose={closeRules} /></>;
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
