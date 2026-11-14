@@ -211,6 +211,7 @@ export function RunsCinematicHome({
     <div className="rch-arcade-actions">
      <Link href="/runs?view=list#rch-upcoming-runs" className="rch-arcade-primary"><FaBasketball aria-hidden="true"/> FIND A RUN <FaArrowRight aria-hidden="true"/></Link>
      <Link href="/runs?create=1" className="rch-arcade-secondary"><FaPlus aria-hidden="true"/> HOST PICKUP</Link>
+     <Link href="/runs?view=world&amp;tutorial=1" className="rch-arcade-secondary"><FaBookOpen aria-hidden="true"/> HOW TO PLAY</Link>
     </div>
    </div>
    <button type="button" onClick={onPlayer} className="rch-arcade-player-hud" aria-label="Open My Player">
