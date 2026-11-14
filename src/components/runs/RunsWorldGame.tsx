@@ -18,6 +18,7 @@ import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
 import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
 import './runs-world.css';
+import {RunsTutorialsModal} from '@/components/runs/RunsTutorialsModal';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
 import {RunsCinematicHome,RunsCinematicIntro} from '@/components/runs/RunsCinematicHome';
 import {RunsMyCareerStage} from '@/components/runs/RunsMyCareerStage';
@@ -62,6 +63,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const selectedMode=requestedMode&&allowedModes.includes(requestedMode as Screen)?requestedMode as Screen:initialScreen;
  const [screen,setScreen]=useState<Screen>(selectedMode);
  const [introReplay,setIntroReplay]=useState(0);
+ const [tutorialsOpen,setTutorialsOpen]=useState(false);
  useEffect(()=>{setScreen(selectedMode);},[selectedMode]);
  const [cityId,setCityId]=useState<string|null>(null);
  const [courts,setCourts]=useState<WorldCourt[]>([]);
@@ -315,7 +317,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <p>Explore courts. Find games. Defend your city.</p>
     </div>
     <div className="rwg-top-actions">
-     <button type="button" className="rwg-soft" onClick={onOpenRules} aria-label="Read the Runs World rules"><FaBookOpen/> How to play</button>
+     <button type="button" className="rwg-soft" onClick={()=>setTutorialsOpen(true)} aria-label="Open quick Runs tutorials"><FaBookOpen/> Tutorials</button>
      <WorldPlayerIdentity avatar={identity?.avatar_url||null}
        name={identity?.display_name||identity?.username||(user?'RCH Hooper':'Join RCH')}
        level={journey?.world_level??null} onOpen={()=>setScreen('player')}/>
@@ -333,7 +335,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       featuredRunIds={featured}
       onWorld={()=>setScreen('world')} onMissions={()=>setScreen('missions')}
       onPlayer={()=>setScreen('player')} onVault={()=>setScreen('vault')}
-      onBattle={()=>setScreen('battle')} onRules={onOpenRules}
+      onBattle={()=>setScreen('battle')} onRules={()=>setTutorialsOpen(true)}
       onReplay={()=>setIntroReplay(n=>n+1)}/>}
 
    {screen==='world'&&<div className="rwg-world-game-tip mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#555555] bg-[#222222] px-4 py-3 text-sm">
@@ -488,5 +490,6 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       <GravityLocationPicker compact/>
     </section>}
   </div>
+  <RunsTutorialsModal open={tutorialsOpen} onClose={()=>setTutorialsOpen(false)} onOpenRules={()=>{setTutorialsOpen(false);onOpenRules();}}/>
  </main>;
 }
