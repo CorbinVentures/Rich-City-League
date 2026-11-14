@@ -3,15 +3,16 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SYB_CHANNEL_ID = 'UCwmdw7192t3UhKAsr3_Tv_g';
-const SYB_LIVE_EMBED_URL = 'https://www.youtube.com/embed/live_stream?channel=UCwmdw7192t3UhKAsr3_Tv_g&autoplay=1&mute=1&playsinline=1&rel=0';
-const SYB_LATEST_EMBED_URL = 'https://www.youtube.com/embed?listType=user_uploads&list=UCwmdw7192t3UhKAsr3_Tv_g&index=0&autoplay=1&mute=1&playsinline=1&rel=0';
+const SYB_UPLOADS_PLAYLIST_ID = 'UUwmdw7192t3UhKAsr3_Tv_g';
+const SYB_LIVE_EMBED_URL = 'https://www.youtube.com/embed/live_stream?channel=' + SYB_CHANNEL_ID + '&autoplay=1&mute=1&playsinline=1&rel=0';
+const SYB_LATEST_EMBED_URL = 'https://www.youtube.com/embed/videoseries?list=' + SYB_UPLOADS_PLAYLIST_ID + '&index=0&autoplay=1&mute=1&playsinline=1&rel=0';
 const SYB_LIVE_START_AT = Date.parse('2026-11-14T16:00:00.000Z');
 const SYB_CHANNEL_LIVE_URL = 'https://www.youtube.com/@supportyourbrothers/live';
 const SYB_CHANNEL_VIDEOS_URL = 'https://www.youtube.com/@supportyourbrothers/videos';
 
 type YouTubePlayer = {
   destroy: () => void;
-  loadPlaylist: (options: { listType: 'user_uploads'; list: string; index: number }) => void;
+  loadPlaylist: (options: { listType: 'playlist'; list: string; index: number }) => void;
 };
 
 type YouTubePlayerEvent = {
@@ -112,7 +113,7 @@ export function SybLiveStream({ variant = 'runs' }: SybLiveStreamProps) {
       fallbackStartedRef.current = true;
 
       try {
-        target?.loadPlaylist({ listType: 'user_uploads', list: SYB_CHANNEL_ID, index: 0 });
+        target?.loadPlaylist({ listType: 'playlist', list: SYB_UPLOADS_PLAYLIST_ID, index: 0 });
         setPlayerApiReady(Boolean(target));
       } catch {
         setPlayerApiReady(false);
