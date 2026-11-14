@@ -129,8 +129,14 @@ export function RunsTutorialsModal({open,onClose,onOpenRules}:{open:boolean;onCl
       <button type="button" className="rrt-rules-link" onClick={onOpenRules}><FaBookOpen aria-hidden="true"/> Full player rulebook <FaArrowRight aria-hidden="true"/></button>
      </div>
      <div className="rrt-tabs" role="tablist" aria-label="Choose a Runs tutorial">
-      {tutorials.map(item=><button key={item.id} id={'rrt-tab-'+item.id} type="button" role="tab" aria-selected={item.id===selected}
-       aria-controls="rrt-tutorial-panel" onClick={()=>{setSelected(item.id);setStep(0);}}>
+      {tutorials.map((item,index)=><button key={item.id} id={'rrt-tab-'+item.id} type="button" role="tab" aria-selected={item.id===selected}
+       aria-controls="rrt-tutorial-panel" onKeyDown={event=>{
+        if(event.key!=='ArrowRight'&&event.key!=='ArrowLeft')return;
+        event.preventDefault();
+        const offset=event.key==='ArrowRight'?1:-1;
+        const target=tutorials[(index+offset+tutorials.length)%tutorials.length];
+        setSelected(target.id);setStep(0);document.getElementById('rrt-tab-'+target.id)?.focus();
+       }} onClick={()=>{setSelected(item.id);setStep(0);}}>
        <item.icon aria-hidden="true"/><span>{item.label}</span>
       </button>)}
      </div>
