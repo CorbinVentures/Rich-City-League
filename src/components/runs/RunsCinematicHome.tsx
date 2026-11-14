@@ -192,7 +192,7 @@ export function RunsCinematicHome({
    <div className="rch-gh-wordmark" aria-label="RCH Runs"><span>RCH</span> <em>RUNS</em><FaCrown aria-hidden="true"/></div>
    <div className="rch-gh-top-actions">
     <span className="rch-arcade-location"><i aria-hidden="true"/>{city||'VIRGINIA'}</span>
-    <button type="button" className="rch-gh-guide" onClick={onRules}><FaBookOpen aria-hidden="true"/><span>How to play</span></button>
+    <button type="button" className="rch-gh-guide" onClick={onRules}><FaBookOpen aria-hidden="true"/><span>Tutorials</span></button>
     <button type="button" className="rch-gh-icon rch-arcade-replay" onClick={onReplay} aria-label="Replay the Runs opening"><FaPlay aria-hidden="true"/></button>
     <Link href="/notifications" aria-label="Open notifications" className="rch-gh-icon"><FaBell aria-hidden="true"/></Link>
     <button type="button" onClick={onPlayer} className="rch-gh-avatar" aria-label="Open My Player">
