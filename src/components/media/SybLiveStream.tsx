@@ -46,11 +46,6 @@ export function SybLiveStream({ variant = 'runs' }: SybLiveStreamProps) {
             <h2 id={headingId} className="mt-2 font-display text-2xl font-black uppercase leading-tight sm:text-3xl">
               {playerReady ? 'Watch the SYBHOOPS stream.' : 'SYBHOOPS goes live at 11.'}
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-white/60">
-              {playerReady
-                ? 'Their current live broadcast will play here. The player follows the official SYBHOOPS channel feed.'
-                : 'The player connects automatically at 11:00 AM Eastern and follows SYBHOOPS’ official YouTube live feed.'}
-            </p>
             <a
               href={SYB_CHANNEL_LIVE_URL}
               target="_blank"
