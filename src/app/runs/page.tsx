@@ -448,6 +448,7 @@ export default function RunsPage() {
 
   return (
     <main className="rch-arena-shell min-h-screen overflow-x-hidden pb-28 text-white">
+      <SybLiveStream variant="runs" />
       <Container maxWidth="xl" className="px-3 pt-6 sm:px-5">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="rch-program-brand-lockup">
