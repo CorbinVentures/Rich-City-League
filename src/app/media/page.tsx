@@ -8,6 +8,7 @@ import { MediaDirectory } from '@/components/PublicDirectory';
 import type { Media } from '@/types/database';
 import { resolveRchMediaUrl, RCH_TV_VIDEO_BUCKET } from '@/lib/rch-tv-media';
 import { RchLiveViewer } from '@/components/media/RchLiveViewer';
+import { SybLiveStream } from '@/components/media/SybLiveStream';
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -83,8 +84,9 @@ export default async function MediaPage() {
       </section>}
       <section id="live-games" aria-labelledby="rch-tv-live-title" className="mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-rcl-blue/15 bg-[#071522]/60 shadow-[0_24px_70px_rgba(0,0,0,.22)]">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-7"><div><p className="text-xs font-black uppercase tracking-[.22em] text-rcl-orange">RCH TV Live</p><h2 id="rch-tv-live-title" className="mt-1 font-display text-2xl font-black uppercase">Live Games</h2></div><span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black uppercase tracking-[.16em] text-emerald-200">Free stream</span></div>
+        <SybLiveStream variant="tv" />
         <RchLiveViewer mode="live_games" />
-        <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">Broadcast schedule</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">Next confirmed broadcast to be announced</h3><p className="mt-1 text-sm text-white/40">League fixtures do not automatically indicate a scheduled RCH TV broadcast.</p></div><div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No subscription required for games.</p></div></div>
+        <div className="grid gap-4 px-5 py-5 sm:px-7 md:grid-cols-[1fr_auto] md:items-center"><div><p className="text-xs font-black uppercase tracking-[.18em] text-white/30">RCH TV broadcast schedule</p><h3 className="mt-2 font-display text-lg font-black uppercase sm:text-xl">Next RCH TV broadcast to be announced</h3><p className="mt-1 text-sm text-white/40">SYBHOOPS’ partner stream is shown above. League fixtures do not automatically indicate an RCH TV broadcast.</p></div><div className="md:text-right"><p className="text-xs font-black uppercase tracking-[.18em] text-rcl-blue">Watch here</p><p className="mt-1 text-xs text-white/35">No subscription required for games.</p></div></div>
       </section>
 
       
