@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { FaArrowRight, FaBasketball, FaChevronRight, FaCompass, FaHouse, FaPlay, FaTrophy, FaUsers } from 'react-icons/fa6';
 
 const items = [
+  { href: '/get-started', label: 'Get Started', Icon: FaCompass },
   { href: '/discover', label: 'Discover', Icon: FaCompass },
   { href: '/runs', label: 'Runs', Icon: FaBasketball },
   { href: '/league', label: 'League', Icon: FaTrophy },
