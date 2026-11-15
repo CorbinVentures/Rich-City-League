@@ -69,15 +69,24 @@ const tourSteps: TourStep[] = [
   },
   {
     shortLabel: 'Your progress',
-    title: 'Keep track of your basketball activity',
-    description: 'Check your My Hoops dashboard, review REP and badges, and keep up with messages and notifications from across the platform.',
-    tip: 'Verified games and eligible Run activity are what count toward official competitive progress.',
-    icon: FaMedal,
+    title: 'Track your basketball progress',
+    description: 'Check your My Hoops dashboard and review REP and badges earned from eligible activity.',
+    tip: 'Verified games and eligible Run activity count toward official competitive progress.',
+    icon: FaTrophy,
     actions: [
       { href: '/my-hoops', label: 'Open My Hoops' },
       { href: '/badges', label: 'View REP + badges' },
-      { href: '/messages', label: 'Messages' },
-      { href: '/notifications', label: 'Notifications' },
+    ],
+  },
+  {
+    shortLabel: 'Stay connected',
+    title: 'Keep up with messages and activity',
+    description: 'Use Messages for private conversations and Notifications to catch updates from across the platform.',
+    tip: 'Open the app menu from any screen to return to this guide or find another feature.',
+    icon: FaBell,
+    actions: [
+      { href: '/messages', label: 'Open Messages' },
+      { href: '/notifications', label: 'View Notifications' },
     ],
   },
 ];
