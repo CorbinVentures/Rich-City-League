@@ -41,6 +41,7 @@ export function NavigationDrawer({open,onClose,groups,pathname}:{open:boolean;on
       <RoyalteeStaffShortcut variant="drawer" onNavigate={onClose} />
       <nav className="rch-menu-destinations" aria-label="Quick destinations">
         {[
+          {href:'/get-started',label:'Get Started',icon:FaCompass},
           {href:'/social/profile/me',label:'My Profile',icon:FaUser},
           {href:'/fantasy',label:'Fantasy',icon:FaUsers},
           {href:'/discover',label:'Discover',icon:FaCompass},
