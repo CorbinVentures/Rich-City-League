@@ -313,9 +313,10 @@ export default function RunsPage() {
       return;
     }
     const court = courts.find(item => item.slug === form.location_slug);
-    const location = court ? runVenueLocation(court) : '';
+    const customLocation = form.custom_location.trim();
+    const location = court ? runVenueLocation(court) : customLocation;
     if (!form.title.trim() || !location || !form.date || !form.time) {
-      setError('Add a title, public outdoor park court, date, and start time.');
+      setError('Add a title, location, date, and start time.');
       return;
     }
     const startError = validateRunStart(form.date, form.time);
@@ -333,9 +334,10 @@ export default function RunsPage() {
         host_id: user.id,
         title: form.title.trim(),
         description: form.description.trim() || null,
-        court_name: court!.name,
+        court_name: court?.name ?? customLocation.slice(0, 160),
         location,
-        location_slug: court!.slug,
+        // Host-entered venues remain unlinked, so they never become verified court pins.
+        location_slug: court?.slug ?? null,
         skill_level: form.skill_level,
         game_format: form.game_format.toLowerCase(),
         max_players: form.max_players,
@@ -630,6 +632,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       {run.partner&&<Link href={'/runs/partners/'+run.partner.slug} className="inline-flex items-center gap-2 self-start rounded-lg border border-[#7b7b7b] bg-[#353535] px-3 py-2 text-xs font-bold text-[#e6e6e6]"><FaCircleCheck aria-hidden="true"/>{run.partner.name} · Approved organizer</Link>}
       {run.partner?.reward_multiplier===2&&<span className="inline-flex self-start rounded-lg border border-[#929292]/60 bg-[#2e2e2e] px-3 py-2 text-xs font-black text-[#e6e6e6]">2× eligible verified game rewards</span>}
       <RCHRunDetails date={dateLabel} location={run.location} occupancy={count+' / '+run.max_players+' registered'} format={run.game_format}/>
+      {!run.location_slug&&<p className="text-[11px] leading-5 text-[#c8c8c8]">Host-provided venue · access details aren’t independently verified.</p>}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs text-[#cecece]">{skillLabels[run.skill_level]} · {runTypeLabels[run.run_type]}</span>
         {isSoloJoinable(run)&&<span className="rch-run-availability">{run.max_players-count} open {run.max_players-count===1?'spot':'spots'} · Solo RSVP</span>}
@@ -707,6 +710,8 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
       <div className="sm:col-span-2 grid grid-cols-3 gap-2">{(['competitive', 'social', 'training'] as RunType[]).map((type) => <button type="button" key={type} onClick={() => setForm((current) => ({ ...current, run_type: type }))} className={`rounded-xl border px-2 py-3 text-xs font-semibold ${form.run_type === type ? 'border-rcl-blue/35 bg-rcl-blue/10 text-rcl-blue' : 'border-white/8 text-white/42'}`}>{type === 'competitive' ? 'Competitive' : type === 'social' ? 'Social meetup' : 'Training'}</button>)}</div>
       <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Title</span><input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={form.run_type === 'social' ? 'Saturday hoops meetup' : 'Friday night competitive run'} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
       <RunVenuePicker selected={courts.find(court => court.slug === form.location_slug) ?? null} onSelect={onPickVenue} onClear={() => setForm(current => ({ ...current, location_slug: '' }))} />
+      <label className="sm:col-span-2"><span className="text-xs font-semibold text-white/42">Or enter a gym or other location</span><input value={form.custom_location} onChange={event=>setForm(current=>({...current,custom_location:event.target.value,location_slug:''}))} maxLength={160} placeholder="The Gym, Richmond, VA — or add the street address" className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none focus:border-rcl-blue/40" /></label>
+      <p className="sm:col-span-2 -mt-2 text-xs leading-5 text-white/50">Include the venue name and city or address. Host-entered locations are not marked as verified Parks &amp; Recreation courts.</p>
       <label><span className="text-xs font-semibold text-white/42">Date</span><input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none" /></label>
       <label><span className="text-xs font-semibold text-white/42">Start time</span><input type="time" value={form.time} onChange={(event) => setForm({ ...form, time: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 py-3 text-sm outline-none" /></label>
       <label><span className="text-xs font-semibold text-white/42">Format</span><select value={form.game_format} onChange={(event) => setForm({ ...form, game_format: event.target.value })} className="mt-2 w-full rounded-xl border border-white/10 bg-[#101010] px-4 py-3 text-sm"><option>5v5</option><option>4v4</option><option>3v3</option><option>2v2</option><option>1v1</option><option value="open_run">Open run</option><option>Shootaround</option></select></label>
