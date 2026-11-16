@@ -12,12 +12,17 @@ type Org = { id: string; name: string; slug: string; network_tier: string };
 type Membership = { organization_id: string; member_role: string; organization: Org | null };
 type Subscription = { plan_code: string; status: string; provider_customer_id: string | null; current_period_end: string | null; cancel_at_period_end: boolean };
 type Ledger = { credit_type: NetworkCreditType; quantity: number };
+type PlanEntitlement = { plan_code: PaidNetworkPartnerPlanCode; entitlement_code: string; monthly_quantity: number | null; enabled: boolean };
+const REQUIRED_PLAN_CREDIT_TYPES: Record<PaidNetworkPartnerPlanCode, NetworkCreditType[]> = {
+  amplify: ['event-spotlight', 'regional-feature', 'social-feed'],
+  premier: ['event-spotlight', 'regional-feature', 'statewide-feature', 'social-feed', 'media-feature'],
+};
 
 export default function NetworkBillingPage() {
   const { user, loading: authLoading } = useAuth();
   const supabase = useMemo(() => getSupabaseClient(), []); const db = supabase as any;
   const [memberships, setMemberships] = useState<Membership[]>([]); const [organizationId, setOrganizationId] = useState('');
-  const [subscription, setSubscription] = useState<Subscription | null>(null); const [ledger, setLedger] = useState<Ledger[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null); const [ledger, setLedger] = useState<Ledger[]>([]); const [planEntitlements, setPlanEntitlements] = useState<PlanEntitlement[]>([]); const [termsLoaded, setTermsLoaded] = useState(false);
   const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(''); const [message, setMessage] = useState('');
 
   useEffect(() => { if (!authLoading && user) void loadOrganizations(); else if (!authLoading) setLoading(false); }, [authLoading, user]);
@@ -30,18 +35,35 @@ export default function NetworkBillingPage() {
     setMemberships(rows); if (rows[0]?.organization_id) setOrganizationId(rows[0].organization_id); setLoading(false);
   }
   async function loadBilling(orgId: string) {
-    const [subResult, ledgerResult] = await Promise.all([
+    setTermsLoaded(false);
+    const [subResult, ledgerResult, entitlementResult] = await Promise.all([
       db.from('network_organization_subscriptions').select('plan_code,status,provider_customer_id,current_period_end,cancel_at_period_end').eq('organization_id', orgId).maybeSingle(),
       db.from('network_partner_credit_ledger').select('credit_type,quantity').eq('organization_id', orgId),
+      db.from('network_partner_plan_entitlements').select('plan_code,entitlement_code,monthly_quantity,enabled').in('plan_code', ['amplify', 'premier']).eq('enabled', true),
     ]);
-    setSubscription(subResult.data ?? null); setLedger(ledgerResult.data ?? []);
+    setSubscription(subResult.data ?? null);
+    setLedger(ledgerResult.data ?? []);
+    const rows = (entitlementResult.data ?? []) as PlanEntitlement[];
+    const creditRows = rows.filter((row) => Object.prototype.hasOwnProperty.call(NETWORK_CREDIT_LABELS, row.entitlement_code) && Number(row.monthly_quantity) > 0);
+    setPlanEntitlements(creditRows);
+    setTermsLoaded(!entitlementResult.error);
+    if (entitlementResult.error) {
+      setMessage('Current partner plan details could not be loaded. Checkout is disabled until they are available.');
+      return;
+    }
+    const complete = (Object.entries(REQUIRED_PLAN_CREDIT_TYPES) as [PaidNetworkPartnerPlanCode, NetworkCreditType[]][]).every(([code, types]) =>
+      types.every((type) => creditRows.some((row) => row.plan_code === code && row.entitlement_code === type))
+    );
+    if (!complete) setMessage('Partner plan allocations are incomplete. Checkout is disabled until the exact included credits are available.');
   }
   const balances = new Map<NetworkCreditType, number>();
   ledger.forEach((row) => balances.set(row.credit_type, (balances.get(row.credit_type) ?? 0) + Number(row.quantity || 0)));
   const selected = memberships.find((m) => m.organization_id === organizationId)?.organization ?? null;
   const currentPlan = subscription && ['active','trialing','past_due'].includes(subscription.status) ? subscription.plan_code : (selected?.network_tier === 'amplify' || selected?.network_tier === 'premier' ? selected.network_tier : 'network');
+  const planTermsReady = termsLoaded && (Object.entries(REQUIRED_PLAN_CREDIT_TYPES) as [PaidNetworkPartnerPlanCode, NetworkCreditType[]][]).every(([code, types]) => types.every((type) => planEntitlements.some((row) => row.plan_code === code && row.entitlement_code === type)));
 
   async function startCheckout(planCode: PaidNetworkPartnerPlanCode) {
+    if (!planTermsReady) { setMessage('Partner plan terms are unavailable. Refresh before checkout.'); return; }
     setBusy(planCode); setMessage('');
     const response = await fetch('/api/network/billing/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ organizationId, planCode }) });
     const payload = await response.json().catch(() => ({})); setBusy('');
@@ -66,7 +88,24 @@ export default function NetworkBillingPage() {
     <div className="mt-6 flex flex-wrap items-center gap-3"><select value={organizationId} onChange={(e)=>setOrganizationId(e.target.value)} className="min-h-11 rounded-xl border border-white/10 bg-[#071522] px-4 text-sm">{memberships.map((m)=><option key={m.organization_id} value={m.organization_id}>{m.organization?.name ?? 'Organization'}</option>)}</select><Link href="/network/dashboard/reach" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-rcl-blue/25 px-4 text-xs font-black uppercase text-rcl-blue">Open RCH Reach <FaArrowRight/></Link></div>
     {message && <p className="mt-5 rounded-xl border border-amber-300/20 bg-amber-300/[.06] p-4 text-sm text-amber-100">{message}</p>}
 
-    <section className="mt-8 grid gap-4 lg:grid-cols-3">{(['network','amplify','premier'] as const).map((code)=>{const plan=NETWORK_PARTNER_PLANS[code];const active=currentPlan===code;return <article key={code} className={`rounded-3xl border p-6 ${active?'border-rcl-orange/45 bg-rcl-orange/[.06]':'border-white/10 bg-white/[.025]'}`}><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-white/35">{active?'Current plan':'Partner plan'}</p><h2 className="mt-2 font-display text-3xl font-black uppercase">{plan.name}</h2></div>{active?<FaCircleCheck className="text-rcl-orange"/>:code==='premier'?<FaCrown className="text-rcl-blue"/>:<FaBolt className="text-rcl-blue"/>}</div><p className="mt-3 text-sm leading-6 text-white/45">{plan.description}</p><p className="mt-5 text-3xl font-black">{code==='network'?'Free':`${formatNetworkPartnerPrice(plan.monthlyPriceCents)}`}<span className="text-xs font-medium text-white/35">{code==='network'?'':' / month'}</span></p>{code!=='network'&&<button disabled={busy===code||active} onClick={()=>void startCheckout(code)} className="mt-5 min-h-11 w-full rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase text-black disabled:opacity-40">{active?'Active':busy===code?'Opening Checkout…':`Choose ${plan.name}`}</button>}</article>})}</section>
+    <section className="mt-8 grid gap-4 lg:grid-cols-3">
+      {(['network','amplify','premier'] as const).map((code)=>{
+        const plan=NETWORK_PARTNER_PLANS[code];
+        const active=currentPlan===code;
+        const included=planEntitlements.filter((row)=>row.plan_code===code);
+        return <article key={code} className={`rounded-3xl border p-6 ${active?'border-rcl-orange/45 bg-rcl-orange/[.06]':'border-white/10 bg-white/[.025]'}`}>
+          <div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-white/35">{active?'Current plan':'Partner plan'}</p><h2 className="mt-2 font-display text-3xl font-black uppercase">{plan.name}</h2></div>{active?<FaCircleCheck className="text-rcl-orange"/>:code==='premier'?<FaCrown className="text-rcl-blue"/>:<FaBolt className="text-rcl-blue"/>}</div>
+          <p className="mt-3 text-sm leading-6 text-white/45">{plan.description}</p>
+          <p className="mt-5 text-3xl font-black">{code==='network'?'Free':formatNetworkPartnerPrice(plan.monthlyPriceCents)}<span className="text-xs font-medium text-white/35">{code==='network'?'':' / month'}</span></p>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-blue">{code==='network'?'Included with the free listing':'Monthly promotion credits'}</p>
+            {code==='network'?<p className="mt-2 text-xs leading-5 text-white/45">Organization page and organic discovery. No paid promotion credits included.</p>:!termsLoaded?<p className="mt-2 text-xs text-white/40">Loading plan allocations…</p>:included.length?<ul className="mt-3 space-y-2">{included.map((row)=><li key={row.entitlement_code} className="flex items-center justify-between gap-3 text-sm"><span className="text-white/65">{NETWORK_CREDIT_LABELS[row.entitlement_code as NetworkCreditType]}</span><b className="text-rcl-blue">{row.monthly_quantity} / month</b></li>)}</ul>:<p className="mt-2 text-xs text-amber-200">Exact monthly allocation is unavailable.</p>}
+          </div>
+          {code!=='network'&&<button disabled={busy===code||active||!planTermsReady} onClick={()=>void startCheckout(code)} className="mt-5 min-h-11 w-full rounded-xl bg-rcl-orange px-4 text-xs font-black uppercase text-black disabled:opacity-40">{active?'Active':busy===code?'Opening Checkout…':!planTermsReady?'Plan details unavailable':`Choose ${plan.name}`}</button>}
+        </article>;
+      })}
+    </section>
+    <p className="mt-4 rounded-xl border border-white/8 bg-white/[.02] p-4 text-[11px] leading-5 text-white/40">A monthly credit submits one promotion request. RCH reviews each request before activation; approved timing depends on placement and available inventory. RCH Reach reports measured delivery, and no impression count is guaranteed.</p>
 
     <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_.8fr]"><div className="rounded-3xl border border-white/10 bg-white/[.025] p-6"><div className="flex items-center gap-3"><FaBolt className="text-rcl-orange"/><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-rcl-orange">Monthly inventory</p><h2 className="font-display text-2xl font-black uppercase">Available promotion credits</h2></div></div><div className="mt-5 grid gap-3 sm:grid-cols-2">{(Object.keys(NETWORK_CREDIT_LABELS) as NetworkCreditType[]).map((type)=><div key={type} className="rounded-xl border border-white/8 bg-black/20 p-4"><b className="text-sm">{NETWORK_CREDIT_LABELS[type]}</b><p className="mt-2 text-3xl font-black text-rcl-blue">{Math.max(0, balances.get(type) ?? 0)}</p><span className="text-[10px] uppercase text-white/30">available</span></div>)}</div><Link href="/network/dashboard/boost" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-rcl-blue px-4 text-xs font-black uppercase text-black">Build a campaign <FaArrowRight/></Link></div>
       <div className="rounded-3xl border border-white/10 bg-[#071522]/55 p-6"><FaCreditCard className="text-rcl-blue"/><h2 className="mt-3 font-display text-2xl font-black uppercase">Billing status</h2><p className="mt-3 text-sm text-white/45">{subscription?`${subscription.plan_code.replace('_',' ')} · ${subscription.status}`:'No paid partner subscription.'}</p>{subscription?.current_period_end&&<p className="mt-2 text-xs text-white/30">Current period ends {new Date(subscription.current_period_end).toLocaleDateString()}.</p>}{subscription?.provider_customer_id&&<button onClick={()=>void openPortal()} disabled={busy==='portal'} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"> <FaReceipt/>{busy==='portal'?'Opening…':'Manage in Stripe'}</button>}<p className="mt-5 text-[11px] leading-5 text-white/30">Billing never changes REP, player ratings, rankings, stats, awards, results, badges or competitive selection.</p></div></section>
