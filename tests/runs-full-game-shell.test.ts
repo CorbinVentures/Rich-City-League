@@ -16,10 +16,10 @@ describe('RCH Runs connected full-game shell v1',()=>{
  it('reuses verified back-end career data and never invents game wins or REP',()=>{
   const chrome=read('src/components/runs/RunsGameChrome.tsx');
   expect(chrome).toContain("db.rpc('get_rch_world_journey')");
-  expect(chrome).toContain("db.from('rch_rep_wallets')");
-  expect(chrome).toContain('worldXpProgress(journey.data.world_xp)');
-  expect(chrome).toContain("setUnavailable(true)");
-  expect(chrome).toContain('VERIFIED GAMES');
+  expect(chrome).not.toContain("db.from('rch_rep_wallets')");
+  expect(chrome).toContain('worldXpProgress(data.world_xp)');
+  expect(chrome).toContain("if(error||!data?.signed_in){setStats(null);return;}");
+  expect(chrome).toContain('HOOPER LVL');
   expect(chrome).toContain("pathname!=='/runs/world'");
  });
  it('gives deep pages the same four game modes as the cinematic home',()=>{
