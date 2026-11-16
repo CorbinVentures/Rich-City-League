@@ -45,6 +45,10 @@ export function isBrowserPublicRoute(pathname: string): boolean {
   if (parts.length === 2 && PUBLIC_DETAIL_SECTIONS.has(parts[0])) {
     return !PRIVATE_DETAIL_SLUGS.has(parts[1].toLowerCase());
   }
+  // Verified court profiles are public discovery pages; management still lives elsewhere.
+  if (parts.length === 3 && parts[0] === 'runs' && parts[1] === 'courts') {
+    return !PRIVATE_DETAIL_SLUGS.has(parts[2].toLowerCase());
+  }
   // Partner public pages are readable without sign-in; review and HQ management remain private.
   if (parts.length === 3 && parts[0] === 'runs' && parts[1] === 'partners') {
     return !PRIVATE_DETAIL_SLUGS.has(parts[2].toLowerCase()) && parts[2].toLowerCase() !== 'review';
