@@ -12,11 +12,11 @@ const css=read('src/components/runs/runs-world.css');
 describe('Runs 2.0 task-first and verified activity UX',()=>{
  it('makes finding or hosting an actual game the first interaction',()=>{
    expect(runs).toContain("searchParams.get('view')!=='world'");
-   expect(runs).toContain('Find a Game');
-   expect(runs).toContain('Host a Game');
-   expect(runs).toContain('Park suggestions are not confirmed games');
-   expect(runs).toContain('href="/runs?view=world&mode=world"');
-   expect(runs.indexOf('Find a Game')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
+   expect(runs).toContain('Find or host your next pickup.');
+   expect(runs).toContain('HOST PICKUP');
+   expect(runs).toContain('public court ideas, not scheduled games');
+   expect(runs).toContain('href="/runs?view=world&amp;tutorial=1"');
+   expect(runs.indexOf('Find or host your next pickup.')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
  });
  it('keeps the optional first-session title screen dismissible and respects replay preferences',()=>{
    expect(runs).not.toContain('setRulesOpen(true);\n  }, [showLegacyList]');
@@ -42,7 +42,7 @@ describe('Runs 2.0 task-first and verified activity UX',()=>{
    expect(world).toContain(".in('location_slug',slugs)");
    expect(world).toContain("select('run_id,bonus_enabled').in('run_id',runIds)");
    expect(world.match(/const slugs=nextCourts.map/g)).toHaveLength(1);
-   expect(world).toContain('A court pin is not a hosted game');
+   expect(world).toContain('const cityRuns=runResult.data.filter(r=>matchesRunToCourts(r,citySlugs)&&!suggestedIds.has(r.id));');
    expect(world).not.toContain('<RunsGameLobby');
    expect(world).not.toContain('Indoor gym hours and permitted basketball use');
  });
