@@ -93,7 +93,8 @@ describe('Runs World playable geography and game progression',()=>{
   expect(world).toContain('rch_court_territories');
   expect(world).toContain('<CourtDominion');
   expect(world).toContain('<RunPassport');
-  expect(world).toContain('No location permission required');
+  expect(world).toContain('<option value="">All Virginia</option>');
+  expect(world).toContain('onOverview={exitCity}');
   expect(preview).toContain('not reserved');
   expect(world).toContain('<RunsCourtPreview');
   expect(world).toContain('readPagedUpcomingRuns<WorldRun>');
