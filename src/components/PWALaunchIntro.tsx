@@ -189,6 +189,10 @@ export function PWALaunchIntro() {
     };
   }, [pathname]);
 
+  // Authentication and command-access routes must server-render their real controls.
+  // Do not leave a decorative "Skip intro" button as the only crawlable form content.
+  if (protectedRoute(pathname)) return null;
+
   return (
     <div className={'rch-launch' + (opening ? ' is-opening' : '')} role="status" aria-label="Opening Rich City League" aria-busy={visible && !opening}>
       <div className="rch-launch-door rch-launch-door-left" aria-hidden="true" />

@@ -51,7 +51,8 @@ describe('Real Virginia geospatial discovery',()=>{
   expect(world).toContain('<AccurateVirginiaMap');
   expect(world).toContain('localityNames(city)');
   expect(world).toContain('matchesRunToCourts(r,citySlugs)');
-  expect(world).toContain('coverage.needsCoordinates');
+  expect(world).toContain('nextCourts.some(c=>c.latitude===null||c.longitude===null)');
+  expect(world).toContain('some lack facility-verified coordinates');
   expect(world).not.toContain('<VirginiaInteractiveAtlas');
  });
  it('keeps boundary GIS hosts in the strict production CSP and offers protected staff QA',()=>{

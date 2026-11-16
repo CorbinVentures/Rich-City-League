@@ -18,7 +18,7 @@ export default async function FoundingPlayerCommandPage() {
   if (!supabase) return <main className="mx-auto max-w-4xl p-8">Service temporarily unavailable.</main>;
 
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return <main className="mx-auto max-w-4xl p-8"><h1>Staff sign-in required</h1><Link href="/login">Sign in</Link></main>;
+  if (!auth.user) return <main className="mx-auto max-w-4xl p-8"><h1>Staff sign-in required</h1><Link href="/auth/sign-in?next=%2Fadmin%2Ffounding-players">Sign in</Link></main>;
 
   const { data: staff } = await supabase.from('profiles').select('role').eq('id', auth.user.id).maybeSingle();
   if (staff?.role !== 'admin') return <main className="mx-auto max-w-4xl p-8"><h1>Restricted staff workspace</h1><p>Only authorized administrators may view this dashboard.</p></main>;

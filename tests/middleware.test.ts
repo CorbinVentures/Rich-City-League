@@ -295,7 +295,7 @@ describe('share card image regression', () => {
     expect(source).toContain('const cover = item.cover_image_url ||');
     expect(source).toContain('encodeURIComponent(item.slug)');
     expect(source).toContain("new URL(cover, 'https://www.richcityhoops.com').toString()");
-    expect(source).toContain('images:[{url:socialCover,width:1200,height:630');
+    expect(source).toContain('images:[{url:socialCover,width:item.feature_interview ? 1254 : 1200,height:item.feature_interview ? 1254 : 630');
     expect(source).toContain('images:[socialCover]');
     expect(source).not.toContain('rcl-share-20261002.png');
   });

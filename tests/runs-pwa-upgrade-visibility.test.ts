@@ -14,14 +14,15 @@ describe('Installed PWA Runs Gameplay Activation parity',()=>{
  it('shows the four guided Runs paths on the immersive PWA home',()=>{
   const home=source('src/components/runs/RunsCinematicHome.tsx');
   const css=source('src/components/runs/runs-cinematic-home.css');
-  expect(home).toContain('RUNS 2.0');
-  expect(home).toContain('rch-gh-mode-console');
-  expect(home).toContain("['quick','01','QUICK RUN'");
-  expect(home).toContain("['verified','02','RCH VERIFIED RUN'");
-  expect(home).toContain("['takeover','03','TERRITORY TAKEOVER'");
-  expect(home).toContain("['partners','04','PARTNER EVENTS'");
-  expect(home).toContain("href:'/runs/partners'");
-  expect(css).toContain('.rch-gh-mode-console-grid');
+  expect(home).toContain('aria-label="Choose a Runs mode"');
+  expect(home).toContain('COURT MAP');
+  expect(home).toContain('TAKEOVER');
+  expect(home).toContain('VERIFIED RUNS');
+  expect(home).toContain('SYB + PARTNERS');
+  expect(home).toContain('RANKED CIRCUIT');
+  expect(home).toContain('BADGE VAULT');
+  expect(home).toContain('href="/runs/partners"');
+  expect(css).toContain('.rch-arcade-doors');
   expect(css).toContain('@media(max-width:650px)');
  });
  it('forwards the rookie filter to real game discovery, never to invented activity',()=>{

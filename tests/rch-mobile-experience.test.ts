@@ -17,18 +17,19 @@ describe('RCH mobile app experience gate', () => {
     path => expect(isBrowserAccountRoute(path)).toBe(false),
   );
 
-  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/membership', '/register', '/discover', '/search', '/runs/open-run', '/pulse', '/app', '/legal/privacy'])(
+  it.each(['/', '/league', '/richmond-basketball-league', '/richmond-basketball-runs', '/runs', '/news', '/news/richmond-finals', '/players/player-id', '/teams/warriors', '/games/game-id', '/organizations', '/organizations/region/central-virginia', '/organizations/local-hoops', '/network/events/open-run', '/runs/courts/fonticello', '/membership', '/register', '/discover', '/search', '/runs/open-run', '/pulse', '/app', '/legal/privacy'])(
     'renders public information on the open web: %s',
     path => expect(isBrowserPublicRoute(path)).toBe(true),
   );
 
-  it.each(['/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/teams/new', '/teams/warriors/edit', '/command', '/command/access', '/member-access'])(
+  it.each(['/social', '/messages', '/admin', '/account', '/settings', '/network/dashboard', '/profile/some-user', '/organizations/manage', '/runs/courts/manage', '/teams/new', '/teams/warriors/edit', '/command', '/command/access', '/member-access'])(
     'keeps member tools and app-only pages outside the public browser allowlist: %s',
     path => expect(isBrowserPublicRoute(path)).toBe(false),
   );
 
   it('normalizes trailing slashes without opening app-only routes', () => {
     expect(isBrowserPublicRoute('/teams/warriors/')).toBe(true);
+    expect(isBrowserPublicRoute('/runs/courts/fonticello/')).toBe(true);
     expect(isBrowserPublicRoute('/')).toBe(true);
     expect(isBrowserPublicRoute('/admin/')).toBe(false);
     expect(isBrowserPublicRoute('/organizations/manage/')).toBe(false);
