@@ -16,12 +16,12 @@ describe('RCH screenshot-driven core product fit',()=>{
  });
  it('prioritizes actual Runs and holds advanced and operator links behind More',()=>{
    const runs=read('src/app/runs/page.tsx');
-   expect(runs).toContain('aria-label="Runs quick actions" className="rch-run-primary-actions"');
+   expect(runs).toContain('aria-labelledby="rch-runs-start" className="rch-run-quick-hero"');
    expect(runs).toContain('<summary>More run tools</summary>');
-   expect(runs).toContain('My Crew');
-   expect(runs).toContain('Explore Courts');
+   expect(runs).toContain('HOST PICKUP');
+   expect(runs).toContain('HOW TO PLAY');
    expect(runs).toContain('id="rch-upcoming-runs"');
-   expect(runs.indexOf('rch-run-primary-actions')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
+   expect(runs.indexOf('rch-run-quick-hero')).toBeLessThan(runs.indexOf('id="rch-upcoming-runs"'));
  });
  it('turns the league into a real-data competition homepage',()=>{
    const league=read('src/components/LeagueCenterExperience.tsx');
