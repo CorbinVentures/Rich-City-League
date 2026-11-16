@@ -75,7 +75,8 @@ describe('Runs World playable geography and game progression',()=>{
   const classic=readFileSync(join(root,'src/app/runs/page.tsx'),'utf8');
   const preview=readFileSync(join(root,'src/components/runs/RunsCourtPreview.tsx'),'utf8');
   // A connected World renderer may be wrapped in onboarding UI without changing routing.
-  expect(classic).toMatch(/if\s*\(!showLegacyList\)\s*return\s*<>\s*<RunsWorldGame\b/);
+  expect(classic).toContain('if(!showLegacyList)return <>');
+  expect(classic).toContain('<RunsWorldGame onOpenRules={() => setRulesOpen(true)}');
   expect(classic).toContain('<RunsRulesIntro open={rulesOpen} onClose={closeRules} />');
   expect(world).toContain('onOpenRules');
   const direct=readFileSync(join(root,'src/app/runs/world/page.tsx'),'utf8');
