@@ -41,11 +41,11 @@ describe('RCH PWA activation phase 1', () => {
 
   it('separates live-event discovery from cinematic exploration', () => {
     const home = source('src/components/runs/RunsCinematicHome.tsx');
-    expect(home).toContain('CHOOSE GAME MODE');
-    expect(home).toContain('EXPLORE WORLD');
-    expect(home).toContain('YOUR NEXT PLAY');
-    expect(home).toContain('QUICK RUN');
-    expect(home).toContain('PARTNER EVENTS');
+    expect(home).toContain('aria-label="Choose a Runs mode"');
+    expect(home).toContain('COURT MAP');
+    expect(home).toContain('TAKEOVER');
+    expect(home).toContain('VERIFIED RUNS');
+    expect(home).toContain('SYB + PARTNERS');
     expect(home).not.toContain("'PLAY NOW'");
   });
 });
