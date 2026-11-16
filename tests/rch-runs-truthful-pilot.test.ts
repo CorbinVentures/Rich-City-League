@@ -14,7 +14,8 @@ describe('RUNS truthful-pilot gating',()=>{
   expect(list).toContain('isSuggestedCourt:suggestedCourtIds.has(run.id)');
   expect(list).toContain('if(run.isSuggestedCourt||Date.parse(run.starts_at)<=Date.now())return false;');
   expect(list).toContain('title="Player-hosted Runs"');
-  expect(list).toContain('not confirmed games');
+  expect(list).toContain('public court ideas, not scheduled games');
+  expect(list).toContain('COURT IDEAS · NOT EVENTS');
   expect(world).toContain('!suggestedIds.has(r.id)');
   expect(home).toContain('candidates.filter(run=>!suggested.has(run.id))');
  });
