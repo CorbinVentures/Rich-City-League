@@ -35,7 +35,8 @@ describe('RCH official 2026 Virginia geographic data',()=>{
   expect(runs).not.toContain(".eq('verification_status','community')");
   expect(runs).not.toContain('leads={communityLeads}');
   expect(runs).toContain("db.from('rch_runs_outdoor_courts')");
-  expect(runs).toContain('not approved courts');
+  expect(runs).toContain(".in('verification_status',['official','provider'])");
+  expect(runs).toContain('.filter(playableCourt)');
  });
 });
 describe('Real county polygon camera framing',()=>{
