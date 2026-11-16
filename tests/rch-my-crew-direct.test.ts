@@ -3,15 +3,17 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 const read=(path:string)=>readFileSync(join(process.cwd(),path),'utf8');
 
-const runs=read('src/app/runs/page.tsx');
+const gameChrome=read('src/components/runs/RunsGameChrome.tsx');
+const globalNav=read('src/components/runs/RunsGlobalNav.tsx');
 const crews=read('src/app/crews/page.tsx');
 const commonwealth=read('src/components/commonwealth/CommonwealthExperience.tsx');
 const creator=read('src/components/crews/CrewCreatorFlow.tsx');
 
 describe('My Crew shortcut direct navigation',()=>{
   it('uses a member-specific destination, not the public directory',()=>{
-    expect(runs).toContain('href="/crews?intent=mine"');
-    expect(runs).toContain('Open my crew dashboard or create a crew');
+    expect(gameChrome).toContain("href:'/crews?intent=mine'");
+    expect(gameChrome).toContain("label:'CREWS'");
+    expect(globalNav).toContain("href:'/crews?intent=mine'");
     expect(crews).toContain("params.get('intent')==='mine'?<MyCrewGateway/>:<CrewsView/>");
   });
 
