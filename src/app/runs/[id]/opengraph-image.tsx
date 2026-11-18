@@ -94,12 +94,12 @@ function createRunCard(run:RunCardData|null){
  const skill=skillLabel(run?.skill_level);
  const partnerPrice=run?.partnerPriceCents===0?'Free session'
   :run?.partnerPriceCents?('$'+(run.partnerPriceCents/100).toFixed(2)+' · pay organizer'):null;
- const titleSize=title.length>34?56:70;
+ const titleSize=title.length>30?48:68;
 
  return new ImageResponse(
   <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',padding:24,backgroundColor:'#090909',backgroundImage:'radial-gradient(ellipse at 50% 0%,rgba(105,105,105,.22),transparent 58%),linear-gradient(145deg,#0b0b0b,#151515 56%,#090909)',color:'#f5f5f5',fontFamily:'Arial, Helvetica, sans-serif'}}>
    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',overflow:'hidden',border:'1px solid #464646',borderRadius:22,backgroundImage:'linear-gradient(155deg,#242424,#171717 55%,#121212 100%)',boxShadow:'0 14px 38px rgba(0,0,0,.42)'}}>
-    <div style={{position:'relative',height:196,display:'flex',flexDirection:'column',justifyContent:'space-between',overflow:'hidden',padding:'25px 34px 26px',borderBottom:'1px solid #424242',backgroundImage:'radial-gradient(ellipse at 85% 12%,rgba(220,220,220,.18),transparent 56%),linear-gradient(160deg,#242424,#1a1a1a)'}}>
+    <div style={{position:'relative',height:226,display:'flex',flexDirection:'column',justifyContent:'space-between',overflow:'hidden',padding:'25px 34px 26px',borderBottom:'1px solid #424242',backgroundImage:'radial-gradient(ellipse at 85% 12%,rgba(220,220,220,.18),transparent 56%),linear-gradient(160deg,#242424,#1a1a1a)'}}>
      <div style={{position:'absolute',right:-22,bottom:-120,width:275,height:275,border:'2px solid rgba(255,255,255,.12)',borderRadius:999,boxShadow:'0 0 0 42px rgba(255,255,255,.025),0 0 0 84px rgba(255,255,255,.02)'}}/>
      <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'space-between',gap:20}}>
       <div style={{display:'flex',alignItems:'center',gap:12,fontSize:26,fontWeight:900,letterSpacing:3,color:'#dedede'}}>{experienceLabel(run)} <span style={{color:'#888'}}>·</span> {format}</div>
@@ -108,7 +108,7 @@ function createRunCard(run:RunCardData|null){
        <div style={{display:'flex',alignItems:'center',padding:'9px 16px',border:'1px solid #777',borderRadius:10,backgroundColor:statusTone,color:'#f0f0f0',fontSize:21,fontWeight:850,whiteSpace:'nowrap'}}>{status}</div>
       </div>
      </div>
-     <div style={{position:'relative',display:'flex',maxWidth:1030,overflow:'hidden',fontSize:titleSize,lineHeight:1.04,fontWeight:900,letterSpacing:-1.7,color:'#fff'}}>{title}</div>
+     <div style={{position:'relative',display:'flex',maxWidth:1030,overflow:'hidden',fontSize:titleSize,maxHeight:112,lineHeight:1.04,fontWeight:900,letterSpacing:-1.7,color:'#fff'}}>{title}</div>
     </div>
     <div style={{display:'flex',flex:1,flexDirection:'column',justifyContent:'space-between',padding:'20px 34px 22px'}}>
      <div style={{display:'flex',flexDirection:'column',gap:10}}>
@@ -128,8 +128,8 @@ function createRunCard(run:RunCardData|null){
      </div>
      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:18,borderTop:'1px solid #424242',paddingTop:14}}>
       <div style={{display:'flex',flexDirection:'column',gap:6}}>
-       <div style={{color:'#d0d0d0',fontSize:21,fontWeight:750}}>{skill} · {runType}</div>
-       <div style={{color:'#bcbcbc',fontSize:20,fontWeight:700}}>{openSpots||partnerPrice||'Run details in the room'}{run?.partnerRewardMultiplier===2?' · 2× eligible verified game rewards':''}</div>
+       <div style={{display:'flex',alignItems:'center',whiteSpace:'nowrap',color:'#d0d0d0',fontSize:21,fontWeight:750}}>{skill} · {runType}</div>
+       <div style={{display:'flex',flexWrap:'wrap',color:'#bcbcbc',fontSize:20,fontWeight:700}}>{openSpots||partnerPrice||'Run details in the room'}{run?.partnerRewardMultiplier===2?' · 2× eligible verified game rewards':''}</div>
       </div>
       <div style={{display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,minHeight:58,padding:'0 24px',borderRadius:12,backgroundColor:'#e3e3e3',color:'#171717',fontSize:24,fontWeight:900}}>View Run <span style={{fontSize:28}}>→</span></div>
