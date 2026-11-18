@@ -1,7 +1,7 @@
 begin;
 
 -- Player-entered Runs stats are personal, self-reported records. They never
--- become official box scores or feed rankings, badges, ratings, or REP.
+-- become official box scores or feed rankings, badges, ratings, or REP wallet credit.
 create table public.rch_solo_run_stat_entries (
   run_id uuid not null references public.runs(id) on delete cascade,
   profile_id uuid not null references public.profiles(id) on delete cascade,
