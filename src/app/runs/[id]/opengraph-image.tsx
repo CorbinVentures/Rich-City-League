@@ -2,23 +2,28 @@ import {ImageResponse} from 'next/og';
 import {getPublicClient} from '@/lib/public-data';
 
 export const runtime='edge';
-export const alt='Rich City Hoops basketball Run card';
+export const alt='Rich City Hoops Run Room preview';
 export const size={width:1200,height:630};
 export const contentType='image/png';
 
 type RunCardData={
  title:string|null;
+ description:string|null;
  location:string|null;
  court_name?:string|null;
  starts_at:string;
  game_format:string|null;
+ skill_level:string|null;
+ max_players:number|null;
  status:string;
 };
 
 function dateLabel(value:string){
  const date=new Date(value);
  if(!Number.isFinite(date.getTime()))return 'See details in the Run Room';
- return date.toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+ const datePart=date.toLocaleDateString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric'});
+ const timePart=date.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+ return datePart+' at '+timePart;
 }
 
 function runStatus(value?:string){
@@ -37,48 +42,47 @@ function imageText(value:string,max:number){
 
 function createRunCard(run:RunCardData|null){
  const title=imageText(run?.title||'Find your next run',38);
- const location=imageText(run?.court_name||run?.location||'Location in Run Room',34);
+ const description=imageText(run?.description?.trim()||'Find your next basketball run in the RCH community.',76);
+ const location=imageText(run?.court_name||run?.location||'Location in Run Room',38);
  const when=run?dateLabel(run.starts_at):'Find a basketball run near you';
- const format=(run?.game_format||'PICKUP BASKETBALL').toUpperCase();
+ const skill=(run?.skill_level||'all').replace(/[_-]+/g,' ').toLowerCase();
+ const format=(run?.game_format||'pickup').toLowerCase();
+ const gameSummary=skill+' · '+format+(run?.max_players?' · up to '+run.max_players:'');
  const status=runStatus(run?.status);
- const titleSize=title.length>30?46:title.length>21?54:66;
+ const titleSize=title.length>30?46:title.length>22?56:70;
  return new ImageResponse(
-  <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'44px 58px',backgroundColor:'#090b0f',color:'#ffffff',fontFamily:'Arial, sans-serif',position:'relative',overflow:'hidden'}}>
-   <div style={{position:'absolute',top:0,left:0,width:'100%',height:10,backgroundColor:'#5bbbff'}}/>
-   <div style={{position:'absolute',top:110,right:-150,width:450,height:450,borderRadius:225,border:'2px solid #18324a',opacity:0.7}}/>
-   <div style={{position:'absolute',top:155,right:-105,width:360,height:360,borderRadius:180,border:'2px solid #142638',opacity:0.8}}/>
-   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',zIndex:1}}>
+  <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',justifyContent:'space-between',backgroundColor:'#0a0a0a',color:'#f5f5f5',fontFamily:'Arial, Helvetica, sans-serif',position:'relative',overflow:'hidden'}}>
+   <div style={{position:'absolute',inset:0,backgroundImage:'radial-gradient(ellipse at 62% 7%, rgba(150,150,150,.27) 0%, rgba(70,70,70,.12) 34%, transparent 66%), linear-gradient(135deg,#0a0a0a 0%,#191919 48%,#090909 100%)'}}/>
+   <div style={{height:82,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 48px',backgroundColor:'#080808',borderBottom:'1px solid #393939',zIndex:1}}>
     <div style={{display:'flex',alignItems:'center',gap:18}}>
-     <div style={{width:74,height:66,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:15,backgroundColor:'#ffffff',color:'#090b0f',fontSize:31,fontWeight:900,fontStyle:'italic'}}>RCH</div>
-     <div style={{display:'flex',flexDirection:'column',gap:5}}>
-      <div style={{fontSize:26,fontWeight:900,letterSpacing:3}}>RICH CITY HOOPS</div>
-      <div style={{fontSize:17,fontWeight:800,letterSpacing:4,color:'#5bbbff'}}>RUNS · REAL BASKETBALL</div>
+     <div style={{fontFamily:'Impact, Arial Black, sans-serif',fontSize:45,fontWeight:900,fontStyle:'italic',letterSpacing:-3,color:'#e3e3e3'}}>RCH</div>
+     <div style={{width:1,height:40,backgroundColor:'#454545'}}/>
+     <div style={{fontSize:16,fontWeight:900,letterSpacing:3,color:'#c8c8c8'}}>RICH CITY HOOPS</div>
+    </div>
+    <div style={{display:'flex',alignItems:'center',padding:'10px 16px',borderRadius:10,border:'1px solid #424242',color:'#c9c9c9',fontSize:14,fontWeight:900,letterSpacing:2}}>RCL RUNS</div>
+   </div>
+   <div style={{display:'flex',flex:1,flexDirection:'column',justifyContent:'center',gap:14,padding:'24px 48px 20px',zIndex:1}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+     <div style={{fontSize:15,fontWeight:900,letterSpacing:4,color:'#c5c5c5'}}>RCL RUNS</div>
+     <div style={{display:'flex',alignItems:'center',padding:'8px 13px',borderRadius:9,border:'1px solid #4a4a4a',color:'#d1d1d1',fontSize:13,fontWeight:900,letterSpacing:1.5}}>{status}</div>
+    </div>
+    <div style={{display:'flex',alignItems:'baseline',gap:20,width:'100%'}}>
+     <div style={{maxWidth:940,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis',fontFamily:'Impact, Arial Black, sans-serif',fontSize:titleSize,fontWeight:900,fontStyle:'italic',lineHeight:.95,letterSpacing:-1.2,color:'#ffffff'}}>{title}</div>
+     <div style={{whiteSpace:'nowrap',fontSize:23,fontWeight:600,color:'#bdc9d8'}}>Run Room</div>
+    </div>
+    <div style={{fontSize:22,color:'#d0d0d0'}}>{description}</div>
+    <div style={{display:'flex',flexDirection:'column',gap:11,marginTop:7,padding:'18px 24px',border:'1px solid #414141',borderRadius:19,backgroundImage:'radial-gradient(ellipse at 60% 0%,#292929 0%,transparent 58%),linear-gradient(145deg,#171717 0%,#111111 70%,#0d0d0d 100%)',boxShadow:'inset 0 1px rgba(255,255,255,.08)'}}>
+     <div style={{display:'flex',alignItems:'center',gap:11,color:'#d9d9d9',fontSize:17,fontWeight:900,letterSpacing:2.2}}>
+      <div style={{width:11,height:11,borderRadius:6,backgroundColor:'#cfcfcf'}}/>
+      <div>{location.toUpperCase()}</div>
      </div>
+     <div style={{fontSize:27,fontWeight:850,color:'#f3f3f3'}}>{when}</div>
+     <div style={{fontSize:19,color:'#b8b8b8'}}>{gameSummary}</div>
     </div>
-    <div style={{display:'flex',alignItems:'center',padding:'11px 17px',borderRadius:12,border:'1px solid #33414c',color:'#c7d5e2',fontSize:16,fontWeight:900,letterSpacing:2}}>RUN CARD</div>
    </div>
-   <div style={{display:'flex',flexDirection:'column',gap:12,zIndex:1,marginTop:6}}>
-    <div style={{display:'flex',alignItems:'center',gap:12,color:'#5bbbff',fontSize:18,fontWeight:900,letterSpacing:3}}>
-     <div style={{width:9,height:9,borderRadius:5,backgroundColor:'#5bbbff'}}/>
-     <div>{format+' · PICKUP RUN'}</div>
-    </div>
-    <div style={{maxWidth:1030,fontSize:titleSize,fontWeight:900,lineHeight:1.02,letterSpacing:-1.5}}>{title}</div>
-    <div style={{fontSize:21,color:'#aeb8c1'}}>Pull up, play, and find your place in the RCH community.</div>
-   </div>
-   <div style={{display:'flex',gap:15,zIndex:1}}>
-    <div style={{flex:1,display:'flex',flexDirection:'column',gap:9,padding:'16px 20px',borderRadius:14,border:'1px solid #303841',backgroundColor:'#11161b'}}>
-     <div style={{fontSize:14,fontWeight:900,letterSpacing:3,color:'#788693'}}>WHEN</div>
-     <div style={{fontSize:23,fontWeight:800}}>{when}</div>
-    </div>
-    <div style={{flex:1,display:'flex',flexDirection:'column',gap:9,padding:'16px 20px',borderRadius:14,border:'1px solid #303841',backgroundColor:'#11161b'}}>
-     <div style={{fontSize:14,fontWeight:900,letterSpacing:3,color:'#788693'}}>WHERE</div>
-     <div style={{fontSize:23,fontWeight:800}}>{location}</div>
-    </div>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'0 20px',borderRadius:14,backgroundColor:'#5bbbff',color:'#07111a',fontSize:16,fontWeight:900,letterSpacing:1}}>{status}</div>
-   </div>
-   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:'1px solid #27313a',paddingTop:14,zIndex:1}}>
-    <div style={{fontSize:16,fontWeight:900,letterSpacing:2,color:'#c6d0d8'}}>VIRGINIA BASKETBALL COMMUNITY</div>
-    <div style={{fontSize:16,fontWeight:900,letterSpacing:2,color:'#5bbbff'}}>RICHCITYHOOPS.COM</div>
+   <div style={{height:48,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 48px',borderTop:'1px solid #333333',backgroundColor:'#0a0a0a',zIndex:1}}>
+    <div style={{fontSize:13,fontWeight:900,letterSpacing:2,color:'#bdbdbd'}}>RCH RUN ROOM</div>
+    <div style={{fontSize:13,fontWeight:900,letterSpacing:2,color:'#c9c9c9'}}>RICHCITYHOOPS.COM</div>
    </div>
   </div>,
   size,
@@ -91,7 +95,7 @@ export default async function Image({params}:{params:Promise<{id:string}>}){
  const client=getPublicClient() as any;
  if(client){
   try{
-   const result=await client.from('runs').select('title,location,court_name,starts_at,game_format,status').eq('id',id).maybeSingle();
+   const result=await client.from('runs').select('title,description,location,court_name,starts_at,game_format,skill_level,max_players,status').eq('id',id).maybeSingle();
    if(!result.error&&result.data)run=result.data as RunCardData;
   }catch{
    run=null;
