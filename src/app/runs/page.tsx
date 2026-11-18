@@ -619,6 +619,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   const highlightWindow=now>=startMs-2*3600000&&now<=startMs+72*3600000;
   const dateLabel=start.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   const experience=run.partner&&run.partner.experience==='rec'?'THE REC':run.partner&&run.partner.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
+  const shareCardVersion=JSON.stringify({title:run.title,location:run.location,starts_at:run.starts_at,game_format:run.game_format,skill_level:run.skill_level,max_players:run.max_players,status:effectiveStatus,registered:count,run_type:run.run_type,partner:run.partner,weekendMultiplier:run.weekendMultiplier});
   return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
     <div className="rch-ux-game-cover">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -642,7 +643,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <div className="rch-ux-game-cta">
         <div className="rch-run-card-primary">
         {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
-        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format} shareCardVersion={shareCardVersion}/>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
