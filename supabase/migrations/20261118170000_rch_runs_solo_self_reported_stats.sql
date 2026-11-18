@@ -149,4 +149,26 @@ begin
 end $$;
 revoke all on function public.rch_rep_verified_earnings() from public, anon, authenticated;
 
+
+-- Self-reported XP must not unlock the cumulative REP badges, now or later.
+-- It still contributes to account XP and level progression.
+create or replace function public.award_rep_badges()
+returns trigger language plpgsql security definer set search_path='' as $$
+declare
+  total_rep integer;
+begin
+  if new.source_type = 'solo_run_stats' then return new; end if;
+  select coalesce(sum(amount), 0) into total_rep
+  from public.xp_transactions
+  where profile_id = new.profile_id
+    and source_type is distinct from 'solo_run_stats';
+  insert into public.fan_badges(profile_id, badge_id)
+  select new.profile_id, b.id from public.badges b
+  where b.is_active = true and b.requirement_type = 'rep_total'
+    and total_rep >= b.requirement_value
+  on conflict (profile_id, badge_id) do nothing;
+  return new;
+end $$;
+revoke execute on function public.award_rep_badges() from public, anon, authenticated;
+
 commit;
