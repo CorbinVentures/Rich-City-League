@@ -76,7 +76,7 @@ function createRunCard(run:RunCardData|null){
       <div style={{width:11,height:11,borderRadius:6,backgroundColor:'#cfcfcf'}}/>
       <div>{location.toUpperCase()}</div>
      </div>
-     <div style={{fontSize:27,fontWeight:850,color:'#f3f3f3'}}>{when}</div>
+     <div style={{fontSize:27,fontWeight:800,color:'#f3f3f3'}}>{when}</div>
      <div style={{fontSize:19,color:'#b8b8b8'}}>{gameSummary}</div>
     </div>
    </div>
