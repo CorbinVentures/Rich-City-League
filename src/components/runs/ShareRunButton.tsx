@@ -23,6 +23,7 @@ export function ShareRunButton({id,title,location,startsAt,format,shareCardVersi
  const imageFile=useRef<{file:File;version:string;createdAt:number}|null>(null);
  const imageRequest=useRef<{version:string;promise:Promise<File>}|null>(null);
  const currentVersion=shareCardVersion??JSON.stringify([id,title,location,startsAt,format]);
+ const currentVersionRef=useRef(currentVersion);
  currentVersionRef.current=currentVersion;
 
  function clearPreparedImage(version:string){
