@@ -162,6 +162,17 @@
   background: rgb(91 91 91 / .24);
   color: #ededed;
 }
+
+.rch-run-rank-status-self-reported {
+  border-color: #b8a66c;
+  background: rgb(184 166 108 / .16);
+  color: #eee0ad;
+}
+.rch-run-rank-status-mixed {
+  border-color: #909eac;
+  background: rgb(144 158 172 / .16);
+  color: #e1e8ee;
+}
 .rch-run-rank-location {
   margin-top: 5px;
   overflow: hidden;

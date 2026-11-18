@@ -92,8 +92,8 @@ export function RunSoloStatTracker({runId,startsAt,eligible}:{runId:string;start
   else{
    const xp=Number(data?.[0]?.xp_awarded??0);
    setNotice(xp>0
-    ?'Stats saved. +'+xp+' XP for this Run; additional game logs do not award more XP.'
-    :'Stats saved. Your once-per-Run XP was already awarded.');
+    ?'Stats saved. +'+xp+' XP and +'+xp+' REP wallet credit for this Run; additional game logs do not award more.'
+    :'Stats saved. Your once-per-Run XP and REP wallet credit were already awarded.');
    await reload();
   }
   setBusy(false);
@@ -106,13 +106,13 @@ export function RunSoloStatTracker({runId,startsAt,eligible}:{runId:string;start
    <div>
     <p className="text-[10px] font-black uppercase tracking-widest text-[#d0d0d0]">Solo player tracker · self-reported</p>
     <h2 className="mt-2 font-display text-2xl font-black">Track your stats</h2>
-    <p className="mt-2 text-sm leading-6 text-[#d2d2d2]">Log your own line even if you are the only RCH player at the Run. No review is required. These stats stay self-reported and do not affect official stats, ratings, rankings, badges or the REP wallet balance.</p>
+    <p className="mt-2 text-sm leading-6 text-[#d2d2d2]">Log your own line even if you are the only RCH player at the Run. No review is required. These stats stay labeled self-reported, count toward official Runs stats and stat rankings, and earn REP wallet credit through the Run XP reward. They do not unlock badges.</p>
    </div>
   </div>
 
   <div className="mt-4 rounded-2xl border border-[#777777]/40 bg-white/[.035] p-4">
-   <p className="flex items-center gap-2 text-sm font-black text-white"><FaBolt className="text-[#d4d4d4]"/> XP only</p>
-   <p className="mt-1 text-sm leading-5 text-[#c8c8c8]">Earn 15 XP once for this hosted Run. You can save up to 20 personal game lines; later saves and edits do not add XP.</p>
+   <p className="flex items-center gap-2 text-sm font-black text-white"><FaBolt className="text-[#d4d4d4]"/> XP + REP wallet</p>
+   <p className="mt-1 text-sm leading-5 text-[#c8c8c8]">Earn 15 XP and 15 REP wallet credit once for this hosted Run. You can save up to 20 personal game lines; later saves and edits do not add more.</p>
   </div>
 
   {!uid

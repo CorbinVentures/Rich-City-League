@@ -34,7 +34,7 @@ export function RunArenaLeaderboard() {
   const fetchRanks = useCallback(async () => {
     if (!db) { setLeaders([]); setRanksUnavailable(true); setLoadingRanks(false); return; }
     setLoadingRanks(true);
-    const { data, error } = await db.rpc('get_rch_verified_run_box_score_leaderboard', { p_scope: scope, p_city: city, p_limit: 30 });
+    const { data, error } = await db.rpc('get_rch_run_box_score_leaderboard', { p_scope: scope, p_city: city, p_limit: 30 });
     if (!error) { setLeaders((data ?? []) as Leader[]); setRanksUnavailable(false); }
     else { setLeaders([]); setRanksUnavailable(true); }
     setLoadingRanks(false);
@@ -97,7 +97,7 @@ export function RunArenaLeaderboard() {
             Runs <span className="text-[#8a8a8a]">Leaderboard</span>
           </h2>
           <p className="mt-1 text-xs font-semibold text-[#bebebe]">
-            {demoCount>0 ? 'Sample preview · Official box scores take the lead' : 'Official box scores from reviewed matches'}
+            {demoCount>0 ? 'Sample preview · Official Runs stats appear as players log' : 'Official Runs stats · verified and self-reported'}
           </p>
         </div>
         <div className="inline-flex shrink-0 rounded-full border border-[#535353] bg-[#151515] p-1 text-xs font-bold" role="group" aria-label="Leaderboard scope">
@@ -113,18 +113,18 @@ export function RunArenaLeaderboard() {
       </label>}
 
       {!loadingRanks && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-bold text-[#d1d1d1]" aria-live="polite">
-        <span><span className="text-[#bebebe]">●</span> {leaders.length} verified player{leaders.length===1?'':'s'}</span>
+        <span><span className="text-[#bebebe]">●</span> {leaders.length} player{leaders.length===1?'':'s'} on the official board</span>
         {demoCount>0 && <span><span className="text-[#d0d0d0]">◇</span> {demoCount} sample player{demoCount===1?'':'s'}</span>}
       </div>}
-      {ranksUnavailable && !loadingRanks && <p role="status" className="mt-3 rounded-lg border border-[#676767] bg-[#292929]/60 p-3 text-xs text-[#dddddd]">Live verified rankings are temporarily unavailable. The players shown below are examples only.</p>}
-      {loadingRanks ? <p className="py-8 text-center text-sm text-[#b5b5b5]">Loading the rankings…</p> : <ol className="mt-4 space-y-3" aria-label="Competitive Runs player rankings">
+      {ranksUnavailable && !loadingRanks && <p role="status" className="mt-3 rounded-lg border border-[#676767] bg-[#292929]/60 p-3 text-xs text-[#dddddd]">Live Runs stat rankings are temporarily unavailable. The players shown below are examples only.</p>}
+      {loadingRanks ? <p className="py-8 text-center text-sm text-[#b5b5b5]">Loading the rankings…</p> : <ol className="mt-4 space-y-3" aria-label="Runs player stat rankings">
         {shown.map((entry,index)=><li key={entry.profile_id} className={'rch-run-rank-card '+(index===0?'rch-run-rank-card-first ':'')+(entry.isDemo?'rch-run-rank-card-sample':'rch-run-rank-card-verified')}>
           <div className="rch-run-rank-identity">
             <span className={'rch-run-rank-place '+(index===0?'rch-run-rank-gold':index===1?'rch-run-rank-silver':index===2?'rch-run-rank-bronze':'rch-run-rank-regular')} aria-label={`Rank ${index+1}`}>{index+1}</span>
             <RankAvatar name={entry.player_name} src={entry.avatar_url} size={44}/>
             <div className="rch-run-rank-details">
               <p className="rch-run-rank-name" title={entry.player_name}>{entry.player_name}</p>
-              <span className={'rch-run-rank-status '+(entry.isDemo?'rch-run-rank-status-sample':'rch-run-rank-status-verified')}>{entry.isDemo?'Sample':'Verified'}</span>
+              <span className={'rch-run-rank-status '+(entry.isDemo?'rch-run-rank-status-sample':entry.record_source==='self_reported'?'rch-run-rank-status-self-reported':entry.record_source==='mixed'?'rch-run-rank-status-mixed':'rch-run-rank-status-verified')}>{entry.isDemo?'Sample':entry.record_source==='self_reported'?'Self-reported':entry.record_source==='mixed'?'Mixed':'Verified'}</span>
               <p className="rch-run-rank-location" title={`${entry.city}, VA · ${entry.games} games`}>{entry.city}, VA · {entry.games} game{entry.games===1?'':'s'}</p>
             </div>
           </div>
@@ -139,7 +139,7 @@ export function RunArenaLeaderboard() {
         <Link href="/runs?view=list#rch-upcoming-runs" className="rch-arena-add-stats inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6e6e6e] to-[#959595] px-4 text-sm font-black text-white shadow-[0_4px_18px_rgba(32,145,255,.27)]"><FaArrowRight/> Find a Live Run</Link>
         {ranked.length>6 && <button type="button" className="min-h-11 rounded-xl border border-[#585858] px-4 text-xs font-semibold text-[#dedede]" onClick={()=>setShowAll(x=>!x)}>{showAll?'Top six':'Full leaderboard'}</button>}
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-[#a7a7a7]">Box scores are imported from the Run Game Mode and enter this board only after the match and player stats receive independent review. Sample players are fictional previews and do not earn REP or count as official results.</p>
+      <p className="mt-3 text-[11px] leading-5 text-[#a7a7a7]">Reviewed match box scores and self-reported Run lines both contribute to PPG, APG, RPG and the official stat rankings. Sources are labeled. Solo lines do not unlock badges; wins still come from verified match results. Sample players are fictional previews.</p>
     </section>
   </>;
 }
