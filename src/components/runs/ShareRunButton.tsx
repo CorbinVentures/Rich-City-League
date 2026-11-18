@@ -1,6 +1,6 @@
 'use client';
 
-import {useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {FaArrowUpRightFromSquare,FaShareNodes} from 'react-icons/fa6';
 import {runInviteUrl} from '@/lib/run-activation';
 import {runShareText} from '@/lib/runs-social-discovery';
@@ -12,15 +12,23 @@ type Props={
  location?:string;
  startsAt?:string;
  format?:string|null;
+ shareCardVersion?:string;
  className?:string;
  label?:string;
  icon?:'arrow'|'nodes';
 };
 
-export function ShareRunButton({id,title,location,startsAt,format,className='rch-run-share-button',label='Share',icon='arrow'}:Props){
+export function ShareRunButton({id,title,location,startsAt,format,shareCardVersion,className='rch-run-share-button',label='Share',icon='arrow'}:Props){
  const [state,setState]=useState<ShareState>('idle');
- const imageFile=useRef<File|null>(null);
- const imageRequest=useRef<Promise<File>|null>(null);
+ const imageFile=useRef<{file:File;version:string;createdAt:number}|null>(null);
+ const imageRequest=useRef<{version:string;promise:Promise<File>}|null>(null);
+ const currentVersion=shareCardVersion??JSON.stringify([id,title,location,startsAt,format]);
+ currentVersionRef.current=currentVersion;
+
+ function clearPreparedImage(version:string){
+  if(imageFile.current?.version===version)imageFile.current=null;
+  if(imageRequest.current?.version===version)imageRequest.current=null;
+ }
 
  function captionAndLink(){
   const url=runInviteUrl(window.location.origin,id);
@@ -30,24 +38,24 @@ export function ShareRunButton({id,title,location,startsAt,format,className='rch
   return caption+'\n\n'+url;
  }
 
- function getImageFile(){
-  if(imageFile.current)return Promise.resolve(imageFile.current);
-  if(imageRequest.current)return imageRequest.current;
-  const imageUrl=new URL('/runs/'+encodeURIComponent(id)+'/opengraph-image?v=run-card-v3',window.location.origin);
+ function getImageFile(version:string){
+  if(imageFile.current?.version===version)return Promise.resolve(imageFile.current.file);
+  if(imageRequest.current?.version===version)return imageRequest.current.promise;
+  const imageUrl=new URL('/runs/'+encodeURIComponent(id)+'/opengraph-image?v=run-card-v3&share='+Date.now(),window.location.origin);
   const request=fetch(imageUrl.toString(),{cache:'no-store',credentials:'same-origin'})
    .then(async response=>{
     if(!response.ok)throw new Error('Run image could not be loaded.');
     const blob=await response.blob();
-    if(!blob.size||blob.type&&!blob.type.startsWith('image/'))throw new Error('Run image is unavailable.');
+    if(!blob.size||(blob.type&&!blob.type.startsWith('image/')))throw new Error('Run image is unavailable.');
     const slug=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||id.slice(0,12);
     const file=new File([blob],'rch-run-'+slug+'.png',{type:blob.type||'image/png'});
-    imageFile.current=file;
+    if(currentVersionRef.current===version)imageFile.current={file,version,createdAt:Date.now()};
     return file;
    });
-  imageRequest.current=request;
+  imageRequest.current={version,promise:request};
   void request.then(
-   ()=>{if(imageRequest.current===request)imageRequest.current=null;},
-   ()=>{if(imageRequest.current===request)imageRequest.current=null;},
+   ()=>{if(imageRequest.current?.promise===request)imageRequest.current=null;},
+   ()=>{if(imageRequest.current?.promise===request)imageRequest.current=null;},
   );
   return request;
  }
@@ -58,7 +66,7 @@ export function ShareRunButton({id,title,location,startsAt,format,className='rch
   return true;
  }
 
- async function downloadAndCopy(file:File,caption:string){
+ async function downloadAndCopy(file:File,caption:string,version:string){
   const objectUrl=URL.createObjectURL(file);
   const link=document.createElement('a');
   link.href=objectUrl;
@@ -74,54 +82,58 @@ export function ShareRunButton({id,title,location,startsAt,format,className='rch
   }catch{
    setState('downloaded');
   }
+  clearPreparedImage(version);
  }
 
- function handleNativeShareError(error:unknown,file:File,caption:string){
+ function handleNativeShareError(error:unknown,file:File,caption:string,version:string){
   const name=error instanceof Error?error.name:'';
   if(name==='AbortError'){
+   clearPreparedImage(version);
    setState('idle');
    return;
   }
   if(name==='NotAllowedError'){
-   // Some browsers require the share call itself to happen directly inside a
-   // user gesture. Keep the image ready so a second tap can open the share sheet.
+   // Keep the freshly generated card available for a direct second tap when a
+   // browser expires transient activation during the image fetch.
    setState('ready');
    return;
   }
-  void downloadAndCopy(file,caption);
+  void downloadAndCopy(file,caption,version);
  }
 
- function openNativeShare(file:File,caption:string){
+ function openNativeShare(file:File,caption:string,version:string){
   try{
    const result=navigator.share({files:[file],title,text:caption});
    void result.then(
-    ()=>setState('idle'),
-    error=>handleNativeShareError(error,file,caption),
+    ()=>{clearPreparedImage(version);setState('idle');},
+    error=>handleNativeShareError(error,file,caption,version),
    );
   }catch(error){
-   handleNativeShareError(error,file,caption);
+   handleNativeShareError(error,file,caption,version);
   }
- }
-
- function warmImage(){
-  void getImageFile().catch(()=>undefined);
  }
 
  async function share(){
   if(state==='preparing')return;
+  const version=currentVersion;
   const caption=captionAndLink();
-  const readyFile=imageFile.current;
-  if(readyFile){
-   if(supportsImageShare(readyFile))openNativeShare(readyFile,caption);
-   else void downloadAndCopy(readyFile,caption);
+  const ready=imageFile.current;
+  if(ready&&ready.version===version&&state==='ready'&&Date.now()-ready.createdAt<10000){
+   openNativeShare(ready.file,caption,version);
    return;
   }
+  if(ready&&ready.version===version)imageFile.current=null;
 
   setState('preparing');
   try{
-   const file=await getImageFile();
-   if(supportsImageShare(file))openNativeShare(file,caption);
-   else await downloadAndCopy(file,caption);
+   const file=await getImageFile(version);
+   if(currentVersionRef.current!==version){
+    clearPreparedImage(version);
+    setState('idle');
+    return;
+   }
+   if(supportsImageShare(file))openNativeShare(file,caption,version);
+   else await downloadAndCopy(file,caption,version);
   }catch{
    try{
     await navigator.clipboard.writeText(caption);
@@ -131,6 +143,12 @@ export function ShareRunButton({id,title,location,startsAt,format,className='rch
    }
   }
  }
+
+ useEffect(()=>{
+  if(imageFile.current?.version!==currentVersion)imageFile.current=null;
+  if(imageRequest.current&&imageRequest.current.version!==currentVersion)imageRequest.current=null;
+  setState('idle');
+ },[currentVersion]);
 
  const iconElement=icon==='nodes'
   ?<FaShareNodes aria-hidden="true"/>
@@ -143,9 +161,6 @@ export function ShareRunButton({id,title,location,startsAt,format,className='rch
 
  return <button
   type="button"
-  onPointerEnter={warmImage}
-  onPointerDown={warmImage}
-  onFocus={warmImage}
   onClick={()=>void share()}
   aria-label={'Share '+title+' as an image'}
   aria-live="polite"
