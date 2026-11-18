@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Container } from '@/components/Container';
+import {ShareRunButton} from '@/components/runs/ShareRunButton';
 import RunsWorldGame from '@/components/runs/RunsWorldGame';
 import { RunsRulesIntro } from '@/components/runs/RunsRulesIntro';
 import {readPagedUpcomingRuns} from '@/lib/runs-world-game';
@@ -15,7 +16,7 @@ import { RunPassport } from '@/components/runs/RunPassport';
 import { RunCultureMoments } from '@/components/runs/RunCultureMoments';
 import { ProgramEmblem } from '@/components/ProgramEmblem';
 import { BadgeMedallion } from '@/components/BadgeMedallion';
-import { rankSoloRuns, isSoloJoinable, runShareText } from '@/lib/runs-social-discovery';
+import { rankSoloRuns, isSoloJoinable } from '@/lib/runs-social-discovery';
 import { RunDailyCircuit } from '@/components/runs/RunDailyCircuit';
 import { rankDailyRuns, type DailyCircuitCandidate, type RunFormat, type RunPlayType } from '@/lib/run-daily-circuit';
 import { CourtDominion } from '@/components/runs/CourtDominion';
@@ -32,7 +33,7 @@ import {RunQuickPlay} from '@/components/runs/RunQuickPlay';
 import {isRookieFriendly} from '@/lib/runs-gameplay-readiness';
 import { useGravityLocation } from '@/hooks/useGravityLocation';
 import { cityForText } from '@/lib/virginia-world';
-import { buildWeeklyRunStarts, runInviteUrl, validateRunStart } from '@/lib/run-activation';
+import { buildWeeklyRunStarts, validateRunStart } from '@/lib/run-activation';
 import {
   FaArrowUpRightFromSquare,
   FaArrowRight,
@@ -618,6 +619,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
   const highlightWindow=now>=startMs-2*3600000&&now<=startMs+72*3600000;
   const dateLabel=start.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   const experience=run.partner&&run.partner.experience==='rec'?'THE REC':run.partner&&run.partner.experience==='park'?'THE PARK':run.run_type==='competitive'?'COMPETITIVE':'COMMUNITY';
+  const shareCardVersion=JSON.stringify({title:run.title,location:run.location,starts_at:run.starts_at,game_format:run.game_format,skill_level:run.skill_level,max_players:run.max_players,status:effectiveStatus,registered:count,run_type:run.run_type,partner:run.partner,weekendMultiplier:run.weekendMultiplier});
   return <article className="rch-ux-game" aria-label={run.title+' · '+effectiveStatus}>
     <div className="rch-ux-game-cover">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -641,7 +643,7 @@ function RunCard({ run, userId, checkedIn, highlightClaimed, busy, onJoin, onChe
       <div className="rch-ux-game-cta">
         <div className="rch-run-card-primary">
         {canJoin?<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-btn-primary"><FaPlus aria-hidden="true"/> Join Run <FaArrowRight aria-hidden="true"/></button>:<Link href={'/runs/'+run.id} className="rch-ux-btn-primary">{joined?'Your Run Room':full?'View Full Run':'View Run'} <FaArrowRight aria-hidden="true"/></Link>}
-        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format}/>
+        <ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format} shareCardVersion={shareCardVersion}/>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {joined&&<button type="button" disabled={busy===`join-${run.id}`} onClick={()=>void onJoin(run)} className="rch-ux-game-secondary">Leave Run</button>}
@@ -729,27 +731,4 @@ function CreateRunModal({ form, setForm, courts, onPickVenue, busy, onClose, onS
     </div>,
     document.body
   );
-}
-
-/** A native share sheet on mobile; copy-link fallback for desktop browsers. */
-function ShareRunButton({ id, title, location, startsAt, format }: { id: string; title: string; location?:string; startsAt?:string; format?:string }) {
-  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
-
-  async function share() {
-    const url = runInviteUrl(window.location.origin, id);
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, text: location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format}) : 'Pull up to this basketball Run on Rich City Hoops.', url });
-        setState('idle');
-        return;
-      }
-      await navigator.clipboard.writeText((location&&startsAt&&format ? runShareText({title,location,starts_at:startsAt,game_format:format})+'\n' : '')+url);
-      setState('copied');
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
-      setState('error');
-    }
-  }
-
-  return <button type="button" onClick={() => void share()} aria-label={'Share '+title} className="rch-run-share-button">{state === 'copied' ? 'Copied ✓' : state === 'error' ? 'Retry share' : <><FaArrowUpRightFromSquare aria-hidden="true"/> Share</>}</button>;
 }
