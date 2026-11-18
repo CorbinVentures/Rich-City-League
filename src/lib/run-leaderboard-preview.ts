@@ -1,6 +1,6 @@
 /**
  * Demonstration-only rows for the Runs leaderboard. These are never inserted
- * into profiles, box scores, REP, or the verified leaderboard RPC.
+ * into profiles, stat records, REP, or the official Runs leaderboard RPC.
  */
 export type RunLeaderboardEntry = {
   profile_id: string;
@@ -14,6 +14,7 @@ export type RunLeaderboardEntry = {
   wins: number;
   rep: number;
   player_level: number;
+  record_source?: 'verified' | 'self_reported' | 'mixed';
 };
 
 export type DisplayRunLeaderboardEntry = RunLeaderboardEntry & { isDemo: boolean };
@@ -35,16 +36,16 @@ const SAMPLE_PLAYERS: RunLeaderboardEntry[] = [
 ];
 
 /**
- * The server's verified ranking order is authoritative. Real players always
- * occupy the highest ranks; examples fill the unused top-ten slots and disappear
- * completely after ten verified players are ranked.
+ * The server's ranking order is authoritative. Real players always occupy the
+ * highest ranks; examples fill unused top-ten slots and disappear completely
+ * after ten real players are ranked.
  */
 export function buildRunLeaderboardDisplay(
-  verifiedPlayers: readonly RunLeaderboardEntry[],
+  officialPlayers: readonly RunLeaderboardEntry[],
   scope: RunLeaderboardScope,
   city: string,
 ): DisplayRunLeaderboardEntry[] {
-  const realRows = verifiedPlayers.map((player) => ({ ...player, isDemo: false }));
+  const realRows = officialPlayers.map((player) => ({ ...player, isDemo: false }));
   const localCity = city.trim() || 'Richmond';
   const demoRows = SAMPLE_PLAYERS.slice(0, Math.max(0, MIN_PREVIEW_ROWS - realRows.length)).map((player) => ({
     ...player,
