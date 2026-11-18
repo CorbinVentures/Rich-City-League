@@ -31,6 +31,7 @@ import {RunsGameplayJourney} from '@/components/runs/RunsGameplayJourney';
 import {RunTeamMatchupBoard} from '@/components/runs/RunTeamMatchupBoard';
 import { RunResultAppeals } from '@/components/runs/RunResultAppeals';
 import { RunSkillEvidenceDesk } from '@/components/runs/RunSkillEvidenceDesk';
+import { RunSoloStatTracker } from '@/components/runs/RunSoloStatTracker';
 import { RunGameConsole } from '@/components/runs/RunGameConsole';
 import './run-room-game.css';
 
@@ -381,6 +382,7 @@ export default function RunRoomPage() {
         <RunCrewEntries runId={run.id} />
         <RunCrewTeamLinker runId={run.id} />
         <div id="rch-result-review" className="scroll-mt-36"><RunRankedMatchControl runId={run.id} hostId={run.host_id} runType={run.run_type} format={run.game_format} games={games} teams={teams} canManageRun={canManage} /></div>
+        <RunSoloStatTracker runId={run.id} startsAt={run.starts_at} eligible={Boolean(user&&(joined||checkins.has(user.id)))}/>
         <RunSkillEvidenceDesk runId={run.id} />
         <div id="rch-host-operations" className="scroll-mt-36"><RunOperationsHQ runId={run.id} hostId={run.host_id} /></div>
         <RunVerifiedSignal runId={run.id} />
