@@ -12,10 +12,10 @@ import {
   FaImage,
   FaLocationDot,
   FaPeopleGroup,
-  FaShareNodes,
   FaVideo,
 } from 'react-icons/fa6';
 import { Container } from '@/components/Container';
+import {ShareRunButton} from '@/components/runs/ShareRunButton';
 import { ClientPageHero } from '@/components/ClientPageHero';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -299,20 +299,6 @@ export default function RunRoomPage() {
     setBusy('');
   };
 
-  const shareRun = async () => {
-    if (!run) return;
-    const url = `${window.location.origin}/runs/${run.id}`;
-    try {
-      if (navigator.share) await navigator.share({ title: run.title, text: 'Join this RCL Open Run.', url });
-      else {
-        await navigator.clipboard.writeText(url);
-        setNotice('Run link copied.');
-      }
-    } catch {
-      // User cancelled the native share sheet.
-    }
-  };
-
   if (!run) {
     return <main className="rcl-social-secondary min-h-screen bg-[#070707] p-8 text-white"><Container maxWidth="lg"><p className="rounded-3xl border border-white/10 p-10 text-center text-white/40">{error || 'Loading run…'}</p></Container></main>;
   }
@@ -328,7 +314,7 @@ export default function RunRoomPage() {
         accent={run.status === 'cancelled' ? 'Cancelled' : isPastRun?'Past listing':suggestedCourt?'Court suggestion':'Run Room'}
         description={suggestedCourt?'Public court discovery only—not an organized or confirmed basketball event.':run.description ?? 'Pickup basketball organized through RCL Runs.'}
         assetKey="runs.cover"
-        actions={<div className="flex flex-wrap gap-2">{returnHref&&<Link href={returnHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#888888] bg-[#343434] px-4 text-xs font-black uppercase"><FaArrowLeft/> Back to Court Arena</Link>}{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#aaaaaa]/40 bg-[#3d3d3d] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><button type="button" onClick={() => void shareRun()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaShareNodes />Share</button></div>}
+        actions={<div className="flex flex-wrap gap-2">{returnHref&&<Link href={returnHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#888888] bg-[#343434] px-4 text-xs font-black uppercase"><FaArrowLeft/> Back to Court Arena</Link>}{partner&&<Link href={'/runs/partners/'+partner.slug} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#aaaaaa]/40 bg-[#3d3d3d] px-4 text-xs font-black uppercase">{partner.experience==='rec'?'THE REC':'THE PARK'} · {partner.name} <FaArrowLeft/></Link>}<Link href="/runs" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"><FaArrowLeft />Runs</Link><ShareRunButton id={run.id} title={run.title} location={run.location} startsAt={run.starts_at} format={run.game_format||'Pickup'} label="Share" icon="nodes" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-xs font-black uppercase"/></div>}
         meta={<div className="min-w-52 rounded-2xl border border-rcl-blue/20 bg-[#131313]/85 p-5"><p className="text-[10px] font-black uppercase tracking-wider text-rcl-blue"><FaLocationDot className="mr-1 inline" />{run.court_name || run.location}</p>{!run.location_slug&&<p className="mt-2 text-xs text-white/55">Host-entered venue · not an RCH-verified court</p>}<p className="mt-2 text-sm font-black">{new Date(run.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}</p><p className="mt-2 text-xs text-white/35">{run.skill_level} · {run.game_format ?? 'Pickup'} · {profiles.length}/{run.max_players}</p></div>}
       />
 
