@@ -106,7 +106,7 @@ export function RunSoloStatTracker({runId,startsAt,eligible}:{runId:string;start
    <div>
     <p className="text-[10px] font-black uppercase tracking-widest text-[#d0d0d0]">Solo player tracker · self-reported</p>
     <h2 className="mt-2 font-display text-2xl font-black">Track your stats</h2>
-    <p className="mt-2 text-sm leading-6 text-[#d2d2d2]">Log your own line even if you are the only RCH player at the Run. No review is required. These stats stay self-reported and do not affect official stats, ratings, rankings, badges or REP.</p>
+    <p className="mt-2 text-sm leading-6 text-[#d2d2d2]">Log your own line even if you are the only RCH player at the Run. No review is required. These stats stay self-reported and do not affect official stats, ratings, rankings, badges or the REP wallet balance.</p>
    </div>
   </div>
 
