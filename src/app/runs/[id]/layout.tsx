@@ -7,7 +7,7 @@ export async function generateMetadata({params}:Omit<Props,'children'>):Promise<
  const {id}=await params;
  const fallback='Find this basketball Run on Rich City Hoops. Join the community, find open spots, and play.';
  const url='https://www.richcityhoops.com/runs/'+encodeURIComponent(id);
- const cardImage={url:url+'/opengraph-image?v=run-card-v2',width:1200,height:630,alt:'Rich City Hoops Run card'};
+ const cardImage={url:url+'/opengraph-image?v=run-card-v3',width:1200,height:630,alt:'Rich City Hoops Run card'};
  const shareMetadata=(title:string,description:string):Metadata=>({
   title,description,
   openGraph:{title,description,type:'website',url,siteName:'Rich City Hoops',images:[cardImage]},
