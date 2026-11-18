@@ -60,7 +60,7 @@ function createRunCard(run:RunCardData|null){
    <div style={{display:'flex',flexDirection:'column',gap:12,zIndex:1,marginTop:6}}>
     <div style={{display:'flex',alignItems:'center',gap:12,color:'#5bbbff',fontSize:18,fontWeight:900,letterSpacing:3}}>
      <div style={{width:9,height:9,borderRadius:5,backgroundColor:'#5bbbff'}}/>
-     <div>{format} · PICKUP RUN</div>
+     <div>{format+' · PICKUP RUN'}</div>
     </div>
     <div style={{maxWidth:1030,fontSize:titleSize,fontWeight:900,lineHeight:1.02,letterSpacing:-1.5}}>{title}</div>
     <div style={{fontSize:21,color:'#aeb8c1'}}>Pull up, play, and find your place in the RCH community.</div>
