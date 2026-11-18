@@ -49,7 +49,7 @@ function createRunCard(run:RunCardData|null){
    <div style={{position:'absolute',top:155,right:-105,width:360,height:360,borderRadius:180,border:'2px solid #142638',opacity:0.8}}/>
    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',zIndex:1}}>
     <div style={{display:'flex',alignItems:'center',gap:18}}>
-     <div style={{width:66,height:66,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:15,backgroundColor:'#ffffff',color:'#090b0f',fontSize:42,fontWeight:900,fontStyle:'italic'}}>RCH</div>
+     <div style={{width:74,height:66,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:15,backgroundColor:'#ffffff',color:'#090b0f',fontSize:31,fontWeight:900,fontStyle:'italic'}}>RCH</div>
      <div style={{display:'flex',flexDirection:'column',gap:5}}>
       <div style={{fontSize:26,fontWeight:900,letterSpacing:3}}>RICH CITY HOOPS</div>
       <div style={{fontSize:17,fontWeight:800,letterSpacing:4,color:'#5bbbff'}}>RUNS · REAL BASKETBALL</div>
