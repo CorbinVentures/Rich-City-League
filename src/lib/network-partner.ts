@@ -17,9 +17,9 @@ export const NETWORK_PARTNER_PLANS = {
   },
   premier: {
     code: 'premier' as const,
-    name: 'Partner Pro',
+    name: 'Premier Partner',
     monthlyPriceCents: 14900,
-    description: 'Recurring priority inventory, deeper reporting, cross-channel distribution and priority media consideration.',
+    description: 'Wider monthly promotion inventory, full Reach reporting and priority media consideration.',
   },
 } satisfies Record<NetworkPartnerPlanCode, { code: NetworkPartnerPlanCode; name: string; monthlyPriceCents: number; description: string }>;
 
