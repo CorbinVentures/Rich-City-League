@@ -12,7 +12,7 @@ type Mode = 'checking' | 'mobile-app' | 'browser';
 function BrowserMemberContent({ pathname, children }: { pathname: string; children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) {
-    return <main className="rch-browser-loading" role="status" aria-live="polite">
+    return <main className="rch-browser-loading" role="status" aria-live="polite" aria-busy="true">
       <span className="rch-browser-loading-mark">RCH</span>
       <span>Checking your member session…</span>
     </main>;

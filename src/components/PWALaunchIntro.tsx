@@ -1,43 +1,39 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   isLaunchContentReady,
   canDismissLaunch,
+  RCH_LAUNCH_EXCLUDED_PATH,
+  RCH_LAUNCH_MURAL,
   RCH_LAUNCH_BOOT_FALLBACK_MS,
   RCH_LAUNCH_FALLBACK_MS,
   RCH_LAUNCH_MIN_DISPLAY_MS,
   RCH_LAUNCH_ROUTE_DELAY_MS,
 } from '@/lib/pwa-launch';
 
-const BELT_IMAGE = '/brand/rcl-championship-belt.webp';
 const BOOT_HOLD_MS = 650;
-const SPLIT_DURATION_MS = 760;
+const ART_GRACE_MS = 1400;
+const FADE_MS = 280;
 
-const protectedRoute = (path: string) =>
-  /^\/auth(?:\/|$)/.test(path) || path === '/command' || path.startsWith('/command/');
+const protectedRoute = (path: string) => RCH_LAUNCH_EXCLUDED_PATH.test(path);
 const runsRoute = (path: string) => path === '/runs' || path.startsWith('/runs/');
 
-/**
- * A lightweight championship-belt reveal for an installed RCH mobile PWA.
- * The transparent belt and charcoal curtains split from the middle, revealing
- * the already-rendered page. No video, audio or heavy animation libraries.
- */
+// CSS can paint this server-rendered element as soon as the launch bootstrap opts in.
+const muralStyle = { '--rch-launch-art': `url("${RCH_LAUNCH_MURAL}")` } as CSSProperties;
+
 export function PWALaunchIntro() {
   const pathname = usePathname();
   const mounted = useRef(false);
   const bootInProgress = useRef(false);
-  const beltLoaded = useRef(false);
-  const beltFailed = useRef(false);
-  const checkReadyRef = useRef<() => void>(() => {});
   const dismissRef = useRef<() => void>(() => {});
   const [visible, setVisible] = useState(false);
   const [opening, setOpening] = useState(false);
 
-  // Keep the existing fast-navigation contract: only delayed client-side
-  // transitions get a short loader. The cinematic split is for cold boot.
+  // Only the installed app uses the small, delayed page-to-page loader.
   useEffect(() => {
+    if (document.documentElement.dataset.rchLaunchMode !== 'app') return;
     let armTimer: number | undefined;
     let safetyTimer: number | undefined;
     const clear = () => {
@@ -53,12 +49,14 @@ export function PWALaunchIntro() {
         root.dataset.rchLaunch = 'active';
         setOpening(false);
         setVisible(true);
-        safetyTimer = window.setTimeout(() => {
+        const dismissNavigation = () => {
           if (!bootInProgress.current && root.dataset.rchLaunch === 'active') {
             root.dataset.rchLaunch = 'done';
             setVisible(false);
           }
-        }, RCH_LAUNCH_FALLBACK_MS);
+        };
+        dismissRef.current = dismissNavigation;
+        safetyTimer = window.setTimeout(dismissNavigation, RCH_LAUNCH_FALLBACK_MS);
       }, RCH_LAUNCH_ROUTE_DELAY_MS);
     };
     const onClick = (event: MouseEvent) => {
@@ -96,13 +94,16 @@ export function PWALaunchIntro() {
       return;
     }
 
-    const boot = firstMount && root.dataset.rchLaunchBoot === 'pending';
-    if (firstMount && !boot) return;
+    const boot = root.dataset.rchLaunchBoot === 'pending';
+    const installedApp = root.dataset.rchLaunchMode === 'app';
+    if (!boot && (firstMount || !installedApp)) return;
 
     let stopped = false;
     let holdFinished = false;
     let routeReady = false;
-    let splitStarted = false;
+    let fading = false;
+    let artwork: HTMLImageElement | undefined;
+    const contentReady = () => isLaunchContentReady(document, installedApp);
     let observer: MutationObserver | undefined;
     const timeouts: number[] = [];
     const later = (fn: () => void, ms: number) => {
@@ -122,33 +123,45 @@ export function PWALaunchIntro() {
     dismissRef.current = dismiss;
 
     const checkReady = () => {
-      if (stopped || !canDismissLaunch(isLaunchContentReady(document), boot, holdFinished, routeReady)) return;
+      if (stopped || !canDismissLaunch(contentReady(), boot, holdFinished, routeReady)) return;
       if (boot) {
-        if (!beltLoaded.current && !beltFailed.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (splitStarted) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           dismiss();
           return;
         }
-        splitStarted = true;
+        if (fading) return;
+        fading = true;
         setOpening(true);
-        later(dismiss, SPLIT_DURATION_MS);
+        later(dismiss, FADE_MS);
       } else {
         dismiss();
       }
     };
-
-    checkReadyRef.current = checkReady;
 
     if (boot) {
       bootInProgress.current = true;
       root.dataset.rchLaunch = 'active';
       setOpening(false);
       setVisible(true);
-      later(() => {
-        holdFinished = true;
-        checkReady();
-      }, BOOT_HOLD_MS);
+      let settled = false;
+      const finishHold = () => { holdFinished = true; checkReady(); };
+      const settleArtwork = (loaded: boolean) => {
+        if (settled || stopped) return;
+        settled = true;
+        if (loaded) {
+          root.dataset.rchMuralReady = 'true';
+          later(finishHold, BOOT_HOLD_MS);
+        } else {
+          finishHold();
+        }
+      };
+      artwork = new Image();
+      artwork.onload = () => settleArtwork(true);
+      artwork.onerror = () => settleArtwork(false);
+      artwork.src = RCH_LAUNCH_MURAL;
+      if (artwork.complete) settleArtwork(artwork.naturalWidth > 0);
+      // Start the hold with a complete image. Let a ready page through on slow connections.
+      later(() => settleArtwork(false), ART_GRACE_MS);
       // Never block account access when an image or a content request stalls.
       later(dismiss, RCH_LAUNCH_BOOT_FALLBACK_MS);
     } else if (root.dataset.rchLaunch === 'active') {
@@ -161,9 +174,9 @@ export function PWALaunchIntro() {
       later(dismiss, RCH_LAUNCH_FALLBACK_MS);
     } else {
       routeReady = true;
-      if (!isLaunchContentReady(document)) {
+      if (!contentReady()) {
         later(() => {
-          if (!stopped && !isLaunchContentReady(document)) {
+          if (!stopped && !contentReady()) {
             root.dataset.rchLaunch = 'active';
             setOpening(false);
             setVisible(true);
@@ -184,6 +197,7 @@ export function PWALaunchIntro() {
 
     return () => {
       stopped = true;
+      if (artwork) { artwork.onload = null; artwork.onerror = null; }
       observer?.disconnect();
       timeouts.forEach(id => window.clearTimeout(id));
     };
@@ -191,25 +205,17 @@ export function PWALaunchIntro() {
 
   // Authentication and command-access routes must server-render their real controls.
   // Do not leave a decorative "Skip intro" button as the only crawlable form content.
-  if (protectedRoute(pathname)) return null;
+  if (protectedRoute(pathname) || runsRoute(pathname)) return null;
 
   return (
-    <div className={'rch-launch' + (opening ? ' is-opening' : '')} role="status" aria-label="Opening Rich City League" aria-busy={visible && !opening}>
-      <div className="rch-launch-door rch-launch-door-left" aria-hidden="true" />
-      <div className="rch-launch-door rch-launch-door-right" aria-hidden="true" />
+    <div className={'rch-launch' + (opening ? ' is-opening' : '')} style={muralStyle} role="status" aria-label="Opening Rich City Hoops" aria-busy={visible && !opening}>
+      <span className="rch-launch-wordmark" aria-hidden="true">Rich City Hoops</span>
+      <div className="rch-launch-art" aria-hidden="true" />
       {visible && (
-        <div className="rch-launch-belt" aria-hidden="true">
-          <div className="rch-launch-belt-half rch-launch-belt-left">
-            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
-          </div>
-          <div className="rch-launch-belt-half rch-launch-belt-right">
-            <img src={BELT_IMAGE} alt="" draggable={false} fetchPriority="high" onLoad={() => { beltLoaded.current = true; checkReadyRef.current(); }} onError={() => { beltFailed.current = true; checkReadyRef.current(); }} />
-          </div>
-        </div>
+        <button type="button" className="rch-launch-skip" onClick={() => dismissRef.current()}>
+          Skip intro
+        </button>
       )}
-      <button type="button" className="rch-launch-skip" onClick={() => dismissRef.current()}>
-        Skip intro
-      </button>
     </div>
   );
 }

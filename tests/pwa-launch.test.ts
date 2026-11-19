@@ -1,27 +1,32 @@
 import { runInNewContext } from 'node:vm';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
+import { PWA_LAUNCH_BOOTSTRAP, isLaunchContentReady, canDismissLaunch, RCH_LAUNCH_MURAL, RCH_LAUNCH_BOOT_FALLBACK_MS, RCH_LAUNCH_FALLBACK_MS, RCH_LAUNCH_ROUTE_DELAY_MS } from '../src/lib/pwa-launch';
 
-function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1 }: {
+function launch({ path = '/social', standalone = true, userAgent = 'iPhone', platform = 'iPhone', maxTouchPoints = 1, storage = new Map<string, string>(), search = '', hash = '' }: {
   path?: string;
   standalone?: boolean;
   userAgent?: string;
   platform?: string;
   maxTouchPoints?: number;
+  storage?: Map<string, string> | null;
+  search?: string;
+  hash?: string;
 } = {}) {
   const dataset: Record<string, string> = {};
   const timers: Array<{ callback: () => void; delay: number }> = [];
+  const preloads: Array<{ href: string; onload?: () => void }> = [];
   runInNewContext(PWA_LAUNCH_BOOTSTRAP, {
-    document: { documentElement: { dataset } },
-    location: { pathname: path },
+    document: { documentElement: { dataset }, createElement: () => ({}), head: { appendChild: (link: { href: string }) => preloads.push(link) } },
+    location: { pathname: path, search, hash },
     navigator: { userAgent, platform, maxTouchPoints, standalone },
     window: {
       matchMedia: () => ({ matches: standalone }),
+      sessionStorage: storage && { getItem: (key: string) => storage.get(key), setItem: (key: string, value: string) => storage.set(key, value) },
       setTimeout: (callback: () => void, delay: number) => timers.push({ callback, delay }),
     },
   });
-  return { dataset, timers };
+  return { dataset, timers, preloads };
 }
 
 describe('page launch intro', () => {
@@ -30,13 +35,23 @@ describe('page launch intro', () => {
     expect(launch().dataset.rchLaunchBoot).toBe('pending');
     expect(launch({ path: '/discover' }).dataset.rchLaunch).toBe('active');
   });
-  it('does not cover ordinary browsers or desktop PWAs', () => {
-    expect(launch({ standalone: false }).dataset.rchLaunch).toBeUndefined();
-    expect(launch({ standalone: true, userAgent: 'Mozilla/5.0 Windows NT 10.0', platform: 'Win32' }).dataset.rchLaunch).toBeUndefined();
-    expect(launch({ standalone: true, userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 0 }).dataset.rchLaunch).toBeUndefined();
+  it('starts once per browser tab on an entrance and skips browser deep links', () => {
+    const storage = new Map<string, string>();
+    const web = { standalone: false, storage };
+    expect(launch({ ...web, path: '/news/story' }).preloads).toHaveLength(0);
+    expect(launch({ ...web, path: '/' }).preloads.map(link => link.href)).toEqual([RCH_LAUNCH_MURAL]);
+    expect(launch({ ...web, path: '/social' }).dataset.rchLaunch).toBeUndefined();
+    expect(launch({ standalone: false, path: '/social/' }).dataset.rchLaunchBoot).toBe('pending');
+    expect(launch({ standalone: false, path: '/', storage: null }).dataset.rchLaunch).toBeUndefined();
+    expect(launch({ standalone: true, userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 0, path: '/discover' }).preloads).toHaveLength(0);
+    expect(launch({ standalone: true, userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 5, path: '/discover' }).preloads).toHaveLength(1);
   });
-  it('does not cover account recovery', () => {
-    expect(launch({ path: '/auth/confirm' }).dataset.rchLaunch).toBeUndefined();
+  it('bypasses recovery links, operational tools, Runs and tenant sites', () => {
+    for (const path of ['/auth/confirm', '/command/access', '/account/security', '/portal/scorebook', '/sites/partner', '/runs', '/runs/room/example']) {
+      expect(launch({ path }).preloads).toHaveLength(0);
+    }
+    expect(launch({ path: '/', search: '?code=example' }).preloads).toHaveLength(0);
+    expect(launch({ path: '/', hash: '#access_token=example&refresh_token=example' }).preloads).toHaveLength(0);
   });
   it('always releases the app screen after the safety timeout', () => {
     const result = launch();
@@ -56,18 +71,23 @@ describe('page launch intro', () => {
     expect(canDismissLaunch(true, false, false, false)).toBe(false);
     expect(RCH_LAUNCH_FALLBACK_MS).toBe(4000);
   });
-  it('uses the transparent championship belt image and a CSS split rather than the old video', () => {
-    const component = readFileSync('src/components/PWALaunchIntro.tsx', 'utf8');
-    const styles = readFileSync('src/app/rch-launch.css', 'utf8');
-    expect(existsSync('public/brand/rcl-championship-belt.webp')).toBe(true);
-    expect(component).toContain("const BELT_IMAGE = '/brand/rcl-championship-belt.webp'");
-    expect(component).toContain('rch-launch-belt-left');
-    expect(component).toContain('rch-launch-belt-right');
-    expect(component).not.toContain('<video');
-    expect(component).toContain('prefers-reduced-motion');
-    expect(component).toContain('beltLoaded.current');
-    expect(styles).toContain('.rch-launch.is-opening .rch-launch-door-left');
-    expect(styles).toContain('.rch-launch.is-opening .rch-launch-door-right');
+  it('preloads the shipped mural for the installed app on every cold start', () => {
+    const storage = new Map<string, string>();
+    for (let i = 0; i < 2; i++) {
+      const { dataset, preloads } = launch({ storage });
+      expect(preloads.map(link => link.href)).toEqual([RCH_LAUNCH_MURAL]);
+      expect(dataset.rchMuralReady).toBeUndefined();
+      preloads[0].onload?.();
+      expect(dataset.rchMuralReady).toBe('true');
+    }
+    const art = readFileSync(`public${RCH_LAUNCH_MURAL}`);
+    expect(art.toString('ascii', 8, 12)).toBe('WEBP');
+  });
+  it('waits for the shell that the visitor actually launched', () => {
+    const publicOnly = { querySelector: (selector: string) => selector === '#rch-public-content'
+      ? { querySelector: (child: string) => child === 'main' ? {} : null } : null } as unknown as ParentNode;
+    expect(isLaunchContentReady(publicOnly, false)).toBe(true);
+    expect(isLaunchContentReady(publicOnly, true)).toBe(false);
   });
   it('waits for main content and feed readiness, not photos or unrelated widgets', () => {
     function documentState(main: boolean, pending: boolean) {

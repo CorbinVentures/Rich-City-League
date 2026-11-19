@@ -1,4 +1,4 @@
-/** Lightweight nonverbal suspense fallback under the full-screen RCH video. */
+/** Lightweight route skeleton beneath the optional RCH launch mural. */
 export default function Loading() {
   return (
     <main className="rcl-page-state" aria-busy="true" aria-label="Loading Rich City Hoops">
