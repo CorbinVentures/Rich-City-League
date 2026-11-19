@@ -40,6 +40,12 @@ const nextConfig = {
         ],
       },
       {
+        source: '/brand/richmond-hoops-mural-v1.webp',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           { key: 'Content-Security-Policy', value: `default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co${optionalPosthogConnect} https://tiles.openfreemap.org https://*.openfreemap.org https://services.arcgis.com https://services.dwr.virginia.gov wss://*.livekit.cloud https://*.livekit.cloud${liveKitConnectSource}; img-src 'self' data: blob: https:; media-src 'self' https: blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; font-src 'self' data:; frame-src 'self' https://www.google.com/maps https://www.youtube.com https://www.youtube-nocookie.com https://*.cloudflarestream.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` },
