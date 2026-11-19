@@ -102,7 +102,6 @@ export function PWALaunchIntro() {
     let holdFinished = false;
     let routeReady = false;
     let fading = false;
-    let artSettled = false;
     let artwork: HTMLImageElement | undefined;
     const contentReady = () => isLaunchContentReady(document, installedApp);
     let observer: MutationObserver | undefined;
@@ -130,7 +129,7 @@ export function PWALaunchIntro() {
           dismiss();
           return;
         }
-        if (!artSettled || fading) return;
+        if (fading) return;
         fading = true;
         setOpening(true);
         later(dismiss, FADE_MS);
@@ -144,18 +143,25 @@ export function PWALaunchIntro() {
       root.dataset.rchLaunch = 'active';
       setOpening(false);
       setVisible(true);
-      const artworkReady = () => { artSettled = true; checkReady(); };
+      let settled = false;
+      const finishHold = () => { holdFinished = true; checkReady(); };
+      const settleArtwork = (loaded: boolean) => {
+        if (settled || stopped) return;
+        settled = true;
+        if (loaded) {
+          root.dataset.rchMuralReady = 'true';
+          later(finishHold, BOOT_HOLD_MS);
+        } else {
+          finishHold();
+        }
+      };
       artwork = new Image();
-      artwork.onload = artworkReady;
-      artwork.onerror = artworkReady;
+      artwork.onload = () => settleArtwork(true);
+      artwork.onerror = () => settleArtwork(false);
       artwork.src = RCH_LAUNCH_MURAL;
-      artSettled = artwork.complete;
-      // A slow artwork request must never hold up a ready page indefinitely.
-      later(artworkReady, ART_GRACE_MS);
-      later(() => {
-        holdFinished = true;
-        checkReady();
-      }, BOOT_HOLD_MS);
+      if (artwork.complete) settleArtwork(artwork.naturalWidth > 0);
+      // Start the hold with a complete image. Let a ready page through on slow connections.
+      later(() => settleArtwork(false), ART_GRACE_MS);
       // Never block account access when an image or a content request stalls.
       later(dismiss, RCH_LAUNCH_BOOT_FALLBACK_MS);
     } else if (root.dataset.rchLaunch === 'active') {

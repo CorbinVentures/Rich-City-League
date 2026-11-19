@@ -26,10 +26,12 @@ html[data-rch-launch-boot="pending"] body .rch-launch-art {
   position: absolute;
   inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
     calc(52px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 0px);
-  background-image: var(--rch-launch-art);
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
+}
+html[data-rch-launch-boot="pending"][data-rch-mural-ready="true"] body .rch-launch-art {
+  background-image: var(--rch-launch-art);
 }
 @media (min-aspect-ratio: 1/1) {
   html[data-rch-launch-boot="pending"] body .rch-launch-art {

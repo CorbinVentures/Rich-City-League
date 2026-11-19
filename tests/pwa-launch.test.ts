@@ -15,7 +15,7 @@ function launch({ path = '/social', standalone = true, userAgent = 'iPhone', pla
 } = {}) {
   const dataset: Record<string, string> = {};
   const timers: Array<{ callback: () => void; delay: number }> = [];
-  const preloads: Array<{ href: string }> = [];
+  const preloads: Array<{ href: string; onload?: () => void }> = [];
   runInNewContext(PWA_LAUNCH_BOOTSTRAP, {
     document: { documentElement: { dataset }, createElement: () => ({}), head: { appendChild: (link: { href: string }) => preloads.push(link) } },
     location: { pathname: path, search, hash },
@@ -74,7 +74,11 @@ describe('page launch intro', () => {
   it('preloads the shipped mural for the installed app on every cold start', () => {
     const storage = new Map<string, string>();
     for (let i = 0; i < 2; i++) {
-      expect(launch({ storage }).preloads.map(link => link.href)).toEqual([RCH_LAUNCH_MURAL]);
+      const { dataset, preloads } = launch({ storage });
+      expect(preloads.map(link => link.href)).toEqual([RCH_LAUNCH_MURAL]);
+      expect(dataset.rchMuralReady).toBeUndefined();
+      preloads[0].onload?.();
+      expect(dataset.rchMuralReady).toBe('true');
     }
     const art = readFileSync(`public${RCH_LAUNCH_MURAL}`);
     expect(art.toString('ascii', 8, 12)).toBe('WEBP');

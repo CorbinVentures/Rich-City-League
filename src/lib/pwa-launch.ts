@@ -38,6 +38,7 @@ export const PWA_LAUNCH_BOOTSTRAP = `(() => {
   preload.as = 'image';
   preload.href = '${RCH_LAUNCH_MURAL}';
   preload.fetchPriority = 'high';
+  preload.onload = () => { root.dataset.rchMuralReady = 'true'; };
   document.head.appendChild(preload);
   window.setTimeout(() => {
     // Fail safe if React never mounts, the image fails, or the page stalls.
