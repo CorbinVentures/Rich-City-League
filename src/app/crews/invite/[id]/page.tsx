@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {crewJoinPath, loadCrewInvite} from '@/lib/crew-invite';
+import {loadCrewInvite} from '@/lib/crew-invite';
+import {crewJoinPath} from '@/lib/crew-invite-links';
 
 export const dynamic = 'force-dynamic';
 type Props = {params: Promise<{id: string}>};
