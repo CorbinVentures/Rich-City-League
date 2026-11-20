@@ -13,18 +13,7 @@ export type CrewInviteResult =
  | {status: 'found'; crew: CrewInvite}
  | {status: 'missing' | 'unavailable'; crew: null};
 
-export const RCH_ORIGIN = 'https://www.richcityhoops.com';
 const CREW_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-export function crewInvitePath(id: string) {
- return '/crews/invite/' + encodeURIComponent(id);
-}
-export function crewInviteUrl(id: string) {
- return RCH_ORIGIN + crewInvitePath(id);
-}
-export function crewJoinPath(id: string) {
- return '/crews?crew=' + encodeURIComponent(id) + '#rch-crew-hq';
-}
 
 // Public anon/RLS client only. Never use the service role for share previews.
 export async function loadCrewInvite(id: string): Promise<CrewInviteResult> {
