@@ -221,7 +221,7 @@ export default async function EmailVerificationAdminPage() {
           </table>
         </div>
         {report.members.length > members.length && <p className="mt-3 text-xs text-white/50">Showing the newest 100 pending accounts.</p>}
-        <p className="mt-3 text-xs text-white/50">Provider lookup is limited to the most recent 500 emails. “Not found” does not mean no message was sent. The delivery status is the provider's latest recorded event, not inbox placement.</p>}
+        <p className="mt-3 text-xs text-white/50">Provider lookup is limited to the most recent 500 emails. “Not found” does not mean no message was sent. The delivery status is the provider's latest recorded event, not inbox placement.</p>
       </>}
 
       <section className="mt-10 rounded-2xl border border-white/10 bg-[#101d2b] p-6">
