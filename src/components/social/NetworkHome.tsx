@@ -22,7 +22,7 @@ import { SocialLinkField } from '@/components/SocialRichContent';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useGravityLocation } from '@/hooks/useGravityLocation';
-import { scoreSocialPost } from '@/lib/social-feed';
+import { isRecentMemberPost, scoreSocialPost } from '@/lib/social-feed';
 import {
   isGravityGoal, isGravityIntent, scoreGravityCandidate,
   type GravityGoal, type GravityIntent
@@ -56,7 +56,7 @@ type Story = {
   author?: NetworkAuthor;
 };
 
-type FeedMode = 'for-you' | 'following' | 'trending' | 'courtside';
+type FeedMode = 'for-you' | 'following' | 'latest' | 'trending' | 'courtside';
 
 export default function NetworkHome() {
   const {city:gravityCity} = useGravityLocation();
@@ -197,12 +197,21 @@ export default function NetworkHome() {
 
     try {
       const nowIso = new Date().toISOString();
-      const [basePostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult] = await Promise.all([
+      const [memberPostsResult, automatedPostsResult, repostResult, storiesResult, followsResult, savedResult, currentProfileResult] = await Promise.all([
+        // Each population has its own candidate window: frequent automated
+        // posts must not crowd real member posts out of the first fetch.
         db.from('posts')
           .select('id,author_id,body,media_urls,created_at,is_automated,automation_type')
           .eq('status', 'published')
+          .eq('is_automated', false)
           .order('created_at', { ascending: false })
           .limit(36),
+        db.from('posts')
+          .select('id,author_id,body,media_urls,created_at,is_automated,automation_type')
+          .eq('status', 'published')
+          .eq('is_automated', true)
+          .order('created_at', { ascending: false })
+          .limit(8),
         db.from('post_reposts')
           .select('id,post_id,profile_id,created_at')
           .order('created_at', { ascending: false })
@@ -227,10 +236,13 @@ export default function NetworkHome() {
       ]);
 
       if (requestId !== loadRequestRef.current) return;
-      if (basePostsResult.error) throw basePostsResult.error;
+      if (memberPostsResult.error) throw memberPostsResult.error;
 
       const visibleReposts = repostResult.error ? [] : (repostResult.data ?? []);
-      const basePosts = (basePostsResult.data ?? []) as NetworkPost[];
+      const basePosts = [
+        ...((memberPostsResult.data ?? []) as NetworkPost[]),
+        ...((automatedPostsResult.error ? [] : automatedPostsResult.data ?? []) as NetworkPost[]),
+      ].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
       const basePostIds = new Set(basePosts.map((post) => post.id));
       const neededPostIds = [...new Set([
         ...visibleReposts.map((entry: any) => entry.post_id as string),
@@ -429,6 +441,26 @@ export default function NetworkHome() {
       void supabase.removeChannel(channel);
     };
   }, [supabase, user?.id, focusPostId]);
+  // Supabase realtime may be disconnected on mobile or while a PWA is asleep.
+  // Refresh on return and periodically while visible without polling a hidden tab.
+  useEffect(() => {
+    if (!supabase) return;
+    let lastRefresh = Date.now();
+    const refreshIfStale = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastRefresh < 30_000) return;
+      lastRefresh = Date.now();
+      void load();
+    };
+    const interval = window.setInterval(refreshIfStale, 120_000);
+    document.addEventListener('visibilitychange', refreshIfStale);
+    window.addEventListener('focus', refreshIfStale);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshIfStale);
+      window.removeEventListener('focus', refreshIfStale);
+    };
+  }, [supabase, user?.id, focusPostId]);
+
   const uploadMedia = async (file: File, folder: 'posts' | 'stories') => {
     if (!supabase || !user) throw new Error('Please sign in to upload media.');
     const issue = socialMediaError(file);
@@ -605,6 +637,7 @@ export default function NetworkHome() {
         if (!haystack.includes(query)) return false;
       }
       if (mode === 'courtside' && !/\b(basketball|hoops?|courts?|dunk|bucket|league|runs?|scrimmage|training|rebound|game|score|player|team|rcl|rch)\b/i.test(item.post.body ?? '')) return false;
+      if (mode === 'latest' && item.post.is_automated !== false) return false;
       if (mode === 'following') {
         const distributedBy = item.repost?.profile_id;
         return item.post.author_id === user?.id || following.includes(item.post.author_id) || distributedBy === user?.id || Boolean(distributedBy && following.includes(distributedBy));
@@ -614,7 +647,7 @@ export default function NetworkHome() {
 
     if (mode === 'trending') {
       candidates.sort((a, b) => trendScore(b) - trendScore(a) || new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime());
-    } else if (mode === 'following') {
+    } else if (mode === 'following' || mode === 'latest') {
       candidates.sort((a, b) => new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime());
     } else {
       const rankingNow = Date.now();
@@ -637,7 +670,12 @@ export default function NetworkHome() {
         const repostBoost = item.repost && following.includes(item.repost.profile_id) ? 0.3 : item.repost ? 0.06 : 0;
         return nativeScore * 0.78 + gravity.score * 0.4 + repostBoost;
       };
-      candidates.sort((a,b) => score(b) - score(a) || new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime());
+      candidates.sort((a,b) =>
+        // Recent community voices are always visible before automated updates.
+        Number(isRecentMemberPost(b.post, rankingNow)) - Number(isRecentMemberPost(a.post, rankingNow))
+        || score(b) - score(a)
+        || new Date(b.feed_at).getTime() - new Date(a.feed_at).getTime()
+      );
     }
 
     const seen = new Set<string>();
@@ -674,8 +712,9 @@ export default function NetworkHome() {
             {focusPostId && <div className="flex items-center justify-between rounded-xl border border-rcl-blue/15 bg-rcl-blue/[.04] px-4 py-3"><span className="text-xs font-black uppercase tracking-wider text-rcl-blue">Post permalink</span><Link href="/social" className="inline-flex items-center gap-2 text-xs font-black uppercase text-white/45"><FaArrowLeft/> Back to feed</Link></div>}
 
             {!focusPostId && <div className="rch-timeline-filters">
-              <div className="rcl-feed-mode-tabs grid grid-cols-2">
+              <div className="rcl-feed-mode-tabs grid grid-cols-3">
                 <FeedModeButton active={mode === 'for-you'} onClick={() => { setMode('for-you'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'for-you' }); }}>For You</FeedModeButton>
+                <FeedModeButton active={mode === 'latest'} onClick={() => { setMode('latest'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'latest' }); }}>Members</FeedModeButton>
                 <FeedModeButton active={mode === 'following'} onClick={() => { setMode('following'); void trackActivity('feed_mode_changed', 'feed', undefined, { mode: 'following' }); }}>Following</FeedModeButton>
               </div>
               <select aria-label="More timeline filters" className="rch-timeline-more" value={mode === 'trending' || mode === 'courtside' ? mode : ''} onChange={event => {
@@ -693,7 +732,7 @@ export default function NetworkHome() {
 
             {!focusPostId && <section className="rch-pulse-compose-strip" aria-label="Create a post">
               <button type="button" onClick={openComposer} aria-label="Open post composer"><SocialIdentity author={currentProfile ?? { display_name: user ? 'RCH Member' : 'Guest', username: null }} compact link={false}/></button>
-              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>Share your game…</button>
+              <button type="button" className="rch-pulse-compose-prompt" onClick={openComposer}>Post a clip, ask a hoops question, or introduce yourself…</button>
               <button type="button" className="rch-pulse-compose-media" onClick={openComposer} aria-label="Create a photo or video post"><FaImage aria-hidden="true"/></button>
             </section>}
 
