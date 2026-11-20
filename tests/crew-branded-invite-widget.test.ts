@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8');
 describe('branded crew invite sharing', () => {
  it('routes crew share actions to a dedicated invite page instead of the generic /crews query', () => {
   const page = read('src/app/crews/page.tsx');
-  const invite = read('src/lib/crew-invite.ts');
+  const invite = read('src/lib/crew-invite-links.ts');
   expect(page).toContain('crewInviteUrl(crew.id)');
   expect(page).toContain('<CrewInviteWidget');
   expect(invite).toContain("return '/crews/invite/' + encodeURIComponent(id)");
