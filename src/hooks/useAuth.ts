@@ -38,7 +38,7 @@ function getAuthErrorMessage(error: unknown, fallback: string) {
   if (code === 'user_already_exists' || message.includes('already registered')) {
     return 'This email already has an account. Try signing in or resetting your password.';
   }
-  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') {
+  if (status === 429 || code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit' || message.includes('rate limit')) {
     return 'Too many attempts. Please wait a few minutes before trying again.';
   }
   if (code === 'signup_disabled') return 'New account registration is temporarily paused. Please contact the league.';
@@ -289,10 +289,14 @@ export function useAuth() {
   const resendConfirmation = async (email: string) => {
     if (!supabase) throw new Error(getSupabaseUnavailableMessage());
     setError(null);
-    const { error } = await supabase.auth.resend({ type: 'signup', email });
-    if (error) {
-      setError('Unable to resend the email confirmation. Please try again later.');
-      throw error;
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim() });
+      if (error) throw error;
+      // Supabase accepting a request does not prove that an inbox received it.
+    } catch (err) {
+      const safeMessage = getAuthErrorMessage(err, 'Unable to request another confirmation email. Please try again later or contact support.');
+      setError(safeMessage);
+      throw new Error(safeMessage);
     }
   };
 
