@@ -36,6 +36,20 @@ type FeedContext = {
  * not engaging. Keep ranking explainable and allow chronological/following
  * views alongside the personalized feed.
  */
+/** Genuine recent member contributions deserve visibility over scheduled posts.
+ * This is a presentation signal only; publication access still comes from RLS.
+ */
+export function isRecentMemberPost(
+  post: { is_automated?: boolean; created_at: string },
+  now = Date.now(),
+): boolean {
+  const createdAt = Date.parse(post.created_at);
+  return post.is_automated === false
+    && Number.isFinite(createdAt)
+    && createdAt <= now
+    && createdAt >= now - 7 * 86_400_000;
+}
+
 export function scoreSocialPost(post: SocialFeedPost, context: FeedContext) {
   const now = context.now ?? Date.now();
   const ageHours = Math.max(0, (now - new Date(post.created_at).getTime()) / 3_600_000);
