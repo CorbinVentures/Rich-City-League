@@ -168,7 +168,7 @@ export default async function EmailVerificationAdminPage() {
       <Link href="/admin" className="text-sm font-semibold text-sky-300">← Administration</Link>
       <p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-rcl-orange">Rich City Hoops · Membership operations</p>
       <h1 className="mt-3 font-display text-4xl font-black uppercase sm:text-5xl">Email verification desk</h1>
-      <p className="mt-4 max-w-4xl text-sm leading-7 text-white/70">Review accounts created in the last {DAYS} days that still have an unconfirmed email. A recorded send time and an email provider's “delivered” status are not proof the member saw the message.</p>
+      <p className="mt-4 max-w-4xl text-sm leading-7 text-white/70">Review accounts created in the last {DAYS} days that still have an unconfirmed email. A recorded send time and an email provider&apos;s “delivered” status are not proof the member saw the message.</p>
 
       {error && <p role="alert" className="mt-8 rounded-xl border border-amber-300/30 p-5 text-amber-100">{error}</p>}
       {report && provider && <>
@@ -221,7 +221,7 @@ export default async function EmailVerificationAdminPage() {
           </table>
         </div>
         {report.members.length > members.length && <p className="mt-3 text-xs text-white/50">Showing the newest 100 pending accounts.</p>}
-        <p className="mt-3 text-xs text-white/50">Provider lookup is limited to the most recent 500 emails. “Not found” does not mean no message was sent. The delivery status is the provider's latest recorded event, not inbox placement.</p>
+        <p className="mt-3 text-xs text-white/50">Provider lookup is limited to the most recent 500 emails. “Not found” does not mean no message was sent. The delivery status is the provider&apos;s latest recorded event, not inbox placement.</p>
       </>}
 
       <section className="mt-10 rounded-2xl border border-white/10 bg-[#101d2b] p-6">
