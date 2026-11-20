@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
-import {crewInviteUrl, loadCrewInvite} from '@/lib/crew-invite';
+import {loadCrewInvite} from '@/lib/crew-invite';
+import {crewInviteUrl} from '@/lib/crew-invite-links';
 
 // Fresh server metadata is important when a captain updates their crew's identity.
 export const dynamic = 'force-dynamic';
