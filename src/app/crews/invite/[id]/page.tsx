@@ -9,8 +9,8 @@ type Props = {params: Promise<{id: string}>};
 export default async function CrewInvitePage({params}: Props) {
  const {id} = await params;
  const result = await loadCrewInvite(id);
- if (result.status === 'missing') notFound();
- if (result.status === 'unavailable') {
+ if (result.status !== 'found') {
+  if (result.status === 'missing') notFound();
   return <main className="grid min-h-[70vh] place-items-center bg-[#060d16] px-5 text-white">
    <section className="w-full max-w-lg rounded-2xl border border-[#415d72] bg-[#102234] p-8 text-center">
     <h1 className="text-2xl font-black">Crew invite temporarily unavailable</h1>
