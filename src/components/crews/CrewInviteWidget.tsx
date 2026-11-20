@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {FaArrowUpRightFromSquare, FaShareNodes} from 'react-icons/fa6';
-import {crewInvitePath} from '@/lib/crew-invite';
+import {crewInvitePath} from '@/lib/crew-invite-links';
 
 type Props = {
  id: string;
