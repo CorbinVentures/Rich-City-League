@@ -14,7 +14,7 @@ import { CourtDominion } from '@/components/runs/CourtDominion';
 import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
 import { CrewCreatorFlow } from '@/components/crews/CrewCreatorFlow';
 import { CrewInviteWidget } from '@/components/crews/CrewInviteWidget';
-import { crewInviteUrl } from '@/lib/crew-invite';
+import { crewInviteUrl } from '@/lib/crew-invite-links';
 import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import { getSupabaseClient } from '@/lib/supabase';
 import '../rch-identity.css';
