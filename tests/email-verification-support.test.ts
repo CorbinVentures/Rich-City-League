@@ -27,7 +27,7 @@ describe('RCH email verification and recovery', () => {
 
   it('checks a fresh admin session, verified identity and MFA before using the service role', () => {
     expect(admin).toContain('await requireVerifiedAdmin();');
-    expect(admin).toContain('auth.auth.getUser()');
+    expect(admin).toContain('client.auth.getUser()');
     expect(admin).toContain('user.email_confirmed_at');
     expect(admin).toContain("assurance?.currentLevel !== 'aal2'");
     expect(admin).toContain("profile?.role !== 'admin'");
