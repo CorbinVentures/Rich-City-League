@@ -13,6 +13,8 @@ import { CrewPowerBoard } from '@/components/crews/CrewPowerBoard';
 import { CourtDominion } from '@/components/runs/CourtDominion';
 import { CrewLogoStudio } from '@/components/crews/CrewLogoStudio';
 import { CrewCreatorFlow } from '@/components/crews/CrewCreatorFlow';
+import { CrewInviteWidget } from '@/components/crews/CrewInviteWidget';
+import { crewInviteUrl } from '@/lib/crew-invite';
 import { saveCrewLogo } from '@/lib/crew-logo-storage';
 import { getSupabaseClient } from '@/lib/supabase';
 import '../rch-identity.css';
@@ -109,11 +111,14 @@ function CrewsView(){
     finally{setBusy('');}
   };
   const share=async(crew:Crew)=>{
-    const url=window.location.origin+'/crews?crew='+encodeURIComponent(crew.id);
+    const url=crewInviteUrl(crew.id);
     try{
-      if(navigator.share)await navigator.share({title:crew.name+' · RCH Crews',text:'Join our basketball crew on Rich City Hoops. Run with us and compete for the Commonwealth Cup.',url});
-      else{await navigator.clipboard.writeText(url);setNotice('Crew invitation link copied.');}
-    }catch{/* Share sheet dismissed. */}
+      if(navigator.share)await navigator.share({title:crew.name+' · RCH Crews',text:'Join '+crew.name+' on Rich City Hoops. View our crew and request to join.',url});
+      else{await navigator.clipboard.writeText(url);setNotice(crew.name+' branded crew invitation link copied.');}
+    }catch(err){
+      // A cancelled share sheet is not an error.
+      if(err instanceof Error&&err.name!=='AbortError')setError('Could not share the invitation. Please try again.');
+    }
   };
   const upload=async()=>{
     if(!logoDraft||!myCrew||!db||!captain)return;
@@ -206,7 +211,7 @@ function CrewsView(){
           <p className="mt-2 text-sm text-[#d0d1d4]">Find a player or send your invite link.</p>
           <div className="mt-5 flex gap-2"><input aria-label="Teammate username" value={lookup} onChange={e=>{setLookup(e.target.value);setMatch(null);}} placeholder="@username" className="min-w-0 flex-1 rounded-xl border border-[#3b6996] bg-[#091725] p-3 text-sm text-white placeholder:text-[#9bbbd4]"/><button onClick={()=>void search()} disabled={!!busy||lookup.trim().length<2} className="rounded-xl bg-[#285e8a] px-4 text-xs font-black">Find</button></div>
           {match&&<div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-[#113653] p-3 text-sm"><span>{match.display_name||match.username} @{match.username}</span><button disabled={!!busy||match.id===user?.id} className="rounded-lg bg-[#68baff] px-3 py-2 text-xs font-black text-[#061526]" onClick={()=>void execute('commonwealth_invite_player',{p_crew:myCrew.id,p_player:match.id},'Invite sent. They can accept in Crews HQ.')}>Send invite</button></div>}
-          <button onClick={()=>void share(myCrew)} className="mt-5 inline-flex items-center gap-2 rounded-xl border border-[#436e95] px-4 py-3 text-xs font-black"><FaShareNodes/> Share crew invite link</button>
+          <CrewInviteWidget id={myCrew.id} name={myCrew.name} city={myCrew.city} motto={myCrew.motto} homeCourt={myCrew.home_court_slug||null} logoUrl={logo(myCrew)} onShare={()=>void share(myCrew)}/>
           
         </section>
       </div>}
