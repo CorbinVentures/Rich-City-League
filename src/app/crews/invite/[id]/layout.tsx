@@ -9,11 +9,10 @@ type Props = {children: React.ReactNode; params: Promise<{id: string}>};
 export async function generateMetadata({params}: Omit<Props, 'children'>): Promise<Metadata> {
  const {id} = await params;
  const result = await loadCrewInvite(id);
- if (result.status === 'missing') {
-  return {title: 'Crew invite not found | Rich City Hoops', robots: {index: false, follow: false}};
- }
- if (result.status === 'unavailable') {
-  return {title: 'RCH Crews invitation', robots: {index: false, follow: false}};
+ if (result.status !== 'found') {
+  return result.status === 'missing'
+   ? {title: 'Crew invite not found | Rich City Hoops', robots: {index: false, follow: false}}
+   : {title: 'RCH Crews invitation', robots: {index: false, follow: false}};
  }
  const {crew} = result;
  const url = crewInviteUrl(id);
