@@ -49,7 +49,7 @@ export default function VerifyEmailPage() {
       <span className="grid h-12 w-12 place-items-center rounded-2xl bg-rcl-blue/10 text-rcl-blue"><FaEnvelope /></span>
       <p className="mt-6 text-xs font-black uppercase tracking-[.22em] text-rcl-orange">EMAIL VERIFICATION</p>
       <h1 className="mt-2 font-display text-3xl font-black uppercase sm:text-4xl">Confirm your email</h1>
-      <p className="mt-3 text-sm leading-6 text-white/65">Your email confirmation protects your account. If you haven't received it, try one fresh request below.</p>
+      <p className="mt-3 text-sm leading-6 text-white/65">Your email confirmation protects your account. If you haven&apos;t received it, try one fresh request below.</p>
 
       <label className="mt-7 block text-xs font-black uppercase tracking-wider text-white/65" htmlFor="verify-email">Email address</label>
       <input id="verify-email" required type="email" autoComplete="email" value={email || user?.email || ''} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-white/20 bg-black/35 px-4 py-3 text-sm font-normal text-white outline-none transition focus:border-rcl-blue/55" />
@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
       <h2 className="text-lg font-black text-white">Still not seeing it?</h2>
       <p className="mt-3">In Gmail, search All Mail for <strong className="break-all text-white">{SENDER}</strong> or the subject <strong className="text-white">Confirm your email address</strong>. Also check Spam and Promotions.</p>
       <p className="mt-3">A delivery-provider status of “delivered” means the mail server accepted the message, not that it landed in your inbox.</p>
-      <p className="mt-3">If it still doesn't appear, <a className="font-bold text-rcl-blue underline underline-offset-4" href="mailto:info@richcityhoops.com?subject=RCH%20email%20verification%20support">contact RCH support</a>. Never send your password or verification links. Our team can review an account recovery request without automatically bypassing email ownership checks.</p>
+      <p className="mt-3">If it still doesn&apos;t appear, <a className="font-bold text-rcl-blue underline underline-offset-4" href="mailto:info@richcityhoops.com?subject=RCH%20email%20verification%20support">contact RCH support</a>. Never send your password or verification links. Our team can review an account recovery request without automatically bypassing email ownership checks.</p>
     </section>
   </AuthShell>;
 }
