@@ -8,12 +8,12 @@ const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'
 const int=(n:number)=>new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n);
 const fieldGroups:{heading:string;items:BudgetField[]}[]=[
  {heading:'Registration & projected income',items:['teams','entryFee','spectators','ticketPrice','sponsors','vendors','vendorFee','days','games']},
- {heading:'Jerseys, belts & tournament operations',items:['jerseysPerTeam','jerseyUnitCost','beltCount','beltCost','venueRental','venueStaff','officials','media','dj','otherAwards']},
+ {heading:'Jerseys, belts & tournament operations',items:['jerseysPerTeam','jerseyUnitCost','beltCount','beltCost','venueRental','venueStaff','officialUnits','officialRate','media','dj','otherAwards']},
  {heading:'Event expenses & allowances',items:['insurance','security','marketing','equipment','permits','otherStaff','contingencyRate','processingRate']},
 ];
 const fieldLabels:Record<BudgetField,string>={
  teams:'Players / teams (#)',entryFee:'Registration fee ($)',spectators:'Paid spectators (estimated #)',ticketPrice:'Ticket price ($)',sponsors:'Sponsorships (estimated $)',vendors:'Vendors (estimated #)',vendorFee:'Vendor fee ($)',days:'Event days',games:'Budgeted games (#)',
- jerseysPerTeam:'Jerseys per team / player',jerseyUnitCost:'All-in jersey unit cost ($)',beltCount:'Belts per event (#)',beltCost:'Belt cost each ($)',venueRental:'Gym rental total ($)',venueStaff:'Venue staffing total ($)',officials:'Referee payments total ($)',media:'Media / video total ($)',dj:'DJ / sound ($)',otherAwards:'Additional awards ($)',
+ jerseysPerTeam:'Jerseys per team / player',jerseyUnitCost:'All-in jersey unit cost ($)',beltCount:'Belts per event (#)',beltCost:'Belt cost each ($)',venueRental:'Gym rental total ($)',venueStaff:'Venue staffing total ($)',officialUnits:'Billable referee units (hour or game)',officialRate:'Referee fee per billable unit ($)',media:'Media / video total ($)',dj:'DJ / sound ($)',otherAwards:'Additional awards ($)',
  insurance:'Insurance ($)',security:'Security ($)',marketing:'Marketing ($)',equipment:'Equipment ($)',permits:'Permits / admin ($)',otherStaff:'Other event staff ($)',contingencyRate:'Contingency (decimal)',processingRate:'Processing (decimal)'
 };
 const inputClass='w-full rounded-lg border border-white/15 bg-[#10151d] px-3 py-2 text-sm text-white outline-none focus:border-white/50';
@@ -60,6 +60,7 @@ export function CommandEventBudgets2027(){
   if(plan.event_key==='cup'&&plan.assumptions.jerseysPerTeam!==5)return 'The Cup allocation is confirmed at 5 jerseys per team.';
   if(plan.event_key==='shootout'&&plan.assumptions.jerseysPerTeam!==12)return 'The Shootout allocation is confirmed at 12 jerseys per team.';
   if(['cup','shootout'].includes(plan.event_key)&&plan.assumptions.jerseyUnitCost>9)return 'The confirmed all-inclusive jersey cap is $9.';
+  if(plan.assumptions.officialRate>20)return 'Referee rate is capped at $20 per referee per billable unit (hour or game as agreed).';
   if(plan.cash_prize!==null&&(!Number.isFinite(plan.cash_prize)||plan.cash_prize<0))return 'Enter a valid cash prize or leave it TBD.';
   return null;
  };
