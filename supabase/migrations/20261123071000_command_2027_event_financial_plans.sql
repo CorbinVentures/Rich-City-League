@@ -13,6 +13,7 @@ create table if not exists public.rcl_command_event_financial_plans (
  created_at timestamptz not null default now(),
  updated_at timestamptz not null default now(),
  unique (year,event_key),
+ constraint rch_referee_cap check ((assumptions->>'officialRate')::numeric <= 20),
  constraint rch_jersey_cap check (event_key not in ('cup','shootout') or (assumptions->>'jerseyUnitCost')::numeric <= 9)
 );
 alter table public.rcl_command_event_financial_plans enable row level security;
