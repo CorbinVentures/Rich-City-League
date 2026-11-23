@@ -1,6 +1,7 @@
+import type { Metadata } from 'next';
 import { RCHAudienceJoinPage } from '@/components/RCHAudienceJoinPage';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Richmond Pickup Basketball Players',
   description: 'Find Richmond pickup basketball runs, meet local players and crews, and build a public basketball profile with Rich City Hoops across Virginia.',
   alternates: { canonical: '/join/players' },
