@@ -5,6 +5,12 @@ import { join } from 'node:path';
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8');
 
 describe('SEO robots and noindex alignment', () => {
+  it('uses the www canonical host in Richmond basketball structured data', () => {
+    const page = read('src/app/richmond-basketball-league/page.tsx');
+    expect(page).toContain("url:'https://www.richcityhoops.com/richmond-basketball-league'");
+    expect(page).not.toContain("url:'https://richcityhoops.com/richmond-basketball-league'");
+  });
+
   it('allows crawlers to read noindex metadata on linked auth and account routes', () => {
     const robots = read('src/app/robots.ts');
 
