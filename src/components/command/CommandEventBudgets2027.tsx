@@ -2,6 +2,7 @@
 import { useCallback,useEffect,useMemo,useState } from 'react';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { BUDGET_FIELDS,calculateEventBudget,EVENT_KEYS,INITIAL_EVENT_BUDGETS,NON_CONFIRMED_REVENUE_NOTE,type BudgetField,type EventBudgetPlan,type EventKey } from '@/lib/command/event-budgets-2027';
 
 const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n);
@@ -20,7 +21,7 @@ const inputClass='w-full rounded-lg border border-white/15 bg-[#10151d] px-3 py-
 type Notice={message:string;error:boolean}|null;
 
 export function CommandEventBudgets2027(){
- const db=useMemo(()=>getSupabaseClient(),[]);
+ const db=useMemo(()=>getSupabaseClient() as unknown as SupabaseClient<any>|null,[]);
  const [plans,setPlans]=useState<EventBudgetPlan[]>([]);
  const [selectedKey,setSelectedKey]=useState<EventKey>('cup');
  const [draft,setDraft]=useState<EventBudgetPlan|null>(null);
