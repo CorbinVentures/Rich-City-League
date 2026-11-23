@@ -1,7 +1,7 @@
 /** Planned 2027 RCH event financial scenarios. No projected amount is an actual receipt. */
 export const EVENT_KEYS = ["bmf","cup","tryouts","shootout","full_team"] as const;
 export type EventKey = typeof EVENT_KEYS[number];
-export const BUDGET_FIELDS = ["teams","entryFee","spectators","ticketPrice","sponsors","vendors","vendorFee","days","games","jerseysPerTeam","beltCount","venueRental","venueStaff","officials","media","dj","otherAwards","insurance","security","marketing","equipment","permits","otherStaff","contingencyRate","processingRate","beltCost","jerseyUnitCost"] as const;
+export const BUDGET_FIELDS = ["teams","entryFee","spectators","ticketPrice","sponsors","vendors","vendorFee","days","games","jerseysPerTeam","beltCount","venueRental","venueStaff","officialUnits","officialRate","media","dj","otherAwards","insurance","security","marketing","equipment","permits","otherStaff","contingencyRate","processingRate","beltCost","jerseyUnitCost"] as const;
 export type BudgetField = typeof BUDGET_FIELDS[number];
 export type BudgetAssumptions = Record<BudgetField,number>;
 export type EventBudgetPlan = { id:string;year:number;event_key:EventKey;name:string;event_count:number;cash_prize:number|null;notes:string;assumptions:BudgetAssumptions;updated_at?:string };
@@ -27,7 +27,8 @@ export const INITIAL_EVENT_BUDGETS:SeedBudget[] = [
       "beltCount": 1,
       "venueRental": 510,
       "venueStaff": 240,
-      "officials": 240,
+      "officialUnits": 12,
+      "officialRate": 20,
       "media": 300,
       "dj": 150,
       "otherAwards": 0,
@@ -63,7 +64,8 @@ export const INITIAL_EVENT_BUDGETS:SeedBudget[] = [
       "beltCount": 1,
       "venueRental": 1700,
       "venueStaff": 400,
-      "officials": 800,
+      "officialUnits": 40,
+      "officialRate": 20,
       "media": 800,
       "dj": 300,
       "otherAwards": 200,
@@ -99,7 +101,8 @@ export const INITIAL_EVENT_BUDGETS:SeedBudget[] = [
       "beltCount": 0,
       "venueRental": 340,
       "venueStaff": 160,
-      "officials": 0,
+      "officialUnits": 0,
+      "officialRate": 20,
       "media": 200,
       "dj": 0,
       "otherAwards": 0,
@@ -135,7 +138,8 @@ export const INITIAL_EVENT_BUDGETS:SeedBudget[] = [
       "beltCount": 1,
       "venueRental": 2720,
       "venueStaff": 640,
-      "officials": 920,
+      "officialUnits": 46,
+      "officialRate": 20,
       "media": 1150,
       "dj": 300,
       "otherAwards": 250,
@@ -171,7 +175,8 @@ export const INITIAL_EVENT_BUDGETS:SeedBudget[] = [
       "beltCount": 1,
       "venueRental": 1360,
       "venueStaff": 320,
-      "officials": 920,
+      "officialUnits": 46,
+      "officialRate": 20,
       "media": 1150,
       "dj": 150,
       "otherAwards": 250,
@@ -194,7 +199,7 @@ export function calculateEventBudget(plan:Pick<EventBudgetPlan,'assumptions'|'ev
  const registration=a.teams*a.entryFee;const gate=a.spectators*a.ticketPrice;const sponsorship=a.sponsors;const vendors=a.vendors*a.vendorFee;
  const revenue=registration+gate+sponsorship+vendors;
  const jerseys=a.teams*a.jerseysPerTeam*a.jerseyUnitCost;const belts=a.beltCount*a.beltCost;
- const direct=jerseys+belts+a.venueRental+a.venueStaff+a.officials+a.media+a.dj+a.otherAwards+a.insurance+a.security+a.marketing+a.equipment+a.permits+a.otherStaff;
+ const direct=jerseys+belts+a.venueRental+a.venueStaff+a.officialUnits*a.officialRate+a.media+a.dj+a.otherAwards+a.insurance+a.security+a.marketing+a.equipment+a.permits+a.otherStaff;
  const contingency=direct*a.contingencyRate;const processing=revenue*a.processingRate;
  const expenses=direct+contingency+processing;const prePrizeProfit=revenue-expenses;
  const netProfit=plan.cash_prize===null?null:prePrizeProfit-plan.cash_prize;
