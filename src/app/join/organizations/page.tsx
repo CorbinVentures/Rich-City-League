@@ -1,6 +1,7 @@
+import type { Metadata } from 'next';
 import { RCHAudienceJoinPage } from '@/components/RCHAudienceJoinPage';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Basketball Organization Websites & Tools',
   description: 'Build your basketball organization’s online presence and explore scheduling, registration and community tools for programs across Virginia.',
   alternates: { canonical: '/join/organizations' },
