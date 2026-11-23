@@ -1,6 +1,7 @@
+import type { Metadata } from 'next';
 import { RCHAudienceJoinPage } from '@/components/RCHAudienceJoinPage';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Basketball Coaches Network in Virginia',
   description: 'Connect with Richmond and Virginia basketball athletes, discover local opportunities, and build a coaching profile with Rich City Hoops.',
   alternates: { canonical: '/join/coaches' },
