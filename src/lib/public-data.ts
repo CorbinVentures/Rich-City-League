@@ -107,8 +107,9 @@ export async function getPublishedNews(limit = 100): Promise<PublicNews[]> {
 
 export async function getNewsBySlug(slug: string): Promise<PublicNews | null> {
   if (slug === founderInterview.slug) return founderInterview;
+  if (!slug) return null;
   const client = getPublicClient() as any;
-  if (!client || !slug) return null;
+  if (!client) throw new Error('Public news service is temporarily unavailable.');
   const { data, error } = await client.from('news')
     .select('*')
     .eq('status', 'published')
@@ -116,15 +117,18 @@ export async function getNewsBySlug(slug: string): Promise<PublicNews | null> {
     .maybeSingle();
   if (error) {
     console.error('News detail query failed', error);
-    return null;
+    throw new Error('News article availability could not be verified.');
   }
   return (data ?? null) as PublicNews | null;
 }
 
-export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
+export async function getLeagueSnapshot(options: { strictCore?: boolean } = {}): Promise<LeagueSnapshot> {
   const empty: LeagueSnapshot = { leagues: [], seasons: [], divisions: [], teams: [], teamSeasons: [], games: [], standings: [], news: [founderInterview] as LeagueSnapshot['news'], venues: [] };
   const client = getPublicClient();
-  if (!client) return empty;
+  if (!client) {
+    if (options.strictCore) throw new Error('Public league game data is temporarily unavailable.');
+    return empty;
+  }
 
   const [leagues, seasons, divisions, teams, teamSeasons, games, standings, news, venues] = await Promise.all([
     client.from('leagues').select('*').eq('is_active', true).order('name'),
@@ -139,6 +143,11 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
   ]);
 
   const results = [leagues, seasons, divisions, teams, teamSeasons, games, standings, news, venues];
+  const coreError = [teams, games].find((result) => result.error)?.error;
+  if (options.strictCore && coreError) {
+    console.error('Public league game detail query failed', coreError);
+    throw new Error('Public league game data is temporarily unavailable.');
+  }
   const firstError = results.find((result) => result.error)?.error;
   if (firstError) console.error('Public league snapshot query failed; serving partial data', firstError);
 
@@ -159,7 +168,7 @@ export async function getLeagueSnapshot(): Promise<LeagueSnapshot> {
 
 export async function getTeamDetail(slug: string): Promise<TeamDetailData | null> {
   const client = getPublicClient();
-  if (!client) return null;
+  if (!client) throw new Error('Public team data is temporarily unavailable.');
   const slugResult = await client.from('teams').select('*').eq('slug', slug).eq('is_active', true).maybeSingle() as unknown as { data: Team | null; error: { message: string } | null };
   const teamResult = slugResult.data || slugResult.error
     ? slugResult
@@ -167,7 +176,7 @@ export async function getTeamDetail(slug: string): Promise<TeamDetailData | null
   const { data: team, error: teamError } = teamResult;
   if (teamError) {
     console.error('Public team query failed', teamError);
-    return null;
+    throw new Error('Public team availability could not be verified.');
   }
   if (!team) return null;
   const results = await Promise.all([
@@ -207,12 +216,12 @@ export async function getTeamDetail(slug: string): Promise<TeamDetailData | null
 
 export async function getPlayerDetail(id: string): Promise<PlayerDetailData | null> {
   const client = getPublicClient();
-  if (!client) return null;
+  if (!client) throw new Error('Public player data is temporarily unavailable.');
   const playerResult = await client.from('public_players').select('*').eq('id', id).maybeSingle() as unknown as { data: PublicPlayer | null; error: { message: string } | null };
   const { data: player, error: playerError } = playerResult;
   if (playerError) {
     console.error('Public player query failed', playerError);
-    return null;
+    throw new Error('Public player availability could not be verified.');
   }
   if (!player) return null;
   const [rosterResult, statsResult, iqResult, iqHistoryResult] = await Promise.all([

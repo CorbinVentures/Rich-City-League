@@ -7,8 +7,23 @@ import { LeagueJoinRegistration } from '@/components/LeagueJoinRegistration';
 import { RCL_PRO_SEASON } from '@/lib/rcl-pro-season';
 
 export const metadata: Metadata = {
-  title:'Join Rich City League | Your Basketball Path | Rich City Hoops',
-  description:'Join Rich City Hoops free now. Rich City League professional play is planned for November 2027, with official summer 2027 tryouts and Draft Night beforehand.',
+  title: 'Join Rich City League | Your Basketball Path',
+  description: 'Join Rich City Hoops free now. Rich City League professional play is planned for November 2027, with official summer 2027 tryouts and Draft Night beforehand.',
+  alternates: { canonical: '/league/join' },
+  openGraph: {
+    type: 'website',
+    url: '/league/join',
+    title: 'Join Rich City League | Your Basketball Path',
+    description: 'Join Rich City Hoops free now. Rich City League professional play is planned for November 2027, with official summer 2027 tryouts and Draft Night beforehand.',
+    siteName: 'Rich City Hoops',
+    images: [{ url: 'https://www.richcityhoops.com/opengraph-image?v=20261014', width: 1200, height: 630, alt: 'Rich City Hoops — Virginia basketball community' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Join Rich City League | Your Basketball Path',
+    description: 'Join Rich City Hoops free now. Rich City League professional play is planned for November 2027, with official summer 2027 tryouts and Draft Night beforehand.',
+    images: ['https://www.richcityhoops.com/opengraph-image?v=20261014'],
+  },
 };
 
 const worlds = [
@@ -36,36 +51,18 @@ export default function JoinRichCityLeaguePage(){
    <div className="mt-5 flex flex-wrap gap-3">
     <Link href="/auth/sign-up?next=%2Fsocial" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-rcl-orange px-5 text-sm font-bold text-black">Join RCH free <FaArrowRight aria-hidden="true"/></Link>
     <Link href="/register" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Check league registration</Link>
-    <Link href="/league/rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">Proposed league rules</Link>
+    <Link href="/league/rules" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-bold">League rules</Link>
    </div>
-   <section aria-label="Four basketball destinations" className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {worlds.map(({title,subtitle,href,program})=><Link href={href} key={href} className="flex min-h-28 flex-col gap-2 rounded-xl border border-white/15 bg-white/[.035] p-3 transition hover:border-rcl-orange/50 focus-visible:outline focus-visible:outline-2">
-      <ProgramEmblem program={program as ProgramEmblemId} className="rch-program-emblem-journey"/>
-      <strong className="text-sm">{title}</strong><span className="text-xs leading-4 text-white/55">{subtitle}</span>
-    </Link>)}
+   <div className="mt-8 grid gap-4 sm:grid-cols-2">
+    {worlds.map(world=><Link key={world.href} href={world.href} className="rounded-2xl border border-white/10 bg-white/[.03] p-5 hover:border-rcl-blue/50"><ProgramEmblem program={world.program as ProgramEmblemId}/><h2 className="mt-3 font-display text-xl font-black uppercase">{world.title}</h2><p className="mt-1 text-sm text-white/55">{world.subtitle}</p></Link>)}
+   </div>
+   <section className="mt-10">
+    <h2 className="font-display text-2xl font-black uppercase">Your path into the league</h2>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+     {path.map(step=><article key={step.number} className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><p className="text-xs font-black tracking-widest text-rcl-orange">{step.number}</p><h3 className="mt-2 font-bold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-white/60">{step.detail}</p><Link href={step.href} className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-rcl-blue">{step.action} <FaArrowRight aria-hidden="true"/></Link></article>)}
+    </div>
    </section>
-   <h2 className="mt-9 text-xl font-bold">How it works</h2>
-   <ol className="mt-3 divide-y divide-white/10 overflow-hidden rounded-xl border border-white/15">
-    {path.map(step=><li key={step.number} className="flex gap-3 p-4 sm:gap-5">
-      <span className="w-8 shrink-0 font-display text-xl font-black text-rcl-orange">{step.number}</span>
-      <div className="min-w-0 flex-1">
-       <h3 className="font-semibold">{step.title}</h3>
-       <p className="mt-1 text-xs leading-5 text-white/60">{step.detail}</p>
-       <Link href={step.href} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-rcl-orange">{step.action} <FaArrowRight aria-hidden="true"/></Link>
-      </div>
-    </li>)}
-   </ol>
-   <LeagueJoinRegistration />
-   <div className="mt-6 rounded-xl border border-white/15 p-4">
-    <h2 className="font-semibold">Build your basketball identity anytime</h2>
-    <p className="mt-1 text-xs leading-5 text-white/60">Post highlights, join conversations, and review XP, REP and badges. Verified results and other qualifying activity follow each system&apos;s existing rules. Playing Runs does not guarantee a tryout, draft selection or rewards.</p>
-    <nav aria-label="Build basketball identity" className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-     <Link className="text-rcl-orange" href="/create/social?mode=clip">Post highlights</Link>
-     <Link className="text-rcl-orange" href="/crews">Find a crew</Link>
-     <Link className="text-rcl-orange" href="/badges">Badges</Link>
-     <Link className="text-rcl-orange" href="/rep">REP</Link>
-    </nav>
-   </div>
+   <LeagueJoinRegistration/>
   </Container>
  </main>;
 }
