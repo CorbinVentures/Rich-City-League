@@ -52,6 +52,7 @@ function mapLibre(){
  }).catch(error=>{loadingMapLibre=null;throw error;});
  return loadingMapLibre;
 }
+type TerritoryPin={slug:string;name:string;crewName:string;defenses:number;latitude:number;longitude:number};
 type Layer='all'|'courts'|'runs'|'battle'|'crown'|'territory'|'double-rep';
 const MAP_SESSION='rch-runs-world3-view-';
 type SavedCamera={center:[number,number];zoom:number;pitch:number;bearing:number;at:number};
