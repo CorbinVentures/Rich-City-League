@@ -394,10 +394,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div><div><small>TERRITORIES</small><strong>{loading?'…':mapTerritoryPins.length}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
-    <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Crew</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
+    <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Territory control</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
-      <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Tap a court to open its game card.</p></div>
+      <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Tap a court or controlled territory to inspect its arena.</p></div>
       <div className="rwg-city-actions">
        <label className="sr-only" htmlFor="rwg-city">Virginia city</label>
        <select id="rwg-city" value={city?.id||''} onChange={e=>{const match=runsAreaOptions.find(c=>c.id===e.target.value);if(match)enterCity(match);else exitCity();}}>
@@ -407,12 +407,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} territories={territoryPins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>{
         const slug=id.replace(/^court:/,'');
         if(city){chooseCourt(slug);return;}
         const found=statewideTerritoryPins.find(pin=>pin.slug===slug);
-        const area=found&&runsAreaOptions.find(option=>localityNames(option).some(locality=>locality.toLowerCase()===found.locality.toLowerCase()));
+        const normalizedLocality=found?.locality.toLowerCase().replace(/\\s+(city|county)$/,'').trim();
+        const area=found&&runsAreaOptions.find(option=>option.name.toLowerCase()===normalizedLocality||localityNames(option).some(locality=>locality.toLowerCase()===found.locality.toLowerCase()||locality.toLowerCase()===normalizedLocality));
         if(area){setPendingTerritorySlug(slug);enterCity(area);}
        }} onOverview={exitCity} territories={mapTerritoryPins}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
