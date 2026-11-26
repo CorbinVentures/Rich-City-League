@@ -231,8 +231,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
 
  useEffect(()=>{
   if(!pendingTerritorySlug||!city||loading)return;
-  if(courts.some(court=>court.slug===pendingTerritorySlug))setSelectedSlug(pendingTerritorySlug);
-  setPendingTerritorySlug(null);
+  if(courts.some(court=>court.slug===pendingTerritorySlug)){
+   setSelectedSlug(pendingTerritorySlug);
+   setPendingTerritorySlug(null);
+  }
  },[pendingTerritorySlug,city?.id,loading,courts]);
 
  useEffect(()=>{
