@@ -16,7 +16,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,buildCrewTerritoryMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun,type CrewTerritoryMapPin} from '@/lib/runs-world-game';
 import './runs-world.css';
 import {RunsTutorialsModal} from '@/components/runs/RunsTutorialsModal';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
@@ -27,7 +27,6 @@ import {RunsCourtPreview,type CertifiedCourtBelt} from '@/components/runs/RunsCo
 
 type Screen='home'|'world'|'battle'|'season'|'missions'|'vault'|'player'|'crew';
 type Territory={court_slug:string;crew_id:string;successful_defenses:number};
-type TerritoryMapPin={slug:string;name:string;locality:string;crewName:string;defenses:number;latitude:number;longitude:number};
 type Master={division:string;player_name:string;is_master:boolean;games:number;wins:number};
 type CourtStats={masters:Master[];belts:CertifiedCourtBelt[];crewName:string|null;crewLogoPath:string|null;defenses:number;loading:boolean};
 type Passport={run_rep:number;verified_games:number;badges:string[];last_results:{verified_at:string;court_name?:string;game_format?:string;won?:boolean;rating_before?:number;rating_after?:number}[]};
@@ -72,7 +71,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [runs,setRuns]=useState<WorldRun[]>([]);
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
- const [statewideTerritoryPins,setStatewideTerritoryPins]=useState<TerritoryMapPin[]>([]);
+ const [statewideTerritoryPins,setStatewideTerritoryPins]=useState<CrewTerritoryMapPin[]>([]);
  const [pendingTerritorySlug,setPendingTerritorySlug]=useState<string|null>(null);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
@@ -225,14 +224,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    if(courtResult.error){setStatewideTerritoryPins([]);return;}
    const courts=(courtResult.data||[]) as WorldCourt[];
    const names=Object.fromEntries(((crewResult.data||[]) as {id:string;name:string}[]).map(row=>[row.id,row.name]));
-   const bySlug=new Map(courts.filter(playableCourt).map(court=>[court.slug,court]));
-   setStatewideTerritoryPins(rows.flatMap(row=>{
-    const court=bySlug.get(row.court_slug);
-    if(!court||!Number.isFinite(court.latitude)||!Number.isFinite(court.longitude))return [];
-    return [{slug:row.court_slug,name:court.name,locality:court.locality,
-      crewName:names[row.crew_id]||'Controlling Crew',defenses:row.successful_defenses,
-      latitude:court.latitude as number,longitude:court.longitude as number}];
-   }));
+   setStatewideTerritoryPins(buildCrewTerritoryMapPins(rows,courts,names));
   })().catch(()=>{if(alive)setStatewideTerritoryPins([]);});
   return()=>{alive=false;};
  },[db,pulse]);
@@ -329,10 +321,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
   doubleRepRuns:featured
  }),[courts,runs,territories,worldPulse,featured]);
- const territoryPins=useMemo(()=>territories.map(t=>{const court=courts.find(c=>c.slug===t.court_slug);return court&&Number.isFinite(court.latitude)&&Number.isFinite(court.longitude)?{
-  slug:t.court_slug,name:court.name,locality:court.locality,crewName:crewNames[t.crew_id]||'Controlling Crew',defenses:t.successful_defenses,
-  latitude:court.latitude as number,longitude:court.longitude as number
- }:null}).filter(Boolean) as TerritoryMapPin[],[territories,courts,crewNames]);
+ const territoryPins=useMemo(()=>buildCrewTerritoryMapPins(territories,courts,crewNames),[territories,courts,crewNames]);
  const mapTerritoryPins=city?territoryPins:statewideTerritoryPins;
  const coverage=useMemo(()=>courtCoverage(courts,runs,pins),[courts,runs,pins]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
