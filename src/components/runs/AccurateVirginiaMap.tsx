@@ -31,7 +31,6 @@ type MapLike={
  remove:()=>void;
 };
 type MapLib={Map:new(options:any)=>MapLike;Marker:new(options?:any)=>{setLngLat:(coord:[number,number])=>{addTo:(map:MapLike)=>MapMarker}};NavigationControl:new(options?:any)=>any};
-type TerritoryPin={slug:string;name:string;crewName:string;defenses:number;latitude:number;longitude:number};
 let loadingMapLibre:Promise<MapLib>|null=null;
 function mapLibre(){
  if(typeof window==='undefined')return Promise.reject(new Error('Map unavailable on the server.'));
@@ -99,7 +98,7 @@ function safeCoordinate(point:AtlasPlace){
 }
 export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateways=VIRGINIA_CITIES,onCitySelect,onPlaceSelect,onOverview,territories=[]}:{
  city:VirginiaCity|null;points:AtlasPlace[];selectedId:string|null;leads?:CommunityCourtLead[];areaGateways?:VirginiaCity[];
- onCitySelect:(city:VirginiaCity)=>void;onPlaceSelect:(id:string)=>void;onOverview:()=>void
+ onCitySelect:(city:VirginiaCity)=>void;onPlaceSelect:(id:string)=>void;onOverview:()=>void;territories?:TerritoryPin[]
 }){
  const container=useRef<HTMLDivElement|null>(null);
  const mapRef=useRef<MapLike|null>(null);
@@ -159,6 +158,11 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     // polygon. This must not be replaced with our old fictional SVG outline.
     try{
      map.addSource('rch-vdot-virginia',{type:'geojson',data:REAL_VIRGINIA_MAP.stateOutline});
+     map.addLayer({id:'rch-vdot-outline',type:'line',source:'rch-vdot-virginia',
+      paint:{'line-color':'#c5c5c5','line-width':['interpolate',['linear'],['zoom'],5,1.7,11,3],
+       'line-opacity':0.85}});
+    }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
+    try{
      map.addSource('rch-crew-territories',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
      map.addLayer({id:'rch-crew-territory-glow',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#9d9d9d','circle-opacity':0.12,'circle-radius':['interpolate',['linear'],['zoom'],7,24,10,38,14,62],'circle-stroke-color':'#eeeeee','circle-stroke-opacity':0.72,'circle-stroke-width':['interpolate',['linear'],['zoom'],7,1.5,14,3]}});
      map.addLayer({id:'rch-crew-territory-core',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#d0d0d0','circle-opacity':0.06,'circle-radius':['interpolate',['linear'],['zoom'],7,10,10,16,14,28]}});
