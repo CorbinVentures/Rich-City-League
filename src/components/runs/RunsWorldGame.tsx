@@ -285,6 +285,10 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
   doubleRepRuns:featured
  }),[courts,runs,territories,worldPulse,featured]);
+ const territoryPins=useMemo(()=>territories.map(t=>{const court=courts.find(c=>c.slug===t.court_slug);return court&&Number.isFinite(court.latitude)&&Number.isFinite(court.longitude)?{
+  slug:t.court_slug,name:court.name,crewName:crewNames[t.crew_id]||'Controlling Crew',defenses:t.successful_defenses,
+  latitude:court.latitude as number,longitude:court.longitude as number
+ }:null}).filter(Boolean) as Array<{slug:string;name:string;crewName:string;defenses:number;latitude:number;longitude:number}>,[territories,courts,crewNames]);
  const coverage=useMemo(()=>courtCoverage(courts,runs,pins),[courts,runs,pins]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
  const areaRuns=useMemo(()=>[...runs].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),[runs]);
@@ -353,7 +357,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    {screen==='world'&&<>
     <div className="rwg-hud" aria-label="Your game-world overview">
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
-     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
+     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div><div><small>TERRITORIES</small><strong>{loading?'…':territoryPins.length}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
     <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Crew</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
@@ -369,7 +373,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
       </div>
      </div>
      <div className="rwg-map-stage">
-      <AccurateVirginiaMap city={city} points={pins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
+      <AccurateVirginiaMap city={city} points={pins} territories={territoryPins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
        onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
