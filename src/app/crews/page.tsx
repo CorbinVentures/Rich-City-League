@@ -232,7 +232,11 @@ function CrewsView(){
         <CrewPowerBoard />
       </details>
       <details id="rch-crew-courts" className="mt-3 scroll-mt-24 rounded-xl border border-[#44484e] bg-[#141618] p-4">
-        <summary className="flex min-h-11 cursor-pointer items-center gap-3 text-lg font-black"><FaCrown className="text-[#ff768c]"/> Territory Battles <FaArrowRight className="ml-auto"/></summary>
+        <summary className="flex min-h-11 cursor-pointer items-center gap-3 text-lg font-black"><FaCrown className="text-[#ff768c]"/> Crews Territory & Takeovers <FaArrowRight className="ml-auto"/></summary>
+        <div className="my-4 rounded-xl border border-[#525252] bg-[#202326] p-4">
+          <p className="text-sm leading-6 text-[#d0d1d4]">View verified crew-controlled courts across Virginia, inspect each controller and defense record, then challenge for control through a real competitive Run.</p>
+          <Link href="/runs?view=world" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#c8102e] px-4 py-3 text-xs font-black text-white"><FaCrown/> OPEN CREWS TERRITORY MAP <FaArrowRight/></Link>
+        </div>
         <CourtDominion showTakeovers />
       </details>
 
