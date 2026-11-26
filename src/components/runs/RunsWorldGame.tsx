@@ -412,7 +412,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
         const slug=id.replace(/^court:/,'');
         if(city){chooseCourt(slug);return;}
         const found=statewideTerritoryPins.find(pin=>pin.slug===slug);
-        const normalizedLocality=found?.locality.toLowerCase().replace(/\\s+(city|county)$/,'').trim();
+        const normalizedLocality=found?.locality.toLowerCase().replace(' city','').replace(' county','').trim();
         const area=found&&runsAreaOptions.find(option=>option.name.toLowerCase()===normalizedLocality||localityNames(option).some(locality=>locality.toLowerCase()===found.locality.toLowerCase()||locality.toLowerCase()===normalizedLocality));
         if(area){setPendingTerritorySlug(slug);enterCity(area);}
        }} onOverview={exitCity} territories={mapTerritoryPins}/>
