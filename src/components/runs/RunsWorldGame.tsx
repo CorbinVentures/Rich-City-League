@@ -72,6 +72,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
  const [statewideTerritoryPins,setStatewideTerritoryPins]=useState<CrewTerritoryMapPin[]>([]);
+ const [statewideTerritoryLoading,setStatewideTerritoryLoading]=useState(false);
  const [pendingTerritorySlug,setPendingTerritorySlug]=useState<string|null>(null);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
@@ -204,13 +205,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  // The statewide world also needs a small, verified territory index. The city
  // loader above stays scoped to one locality for fast court discovery.
  useEffect(()=>{
-  if(!db){setStatewideTerritoryPins([]);return;}
-  let alive=true;
+  if(!db){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
+  let alive=true;setStatewideTerritoryLoading(true);
   void (async()=>{
    const {data:territoryRows,error:territoryError}=await db.from('rch_court_territories')
     .select('court_slug,crew_id,successful_defenses').limit(300);
    if(!alive)return;
-   if(territoryError||!territoryRows?.length){setStatewideTerritoryPins([]);return;}
+   if(territoryError||!territoryRows?.length){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
    const rows=territoryRows as Territory[];
    const slugs=[...new Set(rows.map(row=>row.court_slug))];
    const crewIds=[...new Set(rows.map(row=>row.crew_id))];
@@ -221,11 +222,12 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
     crewIds.length?db.from('commonwealth_crews').select('id,name').in('id',crewIds.slice(0,200)).limit(200):Promise.resolve({data:[],error:null})
    ]);
    if(!alive)return;
-   if(courtResult.error){setStatewideTerritoryPins([]);return;}
+   if(courtResult.error){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
    const courts=(courtResult.data||[]) as WorldCourt[];
    const names=Object.fromEntries(((crewResult.data||[]) as {id:string;name:string}[]).map(row=>[row.id,row.name]));
    setStatewideTerritoryPins(buildCrewTerritoryMapPins(rows,courts,names));
-  })().catch(()=>{if(alive)setStatewideTerritoryPins([]);});
+   setStatewideTerritoryLoading(false);
+  })().catch(()=>{if(alive){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);}});
   return()=>{alive=false;};
  },[db,pulse]);
 
@@ -393,7 +395,7 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    {screen==='world'&&<>
     <div className="rwg-hud" aria-label="Your game-world overview">
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
-     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div><div><small>TERRITORIES</small><strong>{loading?'…':mapTerritoryPins.length}</strong></div>
+     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div><div><small>TERRITORIES</small><strong>{(loading||(!city&&statewideTerritoryLoading))?'…':mapTerritoryPins.length}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
     <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Territory control</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
