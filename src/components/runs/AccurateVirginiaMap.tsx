@@ -15,7 +15,7 @@ const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre
 export type CommunityCourtLead={slug:string;name:string;locality:string;latitude:number;longitude:number};
 type MapMarker={remove:()=>void};
 type MapLike={
- on:(event:string,listener:(e?:any)=>void)=>void;
+ on:(event:string,listenerOrLayer:string|((e?:any)=>void),listener?:(e?:any)=>void)=>void;
  once:(event:string,listener:()=>void)=>void;
  addSource:(id:string,source:any)=>void;
  addLayer:(layer:any)=>void;
@@ -123,7 +123,8 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   try{window.sessionStorage.setItem('rch-runs-world3-map-layer',next);}catch{/* Optional. */}
  };
  const mapped=useMemo(()=>filteredPins(points,layer).filter(safeCoordinate),[points,layer]);
- const territoryCollection=useMemo(()=>({type:'FeatureCollection' as const,features:territories.filter(t=>safeCoordinate({lat:t.latitude,lon:t.longitude} as any)).map(t=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[t.longitude,t.latitude]},properties:{slug:t.slug,name:t.name,crewName:t.crewName,defenses:t.defenses}}))}),[territories]);
+ const visibleTerritories=(layer==='all'||layer==='crown'||layer==='territory')?territories:[];
+ const territoryCollection=useMemo(()=>({type:'FeatureCollection' as const,features:visibleTerritories.filter(t=>safeCoordinate({lat:t.latitude,lon:t.longitude} as any)).map(t=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[t.longitude,t.latitude]},properties:{slug:t.slug,name:t.name,crewName:t.crewName,defenses:t.defenses}}))}),[visibleTerritories]);
  const candidateCollection=useMemo(()=>({type:'FeatureCollection' as const,features:
   (layer==='all'||layer==='courts'?leads:[])
    .filter(l=>Number.isFinite(l.latitude)&&Number.isFinite(l.longitude)&&l.latitude>=36.4&&l.latitude<=39.65&&l.longitude>=-83.85&&l.longitude<=-74.95)
@@ -167,6 +168,10 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
      map.addSource('rch-crew-territories',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
      map.addLayer({id:'rch-crew-territory-glow',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#9d9d9d','circle-opacity':0.12,'circle-radius':['interpolate',['linear'],['zoom'],7,24,10,38,14,62],'circle-stroke-color':'#eeeeee','circle-stroke-opacity':0.72,'circle-stroke-width':['interpolate',['linear'],['zoom'],7,1.5,14,3]}});
      map.addLayer({id:'rch-crew-territory-core',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#d0d0d0','circle-opacity':0.06,'circle-radius':['interpolate',['linear'],['zoom'],7,10,10,16,14,28]}});
+     map.on('click','rch-crew-territory-glow',(event:any)=>{
+      const slug=event?.features?.[0]?.properties?.slug;
+      if(typeof slug==='string'&&slug)callbacks.current.onPlaceSelect('court:'+slug);
+     });
     }catch{/* Territory overlay is optional; court pins remain usable. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
@@ -229,6 +234,16 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     btn.addEventListener('click',()=>callbacks.current.onCitySelect(point));
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([point.lon,point.lat]).addTo(map));
    }
+   if(layer==='all'||layer==='territory'||layer==='crown'){
+    for(const territory of territories){
+     if(!Number.isFinite(territory.latitude)||!Number.isFinite(territory.longitude))continue;
+     const btn=document.createElement('button');btn.type='button';btn.className='rwg-real-pin state-crown rwg-territory-control';
+     btn.textContent='♛';btn.title=territory.crewName+' controls '+territory.name+' · '+territory.defenses+' successful defenses';
+     btn.setAttribute('aria-label',btn.title);
+     btn.addEventListener('click',()=>callbacks.current.onPlaceSelect('court:'+territory.slug));
+     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([territory.longitude,territory.latitude]).addTo(map));
+    }
+   }
   }else{
    for(const point of markerItems){
     const p=point.p;
@@ -241,7 +256,7 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map));
    }
   }
- },[city?.id,markerItems,selectedId,status,areaGateways]);
+ },[city?.id,markerItems,selectedId,status,areaGateways,layer,territories]);
  useEffect(()=>{
   const territorySource=mapRef.current?.getSource('rch-crew-territories');
   if(status==='ready'&&territorySource?.setData)territorySource.setData(territoryCollection);
