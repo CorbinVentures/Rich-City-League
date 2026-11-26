@@ -16,7 +16,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useGravityLocation} from '@/hooks/useGravityLocation';
 import {getSupabaseClient} from '@/lib/supabase';
 import {VIRGINIA_CITIES,type VirginiaCity} from '@/lib/virginia-world';
-import {buildCourtMapPins,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun} from '@/lib/runs-world-game';
+import {buildCourtMapPins,buildCrewTerritoryMapPins,buildCrewTerritoryLeaderboard,readPagedUpcomingRuns,playableCourt,type WorldCourt,type WorldRun,type CrewTerritoryMapPin} from '@/lib/runs-world-game';
 import './runs-world.css';
 import {RunsTutorialsModal} from '@/components/runs/RunsTutorialsModal';
 import {RunsWorldExpansion} from '@/components/runs/RunsWorldExpansion';
@@ -71,6 +71,9 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
  const [runs,setRuns]=useState<WorldRun[]>([]);
  const [featured,setFeatured]=useState<string[]>([]);
  const [territories,setTerritories]=useState<Territory[]>([]);
+ const [statewideTerritoryPins,setStatewideTerritoryPins]=useState<CrewTerritoryMapPin[]>([]);
+ const [statewideTerritoryLoading,setStatewideTerritoryLoading]=useState(false);
+ const [pendingTerritorySlug,setPendingTerritorySlug]=useState<string|null>(null);
  const [crewNames,setCrewNames]=useState<Record<string,string>>({});
  const [selectedSlug,setSelectedSlug]=useState<string|null>(null);
  const [courtStats,setCourtStats]=useState<CourtStats>({masters:[],belts:[],crewName:null,crewLogoPath:null,defenses:0,loading:false});
@@ -199,6 +202,43 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   return()=>{alive=false;};
  },[db,city?.id,pulse]);
 
+ // The statewide world also needs a small, verified territory index. The city
+ // loader above stays scoped to one locality for fast court discovery.
+ useEffect(()=>{
+  if(!db){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
+  let alive=true;setStatewideTerritoryLoading(true);
+  void (async()=>{
+   const {data:territoryRows,error:territoryError}=await db.from('rch_court_territories')
+    .select('court_slug,crew_id,successful_defenses').limit(300);
+   if(!alive)return;
+   if(territoryError||!territoryRows?.length){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
+   const rows=territoryRows as Territory[];
+   const slugs=[...new Set(rows.map(row=>row.court_slug))];
+   const crewIds=[...new Set(rows.map(row=>row.crew_id))];
+   const [courtResult,crewResult]=await Promise.all([
+    db.from('rch_runs_outdoor_courts')
+     .select('slug,name,address,locality,latitude,longitude,verification_status,access_type,venue_type,source_label,source_url,hours_text,notes')
+     .eq('is_active',true).in('slug',slugs).in('verification_status',['official','provider']).limit(300),
+    crewIds.length?db.from('commonwealth_crews').select('id,name').in('id',crewIds.slice(0,200)).limit(200):Promise.resolve({data:[],error:null})
+   ]);
+   if(!alive)return;
+   if(courtResult.error){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);return;}
+   const courts=(courtResult.data||[]) as WorldCourt[];
+   const names=Object.fromEntries(((crewResult.data||[]) as {id:string;name:string}[]).map(row=>[row.id,row.name]));
+   setStatewideTerritoryPins(buildCrewTerritoryMapPins(rows,courts,names));
+   setStatewideTerritoryLoading(false);
+  })().catch(()=>{if(alive){setStatewideTerritoryPins([]);setStatewideTerritoryLoading(false);}});
+  return()=>{alive=false;};
+ },[db,pulse]);
+
+ useEffect(()=>{
+  if(!pendingTerritorySlug||!city||loading)return;
+  if(courts.some(court=>court.slug===pendingTerritorySlug)){
+   setSelectedSlug(pendingTerritorySlug);
+   setPendingTerritorySlug(null);
+  }
+ },[pendingTerritorySlug,city?.id,loading,courts]);
+
  useEffect(()=>{
   if(!db||!user?.id){setPlayer(blankStats);return;}
   let active=true;
@@ -285,6 +325,9 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
   challengedCourts:worldPulse.filter(e=>e.status==='pending').map(e=>e.court_slug),
   doubleRepRuns:featured
  }),[courts,runs,territories,worldPulse,featured]);
+ const territoryPins=useMemo(()=>buildCrewTerritoryMapPins(territories,courts,crewNames),[territories,courts,crewNames]);
+ const mapTerritoryPins=city?territoryPins:statewideTerritoryPins;
+ const territoryRankings=useMemo(()=>buildCrewTerritoryLeaderboard(statewideTerritoryPins),[statewideTerritoryPins]);
  const coverage=useMemo(()=>courtCoverage(courts,runs,pins),[courts,runs,pins]);
  const featuredSet=useMemo(()=>new Set(featured),[featured]);
  const areaRuns=useMemo(()=>[...runs].sort((a,b)=>a.starts_at.localeCompare(b.starts_at)),[runs]);
@@ -353,13 +396,13 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
    {screen==='world'&&<>
     <div className="rwg-hud" aria-label="Your game-world overview">
      <div><small>WORLD</small><strong>{city?.name||'VIRGINIA'}</strong></div>
-     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div>
+     <div><small>COURTS</small><strong>{loading?'…':coverage.total}</strong></div><div><small>TERRITORIES</small><strong>{(loading||(!city&&statewideTerritoryLoading))?'…':mapTerritoryPins.length}</strong></div>
      <div><small>{city?'UPCOMING RUNS':'SELECT A CITY'}</small><strong>{city?(loading?'…':coverage.scheduled):'—'}</strong></div>
     </div>
-    <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Crew</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
+    <div className="rwg-world-game-legend" aria-label="Court map markers"><span><FaLocationDot/> Court</span><span><FaCrown/> Territory control</span><span><FaBolt/> Challenge</span><span><FaGift/> 2× REP</span></div>
     <section id="rwg-world-map" tabIndex={-1} className="rwg-world" aria-label="Explore Virginia basketball courts">
      <div className="rwg-area-controls">
-      <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Tap a court to open its game card.</p></div>
+      <div><h2><FaLocationDot/> {city?'Exploring '+city.name:'Choose a city portal'}</h2><p>Tap a court or controlled territory to inspect its arena.</p></div>
       <div className="rwg-city-actions">
        <label className="sr-only" htmlFor="rwg-city">Virginia city</label>
        <select id="rwg-city" value={city?.id||''} onChange={e=>{const match=runsAreaOptions.find(c=>c.id===e.target.value);if(match)enterCity(match);else exitCity();}}>
@@ -370,7 +413,14 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
      </div>
      <div className="rwg-map-stage">
       <AccurateVirginiaMap city={city} points={pins} areaGateways={runsAreaOptions} selectedId={selectedSlug&&pins.some(p=>p.id==='court:'+selectedSlug)?'court:'+selectedSlug:null}
-       onCitySelect={enterCity} onPlaceSelect={id=>chooseCourt(id.replace(/^court:/,''))} onOverview={exitCity}/>
+       onCitySelect={enterCity} onPlaceSelect={id=>{
+        const slug=id.replace(/^court:/,'');
+        if(city){chooseCourt(slug);return;}
+        const found=statewideTerritoryPins.find(pin=>pin.slug===slug);
+        const normalizedLocality=found?.locality.toLowerCase().replace(' city','').replace(' county','').trim();
+        const area=found&&runsAreaOptions.find(option=>option.name.toLowerCase()===normalizedLocality||localityNames(option).some(locality=>locality.toLowerCase()===found.locality.toLowerCase()||locality.toLowerCase()===normalizedLocality));
+        if(area){setPendingTerritorySlug(slug);enterCity(area);}
+       }} onOverview={exitCity} territories={mapTerritoryPins}/>
       {selectedCourt&&city&&<RunsCourtPreview key={selectedCourt.slug} court={selectedCourt} cityId={city.id}
        events={courtRuns} belts={courtStats.belts} beltLoading={courtStats.loading}
        controllingCrew={courtStats.crewName} crewLogoUrl={courtStats.crewLogoPath&&db?db.storage.from('rch-crew-logos').getPublicUrl(courtStats.crewLogoPath).data.publicUrl:null} recordedDefenses={courtStats.defenses}
@@ -379,8 +429,18 @@ export default function RunsWorldGame({onOpenRules,introEnabled=true,initialScre
        loggedIn={Boolean(user)} scouted={Boolean(journey?.stamps.some(stamp=>stamp.court_slug===selectedCourt.slug))} onScout={()=>setScoutVersion(n=>n+1)}
        onClose={closeCourtPreview}/>}
      </div>
-     <div className="rwg-map-keyline"><FaShieldHalved aria-hidden="true"/><span>Map pins are courts. The Run board shows scheduled games.</span></div>
+     <div className="rwg-map-keyline"><FaShieldHalved aria-hidden="true"/><span>Court rings show verified crew control points, not neighborhood boundaries. Tap one to inspect the territory.</span></div>
      <details className="rwg-map-notes"><summary>About court listings</summary><p>This map shows sourced public outdoor Parks & Recreation courts. A pin is not a reservation or a live game. Confirm park hours and access before traveling. GPS is optional.</p></details>
+    </section>
+
+    <section className="rwg-activity mt-4" aria-label="Virginia crew territory standings">
+     <div className="rwg-section-head"><div><span className="rwg-kicker">VERIFIED COURT CONTROL</span><h2>Virginia Territory Rankings</h2></div><span className="text-xs font-black uppercase tracking-wider text-[#c8c8c8]">{territoryRankings.length} crews holding courts</span></div>
+     {statewideTerritoryLoading?<p className="rwg-empty" role="status">Loading the verified territory ledger…</p>:
+      territoryRankings.length?territoryRankings.slice(0,8).map((standing,index)=><Link key={standing.crewId} href={'/crews?crew='+encodeURIComponent(standing.crewId)} className="rwg-run-row">
+       <span className="rwg-run-basket"><FaCrown aria-hidden="true"/></span>
+       <span><strong>#{index+1} {standing.crewName}</strong><small>{standing.courtsHeld} controlled court{standing.courtsHeld===1?'':'s'} · {standing.successfulDefenses} verified defense{standing.successfulDefenses===1?'':'s'} · {standing.localities.slice(0,3).join(', ')||'Virginia'}</small></span>
+       <FaArrowRight aria-hidden="true"/>
+      </Link>):<p className="rwg-empty">No persisted crew territories yet. Verified crew-vs-crew Takeover Runs establish control, and each additional controlled court expands a crew’s recorded footprint.</p>}
     </section>
 
     {!city?<section className="rwg-portals" aria-labelledby="rwg-portals-head">

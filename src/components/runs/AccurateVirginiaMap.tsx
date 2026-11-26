@@ -15,7 +15,7 @@ const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.1/dist/maplibre
 export type CommunityCourtLead={slug:string;name:string;locality:string;latitude:number;longitude:number};
 type MapMarker={remove:()=>void};
 type MapLike={
- on:(event:string,listener:(e?:any)=>void)=>void;
+ on:(event:string,listenerOrLayer:string|((e?:any)=>void),listener?:(e?:any)=>void)=>void;
  once:(event:string,listener:()=>void)=>void;
  addSource:(id:string,source:any)=>void;
  addLayer:(layer:any)=>void;
@@ -52,7 +52,8 @@ function mapLibre(){
  }).catch(error=>{loadingMapLibre=null;throw error;});
  return loadingMapLibre;
 }
-type Layer='all'|'courts'|'runs'|'battle'|'crown'|'double-rep';
+type TerritoryPin={slug:string;name:string;crewName:string;defenses:number;latitude:number;longitude:number};
+type Layer='all'|'courts'|'runs'|'battle'|'crown'|'territory'|'double-rep';
 const MAP_SESSION='rch-runs-world3-view-';
 type SavedCamera={center:[number,number];zoom:number;pitch:number;bearing:number;at:number};
 function savedCamera(key:string):SavedCamera|null{
@@ -78,7 +79,7 @@ function saveCamera(map:MapLike,key:string){
 }
 const layerOptions:{id:Layer;label:string}[]=[
  {id:'all',label:'All'},{id:'courts',label:'Courts'},{id:'runs',label:'Runs'},
- {id:'battle',label:'Battles'},{id:'crown',label:'Crews'},{id:'double-rep',label:'2× REP'}
+ {id:'battle',label:'Battles'},{id:'crown',label:'Crews'},{id:'territory',label:'Territory'},{id:'double-rep',label:'2× REP'}
 ];
 function pinLabel(point:AtlasPlace){
  if(point.gameState==='battle')return '⚔';
@@ -87,7 +88,7 @@ function pinLabel(point:AtlasPlace){
  return point.indoor?'🏟':'🏀';
 }
 function filteredPins(points:readonly AtlasPlace[],layer:Layer){
- if(layer==='all')return [...points];
+ if(layer==='all'||layer==='territory')return layer==='territory'?points.filter(p=>p.gameState==='crown'):[...points];
  if(layer==='courts')return points.filter(p=>p.kind==='court');
  if(layer==='runs')return points.filter(p=>p.kind==='run');
  return points.filter(p=>p.gameState===layer);
@@ -96,9 +97,9 @@ function safeCoordinate(point:AtlasPlace){
  return Number.isFinite(point.lat)&&Number.isFinite(point.lon)&&
   point.lat>=36.4&&point.lat<=39.65&&point.lon>=-83.85&&point.lon<=-74.95;
 }
-export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateways=VIRGINIA_CITIES,onCitySelect,onPlaceSelect,onOverview}:{
+export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateways=VIRGINIA_CITIES,onCitySelect,onPlaceSelect,onOverview,territories=[]}:{
  city:VirginiaCity|null;points:AtlasPlace[];selectedId:string|null;leads?:CommunityCourtLead[];areaGateways?:VirginiaCity[];
- onCitySelect:(city:VirginiaCity)=>void;onPlaceSelect:(id:string)=>void;onOverview:()=>void
+ onCitySelect:(city:VirginiaCity)=>void;onPlaceSelect:(id:string)=>void;onOverview:()=>void;territories?:TerritoryPin[]
 }){
  const container=useRef<HTMLDivElement|null>(null);
  const mapRef=useRef<MapLike|null>(null);
@@ -122,6 +123,8 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
   try{window.sessionStorage.setItem('rch-runs-world3-map-layer',next);}catch{/* Optional. */}
  };
  const mapped=useMemo(()=>filteredPins(points,layer).filter(safeCoordinate),[points,layer]);
+ const visibleTerritories=(layer==='all'||layer==='crown'||layer==='territory')?territories:[];
+ const territoryCollection=useMemo(()=>({type:'FeatureCollection' as const,features:visibleTerritories.filter(t=>safeCoordinate({lat:t.latitude,lon:t.longitude} as any)).map(t=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[t.longitude,t.latitude]},properties:{slug:t.slug,name:t.name,crewName:t.crewName,defenses:t.defenses}}))}),[visibleTerritories]);
  const candidateCollection=useMemo(()=>({type:'FeatureCollection' as const,features:
   (layer==='all'||layer==='courts'?leads:[])
    .filter(l=>Number.isFinite(l.latitude)&&Number.isFinite(l.longitude)&&l.latitude>=36.4&&l.latitude<=39.65&&l.longitude>=-83.85&&l.longitude<=-74.95)
@@ -161,6 +164,15 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
       paint:{'line-color':'#c5c5c5','line-width':['interpolate',['linear'],['zoom'],5,1.7,11,3],
        'line-opacity':0.85}});
     }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
+    try{
+     map.addSource('rch-crew-territories',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+     map.addLayer({id:'rch-crew-territory-glow',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#9d9d9d','circle-opacity':0.12,'circle-radius':['interpolate',['linear'],['zoom'],7,24,10,38,14,62],'circle-stroke-color':'#eeeeee','circle-stroke-opacity':0.72,'circle-stroke-width':['interpolate',['linear'],['zoom'],7,1.5,14,3]}});
+     map.addLayer({id:'rch-crew-territory-core',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#d0d0d0','circle-opacity':0.06,'circle-radius':['interpolate',['linear'],['zoom'],7,10,10,16,14,28]}});
+     map.on('click','rch-crew-territory-glow',(event:any)=>{
+      const slug=event?.features?.[0]?.properties?.slug;
+      if(typeof slug==='string'&&slug)callbacks.current.onPlaceSelect('court:'+slug);
+     });
+    }catch{/* Territory overlay is optional; court pins remain usable. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
      map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
@@ -222,6 +234,16 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     btn.addEventListener('click',()=>callbacks.current.onCitySelect(point));
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([point.lon,point.lat]).addTo(map));
    }
+   if(layer==='all'||layer==='territory'||layer==='crown'){
+    for(const territory of territories){
+     if(!Number.isFinite(territory.latitude)||!Number.isFinite(territory.longitude))continue;
+     const btn=document.createElement('button');btn.type='button';btn.className='rwg-real-pin state-crown rwg-territory-control';
+     btn.textContent='♛';btn.title=territory.crewName+' controls '+territory.name+' · '+territory.defenses+' successful defenses';
+     btn.setAttribute('aria-label',btn.title);
+     btn.addEventListener('click',()=>callbacks.current.onPlaceSelect('court:'+territory.slug));
+     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([territory.longitude,territory.latitude]).addTo(map));
+    }
+   }
   }else{
    for(const point of markerItems){
     const p=point.p;
@@ -234,11 +256,13 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
     markers.current.push(new lib.Marker({element:btn,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map));
    }
   }
- },[city?.id,markerItems,selectedId,status,areaGateways]);
+ },[city?.id,markerItems,selectedId,status,areaGateways,layer,territories]);
  useEffect(()=>{
+  const territorySource=mapRef.current?.getSource('rch-crew-territories');
+  if(status==='ready'&&territorySource?.setData)territorySource.setData(territoryCollection);
   const source=mapRef.current?.getSource('rch-unverified-leads');
   if(status==='ready'&&source?.setData)source.setData(candidateCollection);
- },[candidateCollection,status]);
+ },[candidateCollection,territoryCollection,status]);
  useEffect(()=>{
   if(!selectedId||status!=='ready')return;
   const point=points.find(p=>p.id===selectedId);
