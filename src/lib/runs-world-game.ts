@@ -13,6 +13,28 @@ export type WorldRun={
  status:string;game_format:string;run_type:string;
 };
 export type WorldMapState={ownedCourts?:readonly string[];challengedCourts?:readonly string[];doubleRepRuns?:readonly string[]};
+
+export type CourtTerritoryRecord={court_slug:string;crew_id:string;successful_defenses:number};
+export type CrewTerritoryMapPin={slug:string;name:string;locality:string;crewName:string;defenses:number;latitude:number;longitude:number};
+/** Only a verified, public, coordinate-backed playable court can appear as a map territory. */
+export function buildCrewTerritoryMapPins(
+ territories:readonly CourtTerritoryRecord[],
+ courts:readonly WorldCourt[],
+ crewNames:Readonly<Record<string,string>>
+):CrewTerritoryMapPin[]{
+ const bySlug=new Map(courts.filter(playableCourt).filter(court=>virginiaCoordinates(court.latitude,court.longitude))
+  .map(court=>[court.slug,court]));
+ return territories.flatMap(territory=>{
+  const court=bySlug.get(territory.court_slug);
+  if(!court||typeof territory.successful_defenses!=='number'||territory.successful_defenses<0)return [];
+  return [{
+   slug:territory.court_slug,name:court.name,locality:court.locality,
+   crewName:crewNames[territory.crew_id]||'Controlling Crew',
+   defenses:territory.successful_defenses,
+   latitude:court.latitude as number,longitude:court.longitude as number
+  }];
+ });
+}
 export type WorldMission={
  id:'scout'|'join'|'compete';title:string;detail:string;complete:boolean;href:string;
 };
