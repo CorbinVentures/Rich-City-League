@@ -167,11 +167,6 @@ export function AccurateVirginiaMap({city,points,selectedId,leads=[],areaGateway
      map.addLayer({id:'rch-crew-territory-glow',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#9d9d9d','circle-opacity':0.12,'circle-radius':['interpolate',['linear'],['zoom'],7,24,10,38,14,62],'circle-stroke-color':'#eeeeee','circle-stroke-opacity':0.72,'circle-stroke-width':['interpolate',['linear'],['zoom'],7,1.5,14,3]}});
      map.addLayer({id:'rch-crew-territory-core',type:'circle',source:'rch-crew-territories',paint:{'circle-color':'#d0d0d0','circle-opacity':0.06,'circle-radius':['interpolate',['linear'],['zoom'],7,10,10,16,14,28]}});
     }catch{/* Territory overlay is optional; court pins remain usable. */}
-    // The outline is sourced directly from the official 2026 Census
-     map.addLayer({id:'rch-vdot-outline',type:'line',source:'rch-vdot-virginia',
-      paint:{'line-color':'#c5c5c5','line-width':['interpolate',['linear'],['zoom'],5,1.7,11,3],
-       'line-opacity':0.85}});
-    }catch{/* Detailed basemap remains available when a GIS overlay is offline. */}
     if(city?.id==='chesterfield')try{
      map.addSource('rch-chesterfield-vgin',{type:'geojson',data:REAL_VIRGINIA_MAP.chesterfieldJurisdiction});
      map.addLayer({id:'rch-chesterfield-fill',type:'fill',source:'rch-chesterfield-vgin',filter:['==',['get','GEOID'],'51041'],
