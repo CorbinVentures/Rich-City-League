@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {buildCrewTerritoryMapPins,type WorldCourt} from '../src/lib/runs-world-game';
+import {buildCrewTerritoryMapPins,buildCrewTerritoryLeaderboard,type WorldCourt,type CrewTerritoryMapPin} from '../src/lib/runs-world-game';
 
 const court=(overrides:Partial<WorldCourt>={}):WorldCourt=>({
  slug:'bellmeade-park',name:'Bellemeade Park',address:'Richmond, VA',
@@ -27,7 +27,7 @@ describe('RCH Crews Territory map model',()=>{
    court({slug:'outside-va',latitude:40.01,longitude:-77.43})
   ],{804:'804 Ballers',other:'RVA Elite'});
   expect(pins).toEqual([{
-   slug:'bellmeade-park',name:'Bellemeade Park',locality:'Richmond',
+   slug:'bellmeade-park',name:'Bellemeade Park',locality:'Richmond',crewId:'804',
    crewName:'804 Ballers',defenses:3,latitude:37.51,longitude:-77.43
   }]);
  });
@@ -42,6 +42,17 @@ describe('RCH Crews Territory map model',()=>{
    {court_slug:'bellmeade-park',crew_id:'804',successful_defenses:-1}
   ],[court()],{804:'804 Ballers'});
   expect(pins).toHaveLength(0);
+ });
+ it('ranks crews by controlled courts, then verified defenses, and aggregates their localities',()=>{
+  const pins: CrewTerritoryMapPin[]=[
+   {slug:'a',name:'Court A',locality:'Richmond',crewId:'804',crewName:'804 Ballers',defenses:2,latitude:37.5,longitude:-77.4},
+   {slug:'b',name:'Court B',locality:'Henrico',crewId:'804',crewName:'804 Ballers',defenses:1,latitude:37.6,longitude:-77.4},
+   {slug:'c',name:'Court C',locality:'Norfolk',crewId:'757',crewName:'757 Hoopers',defenses:5,latitude:36.8,longitude:-76.2},
+  ];
+  expect(buildCrewTerritoryLeaderboard(pins)).toEqual([
+   {crewId:'804',crewName:'804 Ballers',courtsHeld:2,successfulDefenses:3,localities:['Henrico','Richmond']},
+   {crewId:'757',crewName:'757 Hoopers',courtsHeld:1,successfulDefenses:5,localities:['Norfolk']},
+  ]);
  });
  it('mounts the interactive and filterable territory layer with truthful map labeling',()=>{
   const map=readFileSync(join(process.cwd(),'src/components/runs/AccurateVirginiaMap.tsx'),'utf8');
